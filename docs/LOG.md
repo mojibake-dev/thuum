@@ -5367,3 +5367,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   asks no redraw; the closed-menu path keeps the full apply. One turbo bundle carries the deaths' settle and grace, the prop range
   of a cell and the chest; x-shared-chest-phantom and x-npc-death-freeze run after the arm with lab-api's grammar.
 
+
+- 15:57 PST 2026-11-02 item 6's fix built (perk points): the rule counted every perk held against the points (level - 1 - perks held), so
+  rotfern, set up with the console's AddPerk, reached its level-up with nothing to spend. Fork m5-perk-points 59bed946 (server
+  only, off parity 6d7fcc84): ActorValueRecord.perkPicks counts the picks the rule accepted; points are level - 1 - picks; the
+  console's, a native's and a quest's add spend nothing, RemovePerk refunds nothing (vanilla's console refunds nothing); JSON
+  perkPicks beside perks, an older record read as the perks held capped at level - 1 so it keeps the points it showed. wire-rules
+  perks.rs Record.picks with its test, wire-bridge pick(..., picks, ...) and perk_points(level, picks), PerkTest's two new cases.
+  An R0 after the arm (T0 and T2); the level-up's attribute pick (also item 6) stays a later slice: it needs the menu's RE.

@@ -35,7 +35,7 @@ operator in the top three bits of byte 0, the comparison float at 4, the functio
 | consequence | seen in | disposition |
 | --- | --- | --- |
 | the Skills menu's pick: the perk taken, a point spent, the sound and the constellation's star | engine (the menu) | native on the picking game; observed at the menu's close and reported (R1) |
-| the perk point count the menu offers | engine (PlayerCharacter's perk count) | imposed: the server's points (level - 1 - perks held), Game.setPerkPoints at login and at each change |
+| the perk point count the menu offers | engine (PlayerCharacter's perk count) | imposed: the server's points (level - 1 - the picks the server granted; a perk from the console, a quest or a mod spends nothing), Game.setPerkPoints at login and at each change |
 | the perk's own effects (damage, costs, the entries' spells and abilities) | engine | native on the game that holds the perk; the server's formulas honour none yet (M5's second half, Known limits) |
 | the perk set across a relaunch and a restart | code | R0: the record's perks; the client adds what the record holds and drops a tree perk the record lacks |
 | a pick the server refuses | code | the game's perk removed and its points reset by the server's word (PerkState) |
@@ -59,7 +59,7 @@ its engine took; the server judges).
 Why this rung and not the one above it: the menu is the player's game's (its UI, its sound); the server cannot see the
 pick before the engine does, so the engine's pick is a report, judged and undone when refused.
 What the server validates (R1): the perk exists in the game files and is playable and not hidden (DATA), not already
-held, one point left (level - 1 - perks held, vanilla's one a level), and every top-level condition of the record
+held, one point left (level - 1 - the picks granted, vanilla's one a level; the counter since 2026-11-02, see below), and every top-level condition of the record
 holds against the record: HasPerk(X) against the perks held, GetBaseActorValue(av) against the record's skill level
 for a skill (6 to 23) or its base otherwise, GetLevel against the character level; a condition with any other function
 refuses the pick (E_PERK_CONDITION, one log per function id), by rule 5. The game's own perk points come from the
@@ -117,7 +117,7 @@ Rate limit / bounds: a budget of 8 then 2 a second (UNMEASURED); a perk set of a
 ## Server
 
 - Where the logic lives: wire-rules perks.rs: Table (perk -> playable, hidden, conditions as HasPerk(id, wanted),
-  AtLeast/Compare(av, op, value), Level(op, value), Unknown(function)), `points(level, held)`, `pick(table, record,
+  AtLeast/Compare(av, op, value), Level(op, value), Unknown(function)), `points(level, picks)`, `pick(table, record,
   perk) -> Result<(), Refusal>` with E_PERK_UNKNOWN, E_PERK_HIDDEN, E_PERK_OWNED, E_PERK_POINTS, E_PERK_PREREQ (a HasPerk
   condition), E_PERK_SKILL (a value condition), E_PERK_CONDITION (an unknown function). wire-bridge PerkTable.
   PartOne::LoadPerkTable at AttachEspm (every PERK of the load order, conditions' form ids made global);
@@ -127,8 +127,16 @@ Rate limit / bounds: a budget of 8 then 2 a second (UNMEASURED); a perk set of a
   record and PerkState sent). Condition.cpp's HasPerk answers from a player's record. The `perks` setting (default
   false).
 - DB fields / migration: ActorValueRecord.perks in the change form's JSON ("perks", absent in older records, read as
-  none): no schema migration (a JSON field); rule 6's restart scenario is b-perk-pick's.
-- Restart behavior: the record as saved; the points recomputed from level and perks.
+  none) and ActorValueRecord.perkPicks ("perkPicks", the picks the rule accepted; absent in a record from before the
+  counter, read as the perks held capped at level - 1, so such a record keeps the points it showed): no schema
+  migration (JSON fields); rule 6's restart scenario is b-perk-pick's.
+- Restart behavior: the record as saved; the points recomputed from level and picks.
+- The picks counter (playtest 41's item 6, 2026-11-02): the points were level - 1 - perks held, so a perk the console
+  (the lab's setup), a quest or a mod granted counted against them and a seat set up with AddPerk reached its level-up
+  with nothing to spend ("rotfern was NOT offered a perk"). Now an accepted pick increments perkPicks (MpActor::
+  AddPerkByServer(perk, asPick)) and the points are level - 1 - perkPicks; the console's AddPerk, a native's and a
+  quest's add spend nothing, RemovePerk refunds nothing (vanilla's console refunds nothing either), SetLevel moves the
+  points as before.
 - Papyrus natives touched (ledger lines added): Actor.AddPerk, Actor.RemovePerk, Actor.HasPerk (implemented, R0).
 
 - The numbers a pick reads: with leveling on, the record's skills, experience, level and the skills' bases are the server's
@@ -151,9 +159,10 @@ Rate limit / bounds: a budget of 8 then 2 a second (UNMEASURED); a perk set of a
 ## Tests
 
 - T0: wire-rules perks.rs (the points, a first perk, no points, owned, a rank before its predecessor, a skill too low,
-  a hidden or unknown perk, an unknown condition function, a GetLevel condition); unit/PerkTest.cpp (the table from the
-  game files: Armsman's chain and conditions; a pick accepted at level 2 into the record with PerkState sent; the
-  refusals; the console SetLevel; the switch off; the natives); unit/EspmTest.cpp's PERK case.
+  a hidden or unknown perk, an unknown condition function, a GetLevel condition, a perk granted outside a pick spending
+  no point); unit/PerkTest.cpp (the table from the game files: Armsman's chain and conditions; a pick accepted at level
+  2 into the record with PerkState sent; the refusals; the console SetLevel; the switch off; the natives; the picks
+  counter and the older record's read); unit/EspmTest.cpp's PERK case.
 - T2: a session with a PerkPick accepted and one refused; PerkState at login declared in difftest's divergences when
   the lab's settings turn `perks` on.
 - T3 scenario id: lab/scenarios/b-perk-pick.yaml (after the probe): a seat at level 3 by the console picks Armsman
