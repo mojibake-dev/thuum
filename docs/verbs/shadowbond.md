@@ -127,6 +127,17 @@ MoveTo instant, the report cadence 130 ms).
   space modifier the script played (the inventory's row); a snippet at the
   server's swap can carry them later. Before this the script's own MoveTo in
   the caster's game was overwritten by the relay, as every figure move is.
+- What the caster's game gained back (18:37 PST 2026-11-01, fork m2-shadowbond-script-block
+  9aeaeace): the two concealment procs. The script's OnEffectStart cast them
+  in the caster's game, so PartOne::CastBondProc relayed them to every game
+  but the caster's; with the script blocked, the first run on the bondblock
+  train (b-shadowbond 20261102-023146) landed the swap and never showed the
+  caster's game an invisibility (c1.watched_self and c1.watched(c2) both 0).
+  The relay now reaches the caster's game too; its client casts a relayed
+  proc naming its own player through castSpellImmediate's Self branch
+  (remoteServer.ts, casterIsMe), as the target's game always did. BondTest:
+  the caster's game hears both procs. The inventory's first row ("OnEffectStart
+  ... each cast the Self proc") is therefore the server's in every game.
 - Side effects: HYPOTHESIS: the figure's one-frame hop before the relay's
   next report (the placement arrives within a report).
 

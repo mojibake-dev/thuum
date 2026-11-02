@@ -5062,3 +5062,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   permit's 29; an interim head, server-only), b-duel's premise commit (a look at c2 before the Flames hold, the bound unchanged), the
   hide's claims back on main after the bondblock train, b-shadowbond's un-pend on that train's green.
 
+- 18:37 PST 2026-11-01 b-shadowbond on the bondblock train's first stage (023146): the swap landed (the run-out bug is gone) and the
+  caster's game never saw the invisibility: CastBondProc had skipped the caster's game, where the now-blocked script used to cast
+  both procs. Fixed on m2-shadowbond-script-block 9aeaeace (the relay reaches every game; BondTest updated); numidium gates nothing on
+  84f87370 (a green there would have carried the regression), the stage's x-race-permit-hide and x-puzzle-relay reads finish, then
+  the train re-cuts on 9aeaeace (REUSE_DIST on a29a421b's dist) with all three probes by path again.
+
