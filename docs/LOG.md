@@ -5055,3 +5055,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the T2 beside it pulled the branch's bare tag after 7fe600e6's pipeline had pushed a new image, and the lab's next server
   recreate took it (054b5d43 for five runs, 534c49dc after), so the train was restaged on 7fe600e6 and gated again; T2 runs on the
   per-sha tag since.
+
+- 18:18 PST 2026-11-01 the race permit MERGED: fork parity 7fe600e6 (the train m5-train-permit-onceload: the permit's server half, apocrypha's
+  client half with the hide off, the onceLoad landing fix; numidium's regate 12 of 12 after the tooling's two-builds refusal, T2 38 of
+  38). b-race-permit green four times on the train. Follow-ups: parity merged into m4-object-animation (SCHEMA_VERSION 30 kept over the
+  permit's 29; an interim head, server-only), b-duel's premise commit (a look at c2 before the Flames hold, the bound unchanged), the
+  hide's claims back on main after the bondblock train, b-shadowbond's un-pend on that train's green.
+

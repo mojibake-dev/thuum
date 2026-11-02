@@ -229,6 +229,11 @@ applyAppearanceCommon, src/sync/appearance.ts). Candidates for a later verb.
   lower-cased with one warning per unloaded plugin, the T2 session's echo
   declaration); the train for the lab is m5-train-permit-onceload ef404d98
   (parity 562bf934 with the onceLoad fix)
-- [ ] the permit at T2 (session race-permit) and T3 (b-race-permit) green on
-  the stage, two seats
-- [ ] the permit on fork parity
+- [x] the permit at T2 (session race-permit, 38 of 38 identical on 7fe600e6)
+  and T3 (b-race-permit green four times on the train: 20261102-000425 by
+  path, 003638 in the first gate, 013345 by path on the restage, 014505 in
+  the regate; the gate 12 of 12 twice, the first refused by the tooling's two
+  builds)
+- [x] the permit on fork parity 7fe600e6 (18:18 PST 2026-11-01, the train
+  m5-train-permit-onceload with the onceLoad fix); the menu hide follows in
+  the bondblock train
