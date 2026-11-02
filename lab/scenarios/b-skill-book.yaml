@@ -1,0 +1,127 @@
+# b-skill-book (thuum-magnus, promoted 13:35 PST 2026-11-02 from x-skill-book f4d156ff, GREEN on its first run 20261102-212928 on
+# m5-skill-books 38659a3e's stage: the baseline, the one-level read, the "again" with nothing moved, the base after the relaunch and
+# the restart, "again" counted 2 after the restart; docs/verbs/leveling.md, the Skill books section; fork m5-skill-books): a skill
+# book read is the server's one-level increment, once per book per character. The seat reads SkillOneHanded1 (Skyrim.esm BOOK
+# 0x1afe3, DATA flags 0x01 TeachesSkill, teaches ActorValue 6; lab/esm.py 2026-11-02) from its inventory through the lab's equip
+# (Actor.EquipItem on a book opens the Book Menu, which reads the book at its open: the re-analyst's static read of
+# TESObjectBOOK::Read); the equip report reaches the server as OnEquip, ReadBookEvent's skill branch runs the rule (wire-rules
+# leveling.rs apply_book) into the record and sends it. The seat's own engine raises the skill by one at the menu's open on its own
+# (IncrementSkill, id 40489, static read): the record's send replaces that number with the server's. The premise is the clean
+# character's One-handed 20 with no experience (a-actor-values), so the carry through the step is 0 and the base reads 21.
+# Claims, each with what it proves:
+# 1. The premise: One-handed 20 on the seat, experience 0, level 1; c2 at 20; the book in c1's inventory on the server.
+# 2. The read: the server's "reads skill book 1afe3: skill 6 one level up" and "skill 6 reaches level 21" once each, no E_SKILL_
+#    or E_BOOK_ line; the seat's base 21 with experience 0 and level 1 within 10 s of the server's line; the book still in the
+#    inventory (a skill book is read in place; a spell tome goes); c2's record untouched.
+# 3. The same book again: the server's "reads skill book 1afe3 again" once, the "one level up" line still once, the base still 21:
+#    one level per book per character, the record going back to the seat.
+# 4. A relaunch of c1 keeps the base and the level (the record's values at login).
+# 5. A server restart keeps them, and a read after it says "again" (the record's readBooks persisted: rule 6's scenario).
+# Recorded, not claimed: c1's av-read of OneHanded (base and current) before the read, with the Book Menu open, after the record's
+# arrival and after the second read (the ModActorValue question in leveling.md); c1's screenshot with the book open (Eli's T4 of
+# the "Skill increased" message). Assertions are evaluated by lab-api only (ADR-009). Its own commit (rule 13).
+id: b-skill-book
+milestone: M5
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: false
+  gameHour: 7.9
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 12
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c1: server-console {name: AddItem, args: [0x14, 0x1afe3, 1]}
+  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0, rot: [0, 0, 180]}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -80, z: 0, rot: [0, 0, 0]}
+  - wait: 6
+  # 1. the premise
+  - c1: skills {names: ["OneHanded"]}
+  - c2: skills {names: ["OneHanded"]}
+  - c1: av-read {names: [OneHanded]}
+  - assert:
+      - 'c1.skill("OneHanded").base == 20'
+      - 'c1.skill("OneHanded").xp == 0'
+      - c1.level() == 1
+      - 'c2.skill("OneHanded").base == 20'
+      - 'server.inventory("c1").count("0x1afe3") == 1'
+  # 2. the read: the Book Menu opens on the seat (its own rise at the open), the equip report reaches the server
+  - c1: equip {formId: 0x1afe3}
+  - wait: 3
+  - c1: av-read {names: [OneHanded]}
+  - c1: screenshot
+  - c1: close-menu {name: "Book Menu"}
+  - until: {within: 15, every: 1, expect: ['server.log_count("reads skill book 1afe3: skill 6 one level up") >= 1']}
+  - wait: 6
+  - c1: skills {names: ["OneHanded"]}
+  - c1: av-read {names: [OneHanded]}
+  - c2: skills {names: ["OneHanded"]}
+  - assert:
+      - 'server.log_count("reads skill book 1afe3: skill 6 one level up") == 1'
+      - 'server.log_count("ff[0-9a-f]+ skill 6 reaches level 21") == 1'
+      - 'server.log_count("E_SKILL_") == 0'
+      - 'server.log_count("E_BOOK_") == 0'
+      - 'c1.skill("OneHanded").base == 21'
+      - 'c1.skill("OneHanded").xp == 0'
+      - c1.level() == 1
+      - 'c2.skill("OneHanded").base == 20'
+      - 'server.inventory("c1").count("0x1afe3") == 1'
+  # 3. the same book again: nothing moves, the record goes back
+  - c1: equip {formId: 0x1afe3}
+  - wait: 3
+  - c1: close-menu {name: "Book Menu"}
+  - until: {within: 15, every: 1, expect: ['server.log_count("reads skill book 1afe3 again") >= 1']}
+  - wait: 6
+  - c1: skills {names: ["OneHanded"]}
+  - c1: av-read {names: [OneHanded]}
+  - assert:
+      - 'server.log_count("reads skill book 1afe3 again") == 1'
+      - 'server.log_count("reads skill book 1afe3: skill 6 one level up") == 1'
+      - 'server.log_count("ff[0-9a-f]+ skill 6 reaches level 22") == 0'
+      - 'c1.skill("OneHanded").base == 21'
+      - c1.level() == 1
+  # 4. a relaunch keeps the level
+  - c1: relaunch {until: gone}
+  - c1: connect
+  - wait: 15
+  - c1: close-menu {name: MessageBoxMenu}
+  - c1: skills {names: ["OneHanded"]}
+  - assert:
+      - 'c1.skill("OneHanded").base == 21'
+      - c1.level() == 1
+  # 5. a server restart keeps it, and the read books with it: a third read says "again"
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - c2: reconnect
+  - wait: 15
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: skills {names: ["OneHanded"]}
+  - assert:
+      - 'c1.skill("OneHanded").base == 21'
+      - c1.level() == 1
+  - c1: equip {formId: 0x1afe3}
+  - wait: 3
+  - c1: close-menu {name: "Book Menu"}
+  - until: {within: 15, every: 1, expect: ['server.log_count("reads skill book 1afe3 again") >= 1']}
+  - wait: 6
+  - c1: skills {names: ["OneHanded"]}
+  - c2: skills {names: ["OneHanded"]}
+  - c1: av-read {names: [OneHanded]}
+  - c1: dump-state
+  - c2: dump-state
+  - assert:
+      - 'server.log_count("reads skill book 1afe3 again") >= 1'
+      - 'server.log_count("ff[0-9a-f]+ skill 6 reaches level 22") == 0'
+      - 'c1.skill("OneHanded").base == 21'
+      - c1.level() == 1
+      - 'c2.skill("OneHanded").base == 20'
+      - 'server.inventory("c1").count("0x1afe3") == 1'
+artifacts: [server.log, c1.log, c2.log, screenshots]
