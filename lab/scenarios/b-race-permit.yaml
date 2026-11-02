@@ -1,14 +1,14 @@
 # M5, the race permit (docs/verbs/character-creation.md, "The permit"): rotfern's race is test client 1's alone (Eli's call of
 # 2026-11-01). The server restricts rotfern.esp's two races to profile 1 (server-settings.json restrictedRaces: aa00 rotfern,
 # 19d08 rotfernRaceVampire); c1 is profile 1, c2 profile 2. On each seat's own CreateActor the server names the restricted
-# races and the ones that profile may wear, and skymp5-client's RacePermitService takes the difference off the race menu
-# (Race.MakeUnplayable at login and as the RaceSex Menu opens): its "restricted races" line on both seats, two "taken off the
-# menu" lines on c2 and none on c1, no E_RACE_PERMIT (a restricted id that is no race). The rule is the server's:
-# 1. c1 picks rotfern's race in its menu (listed for it, and its recorded race on a playtest seat) and the server takes it; the
-#    real-menu guard against refusing the permitted player, as a-rotfern.
-# 2. c2's menu lacks the race, so lab-driver's race-pick misses through its presses and falls through to Actor.SetRace; the
-#    menu's close sends rotfern's race and the server refuses it for profile 2: E_APPEARANCE_RACE once, the attempt recorded as
-#    refused, c2's record and c1's view of c2 unchanged.
+# races and the ones that profile may wear, and skymp5-client's RacePermitService reads them: its "restricted races" line on
+# both seats, no E_RACE_PERMIT (a restricted id that is no race). The menu hide itself is off until its native (the seats'
+# Race.pex has no native MakeUnplayable, run 20261101-232833), so both menus list the race today. The rule is the server's:
+# 1. c1 picks rotfern's race in its menu (its recorded race on a playtest seat) and the server takes it; the real-menu guard
+#    against refusing the permitted player, as a-rotfern.
+# 2. c2 picks the same race (race-pick reaches it in the list, or falls through to Actor.SetRace); the menu's close sends
+#    rotfern's race and the server refuses it for profile 2: E_APPEARANCE_RACE once, the attempt recorded as refused, c2's
+#    record and c1's view of c2 unchanged.
 # Assertions are evaluated by lab-api only (ADR-009).
 id: b-race-permit
 milestone: M5
@@ -25,16 +25,12 @@ steps:
   - wait: 10
   - c1: log-count {pattern: "restricted races"}
   - c2: log-count {pattern: "restricted races"}
-  - c1: log-count {pattern: "taken off the menu"}
-  - c2: log-count {pattern: "taken off the menu"}
   - c1: log-count {pattern: "E_RACE_PERMIT"}
   - c2: log-count {pattern: "E_RACE_PERMIT"}
   - assert:
       - 'server.log_count("SetRestrictedRacesSettings - 2 race") == 1'
       - 'c1.log_count("restricted races") >= 1'
       - 'c2.log_count("restricted races") >= 1'
-      - 'c1.log_count("taken off the menu") == 0'
-      - 'c2.log_count("taken off the menu") == 2'
       - 'c1.log_count("E_RACE_PERMIT") == 0'
       - 'c2.log_count("E_RACE_PERMIT") == 0'
   # 1. the permitted seat
@@ -54,7 +50,7 @@ steps:
       - c1.state.raceId == form("rotfern.esp:rotfern")
       - c2.view(c1).raceId == form("rotfern.esp:rotfern")
       - 'server.log_count("E_APPEARANCE_RACE") == 0'
-  # 2. the other seat: the hidden race reaches the server through the driver's fallback alone, and the server refuses it
+  # 2. the other seat: the race reaches the server from the menu's pick or the driver's SetRace fallback, and the server refuses it
   - c2: open-race-menu
   - wait: 6
   - c2: race-pick {race: "rotfern.esp:rotfern", max: 16}

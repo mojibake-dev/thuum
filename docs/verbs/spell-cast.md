@@ -1834,3 +1834,29 @@ on the figure, so GetIsID(0x7) passed for it). Reads: p-spell-bolt on parity
 casters (above), which ends the bisect. The reference stays
 until the cause is named (no retake under ADR-042b without it); the row
 blocks nothing, the probes are invisible to a player.
+
+## b-duel's Flames leg: a stream's first and last reports (17:26 PST 2026-11-01)
+
+b-duel's phase 4 (Flames held 4 s at c2 100 units away, the server's number read 5.5 s after the hold begins, claimed
+under 0.78 and over 0.64) went red twice on 2026-11-01 (220416 at 0.7878, 003128 at 0.8453) and green on each rerun
+(220653 at 0.7349, 003355 at 0.7281). The server logs told the mechanism, not a margin: the green run counted 3.45 s of
+stream over 18 reports (every ~183 ms from 0.46 s after the cast to 3.66 s), the red run 1.95 s over 7 (the first report
+1.23 s after the cast, a 732 ms hole counted in full by the 10-30 rule, the last counted report at 2.93 s and one more at
+3.69 s REFUSED as E_SPELL_NO_CAST because the cast's end had closed the hand). c1's own console shows the same 4.00 s hold
+both times (MRh_SpellAimedConcentrationStart to MRh_Equipped_Event). Two mechanisms:
+
+1. The first report. wire-rules casts.rs counts a stream's first report at MAX_TICK_MS (250 ms) whatever its gap from the
+   cast ("the way to the target"), so a first report 1.23 s after the cast loses about a second of hold. Whether that
+   second was the stream missing the figure (the aim after the power attack and the shout phases, the figure's place) or
+   the engine's hit reports starting late is HYPOTHESIS; the victim's own game shows the server's number (ADR-028), so it
+   cannot tell. The premise fix is the scenario's: a look at c2 before the hold (b-duel's own commit, after the permit
+   train merges).
+2. The last report. The stream's end (the hand's Equipped event, magicSyncService) closes the hand at once (casts.rs end()
+   sets the slot to None), so a hit report that reaches the server after the end is refused as E_SPELL_NO_CAST and its
+   gap, up to a cadence, is lost; the green run's last counted report came 40 ms before the end would have. The fix is
+   the rule's: an ended stream stays claimable for one report within HOLE_MS (counting its gap as a later report's), then
+   closes (fork m2-stream-end-grace ea15e8bb (a1bd3908 with its C++ stream test taught the grace), built 17:30 PST 2026-11-01 on the bondblock train's head 84f87370, R0 after that train merges; T0 in casts.rs; a difftest session declares nothing new since the
+   fake clients hold no stream). Not a weakening: the claim stands, the server counts the stream the engine dealt.
+
+Rule 13 kept: b-duel's bound is unchanged; the reruns under ADR-036 carried the two gates meanwhile.
+

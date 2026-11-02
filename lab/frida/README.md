@@ -385,3 +385,12 @@ y, the handler's answer), after x-lockpick v6 (183903) read the pick and lock an
 lever (`params: {SNAP: true, TURN: true}`, TURN_DEG 1.0 a frame from TURN_START_MS 8000 after the menu's first frame, sign
 TURN_SIGN) that ramps lockAngle with the pick snapped: HYPOTHESIS that the menu's update opens the lock at its full turn.
 
+- trap-hit-trace.js: who damages a figure when a trap fires (docs/verbs/traps.md,
+  ADR-059 decision 4's Dynamic plan; written 14:46 PST 2026-11-01). Replaces slot 06 of
+  the three ActorValueOwner vtables (RestoreActorValue: modifier, actor value,
+  amount) and prints each Health change on the player or a figure with the
+  health before and after and the stack, plus every Actor::DamageActor naming
+  one of ours, so the Papyrus path (TrapHitBase's DamageActorValue) and the
+  melee path are told apart. Run on the seat hosting Bleak Falls Temple before
+  the guest steps on the plate (x-object-anim v3's leg B). 1.6.1170 only.
+

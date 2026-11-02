@@ -4973,3 +4973,114 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   x-object-anim). docs/verbs/traps.md and WIRE.md carry it. Main's pipeline 4512 red was the settings' shape (layer-render's,
   both files); a795cfcc green at 4513. Also on the fork: pipeline 4510 (m5-race-permit b59ab993, client build) green.
 
+- 14:23 PST 2026-11-01 the object-animation pair's names for numidium's queue: fork m4-object-animation e1db19c8 (f317ef48 plus the
+  animation family widened from the scripts' own names: the wall's 180For/Half/End/Back and Rearm, the plate's Down, the
+  activator's opened, read off the pex files and the bases' VMAD with vmad.py), thuum layer branch layer-world-scripts-host
+  8b7517f0 (the traps row host-scoped), probe x-object-anim v2 by path 5805d687 (adds decision 4's first read: the host's
+  figure of the guest after the wall's swing). ADR-059 decision 4's Dynamic plan written in traps.md (the wall's level table
+  75 to 200 by level 10 to 30, TrapHitBase's hit shape, the hypothesised RestoreActorValue path, the Frida trace to write; no
+  code until the read).
+
+
+- 14:37 PST 2026-11-01 m4-container-open-poll merged to fork parity 562bf934 (2026-11-01T22:37Z, numidium): the gate
+  20261101-215952-merge-m4-container-open-poll, 20261101-215952-smoke-two-players to 20261101-223315-b-npc-caster (11 runs, all
+  ten green; b-duel's Flames leg read 0.7878 for < 0.78 once and was green on its relaunched rerun 220653); T2 skip on
+  skymp-server:m4-container-open-poll with its T2 beside the gate green (37 sessions identical); both clones promoted. Verbs:
+  containers (the open handler polls the ContainerMenu with Utility.waitMenuMode, since Utility.wait stalls in menu mode). The
+  stage (562bf934 on its own GitLab build 16265, LABAPI=4494, so lab-api 046cb720 with the downtime grammar went live at its pull)
+  played b-magic-restart's downtime copy green by path (215540: the restart step 16.2 s, the effect at 15.2 s of the 10 to 25),
+  and b-locks ran cold by path green in the stage's wait (212943, claim 17's lock at creation on both seats), so both left pending
+  (thuum-magnus' commits). The gate deployed from a worktree at origin/main 55b9a3e8 so that restrictedRaces (held in the shared
+  checkout until then) did not ride it.
+
+- 14:42 PST 2026-11-01 parity moved to 562bf934 (the container fix, numidium's gate 11 of 11 with T2). Two reviewer agents read the
+  permit and ObjectAnimation diffs first (feedback-review-before-lab): the permit's client called natives inside the CreateActor
+  handler (a seat with a hidden race would have lost its own CreateActor), fixed with a deferral to the update thread, plus the
+  setting's key validation, one warning per unloaded plugin and the T2 session's echo and refr declarations (m5-race-permit
+  dd7586c0); ObjectAnimation's host would have re-reported its own lastAnimation replays, fixed with self-played marks, the hook's
+  native range split around the player, a game-file NPC case in T0 (m4-object-animation cd762ef2). Heads for numidium's queue,
+  parity 562bf934 in each: the permit train m5-train-permit-onceload ef404d98 (m5-race-permit dd7586c0 and m4-onceload-pending
+  f3f27ce0), m4-puzzle-relay 6a8d5ab0, m4-object-animation 4afe8d2a (SCHEMA_VERSION 30 kept) with layer-world-scripts-host
+  8b7517f0 and probe x-object-anim v2 5805d687. A stale worktree swallowed the first train cut behind a piped worktree add; the
+  old branch was reset to its remote, nothing pushed.
+
+- 14:59 PST 2026-11-01 b-shadowbond's deterministic red placed (numidium's correction: the SECOND half's claim 54, a run-out with nobody acting;
+  the first half's swap holds, 224953 and x-shadowbond-swap 224524): Apocalypse's WB_InvisProcTeleport_Script runs in the caster's
+  game under ADR-031's effect rule and swaps the actors itself when the server's run-out dispel makes the target visible first (the
+  race with the engine's 20 s expiry; c1's console: the dispel line, then "settle ff00081d: 153.0 units" as the relay returned the
+  moved figure). Fix: a never-admitted script list in Skyrim Platform's OnSendEventEnter, checked before any admission, with that one
+  name (fork m2-shadowbond-script-block; the swap's sound and effects in the caster's game are the documented loss). The bisect
+  stage is dropped. numidium's next train after the permit's: that fix with m4-puzzle-relay 6a8d5ab0 (gate always + b-shadowbond,
+  b-bleak-traps, b-papyrus-events, a-activation-reach + watch; probes b-shadowbond by path, x-puzzle-relay). Also: a frida trace
+  for decision 4 (lab/frida/trap-hit-trace.js) rides x-object-anim v3 4107f964.
+
+- 15:35 PST 2026-11-01 b-race-permit's first run (20261101-232833, the permit train's stage) held every claim but the hide's two: c2 decided
+  its lists right and callNative("Race", "MakeUnplayable") threw "Function is not native" (SKSE's Race.psc defines MakeUnplayable
+  as a script wrapper around the native ClearRaceFlag, apocrypha's read). Taken as B for tonight: the hide call out (fork
+  m5-race-permit 0594f294, the lists and E_RACE_PERMIT kept), b-race-permit without its two hide claims (9de7a6a7, its own
+  commit), the permit train re-merged as m5-train-permit-onceload 64ec9666 and the bondblock train as m4-train-bondblock-puzzle
+  5f891310 (both pushed with their client builds). The hide returns as race.clearRaceFlag(1) with isRaceFlagSet(1) (Skyrim
+  Platform's typed Race, no callNative), apocrypha's commit next, merged into the bondblock train before its stage with the
+  scenario's hide claims back by path there. ObjectAnimation's T0 red of 4522 was the test's bandit (never loaded); fixed
+  2717fe64 (Alvor under npcEnabled), T0 green in 16369.
+
+- 15:40 PST 2026-11-01 the permit train's T2 read every session red: the player's own CreateActor carries props.restrictedRaces on the wire
+  server and the bare word on legacy, undeclared outside the race-permit session (numidium's read). Declared once as a common
+  divergence in difftest's divergences.yaml, the lock's two-step shape (fork m5-race-permit ee9fdec5); paper-only heads with the
+  server-only knob: the permit train 25c00758 (64ec9666's dist stands, its stage continues) and the bondblock train a29a421b
+  (15281798 plus the declaration; 15281798 carries apocrypha's hide 26ebe040: race.clearRaceFlag(1) through the typed Race, the
+  seats' Race.pex being SKSE's with MakeUnplayable a script wrapper). The hide's two claims run by path at the bondblock stage
+  (x-race-permit-hide d567a586) and return to b-race-permit on main after the permit merges.
+
+- 17:30 PST 2026-11-01 b-duel's Flames leg read (two reds, two green reruns today): the server counted 1.95 s of the 4 s hold in the red run
+  against 3.45 in the green, from the stream's first report (1.23 s after the cast, counted at MAX_TICK_MS 0.25) and its last
+  (after the cast's end, refused as E_SPELL_NO_CAST); neither the claim's margin (spell-cast.md, "b-duel's Flames leg"). The rule's
+  half fixed on fork m2-stream-end-grace a1bd3908 (an ended stream takes one last report within HOLE_MS; R0 after the bondblock
+  train, numidium's order); the premise's half is b-duel's own commit (a look at c2 before the hold) once the permit train has
+  merged. Meanwhile the permit's gate was green 12 of 12 with T2 38 of 38 on 7fe600e6, and verb-merge refused it on two builds in
+  the runs (the T2's tag pull moved the lab's image mid-gate; numidium's restage and regate run now, its tooling fix owed).
+
+
+### 2026-11-02
+
+- m5-train-permit-onceload merged to fork parity 7fe600e6 (2026-11-02T02:16Z, numidium): the gate
+  20261102-013806-merge-m5-train-permit-onceload, 20261102-013806-smoke-two-players to 20261102-021256-b-npc-caster (12 runs, all
+  green on the first run); T2 skip on skymp-server:m5-train-permit-onceload, citing the T2 of 7fe600e6 green beside the first gate
+  (38 sessions identical, after the permit's create word was declared common in divergences.yaml and race-permit's departure echo
+  moved to c1, refr:ff000003); clones promoted. Verbs: the race permit (restrictedRaces: rotfern's aa00 and its vampire race 19d08
+  for profile 1 alone; the server refuses another profile's pick with E_APPEARANCE_RACE; b-race-permit 94787ef1 claims the
+  refusal, the client's menu hide is apocrypha's next slice, since Race.MakeUnplayable is a script wrapper in SKSE's Race.pex and
+  threw "not native") and onceLoad (a game-file reference's CreateActor props wait for its 3D instead of dropping after 120
+  frames: b-locks claim 17's slow landing). The first gate (20261102-002715) was green 12 of 12 and refused by gate-cite check 2:
+  the T2 beside it pulled the branch's bare tag after 7fe600e6's pipeline had pushed a new image, and the lab's next server
+  recreate took it (054b5d43 for five runs, 534c49dc after), so the train was restaged on 7fe600e6 and gated again; T2 runs on the
+  per-sha tag since.
+
+- 18:18 PST 2026-11-01 the race permit MERGED: fork parity 7fe600e6 (the train m5-train-permit-onceload: the permit's server half, apocrypha's
+  client half with the hide off, the onceLoad landing fix; numidium's regate 12 of 12 after the tooling's two-builds refusal, T2 38 of
+  38). b-race-permit green four times on the train. Follow-ups: parity merged into m4-object-animation (SCHEMA_VERSION 30 kept over the
+  permit's 29; an interim head, server-only), b-duel's premise commit (a look at c2 before the Flames hold, the bound unchanged), the
+  hide's claims back on main after the bondblock train, b-shadowbond's un-pend on that train's green.
+
+- 18:37 PST 2026-11-01 b-shadowbond on the bondblock train's first stage (023146): the swap landed (the run-out bug is gone) and the
+  caster's game never saw the invisibility: CastBondProc had skipped the caster's game, where the now-blocked script used to cast
+  both procs. Fixed on m2-shadowbond-script-block 9aeaeace (the relay reaches every game; BondTest updated); numidium gates nothing on
+  84f87370 (a green there would have carried the regression), the stage's x-race-permit-hide and x-puzzle-relay reads finish, then
+  the train re-cuts on 9aeaeace (REUSE_DIST on a29a421b's dist) with all three probes by path again.
+
+- 18:42 PST 2026-11-01 the bondblock train's first stage read (84f87370, no gate): x-race-permit-hide GREEN (apocrypha's clearRaceFlag hide takes
+  rotfern's two races off c2's menu, none off c1's), x-puzzle-relay red on its own claim alone (the guest's pillar turn reaches the host
+  and runs there; the host's engine then activates the pillars' XMarker child 0x4fcdf, never loaded by the server, E_TRAP_NO_REF by
+  design; the probe names its codes from v2), b-shadowbond red on the caster's lost procs (fixed 9aeaeace). The train re-cut as
+  m4-train-bondblock-puzzle 400790b2 (server-only over 84f87370, REUSE_DIST on a29a421b's dist); numidium restages it with the three
+  probes by path.
+
+- m4-train-bondblock-puzzle merged to fork parity e6c5d01a (2026-11-02T04:05Z, numidium): the gate
+  20261102-031449-merge-m4-train-bondblock-puzzle (cited, ADR-042: its own fresh run on 400790b2, 12 of 12 green, b-npc-death
+  green on its relaunched rerun; e6c5d01a differs only in the shadowbond session's declarations, check 4),
+  20261102-031449-smoke-two-players to 20261102-035138-b-npc-caster; T2 skip, citing e6c5d01a's T2 on its per-sha tag (38 sessions
+  identical); clones promoted. Verbs: the shadowbond script block (WB_InvisProcTeleport_Script never admitted, so the run-out no
+  longer moves the caster; the server's proc relay now reaches the caster's own game, b-shadowbond green by path 025608 and out of
+  pending), the puzzle relay (a pillar or lever turn relays to every other game in the cell: x-puzzle-relay v3 030924, the XMarker
+  0x4fcdf's E_TRAP_NO_REF by design) and the race permit's menu hide (apocrypha: race.clearRaceFlag(1) through the typed Race,
+  x-race-permit-hide green twice). The first T2 on 400790b2 was red on that caster-side relay's two SpellCasts until declared.

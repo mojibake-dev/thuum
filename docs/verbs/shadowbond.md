@@ -109,8 +109,35 @@ MoveTo instant, the report cadence 130 ms).
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
-- What is suppressed: nothing; a figure's MoveTo by the script in the
-  caster's game is overwritten by the relay, as every figure move is.
+- What is suppressed (since fork m2-shadowbond-script-block, 14:59 PST 2026-11-01):
+  WB_InvisProcTeleport_Script's events, in EVERY game, through Skyrim
+  Platform's never-admitted list (FridaHooks.cpp OnSendEventEnter, checked
+  before ADR-031's effect rule and the admitted names). Why: the script's
+  0.2 s poll swaps the two actors itself the first time EITHER is visible;
+  with the player as the caster the effect rule ran it in c1's game, and the
+  server's own dispel at a bond's run-out tripped its swap (b-shadowbond's
+  second half, run 20261101-224953: c1 "dispelled 1a055b32 from the figure
+  ff00081d" at 22:52:08.9, then "settle ff00081d: 153.0 units" as the relay
+  put the moved figure back, c1's own player carried to the target's place
+  as movement, y -318 for < -400; a race with the engine's 20 s expiry, so
+  10-30's 203601 read green once). The server owns the swap (RecordBond,
+  BreakBondsOf, TickBonds), casts the procs and dispels at the run-out, so
+  the script's one consequence was its double.
+- What the caster's game loses: the swap's sound, visual effects and image
+  space modifier the script played (the inventory's row); a snippet at the
+  server's swap can carry them later. Before this the script's own MoveTo in
+  the caster's game was overwritten by the relay, as every figure move is.
+- What the caster's game gained back (18:37 PST 2026-11-01, fork m2-shadowbond-script-block
+  9aeaeace): the two concealment procs. The script's OnEffectStart cast them
+  in the caster's game, so PartOne::CastBondProc relayed them to every game
+  but the caster's; with the script blocked, the first run on the bondblock
+  train (b-shadowbond 20261102-023146) landed the swap and never showed the
+  caster's game an invisibility (c1.watched_self and c1.watched(c2) both 0).
+  The relay now reaches the caster's game too; its client casts a relayed
+  proc naming its own player through castSpellImmediate's Self branch
+  (remoteServer.ts, casterIsMe), as the target's game always did. BondTest:
+  the caster's game hears both procs. The inventory's first row ("OnEffectStart
+  ... each cast the Self proc") is therefore the server's in every game.
 - Side effects: HYPOTHESIS: the figure's one-frame hop before the relay's
   next report (the placement arrives within a report).
 
@@ -255,3 +282,7 @@ difftest session shadowbond declared that StartCombat; T2 at fork
 m2-train-31 3642bc32 showed it no longer occurring and the declaration went
 (the session's one edit). The bond, its concealment and the break are
 unchanged.
+- [ ] the script's suppression at T3: b-shadowbond green by path on the train
+  m4-train-bondblock-puzzle's stage (both halves: the server's swap at a
+  break, no swap at a run-out), then out of pending (14:59 PST 2026-11-01: built, fork
+  m2-shadowbond-script-block)

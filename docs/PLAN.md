@@ -1387,7 +1387,8 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   formula MERGED 27f5c0a4 (b-perk-damage: kModAttackDamage and kModArmorRating with their keyword conditions; other entry points
   and conditions stay a documented limit); the console's SetLevel and AdvSkill on the server (m5-skill-set); enchanting, alchemy
   and pickpocketing as transactions: not begun (memo D77 D, the benches after the playtest); vampirism: the design owed.
-  The race permit (Eli, 2026-11-01: rotfern's race for test client 1 alone) BUILT WHOLE on fork m5-race-permit b59ab993 (13:56 PST 2026-11-01:
+  The race permit (Eli, 2026-11-01: rotfern's race for test client 1 alone) MERGED to fork parity 7fe600e6 (18:18 PST 2026-11-01; the gate 12 of
+  12, T2 38 of 38; the menu hide follows in the bondblock train), BUILT WHOLE on fork m5-race-permit b59ab993 (13:56 PST 2026-11-01:
   server setting restrictedRaces, two facts on the race rule, CreateActor's restrictedRaces and permittedRaces at SCHEMA_VERSION 29,
   apocrypha's menu hide, T0 RacePermitTest, T2 session race-permit, T3 b-race-permit); numidium stages it after the container gate,
   merge on green (docs/verbs/character-creation.md, "The permit").
