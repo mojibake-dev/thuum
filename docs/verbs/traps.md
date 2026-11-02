@@ -259,6 +259,19 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   silence on the plate legs is the engine's word and decision 4's client half moves to the engine's trap-hit event or to the
   figure's body in the Havok world; without them the trace is wrong before the engine is. Runs in the morning's first free window
   (the sweep holds the lab). The TrapHit server half stands either way; the client half's hook stays HYPOTHESIS.
+- x-trap-path v4 read (05:23 PST 2026-11-02; 20261102-131634, green on its premise; numidium's read of the self-proving trace): the ready row
+  carried pid 4188 while c1's game was pid 10704 (the run's own c1-skyrim-platform-pid10704.log), all five addresses resolved (the
+  DamageActor entry's first bytes a JMP, the platform's own detour, as expected), and no liveness row ever came: the agent lived
+  in another SkyrimSE.exe. lab-api's frida step (config.py's frida_exec_template) takes `Get-Process SkyrimSE`, sleeps 5 s and
+  injects into that pid, so a second game process alive at that moment (the previous game still exiting after the relaunch, a
+  launcher stage) takes the injection; intermittent, which is why x-object-anim v3's leg B saw its fourteen DamageActor rows and
+  every later trace saw nothing. CONSEQUENCES: the silences of x-trap-path v1 to v3 and of pillar-anim-trace.js decide nothing;
+  the "a Frida attach on a platform-attached function fires nothing" reading is RETRACTED; the physics candidates for the figure
+  (its body out of the Havok world after a long teleport, the trap's physics unwoken) are withdrawn, unread; the re-analyst's
+  chain and the hook on 56212 stand as HYPOTHESIS exactly as before the traces. The fix is numidium's in lab-api (inject into the
+  game process deliberately: the pid the platform log names, or the newest SkyrimSE.exe with SkyrimPlatformImpl.dll loaded, and
+  the chosen pid in the step's note), after Eli's turbo; x-trap-path v4 reruns on it unchanged. Standing rule for every trace:
+  the ready row's pid against the platform log's, and no row is read before it matches.
 - x-trap-path v3 read (05:16 PST 2026-11-02; 20261102-130725 on the merged base, green on its premise): the liveness swing LANDED twice (the
   server's "OnWeaponHit - ff000000 hits ff000001 with 12eb7 for 0 damage" at 13:11:15 and 13:11:18, c2's god mode the zero), so
   Actor::ProcessHitVictim and Actor::DamageActor ran on c1 for the figure, and the trace printed no row for them either: the trace
@@ -280,9 +293,8 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   pillar (Trigger01; the Turned0N the script waits for is the graph's event back to it, not sent through the hook). c2's leg C
   screenshot is black (its look-at aimed into the dark), so the guest's turn is proven by its log line, not by eye; the turbo
   sitting reads it. The pillar's engine family stays HYPOTHESIS and is immaterial: the trace lab/frida/pillar-anim-trace.js
-  printed no row because a Frida attach on a function Skyrim Platform already attaches through its own Gum (38048 since forever,
-  14297 on this head) never fires, while an attach on one the platform replaces (DamageActor) does (x-object-anim v3's fourteen
-  rows); the platform's own hooks are the read for such functions from now on. numidium runs the full sweep as the pair's gate;
+  printed no row (RETRACTED 05:23 PST 2026-11-02: not the double-attach reading written here first; the lab's Frida step had injected into the
+  wrong SkyrimSE.exe process, see the x-trap-path v4 read below). numidium runs the full sweep as the pair's gate;
   on its green the pair merges (PROMOTE=0 verb-merge plus the LAYER_RUN layer-merge) and the Status ticks follow.
 - x-trap-path v1 read (22:08 PST 2026-11-01; 20261102-055845, green on its premise): the trace was live before the swing and the figure
   stood on the plate (c1's av-read at 8589, -5338; the plate fired twice, the wall played 180For, 180Back and Rearm), yet

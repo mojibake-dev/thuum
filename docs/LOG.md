@@ -5214,3 +5214,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the trace, not the engine, is at fault (traps.md). Trace v3 proves itself (pid, resolved addresses and bytes, per-hook counts, a
   Sleep pulse; main 173bff7d carried the script alone, this commit its docs); probe v4 c83f645a by path for the next free window.
   The server's "Script 'TrapSwingingWall' not found" line is ADR-059's design, noise to filter later.
+
+- 05:23 PST 2026-11-02 x-trap-path v4 (131634) with the self-proving trace: pid 4188 against the game's 10704, so lab-api's Frida step injected
+  into another SkyrimSE.exe (numidium's read: `Get-Process SkyrimSE` plus a 5 s sleep takes whichever process is alive, intermittently
+  the wrong one). Every trace silence of the night is retracted as evidence (the pillar's family, the figure's physics); the trap-path
+  chain stands as HYPOTHESIS as before. numidium fixes lab-api after Eli's turbo; v4 reruns unchanged.
