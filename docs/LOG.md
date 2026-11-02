@@ -5134,3 +5134,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (R8 target, R9 trap, [RSP+0x28] damage) → Actor::DoTrap1 37509 → ProcessHitVictim 38586 twice (deferred to the main thread) →
   DamageActor with no attacker. The hook for the TrapHit client half is 56212's entry (HYPOTHESIS until trap-path-trace.js);
   filed in traps.md's Dynamic plan.
+
+- 21:58 PST 2026-11-01 TrapHit's client half built on fork m4-trap-hit fd90067f (the ProcessTrapHit native's callback hooked AE-only at 56212 per the
+  re-analyst's read, the trapHit event's three declarations, TrapHitService reporting from the cell's host for another player's
+  figure; server-only push, the client build with its stage). The trace that confirms the hook point, lab/frida/trap-path-trace.js
+  (main 35a9692c), runs as x-trap-path 339985cd by path once numidium's layer deploy carries it; the pillar head waits for the
+  grace's parity.
+
+- 22:04 PST 2026-11-01 m2-stream-end-grace merged to fork parity 235aad49 (2026-11-02T06:03Z, numidium): R0 (ADR-053), no lab gate
+  (the nightly is its T3); T0 pipeline 4583 server-build 16546, 13 of 13 tests; T2 green on
+  skymp-server:m2-stream-end-grace-235aad49 (the per-sha tag); clones not promoted. Verbs: spell-cast's stream end grace (an ended
+  stream that counted a report keeps its hand for one more report within HOLE_MS, so a Flames hold's last report counts: b-duel's
+  Flames leg read 0.7878 and 0.8453 twice tonight for < 0.78; the spell-cast session declares the extra tick). Its first R0 on
+  8eddb2c4 stopped at T2 on a stale image: verb-merge's own T2 pulled the bare tag at 04:10:20Z, four minutes before 8eddb2c4's
+  server-build pushed, so it tested ea15e8bb (no proc relay fix, hence shadowbond's missing caster procs); verb-merge's T2 now
+  waits for the head's server-build and runs on its per-sha tag (main d4c528f7).
