@@ -248,6 +248,29 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   number to the record (R1) with the trap as the cause (ADR-048's hazard death if it kills), and ChangeValues shows the hit seat;
   the host's client reports from the trace's hook point (a platform export beside damageActor's) and the figure's local loss is
   restored by the server's word. Decision 5 (counts) after it.
+- Decision 4, the scripts' own path, static from their bytecode (21:00 PST 2026-11-01; `lab/pex.py disasm` on movingtrap.pex, traphitbase.pex and
+  trapbase.pex out of "Skyrim - Misc.bsa" by lab/tools/bsa-extract.py). This replaces the plan's Papyrus-damage HYPOTHESIS: the
+  swinging wall's harm is an engine native, not a script's DamageActorValue. TrapBase.fireTrap calls ResolveLeveledDamage, which
+  MovingTrap overrides: `damageLevel = CalculateEncounterLevel(TrapLevel)` (ObjectReference's native, SKSE ObjectReference.psc:173,
+  the reference's encounter zone and the player's level at the engine's difficulty 0 to 4), then the ladder LvlDamage1 for a level
+  at or under LvlThreshold1, LvlDamage2 above it and at or under LvlThreshold2, ... LvlDamage6 above LvlThreshold5, written into the
+  same reference's TrapHitBase `damage` property. TrapHitBase.OnTrapHitStart(akTarget, velocities, position, material, ...) in its
+  `canhit` state: a target with the ghostAbility spell or in noHitFaction is skipped; hitOnlyOnce moves the trap to CannotHit; then
+  `akTarget.ProcessTrapHit(self, damage, trapPushBack, velocities, position, material, staggerAmount)` (the engine native, SKSE
+  ObjectReference.psc:489) does the damage, the push and the stagger inside the engine; after it the sound (throttled by
+  soundDelay), the disease roll (isPlayer only: the target must be the game's own player, so a guest's figure never catches one on
+  the host), hitFX, a detection event, and rumble and camera shake for the player alone. The event itself is the engine's
+  TESTrapHitEvent (CommonLibSSE-NG ScriptEventSourceHolder.h:110 sources it, SkyrimVM.h:128 sinks it for Papyrus; its layout is
+  not in the headers). Consequences for the build: (1) the server validates the host's number by membership in the trap's six-value
+  table from the VMAD (TrapLevel's encounter-level scaling is the engine's own system, never reimplemented; the recorded level is
+  not an input), the hit itself by the trap's reach to the target's recorded position, so R1 as planned; (2) the host's report point
+  is where the engine takes afDamage: the trace's two hooks (RestoreActorValue's slot and Actor::DamageActor) tell whether
+  ProcessTrapHit lands in one of them for a figure (then the platform's existing DamageActor replacement is the hook, with the
+  trap as the attacker argument or none) or in neither (then the native's own implementation, found by its registration string
+  "ProcessTrapHit" in Ghidra, is the hook: an RE task before the client half); (3) the whole action on a guest's body (ADR-031):
+  damage by TrapHit to the server, push and stagger by the host's engine on the figure (already the figure's local motion), sound
+  and FX host-side until a later slice, the disease a known gap (server-owned later, noted in Limits). The trace's expectation
+  (lab/frida/trap-hit-trace.js) is corrected to match: the amount arrives from the engine's trap path, not from the VM's dispatch.
 - Decision 1's declaration (20:57 PST 2026-11-01): the hosted-cell gate's native SetCellHosted (the client's HostService telling the platform
   which cells this seat hosts at every grant and release) was bound in C++ and called from TypeScript but never declared in the
   compiled TESModPlatform.pex, so the call threw "Native function not found" on every seat and the host-scoped scripts stayed
