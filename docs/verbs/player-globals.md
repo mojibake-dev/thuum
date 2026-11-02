@@ -153,10 +153,11 @@ watch), the rest refused by the validator.
 - T3 scenario id: lab/scenarios/b-player-globals.yaml: c1's game writes a
   listed global (the driver's global step, as the mod's script would);
   after a server restart and c1's relaunch, c1's game holds the value; c2's
-  game holds the record's default.
+  game holds the list's default where its record is silent (an entry's
+  `default`), else the plugin's own value.
 - Assertions that would fail if the verb silently regressed: c1's value
-  after the restart (the record's default if nothing was recorded); c2's
-  untouched value (fails if values leak between players).
+  after the restart (the list's default, or the plugin's, if nothing was
+  recorded); c2's untouched value (fails if values leak between players).
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
@@ -236,6 +237,21 @@ state: 826 and Update.esm's Survival_ModeEnabledShared (00314A) are never listed
 fresh game whose quests are not running, and A0F (ModeCanBeEnabled's output) is derived. (2) A restored need value needs no care: StartNeed
 applies its stage at once and each tick adds elapsed game hours from the script's own stamp. Known limit (the checklist's): Survival waits
 for the outdoors after an indoor login. If a train ever wants it on from login indoors, the Creation's own StartSurvivalMode() is the path.
+
+## A default for everyone: Undead FX's old decay (Eli, 2026-11-02)
+
+Eli (via numidium, 14:01 PST): "a default setting id like turned for everyone and new players in MCM is the legacy
+resurrection FX for the reanimation fx mod", with "idk if we want to patch the plugin itself" and "remember we want people to be
+downloading the mods from nexus using our script and an api token they place. so it needs to work with the raw plugin installed".
+The setting is Undead FX 4.2's GLOB US_Setting_Decay_UseOld (05178e:UndeadFX.esp, plugin default 0; the MCM's "Use Old Decay FX",
+"Use old version of underskins. Uses less armour slots, but decapitation won't work properly"; the effect scripts branch on it).
+The verb already had the shape: a `playerGlobals` entry may be an object ('global', 'default', 'killAt') (wire-rules
+player_globals::from_json), and the login sends a default for a listed global the record is silent on (at_login); a player's MCM
+change reports through the watch and the record keeps it, so the default is the server's word for everyone and every new player
+and the plugin stays raw. No fork code: the lab's two settings files list the global with default 1 (thuum main c9177cbc, in
+layer-render's shape). ADR-053: a server-only change that moves the engine's FX on every seat keeps one probe at the slot,
+x-global-default by path (d8f5cd9b): both seats read 1 at login; c1 sets 0 as the MCM would and reads 0 while c2 keeps 1; a relaunch
+and a server restart keep both. Then b-global-default in its own commit. The deploy pairs with its probe (numidium).
 
 ## Status
 

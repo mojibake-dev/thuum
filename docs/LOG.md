@@ -5297,3 +5297,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   queued client builds cancelled before they started. Three stages and gates become one, about 1.5 h of lab instead of 4.5.
   restart-dead c3eb2550 in R0 (pipeline 4676); its parity goes into the train and m5-skill-books server-only when it lands.
 
+- 14:01 PST 2026-11-02 Eli's Undead FX default (via numidium: the legacy resurrection FX for everyone and every new player, the plugin raw):
+  no fork code, the player-globals rule already carries an entry's `default` sent where the record is silent; the lab's settings list
+  05178e:UndeadFX.esp with default 1 (c9177cbc, layer-render's shape), player-globals.md gains the section and the T3 wording,
+  probe x-global-default by path d8f5cd9b (login 1 on both seats, c1's MCM change to 0 kept across a relaunch and a restart, c2's 1).
+  Also this hour: the PropTest red of the train's T0 (pipeline 4685) was my FormDesc compare against the load order's spelling,
+  fixed on m4-prop-statics df3b8819 (resolved ids, the plugin case-insensitive); the R0 train m4-turbo2-r0-train 6d7fcc84
+  (restart-dead c3eb2550 plus skill books 38659a3e) pushed server-only for numidium's one T2; the train waits for that parity and
+  the fix in one push. The rune glyph (m2-rune-glyph): the re-analyst's prototype read landed and the placement is written.
+
