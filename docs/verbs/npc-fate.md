@@ -1998,6 +1998,17 @@ and about 120 below the eye (about 13 counts a degree on this seat; the rune pro
   hostility word (the server's package for him read ff000c5e then 1cb09; "ProcessActivate 1c785 - occupant is already this object").
   Recorded, not fixed under the turbo; a read of what the engine does with an angered NPC in a sandbox package when its aggression
   comes from the server.
+- F9 (numidium's log read, 12:37 PST): after the 20:19:47Z restart the relaunched host's fresh engine stood two dead NPCs up
+  ("1066df stands again ... its death before this process; the record's death cleared", Faendal 1348c at 20:20:35Z), against M3's
+  "bodies lie where they died after a relaunch". A body dead since before this server process has no death stamp, and the host's engine
+  loads such a corpse alive for a frame before the kill word lands, so its first live sample read as a resurrection. Fix (fork
+  m4-turbo2-restart-dead aef99109, the server): MpActor::NoteHostSampledDead at a dead sample from the simulator, cleared at the
+  stand-up; a live sample stands a body dead before this process only after its host has sampled it dead once, or within a
+  reanimate's window (ActorDeathTest's case rewritten: the first live sample stands nothing, a dead then a live one stands it).
+- Where the fixes stand (14:44 PST 2026-11-02): F5 MERGED with wall-range (fork parity 4b6f5fa3, 21:12Z); F9 MERGED as the R0 train
+  m4-turbo2-r0-train (parity 6d7fcc84, 22:42Z, with skill books; T0 13 of 13, T2 green); F3 and F4 ride the client train
+  m4-turbo2-train 1a1f304b (with prop-statics and the settle head), arm two's build, its gate after the arm (Eli's turbo order). The
+  reanimate's grace and the never-moved body are read by Eli's eyes in arm two (docs/private/playtest-turbo-2.md, items 1 and 2).
 
 ## Status
 
