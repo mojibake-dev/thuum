@@ -769,3 +769,24 @@ replays it) and relays the same message to the cell's other listeners, whose eng
 hosted-cell gate and play it through PlayAnimation. Fixtures 71-ObjectAnimation-0 and -1; WireJsonContractTest reads them
 through ObjectAnimationMessage.h. No difftest session triggers it yet (the fake clients host no cell).
 
+### TrapHit (t 72): the host's report of a trap's hit on another player's body (traps, M4; ADR-059 decision 4)
+
+Since fork m4-trap-hit c085a3ad (21:17 PST 2026-11-01, SCHEMA_VERSION 31): TrapHit (id 80, MsgType 72), client to server, reliable:
+`{ refr: u32 (the trap, a game-file world object, never 0), target: u32 (the hit actor, another player's, never 0), damage: f32
+(the number the host's engine dealt; finite, 0 or above) }`; validator E_VAL_NONFINITE, E_VAL_RANGE, the sender's budget 16 then
+8 a second (E_VAL_RATE, UNMEASURED). The cell's host's engine runs the trap's scripts (TrapBase.fireTrap resolves MovingTrap's
+leveled pick by the engine's CalculateEncounterLevel into TrapHitBase's damage, which OnTrapHitStart hands to the engine's
+ProcessTrapHit); the host reports what it dealt a guest's figure, and the server, which owns the guest's health, judges it by
+wire-rules traps::hit: the number must be one the trap's scripts could pick (MovingTrap's LvlDamage1 to LvlDamage6 and
+TrapHitBase's damage where a record sets it, read from the base's and the reference's VMAD by the core, E_TRAPHIT_TABLE for a
+reference without one, E_TRAPHIT_DAMAGE for a number off it) and the target's recorded position within traps::REACH 512 of the
+trap (E_TRAPHIT_REACH, UNMEASURED: the probe reads the real distance); the encounter level itself is never recomputed. The core
+takes it from the cell's host alone (E_TRAPHIT_NOT_HOST), for a game-file world object (E_TRAPHIT_NO_REF, E_TRAPHIT_ACTOR) and a
+target that is another player's actor in the trap's cell (E_TRAPHIT_TARGET: the host's own body is its own actor-values report,
+an NPC's values are the host's HostedActorState; E_TRAPHIT_CELL), at most 8 reports a second per trap (E_TRAPHIT_RATE, counted
+before the rule), and applies the table's value through OnWeaponHit's CalculateCurrentHealthPercentage and NetSetPercentages (god
+mode and an ethereal target take nothing; a kill is the server's own, credited to nobody), so ChangeValues reaches the hit seat.
+Fixtures 72-TrapHit-0 and -1. No difftest session triggers it (the fake clients host no cell); T0 unit/TrapHitTest.cpp. The
+client half (where the host's engine takes afDamage: the DamageActor replacement or ProcessTrapHit's own implementation) follows
+x-object-anim v3's trap-hit trace.
+

@@ -248,6 +248,20 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   number to the record (R1) with the trap as the cause (ADR-048's hazard death if it kills), and ChangeValues shows the hit seat;
   the host's client reports from the trace's hook point (a platform export beside damageActor's) and the figure's local loss is
   restored by the server's word. Decision 5 (counts) after it.
+- Decision 4's server half BUILT (21:17 PST 2026-11-01): fork m4-trap-hit c085a3ad (off the pair's 32795060, SCHEMA_VERSION 31; server-only push,
+  CI's T0 pending). The contract is docs/WIRE.md's TrapHit (t 72) `{ refr, target, damage }` C2S, R1: the host's engine computes
+  the number (the scripts' leveled pick through ProcessTrapHit), the server validates it by membership in the trap's own table
+  (wire-rules traps::hit over the VMAD's LvlDamage1 to LvlDamage6 and TrapHitBase's damage, base then reference, read by
+  ActionListener::TrapDamageTable; the encounter level is the engine's and never recomputed) and by reach (traps::REACH 512 from
+  the trap's origin to the target's recorded feet, UNMEASURED until the probe reads it), then applies the table's value to the
+  record as OnWeaponHit does (god mode and ethereal take nothing; a kill is the server's own with no killer). Gates in the core:
+  the cell's host alone, a game-file world object, a target that is another player's actor in the same cell (the host's own body
+  stays its actor-values report, an NPC's values its HostedActorState), 8 reports a second per trap. Codes: E_TRAPHIT_RANGE,
+  _NO_REF, _ACTOR, _NO_CELL, _NOT_HOST, _TARGET, _CELL, _RATE, _TABLE, _REACH, _DAMAGE. T0 unit/TrapHitTest.cpp on the wall
+  0x54b15 (75 lands, 76 does not, 200 kills; the guest's report, the host's own body, Alvor, the portcullis, 600 units and the
+  ninth report are refused). Left for the trace: the client's report point and whether the host's engine lets the figure lose
+  health locally (restored by the server's word either way); then the SP export, the TS service, the probe x-trap-hit (the real
+  distance, the frames) and b-trap-hit, the Status ticks.
 - Decision 4, the scripts' own path, static from their bytecode (21:00 PST 2026-11-01; `lab/pex.py disasm` on movingtrap.pex, traphitbase.pex and
   trapbase.pex out of "Skyrim - Misc.bsa" by lab/tools/bsa-extract.py). This replaces the plan's Papyrus-damage HYPOTHESIS: the
   swinging wall's harm is an engine native, not a script's DamageActorValue. TrapBase.fireTrap calls ResolveLeveledDamage, which

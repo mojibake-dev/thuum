@@ -5110,3 +5110,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (lab/pex.py's rule; the quest-stage pair missed it the same way a day earlier, e0e3af03). Fixed: m4-object-animation 32795060
   (lab/pex.py add-native plus the .psc line, dump-checked), a platform file, so a full client build; numidium restages the train
   over the layer as laid with x-object-anim v3 by path. The layer branch stays still.
+
+- 21:17 PST 2026-11-01 decision 4 while the pair restages: the trap scripts read from their bytecode (lab/pex.py disasm on movingtrap.pex,
+  traphitbase.pex and trapbase.pex out of "Skyrim - Misc.bsa"): TrapBase.fireTrap resolves MovingTrap's leveled pick
+  (CalculateEncounterLevel(TrapLevel) against LvlThreshold1..5 picks LvlDamage1..6) into TrapHitBase's damage, and OnTrapHitStart
+  hands it to the engine native ProcessTrapHit (ghost ability and noHitFaction skip the hit; the disease, rumble and camera shake
+  are the player's alone), so the plan's Papyrus-damage HYPOTHESIS is retired and the trace's expectation corrected (lab/frida
+  trap-hit-trace.js). The server half of TrapHit built on fork m4-trap-hit c085a3ad (MsgType 72 C2S, SCHEMA_VERSION 31,
+  wire-rules traps::hit by table membership and REACH 512 UNMEASURED, ActionListener::OnTrapHit host-only with
+  TrapDamageTable over the VMAD, T0 TrapHitTest; docs/WIRE.md's section); the client half follows the trace's frames.
