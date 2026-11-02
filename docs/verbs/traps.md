@@ -248,6 +248,17 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   number to the record (R1) with the trap as the cause (ADR-048's hazard death if it kills), and ChangeValues shows the hit seat;
   the host's client reports from the trace's hook point (a platform export beside damageActor's) and the figure's local loss is
   restored by the server's word. Decision 5 (counts) after it.
+- Decision 4's server half, static (20:53 PST 2026-11-01): the server needs no new parser for the trap's table. libespm reads a record's
+  whole VMAD (RecordHeader::GetScriptData, skymp/libespm/src/RecordHeader.cpp:43-66; Utils.cpp:177-204 fills each script's name,
+  status and properties, Utils.cpp:123-175 the values: Object, Int, Float, Bool, String and their arrays, libespm/Property.h), ACTI
+  carries it as `scriptData` (libespm/ACTI.h:16), and the server already walks a reference's scripts base-then-ref
+  (MpObjectReference.cpp:1766-1794, `for (auto record : { base.rec, refr.rec })`, the ref's VMAD after the base's) and picks one
+  script's properties by name (ScriptVariablesHolder.cpp:101-121, stricmp on scriptName). So TrapSwingingWall's LvlDamage1..6 and
+  LvlThreshold1..5 on the wall's base 0xc6440, TrapBase's TrapLevel and damage, and the placed 0x54b15's overrides are one
+  GetScriptData per record at the rule's judgment, cached like the rest of the espm. The rule's inputs are then the target's
+  recorded level (the leveling verb's record), the trap's table and the host's reported number; what the trace decides is the
+  client's hook point and whether the host's engine can read the number it dealt the figure (TrapHit carries it for the server to
+  check against the table, R1) or only the hit (the server computes from the table alone, R0).
 - Static pre-answers for ADR-059's next slices (08:03 PST 2026-11-01). Decision 3 (the host's animations to the guests): Skyrim Platform's
   sendAnimationEvent hook (FridaHooks.cpp OnSendAnimationEventEnter) takes the engine's animation-graph holder from rcx and reads
   the TESObjectREFR 0x38 bytes below it, so every reference with a graph reaches EventsApi::SendAnimationEventEnter(formId, name),
