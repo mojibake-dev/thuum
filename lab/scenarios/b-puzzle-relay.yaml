@@ -1,0 +1,108 @@
+# b-puzzle-relay, promoted from the probe x-puzzle-relay v3 (green 20261102-030924 on the bondblock train's stage; thuum-magnus; v1 07:58 PST 2026-11-01, v2 names the refusal codes after 023719, v3 stands the host in the third pillar's reach after 030232; docs/verbs/traps.md, ADR-059 decision 2's last piece; fork m4-puzzle-relay off m4-traps
+# 346249e8, under the layer's rows and the client's activationUnblockedBases as b-bleak-traps lays them). A guest's activation of a
+# scripted world object in a cell it does not host is relayed by the server to the host's engine with the guest's actor as the
+# activator ("[verb:traps] ff000001 activates aa8cb in cell 371de (its host ff000000): relayed to 1 other game(s)"; the host
+# plays it: "relayed activation aa8cb by ff000001"), so the host's defaultPuzzlePillarScript turns and its lever counts the turn;
+# the guest's own engine turned its pillar already (the scripts are admitted everywhere in this dist), and a host's own turn goes
+# to the guest the same way (leg B's third pillar is the host's turn: c2 "relayed activation aa8cd by ff000000"). Bleak Falls Temple's puzzle: pillars
+# 0xaa8cb (initial face 1, solve 3), 0xaa8cc (3, solve 2), 0xaa8cd (1, solve 2); a turn advances one face (HYPOTHESIS: 1 to 2 to 3 to
+# 1, the script's RotatePillarToState order), so two, two and one turns solve it, 3 s apart for the script's busy window. Then the
+# host pulls the puzzle lever 0xaa8c3: on success defaultPillarPuzzleLever activates the door marker 0x3e728 (a STAT the server never
+# loads: that report is refused E_TRAP_NO_REF by design) and the marker's activation parents raise the portcullis 0x3b9f1, which the
+# host reports with the marker as the caster and the server relays by id ("3e728 activates 3b9f1 ... relayed to 1 game(s)"); no dart
+# fires. A wrong face order fires the darts instead and the read says so. Claims: the relays (certain); the success is read (the
+# marker line and the darts' absence asserted loosely, the screenshots at the gate). Assertions are evaluated by lab-api only (ADR-009).
+id: b-puzzle-relay
+milestone: M4
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: false
+  gameHour: 7.9
+timeout_s: 900
+artifacts: [server.log, c1.log, c2.log, screenshots]
+steps:
+  - c1: relaunch {until: gone, files: [{json: "Data/Platform/Plugins/skymp5-client-settings.txt", key: "activationUnblockedBases", value: "1a4bb c6440 21513 3e726 aa8ce b7db4 173fc 2079f"}]}
+  - c2: relaunch {until: gone, files: [{json: "Data/Platform/Plugins/skymp5-client-settings.txt", key: "activationUnblockedBases", value: "1a4bb c6440 21513 3e726 aa8ce b7db4 173fc 2079f"}]}
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c1: teleport {cell: "371de:Skyrim.esm", x: -4200, y: 850, z: 650, rot: [0, 0, 90]}
+  - wait: 20
+  - c2: teleport {cell: "371de:Skyrim.esm", x: -4100, y: 850, z: 650, rot: [0, 0, 90]}
+  - wait: 20
+  - assert:
+      - server.host(0x371de).client == "c1"
+  # the puzzle room: the host by the lever, the guest among the pillars (v3's standing spots, every pillar within reach)
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 5300, y: -1200, z: -768, rot: [0, 0, 90]}
+  - c2: teleport {cell: "371de:Skyrim.esm", x: 5400, y: -900, z: -768, rot: [0, 0, 90]}
+  - wait: 8
+  - c1: look-at {formId: 0xaa8cb}
+  - c1: screenshot
+  - c2: screenshot
+  # A. one turn of the first pillar: the relay to the host, the host's play
+  - c2: activate {refId: 0xaa8cb}
+  - until: {within: 5, every: 0.5, expect: ['server.log_count("ff000001 activates aa8cb in cell 371de") >= 1']}
+  - wait: 3
+  - c1: screenshot
+  - c2: screenshot
+  - c1: log-count {pattern: "relayed activation aa8cb by ff000001"}
+  - assert:
+      - 'c1.log_count("relayed activation aa8cb by ff000001") >= 1'
+      # the codes by name (lab-refusal-claims-name-codes): the pillars' XMarker child 0x4fcdf (XAPR parents the three pillars) is
+      # never loaded by the server, so the host's report of each turn's "aa8cb activates 4fcdf" is E_TRAP_NO_REF by design (v1
+      # 20261102-023719 read it as the probe's one red); every other E_TRAP_ code stays at zero
+      - 'server.log_count("E_TRAP_NOT_HOST") == 0'
+      - 'server.log_count("E_TRAP_UNLINKED") == 0'
+      - 'server.log_count("E_TRAP_RATE") == 0'
+      - 'server.log_count("E_TRAP_NO_CELL") == 0'
+      - 'server.log_count("E_TRAP_NO_REF") - server.log_count("activating 4fcdf, no such reference") == 0'
+  # B. the rest of the solve: the guest turns pillar one once more and pillar two twice; the HOST turns pillar three once (its
+  #    turn relayed to the guest the same way)
+  - c2: activate {refId: 0xaa8cb}
+  - wait: 3
+  - c2: activate {refId: 0xaa8cc}
+  - wait: 3
+  - c2: activate {refId: 0xaa8cc}
+  - wait: 3
+  # the host's own turn: the third pillar stands at (5656, -384, -768), 909 units from c1's watching spot (v2 030232 read the
+  # server's E_ACTIVATE_REACH, reach 674), so c1 steps to (5400, -400) first, 257 units from it on the pillars' walkway
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 5400, y: -400, z: -768, rot: [0, 0, 90]}
+  - wait: 4
+  - c1: look-at {formId: 0xaa8cd}
+  - wait: 1
+  - c1: activate {refId: 0xaa8cd}
+  - wait: 3
+  - c1: log-count {pattern: "relayed activation aa8c[bc] by ff000001"}
+  - c2: log-count {pattern: "relayed activation aa8cd by ff000000"}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - 'server.log_count("ff000001 activates aa8c[bc] in cell 371de") == 4'
+      - 'server.log_count("ff000000 activates aa8cd in cell 371de") == 1'
+      - 'c1.log_count("relayed activation aa8c[bc] by ff000001") == 4'
+      - 'c2.log_count("relayed activation aa8cd by ff000000") == 1'
+  # C. the host pulls the puzzle lever: the marker's portcullis on success, the darts on failure (a read either way)
+  - c2: look-at {formId: 0x3b9f1}
+  # back to the lever's reach (the lever 0xaa8c3 at (5002, -903) is 420 units from (5300, -1200))
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 5300, y: -1200, z: -768, rot: [0, 0, 90]}
+  - wait: 4
+  - c1: look-at {formId: 0xaa8c3}
+  - wait: 2
+  - c1: activate {refId: 0xaa8c3}
+  - wait: 6
+  - c1: screenshot
+  - c2: screenshot
+  - c2: log-count {pattern: "relayed activation 3b9f1 by 3e728"}
+  - c2: log-count {pattern: "relayed activation [0-9a-f]+ by aa8c3"}
+  - assert:
+      - 'server.log_count("3e728 activates 3b9f1") >= 0'
+      - 'server.log_count("aa8c3 activates") >= 0'
+      - 'server.log_count("E_TRAP_NO_REF") >= 0'
+  - c1: dump-state
+  - c2: dump-state

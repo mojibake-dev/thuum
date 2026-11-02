@@ -310,6 +310,10 @@ cell's host and only between references the game files link (XAPR or XLKR of the
 - [x] server logic + T0 (fork m4-traps 16d29f6c: OnLinkedActivation, the host's linked report, the relay, the budget; dc881a11: links from script properties, the caster by id; TrapRelayTest three cases)
 - [x] message + validator (same commit; 702567ba, RelayedActivation MsgType 70, SCHEMA_VERSION 28; decision 3's
   ObjectAnimation MsgType 71, SCHEMA_VERSION 30, fork m4-object-animation)
+- [x] decision 2 whole: a player's activation of a scripted world object relayed to the cell's other games, both ways
+  (fork m4-puzzle-relay, MERGED to parity e6c5d01a 20:09 PST 2026-11-01 in the bondblock train); x-puzzle-relay v3 green 030924 and
+  promoted to lab/scenarios/b-puzzle-relay.yaml (b133be9a): the guest's turns run on the host, the host's reach the guest, the
+  solved pull opens the portcullis; the pillars' marker 0x4fcdf E_TRAP_NO_REF by design
 - [x] native hook + T1 (none)
 - [x] TS handler, first cut (relayedActivationService.ts plays the relay, activationService.ts sends a hosted cell's non-player activations, objectReferenceEx.ts keeps the engine's activation on activationUnblockedBases; 20b1da65, tsc green); its hosted-cell shape is ADR-059 decision 1's platform change
 - [ ] T2 green
