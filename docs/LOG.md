@@ -5134,3 +5134,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (R8 target, R9 trap, [RSP+0x28] damage) → Actor::DoTrap1 37509 → ProcessHitVictim 38586 twice (deferred to the main thread) →
   DamageActor with no attacker. The hook for the TrapHit client half is 56212's entry (HYPOTHESIS until trap-path-trace.js);
   filed in traps.md's Dynamic plan.
+
+- 21:58 PST 2026-11-01 TrapHit's client half built on fork m4-trap-hit fd90067f (the ProcessTrapHit native's callback hooked AE-only at 56212 per the
+  re-analyst's read, the trapHit event's three declarations, TrapHitService reporting from the cell's host for another player's
+  figure; server-only push, the client build with its stage). The trace that confirms the hook point, lab/frida/trap-path-trace.js
+  (main 35a9692c), runs as x-trap-path 339985cd by path once numidium's layer deploy carries it; the pillar head waits for the
+  grace's parity.

@@ -248,6 +248,19 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   number to the record (R1) with the trap as the cause (ADR-048's hazard death if it kills), and ChangeValues shows the hit seat;
   the host's client reports from the trace's hook point (a platform export beside damageActor's) and the figure's local loss is
   restored by the server's word. Decision 5 (counts) after it.
+- Decision 4's client half BUILT (21:58 PST 2026-11-01): fork m4-trap-hit fd90067f (over c085a3ad, off the pair's 32795060; server-only push, the
+  client build when it stages). Skyrim Platform hooks the ProcessTrapHit native's callback (game/Offsets.h ProcessTrapHit,
+  REL::ID(56212), AE only: r8 the hit reference, r9 the trap, the Papyrus floats as stack arguments five, six and fourteen, read
+  through gum's nth-argument as float32 low dwords; HYPOTHESIS until trap-path-trace.js) and raises `trapHit` {trap, target,
+  damage, pushback, stagger} on the next tick (EventManager's EmplaceEvent, Definitions.txt's TrapHitEvent, the regenerated
+  typings); skymp5-client's TrapHitService sends TrapHit (MsgType 72) when this game hosts the trap's cell (HostService.isHostedHere)
+  and the hit reference is a server copy (another player's figure; the player's own body and game-file NPCs are not its), logging
+  "trap hit <trap> on <target> for <damage> reported". Observed only: the engine's DoTrap1, ProcessHitVictim and DamageActor run as
+  they do, the DamageActor replacement cutting the figure's number, so the figure's health is the server's word alone. Left: the
+  trace's confirmation (x-trap-path 339985cd by path on the layer's seats), the pair's merge and parity into this branch, its client
+  build and stage with x-trap-hit (lab/.cache/probes x-trap-hit.yaml: c2 without god mode on the plate, the server's hit line with
+  the distance for traps::REACH, c2's health under 60), then b-trap-hit and the Status ticks. The disease roll, the camera shake
+  and the rumble stay the hit player's own engine's and never reach a guest (Limits).
 - Decision 4's engine path, the re-analyst's static read on sky-re (21:54 PST 2026-11-01; pyghidra-mcp on SkyrimSE-1.6.1170.0, REA down; every
   id below is 1.6.1170's by `just addr`, every inferred fact HYPOTHESIS until lab/frida/trap-path-trace.js runs). The trace's three
   return addresses were not the trap routine: +0x654a70 sits in the TaskQueueInterface pump (36891, 0x654880) and +0x657972 in the
