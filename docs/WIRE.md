@@ -790,3 +790,16 @@ Fixtures 72-TrapHit-0 and -1. No difftest session triggers it (the fake clients 
 client half (where the host's engine takes afDamage: the DamageActor replacement or ProcessTrapHit's own implementation) follows
 x-object-anim v3's trap-hit trace.
 
+### SpellCast (t 23) gains `decal` (the rune's glyph on the observer; queued by Eli 2026-11-02)
+
+Since fork m2-rune-glyph (14:2x PST 2026-11-02, SCHEMA_VERSION 32; 31 is m4-trap-hit's): SpellCastData gains the optional
+`decal: { normalX: f32, normalY: f32, normalZ: f32, materialId: u32 }`, the surface the caster's own target-location launch picked,
+read in its game from the engine's decal placement (Skyrim Platform's runeDecal, a hook on Address Library 44186's entry for the
+player's own projectile: the pick's position, its normal scaled to 69.99, the material id from 44190; unitized by the hook).
+Validator (wire-validate check_decal): only with `hasLaunch` (E_VAL_RANGE), the normal finite (E_VAL_NONFINITE) and of unit length
+within 0.05 (E_VAL_RANGE); the material id any number, 0 for none. The server relays it with the cast as it does the launch and
+strips it with the launch (E_SPELL_ORIGIN). Each observer's game hands it to the same placement after its relayed launch
+(MagicApi PlaceRelayedDecal, the grenade's own decal group), and keeps one armed rune per figure (the engine's own cap is the
+player's; the relayed runes pass no registration). wire-legacy LEGACY_ABSENT ("SpellCastData", "decal"); fixture 23-SpellCast-1
+carries one. The C++ struct SpellCastDecal (SpellCastMessage.h), the client's SpellCastDecal (spellCastMessage.ts),
+castSpellImmediate's five trailing arguments (hasDecal, the normal, the material id).

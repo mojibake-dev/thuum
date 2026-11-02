@@ -1750,6 +1750,15 @@ gate and the merges after).
   dynamic-form shooter (rule 9). Still wanted: a per-figure rune cap in the
   observer's game, since the registration gate (43934) admits the player's
   runes alone and a figure's four casts would leave four armed runes.
+  BUILDING 14:2x PST 2026-11-02 on fork m2-rune-glyph (queued by Eli the same day: "yes please queue it on virtue that it should
+  have been done already tbh"): the wire half (SpellCastData.decal {normal, materialId}, SCHEMA_VERSION 32, check_decal, the legacy
+  table, the fixture; the C++ struct, the server's strip with the launch, unit/SpellDecalTest.cpp), the platform's reads (the
+  projectileLaunched event gains LaunchData's contactNormal; a hook on 44186's entry for the player's own projectile raises
+  runeDecal with the pick's position, the unit normal and the material id, the lab-confirmed argument layout of
+  rune-decal-trace.js), the caster's pairing (magicSyncService keeps the decal beside the launch by projectile base and sends it
+  with the cast), the observer's pass-through (castSpellImmediate's five trailing arguments into MagicApi's RelayedDecal). The
+  placement call itself (44186's prototype) and the per-figure cap take the re-analyst's read of the same hour; the probe
+  x-rune-glyph by path (two casts at the summit, the paired-surface and placed-decal lines on each seat, the cap's line once).
 - The event filter (row 1) is its own verb, docs/verbs/papyrus-events.md
   (b2db6354 on this branch), with its rate read: a dozen Papyrus events a
   second at idle on the old filter (numidium, lab/frida/sendevent-rate.js:
