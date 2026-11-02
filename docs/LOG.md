@@ -5032,3 +5032,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   seats' Race.pex being SKSE's with MakeUnplayable a script wrapper). The hide's two claims run by path at the bondblock stage
   (x-race-permit-hide d567a586) and return to b-race-permit on main after the permit merges.
 
+- 17:30 PST 2026-11-01 b-duel's Flames leg read (two reds, two green reruns today): the server counted 1.95 s of the 4 s hold in the red run
+  against 3.45 in the green, from the stream's first report (1.23 s after the cast, counted at MAX_TICK_MS 0.25) and its last
+  (after the cast's end, refused as E_SPELL_NO_CAST); neither the claim's margin (spell-cast.md, "b-duel's Flames leg"). The rule's
+  half fixed on fork m2-stream-end-grace a1bd3908 (an ended stream takes one last report within HOLE_MS; R0 after the bondblock
+  train, numidium's order); the premise's half is b-duel's own commit (a look at c2 before the hold) once the permit train has
+  merged. Meanwhile the permit's gate was green 12 of 12 with T2 38 of 38 on 7fe600e6, and verb-merge refused it on two builds in
+  the runs (the T2's tag pull moved the lab's image mid-gate; numidium's restage and regate run now, its tooling fix owed).
+
