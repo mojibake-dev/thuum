@@ -5274,7 +5274,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   Skyrim.esm); the admission is a list (`propStatics` in server-settings.json, the restrictedRaces shape; the lab's two settings files
   list the wheel), since the MSTTs around the lab's cells are effects, signs and animated statics and a Raise Wall's must stay out:
   the loader admits a listed base's references (WorldState::IsPropStatic), IsPropKind takes their claims and transforms, the client's
-  scan admits MovableStatic (FormTypeEx.isProp). T0 PropTest's new case; no wire change. Probe x-prop-static by path 1fd2b722 (the
+  scan admits MovableStatic (FormTypeEx.isProp). T0 PropTest's new case; no wire change. Probe x-prop-static by path 9ef40b22 (the
   smithy's yard, the host's walk through the wheel, the rest across a restart). The deploy needs the settings on sky-srv before the
   stage (deploy config pairs with its image). Also this hour: restart-dead c3eb2550 (parity 4b6f5fa3 hand-merged, both sides kept)
   pushed for numidium's R0; the deaths client head de969496 pushed with its client build; x-skill-book staging on 38659a3e.
