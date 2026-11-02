@@ -5185,3 +5185,21 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   or E_OBJANIM line on the server, no "object animation" line on c1, the same zero as yesterday's green), so the scenario's two known
   fragilities, not the pair's code; ADR-036's lone-red reruns, a watch item on two greens; if it stays red the merges hold and the
   morning's fix is the scenario's premise in its own commit, never its claims.
+
+- 05:06 PST 2026-11-02 m4-object-animation merged to fork parity 64dbacfe (2026-11-02T13:04Z, numidium): the gate
+  20261102-064754-pair-objanim-host (cited, ADR-042; the train staged over the host layer as laid, ADR-042a), 126 runs, 114 of 114
+  green, verdict watch on b-npc-talk (red three times with two failures of its own, Sven's walk around the hold and the E's menu
+  after a granted claim, then green on both lone-red reruns; the pair inert in those runs: no traps, animates or object-animation
+  line); T2 green on skymp-server:m4-object-animation-64dbacfe (the per-sha tag); clones not promoted (PROMOTE=0, the layer-merge
+  promoted the pair). Verbs: ADR-059 decision 1's hosted-cell gate (SetCellHosted, declared in TESModPlatform.pex since 32795060:
+  its first stage read "Native function not found" and every host-scoped script stayed blocked) and decision 3's ObjectAnimation
+  (MsgType 71, SCHEMA_VERSION 30): the host's world-object animation events relayed to the guests (x-object-anim v4 063627: the
+  wall, the plate and the pillar), the lifecycle events admitted for host-scoped scripts on every seat (the pillar's OnCellLoad),
+  and PlayAnimation_Impl as a second observe point. Five c1 load crashes at SkyrimSE.exe+0x2AD242 (terrain streaming) in the
+  sweep, each green on its lab-fault rerun; b-spell-placed-wall a relaunch finding by name.
+
+- 05:06 PST 2026-11-02 layer-world-scripts-host (a mod layer) merged to main 8139d579 by merge commit (2026-11-02T13:06Z,
+  numidium): the full sweep 20261102-064754-pair-objanim-host (cited with m4-object-animation, ADR-042a; the layer's own run
+  20261102-043530-smoke-two-players; the eight checks ok), both clones promoted (clean-m1 is the merged base). Plugins: none
+  added; lab/layer/papyrus-admitted.tsv's traps row is host-scoped ("Skyrim.esm: 11 script class names (game, named, host)"), so
+  the temple's trap and puzzle scripts run on the cell's host alone and the guests see their animations through ObjectAnimation.
