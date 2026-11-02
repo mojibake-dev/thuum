@@ -302,6 +302,9 @@ them (its two lines of the night are Sneak's at 20:27): the engine's rise for a 
   server's two lines once, the seat's base 21 with the experience 0 and the level 1 within 10 s, no E_SKILL_ or E_BOOK_; the same
   book again: the "again" line, the base still 21; c2's record at 20 throughout; a relaunch keeps 21; a server restart keeps 21 and
   a third read says "again" (readBooks persisted); the current value recorded beside the base for the ModActorValue question.
+- x-skill-book GREEN on its first run (20261102-212928 on m5-skill-books 38659a3e's stage, numidium): the baseline, the one-level
+  read, the "again" with nothing moved, the base 21 after the relaunch and after the restart, "again" counted 2 after the restart.
+  Promoted to b-skill-book (thuum main 2d42914c, its own commit). The head takes parity and goes R0 (ADR-053) after restart-dead's.
 - Known limits: the seat's own base form carries the read flag only for its process (no save keeps it under SkyMP), so after a
   relaunch the game opens the same book as unread and raises the skill on its own until the server's record arrives, a flash of
   one level; the "Skill increased" message and sound are the engine's own at the open, before the server's word. Trainers stay

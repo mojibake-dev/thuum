@@ -658,6 +658,28 @@ carries H1 meanwhile.
   TE-MAP.md:66, resolved per rule 1 first). Owner: agent (Frida); Eli only
   on a falsified H5.
 
+## The viewing seat's hide (playtest 40's F2, 2026-11-02; fork m4-turbo2-settle 7aac21d4)
+
+Hilde (0x35534) on the guest's screen, 20:08:37Z: her host's engine walked her through her door into 1cb84, which nobody hosted
+(D6: the server followed her record in, told the one viewing game a Teleport ahead of its unsubscribe, dropped that game's
+sightings of her and sent it a Disable snippet once). On the guest, the reference was moved after her, lost its 3D in the unloaded
+house, was released to its schedule after the grace (ADR-051, D11), and her own package walked her back out: she stood on the
+street as a ghost under the puppet flag while her record sat indoors, the E at 20:09:28 claimed in vain, and the roster kept
+sighting her every 10 s (the server's drop lines). b-npc-handoff-door never showed it because Alvor's schedule kept him inside on
+both engines.
+
+The rule, in the client (PuppetService.recordCellSeen from the view's engine-reference branch every update; hideInUnloadedCell from
+RemoteServer's Teleport handler, since the view is destroyed in the same tick): an actor this game does not simulate whose record
+stands in an interior this game has not loaded (Cell.isAttached false) is HIDDEN here, ObjectReference.Disable on its engine
+reference, and reconcile never releases a hidden actor to its schedule; when its record is back in a loaded cell (it came out, or this
+game walked in) it is shown (Enable, moved to the record) and reconciled (the house granted makes it live, the word makes it a
+puppet). The host's own reference is never hidden. Unhosted cells freeze; a seat that does not load a cell sees none of its actors:
+the design law's reading of D6 for the viewer. HYPOTHESIS until x-handoff-hide (by path): Disable holds a puppet-flagged actor (the
+server's own snippet did not hold Hilde: that snippet ran while the Teleport's move was in flight, and the release re-enabled nothing,
+so the order of the two is the probe's read) and the enable-and-move at the attach lands within the door scenario's 15 s. The same
+head carries the furniture hold (movementApply.ts: a puppet in furniture far from its record is told IdleFurnitureExit and, still
+held, placed; the settle loop of f4a39's coffin and ff000d9d's bed in playtest 40).
+
 ## Status
 
 Doc drafted 2026-10-22 during playtest 32, before any code; the fork lines

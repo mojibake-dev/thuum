@@ -5279,3 +5279,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   stage (deploy config pairs with its image). Also this hour: restart-dead c3eb2550 (parity 4b6f5fa3 hand-merged, both sides kept)
   pushed for numidium's R0; the deaths client head de969496 pushed with its client build; x-skill-book staging on 38659a3e.
 
+- 13:36 PST 2026-11-02 turbo 2's arm one, two more items: (3) skill books GREEN (x-skill-book 20261102-212928 first run on 38659a3e's stage;
+  b-skill-book promoted, main 2d42914c; the head takes parity after restart-dead's R0, then its own R0); (1) quest script behavior
+  BUILT on fork m4-turbo2-settle 7aac21d4 (client, pushed with its build): the settle's furniture hold (a puppet held by furniture far
+  from its record is told IdleFurnitureExit and, still held, placed once per 5 s; f4a39's coffin and ff000d9d's bed looped the settle
+  every host sample) and the viewing seat's hide (an engine reference whose record stands in an interior this game has not loaded
+  is disabled here, never released to its schedule, shown at the record when the cell is loaded; Hilde's ghost: the release after the
+  move indoors put her AI back on and her own package walked her out). Probe x-handoff-hide by path (b-npc-handoff-door's frame plus
+  the hide and shown claims; its two claims go into the scenario when green). npc-handoff.md carries the section. The lab's settings
+  key for slice two was re-rendered by numidium (0ac3f24f): settings keys go through lab/tools/layer-render.py.
+
