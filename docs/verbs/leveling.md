@@ -33,7 +33,8 @@ ActorValueInfo.h:34-41) and the game settings fSkillUseCurve, fXPPerSkillRank, f
 | the level-up's choice of health, magicka or stamina (+10) and the perk point | engine (the Stats menu) | later: a transaction verb (pile item 13's perks; the attribute pick with it) |
 | the Legendary reset (a skill at 100 back to 15, the perks refunded) | engine | later: with the perk transactions |
 | skill-dependent conditions in the world (dialogue, perks' ranks) | engine | native: the engine reads the base the server wrote |
-| the skill books and trainers | engine | later: both are increments the server validates (a book read once, a trainer's gold and five a level) |
+| a skill book read: the skill one level up, the bar keeping its share, the character credited, the base form marked read | engine (IncrementSkill at the Book Menu's open, the re-analyst's static read 2026-11-02) | imposed (R0): the server's one-level increment once per book per character (the record's readBooks), the record sent so the seat's own rise is the server's number (the Skill books section; fork m5-skill-books 38659a3e, 2026-11-02) |
+| the trainers | engine | later: an increment the server validates (a trainer's gold and five a level) |
 
 ### Sequences and combinations (ADR-033)
 
@@ -43,6 +44,7 @@ ActorValueInfo.h:34-41) and the game settings fSkillUseCurve, fXPPerSkillRank, f
 | each skill's use shape reported once (a hit, a block, a cast of each school, a lock, a craft, a sale) | x-skill-use | |
 | the level-up threshold met on both seats' displays after a relaunch and a restart | p-level-up | GREEN 152612 (c1's level 2 and base 27 after the relaunch and the restart; the other seat's display of a figure carries no level) |
 | two players raising skills at once (two records, no crosstalk) | p-level-up | GREEN 152612 (the target's record stayed at 20 through 168 hits on it; both raising at once is the playtest's) |
+| a skill book read once, read again, read after a relaunch and after a restart (one level the first time, the record back every time, the other seat untouched) | x-skill-book by path, then b-skill-book | |
 
 ## Authority
 
@@ -171,6 +173,9 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
   progress level shown, and before this the skill's next use recomputed the base from the old progress and the set snapped
   back (found writing x-lockpick v4's Lockpicking 100). wire-rules actor_values::skill_index names the progress index.
 - Kill switch: server setting `leveling` (false: the server records snapshots as today and takes no SkillUse).
+- DB fields / migration, since the Skill books section (2026-11-02): `readBooks` on the actor's change form (a set of base ids
+  beside learnedSpells, written in both JSON shapes; a record without it reads empty, rule 6's migration), its restart scenario
+  b-skill-book's restart leg.
 
 ## Client
 
@@ -248,6 +253,59 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
   (the same AVSK constants) write the record; the hook passes the call through. Block and the casting schools are
   read by the same hook when their probes run (expected: the blocked damage, the spell's cost).
 - Owner: agent (the hook and the service, a client build); Eli for the Stats menu's pick (perks.md).
+
+## Skill books (turbo 2's arm one, Eli 2026-11-02: "land fixes for those things ... skill books")
+
+The increment the inventory called "later". Playtest 40's server log holds six "reading skill book ... detected, not implemented"
+lines for ff000001 at 20:22:15 to 20:22:36Z (1b00e SkillSpeechcraft2, 1b00d, 1afc4, 1afee, 2f838, 1b01c; each a drop of the book
+that the seat's game read first, F8's store turning into "use"), and that seat's console carries no "skill uses sent" at any of
+them (its two lines of the night are Sneak's at 20:27): the engine's rise for a book never passes the hooked AddSkillExperience.
+
+- Rung: R0. The server's rule gives the skill one level (nothing at the cap: the book is still spent), carries the experience
+  toward the next level as the same share of the new step's cost, credits the character the new level as for any skill level, and
+  does it once per book per character; the seat reports nothing new (the read travels as the equip report, OnEquip 11, as a
+  spell tome's does: no wire change, rule 4 untouched). Not R1: the seat's own rise is an engine constant (one level) the server
+  computes itself; the seat's number is replaced by the record's send whatever moved.
+- Engine surface, the re-analyst's static read (pyghidra, 2026-11-02; every line HYPOTHESIS until x-skill-book): TESObjectBOOK::Read
+  (RELOCATION_ID(17439, 17842), src/RE/T/TESObjectBOOK.cpp:60; 0x27aad0 on 1.6.1170 by `just addr`) gates on the reader being the
+  player, then for a skill book (flags bit 0, kTeachesSpell clear) with the permanent value under 200 takes 1.0 through the perk
+  entry point kAdjustBookSkillPoints (BGSEntryPoint.h:18), truncates it to a count and calls id 40489 (0x736e60, no CommonLib
+  name; IncrementSkill by its shape, the console's IncPCS and the TrainingMenu call it too), which loops into id 41561 (the body
+  behind 40488's wrapper) with the exact remainder to the threshold and the use mult off: the level rises by ActorValueOwner
+  slot 5 ModActorValue(av, 1.0) (ActorValueOwner.h:19), the skill's experience is rescaled to its share of the new threshold
+  (`newThreshold * xp / threshold`, the new threshold `improveMult * level^fSkillUseCurve + improveOffset`, 0 at 100), the
+  character's experience gains the new level times fXPPerSkillRank (0 on a seat today), SkillIncrease and story events fire,
+  AdvanceLevel is never reached (the Stats menu pulls the level-up). After the rise, on the base form: flags 0 and 2 cleared,
+  bit 3 (kHasBeenRead) set, AddChange(kTeachesSkill) and AddChange(kRead), one BooksRead event. Read runs at BookMenu::OpenBookMenu's
+  end (the rise is at the menu's OPEN) and from the two inventory handlers; a non-player reader gets nothing, and TESObjectBOOK::
+  Activate never reads. The rule's carry matches this read; the DATA's teaches field of a skill book is the skill's ActorValue, not
+  a form (lab/esm.py: SkillOneHanded1 0x1afe3 carries 6, SkillSpeechcraft2 0x1b00e 17, SkillAlchemy1 0x1afc4 16).
+- Server (fork m5-skill-books 38659a3e): wire-rules leveling.rs `Progress::apply_book` (the character loop shared with apply_use;
+  `carry_after_step`), the bridge's `apply_book` beside `apply_use` (one `judge`), PartOne::ApplySkillBook (the record write shared
+  with ApplySkillUse through WriteLevelingOutcome, the record sent always), WorldState::applySkillBook installed by PartOne,
+  MpActor::IsBookRead/MarkBookRead over the change form's `readBooks`, and ReadBookEvent's skill branch: ActorValue 6 to 23 else
+  E_BOOK_SKILL; read before: "reads skill book {:x} again ... the record goes back to its game" and SendActorValueRecord; leveling
+  off: dropped and the book not spent (ApplySkillBook's debug line); accepted: MarkBookRead and "{:x} reads skill book {:x}: skill
+  {} one level up" after the rule's "skill {} reaches level {}". A blocked read (the gamemode's) re-sends the record. The book
+  stays in the inventory (a spell tome goes).
+- Client: nothing new. The seat's engine raises the skill at the menu's open; the record's send sets the base and the progress to
+  the server's numbers. HYPOTHESIS: slot 5's ModActorValue on a skill moves the base and not a permanent modifier (the console's
+  IncPCS, the same path, leaves no highlighted skill); if the probe reads the current value one over the base after the record's
+  send, the client gets a one-line undo of the engine's own rise on the skillIncrease event.
+- T0 (38659a3e): LevelingTest's skill-book case (One-handed 15 with 378 toward 392.6, the book takes it to 16 with the carry
+  378 / 392.6 of the step from 16, the base 16, the character's 16, one ActorValues sent, the book kept; the same book again moves
+  nothing and sends the record once; readBooks on the change form; leveling off drops a second book's read unspent),
+  FormDescWorldTest's readBooks in both JSON shapes and across orders A to B (rotfern's slot 02 to 03), leveling.rs's three cases
+  (the share kept, the character's level from six books, the cap and the refusals, the carry's bounds), the bridge's case.
+- Probe x-skill-book by path, then scenario b-skill-book (its own commit when green): c1 at One-handed 20 reads SkillOneHanded1
+  0x1afe3 from its inventory (the lab's equip opens the Book Menu; close-menu "Book Menu", CommonLibSSE-NG BookMenu.h:36): the
+  server's two lines once, the seat's base 21 with the experience 0 and the level 1 within 10 s, no E_SKILL_ or E_BOOK_; the same
+  book again: the "again" line, the base still 21; c2's record at 20 throughout; a relaunch keeps 21; a server restart keeps 21 and
+  a third read says "again" (readBooks persisted); the current value recorded beside the base for the ModActorValue question.
+- Known limits: the seat's own base form carries the read flag only for its process (no save keeps it under SkyMP), so after a
+  relaunch the game opens the same book as unread and raises the skill on its own until the server's record arrives, a flash of
+  one level; the "Skill increased" message and sound are the engine's own at the open, before the server's word. Trainers stay
+  "later".
 
 ## Status
 

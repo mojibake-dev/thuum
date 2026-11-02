@@ -5256,3 +5256,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   https://thuum.gaussing.tv/results/playtest-40/ (every log from 19:38Z) and the world playtest-turbo-2-arm1-end-evidence-20261102T203234Z
   (not a base; Eli ditches this world). Landing: m4-turbo2-wall-range 4b6f5fa3 by R0 (verb-merge's per-sha T2 and the head's
   ctest), then m4-turbo2-deaths-client on the new parity through verb-stage and its gate.
+
+- 13:09 PST 2026-11-02 skill books BUILT (turbo 2's arm one, item 3): fork m5-skill-books 38659a3e off parity 64dbacfe, server-only (T0 in its
+  pipeline). The rule: wire-rules leveling.rs Progress::apply_book (one level, the bar's share of the new step carried, the character
+  credited, nothing at the cap; the character loop shared with apply_use), the bridge's apply_book, PartOne::ApplySkillBook (the record
+  write shared with ApplySkillUse, the record sent always), the change form's readBooks (JSON both shapes, absent reads empty: rule 6's
+  migration), ReadBookEvent's skill branch (the DATA's teaches field is the ActorValue: 0x1afe3 carries 6; read again re-sends the
+  record; leveling off drops the read unspent). Evidence from playtest 40: six "detected, not implemented" reads at 20:22Z and no
+  "skill uses sent" on that seat, so the engine's rise never passes the hooked 40488; the re-analyst's static read (pyghidra) puts it
+  at IncrementSkill 40489 into 41561 at the Book Menu's open (ModActorValue +1, xp rescaled to its share, fXPPerSkillRank credit, no
+  AdvanceLevel; the base form's flags after), HYPOTHESIS until x-skill-book. leveling.md carries the section; the probe by path and
+  then b-skill-book (own commit) follow; R0 through numidium when the T0 is green. Also: PLAN's rune glyph row QUEUED by Eli (c7cff098).
