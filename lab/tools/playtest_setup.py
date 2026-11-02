@@ -83,6 +83,10 @@ def check_profile(p: Any, n: int) -> dict[str, Any]:
         raise ProfileError("hold.minutes is 1 to 600")
     if not isinstance(hold.get("reason", ""), str):
         raise ProfileError("hold.reason is text")
+    # lab-api's perks step (app.py seat_perks) refuses a hold whose reason is not a playtest's (E_NO_PLAYTEST): profile
+    # 40's first setup gave no perks under "turbo 2: ..." (2026-11-02)
+    if hold.get("reason") and not str(hold["reason"]).startswith("playtest"):
+        raise ProfileError(f"hold.reason starts with 'playtest' (lab-api's perks step needs it), got {hold['reason']!r}")
     server = p.get("server") or {}
     if not isinstance(server, dict) or set(server) - SERVER_KEYS:
         raise ProfileError(f"server takes {sorted(SERVER_KEYS)}, got {server!r}")

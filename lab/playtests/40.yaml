@@ -8,15 +8,17 @@
 # 828:ccQDRSSE001-SurvivalMode.esl at 0 on both records, set at the lay through the server's setglobal. The world: 39's end,
 # playtest-m3-39-paused-20261031T014638Z (rotfern profile 1, Prisoner profile 2), the clock 7.9, npcEnabled, bars full, no god
 # mode (Eli toggles tgm). Both seats at the Riverwood guard camp, as 39. Spells: the records keep Raise Wall, Dead Thrall and
-# Reanimate Corpse by FormDesc; the setup's AddSpell takes this load order's ids, so Raise Wall (00cc14 of Apocalypse - Magic
-# of Skyrim.esp, full plugin 0x25 since the layers grew the order) is 0x2500cc14, no longer 39's 1a00cc14. Everything here is
+# Reanimate Corpse by FormDesc; the setup's AddSpell takes the server's own ids: Raise Wall is 0x1a00cc14 (labState's spell read,
+# WB_Alt_WorldInteractions2_Spell_RaiseWall), as 39 had it. A count of the deploy settings' loadOrder put Apocalypse at 0x25 and
+# the server answered "2500cc14 is no spell" (the lay's first setup, 19:39Z): an id comes from the server, never a count.
+# The hold's reason starts with "playtest": lab-api's perks step refuses any other (E_NO_PLAYTEST). Everything here is
 # server-side (labCommand); the seats type nothing.
 id: 40
 build: "fork parity 64dbacfe (the object-animation pair merged), thuum main 43c31c1b, the server image skymp-server:m4-object-animation-64dbacfe (sha256 ea9234be), the dist GitLab client-build 16578 of 64dbacfe in both clones' clean-m1, lab-api 046cb720; switches locks, weatherSync, perks and leveling OFF; Survival off (Eli, 10-31)"
 world: playtest-m3-39-paused-20261031T014638Z   # 39's end (saved when Eli paused 39, 2026-10-31T01:46Z), the newest saved playtest world
 hold:
   minutes: 300
-  reason: "turbo 2: one switch at a time"
+  reason: "playtest 40: turbo 2, one switch at a time"
 server:
   npcEnabled: true
   gameHour: 7.9
@@ -32,14 +34,14 @@ seats:
   - profile: 1
     name: "test 1"
     perks: [0x7934b]   # Overdraw40 (as 37 to 39); given by the setup, nothing to type
-    spells: [0x2500cc14, 0x7e8df, 0x65bd7]   # Raise Wall, Dead Thrall, Reanimate Corpse
+    spells: [0x1a00cc14, 0x7e8df, 0x65bd7]   # Raise Wall, Dead Thrall, Reanimate Corpse
     values:
       Marksman: 60
     percentages: {health: 1, magicka: 1, stamina: 1}
   - profile: 2
     name: "test 2"
     perks: []   # none
-    spells: [0x2500cc14, 0x7e8df, 0x65bd7]
+    spells: [0x1a00cc14, 0x7e8df, 0x65bd7]
     percentages: {health: 1, magicka: 1, stamina: 1}
 streams:
   test1: 48989
