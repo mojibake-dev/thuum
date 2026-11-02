@@ -5149,3 +5149,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   8eddb2c4 stopped at T2 on a stale image: verb-merge's own T2 pulled the bare tag at 04:10:20Z, four minutes before 8eddb2c4's
   server-build pushed, so it tested ea15e8bb (no proc relay fix, hence shadowbond's missing caster procs); verb-merge's T2 now
   waits for the head's server-build and runs on its per-sha tag (main d4c528f7).
+
+- 22:08 PST 2026-11-01 the grace MERGED by numidium: fork parity 235aad49 (R0, T0 13 of 13, the per-sha T2). The pair's pillar-fix head cut on it:
+  m4-object-animation 64dbacfe (63df9393 plus parity, client build); numidium restages it with x-object-anim v4 (sha1 2a415dae).
+  x-trap-path v1 (055845) ran green on its premise but printed no trace row for the figure the wall swung at (traps.md); trace
+  and probe v2 (the native unfiltered, the TESTrapHitEvent dispatch hooked, the host's own body first) wait for the seats after v4.

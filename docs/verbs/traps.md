@@ -248,6 +248,18 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   number to the record (R1) with the trap as the cause (ADR-048's hazard death if it kills), and ChangeValues shows the hit seat;
   the host's client reports from the trace's hook point (a platform export beside damageActor's) and the figure's local loss is
   restored by the server's word. Decision 5 (counts) after it.
+- x-trap-path v1 read (22:08 PST 2026-11-01; 20261102-055845, green on its premise): the trace was live before the swing and the figure
+  stood on the plate (c1's av-read at 8589, -5338; the plate fired twice, the wall played 180For, 180Back and Rearm), yet
+  none of the four hooked functions ran for it: on this run the host's engine registered no blade on the figure, where
+  x-object-anim v3's leg B had fourteen DamageActor calls on it. The visible difference: in v3 the host had stood on the plate
+  itself first and the figure arrived from 200 units away; here the host kept 400 units off and the figure came from across
+  the cell (its recorded place exactly the teleport's, no physics nudge). HYPOTHESIS, two candidates: the blade's Havok contact
+  with the figure's character controller (the trap hit event is the Havok listener's) depends on the figure's body being in
+  the world as a teleport from afar leaves it (lab-teleport-settle-fault), or on the trap's physics having been woken by the
+  player's own presence. v2 of the trace and the probe (the native and DoTrap1 unfiltered, the TESTrapHitEvent dispatch 26104
+  hooked; the host's own body on the plate first, the figure after) reads the player's rows as proof of the hooks and the
+  figure's rows, or their absence, as the physics' word; if the engine never fires the event for a figure, decision 4 needs
+  the figure's body in the world first, not a different hook.
 - Decision 4's client half BUILT (21:58 PST 2026-11-01): fork m4-trap-hit fd90067f (over c085a3ad, off the pair's 32795060; server-only push, the
   client build when it stages). Skyrim Platform hooks the ProcessTrapHit native's callback (game/Offsets.h ProcessTrapHit,
   REL::ID(56212), AE only: r8 the hit reference, r9 the trap, the Papyrus floats as stack arguments five, six and fourteen, read
