@@ -3506,6 +3506,10 @@ its bodies row at "within a stride" (R0 standing point, R2 fall), and M4 builds 
 dragging (slice three: the host's settled bone transforms keyframed on every other seat and re-applied at a cell reload, the stream
 dragging needs anyway), with Eli's clause that it goes to the backlog if it becomes too much of a bugbear. Corpse-as-prop's root-only
 SetPosition is retired (a dead ragdoll takes none).
+Note, 12:35 PST 2026-11-02 (turbo 2, arm one's close; thuum-magnus): slice two is PULLED FORWARD from M4 by Eli's word, relayed by numidium
+verbatim: "ok close out this arm of the playtest. that's enough things for now. land fixes for those things. quest script behavior, containers both boxes and bodies, skill books, physics world objects raise wall". "Physics world objects" names the non-item Havok references (Eli kicked a cart at Riverwood this morning; the
+10-29 survey found no MSTT near Riverwood, so the slice starts by reading that cart's record type and collision), the rest of
+slice two as decision 4 wrote it; prop-physics.md's slice-two section carries the build.
 
 D73 (19:56 PDT 2026-10-30, the pass; taken under the pass's rule from the physics stage's reads, Eli may veto): decision 3 refined, a
 body is Dynamic unless another seat streams it awake right now. Facts (m3-prop-physics dde874b5 on the merged base): x-prop-grab v8

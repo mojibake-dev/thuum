@@ -173,6 +173,11 @@ push; MSVC's /WX is the first reader.
 
 ## Slice two's read and the persistence path (16:54 PDT 2026-10-29)
 
+**Pulled forward 12:35 PST 2026-11-02 (turbo 2, Eli's close of arm one: "ok close out this arm of the playtest. that's enough things for now. land fixes for those things. quest script behavior, containers both boxes and bodies, skill books, physics world objects raise wall"):** slice two builds now, not in M4's dungeon work. First
+read: the Riverwood cart Eli kicked (its reference and base record type by esm.py near the camp; the 10-29 survey listed no MSTT
+there, so a STAT or a MISC with a Havok body is the likely answer), then the prop row kind widened to that type with the same
+PropTransform, PropClaim and PropOwner shape; the persistence path as written below.
+
 ADR-058 decision 4 gave slice two the movable statics (MSTT) and the Blue Palace's physical container. The master file says otherwise
 for the lab's cells (esm.py on sky-srv, Skyrim.esm 1.6.1170, `near 0x3c` within 3000 units): eight MSTT references around Riverwood's
 spot, none around lab-spawn, every one an effect or an animated static (FXMotesForest01, FXSmokeChimney02, FXMistStreet01,

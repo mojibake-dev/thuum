@@ -5235,3 +5235,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   body, D78 C; F4 one resurrect per body and a 1.5 s grace before the puppet flag) for client-hot, and the server m4-turbo2-wall-range
   f6c25cec (F1 the band, F5 the reanimation's end taken from the host within 90 s of the server's stand-up; ActorDeathTest) for the
   redeploy; F6 (Alvor hostile at the forge) recorded. npc-fate.md carries the reads.
+
+- 12:35 PST 2026-11-02 turbo 2's arm one CLOSED by Eli at 12:32 PST: "ok close out this arm of the playtest. that's enough things for now. land fixes for those things. quest script behavior, containers both boxes and bodies, skill books, physics world objects raise wall" The heads: server m4-turbo2-wall-range 4b6f5fa3 (F1, F5, the
+  container drop in the animation relay; numidium's R0 on green), client m4-turbo2-deaths-client 4d9a5066 (F3, F4, the relay's
+  container skip; a stage with the deaths set and b-object-anim). ADR-058 slice two pulled forward by the same word (DECISIONS,
+  prop-physics.md). F8's root (the shared loot path's lost live updates, a store turning into "use" on chests and bodies) still to
+  read; skill books and the puppet settle loops next; the lab is free for stages and probes.
