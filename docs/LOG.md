@@ -5289,3 +5289,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the hide and shown claims; its two claims go into the scenario when green). npc-handoff.md carries the section. The lab's settings
   key for slice two was re-rendered by numidium (0ac3f24f): settings keys go through lab/tools/layer-render.py.
 
+- 13:40 PST 2026-11-02 the arm's client heads trained (numidium's proposal, ADR-030 C2): m4-turbo2-train f954055f = the deaths client head de969496
+  (its Windows build running) + prop-statics a290aba0 + settle 7aac21d4, both merges clean, the union's tsc and fork-lint green, pushed
+  server-only; numidium stages it with REUSE_DIST from the deaths head (the other two are TypeScript alone) and the probes x-prop-static
+  9ef40b22 and x-handoff-hide 4ca4a044 by path, then one gate (the always three, the death set, b-object-anim, b-puzzle-relay,
+  b-container-rest, b-locks, b-prop-push, b-npc-handoff-door, b-npc-handoff-night, b-npc-puppet, b-perk-pick, the watch); the two
+  queued client builds cancelled before they started. Three stages and gates become one, about 1.5 h of lab instead of 4.5.
+  restart-dead c3eb2550 in R0 (pipeline 4676); its parity goes into the train and m5-skill-books server-only when it lands.
+
