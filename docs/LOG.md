@@ -5068,3 +5068,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   84f87370 (a green there would have carried the regression), the stage's x-race-permit-hide and x-puzzle-relay reads finish, then
   the train re-cuts on 9aeaeace (REUSE_DIST on a29a421b's dist) with all three probes by path again.
 
+- 18:42 PST 2026-11-01 the bondblock train's first stage read (84f87370, no gate): x-race-permit-hide GREEN (apocrypha's clearRaceFlag hide takes
+  rotfern's two races off c2's menu, none off c1's), x-puzzle-relay red on its own claim alone (the guest's pillar turn reaches the host
+  and runs there; the host's engine then activates the pillars' XMarker child 0x4fcdf, never loaded by the server, E_TRAP_NO_REF by
+  design; the probe names its codes from v2), b-shadowbond red on the caster's lost procs (fixed 9aeaeace). The train re-cut as
+  m4-train-bondblock-puzzle 400790b2 (server-only over 84f87370, REUSE_DIST on a29a421b's dist); numidium restages it with the three
+  probes by path.
+

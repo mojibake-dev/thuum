@@ -199,6 +199,15 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   the guest's four turns and the host's one relayed and played on the other seat, then the host's pull and the marker's portcullis
   on both (the success path's read; the face order 1 to 2 to 3 is HYPOTHESIS). Stages after the pair merges (no client change: the
   traps dist serves).
+- Decision 2's relay to the host READ (18:42 PST 2026-11-01; x-puzzle-relay v1 f67fabe3 on the bondblock train's stage, run 20261102-023719): the
+  guest's turn of pillar 0xaa8cb reaches the host and its engine runs the pillar's script ("relayed activation aa8cb by ff000001" on
+  c1, "ff000001 activates aa8cb in cell 371de (its host ff000000): relayed to 1 other game(s)" on the server), so a guest's turn
+  counts on the host's lever. The run's one red was the probe's own claim of no E_TRAP_ line: the host's engine then reported
+  aa8cb activating 0x4fcdf, which the server never loads (E_TRAP_NO_REF, by design as the marker 0x3e728's case): 0x4fcdf is an
+  XMarker (base 0x3b) in the puzzle room at (5418.6, -555.3, -760.0) whose XAPR activation parents are the three pillars 0xaa8cb,
+  0xaa8cc and 0xaa8cd (lab/esm.py ref and id on sky-srv), the engine's own child of every pillar turn, with no consequence the
+  server owns. The probe's claims name the codes from v2 on: no E_TRAP_NOT_HOST, E_TRAP_UNLINKED or E_TRAP_RATE, and every
+  E_TRAP_NO_REF the marker's ([[lab-refusal-claims-name-codes]] in spirit: a no-refusal claim names its codes).
 - ADR-059 decision 3 BUILT (fork m4-object-animation off m4-world-scripts-host 9bb3d3ed, 14:2x PST 2026-11-01; the head in
   docs/LOG.md): the host's engine's world-object animation events reach the guests. Client: ObjectAnimationService hooks
   sendAnimationEvent for the family the trap and puzzle scripts play, matched in native (HookPattern; from the scripts' own
