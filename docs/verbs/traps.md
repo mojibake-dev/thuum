@@ -248,6 +248,17 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   number to the record (R1) with the trap as the cause (ADR-048's hazard death if it kills), and ChangeValues shows the hit seat;
   the host's client reports from the trace's hook point (a platform export beside damageActor's) and the figure's local loss is
   restored by the server's word. Decision 5 (counts) after it.
+- x-trap-path v2 read (22:51 PST 2026-11-01; 20261102-064240, green on its premise, on the pillar-fix head): the host's own god-mode body on the
+  plate first, then the guest's figure; the trace loaded with five hooks and printed NOTHING in either leg, the engine's
+  TESTrapHitEvent dispatch included, so no row even for the player. Two candidates stand, and the trace cannot yet tell them
+  apart: the trap path was not taken (god mode may end the engine's trap hit before any of the five run, and the figure case has
+  now been silent twice against x-object-anim v3's fourteen DamageActor rows), or the attaches do not fire where they sit (the
+  five ids are the re-analyst's; the same DamageActor attach fired in v3, and none of these functions is platform-hooked on this
+  build). v3 of the probe (lab/.cache/probes x-trap-path, sha1 below in the LOG) adds a liveness leg: one sword swing by the host on
+  the figure before the plate, whose ProcessHitVictim and DamageActor rows prove the attaches and the filters; with them present,
+  silence on the plate legs is the engine's word and decision 4's client half moves to the engine's trap-hit event or to the
+  figure's body in the Havok world; without them the trace is wrong before the engine is. Runs in the morning's first free window
+  (the sweep holds the lab). The TrapHit server half stands either way; the client half's hook stays HYPOTHESIS.
 - x-object-anim v4 GREEN (22:43 PST 2026-11-01; 20261102-063627 on the pillar-fix head 64dbacfe over layer 8d4b177c, every claim of the three
   legs). Decision 1's lifecycle rule CONFIRMED: with its OnCellLoad admitted the pillar's script left its empty state, and the host's
   turn moved the pillar (c1's screenshots before and after show the eagle face giving way to the snake face) and played

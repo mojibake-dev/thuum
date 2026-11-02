@@ -5164,3 +5164,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   Trigger01 is reported, recorded and played on the guest; the plate's and wall's names confirmed; decision 1's lifecycle rule and
   decision 3's second family hold. The pillar trace printed nothing: a Frida attach on a function the platform already Gum-attaches
   never fires (the family stays HYPOTHESIS, immaterial). The sweep runs as the pair's gate; the merge is numidium's on its green.
+
+- 22:51 PST 2026-11-01 x-trap-path v2 (064240) green on its premise and silent in its trace for every hook, the god-mode host on the plate included
+  (traps.md: the two candidates). v3 by path, sha1 40c153a5: a liveness swing on the figure before the plate legs; runs in the first free
+  window after the pair's sweep. Tonight ends here (Eli: packaging, turbo in the morning); the pair's sweep is numidium's.
