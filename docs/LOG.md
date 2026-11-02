@@ -5075,3 +5075,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   m4-train-bondblock-puzzle 400790b2 (server-only over 84f87370, REUSE_DIST on a29a421b's dist); numidium restages it with the three
   probes by path.
 
+- m4-train-bondblock-puzzle merged to fork parity e6c5d01a (2026-11-02T04:05Z, numidium): the gate
+  20261102-031449-merge-m4-train-bondblock-puzzle (cited, ADR-042: its own fresh run on 400790b2, 12 of 12 green, b-npc-death
+  green on its relaunched rerun; e6c5d01a differs only in the shadowbond session's declarations, check 4),
+  20261102-031449-smoke-two-players to 20261102-035138-b-npc-caster; T2 skip, citing e6c5d01a's T2 on its per-sha tag (38 sessions
+  identical); clones promoted. Verbs: the shadowbond script block (WB_InvisProcTeleport_Script never admitted, so the run-out no
+  longer moves the caster; the server's proc relay now reaches the caster's own game, b-shadowbond green by path 025608 and out of
+  pending), the puzzle relay (a pillar or lever turn relays to every other game in the cell: x-puzzle-relay v3 030924, the XMarker
+  0x4fcdf's E_TRAP_NO_REF by design) and the race permit's menu hide (apocrypha: race.clearRaceFlag(1) through the typed Race,
+  x-race-permit-hide green twice). The first T2 on 400790b2 was red on that caster-side relay's two SpellCasts until declared.
