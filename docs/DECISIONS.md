@@ -3500,7 +3500,12 @@ dungeons, the traps' bodies (M4's d-bleak-falls). Decision 4's slice two is ther
 loader's MSTT admission costs records and arrival messages for effect objects and buys nothing in the lab's cells), and head 3 of
 the pass continues on slice one: its proof at T3 (x-prop-push, x-prop-pass, prop-contact.js), its persistence (rule 6: the record's
 position is written by the asleep sample's SetPos, a PropTest case and x-prop-restart by path), a rules review of the branch, and the
-budgets measured at the stage. Slice three's ragdoll bodies keep their place (M4) unless playtest 39 ranks the bodies' drift first. Eli, 12:24 PDT 2026-10-30: "i think integrating the physics and bodies sooner rather than later will cause more problems than it will solve"; the playtest 39 clause is retired, slice three is M4's, and the read before its build (npc-fate's measured "a dead ragdoll takes no SetPosition" against the row's SetPosition hypothesis) waits with it.
+budgets measured at the stage. Slice three's ragdoll bodies keep their place (M4) unless playtest 39 ranks the bodies' drift first. Eli, 12:24 PDT 2026-10-30: "i think integrating the physics and bodies sooner rather than later will cause more problems than it will solve"; the playtest 39 clause is retired, slice three is M4's, and the read before its build (npc-fate's measured "a dead ragdoll takes no SetPosition" against the row's SetPosition hypothesis) waits with it. D78 (23:28 PST 2026-11-01, Eli: "ok C for m3, B goes in M4 with dragging with a note that if it becomes too much of a bugbear it can get thrown into the backlog."): the re-analyst's read (npc-fate.md's Dynamic plan) showed the death's Havok handoff is forced
+inside Actor::KillImpl for every ragdoll-bearing actor, so a deterministic death animation is no route to same-spot bodies; M3 closes
+its bodies row at "within a stride" (R0 standing point, R2 fall), and M4 builds the resting body as POSE REPLICATION with corpse
+dragging (slice three: the host's settled bone transforms keyframed on every other seat and re-applied at a cell reload, the stream
+dragging needs anyway), with Eli's clause that it goes to the backlog if it becomes too much of a bugbear. Corpse-as-prop's root-only
+SetPosition is retired (a dead ragdoll takes none).
 
 D73 (19:56 PDT 2026-10-30, the pass; taken under the pass's rule from the physics stage's reads, Eli may veto): decision 3 refined, a
 body is Dynamic unless another seat streams it awake right now. Facts (m3-prop-physics dde874b5 on the merged base): x-prop-grab v8

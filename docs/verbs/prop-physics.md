@@ -336,6 +336,13 @@ Two props the engine owns differently from clutter, written so the row kind "pro
   settled ragdoll moves the whole body coherently on 1.6.1170, and that the second seat's own ragdoll, already at rest, re-settles
   within a stride rather than standing. Corpse dragging is the held object's case on a body (the engine's grab works on ragdolls).
   M4 by Eli's word (12:24 PDT 2026-10-30: "i think integrating the physics and bodies sooner rather than later will cause more problems than it will solve"); no earlier slice, whatever playtest 39 shows of the bodies' drift (ADR-058).
+- D78 (23:28 PST 2026-11-01; Eli: "ok C for m3, B goes in M4 with dragging with a note that if it becomes too much of a bugbear it can get thrown into the backlog.") rewrites the body half above: the root-only SetPosition is retired (a dead ragdoll takes none,
+  npc-fate's measurements; the death's Havok handoff is forced inside Actor::KillImpl for every ragdoll-bearing actor, so no
+  death-animation route exists, npc-fate.md's Dynamic plan). The resting body is POSE REPLICATION: the host's settled ragdoll's bone
+  transforms, sent once at rest and re-applied at a cell reload, keyframed on every other seat as the grab keyframes a ragdoll's
+  root with the constraints following (HYPOTHESIS to trace before the build: a dead ragdoll on 1.6.1170 keyframes bone by bone).
+  It shares its stream with corpse dragging and is built with it in M4; by Eli's clause it goes to the backlog if it becomes too
+  much of a bugbear. M3's bodies row closes at "within a stride".
 - Not slice three's: traps' bodies (M4's dungeon work, with the MSTT admission ADR-058's note defers there), horses (mount.md).
 
 ## The physics stage's first reads (19:30 PDT 2026-10-30; m3-prop-physics dde874b5 on the merged base, LABAPI 4021)

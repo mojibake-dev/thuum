@@ -59,7 +59,7 @@ merged away (D71 the guest's loot, D70 Raise Wall's pose, D68 props): test 1 rot
        menu on BOTH screens; each of you takes one thing and the other's next open shows it gone; then the seat that does NOT host
        the cell casts Reanimate Corpse at it: it stands within two seconds on both screens and fights, and turns to ash on both when
        the effect ends.
-2. [ ] Bodies lie where they died, no T-pose (71): rotfern kills a bandit; Prisoner relaunches and walks back in: no death sound
+2. [ ] Bodies lie where they died, no T-pose (71; D78: "within a stride" is this row's standard, same-spot bodies are M4's): rotfern kills a bandit; Prisoner relaunches and walks back in: no death sound
        and no fall at the load, the body lying within a stride of where rotfern's screen shows it. Then the other way round.
 3. [ ] The roster and the hands (66, 68): rotfern leaves the hall while Prisoner stays (Prisoner's game takes the cell), then walks
        back in: every bandit Prisoner sees stands on rotfern's screen within seconds and rotfern's arrows HIT them; rotfern relaunches

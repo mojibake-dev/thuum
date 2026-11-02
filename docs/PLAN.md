@@ -1370,6 +1370,10 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   linked refs (the lever that opens the door), statics.
 - Weather and time as server globals; both rendered, neither rolled locally.
 - Dropped items and kicked objects under the physics host.
+- Bodies that lie the same on every screen, with corpse dragging (ADR-058 slice three; D78, Eli 23:28 PST 2026-11-01): the
+  host's settled ragdoll pose replicated as bone transforms keyframed on every other seat and re-applied at a cell reload (the
+  death's Havok handoff is the engine's, forced in KillImpl, so no death-animation switch exists: npc-fate.md's read). Eli's clause:
+  if it becomes too much of a bugbear it goes to the backlog. M3 closes its bodies row at "within a stride".
 - Containers and loot (from M2, Eli 2026-10-09: "looting and containers is
   way more a dungeon thing than a combat thing"): several players in one
   container, its changes sent to every viewer (the server keeps one

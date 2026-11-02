@@ -5175,3 +5175,6 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   drafted; A' (the race flag for the kill window) is a fragile trick; same-spot bodies are B's (pose replication) in M4, C closes M3's
   row. Folded into docs/private/decisions-m4-bodies.md and npc-fate.md's Dynamic plan. Also: a-melee-cone 071410 errored on a c1
   startup crash (terrain streaming at 14 s uptime, engine frames only, the seats' known family): a rerun, read to numidium.
+
+- 23:28 PST 2026-11-01 D78 decided by Eli: "ok C for m3, B goes in M4 with dragging with a note that if it becomes too much of a bugbear it can get thrown into the backlog." Recorded in DECISIONS (ADR-058), PLAN's M4 list, prop-physics.md's slice three (pose
+  replication, the root-only SetPosition retired), M3-CLOSE.md row 2 and the memo.
