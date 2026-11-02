@@ -248,6 +248,32 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   number to the record (R1) with the trap as the cause (ADR-048's hazard death if it kills), and ChangeValues shows the hit seat;
   the host's client reports from the trace's hook point (a platform export beside damageActor's) and the figure's local loss is
   restored by the server's word. Decision 5 (counts) after it.
+- The pair's second stage read (21:34 PST 2026-11-01; x-object-anim v3 20261102-051618 on 32795060 over layer 339a9d12): legs A and B GREEN,
+  leg C red. A: the host's plate fires ("567f2 activates 54b15" 3), the wall's 180For, 180Back and Rearm and the plate's Down reach
+  c1's service and c2 plays them (the engine's names for TrapSwingingWall rotation 1 and PressurePlate: CONFIRMED, the HYPOTHESIS
+  list was right for these two). B (H3 CONFIRMED): the guest's figure on the plate fires the plate on the host's engine (5 more
+  activations), c2's own engine fires nothing, c2 plays the wall again. Decision 4's trace on c1 through leg B: fourteen
+  Actor::DamageActor calls naming c2's figure (regs figure, 3, 0, 0; the frames inside the Papyrus native's call, skse64's
+  native-call layer two frames up) and NO RestoreActorValue on it; c1's av-read of the figure after the swings reads 100 of 100,
+  the platform's DamageActor replacement having cut the engine's number. So the trap's harm on a figure takes the melee path's
+  function with no attacker, and the host's report point is that replacement (victim a figure, attacker none): the amount is
+  there, the trap's identity is not (DamageActor carries none); the trap's id is ProcessTrapHit's akTrap argument, so the
+  client half wants the native's own implementation hooked (the function two frames above DamageActor in the trace,
+  SkyrimSE.exe+0x657972 and +0x654a70 as leads; its registration string "ProcessTrapHit"): an RE brief for the re-analyst, rule 1.
+  C: the host's pillar turn ran nothing: c1's screenshots before and after agree (the same face), and the script's bytecode shows
+  why under the gate: defaultPuzzlePillarScript's onActivate exists only in its position states, which OnCellLoad enters, and the
+  temple loaded at c1's teleport 3.5 s before c1 hosted it, so OnCellLoad was blocked and the script stayed in its empty state
+  (the two "linked activation of 4fcdf" lines are the engine's XAPR propagation). Decision 1 gains the rule: a host-scoped
+  script's LIFECYCLE events (OnInit, OnLoad, OnUnload, OnCellLoad, OnCellAttach, OnCellDetach, OnAttachedToCell,
+  OnDetachedFromCell, OnReset) pass on every seat; they are the engine's word on the world's state and come before any host is
+  known, and a guest's pillar then stands on its initial face (OnCellLoad's StartState02 and StartState03). Limit: what a
+  lifecycle handler does beyond state (MovingTrap.onCellAttach's fireTrap for a trap caught mid-firing) plays as a visual on a
+  guest; the harm stays the host's. Decision 3 gains the engine's other family: a world object without a behavior graph animates
+  by NiControllerManager sequences through TESObjectREFR::PlayAnimation_Impl (CommonLibSSE-NG Offsets.h:546, 14189/14297;
+  src/RE/T/TESObjectREFR.cpp:812-840 is the Papyrus path's shape), which the NotifyAnimationGraph hook never sees; the platform
+  hooks it and raises the sequence's name as the same sendAnimationEvent, so one JS family covers both (fork m4-object-animation
+  63df9393, local until the grace's parity is in). Which family the pillar uses is HYPOTHESIS until lab/frida/pillar-anim-trace.js
+  (both hooks, non-actor references) runs on c1 in probe v4 (lab/.cache/probes x-object-anim 2059c95e).
 - Decision 4's server half BUILT (21:17 PST 2026-11-01): fork m4-trap-hit c085a3ad (off the pair's 32795060, SCHEMA_VERSION 31; server-only push,
   CI's T0 pending). The contract is docs/WIRE.md's TrapHit (t 72) `{ refr, target, damage }` C2S, R1: the host's engine computes
   the number (the scripts' leveled pick through ProcessTrapHit), the server validates it by membership in the trap's own table

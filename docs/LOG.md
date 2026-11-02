@@ -5119,3 +5119,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   trap-hit-trace.js). The server half of TrapHit built on fork m4-trap-hit c085a3ad (MsgType 72 C2S, SCHEMA_VERSION 31,
   wire-rules traps::hit by table membership and REACH 512 UNMEASURED, ActionListener::OnTrapHit host-only with
   TrapDamageTable over the VMAD, T0 TrapHitTest; docs/WIRE.md's section); the client half follows the trace's frames.
+
+- 21:34 PST 2026-11-01 x-object-anim v3 on the pair's restage (20261102-051618): A and B green (the host's and the guest's plate fire on the host's
+  engine, the wall's and plate's events reach the guest; H3 confirmed), decision 4's trace read (fourteen DamageActor calls on the
+  figure, no RestoreActorValue, the figure kept at 100 by the platform's cut; the trap's id needs ProcessTrapHit's native, an RE
+  brief), C red: the pillar never turned on the host because its OnCellLoad was blocked under the gate (the cell loaded 3.5 s before
+  c1 hosted it). Fix on m4-object-animation 63df9393 (local until the grace's parity merges): lifecycle events pass for host-scoped
+  scripts on every seat; the NiControllerManager family (PlayAnimation_Impl 14297) hooked into the same sendAnimationEvent.
+  lab/frida/pillar-anim-trace.js and probe v4 (2059c95e) read the pillar's family. The grace 235aad49 pushed server-only for
+  numidium's per-sha T2 and R0 merge (its parity goes into the pair's head). TrapHit's server half T0 green (pipeline 4581).
