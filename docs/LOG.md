@@ -5340,3 +5340,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   once per scene and actor); numidium turbo-srvs the union image, lays its dist and pushes the bundle at Eli's word. npc-puppet.md
   carries the section; the probe x-scene-guest follows the arm. The hide of F2 held on the same walk (Sven into 1cb84 and back).
 
+- 15:33 PST 2026-11-02 arm two's report (Eli, on the client train 1a1f304b; the runes and scene break not yet laid): (1) the wall appears on the
+  watcher without its rise and vanishes about 0.5 s late; (2) the smithy's wheel did not move, the mine's cart synced until the seats
+  parted (the client's TRACK_RADIUS 1024, a knob); (5) bodies still freeze on the guest and the resurrection still lies: the F3 move
+  is gone ("lies where it fell" logged), so the freeze is the released body's graph that nothing ticks (AI off, flag cleared; Eli saw
+  the body ragdoll when a looter's D71 switched the AI on), fixed as m4-turbo2-deaths2 ce7ddd65 (TS: the flag kept 4 s through the
+  ragdoll's settle, the resurrect grace 6 s) with the repro probe x-npc-death-freeze 3fa8fe53 (red first on the stage's build, then
+  the client-hot); (6) skill books gave both seats experience, perks did not cross, but no attribute pick at the level-up and
+  rotfern got no perk point (the perks rule counts a console-granted perk against the points: points want a counter, earned per
+  level and spent per pick); (7) containers "still broken in the EXACT same way" (both seats stop applying the chest's changes about
+  14 s after the second joins, and a store then turns into a use), under read. Hilde posed wrong on the host until the second
+  player arrived (a read). The Sven scene fix and the runes ride the union-scene bundle at Eli's word.
+
