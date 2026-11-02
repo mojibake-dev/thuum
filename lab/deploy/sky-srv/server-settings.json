@@ -232,6 +232,10 @@
     {
       "global": "8df:ccQDRSSE001-SurvivalMode.esl",
       "default": 1
+    },
+    {
+      "global": "05178e:UndeadFX.esp",
+      "default": 1
     }
   ],
   "survivalFood": {
