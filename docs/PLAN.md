@@ -953,9 +953,9 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   2026-10-20: "cook on a closeout set of tests, that if it passes we call
   m2 done").
 
-### M3: Hosting (8 to 16 weeks, the TES3MP move). DONE 2026-10-31 (started 2026-10-21)
+### M3: Hosting (8 to 16 weeks, the TES3MP move). BUILT 2026-10-31 at T3; the T4 close is open (started 2026-10-21)
 
-Closed 2026-10-31 01:31 PDT (08:31Z; LOG): the exit's last item, a guest's loot of a body released
+Building closed 2026-10-31 01:31 PDT (08:31Z; LOG; the T4 close is docs/M3-CLOSE.md's, Eli 2026-11-01): the exit's last item, a guest's loot of a body released
 from the puppet state (D71), went green on m3-guest-loot v6 and the merge's gate ran 14 of 14 green
 (20261031-074556-merge-m3-guest-loot: the always set, c-riverwood, c-dungeon-enemies, b-npc-body-release
 and the container-handler set, T2 green beside it), fork parity d10789f7, both clones promoted. Ten
@@ -1230,6 +1230,11 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   after containers: x-container-rest 69f2ad68, x-bleak-traps a5335d63, x-talk-console b3156979, x-lockpick e5014621,
   x-skill-use-read f3cfb4df (the leveling client hook's Frida read). Survival off for the rest of testing (D72). Dark: props (D68),
   Raise Wall's copies (D70) until wall-pose merges. Pending by name: b-body-loot (D37). Turbo 2 Sunday evening as set.
+- STATE 22:25 PST 2026-11-01 (Eli's correction, this evening: "you called M3 closed, im accepting it closed as far as building goes, but it
+  still needs to be closed as of testing"): M3 is BUILT, not DONE. Every exit scenario is green at T3 on the merged base and the
+  building is over; the milestone closes at T4 when Eli's playtests tick the rows of docs/M3-CLOSE.md (the closeout set, written
+  tonight in M2-CLOSE.md's shape), starting with the turbo sittings of 2026-11-02. The rule from here: a milestone's DONE needs the
+  T4 close on record; T3 green is BUILT.
 - STATE 2026-10-31 04:41 PDT (the pass's chart line): fork parity b289cbda (m3-attach-uaf, the Windows coverage crash's use-after-free,
   MERGED through ADR-053's R0 path at 11:24Z, its first use: T0 13/13, T2 green, the GitHub proof green, no lab gate). Staging:
   m3-wall-pose 0e4b34e5 with x-raise-wall v5 88877000 (v5's two reds on a08787b5 read: Apocalypse re-uses its two wall references

@@ -5154,3 +5154,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   m4-object-animation 64dbacfe (63df9393 plus parity, client build); numidium restages it with x-object-anim v4 (sha1 2a415dae).
   x-trap-path v1 (055845) ran green on its premise but printed no trace row for the figure the wall swung at (traps.md); trace
   and probe v2 (the native unfiltered, the TESTrapHitEvent dispatch hooked, the host's own body first) wait for the seats after v4.
+
+- 22:25 PST 2026-11-01 Eli: "you called M3 closed, im accepting it closed as far as building goes, but it still needs to be closed as of testing."
+  M3's state corrected to BUILT (T3 green, building over) with the T4 close open; PLAN's M3 header and chart line, docs/M3-CLOSE.md
+  as the closeout set for the turbo sittings, the checklist's item 7 pointing at it. Tonight is packaging, not building (Eli: turbo
+  starts tomorrow morning): the pair's stage runs to its verdict, the two open branches stay named, nothing new opens.
