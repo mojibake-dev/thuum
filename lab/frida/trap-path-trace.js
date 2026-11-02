@@ -1,8 +1,16 @@
-// trap-path-trace.js: the engine's path from a trap's swing to a figure's damage on
-// the seat hosting the cell (thuum docs/verbs/traps.md, ADR-059 decision 4; written
-// 21:5x PST 2026-11-01 from the re-analyst's static read on sky-re, every fact
-// HYPOTHESIS until this trace reads it). Four attaches on SkyrimSE.exe 1.6.1170,
-// ids by lab/addr.py:
+// trap-path-trace.js v2: the engine's path from a trap's swing to a body's damage
+// on the seat hosting the cell (thuum docs/verbs/traps.md, ADR-059 decision 4;
+// written 21:5x PST 2026-11-01 from the re-analyst's static read on sky-re, every
+// fact HYPOTHESIS until this trace reads it; v2 at 22:08 PST 2026-11-01 after x-trap-path v1
+// 20261102-055845 printed no row for the figure while the wall swung at it: the
+// native and DoTrap1 rows are now unfiltered, any target, and the engine's own
+// TESTrapHitEvent dispatch is hooked, so the player's own hit proves the hooks
+// and a figure's silence places the miss). Five attaches on SkyrimSE.exe
+// 1.6.1170, ids by lab/addr.py:
+//   26104 (0x401c90) BSTEventSource<TESTrapHitEvent>::SendEvent as the Havok
+//     listeners (26032, 26033) call it on ScriptEventSourceHolder+0xF78 (CommonLibSSE-NG
+//     ScriptEventSourceHolder.h:110): RCX the source, RDX the event {+0x00 trap
+//     TESObjectREFR*, +0x08 target TESObjectREFR*, +0x10 state (0 start, 2 hit)};
 //   56212 (0xa2f3b0) the Papyrus native ObjectReference.ProcessTrapHit's callback:
 //     RCX IVirtualMachine*, EDX stack id, R8 self (the hit TESObjectREFR*), R9 akTrap,
 //     [RSP+0x28] afDamage (float32 in the low dword), [RSP+0x30] afPushback,
@@ -24,6 +32,7 @@
 // Temple before the guest steps on the plate (x-trap-path). 1.6.1170 only.
 const OFFSETS = {
   '1.6.1170.0': {
+    trapHitEvent: 0x401c90, // lab/addr.py addrlib 1.6.1170 26104 (the re-analyst's read, 2026-11-01: the event source's SendEvent)
     processTrapHit: 0xa2f3b0, // lab/addr.py addrlib 1.6.1170 56212 (the re-analyst's read, 2026-11-01)
     doTrap1: 0x677b70, // lab/addr.py addrlib 1.6.1170 37509: Actor::DoTrap1 (CommonLibSSE-NG TESObjectREFR.h:284, slot 88)
     processHitVictim: 0x6b7bc0, // lab/addr.py addrlib 1.6.1170 38586
@@ -115,10 +124,21 @@ if (at === undefined) {
     } catch (e) { fail('attach:' + name, e); }
   };
   // the native's entry: the stack slots are the caller's argument area, [RSP+0x28] on
+  // the engine's trap hit event, every dispatch (the figure's absence here is the physics' word)
+  attach('trapHitEvent', at.trapHitEvent, function (args) {
+    try {
+      const ev = args[1];
+      if (!readable(ev)) return;
+      emit({
+        fn: 'trapHitEvent', seq: ++seq, tid: Process.getCurrentThreadId(),
+        trap: formInfo(ev.readPointer()), target: formInfo(ev.add(0x08).readPointer()),
+        state: ev.add(0x10).readU32(), frames: where(this.context),
+      });
+    } catch (e) { fail('trapHitEvent', e); }
+  });
   attach('processTrapHit', at.processTrapHit, function (args) {
     try {
       const target = formInfo(this.context.r8);
-      if (!ours(target)) return;
       const sp = this.context.rsp;
       emit({
         fn: 'processTrapHit', seq: ++seq, tid: Process.getCurrentThreadId(),
@@ -132,7 +152,6 @@ if (at === undefined) {
   attach('doTrap1', at.doTrap1, function (args) {
     try {
       const actor = formInfo(args[0]);
-      if (!ours(actor)) return;
       const d = args[1];
       emit({
         fn: 'doTrap1', seq: ++seq, tid: Process.getCurrentThreadId(), actor: actor,

@@ -411,4 +411,7 @@ TURN_SIGN) that ramps lockAngle with the pick snapped: HYPOTHESIS that the menu'
   naming the player or a figure with its numbers, thread and stack. Expected per swing: one
   processTrapHit, one doTrap1, two processHitVictim, one damageActor with no attacker. Run on
   the seat hosting Bleak Falls Temple before the guest steps on the plate (x-trap-path).
-  1.6.1170 only.
+  v2 (22:08 PST 2026-11-01): the native's and DoTrap1's rows unfiltered (any target) and the engine's
+  TESTrapHitEvent dispatch (26104) hooked, after v1's run 20261102-055845 printed no row for the
+  figure the wall swung at; x-trap-path v2 lets the host's own body take the blade first, so the
+  player's rows prove the hooks and the figure's silence places the miss. 1.6.1170 only.

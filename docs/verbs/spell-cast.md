@@ -1870,3 +1870,7 @@ from the CastBondProc count, "to 2 game(s)" against the fixed "to 4"); thuum mai
 server-build and run on its per-sha tag. The grace's push waits for the object-animation pair's layer-merge (that parity merged
 in, server-only), then numidium's per-sha T2 and the R0=1 verb-merge.
 
+MERGED (22:09 PST 2026-11-01): fork parity 235aad49 (numidium's R0 verb-merge under ADR-053: T0 13 of 13, T2 green on the per-sha tag; no lab
+gate, no client change). The end grace is live for every stream: a report within HOLE_MS of an ended stream that counted counts
+its gap once; b-duel's Flames leg keeps its bound, and its look-before-the-hold premise commit stands beside it.
+
