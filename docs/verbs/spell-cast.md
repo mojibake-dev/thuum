@@ -1750,7 +1750,7 @@ gate and the merges after).
   dynamic-form shooter (rule 9). Still wanted: a per-figure rune cap in the
   observer's game, since the registration gate (43934) admits the player's
   runes alone and a figure's four casts would leave four armed runes.
-  BUILT 14:02 PST 2026-11-02, fork m2-rune-glyph 816d3b98 off parity 4b6f5fa3, pushed with its client build (queued by Eli the
+  BUILT 14:02 PST 2026-11-02, fork m2-rune-glyph 1d21c9ba (1d21c9ba plus its client build's two fixes) off parity 4b6f5fa3, pushed with its client build (queued by Eli the
   same day: "yes please queue it on virtue that it should have been done already tbh"): the wire half (SpellCastData.decal {normal, materialId}, SCHEMA_VERSION 32, check_decal, the legacy
   table, the fixture; the C++ struct, the server's strip with the launch, unit/SpellDecalTest.cpp), the platform's reads (the
   projectileLaunched event gains LaunchData's contactNormal; a hook on 44186's entry for the player's own projectile raises

@@ -530,7 +530,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         done already tbh", relayed by numidium): behind the arm's five
         fixes; engine-facing, so its own stage, gated with b-spell and the
         rune probes. BUILT 14:02 PST the same day, fork m2-rune-glyph
-        816d3b98 (SCHEMA_VERSION 32; spell-cast.md's row carries the read
+        1d21c9ba (SCHEMA_VERSION 32; spell-cast.md's row carries the read
         and the probe x-rune-glyph by path); the stage after the arm's
         train.
       - Finger of Death's kill: the allowlisted server-side kill (ADR-029's
@@ -1280,7 +1280,7 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   de969496 with F3, F4 and F8's debounce; prop-statics a290aba0 plus its PropTest fix df3b8819, ADR-058 slice two, the Riverwood cart
   wheel by a settings list; the settle head 7aac21d4, F2's furniture hold and the viewing seat's hide) stages on the R0 parity with
   REUSE_DIST, probes x-prop-static and x-handoff-hide by path; Eli's Undead FX default is a settings entry (c9177cbc, probe
-  x-global-default running); the queued rune glyph BUILT as m2-rune-glyph 816d3b98 (SCHEMA_VERSION 32), its own stage after the
+  x-global-default running); the queued rune glyph BUILT as m2-rune-glyph 1d21c9ba (SCHEMA_VERSION 32), its own stage after the
   train. Arm two's checklist is drafted in docs/private/playtest-turbo-2.md; Eli is pinged by numidium at seats-ready.
 - STATE 2026-10-31 21:07 PDT (the pass's chart line): fork parity 6414dcd2. The day merged containers' rest (ae2cbfd6, 00:44Z: the lid
   on every screen, the second occupant, the take's reach, the disconnect's release, the saved-open chest shut at the load) and physics

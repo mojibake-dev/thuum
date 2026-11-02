@@ -5318,3 +5318,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   seats 1 at login, c1's MCM-style 0 kept across a relaunch and a restart, c2's 1 untouched); promoted to b-global-default (80f42576).
   Eli's item of the hour is live on the lab with the plugin raw.
 
+- 14:25 PST 2026-11-02 the rune glyph's client build red (pipeline 4692): the projectile flags enum lives on BGSProjectileData, not
+  BGSProjectile, and a typed REL::Relocation takes the hook's address() rather than the Relocation<uintptr_t> itself (the puppet
+  hooks' idiom passes a REL::ID). Fixed as m2-rune-glyph 1d21c9ba, pushed with its client build; the docs name the new head.
+
