@@ -248,6 +248,32 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   number to the record (R1) with the trap as the cause (ADR-048's hazard death if it kills), and ChangeValues shows the hit seat;
   the host's client reports from the trace's hook point (a platform export beside damageActor's) and the figure's local loss is
   restored by the server's word. Decision 5 (counts) after it.
+- Decision 4's engine path, the re-analyst's static read on sky-re (21:54 PST 2026-11-01; pyghidra-mcp on SkyrimSE-1.6.1170.0, REA down; every
+  id below is 1.6.1170's by `just addr`, every inferred fact HYPOTHESIS until lab/frida/trap-path-trace.js runs). The trace's three
+  return addresses were not the trap routine: +0x654a70 sits in the TaskQueueInterface pump (36891, 0x654880) and +0x657972 in the
+  task processor (36991, 0x656f30), whose case 0x10 runs the deferred hit on the main thread; +0x6b806c is inside
+  Actor::ProcessHitVictim (38586, 0x6b7bc0), the general victim-side hit processor that calls DamageActor (37335) with the
+  HitData's aggressor, which a trap leaves invalid (the null attacker in the trace). The chain per swing: the Havok listener
+  (26032 state 2, 26033 state 0) dispatches TESTrapHitEvent through ScriptEventSourceHolder+0xF78 (14298; CommonLibSSE-NG
+  ScriptEventSourceHolder.h:110) with no damage in it; SkyrimVM's sink (53999, the only xrefs of "OnTrapHit" and
+  "OnTrapHitStart") sends OnTrapHitStart to the TRAP's script; TrapHitBase calls the native ProcessTrapHit, whose registered
+  callback is 56212 (0xa2f3b0; the registration pairs the string "ProcessTrapHit" with it at 0x140a3568d, 11 parameters, the
+  NativeFunction's callback slot +0x50, CommonLib NativeFunction.h:65-67): entry RCX IVirtualMachine*, EDX stack id, R8 self (the
+  hit TESObjectREFR*), R9 akTrap (TESObjectREFR*), [RSP+0x28] afDamage (float32 in the low dword), [RSP+0x30] pushback,
+  [RSP+0x38..0x48] velocity, [RSP+0x50..0x60] position, [RSP+0x68] material, [RSP+0x70] stagger (prologue PUSH RBX; SUB RSP,0x90).
+  It builds a 0x44-byte TrapData (+0x00 the trap's handle by CreateRefHandle 12326, +0x04 damage, +0x10 pushback, +0x18 stagger,
+  +0x20 velocity, +0x30 position, +0x40 material) and calls the target's vtable slot 88, TESObjectREFR::DoTrap1(TrapData&)
+  (TESObjectREFR.h:284): a bare RET for a non-actor (19696), Actor::DoTrap1 for actors (37509, 0x677b70, the three actor vtables'
+  slot 88), which fills a HitData (totalDamage +0x50 = afDamage, sourceRef +0x20 = the trap's handle, aggressor +0x18 untouched,
+  pushback at +0x78, stagger +0x68 rolled from afStagger) and calls ProcessHitVictim (38586) on the Papyrus thread, which under
+  ShouldUseTaskQueue (39033) only enqueues task 0x10; the pump runs ProcessHitVictim again next frame on the main thread, where
+  DamageActor, the stagger roll and the push impulse happen. So ProcessHitVictim fires twice per trap hit with the same numbers
+  and the trap's identity survives only as HitData.sourceRef. Recommendation taken: hook 56212's entry (R8 target, R9 trap,
+  [RSP+0x28] damage: the script's leveled pick before any engine scaling, exactly what the server validates by table membership),
+  AE only (no SE id read); 37509 is the fallback (RCX actor, RDX TrapData). The trace to confirm (the re-analyst's spec, written as
+  lab/frida/trap-path-trace.js, probe x-trap-path by path): per swing one 56212 row (trap 0x54b15, the figure, damage 75), one
+  37509, two 38586 (Papyrus thread then main), then DamageActor with no attacker; a swing with DamageActor and no 56212 row, a
+  56212 row whose R9 is not the trap or whose float is not the pick, or two 56212 rows per swing falsifies it.
 - The pair's second stage read (21:34 PST 2026-11-01; x-object-anim v3 20261102-051618 on 32795060 over layer 339a9d12): legs A and B GREEN,
   leg C red. A: the host's plate fires ("567f2 activates 54b15" 3), the wall's 180For, 180Back and Rearm and the plate's Down reach
   c1's service and c2 plays them (the engine's names for TrapSwingingWall rotation 1 and PressurePlate: CONFIRMED, the HYPOTHESIS

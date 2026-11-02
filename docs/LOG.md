@@ -5128,3 +5128,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   scripts on every seat; the NiControllerManager family (PlayAnimation_Impl 14297) hooked into the same sendAnimationEvent.
   lab/frida/pillar-anim-trace.js and probe v4 (2059c95e) read the pillar's family. The grace 235aad49 pushed server-only for
   numidium's per-sha T2 and R0 merge (its parity goes into the pair's head). TrapHit's server half T0 green (pipeline 4581).
+
+- 21:54 PST 2026-11-01 decision 4's engine path read by the re-analyst (sky-re, Ghidra, REA down): the trace's frames were the task queue's, not
+  the trap's; the chain is the Havok listener's TESTrapHitEvent (no damage) → OnTrapHitStart → the ProcessTrapHit native 56212
+  (R8 target, R9 trap, [RSP+0x28] damage) → Actor::DoTrap1 37509 → ProcessHitVictim 38586 twice (deferred to the main thread) →
+  DamageActor with no attacker. The hook for the TrapHit client half is 56212's entry (HYPOTHESIS until trap-path-trace.js);
+  filed in traps.md's Dynamic plan.
