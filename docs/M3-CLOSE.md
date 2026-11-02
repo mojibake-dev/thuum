@@ -47,35 +47,52 @@ with each; lab/gate.yaml's `pending` names any row waiting on a fix, none of the
 | c-dungeon-enemies | green at T3 on the merged base (lab/gate.yaml; pending rows excepted) |
 | c-riverwood | green at T3 on the merged base (lab/gate.yaml; pending rows excepted) |
 
-## 2. The T4 rows (Eli's sittings; test 1 rotfern hosts unless the row says otherwise)
+## 2. The T4 rows: playtest thirty-nine's eight, on the merged base
 
-Behaving the same (npc-stream, npc-puppet, cell-host):
-- [ ] A cell's NPCs move under their packages on the host's screen and the guest sees the same NPCs in the same places doing
-      the same things (Riverwood's residents at their stations, the temple's bandits on their patrol).
-- [ ] The guest's puppets do not fight the air, slide, or pop: a puppet attacks, blocks and staggers where the host's actor
-      does (b-npc-stream-actions' set of actions, seen by eye).
-- [ ] The host leaves the cell and the guest takes it over: the NPCs keep moving within the grace, nobody freezes for long,
-      and the roster and the hands are right when the first host returns (npc-handoff; playtest 39's items 2 and 3).
-- [ ] A restart mid-cell: the NPCs come back where they were, dead ones dead (b-npc-handoff-restart's world, by eye).
+The record (22:30 PST 2026-11-01): the last M3 sitting with ticks was thirty-eight (2026-10-29, "basically everything failed in one way or
+another", findings 65 to 76), whose findings the pass's trains fixed; thirty-nine (2026-10-30, the pass's own playtest, eight items
+drafted in docs/private/playtest-m3-39.md) paused at its first finding before any item (F1, Survival's needs, memo D72) and never
+resumed. So every M3 row below is still unticked by human eyes. The items are thirty-nine's, with the three limits it declared now
+merged away (D71 the guest's loot, D70 Raise Wall's pose, D68 props): test 1 rotfern, test 2 Prisoner, both screens where it says so.
 
-Talking the same (npc-talk, the voice slice):
-- [ ] A resident's line is heard and mouthed on both screens when the host talks to it; the guest hears what the host
-      hears (not a trade menu opening on both seats: playtest 37's finding, fixed).
-- [ ] The guest can open dialogue with a resident in the host's cell and the host hears the lines (the dialogue claim).
+1. [ ] The found body (findings 65, 73, 74): a dead bandit or skeleton you find, not one you killed. The same items in its loot
+       menu on BOTH screens; each of you takes one thing and the other's next open shows it gone; then the seat that does NOT host
+       the cell casts Reanimate Corpse at it: it stands within two seconds on both screens and fights, and turns to ash on both when
+       the effect ends.
+2. [ ] Bodies lie where they died, no T-pose (71): rotfern kills a bandit; Prisoner relaunches and walks back in: no death sound
+       and no fall at the load, the body lying within a stride of where rotfern's screen shows it. Then the other way round.
+3. [ ] The roster and the hands (66, 68): rotfern leaves the hall while Prisoner stays (Prisoner's game takes the cell), then walks
+       back in: every bandit Prisoner sees stands on rotfern's screen within seconds and rotfern's arrows HIT them; rotfern relaunches
+       and fires once on arriving: the bow draws an arrow at the first shot.
+4. [ ] Reanimation, both halves (38's item 4): Prisoner casts Reanimate Corpse on a body in a cell rotfern hosts, then rotfern casts
+       Dead Thrall on a body in a cell Prisoner hosts; the body stands within two seconds on BOTH screens, walks and fights on both.
+5. [ ] NPC reach and cone: a bandit's swing from beyond its reach or from behind takes no health (the bar still moves for swings in
+       front and in reach); your swing on a bandit from outside the cone or beyond reach takes none of its health.
+6. [ ] Quests, three halves: (a) both seats start outside Riverwood and walk in: A Lovely Letter starts for both; Prisoner relaunches
+       and logs in inside: the quest is already there. (b) Prisoner talks to Lucan: The Golden Claw's entry appears in rotfern's
+       journal within seconds. (c) a stage set on one seat (numidium's lever, MS10MiscObjPointer 0x10d3bb) shows in the other's journal.
+7. [ ] Physics props (ADR-058 slice one, merged 2026-11-01): rotfern drops a basket from the inventory: it lands where Prisoner sees
+       it land, within a step; rotfern runs through it: it flies and rests at the SAME spot on both screens, a beat behind on
+       Prisoner's, no snap-back; Prisoner kicks it back: it moves on rotfern's screen the same way; a server restart leaves it where it
+       rested on both seats. A prop that hangs in the air, jitters or vanishes is the finding; name the screen.
+8. [ ] Raise Wall (D74's shape A, merged 2026-10-31): rotfern casts it facing Prisoner across open ground: the wall rises where
+       rotfern aimed on BOTH screens and blocks Prisoner there (thirty-nine had it on the caster's screen only, by choice).
+9. [ ] The guest's loot (D71, merged 2026-10-31 as M3's exit): the seat that does NOT host the cell loots a bandit the host killed;
+       the body opens within three seconds on the guest's screen (the turbo checklist's item 7).
+10. [ ] Talking the same (the voice slice; the dialogue claim H-58b was CONFIRMED at T4 on 2026-10-28, "shop worked!"): a resident's
+       line is heard and mouthed on both screens when either of you talks to it, and no menu opens on the seat that did not talk.
 
-Dying the same (npc-fate, death-path):
-- [ ] The host kills a bandit: it dies once, on both screens, within a breath; no pop-back of its health bar on either seat.
-- [ ] The guest kills the host's bandit: same; the host's actor reacts to the guest's hits.
-- [ ] Bodies lie where they died on both screens, and still do after a relaunch; the guest loots a body the host killed
-      and the container opens within three seconds (D71, item 7 of the turbo checklist).
+Bonus reads, a word each, recorded not scored: the atronach's death as the watcher (75: does it fall and explode on the other
+screen, or freeze); the "death service is busy" flood after a death (67); the fire cloak of an atronach nobody hit (H-53h); a
+resident's face during a line, both screens (H-54c).
 
-Attacking the same (npc-stream's hits; bows and spells):
-- [ ] A hosted bandit's melee lands on the guest and on the host; a hosted archer's arrows fly on both screens and hurt;
-      a hosted mage's spells cast and land on both screens.
+## 2b. The paper close
 
-Props (prop-physics, ADR-058 slice one):
-- [ ] Push, pass, grab and drop a prop between two seats: it lands in the same place on both; the drop point and the grab
-      feel are the engine's (b-prop-* green; Eli's eye for the feel).
+The verb rule ("done at T3 green with no open HYPOTHESIS") is not met on paper either: the pass's inventory of 2026-10-29
+(docs/private/hypothesis-inventory-2026-10-29.md) unticked the "no HYPOTHESIS tags" boxes of npc-stream, npc-fate, npc-handoff,
+npc-talk and cell-host, and prop-physics' are open since its merge. Its steps 3 and 4 remain: every open tag ends as a named limit,
+a Dynamic plan line, or a deletion where the sentence is history; then the boxes read true. This is agent work beside the sittings,
+not a thing for human eyes; it closes in this file's section 3 with the sitting that ticks the last row.
 
 ## 3. Report
 
