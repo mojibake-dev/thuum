@@ -1,4 +1,4 @@
-// trap-path-trace.js v2: the engine's path from a trap's swing to a body's damage
+// trap-path-trace.js v3: the engine's path from a trap's swing to a body's damage
 // on the seat hosting the cell (thuum docs/verbs/traps.md, ADR-059 decision 4;
 // written 21:5x PST 2026-11-01 from the re-analyst's static read on sky-re, every
 // fact HYPOTHESIS until this trace reads it; v2 at 22:08 PST 2026-11-01 after x-trap-path v1
@@ -6,7 +6,15 @@
 // native and DoTrap1 rows are now unfiltered, any target, and the engine's own
 // TESTrapHitEvent dispatch is hooked, so the player's own hit proves the hooks
 // and a figure's silence places the miss). Five attaches on SkyrimSE.exe
-// 1.6.1170, ids by lab/addr.py:
+// 1.6.1170, ids by lab/addr.py. v3 (05:15 PST 2026-11-02) after x-trap-path v3 20261102-130725: the liveness swing
+// landed twice (the server's OnWeaponHit lines) and the trace still printed no row, so
+// the trace is wrong before the engine is. v3 proves itself: the ready row carries the
+// process id (compare with the platform log's pid), the module base, each hook's
+// resolved address and its first eight bytes; every hook counts every call before any
+// filter; a sixth attach on kernel32!Sleep counts a call the process makes constantly;
+// and a {fn: 'liveness'} row every ten seconds carries the counts. A zero Sleep count
+// means the Interceptor is not live in this process; hook counts of zero with a live
+// Sleep count mean the functions were not called; counts with no rows mean the filter.
 //   26104 (0x401c90) BSTEventSource<TESTrapHitEvent>::SendEvent as the Havok
 //     listeners (26032, 26033) call it on ScriptEventSourceHolder+0xF78 (CommonLibSSE-NG
 //     ScriptEventSourceHolder.h:110): RCX the source, RDX the event {+0x00 trap
@@ -117,12 +125,29 @@ if (at === undefined) {
   emit({ error: 'no offsets for this runtime', version: version });
 } else {
   let hooks = 0;
+  const counts = {};
+  const resolved = {};
   const attach = function (name, offset, onEnter) {
+    counts[name] = 0;
     try {
-      Interceptor.attach(exe.base.add(offset), { onEnter: onEnter });
+      const target = exe.base.add(offset);
+      resolved[name] = { at: target.toString(), bytes: readable(target) ? target.readByteArray(8) && Array.from(new Uint8Array(target.readByteArray(8))).map(function (b) { return ('0' + b.toString(16)).slice(-2); }).join(' ') : 'unreadable' };
+      Interceptor.attach(target, {
+        onEnter: function (args) {
+          counts[name]++;
+          return onEnter.call(this, args);
+        },
+      });
       hooks++;
     } catch (e) { fail('attach:' + name, e); }
   };
+  // a call the process makes constantly, so a zero count means the Interceptor itself is not live here
+  try {
+    const sleep = Module.getExportByName('kernel32.dll', 'Sleep');
+    counts.sleep = 0;
+    Interceptor.attach(sleep, { onEnter: function () { counts.sleep++; } });
+    resolved.sleep = { at: sleep.toString() };
+  } catch (e) { fail('attach:sleep', e); }
   // the native's entry: the stack slots are the caller's argument area, [RSP+0x28] on
   // the engine's trap hit event, every dispatch (the figure's absence here is the physics' word)
   attach('trapHitEvent', at.trapHitEvent, function (args) {
@@ -182,5 +207,8 @@ if (at === undefined) {
       });
     } catch (e) { fail('damageActor', e); }
   });
-  emit({ ready: true, version: version, hooks: hooks });
+  emit({ ready: true, version: version, hooks: hooks, pid: Process.id, base: exe.base.toString(), resolved: resolved });
+  setInterval(function () {
+    emit({ fn: 'liveness', pid: Process.id, counts: JSON.parse(JSON.stringify(counts)) });
+  }, 10000);
 }
