@@ -5322,3 +5322,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   BGSProjectile, and a typed REL::Relocation takes the hook's address() rather than the Relocation<uintptr_t> itself (the puppet
   hooks' idiom passes a REL::ID). Fixed as m2-rune-glyph 1d21c9ba, pushed with its client build; the docs name the new head.
 
+- 14:32 PST 2026-11-02 turbo correction from Eli (via numidium: "that's on turbo mode??? that's WAY longer than before"): the arm-two build is
+  staged BEFORE its gate, the gates and probes run after the arm. So: the client train m4-turbo2-train 1a1f304b (the deaths head,
+  prop-statics with df3b8819, settle; 6d7fcc84 inside) pushed server-only at 14:29 PST without waiting for parity; numidium
+  verb-stages it as arm two's build on its server-build (REUSE from the deaths head plus the Mac's TS) and lays the seats. The rune
+  glyph joins mid-arm as a turbo push: the union m4-turbo2-union (1a1f304b plus 1d21c9ba, schema 32, a clean merge; tsc, fork-lint
+  and the wire workspace green) pushed WITH its client build; when green numidium turbo-srvs the union image and lays its dist on
+  both seats. x-prop-static, x-handoff-hide, x-rune-glyph and the gate run after the arm.
+
