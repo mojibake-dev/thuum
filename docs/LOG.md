@@ -5094,3 +5094,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   OnObjectAnimation's closing brace, caught by the brace count against both parents and restored before the push; client build in
   its pipeline) with layer-world-scripts-host e94ec494 (main merged) and x-object-anim v3 4107f964.
 
+- 20:51 PST 2026-11-01 the end grace's first T2 (8eddb2c4, numidium's R0 verb-merge) read: verb-merge's T2 step ran on the bare tag four minutes
+  before the head's server-build (pipeline 4568) finished, so it tested ea15e8bb's image, the grace without 9aeaeace; its shadowbond
+  line (c1 without the caster's two procs, CastBondProc "to 2 game(s)") is the pre-fix count and no code finding; its spell-cast line
+  is the grace's own tick, c2's health 0.908 after c1's 4.3 s report (300 ms after the end, its 500 ms gap counted), declared on
+  m2-stream-end-grace 235aad49 (within 0.001, legacy 0 wire 1; the header and the 0.68 reason follow). Tooling: main d4c528f7
+  (numidium) makes verb-merge wait for the head's server-build and run its T2 on the per-sha tag. The grace's push waits for the
+  object-animation pair's layer-merge (that parity merged in, server-only), then numidium's per-sha T2 and the R0=1 verb-merge.

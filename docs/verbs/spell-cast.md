@@ -1860,3 +1860,13 @@ both times (MRh_SpellAimedConcentrationStart to MRh_Equipped_Event). Two mechani
 
 Rule 13 kept: b-duel's bound is unchanged; the reruns under ADR-036 carried the two gates meanwhile.
 
+T2 (20:51 PST 2026-11-01, on 8eddb2c4, the grace with parity e6c5d01a merged in): the grace shows in difftest's spell-cast session as
+one more c2 ChangeValues, health 0.908 after c1's 4.3 s report (300 ms after the end; its gap since the last counted report,
+500 ms, is 4 of Flames' 8), declared in the session on m2-stream-end-grace 235aad49 (legacy 0, wire 1, within 0.001 as the
+second tick's, since the gap is the server's clock; the header and the 0.68 reason follow it). The same run's shadowbond red
+(c1 without the caster's two relayed procs) was the image's, not the code's: verb-merge's T2 step ran on the bare tag four
+minutes before the head's server-build finished, so it tested ea15e8bb's image, the grace without 9aeaeace (numidium's read
+from the CastBondProc count, "to 2 game(s)" against the fixed "to 4"); thuum main d4c528f7 makes verb-merge wait for the head's
+server-build and run on its per-sha tag. The grace's push waits for the object-animation pair's layer-merge (that parity merged
+in, server-only), then numidium's per-sha T2 and the R0=1 verb-merge.
+
