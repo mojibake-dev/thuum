@@ -1395,6 +1395,13 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
 
 ### M5: Progression (4 to 8 weeks, Class A/B). Started 2026-10-31 (the weekend pass)
 
+- STATE (05:09 PST 2026-11-02, thuum-magnus): the object-animation pair MERGED, fork parity 64dbacfe (from 235aad49) and the host-scoped layer
+  on main 8139d579, both clones promoted (numidium: the sweep 20261102-064754, 114 of 114 green in 126 runs, verdict watch on
+  b-npc-talk's two lone-red reruns; five c1 startup crashes at the terrain race, each green on rerun, a lab-api fault signature owed).
+  ADR-059's decisions 1 to 3 are whole: the host runs the cell's world scripts (lifecycle events everywhere), the guests play the host's
+  activations and animations (b-object-anim promoted, 66607f91). The end grace merged before it (235aad49, R0). Open on branches:
+  decision 4, TrapHit (m4-trap-hit 0b3dadc2 with this parity: server half T0 green, client half built, the hook point unconfirmed
+  after two silent traces; x-trap-path v3 running); decision 5 (counts) unstarted. This is the base turbo 2 starts on this morning.
 - STATE (06:22 PST 2026-11-01, thuum-magnus): skills by use MERGED b6748da0 (p-level-up 10 of 10: the 40488 hook, UESP's formulas on the
   server, the level and skills on the record); perks as transactions MERGED 395cdc49 (b-perk-pick: the pick validated against the
   tree and the points; Skyrim Platform's array results fixed on the way) and the perk records' EFFECTS in the server's damage

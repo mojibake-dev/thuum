@@ -469,9 +469,18 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   (fork m4-puzzle-relay, MERGED to parity e6c5d01a 20:09 PST 2026-11-01 in the bondblock train); x-puzzle-relay v3 green 030924 and
   promoted to lab/scenarios/b-puzzle-relay.yaml (b133be9a): the guest's turns run on the host, the host's reach the guest, the
   solved pull opens the portcullis; the pillars' marker 0x4fcdf E_TRAP_NO_REF by design
-- [x] native hook + T1 (none)
+- [x] decisions 1 and 3 whole (fork m4-object-animation, MERGED to parity 64dbacfe with layer-world-scripts-host to main 8139d579,
+  05:09 PST 2026-11-02, numidium: the sweep 20261102-064754 114 of 114 green in 126 runs, verdict watch on b-npc-talk's two
+  lone-red reruns; both clones promoted): the hosted-cell gate (host-scoped script rows, SetCellHosted, the lifecycle events admitted
+  everywhere), ObjectAnimation (MsgType 71) from the host's two engine families (the behavior graph's event and the NiControllerManager
+  sequence) to the guests, recorded as lastAnimation. T3: b-object-anim (promoted from x-object-anim v4, green 063627; 66607f91),
+  b-puzzle-relay, b-bleak-traps. What a player gets: plates, walls, levers and pillars play on every screen as the host's engine plays
+  them; a guest's own engine runs none of the cell's scripts; a trap still harms no guest (decision 4, TrapHit, on its branch)
+- [x] native hook + T1 (decisions 1 and 3: SetCellHosted (TESModPlatform, declared in the pex), the SendAnimation hook's reference
+  range and the PlayAnimation_Impl hook (14297), AE only; T1 is the lab's platform log lines)
 - [x] TS handler, first cut (relayedActivationService.ts plays the relay, activationService.ts sends a hosted cell's non-player activations, objectReferenceEx.ts keeps the engine's activation on activationUnblockedBases; 20b1da65, tsc green); its hosted-cell shape is ADR-059 decision 1's platform change
-- [ ] T2 green
+- [x] T2 green (the pair's verb-merge on the per-sha tag of 64dbacfe, 2026-11-02; every session identical; no difftest session
+  triggers ObjectAnimation or TrapHit yet, the fake clients host no cell)
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)

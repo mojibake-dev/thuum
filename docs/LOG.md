@@ -5203,3 +5203,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   20261102-043530-smoke-two-players; the eight checks ok), both clones promoted (clean-m1 is the merged base). Plugins: none
   added; lab/layer/papyrus-admitted.tsv's traps row is host-scoped ("Skyrim.esm: 11 script class names (game, named, host)"), so
   the temple's trap and puzzle scripts run on the cell's host alone and the guests see their animations through ObjectAnimation.
+
+- 05:09 PST 2026-11-02 the object-animation pair MERGED (numidium: parity 64dbacfe, layer-world-scripts-host to main 8139d579, clones promoted;
+  sweep 114 of 114 in 126 runs, watch on b-npc-talk). Mine after it: b-object-anim promoted from the probe (66607f91, its own
+  commit), traps.md's Status (decisions 1 and 3 whole, T2 green, the native hooks), PLAN's M4 state line, the turbo checklist's item 9
+  rewritten to the merged build; m4-trap-hit re-based on this parity (0b3dadc2, the hook-id conflict kept both; server-only push).
+  x-trap-path v3 runs by path on the merged base; its rows decide TrapHit's hook.
