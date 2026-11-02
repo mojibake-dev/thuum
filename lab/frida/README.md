@@ -414,4 +414,8 @@ TURN_SIGN) that ramps lockAngle with the pick snapped: HYPOTHESIS that the menu'
   v2 (22:08 PST 2026-11-01): the native's and DoTrap1's rows unfiltered (any target) and the engine's
   TESTrapHitEvent dispatch (26104) hooked, after v1's run 20261102-055845 printed no row for the
   figure the wall swung at; x-trap-path v2 lets the host's own body take the blade first, so the
-  player's rows prove the hooks and the figure's silence places the miss. 1.6.1170 only.
+  player's rows prove the hooks and the figure's silence places the miss. v3 (05:16 PST 2026-11-02): proves
+  itself after x-trap-path v3 (130725) landed its liveness swing twice on the server with no row: the ready row carries the
+  process id, the module base and each hook's resolved address with its first eight bytes; every hook counts every call before
+  its filter; kernel32!Sleep is counted as a call the process makes constantly; a liveness row every ten seconds carries the
+  counts. 1.6.1170 only.

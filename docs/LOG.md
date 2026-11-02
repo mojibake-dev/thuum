@@ -5209,3 +5209,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   commit), traps.md's Status (decisions 1 and 3 whole, T2 green, the native hooks), PLAN's M4 state line, the turbo checklist's item 9
   rewritten to the merged build; m4-trap-hit re-based on this parity (0b3dadc2, the hook-id conflict kept both; server-only push).
   x-trap-path v3 runs by path on the merged base; its rows decide TrapHit's hook.
+
+- 05:16 PST 2026-11-02 x-trap-path v3 (130725, numidium): the liveness swing landed twice on the server and the trace still printed nothing, so
+  the trace, not the engine, is at fault (traps.md). Trace v3 proves itself (pid, resolved addresses and bytes, per-hook counts, a
+  Sleep pulse; main 173bff7d carried the script alone, this commit its docs); probe v4 c83f645a by path for the next free window.
+  The server's "Script 'TrapSwingingWall' not found" line is ADR-059's design, noise to filter later.

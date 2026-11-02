@@ -259,6 +259,18 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   silence on the plate legs is the engine's word and decision 4's client half moves to the engine's trap-hit event or to the
   figure's body in the Havok world; without them the trace is wrong before the engine is. Runs in the morning's first free window
   (the sweep holds the lab). The TrapHit server half stands either way; the client half's hook stays HYPOTHESIS.
+- x-trap-path v3 read (05:16 PST 2026-11-02; 20261102-130725 on the merged base, green on its premise): the liveness swing LANDED twice (the
+  server's "OnWeaponHit - ff000000 hits ff000001 with 12eb7 for 0 damage" at 13:11:15 and 13:11:18, c2's god mode the zero), so
+  Actor::ProcessHitVictim and Actor::DamageActor ran on c1 for the figure, and the trace printed no row for them either: the trace
+  is wrong before the engine is (the attaches do not fire where they sit, or the agent is not in the game's process; x-object-anim
+  v3's fourteen DamageActor rows came through a different script). So the two silent plate runs decide nothing about the trap's
+  physics yet. Trace v3 proves itself (lab/frida/trap-path-trace.js, main 173bff7d: the process id against the platform log's pid,
+  the module base, each hook's resolved address and first eight bytes, per-hook call counts before any filter, a kernel32!Sleep
+  count as the Interceptor's pulse, a liveness row every ten seconds); probe x-trap-path v4 (sha1 c83f645a) is v3's steps with it.
+  Also in that run's server log, twice at 13:10:50: "Script 'TrapSwingingWall' not found in the script storage": the server's Papyrus
+  VM asked for the wall's script at the relayed activation; Skyrim.esm's scripts are not in the server's storage by ADR-059's
+  design, so the line is noise, not a finding (a filter for the eleven host-scoped names is a later tidy). Decision 4's client half
+  keeps its HYPOTHESIS; the TrapHit branch waits on v4's rows.
 - x-object-anim v4 GREEN (22:43 PST 2026-11-01; 20261102-063627 on the pillar-fix head 64dbacfe over layer 8d4b177c, every claim of the three
   legs). Decision 1's lifecycle rule CONFIRMED: with its OnCellLoad admitted the pillar's script left its empty state, and the host's
   turn moved the pillar (c1's screenshots before and after show the eagle face giving way to the snake face) and played
