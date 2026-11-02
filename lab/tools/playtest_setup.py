@@ -43,7 +43,10 @@ SRV = "eli@10.10.70.10"
 # mounts instead (lab-api's runner writes the same file for a run's npcEnabled, ADR-035 point 9)
 SETTINGS = "/srv/lab/server/server-settings.json"
 OVERLAY = "/srv/lab/server/server-settings-run.json"
-SERVER_KEYS = {"npcEnabled", "gameHour"}
+# the turbo switches (docs/private/playtest-turbo-2.md: the merged base carries every switch OFF, each item turns
+# its own on): the deployed settings keep them ON for the gates' scenarios, a playtest's overlay says otherwise
+SWITCHES = ("locks", "weatherSync", "perks", "leveling")
+SERVER_KEYS = {"npcEnabled", "gameHour", *SWITCHES}
 PLAYER = 20  # the console's word for the player itself (0x14)
 BARS = ("health", "magicka", "stamina")
 
@@ -83,8 +86,9 @@ def check_profile(p: Any, n: int) -> dict[str, Any]:
     server = p.get("server") or {}
     if not isinstance(server, dict) or set(server) - SERVER_KEYS:
         raise ProfileError(f"server takes {sorted(SERVER_KEYS)}, got {server!r}")
-    if "npcEnabled" in server and not isinstance(server["npcEnabled"], bool):
-        raise ProfileError(f"server.npcEnabled is true or false, got {server['npcEnabled']!r}")
+    for key in ("npcEnabled", *SWITCHES):
+        if key in server and not isinstance(server[key], bool):
+            raise ProfileError(f"server.{key} is true or false, got {server[key]!r}")
     hour = server.get("gameHour", 0)
     if isinstance(hour, bool) or not isinstance(hour, (int, float)) or not 0 <= hour < 24:
         raise ProfileError(f"server.gameHour is an hour from 0 up to 24, got {server['gameHour']!r}")
@@ -143,8 +147,9 @@ def overlay_text(settings_text: str, server: dict[str, Any], now: float | None =
     clock's hour as its time block (wire-rules clock.rs: a pure function of the wall clock that reads start.hour at the
     epoch, so the epoch is setup's own time)."""
     d = json.loads(settings_text)
-    if "npcEnabled" in server:
-        d["npcEnabled"] = server["npcEnabled"]
+    for key in ("npcEnabled", *SWITCHES):
+        if key in server:
+            d[key] = server[key]
     if "gameHour" in server:
         block = dict(d.get("time") or {})
         block["epoch"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(time.time() if now is None else now))

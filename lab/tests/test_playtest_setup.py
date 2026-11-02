@@ -101,6 +101,22 @@ class PlaytestProfile(unittest.TestCase):
             with self.assertRaises(ProfileError, msg=bad):
                 self.load(PROFILE + bad)
 
+    def test_a_profiles_switches_are_laid_off_over_the_deployed_file(self):
+        # turbo 2 (numidium, 2026-11-02): the deployed settings carry locks, weatherSync, perks and leveling ON for
+        # the gates' scenarios; the sitting's server runs them OFF and an item turns its own on
+        import json
+
+        from playtest_setup import ProfileError, overlay_text
+
+        p = self.load(PROFILE + "server: {npcEnabled: true, locks: false, weatherSync: false, perks: false, leveling: false}\n")
+        deployed = '{"locks": true, "weatherSync": true, "perks": true, "leveling": true, "weather": {"pool": [1]}}'
+        laid = json.loads(overlay_text(deployed, p["server"]))
+        self.assertEqual(laid, {"locks": False, "weatherSync": False, "perks": False, "leveling": False,
+                                "weather": {"pool": [1]}, "npcEnabled": True})
+        for bad in ("server: {locks: off please}\n", "server: {perks: 1}\n", "server: {weather: false}\n"):
+            with self.assertRaises(ProfileError, msg=bad):
+                self.load(PROFILE + bad)
+
     def test_a_profiles_hour_is_the_clocks_time_block(self):
         # playtest thirty-one's morning (thuum-magnus, 2026-10-22): the runner's own shape for a run's gameHour, the
         # epoch at setup and start.hour at the hour, the deployed block's other keys kept
