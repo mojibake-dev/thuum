@@ -1319,6 +1319,27 @@ the cap with a warn once per 10 s), swept once a second from the cell-host tick 
 sighting of the same cell), and a reporter's entries are forgotten at its disconnect beside the cells rule's gone. CellHostTest's
 two new cases drive the pair key and the bound; HeldSightingsCount is the lab's read.
 
+## Scenes on the viewing seat (playtest 41, 15:05 PST 2026-11-02; fork m4-turbo2-union-scene 5e402af7)
+
+Eli, arm two of turbo 2: "the sven scene is wack, it starts over when the other player walks up and animations play for neither".
+The read (results/playtest-41, both consoles and the server): quest 0x954d9 is DialogueRiverwoodIntroScene; both seats' drivers
+logged its start at 22:55:54Z, 0.6 s apart, as each player arrived. On c2, the host of Riverwood's cells, the scene ran its phases
+over its live Sven and Hilde (ActionSyncService sent the turns, the tanning enter, the door; the voice and face relays reached c1 and
+played there) and the quest stopped at 22:58:55. On c1 the quest never stopped: the guest's engine ran its own copy of the scene over
+the same two actors, puppets here with no AI, so its phases drove nothing visible, its hold on the actors' behavior overrode the
+host's relayed idles (no performAction refusal in the window: the entry took them and the scene took them back), and the walk-up
+re-ran its begin conditions. The relay is fine; the second scene is the bug.
+
+The rule: scenes are the host's (CLAUDE.md's design law: we do not reimplement what a host client runs for us; a guest renders the
+relay). PuppetService.stopLocalScene, from reconcile's puppet branch: a scene the engine plays here on a flagged puppet
+(Actor.getCurrentScene, isPlaying) is stopped (Papyrus Scene.Stop), once per scene and actor until the engine starts it again (the
+two-second poll re-stops it); a live actor's scene is left alone. TypeScript only, pushed as the turbo client bundle on top of the
+union 08b530d5 (runes and the scene in one break). HYPOTHESIS until the break and a probe: Scene.Stop on the guest leaves the host's
+relayed idles free to play on the puppets, and the engine's restart of a begin-on-near scene is caught within the poll. A probe
+(x-scene-guest, b-npc-handoff's Riverwood frame at the intro's hour) claims the guest's "scene ... stopped" line and a relayed idle
+played on the puppet within the scene's window; the quest's stages come from the host under quest sharing where the quest is shared,
+and the guest's local quest stays where its stopped scene left it otherwise (the intro scene's are ambient).
+
 ## Status
 
 Doc drafted 2026-10-21, before any code. Build begun 2026-10-21 17:41 PDT

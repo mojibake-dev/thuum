@@ -5331,3 +5331,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   both seats. x-prop-static, x-handoff-hide, x-rune-glyph and the gate run after the arm.
 
 - m4-turbo2-r0-train merged to fork parity 6d7fcc84 (2026-11-02T22:42Z): R0 (ADR-053): T0 pipeline 4688 server-build 16872: 100% tests passed, 0 tests failed out of 13, no lab gate (the nightly is its T3); T2 green on skymp-server:m4-turbo2-r0-train; clones not promoted. Verbs: npc-fate (playtest 40's F9: a body dead since before the process stands again on its host's live sample only after the host has sampled it dead once, or within a reanimate's window), leveling (skill books: a book's read is the server's increment, once per book per character, readBooks persisted; x-skill-book green 20261102-212928, b-skill-book on main 2d42914c); the R0 train cut from restart-dead c3eb2550 and m5-skill-books 38659a3e; skymp pinned at 6d7fcc84.
+
+- 15:05 PST 2026-11-02 arm two's first finding (Eli: "the sven scene is wack, it starts over when the other player walks up and animations play for
+  neither"): the guest's own DialogueRiverwoodIntroScene (quest 0x954d9, started on both engines at 22:55:54Z as each player arrived)
+  ran over the host's Sven and Hilde as AI-off puppets, held their behavior against the relayed idles and restarted on the walk-up;
+  the host's scene played whole and its lines reached the guest. Fix as a turbo client bundle on top of the union: fork
+  m4-turbo2-union-scene 5e402af7 (TypeScript only: PuppetService.stopLocalScene, Scene.Stop on a scene playing on a flagged puppet,
+  once per scene and actor); numidium turbo-srvs the union image, lays its dist and pushes the bundle at Eli's word. npc-puppet.md
+  carries the section; the probe x-scene-guest follows the arm. The hide of F2 held on the same walk (Sven into 1cb84 and back).
+
