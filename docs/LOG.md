@@ -5360,3 +5360,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   apply under an open menu, the record diffed against the last record applied) waits for the red. Arm two's seven items and F11 to
   F16 are in the private playtest doc.
 
+- 15:42 PST 2026-11-02 item 7's fix built (Eli's standing word for the arm: "if there's a fix yes please implement and tell me and ill test it"):
+  fork m4-turbo2-chest (TS only, on top of m4-turbo2-props-range bbc540e9 which sits on m4-turbo2-deaths2 ce7ddd65): under an open
+  ContainerMenu a container's record is applied by base counts (RemoteServer.applyContainerByCounts: the record's count per base
+  against the engine's, the shortfall added with the record's extras, the surplus removed), so a re-sent record adds no phantom and
+  asks no redraw; the closed-menu path keeps the full apply. One turbo bundle carries the deaths' settle and grace, the prop range
+  of a cell and the chest; x-shared-chest-phantom and x-npc-death-freeze run after the arm with lab-api's grammar.
+
