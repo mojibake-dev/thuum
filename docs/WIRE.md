@@ -792,7 +792,7 @@ x-object-anim v3's trap-hit trace.
 
 ### SpellCast (t 23) gains `decal` (the rune's glyph on the observer; queued by Eli 2026-11-02)
 
-Since fork m2-rune-glyph (14:2x PST 2026-11-02, SCHEMA_VERSION 32; 31 is m4-trap-hit's): SpellCastData gains the optional
+Since fork m2-rune-glyph 816d3b98 (14:02 PST 2026-11-02, SCHEMA_VERSION 32; 31 is m4-trap-hit's): SpellCastData gains the optional
 `decal: { normalX: f32, normalY: f32, normalZ: f32, materialId: u32 }`, the surface the caster's own target-location launch picked,
 read in its game from the engine's decal placement (Skyrim Platform's runeDecal, a hook on Address Library 44186's entry for the
 player's own projectile: the pick's position, its normal scaled to 69.99, the material id from 44190; unitized by the hook).

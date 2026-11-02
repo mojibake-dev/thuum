@@ -529,7 +529,10 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         2026-11-02 ("yes please queue it on virtue that it should have been
         done already tbh", relayed by numidium): behind the arm's five
         fixes; engine-facing, so its own stage, gated with b-spell and the
-        rune probes.
+        rune probes. BUILT 14:02 PST the same day, fork m2-rune-glyph
+        816d3b98 (SCHEMA_VERSION 32; spell-cast.md's row carries the read
+        and the probe x-rune-glyph by path); the stage after the arm's
+        train.
       - Finger of Death's kill: the allowlisted server-side kill (ADR-029's
         ground; MpActor::Kill is the primitive) with the client's script
         blanked. Not built in Train-30; the default stood into playtest

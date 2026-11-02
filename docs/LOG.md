@@ -5306,3 +5306,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (restart-dead c3eb2550 plus skill books 38659a3e) pushed server-only for numidium's one T2; the train waits for that parity and
   the fix in one push. The rune glyph (m2-rune-glyph): the re-analyst's prototype read landed and the placement is written.
 
+- 14:03 PST 2026-11-02 the rune's glyph on the observer BUILT (Eli's queue of the day): fork m2-rune-glyph 816d3b98, pushed with its client build.
+  The caster's own decal placement read by a hook on 44186's entry (runeDecal: the pick, the unit normal, the material), the cast
+  carries it (SpellCastData.decal, SCHEMA_VERSION 32, check_decal, LEGACY_ABSENT, the fixture, the C++ and TS types, the server's
+  strip with the launch, unit/SpellDecalTest.cpp), the observer places it after its relayed launch (PlaceRelayedDecal: the
+  re-analyst's prototype read, HYPOTHESIS; the landscape's material when none came) and keeps one armed rune per figure
+  (CapFigureRunes; iMaxPlayerRunes 1). Probe x-rune-glyph by path e4bdd74b; the stage after the arm's train, gated with b-spell and
+  the rune probes. spell-cast.md's row, WIRE.md and PLAN carry it.
+

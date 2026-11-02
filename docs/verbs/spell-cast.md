@@ -1750,15 +1750,29 @@ gate and the merges after).
   dynamic-form shooter (rule 9). Still wanted: a per-figure rune cap in the
   observer's game, since the registration gate (43934) admits the player's
   runes alone and a figure's four casts would leave four armed runes.
-  BUILDING 14:2x PST 2026-11-02 on fork m2-rune-glyph (queued by Eli the same day: "yes please queue it on virtue that it should
-  have been done already tbh"): the wire half (SpellCastData.decal {normal, materialId}, SCHEMA_VERSION 32, check_decal, the legacy
+  BUILT 14:02 PST 2026-11-02, fork m2-rune-glyph 816d3b98 off parity 4b6f5fa3, pushed with its client build (queued by Eli the
+  same day: "yes please queue it on virtue that it should have been done already tbh"): the wire half (SpellCastData.decal {normal, materialId}, SCHEMA_VERSION 32, check_decal, the legacy
   table, the fixture; the C++ struct, the server's strip with the launch, unit/SpellDecalTest.cpp), the platform's reads (the
   projectileLaunched event gains LaunchData's contactNormal; a hook on 44186's entry for the player's own projectile raises
   runeDecal with the pick's position, the unit normal and the material id, the lab-confirmed argument layout of
   rune-decal-trace.js), the caster's pairing (magicSyncService keeps the decal beside the launch by projectile base and sends it
-  with the cast), the observer's pass-through (castSpellImmediate's five trailing arguments into MagicApi's RelayedDecal). The
-  placement call itself (44186's prototype) and the per-figure cap take the re-analyst's read of the same hour; the probe
-  x-rune-glyph by path (two casts at the summit, the paired-surface and placed-decal lines on each seat, the cap's line once).
+  with the cast), the observer's pass-through (castSpellImmediate's five trailing arguments into MagicApi's RelayedDecal), and the
+  placement itself (MagicApi PlaceRelayedDecal after the relayed Launch). The re-analyst's static read of the same hour (pyghidra;
+  every line HYPOTHESIS until x-rune-glyph): 44186 is `void (Projectile*, const NiPoint3* position, const NiPoint3* direction,
+  MATERIAL_ID material, uint8_t flagB5, BGSImpactData* impact, BGSDecalGroup* group, uint8_t force)`, void (both callers discard
+  RAX; the 0x10000 was residue); the direction is renormalized inside, so the unit contactNormal serves (34452's 69.99 is
+  bhkWorld::GetWorldScaleInverse, a literal); impact may be null (the body takes the projectile's own impact data set, by the
+  material through BGSMaterialType::GetMaterialType, and draws nothing on a miss or a null decal texture set); the group is the
+  grenade's own GetDecalGroup (+0x1E0, allocated by the grenade's constructor); force 1 passes the fDecalLOD0 800-unit cull from
+  the observer's player. 44190 needs a collidable (an actor's blood material, the ground layer's TES::GetLandMaterialType, else
+  the shape's material by key), so the observer relays the material and falls back to TES::GetLandMaterialType(origin) when none
+  came (TES.h:73). The cap: the engine's 43934 admits the player's runes alone and 40674 holds them at iMaxPlayerRunes (Skyrim.esm's
+  GMST 0x60290 is 1) plus kModMaxPlaceableMines perks, ending the oldest by livingTime; CapFigureRunes keeps one armed rune per
+  figure (a mine: kExplosionAltTrigger with an explosion proximity, slot 0xAE's read), the earlier one disabled and deleted
+  (HYPOTHESIS that it leaves the world as 44110 ends the player's), the figure's perks a known limit. Probe x-rune-glyph by path
+  (e4bdd74b): x-rune-visible's summit frame, two casts; the paired-surface line on the caster and the placed-decal line on the
+  observer once then twice, the cap's line once, no E_VAL_; the glyph on both screens is Eli's T4. Its stage follows the arm's
+  train (gated with b-spell and the rune probes, as Eli's queue said).
 - The event filter (row 1) is its own verb, docs/verbs/papyrus-events.md
   (b2db6354 on this branch), with its rate read: a dozen Papyrus events a
   second at idle on the old filter (numidium, lab/frida/sendevent-rate.js:
