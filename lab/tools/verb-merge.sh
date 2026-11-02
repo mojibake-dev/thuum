@@ -47,9 +47,33 @@ just deploy-srv 2>&1 | tail -1
 if [ "${T2:-}" = skip ]; then
   echo "== 2. T2 skipped (T2=skip): cite the T2 of $head in the merge commit"
 else
-  echo "== 2. T2 on skymp-server:$branch $(date +%H:%M:%S)"
+  # T2 on the head's own image: its server-build pushes skymp-server:<branch>-<sha8>, so wait for that, then test the per-sha
+  # tag and never the bare one, which can still name the previous head's image (m2-stream-end-grace's R0, 2026-11-02: T2 at
+  # 04:10:20Z ran ea15e8bb's image, 8eddb2c4's server-build finished 04:14:29Z) and whose pull re-points the lab's own image
+  # mid-gate (the permit gate 20261102-002715, two builds)
+  sb=""
+  for _ in $(seq 1 60); do
+    sb=$(python3 - "$sha" <<'PY' || true
+import sys
+sys.path.insert(0, "lab/tools")
+import glab
+t = glab.token("skymp")
+st = set()
+for p in glab.get(t, f"/projects/7/pipelines?sha={sys.argv[1]}&per_page=10"):
+    for j in glab.get(t, f"/projects/7/pipelines/{p['id']}/jobs?per_page=50"):
+        if j["name"] == "server-build":
+            st.add(j["status"])
+live = {"created", "waiting_for_resource", "preparing", "pending", "running"}
+print("success" if "success" in st else "live" if st & live else "failed" if st else "none")
+PY
+)
+    case "$sb" in success|failed|none) break;; esac
+    sleep 30
+  done
+  [ "$sb" = success ] || { echo "== no successful server-build at $head (${sb:-unread}): its image is not pushed, so no T2; parity not moved" >&2; exit 1; }
+  echo "== 2. T2 on skymp-server:$branch-$head $(date +%H:%M:%S)"
   t2log=lab/results/runsets/t2-$branch-$head.log; mkdir -p lab/results/runsets
-  if ! just test-proto "$branch" > "$t2log" 2>&1; then
+  if ! just test-proto "$branch-$head" > "$t2log" 2>&1; then
     tail -8 "$t2log"; echo "== T2 not green ($t2log): parity not moved" >&2; exit 1
   fi
   grep -q '^T2 green' "$t2log" || { tail -4 "$t2log"; echo "== T2 did not end green: parity not moved" >&2; exit 1; }
