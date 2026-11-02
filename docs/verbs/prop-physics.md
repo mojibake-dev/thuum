@@ -178,6 +178,21 @@ read: the Riverwood cart Eli kicked (its reference and base record type by esm.p
 there, so a STAT or a MISC with a Havok body is the likely answer), then the prop row kind widened to that type with the same
 PropTransform, PropClaim and PropOwner shape; the persistence path as written below.
 
+**BUILT 13:5x PST 2026-11-02, fork m4-prop-statics (off parity 4b6f5fa3):** the cart Eli kicked is Riverwood's cart wheel, the one
+MSTT named Cart in Skyrim.esm (HandCart01Wheel 0x1c0c3, placed twice: 0x1c0c2 by the smithy at (20758, -45548, -104) and 0x14201 at
+(21377, -46104, -99); lab/esm.py). The admission is a list, not a type: server-settings.json's `propStatics` (["<shortid>:<plugin>",
+...], the restrictedRaces key's shape; the lab's files list the wheel) names the movable static bases that are props, because every
+other MSTT near the lab's cells is an effect, a sign or an animated static and a Raise Wall's MSTT must stay out. The server loads a
+listed base's references from the game files as items (WorldState::AttachEspmRecord's isPropStatic, WorldState::IsPropStatic resolving
+the FormDesc at the ask), IsPropKind takes claims and transforms on them, and the client's scan admits MovableStatic beside the item
+types (FormTypeEx.isProp; the server sends records for the listed bases alone, so nothing else reaches the scan: no wire change, the
+record write slice one's, no migration). T0: PropTest's movable static case (the wheel's claim granted and its sample moving the record
+and relayed; the wall's refused; the list cleared; bad entries throw). Probe x-prop-static by path (1fd2b722): c1 hosts the smithy's
+yard and walks through the wheel, both seats within 32 units and the record moved, the rest kept across a restart; HYPOTHESIS until it
+runs: the proxy controller's contact fires for the wheel's collision layer (a non-host's walk would claim it; the probe's walker is the
+host, so its leg needs no claim), and a walk shoves a cart wheel at all (the record's move is claimed over 4 units, not slice one's 16).
+Then b-prop-static in its own commit. Slice three (dragging, bodies) stays as written below.
+
 ADR-058 decision 4 gave slice two the movable statics (MSTT) and the Blue Palace's physical container. The master file says otherwise
 for the lab's cells (esm.py on sky-srv, Skyrim.esm 1.6.1170, `near 0x3c` within 3000 units): eight MSTT references around Riverwood's
 spot, none around lab-spawn, every one an effect or an animated static (FXMotesForest01, FXSmokeChimney02, FXMistStreet01,

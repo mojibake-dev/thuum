@@ -356,6 +356,7 @@
   "leveling": true,
   "locks": true,
   "perks": true,
+  "propStatics": ["1c0c3:Skyrim.esm"],
   "spellPlacedObjects": [
     {
       "spell": "00cc14:Apocalypse - Magic of Skyrim.esp",

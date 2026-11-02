@@ -5268,3 +5268,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   AdvanceLevel; the base form's flags after), HYPOTHESIS until x-skill-book. leveling.md carries the section; the probe by path and
   then b-skill-book (own commit) follow; R0 through numidium when the T0 is green. Also: PLAN's rune glyph row QUEUED by Eli (c7cff098).
 - m4-turbo2-wall-range merged to fork parity 4b6f5fa3 (2026-11-02T21:12Z): R0 (ADR-053): T0 pipeline 4663 server-build 16785: 100% tests passed, 0 tests failed out of 13, no lab gate (the nightly is its T3); T2 green on skymp-server:m4-turbo2-wall-range; clones not promoted. Verbs: spell-placed-object (playtest 40's F1: the report band 64 to 320 for real terrain), npc-fate (F5: a reanimated body's cause-0 end taken from its host within 90 s of the server's stand-up), traps' ObjectAnimation (a container's events dropped as a door's, F8's lid); skymp pinned at 4b6f5fa3.
+
+- 13:23 PST 2026-11-02 ADR-058 slice two BUILT (turbo 2's arm one, item 4): fork m4-prop-statics off parity 4b6f5fa3, pushed with its client build.
+  The cart Eli kicked is Riverwood's cart wheel (HandCart01Wheel 0x1c0c3, refs 0x1c0c2 and 0x14201; the one MSTT named Cart in
+  Skyrim.esm); the admission is a list (`propStatics` in server-settings.json, the restrictedRaces shape; the lab's two settings files
+  list the wheel), since the MSTTs around the lab's cells are effects, signs and animated statics and a Raise Wall's must stay out:
+  the loader admits a listed base's references (WorldState::IsPropStatic), IsPropKind takes their claims and transforms, the client's
+  scan admits MovableStatic (FormTypeEx.isProp). T0 PropTest's new case; no wire change. Probe x-prop-static by path 1fd2b722 (the
+  smithy's yard, the host's walk through the wheel, the rest across a restart). The deploy needs the settings on sky-srv before the
+  stage (deploy config pairs with its image). Also this hour: restart-dead c3eb2550 (parity 4b6f5fa3 hand-merged, both sides kept)
+  pushed for numidium's R0; the deaths client head de969496 pushed with its client build; x-skill-book staging on 38659a3e.
+
