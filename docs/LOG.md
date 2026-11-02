@@ -5352,3 +5352,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   14 s after the second joins, and a store then turns into a use), under read. Hilde posed wrong on the host until the second
   player arrived (a read). The Sven scene fix and the runes ride the union-scene bundle at Eli's word.
 
+- 15:38 PST 2026-11-02 item 7's read (41's chest b6fdc): c1 logged addItemEx(b6fdc, 13790, 1) three times for one axe Prisoner stored once, with no
+  transfer of its own between; each re-sent record re-added the axe to c1's local chest (the live-chest apply diffs against the
+  engine's read, which under the open menu did not show the earlier add, HYPOTHESIS), c1 took a phantom, the server refused it
+  ("Source inventory doesn't have enough 0x13790"), c1's game equipped it (the "use") and the views split. Repro probe
+  x-shared-chest-phantom by path, after lab-api's `transfer` step and a reference's `server.inventory`; the fix (an idempotent
+  apply under an open menu, the record diffed against the last record applied) waits for the red. Arm two's seven items and F11 to
+  F16 are in the private playtest doc.
+
