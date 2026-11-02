@@ -33,6 +33,11 @@
 // healthAfter, frames} per Health change on ours (the first three calls on
 // anyone, as a probe that the hook fires); {fn: 'damageActor', regs, frames}
 // per DamageActor naming ours; {fn, err} once per failing hook.
+// Corrected 21:00 PST 2026-11-01 (thuum docs/verbs/traps.md, decision 4, the bytecode read): the
+// scripts do not call DamageActorValue; TrapHitBase.OnTrapHitStart calls the engine
+// native ObjectReference.ProcessTrapHit(trap, damage, pushback, ...) with MovingTrap's
+// leveled pick, so the amount arrives from the engine's trap path and either hook
+// (slot 06 or DamageActor) may be the one that fires; the frames name the path.
 
 function emit(obj) { obj.t = Date.now(); send(obj); console.log(JSON.stringify(obj)); }
 

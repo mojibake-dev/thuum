@@ -394,3 +394,11 @@ TURN_SIGN) that ramps lockAngle with the pick snapped: HYPOTHESIS that the menu'
   melee path are told apart. Run on the seat hosting Bleak Falls Temple before
   the guest steps on the plate (x-object-anim v3's leg B). 1.6.1170 only.
 
+- pillar-anim-trace.js: which engine family animates a world object (docs/verbs/traps.md,
+  ADR-059 decision 3; written 21:4x PST 2026-11-01 after x-object-anim v3 read the puzzle
+  pillar silent under the platform's NotifyAnimationGraph hook while the wall and the plate
+  spoke through it). Attaches to TESObjectREFR::PlayAnimation_Impl (CommonLibSSE-NG
+  Offsets.h:546, AE 14297: the NiControllerManager sequences, their names) and to the
+  platform's SendAnimation target (game/Offsets.h, AE 38048: the behavior-graph events) and
+  prints every call on a non-actor reference with the stack. Run on the seat hosting Bleak
+  Falls Temple before the host turns a pillar (x-object-anim v4's leg C). 1.6.1170 only.

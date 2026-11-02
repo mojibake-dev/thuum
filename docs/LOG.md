@@ -5110,3 +5110,27 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (lab/pex.py's rule; the quest-stage pair missed it the same way a day earlier, e0e3af03). Fixed: m4-object-animation 32795060
   (lab/pex.py add-native plus the .psc line, dump-checked), a platform file, so a full client build; numidium restages the train
   over the layer as laid with x-object-anim v3 by path. The layer branch stays still.
+
+- 21:17 PST 2026-11-01 decision 4 while the pair restages: the trap scripts read from their bytecode (lab/pex.py disasm on movingtrap.pex,
+  traphitbase.pex and trapbase.pex out of "Skyrim - Misc.bsa"): TrapBase.fireTrap resolves MovingTrap's leveled pick
+  (CalculateEncounterLevel(TrapLevel) against LvlThreshold1..5 picks LvlDamage1..6) into TrapHitBase's damage, and OnTrapHitStart
+  hands it to the engine native ProcessTrapHit (ghost ability and noHitFaction skip the hit; the disease, rumble and camera shake
+  are the player's alone), so the plan's Papyrus-damage HYPOTHESIS is retired and the trace's expectation corrected (lab/frida
+  trap-hit-trace.js). The server half of TrapHit built on fork m4-trap-hit c085a3ad (MsgType 72 C2S, SCHEMA_VERSION 31,
+  wire-rules traps::hit by table membership and REACH 512 UNMEASURED, ActionListener::OnTrapHit host-only with
+  TrapDamageTable over the VMAD, T0 TrapHitTest; docs/WIRE.md's section); the client half follows the trace's frames.
+
+- 21:34 PST 2026-11-01 x-object-anim v3 on the pair's restage (20261102-051618): A and B green (the host's and the guest's plate fire on the host's
+  engine, the wall's and plate's events reach the guest; H3 confirmed), decision 4's trace read (fourteen DamageActor calls on the
+  figure, no RestoreActorValue, the figure kept at 100 by the platform's cut; the trap's id needs ProcessTrapHit's native, an RE
+  brief), C red: the pillar never turned on the host because its OnCellLoad was blocked under the gate (the cell loaded 3.5 s before
+  c1 hosted it). Fix on m4-object-animation 63df9393 (local until the grace's parity merges): lifecycle events pass for host-scoped
+  scripts on every seat; the NiControllerManager family (PlayAnimation_Impl 14297) hooked into the same sendAnimationEvent.
+  lab/frida/pillar-anim-trace.js and probe v4 (2059c95e) read the pillar's family. The grace 235aad49 pushed server-only for
+  numidium's per-sha T2 and R0 merge (its parity goes into the pair's head). TrapHit's server half T0 green (pipeline 4581).
+
+- 21:54 PST 2026-11-01 decision 4's engine path read by the re-analyst (sky-re, Ghidra, REA down): the trace's frames were the task queue's, not
+  the trap's; the chain is the Havok listener's TESTrapHitEvent (no damage) → OnTrapHitStart → the ProcessTrapHit native 56212
+  (R8 target, R9 trap, [RSP+0x28] damage) → Actor::DoTrap1 37509 → ProcessHitVictim 38586 twice (deferred to the main thread) →
+  DamageActor with no attacker. The hook for the TrapHit client half is 56212's entry (HYPOTHESIS until trap-path-trace.js);
+  filed in traps.md's Dynamic plan.

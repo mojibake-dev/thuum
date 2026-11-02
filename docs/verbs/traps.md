@@ -248,6 +248,95 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   number to the record (R1) with the trap as the cause (ADR-048's hazard death if it kills), and ChangeValues shows the hit seat;
   the host's client reports from the trace's hook point (a platform export beside damageActor's) and the figure's local loss is
   restored by the server's word. Decision 5 (counts) after it.
+- Decision 4's engine path, the re-analyst's static read on sky-re (21:54 PST 2026-11-01; pyghidra-mcp on SkyrimSE-1.6.1170.0, REA down; every
+  id below is 1.6.1170's by `just addr`, every inferred fact HYPOTHESIS until lab/frida/trap-path-trace.js runs). The trace's three
+  return addresses were not the trap routine: +0x654a70 sits in the TaskQueueInterface pump (36891, 0x654880) and +0x657972 in the
+  task processor (36991, 0x656f30), whose case 0x10 runs the deferred hit on the main thread; +0x6b806c is inside
+  Actor::ProcessHitVictim (38586, 0x6b7bc0), the general victim-side hit processor that calls DamageActor (37335) with the
+  HitData's aggressor, which a trap leaves invalid (the null attacker in the trace). The chain per swing: the Havok listener
+  (26032 state 2, 26033 state 0) dispatches TESTrapHitEvent through ScriptEventSourceHolder+0xF78 (14298; CommonLibSSE-NG
+  ScriptEventSourceHolder.h:110) with no damage in it; SkyrimVM's sink (53999, the only xrefs of "OnTrapHit" and
+  "OnTrapHitStart") sends OnTrapHitStart to the TRAP's script; TrapHitBase calls the native ProcessTrapHit, whose registered
+  callback is 56212 (0xa2f3b0; the registration pairs the string "ProcessTrapHit" with it at 0x140a3568d, 11 parameters, the
+  NativeFunction's callback slot +0x50, CommonLib NativeFunction.h:65-67): entry RCX IVirtualMachine*, EDX stack id, R8 self (the
+  hit TESObjectREFR*), R9 akTrap (TESObjectREFR*), [RSP+0x28] afDamage (float32 in the low dword), [RSP+0x30] pushback,
+  [RSP+0x38..0x48] velocity, [RSP+0x50..0x60] position, [RSP+0x68] material, [RSP+0x70] stagger (prologue PUSH RBX; SUB RSP,0x90).
+  It builds a 0x44-byte TrapData (+0x00 the trap's handle by CreateRefHandle 12326, +0x04 damage, +0x10 pushback, +0x18 stagger,
+  +0x20 velocity, +0x30 position, +0x40 material) and calls the target's vtable slot 88, TESObjectREFR::DoTrap1(TrapData&)
+  (TESObjectREFR.h:284): a bare RET for a non-actor (19696), Actor::DoTrap1 for actors (37509, 0x677b70, the three actor vtables'
+  slot 88), which fills a HitData (totalDamage +0x50 = afDamage, sourceRef +0x20 = the trap's handle, aggressor +0x18 untouched,
+  pushback at +0x78, stagger +0x68 rolled from afStagger) and calls ProcessHitVictim (38586) on the Papyrus thread, which under
+  ShouldUseTaskQueue (39033) only enqueues task 0x10; the pump runs ProcessHitVictim again next frame on the main thread, where
+  DamageActor, the stagger roll and the push impulse happen. So ProcessHitVictim fires twice per trap hit with the same numbers
+  and the trap's identity survives only as HitData.sourceRef. Recommendation taken: hook 56212's entry (R8 target, R9 trap,
+  [RSP+0x28] damage: the script's leveled pick before any engine scaling, exactly what the server validates by table membership),
+  AE only (no SE id read); 37509 is the fallback (RCX actor, RDX TrapData). The trace to confirm (the re-analyst's spec, written as
+  lab/frida/trap-path-trace.js, probe x-trap-path by path): per swing one 56212 row (trap 0x54b15, the figure, damage 75), one
+  37509, two 38586 (Papyrus thread then main), then DamageActor with no attacker; a swing with DamageActor and no 56212 row, a
+  56212 row whose R9 is not the trap or whose float is not the pick, or two 56212 rows per swing falsifies it.
+- The pair's second stage read (21:34 PST 2026-11-01; x-object-anim v3 20261102-051618 on 32795060 over layer 339a9d12): legs A and B GREEN,
+  leg C red. A: the host's plate fires ("567f2 activates 54b15" 3), the wall's 180For, 180Back and Rearm and the plate's Down reach
+  c1's service and c2 plays them (the engine's names for TrapSwingingWall rotation 1 and PressurePlate: CONFIRMED, the HYPOTHESIS
+  list was right for these two). B (H3 CONFIRMED): the guest's figure on the plate fires the plate on the host's engine (5 more
+  activations), c2's own engine fires nothing, c2 plays the wall again. Decision 4's trace on c1 through leg B: fourteen
+  Actor::DamageActor calls naming c2's figure (regs figure, 3, 0, 0; the frames inside the Papyrus native's call, skse64's
+  native-call layer two frames up) and NO RestoreActorValue on it; c1's av-read of the figure after the swings reads 100 of 100,
+  the platform's DamageActor replacement having cut the engine's number. So the trap's harm on a figure takes the melee path's
+  function with no attacker, and the host's report point is that replacement (victim a figure, attacker none): the amount is
+  there, the trap's identity is not (DamageActor carries none); the trap's id is ProcessTrapHit's akTrap argument, so the
+  client half wants the native's own implementation hooked (the function two frames above DamageActor in the trace,
+  SkyrimSE.exe+0x657972 and +0x654a70 as leads; its registration string "ProcessTrapHit"): an RE brief for the re-analyst, rule 1.
+  C: the host's pillar turn ran nothing: c1's screenshots before and after agree (the same face), and the script's bytecode shows
+  why under the gate: defaultPuzzlePillarScript's onActivate exists only in its position states, which OnCellLoad enters, and the
+  temple loaded at c1's teleport 3.5 s before c1 hosted it, so OnCellLoad was blocked and the script stayed in its empty state
+  (the two "linked activation of 4fcdf" lines are the engine's XAPR propagation). Decision 1 gains the rule: a host-scoped
+  script's LIFECYCLE events (OnInit, OnLoad, OnUnload, OnCellLoad, OnCellAttach, OnCellDetach, OnAttachedToCell,
+  OnDetachedFromCell, OnReset) pass on every seat; they are the engine's word on the world's state and come before any host is
+  known, and a guest's pillar then stands on its initial face (OnCellLoad's StartState02 and StartState03). Limit: what a
+  lifecycle handler does beyond state (MovingTrap.onCellAttach's fireTrap for a trap caught mid-firing) plays as a visual on a
+  guest; the harm stays the host's. Decision 3 gains the engine's other family: a world object without a behavior graph animates
+  by NiControllerManager sequences through TESObjectREFR::PlayAnimation_Impl (CommonLibSSE-NG Offsets.h:546, 14189/14297;
+  src/RE/T/TESObjectREFR.cpp:812-840 is the Papyrus path's shape), which the NotifyAnimationGraph hook never sees; the platform
+  hooks it and raises the sequence's name as the same sendAnimationEvent, so one JS family covers both (fork m4-object-animation
+  63df9393, local until the grace's parity is in). Which family the pillar uses is HYPOTHESIS until lab/frida/pillar-anim-trace.js
+  (both hooks, non-actor references) runs on c1 in probe v4 (lab/.cache/probes x-object-anim 2059c95e).
+- Decision 4's server half BUILT (21:17 PST 2026-11-01): fork m4-trap-hit c085a3ad (off the pair's 32795060, SCHEMA_VERSION 31; server-only push,
+  CI's T0 pending). The contract is docs/WIRE.md's TrapHit (t 72) `{ refr, target, damage }` C2S, R1: the host's engine computes
+  the number (the scripts' leveled pick through ProcessTrapHit), the server validates it by membership in the trap's own table
+  (wire-rules traps::hit over the VMAD's LvlDamage1 to LvlDamage6 and TrapHitBase's damage, base then reference, read by
+  ActionListener::TrapDamageTable; the encounter level is the engine's and never recomputed) and by reach (traps::REACH 512 from
+  the trap's origin to the target's recorded feet, UNMEASURED until the probe reads it), then applies the table's value to the
+  record as OnWeaponHit does (god mode and ethereal take nothing; a kill is the server's own with no killer). Gates in the core:
+  the cell's host alone, a game-file world object, a target that is another player's actor in the same cell (the host's own body
+  stays its actor-values report, an NPC's values its HostedActorState), 8 reports a second per trap. Codes: E_TRAPHIT_RANGE,
+  _NO_REF, _ACTOR, _NO_CELL, _NOT_HOST, _TARGET, _CELL, _RATE, _TABLE, _REACH, _DAMAGE. T0 unit/TrapHitTest.cpp on the wall
+  0x54b15 (75 lands, 76 does not, 200 kills; the guest's report, the host's own body, Alvor, the portcullis, 600 units and the
+  ninth report are refused). Left for the trace: the client's report point and whether the host's engine lets the figure lose
+  health locally (restored by the server's word either way); then the SP export, the TS service, the probe x-trap-hit (the real
+  distance, the frames) and b-trap-hit, the Status ticks.
+- Decision 4, the scripts' own path, static from their bytecode (21:00 PST 2026-11-01; `lab/pex.py disasm` on movingtrap.pex, traphitbase.pex and
+  trapbase.pex out of "Skyrim - Misc.bsa" by lab/tools/bsa-extract.py). This replaces the plan's Papyrus-damage HYPOTHESIS: the
+  swinging wall's harm is an engine native, not a script's DamageActorValue. TrapBase.fireTrap calls ResolveLeveledDamage, which
+  MovingTrap overrides: `damageLevel = CalculateEncounterLevel(TrapLevel)` (ObjectReference's native, SKSE ObjectReference.psc:173,
+  the reference's encounter zone and the player's level at the engine's difficulty 0 to 4), then the ladder LvlDamage1 for a level
+  at or under LvlThreshold1, LvlDamage2 above it and at or under LvlThreshold2, ... LvlDamage6 above LvlThreshold5, written into the
+  same reference's TrapHitBase `damage` property. TrapHitBase.OnTrapHitStart(akTarget, velocities, position, material, ...) in its
+  `canhit` state: a target with the ghostAbility spell or in noHitFaction is skipped; hitOnlyOnce moves the trap to CannotHit; then
+  `akTarget.ProcessTrapHit(self, damage, trapPushBack, velocities, position, material, staggerAmount)` (the engine native, SKSE
+  ObjectReference.psc:489) does the damage, the push and the stagger inside the engine; after it the sound (throttled by
+  soundDelay), the disease roll (isPlayer only: the target must be the game's own player, so a guest's figure never catches one on
+  the host), hitFX, a detection event, and rumble and camera shake for the player alone. The event itself is the engine's
+  TESTrapHitEvent (CommonLibSSE-NG ScriptEventSourceHolder.h:110 sources it, SkyrimVM.h:128 sinks it for Papyrus; its layout is
+  not in the headers). Consequences for the build: (1) the server validates the host's number by membership in the trap's six-value
+  table from the VMAD (TrapLevel's encounter-level scaling is the engine's own system, never reimplemented; the recorded level is
+  not an input), the hit itself by the trap's reach to the target's recorded position, so R1 as planned; (2) the host's report point
+  is where the engine takes afDamage: the trace's two hooks (RestoreActorValue's slot and Actor::DamageActor) tell whether
+  ProcessTrapHit lands in one of them for a figure (then the platform's existing DamageActor replacement is the hook, with the
+  trap as the attacker argument or none) or in neither (then the native's own implementation, found by its registration string
+  "ProcessTrapHit" in Ghidra, is the hook: an RE task before the client half); (3) the whole action on a guest's body (ADR-031):
+  damage by TrapHit to the server, push and stagger by the host's engine on the figure (already the figure's local motion), sound
+  and FX host-side until a later slice, the disease a known gap (server-owned later, noted in Limits). The trace's expectation
+  (lab/frida/trap-hit-trace.js) is corrected to match: the amount arrives from the engine's trap path, not from the VM's dispatch.
 - Decision 1's declaration (20:57 PST 2026-11-01): the hosted-cell gate's native SetCellHosted (the client's HostService telling the platform
   which cells this seat hosts at every grant and release) was bound in C++ and called from TypeScript but never declared in the
   compiled TESModPlatform.pex, so the call threw "Native function not found" on every seat and the host-scoped scripts stayed
