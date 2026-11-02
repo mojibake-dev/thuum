@@ -248,6 +248,19 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   number to the record (R1) with the trap as the cause (ADR-048's hazard death if it kills), and ChangeValues shows the hit seat;
   the host's client reports from the trace's hook point (a platform export beside damageActor's) and the figure's local loss is
   restored by the server's word. Decision 5 (counts) after it.
+- x-object-anim v4 GREEN (22:43 PST 2026-11-01; 20261102-063627 on the pillar-fix head 64dbacfe over layer 8d4b177c, every claim of the three
+  legs). Decision 1's lifecycle rule CONFIRMED: with its OnCellLoad admitted the pillar's script left its empty state, and the host's
+  turn moved the pillar (c1's screenshots before and after show the eagle face giving way to the snake face) and played
+  "Trigger01" through the hook ("object animation aa8cb Trigger01 reported" on c1 at 06:41:12.5, "played" on c2 27 ms earlier by
+  c2's clock, the server's "aa8cb animates aa8cb 'Trigger01'" recorded and relayed to one game; the marker's two E_TRAP_NO_REF by
+  design). Decision 3's names CONFIRMED for the plate (Down), the wall (180For, 180Back, Rearm; no Half or End reached JS) and the
+  pillar (Trigger01; the Turned0N the script waits for is the graph's event back to it, not sent through the hook). c2's leg C
+  screenshot is black (its look-at aimed into the dark), so the guest's turn is proven by its log line, not by eye; the turbo
+  sitting reads it. The pillar's engine family stays HYPOTHESIS and is immaterial: the trace lab/frida/pillar-anim-trace.js
+  printed no row because a Frida attach on a function Skyrim Platform already attaches through its own Gum (38048 since forever,
+  14297 on this head) never fires, while an attach on one the platform replaces (DamageActor) does (x-object-anim v3's fourteen
+  rows); the platform's own hooks are the read for such functions from now on. numidium runs the full sweep as the pair's gate;
+  on its green the pair merges (PROMOTE=0 verb-merge plus the LAYER_RUN layer-merge) and the Status ticks follow.
 - x-trap-path v1 read (22:08 PST 2026-11-01; 20261102-055845, green on its premise): the trace was live before the swing and the figure
   stood on the plate (c1's av-read at 8589, -5338; the plate fired twice, the wall played 180For, 180Back and Rearm), yet
   none of the four hooked functions ran for it: on this run the host's engine registered no blade on the figure, where

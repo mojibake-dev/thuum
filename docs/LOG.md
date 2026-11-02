@@ -5159,3 +5159,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   M3's state corrected to BUILT (T3 green, building over) with the T4 close open; PLAN's M3 header and chart line, docs/M3-CLOSE.md
   as the closeout set for the turbo sittings, the checklist's item 7 pointing at it. Tonight is packaging, not building (Eli: turbo
   starts tomorrow morning): the pair's stage runs to its verdict, the two open branches stay named, nothing new opens.
+
+- 22:43 PST 2026-11-01 x-object-anim v4 GREEN (063627) on the pair's head 64dbacfe: the pillar turns on the host (screenshots: eagle to snake), its
+  Trigger01 is reported, recorded and played on the guest; the plate's and wall's names confirmed; decision 1's lifecycle rule and
+  decision 3's second family hold. The pillar trace printed nothing: a Frida attach on a function the platform already Gum-attaches
+  never fires (the family stays HYPOTHESIS, immaterial). The sweep runs as the pair's gate; the merge is numidium's on its green.
