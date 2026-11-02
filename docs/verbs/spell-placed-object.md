@@ -331,6 +331,16 @@ are the caster's alone (ADR-057).
   the cast.
 - Owner: agent.
 
+## Playtest 40's F1 (12:17 PST 2026-11-02): the band on real terrain
+
+Eli: "raise wall doesnt work". rotfern cast Raise Wall at the Riverwood camp at 20:07:50Z (cell 9732, hosted by c2); its game
+reported both pieces inside the window (the wall ACTI 1a0735e8 at (20301, -46151, -142), the halo MSTT 1a098529 at (20311,
+-46142, -190)) and the server refused both with E_PLACED_RANGE: "145 on the ground and 0 up", "131 on the ground and 48 up",
+then "nothing placed". The band of 150 to 260 was flat ground's measurement (x-raise-wall-pitch v1: 206.25 and 196.875); on the
+camp's slope the engine's own placement stood the pieces nearer. The band is a forgery bound and not a measurement, so it is now
+a body to a wall and a half (REPORT_MIN_UNITS 64, REPORT_MAX_UNITS 320, REPORT_MAX_DZ 256 unchanged; wire-rules placements.rs, fork
+m4-turbo2-wall-range, the tests carrying the camp's two casts), deployed under the turbo as a server redeploy; R0 after it.
+
 ## Status
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (ticked 17:02 PDT 2026-10-29 by the pass: the Inventory's 23 rows each carry a disposition; Rung R0 for the objects, declared at the top)

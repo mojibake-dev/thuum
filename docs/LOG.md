@@ -5225,3 +5225,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   locks, weatherSync, perks and leveling OFF through the playtest overlay, each item's switch turned on at its turn; Survival off. The
   build is frozen until Eli's report; findings come to thuum-magnus for fixes (client-hot for TS, a redeploy for the server). The
   trap-path rerun waits for numidium's frida pid fix after the turbo.
+
+- 12:17 PST 2026-11-02 turbo 2's first findings (numidium's logs at results/playtest-40): F1 Raise Wall refused by range on the camp's terrain (145
+  and 131 units against 150 to 260): the band widened to 64 to 320 on fork m4-turbo2-wall-range (a server redeploy under the turbo,
+  R0 after); F2 Hilde's puppet left behind on the guest's seat when the host's Hilde went indoors to an unhosted cell (npc-handoff D6
+  and D11: released, re-puppeted, a ghost), recorded for the M3 rows, no quick fix.
