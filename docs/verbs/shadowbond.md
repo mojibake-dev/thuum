@@ -282,7 +282,9 @@ difftest session shadowbond declared that StartCombat; T2 at fork
 m2-train-31 3642bc32 showed it no longer occurring and the declaration went
 (the session's one edit). The bond, its concealment and the break are
 unchanged.
-- [ ] the script's suppression at T3: b-shadowbond green by path on the train
-  m4-train-bondblock-puzzle's stage (both halves: the server's swap at a
-  break, no swap at a run-out), then out of pending (14:59 PST 2026-11-01: built, fork
-  m2-shadowbond-script-block)
+- [x] the script's suppression at T3: b-shadowbond green by path on the
+  re-cut train (025608) and inside its gate (032144), both halves (the
+  server's swap at a break, the caster's procs through the relay, no swap at
+  a run-out); out of pending (main 3f547169); MERGED to fork parity e6c5d01a
+  (20:09 PST 2026-11-01, the train m4-train-bondblock-puzzle with the puzzle relay and
+  the race menu hide; gate 12 of 12, T2 38 of 38)

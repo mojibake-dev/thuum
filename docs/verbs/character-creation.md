@@ -235,5 +235,8 @@ applyAppearanceCommon, src/sync/appearance.ts). Candidates for a later verb.
   the regate; the gate 12 of 12 twice, the first refused by the tooling's two
   builds)
 - [x] the permit on fork parity 7fe600e6 (18:18 PST 2026-11-01, the train
-  m5-train-permit-onceload with the onceLoad fix); the menu hide follows in
-  the bondblock train
+  m5-train-permit-onceload with the onceLoad fix); the menu hide
+  (apocrypha 26ebe040, clearRaceFlag) MERGED to parity e6c5d01a in the
+  bondblock train (20:09 PST 2026-11-01; x-race-permit-hide green 023428 and 025940,
+  b-race-permit green in that gate too), its two claims back in
+  b-race-permit (9826bcc1)

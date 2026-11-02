@@ -5084,3 +5084,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   pending), the puzzle relay (a pillar or lever turn relays to every other game in the cell: x-puzzle-relay v3 030924, the XMarker
   0x4fcdf's E_TRAP_NO_REF by design) and the race permit's menu hide (apocrypha: race.clearRaceFlag(1) through the typed Race,
   x-race-permit-hide green twice). The first T2 on 400790b2 was red on that caster-side relay's two SpellCasts until declared.
+
+- 20:09 PST 2026-11-01 the bondblock train MERGED: fork parity e6c5d01a (Apocalypse's Shadowbond script blocked everywhere with the procs
+  relayed to the caster's game too, the puzzle relay both ways, apocrypha's clearRaceFlag hide, the permit train inside; gate
+  20261102-031449 12 of 12 on 400790b2, T2 38 of 38 on e6c5d01a, numidium). On main: b-race-permit's two hide claims back
+  (9826bcc1), b-puzzle-relay promoted from the probe (b133be9a), the verbs' Status ticks. Heads for numidium's queue: the end grace
+  m2-stream-end-grace 8eddb2c4 (parity merged, R0 by `R0=1 just verb-merge` on its per-sha T2), the object-animation pair
+  m4-object-animation 7c82e51e (parity merged, SCHEMA_VERSION 30 kept; a both-sides merge of ActionListener.cpp lost
+  OnObjectAnimation's closing brace, caught by the brace count against both parents and restored before the push; client build in
+  its pipeline) with layer-world-scripts-host e94ec494 (main merged) and x-object-anim v3 4107f964.
+

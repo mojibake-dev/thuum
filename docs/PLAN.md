@@ -1379,6 +1379,11 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
 - Exit: `d-bleak-falls` (both players through the puzzle door and the traps,
   with a restart mid-dungeon).
 
+- STATE (20:09 PST 2026-11-01, thuum-magnus): traps' decision 2 whole on parity e6c5d01a (the puzzle relay both ways, b-puzzle-relay); the
+  shadowbond run-out swap fixed there (the mod's script blocked everywhere, the procs the server's relay); decision 3 (the host's
+  animations to the guests) and decision 1's hosted-cell gate built on m4-object-animation 7c82e51e, the pair's stage next (its
+  layer branch e94ec494 flips the traps row to host scope); decisions 4 (harm) and 5 (counts) planned in traps.md.
+
 ### M5: Progression (4 to 8 weeks, Class A/B). Started 2026-10-31 (the weekend pass)
 
 - STATE (06:22 PST 2026-11-01, thuum-magnus): skills by use MERGED b6748da0 (p-level-up 10 of 10: the 40488 hook, UESP's formulas on the
