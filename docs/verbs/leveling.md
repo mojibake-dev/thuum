@@ -289,9 +289,9 @@ them (its two lines of the night are Sneak's at 20:27): the engine's rise for a 
   {} one level up" after the rule's "skill {} reaches level {}". A blocked read (the gamemode's) re-sends the record. The book
   stays in the inventory (a spell tome goes).
 - Client: nothing new. The seat's engine raises the skill at the menu's open; the record's send sets the base and the progress to
-  the server's numbers. HYPOTHESIS: slot 5's ModActorValue on a skill moves the base and not a permanent modifier (the console's
-  IncPCS, the same path, leaves no highlighted skill); if the probe reads the current value one over the base after the record's
-  send, the client gets a one-line undo of the engine's own rise on the skillIncrease event.
+  the server's numbers. CONFIRMED by x-skill-book 212928's av-read steps: base 21 and current 21 with the Book Menu open, after
+  the record's arrival, after the second read and after the restart, so slot 5's ModActorValue on a skill moves the base, not a
+  permanent modifier, and the seat needs no undo of its own rise.
 - T0 (38659a3e): LevelingTest's skill-book case (One-handed 15 with 378 toward 392.6, the book takes it to 16 with the carry
   378 / 392.6 of the step from 16, the base 16, the character's 16, one ActorValues sent, the book kept; the same book again moves
   nothing and sends the record once; readBooks on the change form; leveling off drops a second book's read unspent),
