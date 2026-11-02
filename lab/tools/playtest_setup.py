@@ -412,7 +412,15 @@ def ready(n: int) -> int:
     for name, port in (p.get("streams") or {}).items():
         r = subprocess.run(["pgrep", "-f", f"Moonlight stream core.gaussing.tv:{port}"], capture_output=True, text=True)
         pids = r.stdout.split()
-        (rep.ok if len(pids) == 1 else rep.fail)(f"stream {name} ({port}): {'pid ' + pids[0] if len(pids) == 1 else (str(len(pids)) + ' windows' if pids else 'no window')}")
+        if len(pids) != 1:
+            rep.fail(f"stream {name} ({port}): {str(len(pids)) + ' windows' if pids else 'no window'}")
+            continue
+        # a window that outlived a Sunshine restart (setup's own) or a clone rollback is a dead session that pgrep
+        # still lists: it holds no socket, a live stream holds several (playtest 40, 2026-11-02: playtest 39's two
+        # windows passed this check with 0 sockets each and showed nothing; the fresh ones held 3)
+        s = subprocess.run(["lsof", "-nP", "-a", "-p", pids[0], "-i"], capture_output=True, text=True)
+        socks = max(len(s.stdout.splitlines()) - 1, 0)
+        (rep.ok if socks else rep.fail)(f"stream {name} ({port}): pid {pids[0]}, {socks} sockets" + ("" if socks else ": a dead session, close it and open a fresh stream, then playtest-ready again"))
     for seat in p["seats"]:
         if seat.get("by_hand"):
             rep.note(f"profile {seat['profile']} by hand: {seat['by_hand']}")
