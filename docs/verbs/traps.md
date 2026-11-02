@@ -248,6 +248,12 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   number to the record (R1) with the trap as the cause (ADR-048's hazard death if it kills), and ChangeValues shows the hit seat;
   the host's client reports from the trace's hook point (a platform export beside damageActor's) and the figure's local loss is
   restored by the server's word. Decision 5 (counts) after it.
+- Decision 1's declaration (20:57 PST 2026-11-01): the hosted-cell gate's native SetCellHosted (the client's HostService telling the platform
+  which cells this seat hosts at every grant and release) was bound in C++ and called from TypeScript but never declared in the
+  compiled TESModPlatform.pex, so the call threw "Native function not found" on every seat and the host-scoped scripts stayed
+  blocked on the host (x-object-anim v3 20261102-045036: the plate 0x567f2 never activated the wall). Declared on m4-object-animation
+  32795060 (lab/pex.py add-native, the .psc line beside it); the stage repeats on that head. The lesson is the pex rule's: a new
+  TESModPlatform native is the binding, the .psc line and the .pex declaration, and the dump is the check before any push.
 - Decision 4's server half, static (20:53 PST 2026-11-01): the server needs no new parser for the trap's table. libespm reads a record's
   whole VMAD (RecordHeader::GetScriptData, skymp/libespm/src/RecordHeader.cpp:43-66; Utils.cpp:177-204 fills each script's name,
   status and properties, Utils.cpp:123-175 the values: Object, Int, Float, Bool, String and their arrays, libespm/Property.h), ACTI

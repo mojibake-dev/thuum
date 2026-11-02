@@ -5101,3 +5101,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   m2-stream-end-grace 235aad49 (within 0.001, legacy 0 wire 1; the header and the 0.68 reason follow). Tooling: main d4c528f7
   (numidium) makes verb-merge wait for the head's server-build and run its T2 on the per-sha tag. The grace's push waits for the
   object-animation pair's layer-merge (that parity merged in, server-only), then numidium's per-sha T2 and the R0=1 verb-merge.
+
+- 20:57 PST 2026-11-01 the object-animation pair's first stage (layer b0a5365b laid, LAYER EXIT 0, smoke 043530 green; train 7c82e51e over it): x-object-anim v3
+  RED at 045036, the host's plate never fired. c1's console: "HostService: SetCellHosted unavailable on this platform: Error: Native
+  function not found 'TESModPlatform.SetCellHosted'", so no seat told the platform which cells it hosts and the eleven host-scoped
+  trap scripts stayed blocked on the host too (the SP log's "11 of them on the hosting seat alone"). The native had its C++ binding
+  (PapyrusTESModPlatform.cpp) and its client call but no declaration in the compiled TESModPlatform.pex, which CI cannot compile
+  (lab/pex.py's rule; the quest-stage pair missed it the same way a day earlier, e0e3af03). Fixed: m4-object-animation 32795060
+  (lab/pex.py add-native plus the .psc line, dump-checked), a platform file, so a full client build; numidium restages the train
+  over the layer as laid with x-object-anim v3 by path. The layer branch stays still.
