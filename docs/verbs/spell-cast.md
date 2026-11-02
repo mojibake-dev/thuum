@@ -1855,7 +1855,7 @@ both times (MRh_SpellAimedConcentrationStart to MRh_Equipped_Event). Two mechani
    sets the slot to None), so a hit report that reaches the server after the end is refused as E_SPELL_NO_CAST and its
    gap, up to a cadence, is lost; the green run's last counted report came 40 ms before the end would have. The fix is
    the rule's: an ended stream stays claimable for one report within HOLE_MS (counting its gap as a later report's), then
-   closes (fork m2-stream-end-grace a1bd3908, built 17:30 PST 2026-11-01 on the bondblock train's head 84f87370, R0 after that train merges; T0 in casts.rs; a difftest session declares nothing new since the
+   closes (fork m2-stream-end-grace ea15e8bb (a1bd3908 with its C++ stream test taught the grace), built 17:30 PST 2026-11-01 on the bondblock train's head 84f87370, R0 after that train merges; T0 in casts.rs; a difftest session declares nothing new since the
    fake clients hold no stream). Not a weakening: the claim stands, the server counts the stream the engine dealt.
 
 Rule 13 kept: b-duel's bound is unchanged; the reruns under ADR-036 carried the two gates meanwhile.
