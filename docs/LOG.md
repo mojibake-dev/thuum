@@ -5178,3 +5178,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
 
 - 23:28 PST 2026-11-01 D78 decided by Eli: "ok C for m3, B goes in M4 with dragging with a note that if it becomes too much of a bugbear it can get thrown into the backlog." Recorded in DECISIONS (ADR-058), PLAN's M4 list, prop-physics.md's slice three (pose
   replication, the root-only SetPosition retired), M3-CLOSE.md row 2 and the memo.
+
+- 02:18 PST 2026-11-02 the pair's sweep at 72 of 114 (numidium): two c1 startup crashes (terrain streaming, +0x2AD242) each green on the lab-fault
+  rerun; b-npc-talk red three times in two shapes (Sven's drift around the hold on relaunched seats; the Dialogue Menu not opening
+  after a granted claim on the cold run), green yesterday on its first run. Read: the pair was inert in those runs (no trap, animation
+  or E_OBJANIM line on the server, no "object animation" line on c1, the same zero as yesterday's green), so the scenario's two known
+  fragilities, not the pair's code; ADR-036's lone-red reruns, a watch item on two greens; if it stays red the merges hold and the
+  morning's fix is the scenario's premise in its own commit, never its claims.
