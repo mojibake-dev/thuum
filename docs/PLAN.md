@@ -1082,6 +1082,14 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   client), 4 (numidium's grammar), 5 (P0 to P5, b-npc-puppet, the gate) and
   6 (docs) follow with no playtest between; playtest 31 after the merge.
 
+- STATE 2026-11-02 14:05 PST (turbo 2's arm one, Eli's close at 12:32 PST, and the day's queue): wall-range MERGED (parity 4b6f5fa3: F1's band, F5's
+  reanimation end, the container drop); the R0 train m4-turbo2-r0-train 6d7fcc84 (F9 restart-dead c3eb2550 plus skill books 38659a3e,
+  GREEN at T3 as x-skill-book 212928, b-skill-book promoted) in numidium's one T2; the big client train m4-turbo2-train (the deaths head
+  de969496 with F3, F4 and F8's debounce; prop-statics a290aba0 plus its PropTest fix df3b8819, ADR-058 slice two, the Riverwood cart
+  wheel by a settings list; the settle head 7aac21d4, F2's furniture hold and the viewing seat's hide) stages on the R0 parity with
+  REUSE_DIST, probes x-prop-static and x-handoff-hide by path; Eli's Undead FX default is a settings entry (c9177cbc, probe
+  x-global-default running); the queued rune glyph BUILT as m2-rune-glyph 816d3b98 (SCHEMA_VERSION 32), its own stage after the
+  train. Arm two's checklist is drafted in docs/private/playtest-turbo-2.md; Eli is pinged by numidium at seats-ready.
 - STATE 2026-10-23 17:45 PDT (the day's chart line, replacing the 15:2x
   one): cell-host DONE (parity 535544db), npc-puppet DONE (19e7ca9b), trains
   34 to 38 merged (parity a25caf02). The four limits Eli asked for before
@@ -1301,14 +1309,6 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   engine, Eli's ask); m3-death-range 2069d4d2 (the 0xff death report) waits for the next train. Findings 40 to 49 in
   docs/private/playtest-m3-37.md; the lay by numidium at the train's green, then Eli's reads in the order of pain
   (the chest, the shop topic, the face, the atronach, a reanimation, x-quest-stage at the train's stage).
-- STATE 14:05 PST 2026-11-02 (turbo 2's arm one, Eli's close at 12:32 PST, and the day's queue): wall-range MERGED (parity 4b6f5fa3: F1's band, F5's
-  reanimation end, the container drop); the R0 train m4-turbo2-r0-train 6d7fcc84 (F9 restart-dead c3eb2550 plus skill books 38659a3e,
-  GREEN at T3 as x-skill-book 212928, b-skill-book promoted) in numidium's one T2; the big client train m4-turbo2-train (the deaths head
-  de969496 with F3, F4 and F8's debounce; prop-statics a290aba0 plus its PropTest fix df3b8819, ADR-058 slice two, the Riverwood cart
-  wheel by a settings list; the settle head 7aac21d4, F2's furniture hold and the viewing seat's hide) stages on the R0 parity with
-  REUSE_DIST, probes x-prop-static and x-handoff-hide by path; Eli's Undead FX default is a settings entry (c9177cbc, probe
-  x-global-default running); the queued rune glyph BUILT as m2-rune-glyph 816d3b98 (SCHEMA_VERSION 32), its own stage after the
-  train. Arm two's checklist is drafted in docs/private/playtest-turbo-2.md; Eli is pinged by numidium at seats-ready.
 
 
 **STATE 14:05 PDT 2026-10-29 (the weekend pass's audit of parity bf133744 against this chart; one line per item):**
