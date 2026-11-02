@@ -402,3 +402,13 @@ TURN_SIGN) that ramps lockAngle with the pick snapped: HYPOTHESIS that the menu'
   platform's SendAnimation target (game/Offsets.h, AE 38048: the behavior-graph events) and
   prints every call on a non-actor reference with the stack. Run on the seat hosting Bleak
   Falls Temple before the host turns a pillar (x-object-anim v4's leg C). 1.6.1170 only.
+
+- trap-path-trace.js: the engine's path from a trap's swing to a figure's damage on the
+  hosting seat (docs/verbs/traps.md, ADR-059 decision 4; written 21:5x PST 2026-11-01 from
+  the re-analyst's static read, HYPOTHESIS until it runs). Attaches to the ProcessTrapHit
+  native's callback (56212: R8 target, R9 trap, [RSP+0x28] damage), Actor::DoTrap1 (37509),
+  Actor::ProcessHitVictim (38586) and Actor::DamageActor (37335) and prints every call
+  naming the player or a figure with its numbers, thread and stack. Expected per swing: one
+  processTrapHit, one doTrap1, two processHitVictim, one damageActor with no attacker. Run on
+  the seat hosting Bleak Falls Temple before the guest steps on the plate (x-trap-path).
+  1.6.1170 only.
