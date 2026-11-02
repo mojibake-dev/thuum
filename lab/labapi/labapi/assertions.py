@@ -155,6 +155,7 @@ class ViewsFacade(Protocol):
     def figure_spells(self, observer: str) -> dict[str, Any] | None: ...
     def log_count(self, observer: str, pattern: str) -> int | None: ...
     def skills(self, observer: str) -> dict[str, Any] | None: ...
+    def weather(self, observer: str) -> dict[str, Any] | None: ...
     def node_scales(self, observer: str) -> dict[str, Any] | None: ...
     def av_reads(self, observer: str) -> dict[str, Any] | None: ...
     def presets(self, observer: str) -> dict[str, Any] | None: ...
@@ -724,6 +725,19 @@ class SkillView:
     base: float
     xp: float
     legendary: int
+
+
+@dataclass(frozen=True)
+class WeatherView:
+    """c.weather(): the sky as that client's engine holds it, from its last
+    `weather` step (Weather.getCurrentWeather, getOutgoingWeather and
+    getCurrentWeatherTransition): the current weather's form id, the one it
+    is blending from (0 once settled) and the blend's progress, 1 once
+    settled (docs/verbs/weather.md)."""
+
+    current: int
+    outgoing: int
+    transition: float
 
 
 @dataclass(frozen=True)
@@ -1722,6 +1736,18 @@ class _ClientRef:
             raise AssertionData(f"{self.name}'s skills step did not read the level")
         return level
 
+    def weather(self) -> WeatherView:
+        """c.weather(): the sky that client's engine holds, from its last
+        `weather` step (docs/verbs/weather.md)."""
+        fn = getattr(self._views, "weather", None)
+        data = fn(self.name) if fn else None
+        if not isinstance(data, dict):
+            raise AssertionData(f"{self.name} has not reported a weather step yet")
+        try:
+            return WeatherView(current=int(data["current"]), outgoing=int(data["outgoing"]), transition=float(data["transition"]))
+        except (KeyError, TypeError, ValueError) as e:
+            raise AssertionData(f"{self.name}'s weather step lacks {e}") from e
+
     def preset(self, name: str) -> PresetView:
         """c.preset(name): what that client's last racemenu-save {name} step
         wrote, its size and SHA-256."""
@@ -1917,6 +1943,7 @@ _ATTRS = {
     PosView: {"x", "y", "z"},
     PoisonView: {"poisonId", "count"},
     SkillView: {"base", "xp", "legendary"},
+    WeatherView: {"current", "outgoing", "transition"},
     PresetView: {"bytes", "sha256", "look"},
     TimeView: {"year", "month", "day", "hour", "daysPassed", "timeScale"},
     SpellView: {"magnitude", "overTime", "conditional", "effects"},
@@ -1962,12 +1989,12 @@ _STRING_NUMBER_METHODS = {
 # Methods that take no argument: server.time()
 _NULLARY = {
     _ServerRef: {"time"},
-    _ClientRef: {"level", "node_scale", "morph", "head_parts", "watched_self", "av", "refs_near", "figure_spells"},
+    _ClientRef: {"level", "node_scale", "morph", "head_parts", "watched_self", "av", "refs_near", "figure_spells", "weather"},
     QuestView: {"stage", "running"},
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref", "follow", "fate", "log_count", "stream"},
-    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near"},
+    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "weather", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near"},
     InventoryView: {"count"},
     RefsNearView: {"count", "has", "distance", "runtime_of", "pos", "disabled"},
     EffectsView: {"left", "magnitude"},

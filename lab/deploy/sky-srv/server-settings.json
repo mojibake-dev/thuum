@@ -269,6 +269,14 @@
       }
     ]
   },
+  "restrictedRaces": {
+    "aa00:rotfern.esp": [
+      1
+    ],
+    "19d08:rotfern.esp": [
+      1
+    ]
+  },
   "cureSpells": [
     "b8780:Skyrim.esm"
   ],
@@ -333,7 +341,52 @@
     "b6031:Skyrim.esm",
     "3dd29:Skyrim.esm"
   ],
-  "spellPlacedObjects": [],
+  "weatherSync": true,
+  "weather": {
+    "changeGameMinutes": 10,
+    "seed": 1,
+    "pools": {
+      "3c:Skyrim.esm": [
+        {
+          "weather": "81a:Skyrim.esm",
+          "chance": 50
+        },
+        {
+          "weather": "12f89:Skyrim.esm",
+          "chance": 50
+        }
+      ]
+    }
+  },
+  "leveling": true,
+  "locks": true,
+  "perks": true,
+  "spellPlacedObjects": [
+    {
+      "spell": "00cc14:Apocalypse - Magic of Skyrim.esp",
+      "anchor": "caster",
+      "objects": [
+        {
+          "base": "098529:Apocalypse - Magic of Skyrim.esp",
+          "type": "MSTT",
+          "forward": 192,
+          "dz": -48
+        },
+        {
+          "base": "0735e8:Apocalypse - Magic of Skyrim.esp",
+          "type": "ACTI",
+          "forward": 192,
+          "dz": 0
+        }
+      ],
+      "lifetime": {
+        "whileHeld": true,
+        "lingerS": 5,
+        "maxS": 120
+      },
+      "perCaster": 2
+    }
+  ],
   "modLock": {
     "enabled": true,
     "requireHello": false

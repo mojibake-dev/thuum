@@ -630,10 +630,18 @@ class Runner:
                 continue
             await self._fetch_client_file(rec, g, f"{client}-before.log", f"'{self.s.client_driver_log}'")
 
-    async def _restart_server(self, rec: RunRecord, hour: float | None = None) -> None:
+    async def _restart_server(self, rec: RunRecord, hour: float | None = None, downtime: float | None = None) -> None:
         """A restart inside the run; `server: restart {gameHour}` lays the overlay's clock anew first, the hour
-        starting at the restart (x-handoff-night's evening, then its morning)."""
-        await asyncio.to_thread(self.system.run, self._compose("restart", self.s.compose_service), env=self._compose_env(rec, hour))
+        starting at the restart (x-handoff-night's evening, then its morning). `{downtime: 15}` stops the container,
+        holds it that many seconds and starts it again, so a run can see the world's clock run through a stop (a
+        compose restart alone takes under a second since the server's process became node, 2026-11-01)."""
+        env = self._compose_env(rec, hour)
+        if downtime:
+            await asyncio.to_thread(self.system.run, self._compose("stop", self.s.compose_service), env=env)
+            await asyncio.sleep(float(downtime))
+            await asyncio.to_thread(self.system.run, self._compose("start", self.s.compose_service), env=env)
+        else:
+            await asyncio.to_thread(self.system.run, self._compose("restart", self.s.compose_service), env=env)
         ready = await asyncio.to_thread(self.system.tcp_ready, "127.0.0.1", self.s.server_ui_port, self.s.server_ready_timeout_s)
         if not ready:
             raise RunnerError("E_RUN_SERVER_NOT_READY: after restart")
@@ -999,7 +1007,7 @@ class Runner:
                 elif step.action == "log-count":
                     return await self._server_log_count(rec, index, str(step.args["pattern"]))
                 else:
-                    await self._restart_server(rec, step.args.get("gameHour"))
+                    await self._restart_server(rec, step.args.get("gameHour"), step.args.get("downtime"))
                 return True, ""
             except RunnerError as e:
                 rec.failures.append({"step": index, "kind": "lab", "error": str(e)})

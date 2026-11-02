@@ -330,6 +330,13 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   seat sees motion type 4 and no impulse. Struct offsets are read from the
   CommonLibSSE-NG headers named in the header. Run on both seats through
   x-prop-push.
+- prop-launch.js: prop-contact.js plus the body's motion at each contact and before and after every impulse push (the hkpEntity's
+  embedded motion: type, position, linear velocity and its length, angular speed, inverse mass; offsets from hkpEntity.h, hkpMotion.h,
+  hkMotionState.h, hkTransform.h), for D73's open item: a resting Dynamic basket thrown out of reach by a standing capsule contact (push
+  v13 034316, pass v11 034648). Armed on the host seat at a relaunch by x-prop-launch; read against an engine-native basket (the game's
+  own console placeatme) in the same run. A launch reads as a jump in vel per push (the push's impulse), a huge massInv (a wrong mass
+  after the Dynamic set) or vel growing between pushes (something else moving it). The field offsets are HYPOTHESES until the native
+  basket's lines read sane (massInv about 0.3 to 1, a nudge's speed under 100). 2026-10-30.
 - cloak-hostile.js: whether a hostile creature's engine counts the player as
   hostile before any blow (docs/verbs/npc-stream.md slice 6, H-53h). Hooks
   Actor::IsHostileToActor and logs self, other, the answer and the caller's
@@ -353,3 +360,62 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   the hold works; a write of 0 from a caller other than 37489 while held names
   the clearer; no write at all says the call never reached the engine. Address
   Library ids by `just addr`, 1.6.1170 only.
+- skill-use.js: what the engine hands its skill experience path (thuum
+  docs/verbs/leveling.md, M5). Hooks PlayerCharacter::AddSkillExperience
+  (Address Library 40488 on 1.6.1170; CommonLibSSE-NG's RELOCATION_ID(39413,
+  40488)) and, from the first call's `this`, the player's UseSkill through
+  its vtable slot 0xF7 (Actor.h:445); each call prints the skill (ActorValue),
+  the float (the points or the experience) and the form. Decides where the
+  leveling client hook goes: UseSkill's points if AddSkillExperience reads a
+  zero under skymp5-client's zeroed mults, else AddSkillExperience itself with
+  the engine's write cut. Probe x-skill-use-read (by path).
+
+## lockpick-trace.js
+
+The Lockpicking Menu's runtime data per frame while the lab drives the minigame (docs/verbs/locks.md, Dynamic plan; written
+11:07 PDT 2026-10-31 after x-lockpick v4's silent red): hooks IMenu slots 04 ProcessMessage and 05 AdvanceMovie read from
+VTABLE_LockpickingMenu[0] (Address Library 215604 by `just addr`), reads RUNTIME_DATA at this+0x48 (pickAngle, lockAngle, the
+break timer, sweetSpotAngle, partialPickAngle, numBrokenPicks; LockpickingMenu.h). Rows on every half-degree move of the pick or
+the lock, every broken pick, every message, and once a second. With `params: {SNAP: true}` it writes the pick's angle to the
+sweet spot every frame, so a held A opens the lock by the engine's own minigame (the lab's lever for the pick leg, HYPOTHESIS
+until its first run). `frida {script: lockpick-trace.js}` on the picking seat before the activation.
+v2 (11:49 PDT): hooks the menu's MenuEventHandler slots (CanProcess, ProcessMouseMove, ProcessButton through VTABLE_LockpickingMenu[1],
+Address Library 215606) and rows every event that reaches them (device, type, user event, id code, value or held seconds or x and
+y, the handler's answer), after x-lockpick v6 (183903) read the pick and lock angles flat at 0 through 27 lab attempts; and a TURN
+lever (`params: {SNAP: true, TURN: true}`, TURN_DEG 1.0 a frame from TURN_START_MS 8000 after the menu's first frame, sign
+TURN_SIGN) that ramps lockAngle with the pick snapped: HYPOTHESIS that the menu's update opens the lock at its full turn.
+
+- trap-hit-trace.js: who damages a figure when a trap fires (docs/verbs/traps.md,
+  ADR-059 decision 4's Dynamic plan; written 14:46 PST 2026-11-01). Replaces slot 06 of
+  the three ActorValueOwner vtables (RestoreActorValue: modifier, actor value,
+  amount) and prints each Health change on the player or a figure with the
+  health before and after and the stack, plus every Actor::DamageActor naming
+  one of ours, so the Papyrus path (TrapHitBase's DamageActorValue) and the
+  melee path are told apart. Run on the seat hosting Bleak Falls Temple before
+  the guest steps on the plate (x-object-anim v3's leg B). 1.6.1170 only.
+
+- pillar-anim-trace.js: which engine family animates a world object (docs/verbs/traps.md,
+  ADR-059 decision 3; written 21:4x PST 2026-11-01 after x-object-anim v3 read the puzzle
+  pillar silent under the platform's NotifyAnimationGraph hook while the wall and the plate
+  spoke through it). Attaches to TESObjectREFR::PlayAnimation_Impl (CommonLibSSE-NG
+  Offsets.h:546, AE 14297: the NiControllerManager sequences, their names) and to the
+  platform's SendAnimation target (game/Offsets.h, AE 38048: the behavior-graph events) and
+  prints every call on a non-actor reference with the stack. Run on the seat hosting Bleak
+  Falls Temple before the host turns a pillar (x-object-anim v4's leg C). 1.6.1170 only.
+
+- trap-path-trace.js: the engine's path from a trap's swing to a figure's damage on the
+  hosting seat (docs/verbs/traps.md, ADR-059 decision 4; written 21:5x PST 2026-11-01 from
+  the re-analyst's static read, HYPOTHESIS until it runs). Attaches to the ProcessTrapHit
+  native's callback (56212: R8 target, R9 trap, [RSP+0x28] damage), Actor::DoTrap1 (37509),
+  Actor::ProcessHitVictim (38586) and Actor::DamageActor (37335) and prints every call
+  naming the player or a figure with its numbers, thread and stack. Expected per swing: one
+  processTrapHit, one doTrap1, two processHitVictim, one damageActor with no attacker. Run on
+  the seat hosting Bleak Falls Temple before the guest steps on the plate (x-trap-path).
+  v2 (22:08 PST 2026-11-01): the native's and DoTrap1's rows unfiltered (any target) and the engine's
+  TESTrapHitEvent dispatch (26104) hooked, after v1's run 20261102-055845 printed no row for the
+  figure the wall swung at; x-trap-path v2 lets the host's own body take the blade first, so the
+  player's rows prove the hooks and the figure's silence places the miss. v3 (05:16 PST 2026-11-02): proves
+  itself after x-trap-path v3 (130725) landed its liveness swing twice on the server with no row: the ready row carries the
+  process id, the module base and each hook's resolved address with its first eight bytes; every hook counts every call before
+  its filter; kernel32!Sleep is counted as a call the process makes constantly; a liveness row every ten seconds carries the
+  counts. 1.6.1170 only.

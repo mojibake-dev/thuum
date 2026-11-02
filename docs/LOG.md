@@ -3679,3 +3679,1549 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   at 97 of 102 (14:38 PDT): 94 green, the three reds read and recorded.
 - m3-pass-train-3-win merged to fork parity 0e23c820 (2026-10-30T21:55Z): the gate 20261030-164127-pass-union-0e23c820 (cited, ADR-042), 20261030-164127-a-activation-reach to 20261030-214533-t2-fakeclient-restart (111 runs); T2 skip on skymp-server:m3-pass-train-3-win, citing 0e23c820's T2 green alone 15:41 to 16:10Z (92a3f276's per-field tolerance inside); clones not promoted here (layer-merge promotes the pair, ADR-042a). The union P3-win over parity bf133744: trains 1 to 3, D64's 60 Hz send flush, D66's held-cast hole time, the CallNative fix (Raise Wall seen by the other seat, its server copies then off for the merge under D70 B), the prop candidate set and the drop's reference gate (props dark, propPhysics off by default, D68), quest sharing in mode all (b-quest-stage green), the story arrival (b-story-arrival green) and the non-host reanimate (x-reanimate-host v6 green). The set: 99 of 102 green, red only on what gate.yaml holds pending at the merge (b-spell-placed-wall D70; c-dungeon-enemies D71, the guest cannot open a body, so M3's exit stays open; b-npc-body-release 428a2ee, its amended claim follows the OpenContainer and menu order, red twice in the rest set 20261030-214710-pass-union-rest, which is that line's evidence and not the citation); c-riverwood a watch item (the restart leg's write-behind lag, red 211911 then green 212353); b-body-loot green on its cold rerun, pending for the D37 layer. The GPU stagger held all day (core: 45 bursts, none closer than 20 s, no failure). The defaults layer bd5bb64 merges next under the same set.
 - apocrypha/layer-defaults (a mod layer) merged to main 31a2080a by merge commit (2026-10-30T21:57Z): the full sweep 20261030-164127-pass-union-0e23c820 (cited with m3-pass-train-3-win, ADR-042a; the layer's own run 20261030-122932-smoke-two-players), 20261030-164127-a-activation-reach to 20261030-214533-t2-fakeclient-restart (111 runs); both clones promoted. Plugins: the load order unchanged (no plugin added or dropped); the layer is patches and keys only: game-ini.tsv's subtitles on (bGeneralSubtitles, bDialogueSubtitles) and the kill camera off (bVATSDisable=1); plugin-patches.tsv's rotfern.esp FormList sets (RaceCompatibility's and the vampire half), USSEP's Steady Hand slowdown abilities dropped and Quick Reflexes' slowdown at 1.0, and SpellAbsorption's three Slow Time words at magnitude 1.0, so no shout or perk slows the other seat's clock; persist's tree 5,754 files (rotfern.esp CRC32 7B65C699). The fork's parity 0e23c820 was merged first (c8d8ec9), the pair's clean-m1-next promoted here. Next layer: apocrypha/layer-souls (D37 B's Death Drop Overhaul out and Skyrim Souls RE), b-body-loot its gate scenario after the clone's deletion of DeathDropOverhaul.dll is read.
+- 15:03 PDT: BASE MERGED (numidium): fork parity 0e23c820 (the union; was bf133744), thuum main d39fbd3 (c8d8ec9 the skymp bump and the
+  union's LOG entry, 31a2080 the defaults layer's merge, d39fbd3 its entry), both clones promoted to clean-m1; the gate's record
+  20261030-164127-pass-union-0e23c820, 99 of 102 green, red only on pending, c-riverwood a watch item. b-npc-body-release went pending
+  (428a2ee, numidium under my rule) on its two rest-set reruns (214710, 215006): c1's menu open with no handler line at +4 s. Its cause,
+  read from the runs and the code: on the host the engine opens the menu itself and the game pauses, so the handler's game-time wait
+  stalls until the close, the "waiting" line prints after it and the closing activation goes out by the 15 s give-up; a client defect
+  (the first wait as waitMenuMode) for the guest-loot train, whose gate re-times both scenarios' host claims (npc-fate.md). The
+  guest read x-body-open-guest v2 (4ef23336) runs now, ten minutes before 39's setup. lab/playtests/39.yaml written for numidium
+  (38's end world composed as 36 and 37 were, both seats outdoors at the guard camp, perks as before, no god mode; the world's stamp
+  numidium's to fill); the physics push waits for Eli's report, then verb-stage with the five probes.
+- 15:04 PDT: the guest-loot train begun as prework on fork m3-guest-loot 39e5c2f5 (off parity 0e23c820, tsc clean, unpushed until the
+  physics stage): the host handler's first wait in menu mode (the 15 s late release); the guest's open follows v2's answer.
+  lab/playtests/39.yaml handed to numidium (2bea6a6); the lab is 39's after the guest read.
+- 15:08 PDT: x-body-open-guest v2 (215922, numidium) GREEN: H5 holds, a released body takes an activation only with its AI on (both
+  kills refused with the AI off; with the AI on the menu opens and the body walks 45 units in 5 s, H-54e). The fix built on fork
+  m3-guest-loot 05ac32a9 (client: the AI on around the server's open and off at the first sight of the menu or after 2 s; the host's
+  menu-mode wait 39e5c2f5 before it), tsc clean, unpushed until the physics stage; its probe x-body-open-guest-fix v1 by path
+  (cb798c4c). The train's gate: c-dungeon-enemies, b-npc-body-release, the probe. D71's record carries the read.
+- 15:11 PDT: PLAYTEST 39 SEATS READY (numidium, 15:10:30 PDT; playtest-ready all ok): the merged base (fork parity 0e23c820, the
+  m3-pass-train-3-win image; thuum main 69765ae with the world's stamp playtest-m3-39-rotfern-prisoner-20261030T220506Z, 38's end
+  with the needs zeroed), both seats outdoors at the guard camp, test 1 Marksman 60 and Overdraw40, bars full, no god mode, the three
+  spells held, streams 48989 and 49989, the hold to 01:09:52Z. Notes: Sunshine on sky-c2 reads Stopped 3 s after a restart and
+  Running at 12 s (numidium's tooling note); parity's pipeline 4047 red at wire-test on a CI DNS miss (cargo-deny's fetch), 4054
+  rebuilding server-only so no Windows build runs during 39. The build is frozen until Eli's report.
+- 18:48 PDT: PLAYTEST 39 PAUSED by Eli at the laid seats ("kill playtest for now. ill open later."): numidium saves the world and releases
+  the hold; the seats are free; m3-prop-physics dde874b5 pushed (pipeline 4059, the client build), numidium's verb-stage with the five
+  probes when green; 39 resumes on that stage, re-laid from the paused world with the needs zeroed at Eli's start word (the lesson: the
+  needs maxed while the seats sat 40 minutes under the clock). Finding F1 (Eli): Survival does not kill, and its low-needs effects made
+  the seats hard to play; recorded in player-globals.md with memo D72 (A leave the mod's rule and fix the set-up, B or C by a read of
+  whether the cold stage drains health or caps maximums; the server takes a player's reported health drop, OnChangeValues); not in
+  tonight's queue.
+- 18:48 PDT: 39 saved paused (numidium: playtest-m3-39-paused-20261031T014638Z, 1237 records), the hold released, the lab free. The
+  physics pipeline 4059 (dde874b5) failed wire-test 14865 at 01:47Z on sky-ci's "Could not resolve host: github.com" (cargo-deny's
+  RustSec fetch on VM 702), as parity's 4047 and 4054 did; difftest-build green, server-build and client-build skipped behind it;
+  core asked for the DNS fix, numidium retries the job (no new pipeline), the physics stage follows the Windows green. The guest-loot
+  and dedupe branches wait on the same runner.
+- 18:59 PDT: DNS back on the runners (core moved the dead Mullvad relay to us-lax-wg-201). numidium retried 4059's wire-test (job 14874;
+  server-build and the Windows client follow) and parity's server-only 4054 (14875, the parity image), rolled both clones back to
+  clean-m1-next and armed `LABAPI=4021 just verb-stage m3-prop-physics` with the five probes (sha1s checked), waiting on dde874b5's
+  builds; LABAPI 4021 is 5cc62f8's own pipeline, the newest labapi image, and nothing under lab/labapi, the driver or the gamemode
+  has changed since. thuum main's pipelines were red since 21:59Z on docs-lint's Alpine fetch (the same DNS); this push's pipeline
+  clears the record. m3-guest-loot and m3-quest-report-dedupe push after the physics builds are green (one Windows runner).
+- 19:30 PDT: the physics stage (dde874b5, LABAPI 4021, 02:13Z): push v9 021439 RED (read: the spawn at the host's feet ejected the awake
+  body before its first track, the snap set it Dynamic without the wake flag, no contact ever after, the run through it clean; H-P1 a
+  body denied activation is inert to the controller), pass v9 021831 a lab fault (rerun queued), grab v7 022116 RED on 2 of 9 (the
+  guest's grab end to end; the flip in the hand, the basket flew out of the cell on both seats, the host untracked it; H-P2). Fixes
+  local on the branch: 46f1a2dc (allowActivate true for the simulator), a2256945 (no motion set on a held body). Reads by path for the
+  current stage: push v10 49f0815b and grab v8 7d0b64c6, the basket anchored on the mining floor marker 0x10e6cc clear of every capsule,
+  the track lines awaited before the key. numidium asked: the two reads after the queue, then the fixed head; 39 on clean-m1 if Eli
+  returns before the fixed stage is proven.
+- 19:33 PDT: drop v4 022528 on the physics stage RED on one claim alone (the sword rolled 233 downhill on the camp's rise; the non-host
+  drop sync held end to end: the gate, the grant by touch 2, the stream at the grant, the host's apply, one copy per seat within 20
+  units): x-prop-drop v5 by path 426cf923 on lab-spawn's flat strip, claims unchanged. push v10 861f51bf and grab v8 7689e959 after
+  probe-check's rule (no client log count inside an until). The stage's queue: x-raise-wall-pitch v1, pass v9's rerun, push v10, grab
+  v8, drop v5. c2's rollback took 195 s after pass v9's agent fault (numidium watching the agent).
+- 19:36 PDT: x-raise-wall-pitch v1 023141 GREEN (numidium): the engine's wall at a fixed 206.25 (MSTT) and 196.875 (ACTI) from the caster
+  at every pitch; D70's aim hypothesis falls; the sweep's offset is the caster's heading against the record's yaw (about 42 degrees,
+  HYPOTHESIS) plus 192 against 206; shape A stands with the measured distance as its validator's bound (DECISIONS, the verb doc). The
+  physics stage ended (exit 0, dde874b5 laid); the after-stage queue runs pass v9's rerun, push v10, grab v8, drop v5.
+- 19:42 PDT: pass v9's rerun 023534 RED on 3 of 15 (numidium): the pass works, then the basket flies out of reach 3 s after c2's grant
+  with no hand on it (grab v7's flight again): H-P3, the grant's flip on a follower's copy flings it (the drop's copy, never a
+  follower, took the same flip without flight). Read before the fix: x-prop-pass v10 by path 372f3a71 (the position on both seats at
+  1, 2 and 4 s after the key), queued after drop v5; the two local fixes wait on the reads. push v10 running, then grab v8, drop v5.
+- 19:45 PDT: push v10 023846 RED at its premise with no key pressed: the watcher's "followed: Keyframed" line prints only after an owner
+  line naming another seat (the flip), and an unclaimed host prop gives the watcher none (the Keyframed set at the track logs nothing);
+  the other three premise lines held (the marker anchor works: c1 tracked at 80 units, placed, Dynamic; c2 tracked at 131). v11 by path
+  1e8203e4 drops that line. The queue: grab v8 (running), drop v5, pass v10, push v11. numidium: c2's rollback took 195 s twice, both
+  after a pass run (a typical one 80 s), counting for core.
+- 19:52 PDT: grab v8 024409 RED 4 of 12: the grab holds end to end on the marker site, then the basket vanishes on BOTH seats within
+  20 ms half a second after the grabber's asleep sample (c2 "its reference is gone"): the server's doing; candidates (a) the pickup
+  delete of an activated 0xff MISC, (b) a far accepted asleep sample (pass v9's shape). numidium greps both runs; pass v10b a0a6e14b
+  (server.ref 0xff000002 at 1, 2, 4 s) runs in v10's slot, then push v11, then drop v5's rerun (024852 a lab fault at c2's relaunch,
+  lab-api's EXEC_LOST handling numidium's).
+- 19:56 PDT: grab v8's vanish CONFIRMED as the pickup of a failed grab (numidium: c2's activation at 02:47:37.346, the server's "Deleting
+  0xff item" at 38.003; pass v9's rerun shows neither): a Keyframed follower cannot be held (touch 1 and 2 in one instant). D73 under
+  ADR-058: a body is Dynamic unless another seat streams it awake right now (Keyframed from a stream's first awake sample to 150 ms
+  after its asleep one, or a second of quiet); built on m3-prop-physics 0bb02f74 over the wake fix 46f1a2dc, the held-hand guess
+  a2256945 reverted (unpushed). The branch pushes after the stage's reads end (pass v10b, push v11, drop v5's rerun), then the build,
+  the restage and the four probes; 39 on clean-m1 meanwhile if Eli opens it.
+- 20:00 PDT: pass v10b 025124 (numidium): the server's record never moved, the host kept the basket, the claimant's engine lost its own
+  copy within 1 s of the grant's Dynamic set. H-P4: setPosition leaves a Keyframed body's collision behind (every flown copy had been
+  placed by it; the drop's copy, never placed, settled). Fix fa225f01 on m3-prop-physics (jumps and the first placement by keyframed
+  translate, the rest-Dynamic set at 300 ms); pass v10c by path 02af9dc2 (snapshots, no pos claims). The branch (46f1a2dc, 0bb02f74,
+  fa225f01) pushes at numidium's "queue done"; the restage's probes push v11, pass v10c, grab v8, drop v5.
+- 20:01 PDT: push v11 025647 on the old build RED 5 of 10, as expected, reading H-P4 from the host's side: the setPosition-snapped,
+  Dynamic-no-wake copy took the walker's contact ("owned, no claim") and vanished from the host's own listing, c2's copy unmoved at the
+  spot; H-P1's inertness unconfirmed (the body did take a contact), the wake fix kept as the engine's default. drop v5's rerun is the
+  queue's last; then the branch pushes (46f1a2dc, 0bb02f74, fa225f01).
+- 20:07 PDT: QUEUE DONE (numidium); m3-prop-physics pushed at fa225f01 (46f1a2dc the wake, 0bb02f74 D73, fa225f01 H-P4), pipeline 4076
+  building. drop v5's rerun 030029 RED on the distance alone (157 against 150): read with v4, the sword lies about 150 units BELOW the
+  ground at its spot on both seats (the copy spawns at the dropper's feet z, half inside the terrain, and falls through to the cell's
+  floor; v4's "downhill" was the same): a server spawn lift on the branch after 4076's client build, drop v6 by path with the floor
+  claim (z above 14600). The bound stays.
+- 20:08 PDT: the drop's spawn lift committed on m3-prop-physics b421d1b2 (MpActor::DropItem: the copy 48 above the feet, DropItemTest's
+  z 51; clang-format 21.1.8), local until 4076's client build is green, then pushed with CLIENT_BUILD_WINDOWS=0 so the restage takes
+  4076's dist with the new server image. drop v6 by path 34853faa (the floor claim). The restage's set: push v11, pass v10c, grab v8,
+  drop v6.
+- 20:15 PDT: pipeline 4076 GREEN (fa225f01: client-build 14923 at 03:14Z, server-build 14922); the drop lift pushed server-only,
+  m3-prop-physics b421d1b2, pipeline 4079 (server-build 14928, CLIENT_BUILD_WINDOWS=0). numidium's restage after it: both clones
+  rolled back, `REUSE_DIST=1 LABAPI=4021 just verb-stage m3-prop-physics` with 14923's dist and 4079's server image, the probes push
+  v11, pass v10c, grab v8, drop v6. Parity's server-only pipeline 4054 green on the retry: skymp-server:parity at 0e23c820 exists
+  again. The guest-loot and dedupe pushes wait for the restage's probes.
+- 20:33 PDT: the restage on the fixed build (b421d1b2 server, 14923 dist): push v11 032724 RED 3 of 10 at the rest reads with three fixes
+  reading true (the translated placement, the wake, the kick's stream applied by the follower); the basket then travelled out of reach
+  in 3 s on both seats through the stream: the marker's slope (175 below the strip) or a throw; pass v10c's record snapshots tell.
+  push v12 by path 0a0e31ef (the flat strip, the ejection as the first contact, the kick read with b0/r1/r2/r4) for after grab v8 and
+  drop v6.
+- 20:37 PDT: pass v10c 033116 RED at its premise on the flat: the console basket at the host's feet thrown past 400 at the Dynamic set
+  (the capsule contact's claim, the translate back into the capsule); the slope question moot. The probes spawn by the verb's own drop
+  from here: push v13 e98f89ba, pass v11 by path (the host drops a Basket01, 64 ahead and 48 up, its claim, fall and sleep the premise,
+  then the kick with b0/r1/r2/r4). A follow-up noted for the placement translate into a capsule.
+- 20:40 PDT: grab v8 033439 on the fixed build RED 4 of 12, the pickup again: the grab closes and releases in one instant even on D73's
+  Dynamic body, the E's release picks the basket up (c2's activation 05.259, the server's delete 05.461). The grab's engine read is
+  owed (StartGrabObject/EndGrabObject on c2) and the pickup after a failed grab is a client follow-up; the grab is a declared limit
+  for the physics train. drop v6 running, then push v13 and pass v11.
+- 20:45 PDT: drop v6 033901 on the lift build RED 3 of 15 (the floor claims): the sword rests 150 below the strip exactly as without
+  the lift, so the weapon's copy falls THROUGH the strip's (and the camp's) collision on the dropper's seat, the sync itself green.
+  The basket drop in push v13's premise tells MISC from WEAP; a placed weapon's collision read and the adoption of the engine's own
+  drop are the items; a dropped weapon is the drop's declared limit for the train (the checklist: drop a basket or a tankard). The
+  stage ended (exit 0); push v13 running, then pass v11.
+- 20:51 PDT: push v13 034316 RED at its premise on the flat: the basket's drop fell and settled (the weapon's fall-through is the weapon's),
+  then one standing capsule contact launched it out of reach in 2 s (push v11's travel was this, not the slope). The view spawns a
+  copy disabled at the player, positions it, then enables it (the collision built in place), so the launch is unexplained: hypotheses
+  (the proxy's recovery on our Dynamic-set body; the wake; an echo of our own stream) and a Frida read tomorrow (the body's velocity
+  around the contact against an engine-native basket). Decision under the pass's rule: the physics train waits; props dark on parity
+  (D68); the lab goes to the guest-loot train after pass v11, then D69's; 39's item 7 skipped. Tonight's physics yield: five engine
+  facts read (a body denied activation takes contacts after all; a Keyframed follower cannot be held, its E a pickup; setPosition then
+  Dynamic flings; a weapon copy falls through the ground; a Dynamic basket launches at a standing contact), D73 and three fixes on the
+  branch.
+- 20:52 PDT: pass v11 034648 RED at its premise, push v13's launch again (the host's drop settles, the host's standing capsule touches the
+  resting basket 1.8 s later, out of reach on both seats 2.25 s after): two independent runs on the flat. The physics queue is done.
+  numidium's reading, taken: on this build the wake's allowActivate is the lever both ways (inert without it on the old build, a
+  launch with it); three code items owed on the branch (the launch at contact, the pickup after a grab, the weapon copy through the
+  ground), each behind a read. The lab's next: the guest-loot train (m3-guest-loot 05ac32a9 pushed for its Windows build), then D69.
+  Every GPU watcher clean all night (numidium).
+- 21:18 PDT: x-body-open-guest-fix v1 041249 RED 1 of 5 on the guest-loot stage: the AI switch and the activate in one frame, the menu
+  never open, no later handler line, the AI off at the dump (the enable a frame early, or never taken). The fix's v2 pushed on
+  m3-guest-loot (the activate deferred one update, the AI state logged at the switch, before the activate and at the off); numidium
+  stages D69 (dc3ec679, x-quest-rumor v1 88202e30) meanwhile, then restages guest-loot on the new head.
+- 21:46 PDT: D69's stage (dc3ec679, the union's dist by REUSE_DIST_FROM, numidium's verb-stage gain 614e66c2): x-quest-rumor v1 RED twice
+  (043546, 044055) on the HeartwoodMill half alone, the rumor relay and the denied quest green: the chain trace shows the engine refusing
+  the console's setstage 10 (SetStage ret 0, no event) because a start-up stage is done by the quest's own start at login; the probe's
+  premise. v2 by path (the start-up stage read as done, stage 20's relay, the refusal through DLC1VCController's own stage-0 reports
+  within 150 s) for D69's restage after the guest-loot gate. Also: c1 crashed at 04:25:18Z, 25 s into its login to the guest-loot v1
+  stage's world (SkyrimSE.exe+015F0D8, then +0151F03; a Restless Draugr 0x8009e and USSEP's Ancient Nord War Axe 0x2c672, then a
+  Draugr 0x1d219 and the Battleaxe 0x1cb64 in the registers): HYPOTHESIS for apocrypha, the defaults layer's patched USSEP (plugin-
+  patches.tsv, its CRC changed) against the clients' copy; one crash, watched for a recurrence; the logs ride D69's clean-m1-next.
+  numidium's tooling: runset's RUNSET_AFTER rest leaves pending out (e46fda2b), playtest_setup waits 20 s for Sunshine (5c2e70e8).
+- 21:49 PDT: the launch read prepared for the physics branch's restage: lab/frida/prop-launch.js (the contact tracer plus the body's
+  velocity, position and inverse mass at each contact and push, offsets from the Havok headers) and x-prop-launch v1 by path 3edfc17a
+  (an engine-native basket against the server's drop, the host running through each, the record snapshotted); the Dynamic plan in
+  prop-physics.md names what each reading means. The guest-loot v2 restage is laying its client; its probe next, then D69's restage
+  with x-quest-rumor v2.
+- 21:57 PDT: apocrypha on c1's 04:25Z login crash: the patched USSEP is exonerated by bytes (the rebuilt render equals both server copies,
+  SHA-256 010647609359e1c8...; against the original only HEDR's count, the two Steady Hand PERKs and the appended Quick Reflexes SPEL
+  differ; every WEAP record identical, the draugr NPC_ records Skyrim.esm's); the crash is the equip-slot path on a BSJobs::JobThread
+  during the actor's load (BGSEquipSlot, BaseExtraList, skeleton.nif on the stack, RAX a float pair), the first login into the
+  guest-loot v1 world on the new server build; the same plugin bytes carried every login since 05:16Z. My hypothesis withdrawn; the
+  lead is the load-time equip path (the load-freeze family's neighbourhood), watched for a recurrence; the clients' copies apocrypha
+  reads at numidium's idle signal. Also from apocrypha: the injected spell's name travelled as a two-byte garbage string (Skyrim.esm
+  localized, USSEP not); fixed on apocrypha/layer-souls 5e37aefd (the injection drops FULL and DESC when the localized flags differ),
+  so the Souls stage lays USSEP at 21,106,757 B, CRC32 73EAEC17, SHA-256 5d1f44fa..., replacing 7CA7F25F; cosmetic, no crash path.
+- 21:58 PDT: the login crash's lead (numidium, apocrypha): equipment applied to a draugr while its 3D loads on a BSJobs worker thread (RAX
+  two floats, 0x3DB2B8C2 and 3000.0), c1 on the guest-loot v1 client in run 041249's end world. The guest-loot client's two commits
+  run only inside onOpenContainerMessage (nothing at a login), so the first candidate is the late redress at the bind (train 47b, the
+  fate's worn set applied at every dressed NPC's 3D load, on every build since 10-27); one crash, watched across the restages; if it
+  recurs, defer the redress apply off the load frame and lay the crash's thread beside the redress line's timing.
+- 22:03 PDT: the guest-loot fix's v2 RED twice (045522, 045859): the AI read true at the switch, the once('update') deferral ran in the
+  same millisecond, the activate in the enable's frame, no menu; the AI off at the dump. v3 pushed (m3-guest-loot 0547e5d4: a latent
+  waitMenuMode(0.2) between the switch and the activate, the state logged before it, the off deadline 3 s). numidium takes the lab to
+  D69's restage (dc3ec679, x-quest-rumor v2 7923ecc8) first; guest-loot restages on 0547e5d4 after it, the gate as agreed.
+- 22:06 PDT: the guest-loot handler's loop never iterated after the activate in 045522 and 045859 (no deadline, no give-up; numidium's
+  grep), so the AI's off at the dump is another hand's. The loop's poll and v3's beat were VM latents (waitMenuMode); the original
+  loop's Utility.wait is Skyrim Platform's own and iterated for 15 s on guests before. v4 ce1df68b pushed (the beat and the poll on
+  Utility.wait, the first wait in menu mode), the restage's head after D69's probe; the onResult lines of the next run read the latent
+  question. v3 0547e5d4 superseded before any run.
+- 22:07 PDT: numidium's onResult read (c2.log, spdlog): in 045522 and 045859 Utility.waitMenuMode resolved three times (the handler's first
+  wait, then two polls about 170 ms apart) and no latent of any kind completed again while cast-action and npc-stream kept logging; so
+  waitMenuMode does resolve outside a menu, and the handler's fourth VM latent never came back or its loop died after the third. In
+  045859 the body's inventory apply (three TESModPlatform.addItemEx calls on 39fe4) sat between polls two and three. v4 ce1df68b (the
+  poll and the beat on Skyrim Platform's own Utility.wait) is the restage's head; if the open still fails, the next lines to add are
+  the activate's return and the AI's other hand.
+- 22:20 PDT: x-quest-rumor v2 GREEN on D69's restage (20261031-051455, dc3ec679 on the union's dist): D69 B proven at T3 (the rumor's
+  stage crosses, the denied quest stays, the start-up stage per seat and the later stage the world's, the controller's own-start
+  reports refused). b-quest-rumor promoted unchanged (1b4dde1c, its own commit; the steps byte-identical to the probe, checked) and
+  pending in gate.yaml (ebfbe115) until the merge, the nightly playing parity. numidium restages guest-loot on ce1df68b (build 14987);
+  on green the two trains merge as one union under one gate (always, c-dungeon-enemies, b-npc-body-release, b-quest-rumor, the
+  quest-stage scenarios, watch; T2 beside), un-pending the three in the merge's commit; on red D69 merges alone after its restage.
+  0548fff3's online wait proven live (c1 back online 62 s after a rollback, where the old check said 15).
+- 22:23 PDT: numidium cut the union fork m3-pass-train-4 848a1d67 (a --no-ff merge of m3-quest-sge-stages dc3ec679 into m3-guest-loot
+  ce1df68b; against parity remoteServer.ts, ActionListener.cpp, QuestStageTest.cpp; pushed with the knob, the stage reusing guest-loot's
+  client build 14987; pipeline 4105 with difftest for T2). Its gate, agreed, seventeen scenarios: always (smoke-two-players,
+  a-restart-persistence, b-duel), named c-dungeon-enemies, b-npc-body-release, b-npc-loot, b-npc-death-report, b-quest-rumor,
+  b-quest-stage, b-story-arrival, m0-inventory, a-activation-reach, a-sleep (the handler's first wait and open-poll changed for every
+  open it serves), watch b-npc-death, b-npc-stream-voice, b-npc-caster, c-riverwood; b-body-loot out (pending on D37); the merge
+  commit un-pends the three on green. b-quest-stage-restart is a verb-doc debt, noted. The v4 probe first, on build 14987.
+- 22:40 PDT: the guest-loot fix's v4 RED twice (053012, 053335): after enableAI(true) the handler's next await never resumes whatever it
+  awaits (v2 two awaits later, v4 the first), the plugin alive; the "server mods, attempt 2" line 13 to 15 s after the switch in every
+  run (kept). v5 built: the body's open on the TimersService with no await after the switch (80188d13, local until D69's merge; the
+  activate's return logged). The probe x-body-open-guest-fix v2 by path and the two pending scenarios (a8cd208's and 330124b's
+  successors, their own commits) read the guest's lines from the body-open path. D69 merges alone (numidium's merge-d69); the union
+  m3-pass-train-4 re-cut on v5 after.
+- 23:10 PDT: Eli: "its gonna be a bit before i can playtest but when i do im doing turbo mode (probs sunday evening and all of monday.)
+  where i'll likely attack one open feature at a time and iterate till it's fixed. what all can we get pre-work done on and add to the
+  pile? what from m4 and m5?" The pile through Sunday evening written as docs/private/turbo-2-prework.md: A, M3's open items in
+  order (guest loot, physics with its three reads, the wall's reported pose, the dedupe, Survival's read, the small ones); B, M4
+  items pre-built to T3 behind switches (containers' rest, locks and lockpicking, traps and the puzzle door toward d-bleak-falls,
+  weather as a server global, word walls); C, M5 items to T0/T2 and probed (skills and leveling R0, perk picks as transactions,
+  alchemy and enchanting on the craft path, vampirism's design); D, the turbo shape (a switch, a probe, a checklist line per item,
+  the hot-push loop); E, the order Fri night to Sun afternoon with one sweep on the merged base before the seats are laid.
+- 23:25 PDT: Eli: "go ahead with the pile in that order" (docs/private/turbo-2-prework.md). The lab's queue from here: D69's merge (in
+  its gate), then guest-loot v5's stage, probe and gate (M3's exit), then the physics restage with x-prop-launch (the launch read),
+  then the dedupe's stage; the agent starts Raise Wall's reported pose (shape A: the message, the validator, the server's placement
+  at the reported pose, the client's report) while the lab works through those, then containers' rest and locks to T0.
+
+### 2026-10-31
+
+- m3-quest-sge-stages merged to fork parity dc3ec679 (2026-10-31T06:26Z): the gate 20261031-054843-merge-m3-quest-sge-stages, 20261031-054843-smoke-two-players to 20261031-062140-c-riverwood (11 runs); T2 skip on skymp-server:m3-quest-sge-stages, its T2 run beside the gate green 05:36 to 06:05Z (T2_LOG; difftest job 14852 from 0e23c820, the branch left skymp-wire alone); clones not promoted (server-only; the stage laid the union's 0e23c820 dist through REUSE_DIST_FROM, main 614e66c2). Verbs: quest-stage, D69 B (a start-game-enabled quest keeps only the engine's own start per seat, stage 0 and the record's start-up stages, and its later stages are the world's): x-quest-rumor v2 green 20261031-051455 on the stage (v1 red twice, 043546 and 044055, on its premise: c1's console SetStage of FreeformHeartwoodMill's flagged stage 10 returned 0, the stage already done at login on both seats), b-quest-rumor green in the gate and out of gate.yaml's pending here. Watch: b-npc-death red at 060342 (step 44: the body rested 563 units off its death x against 256) and green on its relaunched rerun 060754, a finding by name. Its own train, the union m3-pass-train-4 with guest-loot dropped when the guest-loot fix's v4 went red twice (053012, 053335); guest-loot v5 stages next.
+- 23:28 PDT: D69 MERGED (numidium): fork parity dc3ec679 (was 0e23c820) at 06:26Z, the gate 20261031-054843-merge-m3-quest-sge-stages
+  10 of 10 (b-npc-death red at 060342 with the body 563 units off its death x against 256, green on its relaunched rerun 060754: the
+  corpse drift family, a watch finding by name), T2 green on the branch's image, the clones not promoted (server-only); numidium's
+  merge commit on main bumps the submodule and un-pends b-quest-rumor. The guest-loot v5 pushed with parity merged in (m3-guest-loot
+  b878b2a6; remoteServer.ts alone against parity), its probe x-body-open-guest-fix v2 aba01c6f; the gate list the union's (the two
+  exit scenarios, b-npc-loot, b-npc-death-report, m0-inventory, a-activation-reach, a-sleep, always, watch). The union m3-pass-train-4
+  is moot and left as cut.
+- (00:15 PDT 2026-10-31) Raise Wall's reported pose built (D70's shape A; D74 the handshake): fork m3-wall-pose off parity dc3ec679:
+  23e334b9 the wire (PlacedRequest 61 S2C, PlacedReport 62 C2S, their validator, SCHEMA_VERSION 22, two fixtures each, the C++ structs
+  registered), 69ca1221 the rule and the server (placements.rs asks at the accepted cast and places each base where the caster's game
+  reports it: the band 150 to 260 on the ground and 256 up from the cast's pose, the window 3 s, the caps before the request, "nothing
+  placed, the caster's game reported no base within the window" when none comes; PartOne's SendPlacementRequests and ReportPlacedObject,
+  ActionListener::OnPlacedReport, one "placed 1 form" line per reported form; SpellPlacedTest rewritten on the request and report path),
+  866ff864 the client (SpellPlacedService: the engine's own reference nearest the point 200 ahead of the player, the view's copies and
+  earlier sets skipped, settled over two 100 ms reads, reported once per base), 7ac26664 the table reading and ignoring forward and dz
+  (so one deploy settings file serves a server of either shape until the merge; both deploy files restored to the Raise Wall entry here,
+  a shape C server placing D70's known-wrong wall meanwhile). Local: cargo test, clippy, deny and the header green across the workspace;
+  tsc green; fork-lint clean; the C++ T0 is the pipeline's (4115 for 866ff864 with the client build 15027; 7ac26664 pushed server-only).
+  Probe x-raise-wall v4 by path (960011fb; 55 steps, 34 claims): the request, two accepted reports and two "placed 1 form" lines a cast,
+  no refusal, the caster's own request and report lines, c2's copy within 16 of c1's own engine copy (both distances from c2's position),
+  one runtime reference a base a seat, the skip lines, the removal; the walk at the wall recorded and not claimed (the engine's heading at
+  the cast is the open read). b-spell-placed-wall's amendment (its own commit) after the probe's read. Guest-loot v5 (b878b2a6) RED twice
+  (065444 cold, 065821 relaunched; numidium's read): the activate 150 ms after the AI switch returned false with the AI reading true, the
+  timers path otherwise whole end to end; the one green read (leg 4 of x-body-open-guest v2) had the AI on for over five seconds first.
+  v6 (m3-guest-loot d10789f7, client build): the activate retried every 200 ms for up to 5 s, each return logged with the body's AI,
+  death, 3D and health (the beat the engine needs is the measurement; a run of refusals sends the read to Actor::ActivateRef); the probe
+  aba01c6f unchanged. The lab's order: the physics restage (b421d1b2, x-prop-launch v1), then guest-loot v6's stage and gate (M3's exit),
+  then m3-wall-pose's stage with x-raise-wall v4 and the entry deployed.
+- (00:21 PDT 2026-10-31) Pipeline 4115 (m3-wall-pose 866ff864) green: the C++ T0 with the rewritten SpellPlacedTest and the client
+  build 15027 for the stage; 4117 (7ac26664, server-only) and 4116 (guest-loot v6 d10789f7) running. m3-quest-report-dedupe a837ecdc
+  pushed with parity dc3ec679 merged (pile item 4; its probe x-quest-report-dedupe v1 0a281115, the queue's tail). Pile item 5's read
+  drafted: x-survival-cold v1 by path (23b6403f, one seat, no build; player-globals.md's D72 paragraph): the cold need forced to 990 for
+  a minute (health on the seat and the record, recorded: a drain or a cap picks D72's B or C), then to 1000 for the server's own kill
+  word (D51 B, never read), the seat down, the respawn, and one kill line only (a second is a death loop finding). Told numidium for a
+  lab gap. Two code maps dispatched for pile items 7 (containers' rest) and 8 (locks and lockpicking) on a worktree off parity
+  (m4-containers-rest); their verb docs follow the maps.
+- (00:26 PDT 2026-10-31) Pipelines 4116 (guest-loot v6 d10789f7, client build 15029) and 4117 (m3-wall-pose 7ac26664, server-only)
+  green beside 4115: v6's stage and the wall-pose stage have their builds. x-prop-launch v1 RED twice on its premise (071449, 071905;
+  numidium's read): the console's placeatme never reaches the engine under skymp5-client (consoleCommandsService's schema takes two
+  arguments, the count makes three, and a matched command goes to the server and returns false), so phase A's native basket was never
+  placed; x-survival-cold v1 ran in the gap meanwhile (its read pending). Fix: the lab driver gains `place-ref {base, count, x, y, z}`
+  (Papyrus PlaceAtMe by the player, the one way to a reference the server does not own; the world cleaner touches actors alone),
+  lab-api's CLIENT_ACTIONS names it, the bundle builds (webpack, 420 K); x-prop-launch v2 by path (ce95029f) places phase A's basket
+  with it; the step reaches the seats with main's driver at the next dist, so v2 runs at the physics branch's next stage, after v6
+  and wall-pose. A side finding from the same run: TalkService logs "E: nothing or no actor under the crosshair" for every e typed
+  into the open console (no console or menu guard on its E handler); a one-line client fix, its own small branch. The locks map
+  (pile item 8) is in: no lock state on the server, no XLOC in libespm, no KEYM record, the client strips every lock in dealWithRef,
+  Skyrim Platform's lockChanged carries the reference alone and nothing names a broken pick; docs/verbs/locks.md written from it.
+- (00:3x PDT 2026-10-31) Pile items 7 and 8 from their code maps. docs/verbs/locks.md written (no lock state on the server, no XLOC or
+  KEYM in libespm, the client strips every lock in dealWithRef, Skyrim Platform's lockChanged carries the reference alone; the design:
+  the state R0 on the record from the XLOC, a key in the record unlocks, the minigame's result reported R1 and bounded, a broken pick
+  costs a Lockpick, the console unlock undone; LockReport MsgType 63 and a lock prop on CreateActor; nothing built yet). Containers:
+  docs/verbs/containers.md written (memo D52's shared occupancy recorded with it) and the rest of the row built on fork
+  m4-containers-rest off parity dc3ec679: a put or a take from beyond the activation reach or another cell refused and the mover
+  resynced (E_CONTAINER_REACH, E_CONTAINER_CELL, the activation rule's distance); RequestReloot keeps the moment asked for (a restart's
+  remaining time stood a full window later before); a CONT saved open comes back shut at load; a disconnect releases the player's
+  containers (the chest shut for the others when it was the last: a disconnect neither destroys nor disables the actor, so D52's sinks
+  never fired); the watcher's lid plays the Open and Close animation events on the isOpen change (HYPOTHESIS until x-container-rest).
+  Four Containers cases in PartOne_ActivateTest; tsc green; the probe and the scenario follow the build. x-survival-cold v1 red on its
+  premise (the cold need falls about 200 a minute at lab-spawn; numidium's read: health full through a minute at stage 5, so the mod
+  drains nothing by stage), v2 1bb33d7e (25 s stage read, 1200 for the kill) for the next gap; D72 leans A with the cold kill proven by v2.
+- (00:4x PDT 2026-10-31) The third code map (pile items 9, 10, 11) in, and four verb docs drafted from the maps and UESP's formulas:
+  docs/verbs/leveling.md (item 12: a skill use reported from a hook on PlayerCharacter::AddSkillExperience, CommonLibSSE-NG's own
+  RELOCATION_ID 39413/40488 as the cited source; the AVSK constants and fSkillUseCurve 1.95, the level cost mult*(L-1)^1.95+offset, the
+  character threshold (L+3)*25; SkillUse MsgType 64; leveling.rs owed), docs/verbs/traps.md (item 9: a host's self-activation is noted
+  and runs nothing, a lever's door activation never leaves the host's game since the client sends a non-player caster only when it
+  equals the target, the vanilla scripts run on no server; the design: the host reports linked activations, the server runs the XAPR
+  children and relays, the door opens by the host's word; x-bleak-traps is the read), docs/verbs/weather.md (item 10: no weather sync or
+  CLMT/REGN/WTHR reader exists; SetWeather S2C, the pick seeded by the clock, Weather.forceActive on the client, `weatherSync`),
+  docs/verbs/word-wall.md (item 11: the shout record is written by the console alone, no WOOP reader, no server TeachWord; WordWall C2S,
+  the record written as the console writes it, the natives as ledger lines). The containers train m4-containers-rest db7ec1e5 pushed
+  (client build); its probe waits on Bleak Falls Temple's chest ids from the master file.
+- (00:5x PDT 2026-10-31) Guest-loot v6 GREEN (x-body-open-guest-fix v2 074043, cold): the engine takes the released body's activation
+  2.1 s after the AI switch (nine refusals, the tenth taken at +2127 ms; numidium's read); M3's exit gate runs on d10789f7 (14
+  scenarios, T2 beside). Containers: the branch gained the lab's log lines (a CONT's open or shut with its occupants, the disconnect's
+  release, the load's shut) and the lid plays only on a change of the applied state (a cell's load creates hundreds of closed
+  containers): m4-containers-rest d56d2be3; probe x-container-rest v1 69f2ad68 (Bleak Falls Temple's bandit chest 0x371e9, lab/esm.py
+  cellrefs). The traps read x-bleak-traps v1 a5335d63 (the plate 0x567f2 and wall 0x54b15, the pillars 0xaa8cb to 0xaa8cd, the lever
+  0x6a9e2, the portcullis 0x3b9f1; screenshots and counts, premises alone claimed). The talk service's console guard: fork
+  m3-talk-console-guard 9b796255 (client only), probe x-talk-console v1 b3156979. Leveling's T0 begun: wire-rules leveling.rs on fork
+  m5-leveling (the eighteen skills' AVSK constants from UESP's table, the use, the level cost whose convention the page's totals pin
+  (from L to L+1: mult * L^1.95 + offset), the character threshold, the progress state machine with its events and refusals).
+- (00:5x PDT 2026-10-31) Two rules to T0 on their own forks, server-only pushes: m5-leveling 2b9df509 (wire-rules leveling.rs: the
+  eighteen skills' AVSK constants from UESP, a use's experience, the level cost mult * L^1.95 + offset (the convention pinned by the
+  page's totals: 528,804 for a 2 and 0 skill from 15 to 100, 91,600 Smithing, 278,852 Enchanting, 142,401 Sneak, 428,568 Alchemy,
+  87,350 Pickpocket), the character threshold 75 + 25 N, Progress::apply_use with its events and refusals; eight cases) and m4-locks
+  (wire-rules locks.rs: the tier from the XLOC level byte, the key's open at the activation, a pick report judged by lock, reach, gap,
+  key tier and picks held, broken picks costing what is held; five cases). The docs' Status lines say "the rule alone". Memory:
+  thuum-pile-state-2026-10-31 carries every branch and probe sha of the night.
+- (00:5x PDT 2026-10-31) m5-leveling grows libespm's AVIF reader (the AVSK constants and the perk tree's nodes, UESP's record
+  layout; EspmTest reads One-handed 0x44c with the root to Armsman00 0xbabe4's node 7, Smithing 0x450 with eleven nodes, and a plain
+  actor value) and the rule's Table (the records' constants over UESP's fallback). The read against Skyrim.esm (lab/esm.py id):
+  Smithing's AVSK is 160, 0, 0.25, 300 where UESP's table writes a use mult of 1, so the records stay the source and the page the
+  fallback. Three server-only pushes on the branch (2b9df509, bb0b37d8, the table after).
+- (01:0x PDT 2026-10-31) Eli, on the Survival read: "knowing that about survival i say we deactivate survival for the rest of
+  testing." D72 taken as A with the switch off (DECISIONS): every lay puts 828 at 0 on both records, the start word neither switches
+  the mode on nor zeroes needs, the Creation stays in the load order, the checklist's build line says so; x-survival-cold v2 leaves
+  the queue. Told numidium (the set-up is its lever). Status given to Eli: the pile's state, M3's exit gate running, turbo 2 Sunday
+  evening as set.
+- (01:2x PDT 2026-10-31) Locks built whole on fork m4-locks (stacked on m5-leveling and m3-wall-pose for the message ids; c324c015
+  the contract, aec38c1a the server, the client after): libespm's XLOC and KEYM (Bleak Falls Temple's chests read 0, 25 and 0 from the
+  master file, so a level byte of 0 is a Novice lock and the rule's tiers follow the Creation Kit's values), the change form's lock,
+  the gate in ProcessActivateNormal (the key in the record opens, else LockPrompt to the player), OnLockReport through wire-rules
+  locks.rs, the console's Lock and Unlock (ranked admin, the client sends the game's own lock and unlock to the server), the Papyrus
+  natives Lock, IsLocked, GetLockLevel, SetLockLevel, GetKey (NATIVES.md rows, R0), the `locks` switch (default off; both deploy
+  settings set it true), and the client: dealWithRef applies the server's lock prop instead of stripping, LockService runs the
+  engine's own activation on the locked reference at the prompt and reports the attempt's end from lockChanged and the Lockpicking
+  Menu's close. A design fact found building: every door and container is activation-blocked in this game, so the engine's menu
+  opens only at the server's prompt (locks.md's Observe rewritten). The leveling server half landed the same way on m5-leveling
+  (553863f8 SkillUse 63, 167a4ccc the handler, 67adc699 the include): a reported use runs the formulas into the actor value record
+  with the AVIF constants loaded at AttachEspm, the record sent when a level moves, the `leveling` switch (default off). Three unit
+  files ride the pipelines (LevelingTest, LockTest, EspmTest's AVIF case); the probe x-lockpick and the client's skill-use hook are
+  next.
+- m3-guest-loot merged to fork parity d10789f7 (2026-10-31T08:31Z): the gate 20261031-074556-merge-m3-guest-loot, 20261031-074556-smoke-two-players to 20261031-082539-c-riverwood (14 runs, 14 green, no rerun); T2 skip on skymp-server:m3-guest-loot, its T2 run beside the gate green to 08:15Z (T2_LOG; the branch changes remoteServer.ts alone against parity, so the server under test is parity's tree); clones promoted (clean-m1-next to clean-m1 on both, restacked). Verbs: npc-fate, D71 (the guest's open of a released body): the server's open switches the body's AI on, retries the engine's activate every 200 ms (v6), and switches the AI off at the open or at the deadline. x-body-open-guest-fix v2 aba01c6f GREEN 20261031-074043 on the stage: nine refusals from +164 to +1904 ms, the tenth taken at +2127 ms, the ContainerMenu open 54 ms later and the closing activation at the close. The reds that led there: v2 and v4 stopped after the switch (045522, 045859; 053012, 053335), v5's single activate at 150 ms returned false (065444, 065821). M3's exit: c-dungeon-enemies green 075356 and b-npc-body-release green 075838 in the gate, both out of gate.yaml's pending here; the container-handler set (b-npc-loot, b-npc-death-report, m0-inventory, a-activation-reach, a-sleep) and the four watch items green.
+- (01:5x PDT 2026-10-31) M3 DONE at numidium's merge (above): PLAN's M3 header carries the date and a STATE line the chart. Ten days
+  from the start (2026-10-21 00:05 PDT). What stays dark or pending on the merged build is named there (props D68, Raise Wall's
+  copies D70 until m3-wall-pose merges, b-body-loot behind the D37 layer).
+- (01:5x PDT 2026-10-31) Stamps corrected. Every stamp I wrote between 00:21 and 01:35 PDT tonight ran ahead of the clock, by up to
+  seven hours at the end (a mental clock again; the 10-28 lesson in memory). Each was reread from the session transcript's own
+  timestamp of its first write and fixed in this commit: LOG's 00:58 to 00:21, 01:30 to 00:26, 02:1x to 00:3x, 02:5x to 00:4x,
+  03:3x and 03:5x and 04:3x to 00:5x, 04:5x to 01:0x (also DECISIONS D72, player-globals.md, the summary), 06:1x to 01:2x; the verb
+  headers containers.md 00:3x, leveling.md 00:3x, locks.md 00:2x, traps, weather and word-wall 00:4x; npc-fate.md and
+  player-globals.md's D72 lines. The probes handed over by path keep their header stamps so their shas stand; their true times:
+  x-survival-cold v1 00:20 and v2 00:29, x-prop-launch v2 00:25, x-container-rest and x-bleak-traps 00:45, x-talk-console 00:46,
+  x-lockpick 01:28, x-raise-wall v4 00:06 PDT. From here the clock is read before any stamp, in the same command as the write.
+- (01:5x PDT 2026-10-31) m3-wall-pose took parity d10789f7 as 1e836299 (pipeline 4145: the server half green, the client build queued
+  behind m4-locks' 4141 build on the Windows runner). numidium's first stage of it stopped in its rollbacks on purpose: REUSE_DIST
+  would have laid the older dist beside a locally built bundle, since the merge brought remoteServer.ts; the restage waits for 4145's
+  own client build, with x-raise-wall v4 960011fb. Parity's own pipeline 4142 (d10789f7) shows a red client build: the compile ran
+  and the artifact upload failed three times on GitLab's coordinator answering 500 at 08:39Z, so it is a retry, not a code red.
+- (01:5x PDT 2026-10-31) Leveling's two reds fixed (16b4d346, pipeline 4143 GREEN): LevelingTest and EspmTest asserted Smithing's use
+  mult 160 as Skyrim.esm writes it, where the load order's Update.esm overrides it to 1 (UESP's number): the load order is the
+  source, a single plugin's read is not the game's value (leveling.md corrected; memory lab-esm-reader). Then 1e836299 merged in as
+  e9c1521e (server-only push). The Frida read for the client hook is committed (thuum 30e3d365, pipeline 4146 green):
+  lab/frida/skill-use.js hooks PlayerCharacter::AddSkillExperience (Address Library 40488, CommonLibSSE-NG's RELOCATION_ID(39413,
+  40488), rcx this, edx the skill, xmm2 the experience) and, from the first call's `this`, the player's UseSkill through its vtable
+  slot 0xF7 (Actor.h:445); probe x-skill-use-read v1 f3cfb4df by path (one seat, an iron sword and a placed bandit under TGM, eight
+  attackStart swings through one repeat step; the trace is the read, the one claim a tautology). A rule 1 slip caught before the
+  commit: the first draft carried the PlayerCharacter singleton's RVA from memory (the id was not in CommonLib's headers either);
+  dropped for the lazy hook, which needs no singleton. esm.py's id prints hex beside every float in the same commit.
+- (01:5x PDT 2026-10-31) Locks: probe x-lockpick v1 e5014621 by path (two seats in Bleak Falls Temple at the bandit chest 0x371e9: A
+  the lock on both games and the Lockpicking Menu at c1's activation, B the Novice pick with A held and the server's unlock on c2's
+  game, C the console's Lock at 50 and a broken pick or an open, D a typed unlock recorded). m4-locks re-stacked on e9c1521e as
+  387e4537 (client build queued; 4141's server half was the old leveling red, its client build runs on as the compile check).
+- (01:5x PDT 2026-10-31) The queue's branches re-stacked on 1e836299 and pushed with client builds, in the lab's order: m3-quest-report-dedupe
+  4ca5783c, m4-containers-rest 0adb994e, m3-talk-console-guard 19431840; no conflicts. Each now contains the wall-pose head, so each
+  merges only after wall-pose does (numidium's queue holds that order); a wall-pose fix, if its read asks one, merges into them the
+  same way. Builds queued on the one Windows runner behind 4141 and 4145.
+- (02:2x PDT 2026-10-31) Weather BUILT WHOLE on fork m4-weather (stacked on m4-locks 387e4537 for MsgType 66; three commits: the
+  wire, the server half, the client; a client build), pile item 10. The design moved on a fact from the master file (lab/esm.py):
+  Tamriel's climate SkyrimClimate 0x812 lists ONE weather (SkyrimCloudy 0x12f89 at 100), so the climate is not the sky's source; the
+  forty weather regions are (REGN Weather*, each with WNAM and an RDWT list; WeatherTundra 0xc5858 has six, Sovngarde's one), and
+  libespm now reads REGN. One weather per worldspace, a pure function of the clock (slots of changeGameMinutes, a seeded draw that
+  never repeats the previous slot's weather, so the lab's two-entry pool alternates), nothing persisted (rule 6 by construction, as
+  the clock), told to each player for the place it stands in: a cut at login and at a place change, the engine's own blend on a
+  change stood through, a release (weather 0) in an interior. The `weatherSync` switch (default off) is ON in both deploy settings
+  with a lab pool of SkyrimClear 0x81a and SkyrimCloudy 0x12f89 over Tamriel at a slot of ten game minutes (30 s real), so the probe
+  sees a change; lab/tools/test-proto.sh pins T2 to one weather and a slot of a game day, and difftest's divergences.yaml declares
+  the one login word (t 66). Local greens: cargo test on wire-rules (six weather cases), wire-schema, wire-validate, wire-json,
+  wire-legacy and wire-bridge; clippy clean; the client's tsc; fork-lint after clang-format 21.1.8 on three files. T0 (WeatherTest,
+  EspmTest's REGN case) runs in the pipeline. Probe x-weather v1 by path (bd44bf04; legs A login words, B a blend within 45 s, C an
+  interior's release and the way out's cut, D a relaunch, E a restart recorded); the driver's `weather` step gained {read: true}
+  (current, outgoing, the blend's progress). docs/verbs/weather.md rewritten to the build (Known limits: one sky per worldspace where
+  TES3MP syncs per region); WIRE.md's SetWeather section. b-weather follows the read and a lab-api weather fact.
+- (03:1x PDT 2026-10-31) The skill-use read is CONFIRMED (x-skill-use-read v1 f3cfb4df, v2 a18406a9 solo, v3 the replacement; runs
+  092918, 093933, 094735 by numidium): the player's UseSkill (vtable slot 0xF7) and CommonLibSSE-NG's AddSkillExperience 40488 are
+  one function (RVA 0x736e20 on 1.6.1170), called once per LANDED hit with the player, the skill, the points and the source form;
+  the points are the weapon's base damage (7.0 for the iron sword, eight hits, 352.8 xp: the use mult 6.3 applied inside, after the
+  entry). v1 saw nothing (a connected game's cleaner took the locally placed bandit; v2 went solo), v2 read the float as null (an
+  attach's context has no XMM registers; v3 replaces the function with a NativeCallback of the header's signature). leveling.md's
+  Dynamic plan carries the read and the decision: the client hook is a Skyrim Platform native replacement at 40488 raising a
+  skillUse event, skillUseService batching into SkillUse 63 with the points as the amount. Built next.
+- (03:1x PDT 2026-10-31) Two reds on the stack found and fixed: m4-locks's server half had never compiled in CI (MpObjectReference.cpp
+  used the Rust bridge without its include; 4141 and 4148 were this, misread as the leveling red) and LockTest assumed a picker
+  created empty (ten Lockpicks on it; the counts are deltas from an emptied inventory now): e7e60452, pipeline 4157 green.
+  WeatherTest's release case named a game-file cell a core without the files cannot resolve (4158): a server-made cell id stands
+  in, e9952839. The parity-wide Windows red is OpenCppCoverage's instrumented run dying mid-test (not at exit) since the union
+  0e23c820, a memory bug under the debug heap; a reviewer agent reads the 780-line server diff between 6796e787 (green) and
+  7a6fd1e2 (red). GitLab's artifact store was full (59 GB of never-expired artifacts; core is expiring), which failed every client
+  build's upload since 08:39Z, so no new dist landed by either path tonight.
+- (03:1x PDT 2026-10-31) Perks BUILT WHOLE on fork m5-perks (stacked on m4-weather e9952839 for MsgTypes 67 and 68; three commits: the
+  wire, the server half, the client; a client build), pile item 13. The design from the records: a PERK's own conditions before its
+  first section carry the whole tree (Armsman20 0x79343 wants GetBaseActorValue(OneHanded) >= 20 and HasPerk(Armsman00); the ranks
+  chain by NNAM), so the server judges a pick as the Skills menu does, by those conditions (HasPerk, GetBaseActorValue, GetLevel; any
+  other function refuses, rule 5) and the points left (one a level past the first less the perks held). The record holds the perks;
+  the client reports the engine's pick at the menu's close and every 5 s (no perk event in Skyrim Platform), the server answers with
+  the whole set and points, a refused pick is removed by that answer; only tree perks (ActorValueInfo.getPerks) are ever touched.
+  Natives Actor.AddPerk, RemovePerk, HasPerk implemented (R0, NATIVES.md); the console's AddPerk, RemovePerk and SetLevel (the lab's
+  lever for points); the `perks` switch, default off, ON in both deploy settings. Local greens: cargo test (perks.rs five cases,
+  the console table, the wire crates, the bridge), clippy, the client's tsc, fork-lint. Probe x-perk-pick v1 5e0f733f by path (one
+  seat; the driver's add-perks stands in for the menu's pick, `known` reads a perk, `skills` reads the engine's perkPoints; legs A
+  to G on Armsman's ranks with the clean character's One-handed 20 and the server's SetLevel and SetActorValue). docs/verbs/perks.md,
+  WIRE.md's section, the T2 divergence for PerkState at login.
+- (03:2x PDT 2026-10-31) x-raise-wall v4 (960011fb) ran on 1e836299's own build (20261031-100519, -100936): shape A holds end to end
+  on the FIRST cast (the request, two reports accepted, two copies placed at the reported pose, the watcher's distances within 16
+  of the caster's, the removal after the linger, the caster's skip of the server's copy, nothing refused) and the SECOND cast
+  placed nothing: the caster's search (Game.findClosestReferenceOfType) met the first wall, still standing at the same point 29 s
+  later, and skipped it as reported, so a new wall beside it was never seen. Fixed on m3-wall-pose a08787b5 (client): the search
+  lists the cell's references of the base (Cell.getNumRefs and getNthRef) and takes the nearest, skipping a reported reference only
+  while it stands within 8 units of where it was reported. x-raise-wall v5 88877000 adds the caster's refs-near, a screenshot and
+  the set-1 lines right after the second release, ahead of the claim. numidium restages on a08787b5's build; the stack takes the
+  fix by merge after v5 reads green; the b-spell-placed-wall amendment follows.
+- (03:2x PDT 2026-10-31) Leveling's client half built on fork m5-leveling: Skyrim Platform replaces PlayerCharacter::UseSkill (game/Offsets.h
+  UseSkill, Address Library 40488, the one funnel the read found) through Gum, raising `skillUse` {skill, points, source} to JS on
+  the next tick and calling the original (nothing under the zeroed mults); Definitions.txt gains SkillUseEvent and skyrimPlatform.ts
+  is regenerated; skillUseService sums a second's uses per skill into SkillUse 63 (each skill once, the amount bounded). The
+  `leveling` switch turns ON in both deploy settings. Probe x-skill-use v1 549cec01 by path (two seats: c2 the target 120 units
+  north under god mode, twenty swings; One-handed 20 to 21 on the server and on the seat's base, the engine's xp 0, the level kept
+  across a relaunch; HYPOTHESIS read: the hook fires for a hit on a figure as it did on a local NPC).
+- (03:3x PDT 2026-10-31) The Windows coverage crash FOUND (a reviewer agent over the 780-line server diff 6796e787..7a6fd1e2, 48
+  min): WorldState::AttachEspmRecord (2f886731, finding 65) took the new MpActor's pointer before AddForm and marked it placed-dead
+  after; when the id was already attached, AddForm's insert dropped the duplicate and freed the form, and MarkPlacedDead wrote into
+  the freed actor. The duplicate attach is deterministic: LoadForm has no "already loaded" check, and the attach's own
+  ForceSubscriptionsUpdate chunk-loads the record's own square, re-entering LoadForm for it. Natively the writes land in freed
+  memory nobody reuses (silent); under the debugger heap OpenCppCoverage runs the binary with, the freed block reads 0xFEEEFEEE
+  and the store faults: every Windows run red since the union. Fix on fork m3-attach-uaf (off parity d10789f7, server-only push):
+  the mark through the map after AddForm, LoadForm's guard against a second attach, DestroyForm clearing the idx's unreliable
+  slot. Its GitHub Windows run is the proof; its merge is an R0 change (T0 and T2). A memory corrected on the way: GetPartOne()
+  builds a FRESH PartOne per call (unit/PartOne_ActivateTest.cpp:38-48), so the unit cases share the espm loader and static
+  locals, not a world; LockTest's ten Lockpicks were the fresh actor's own kit.
+- (03:3x PDT 2026-10-31) Lab grammar: the driver's `papyrus-log {minSelfId, maxSelfId, eventPattern?}` prints every Papyrus event the
+  engine sends to a script on those references (Skyrim Platform's sendPapyrusEvent hook: the self id and the event's name, no
+  arguments); `{stop: true}` removes it (YAML reads `on` and `off` as booleans, which a first cut tripped on). lab-api lists the
+  action. Probe x-word-wall-read v1 147f0ba8 by path (Bleak Falls Sanctum 0x371dd: the wall 0x709d1 and its trigger 0x709d2, the
+  block lifted, the logger on both, c1 walks into the trigger; `known` of WordFus 0x13e22 before and after, screenshots). Designs:
+  docs/verbs/vampirism.md (the ten race pairs, PlayerVampireQuest 0xeafd5, the globals, the abilities, the Vampire Lord later; the
+  condition as records the server has, the feed R1; after turbo 2) and docs/verbs/alchemy-enchanting.md (a memo: a brewed potion
+  and a custom enchantment are forms the engine invents on one seat and the inventory carries base ids with upstream's extras;
+  the call under the pass's rule is C now, local only and named in the checklist, with B, a template plugin, drafted as the
+  build). The deploy settings are rendered by lab/tools/layer-render.py now (the labapi test wants the renderer's form; my hand
+  insertions of the four switches passed through it unchanged).
+- (04:05 PDT 2026-10-31) x-raise-wall v5 (88877000) red twice on a08787b5's own build (20261031-104852 cold, -105243 relaunched), both at
+  the second cast with three "placed 1 form" lines, not four; the first cast held every claim, so shape A's four HYPOTHESIS tags are
+  cleared. The mechanism (numidium's read and mine agree): Apocalypse's script keeps the SAME two references across casts, disabled at
+  the first release (c1's listing 9 s after it: disabled true, deleted false, so the "Wait 5, Delete" of the script read never shows)
+  and re-enabled and raised again by the second cast, nothing new created (c1's listing 4 s into cast two: exactly cast one's ids at
+  206.25 and 196.875). a08787b5's reported-and-unmoved skip hid the re-enabled halo and caught the wall only once it had moved,
+  mid-rise 2.5 s after the request, reported unsettled at the deadline 29 to 33 units low. The fix, fork m3-wall-pose b36d93aa
+  (client and wire-rules, both remotes verified; its wire-bridge placements test still named the 3,000 ms window and went red in
+  CI, fixed at 0e4b34e5, the head numidium stages): eligibility is disabled-or-deleted and nothing else (a disabled reference is the
+  earlier cast's object; a re-enabled one is this cast's), the reported map is gone, and REPORT_WINDOW_MS is 6,000 (the second
+  cast's wall began its rise about 2.3 s after the request on both runs; a 3 s window less the 500 ms reply margin cannot settle it).
+  The verb doc carries the finding, row 74's observation and the window; the scenario's shape A amendment is drafted (the walk's line
+  re-derived from the band: c2 north of -250, the southmost north face a wall the server accepts can have being -216; an unblocked
+  walk ends at c1's capsule near -298) and commits on its own after the rerun reads. numidium restages the head with v5 unchanged.
+  Noted for the checklist: the caster's wall fades at the release while the other seat's copy lingers the table's 5 s.
+- (04:10 PDT 2026-10-31) m3-prop-physics carries parity d10789f7: a clean merge (remoteServer.ts, ActionListener.cpp, QuestStageTest.cpp
+  from parity), e6befc5e, tsc green, both remotes verified, its pipeline building. Its next stage runs the launch read x-prop-launch v2
+  (ce95029f) as the pass planned, after the leveling, locks, weather and perk probes; the physics item stays SKIPPED in the checklist
+  until the train merges (D68, D73). The wall stage sits on 0e4b34e5 waiting for its client build (numidium).
+- m3-attach-uaf merged to fork parity b289cbda (2026-10-31T11:24Z): R0 (ADR-053): T0 pipeline 4168 server-build 15213: 100% tests passed, 0 tests failed out of 13, no lab gate (the nightly is its T3); T2 skip on skymp-server:m3-attach-uaf, its T2 run beside the merge green to 11:24Z (T2_LOG); the Windows proof run 41193592558 green at 11:17Z (test_unit_coverage's two runs 509 of 509, "OpenCppCoverage exited with code 0"); clones not promoted. Verbs: none, a fix: WorldState::AttachEspmRecord's use-after-free (MarkPlacedDead wrote into the duplicate form AddForm had freed, when the record was already attached), the Windows coverage red on every branch since the union 0e23c820. The first merge through verb-merge's R0=1 path (main 00b924d1).
+- (04:24 PDT 2026-10-31) lab-api grammar: the weather fact. A `weather` step's answer (the driver's read: current, outgoing, transition)
+  is kept per seat by the board and read as `c.weather().current`, `.outgoing` and `.transition` (assertions.py's WeatherView, the
+  method tables, two unit tests; README and LAB.md), so b-weather can claim two seats' skies equal instead of counting console lines
+  (weather.md's "after the lab-api grammar gains a weather fact"). 964 lab tests green. The scenario follows x-weather's read.
+- (04:30 PDT 2026-10-31) parity is b289cbda (numidium's R0 merge of m3-attach-uaf at 11:24Z: T0 13/13, T2 green, the Windows proof
+  41193592558 green, no lab gate). The stack's shape from git: locks branched from leveling's server half (merge-base e9c1521e),
+  weather contains locks, perks contains weather, none carried the new parity. The cascade for the probes' client builds: m5-leveling
+  ef618dee into m4-locks (7a098d1c; the same three both-added conflicts in index.ts, messages.ts and anyMessage.ts, both sides kept),
+  locks into m4-weather (f7709626), weather into m5-perks (70f9e69b), each tsc green and on both remotes, their builds queued behind
+  the wall's 0e4b34e5 and physics' e6befc5e. Leveling stages at ef618dee (its own 4171 dist) for x-skill-use; parity merges into each
+  branch before its gate, one build each. With the locks merge, the server console's Lock takes a third argument, the key's base
+  form id (2d79199f: 0 clears it, a level alone keeps it; LockTest's console case through OnConsoleCommand), so the lab stands a key
+  lock on any reference (255 with RiverwoodAlvorHouseKey 0x36a3d, handed by AddItem), as checklist item 4 promised; locks.md says so.
+- (04:40 PDT 2026-10-31) perks' pipeline 4183 (70f9e69b) went red in its server-build at ConsoleCommandTest.cpp:265: the rank case
+  sends SetLevel as its listed-but-unserved command and perks serves SetLevel now (console.rs); the case names AdvSkill instead
+  (advancepcskill's alias, still unserved), m5-perks 1bd5abae. I first read the failing job as locks' (glab.py prints the newest
+  pipeline's jobs under the list) and suspected the shared CI tree again; locks' 4181 and weather's 4182 server-builds are green,
+  so no contamination this time. Scenario drafts for the five pending probes are written and probe-checked in the scratchpad
+  (p-level-up, b-lockpick with the key leg and the typed unlock under the lab's rank, b-weather on the new fact, b-perk-pick,
+  b-container-rest); each commits on its own after its probe reads.
+- (04:44 PDT 2026-10-31) x-raise-wall v5 (88877000) GREEN on m3-wall-pose 0e4b34e5's own build, run 20261031-113932 (59 steps, every
+  claim held): cast two re-uses cast one's two references at the same settled pose and both are reported 0.33 s and 1.2 s after the
+  request (cast one's cadence: the red runs' 2.3 s was the old skip's artifact; the 6 s window is headroom), four "placed 1 form"
+  lines, no unsettled line, c2's distances equal to c1's own copies', one runtime reference per base per seat, both sets removed at
+  their linger. c2's walk stopped at y -114 with the wall's centre at -160: the collision row reads blocked (the Havok body thinner
+  than the mesh's 104; recorded). Parity b289cbda merged into the branch locally during the run and pushed after it: e713862c is the
+  gate head (server-only, so the stage re-uses 0e4b34e5's dist). The b-spell-placed-wall amendment commits on its own next. The lab
+  moves to leveling ef618dee with x-skill-use 549cec01 (numidium).
+- (05:25 PDT 2026-10-31) x-skill-use v1 (549cec01) red twice on m5-leveling ef618dee's own build (20261031-115628 cold, -115955
+  relaunched), both at c2's teleport before any swing: 20 attempts in 60 s, the server's record at the target, the client's own
+  dump unmoved at (134203, -60537, 13486), 1,176 units under lab-spawn, the same point both runs; c1 landed in 3 s. Read: both
+  seats' platform logs are the same build (v2.9.0, the same hook-install lines; the UseSkill hook logs no install line, to add), no
+  message box noted, no skill uses at login, no wire refusal; c2's latent calls answered through the third ragdoll removal and then
+  stopped; the one timing difference from the green wall run is the move 11 s after c2's 3D load where the wall's came at about
+  20 s (Skyrim Platform blocks MoveRefrToPosition until 50 Papyrus updates after the generated save's load event). The "applied the
+  server's actor values" line missing on both seats is no bug: in a fresh world the server records each seat's own report and
+  sends the record back only when it holds server-set values (the wall run's c2 had a record from its earlier session). x-skill-use
+  v2 55b7d02a dropped the impossible "xp == 0 after swings" claim (the server writes the carry into the record and the seat applies
+  it); v3 4585b2a0 dumps and screenshots both seats before any move, waits 10 s more and moves c2 first. The reviewer agent's pass
+  over the five drafts and the wall amendment is folded in: b-lockpick's inventory counts as hex strings and a third branch for a
+  turn that neither picks nor breaks, b-container-rest's restart leg counting the run's lid lines before and after (x-container-rest
+  v2 5bb7dd5f the same), p-level-up on the clean character's 20 (the console's SetActorValue writes the base, not the leveling
+  standing; 20 to 21 then to 25 for the character's level 2; no xp claim after a swing), b-weather's equalities outgoing-aware
+  (two reads 1 to 3 s apart can straddle a 30 s slot).
+- (05:31 PDT 2026-10-31) b-spell-placed-wall v4 GREEN at the wall's gate (runset merge-m3-wall-pose 20261031-121742, run 122522 on
+  e713862c, 71 steps, every claim held; the walk: c2 stopped at -113.8, c1 132 units into its own copy from -365.9); un-pended in
+  lab/gate.yaml (the D70 entry of 10-30 said "un-pend with the caster-reported pose train, whose stage proves it"), spell-placed-object.md's
+  T3 box ticked. The mirror's Windows runs are red on every cascade head and on physics for the UAF fix they do not carry (test_unit
+  passes, test_unit_coverage dies with an access violation; parity b289cbda and the wall's e713862c pass): the parity merge before
+  each gate cures them, once, after the wall merges.
+- (05:38 PDT 2026-10-31) two of the pile's small ones (item 6): b-quest-stage-restart.yaml on main 7c9cc309 (quest-stage.md's named restart
+  scenario, the debt of 10-30: the stage set through the console and relayed, kept across a server restart through the journal's
+  change form, read by a relaunched seat at its login; to run once standalone before any quest-stage gate), and fork
+  m2-effect-conditions-row 027ffa28 off parity (R0: EffectConditionsHold's refusal line names the first row that fails on its own,
+  ConditionsEvaluator::FirstFailingRow, with an optional out-parameter EffectConditionsTest's Firebolt rider case reads;
+  server-only push). The leveling branch carries a local commit (6b1404d5, the UseSkill hook's install log line) that pushes with
+  its parity merge.
+- m3-wall-pose merged to fork parity e713862c (2026-10-31T12:51Z): the gate 20261031-121742-merge-m3-wall-pose, 20261031-121742-smoke-two-players to 20261031-124604-c-riverwood (9 runs, 8 of 8 green); T2 skip on skymp-server:m3-wall-pose, its T2 run beside the gate green (T2_LOG); clones promoted (the stage laid 0e4b34e5's build 15240 through REUSE_DIST, the gate head e713862c adding parity b289cbda's WorldState fix alone). Verbs: spell-placed-object, shape A (D74's handshake: the server asks the caster for a cast's bases, PlacedRequest 61, and places its copies at the poses the caster's game reports, PlacedReport 62; the caster's search skips only disabled or deleted references, since Raise Wall reuses its two references cast after cast, and a 6 s report window). x-raise-wall v5 88877000 green 20261031-113932 on 0e4b34e5 (four "placed 1 form" lines, both sets removed after the linger, no unsettled report); the reds before it: v4 on 1e836299 (100519, 100936: cast 2 found no wall, the closest-reference search), v5 on a08787b5 (104852, 105243: the reused references skipped by position). b-spell-placed-wall v4 (9e012045) green in the gate at 122522, out of gate.yaml's pending by thuum-cf's 70cf0629; spellPlacedObjects' Raise Wall entry restored in both deploy settings (75973d7f). Watch: b-npc-caster red at 124035 (step 57: c2's "cast end ... on puppet ... hand" count 0) and green on its relaunched rerun 124318, a finding by name.
+- (05:54 PDT 2026-10-31) m3-wall-pose MERGED to fork parity e713862c at 12:51Z (numidium's verb-merge: the gate run set
+  20261031-121742 green 8 of 8 in 9 runs, smoke, a-restart-persistence, b-duel, b-spell-placed-wall v4, b-npc-death,
+  b-npc-stream-voice, b-npc-caster red at 124035 and green on its relaunched rerun 124318 (step 57's puppet cast-end count 0, the
+  watch item's family), c-riverwood; T2 green beside; clones promoted to clean-m1). spell-placed-object.md: Status MERGED, T2 ticked,
+  the late joiner's sequence row green, the other rows open (rhythm, hands, interrupt, both seats, the relaunched caster). The
+  post-wall parity merged into five branches by the scratchpad's merge-parity.sh (clean merges, tsc green, both remotes):
+  m5-leveling b6748da0 (with 6b1404d5's install log), m4-locks 4b52cd12, m4-weather 7ff8acbf, m5-perks 5c4b3509, m3-prop-physics
+  2ad267fa; five client dists queue on sky-build, so the probes run on the prior dists (REUSE_DIST) and the gates on the new heads.
+  The lab takes leveling with x-skill-use v3 now.
+- (06:48 PDT 2026-10-31) x-lockpick v1 (e5014621) red at its first approach on m4-locks 4b52cd12's stage (20261031-134255,
+  E_RUN_APPROACH): lab-api's approach reads the target's position through the driver's npc-state, an actor-only read (namedNpc), so a
+  CONT has none; x-shared-chest approached an NPC. x-lockpick v2 d6958064 and x-container-rest v4 3817b193 (and the two drafts)
+  teleport to the spots approach would have computed, 90 and 110 units from the chest at (-3420, 732, 575) on each seat's line
+  from its landing spot, facing it. A grammar item for later: approach on any reference (an ObjectReference position read).
+  b-quest-stage-restart's first standalone run (125456 on parity e713862c): every restart claim held; one red on "no E_QUEST_ line",
+  which counted the designed E_QUEST_OWN_START login line per seat; v2 2d92004009d5 counts E_QUEST_(?!OWN_START), rerun owed.
+  m2-effect-conditions-row's first push (027ffa28) was red at T0 three times: two tests count the refusal's first clause, which I
+  had reworded, and PerkImpactStaggerPushFFAimed 0x153d3 lists an attack-state row (function 724) before its HasPerk; c97376f7 keeps
+  the clause and names every failing row after "failing:", the test reads HasPerk by containment.
+- (06:58 PDT 2026-10-31) x-lockpick v2 (d6958064) past the approach and red at leg A (20261031-134850 on m4-locks 4b52cd12's stage):
+  no "lock 371e9 applied: locked" on either seat and no [verb:locks] server line. Read: the setting is read (ScampServer's
+  worldState.locksEnabled), the chest's XLOC is Skyrim.esm's alone (no override in the 91 files), VisitProperties carries the lock
+  at creation, and the client's dealWithRef applies it SILENTLY; the "applied" line is applyModelLock's, written at a property
+  change only, so v2's leg A counted a line no creation writes (and the server logs at SetLock only, which nothing had called
+  yet). m4-locks 0fee1628 (TS only, overlay-eligible): dealWithRef logs "lock <id> set at creation: locked, level L, key K";
+  x-lockpick v3 daaee288 and b-lockpick's draft count that line at leg A. b-quest-stage-restart v2 GREEN standalone
+  (20261031-135330, numidium): quest-stage.md's row ticked, in dedupe's gate. The lab moves to leveling b6748da0 with x-skill-use v3.
+- (07:24 PDT 2026-10-31) x-skill-use v3 (4585b2a0) red the same way on b6748da0's own build (20261031-141639): c2's pre-move dump clean
+  (at the clean spot, HUD only, every control on), the fall the target's: (0, 120) is over lab-spawn's north edge, which docs/LAB.md's
+  summit note has said since 2026-10-01 ("(0, +150) and (200, 0) are over the north and east edges"); c2 landed, fell 1,176 units
+  under god mode and rested at the same spot every run, so the judge never saw it settle (numidium's read; the wall's frame met the
+  same edge at (0, 300) on 10-29). The post-load-block HYPOTHESIS is withdrawn and the leveling client cleared. v4 7db1a600 stands c2
+  at (0, -120) facing north and c1 at the origin facing south (p-level-up's draft the same). Lesson: read LAB.md's summit note before
+  placing a seat at lab-spawn; only the strip south of the origin along x = 0 stands.
+- (07:28 PDT 2026-10-31) x-weather v2 9f7c2cfd: c2 off the summit's east edge ((120, 0) was the probe's spot) onto the strip at (0, -120), the
+  draft the same; no other probe or draft stands north or east of lab-spawn's origin. m2-effect-conditions-row carries parity e713862c
+  as e0f9584f (verb-merge's R0 path refuses a branch behind parity; the diff against parity is the five server files), its Windows rerun
+  green (the first attempt's one red was BondTest.cpp:357's time-based invisibility check under the slow coverage pass); numidium runs
+  the R0 merge with T2 in a gap, no seats needed.
+- (07:52 PDT 2026-10-31) x-lockpick v3 (daaee288) on m4-locks 0fee1628 (20261031-144606): the creation line held on both seats, c1's
+  activation went to the server, the server refused it (E_ACTIVATE_LOCKED) and prompted c1, and c1's console threw "'Game.getFormEx'
+  can't be called in this context" 17 ms later (numidium's read): LockService.onPrompt ran its natives inside the network message
+  handler, which has no Papyrus VM context (the rule the teleport handler already follows). Three services of this weekend carried the
+  same shape: fixed on m4-locks 28910a3d (the prompt deferred to the next update), m5-perks d31944f4 (PerkState's apply) and m4-weather
+  b8ebfb13 (SetWeather's apply), each TypeScript only and overlay-eligible; spellPlacedService records its request without
+  natives and skillUseService has no message handler. x-lockpick stays v3.
+- (07:55 PDT 2026-10-31) m2-effect-conditions-row (e0f9584f; T0 green on 4214) folded into m5-perks as 445ae376 instead of its own R0
+  merge: an R0 fast-forward now would put the four cascade branches behind parity again, each needing another parity merge and
+  client build before its gate (numidium held its merge at the T2 wait on my note; its T2 ends and is kept). perks' gate carries the
+  row-naming; the branch stays for the record.
+- (08:16 PDT 2026-10-31) x-skill-use v4 (7db1a600) on m5-leveling b6748da0 (20261031-151047): both teleports landed (the south frame),
+  and the hook's HYPOTHESIS reads CONFIRMED on a figure: c1 sent twelve "skill uses sent: 6:7.0 (1 use(s))" for the server's twelve
+  OnWeaponHit lines of twenty swings (0 damage under god mode), no refusal; red only on the level, twelve hits being 529 xp of the
+  688 the step to 21 needs. v5 (f804a96c) swings thirty-six times and claims at least 21 and never 23 (the base read at least 21),
+  holding from a 45% landing rate to every swing landing; p-level-up's draft recomputed the same way (171 swings in all: skill at least 25,
+  never 28; character level 2, never 3).
+- (08:19 PDT 2026-10-31) x-skill-use v4's relaunched rerun GREEN (20261031-151449 on m5-leveling b6748da0, numidium): sixteen of twenty
+  swings landed, "skill 6 reaches level 21" once, the seat's base 21 with the carry 16.886 applied and kept across the relaunch; v5
+  (f804a96c, thirty-six swings) runs for the record. leveling.md: two HYPOTHESIS tags read (the mult's place from the solo trace, no
+  other caller of the entry), the withdrawn stall reworded, the probe and scenario lines current; p-level-up.yaml on main d9e02b7d
+  (its first run owed standalone before leveling's gate). Left as HYPOTHESIS: the pairing refusal E_SKILL_NO_ACTION's shape at T3,
+  the engine's own level-up prompt (p-level-up's leg 3 reads it).
+- (08:20 PDT 2026-10-31) leveling's order with numidium: after x-skill-use v5 for the record, p-level-up standalone on the laid stage
+  (deploy-srv from d9e02b7d), then verb-merge m5-leveling on the same stage with T2 beside it (named: p-level-up, a-actor-values,
+  b-figure-values, plus always and watch), locks after; a restage saved.
+- (08:24 PDT 2026-10-31) x-skill-use v5 (f804a96c, 20261031-151817) red on the landing premise: 13 of 36 swings landed, all in the
+  first 14 s, none after (numidium's read: each hit nudges the target back and after about a dozen it stands out of the sword's reach;
+  151047's 12 and 151449's 16 fit the same shape). v6 (244f93cb) moved c2 to 80 units; v7 (df00436b) swings in three batches of twelve
+  with c2 teleported back between them. p-level-up v2 (3aa0058a, c2 at 80) then v3 (e4647c46, batches of twelve with the re-teleport,
+  168 swings in all, the counts unchanged); its v1 run 152250 plays out as a record. More swings alone cannot make the count rate-proof.
+- (08:35 PDT 2026-10-31) p-level-up v3 (e4647c46) GREEN standalone (20261031-152612 on m5-leveling b6748da0, 90 steps): 168 of 168 batched
+  swings landed at 80 units, One-handed 21 at hit 16, 22 at 33, 25 at 94 with "reaches character level 2" the same tick, 27 at 145,
+  never 28 and never level 3; the seat read base 27 and level 2 after the relaunch and the restart (the carry 1,033 applied at
+  login), c2's record at 20 throughout. leveling.md: T3 ticked (standalone; the gate runs it again), both sequence rows green. The
+  leveling gate runs (run set 20261031-153419-merge-m5-leveling, ten scenarios: always, p-level-up, a-actor-values, b-figure-values,
+  watch) with T2 beside it; v1 (152250) stands as the 120-unit record.
+- m5-leveling merged to fork parity b6748da0 (2026-10-31T16:20Z): the gate 20261031-153419-merge-m5-leveling, 20261031-153419-smoke-two-players to 20261031-161343-c-riverwood (11 runs, 10 of 10 green); T2 skip on skymp-server:m5-leveling, its T2 run beside the gate green (T2_LOG); clones promoted (the stage on b6748da0's own build 15313). Verbs: leveling (the server half: the SkillUse 63 message, the formulas over the esm's AVSK records, the level and the character level in the actor-value record, the `leveling` switch; the client half: Skyrim Platform's replacement of PlayerCharacter::AddSkillExperience at Address Library 40488, one skillUse per landed hit, batched into SkillUse 63). The read: x-skill-use-read v3 20261031-094735 (points 7 a hit, 44.1 xp after the use mult). x-skill-use v4 green 20261031-151449 (One-handed 20 to 21, xp 16.886, kept across a relaunch); its reds were premises: the teleport target over the summit's north edge (115628, 115955, 141639), then the sword's reach edge at 120 units (151047: 12 hits; v5 151817: 13 of 36). p-level-up v3 (e4647c46: batches of twelve, c2 back at 80 units between them) green standalone 20261031-152612 and in the gate at 154211; its v1 (152250) red at the reach edge. Watch: c-riverwood red at 160943 (step 36: the seats' x for 0x13489 more than 256 apart) and green on its relaunched rerun 161343, a finding by name.
+- (09:22 PDT 2026-10-31) m5-leveling MERGED to fork parity b6748da0 at 16:20Z (numidium's verb-merge: run set 20261031-153419 green 10
+  of 10 in 11 runs, p-level-up 154211, a-actor-values 155000, b-figure-values 155252, c-riverwood red at 160943 on step 36's NPC
+  position (the two seats' x of 0x13489 apart by more than 256, c2 hosting; the watch item's family) and green relaunched at 161343;
+  T2 green beside; clones promoted). leveling.md's head says MERGED. The new parity merged into the rest (clean, tsc green, both
+  remotes): m4-locks 9ece63c2, m4-weather 6c9de3df, m5-perks afd12dae, m3-prop-physics f923e0a7; locks' probe runs on 28910a3d's
+  build if the stage pins it, its gate on 9ece63c2.
+- (09:26 PDT 2026-10-31) the gap-fillers carry parity b6748da0 too (clean merges, tsc green, both remotes): m3-quest-report-dedupe d0085bb0,
+  m4-containers-rest ae2cbfd6, m3-talk-console-guard 7be4eb41; their probes run on the builds numidium staged (dedupe 4ca5783c now,
+  x-quest-report-dedupe 0a281115), their gates on the new heads. verb-stage stages a branch's current head only, so locks' probe and
+  gate both run on 9ece63c2 once it builds.
+- (10:09 PDT 2026-10-31) x-lockpick v4 b5e2cc64 (probe-only, runs on m4-locks 9ece63c2's dist): v3 (164727) reached the Lockpicking
+  Menu on the prompt's deferral and the held A turned nothing the log sees (the sweet spot is the engine's random angle; the client
+  reports at the menu's close). v4 sets Lockpicking 100 on c1's record (console SetActorValue; the seat applies the base, its applied
+  line claimed), sweeps fourteen absolute pick angles (mouse dx -3000 to the arc's clamped left end, then 0 to 2,600 counts by 200, A
+  held 2 s each) before the "371e9 unlocked" until, teleports c1 back to its spot before the re-activation, and turns leg C's Adept
+  pick from the arc's left end. Sizes from Skyrim.esm (lab/esm.py find GMST on sky-srv): fSweetSpotVeryEasy 30, Easy 15, Average 7.5,
+  Hard 3.75, VeryHard 1.875 (degrees), fLockpickSkillSweetSpotMult 0.006 a skill point; fPartialPickVeryEasy 22 to VeryHard 6,
+  fLockpickSkillPartialPickBase 0.775, Mult 0.015; iXPRewardPickLock 20 to 60; no break-time setting in the esm (the exe's own). The
+  pick-to-mouse ratio in the menu is unknown (no export reads pickAngle), so the 200-count steps are sized for 5 to 14 counts a degree.
+  numidium told (weather's stage runs, hold to 18:26Z; locks' rerun and gate after). Found on the way: the console's SetAV on a skill
+  moves the record's base only (SetActorValueBaseByServer); the leveling progress entry keeps the login report's level and the next
+  use of that skill recomputes the base from it, so the base snaps back: leveling.md's open questions, a server fix candidate (the set
+  also writing the progress entry's level, with a T0), and the playtest's skill numbers go through the leveling path, not SetAV.
+- (10:20 PDT 2026-10-31) m5-skill-set (fork branch off parity b6748da0, server-only): a server set of a skill's base now moves the
+  leveling progress entry with it. wire-rules actor_values::skill_index (its test), the bridge's actor_values_skill_index,
+  WorldState::skillLevelCost installed by PartOne from the skill table, MpActor::SetActorValueBaseByServer writing the entry
+  (level = the value, xp 0, threshold = the table's cost; E_SKILL_SET_NO_COST when no table is installed, the base alone then);
+  T0: LevelingTest's set-then-use case (SetAV OneHanded 50, the next use 63 toward the step from 50, the base stays 50) and
+  ConsoleCommandTest's Marksman 45 progress check. cargo test --workspace green, clippy with CI's deny set clean, fork-lint
+  clean. leveling.md's Server and Tests rows and the open question's resolution; NATIVES.md's Actor.SetActorValue note. The
+  gate is ADR-053's R0 path (T0 from the server build, T2 beside) in numidium's queue after the pile's lab items.
+- (10:42 PDT 2026-10-31) x-weather v2 9f7c2cfd GREEN (20261031-171309 on m4-weather 6c9de3df's own build; an agent's read): both
+  seats hear the login cut and every slot's transition within the same second, the reads agree (current, outgoing, the blend's
+  progress within 0.01), the interior releases and the way out cuts late, the relaunched seat hears the sky at its login; the
+  restart leg reads the slot's pick (the lab's restart re-pins the hour, the slot rewinds, 12f89 both times at slot 192), so the
+  scenario claims agreement after a restart, not the same sky. Two of weather.md's three hypotheses CONFIRMED (the interior's
+  release, the blend's progress below 1); the cell change within the worldspace and the re-force of a settled drift were UNREAD
+  by the probe and are b-weather's legs 3b (c1 at Riverwood) and 3c (SkyrimOvercastRain 0xc821f forced on c1 by the driver's
+  weather step, the one re-apply counted). Finding: every login word applied twice (late, then word, 18 ms apart; a transition
+  on a due tick would be forced, not blended): fixed at m4-weather 79a74960 (TS only; the late apply waits one tick). b-weather
+  on main ca1a5f1d (its own commit): claims 1 to 5 outgoing-aware, the restart leg explained. numidium told: weather's new head,
+  the scenario to deploy before weather's gate (which follows locks' merge).
+- (10:43 PDT 2026-10-31) m5-skill-set a68d1b80: pipeline 4244 green (server-build with the two new T0 cases, wire-test, difftest-build); waits for
+  an R0 slot. PLAN's chart line for the afternoon written.
+- (11:03 PDT 2026-10-31) x-lockpick v4 b5e2cc64 RED (20261031-175103 on m4-locks 9ece63c2's own build 4233): every step to the sweep held
+  (the creation line, c1's applied actor values with Lockpicking 100, the prompt, the Lockpicking Menu open; screenshot 025 shows the
+  menu with "Lockpicking 100", "Lock Level: Novice", "Lockpicks Left: 15" and the hints "Mouse Rotate Pick", "A D Rotate Lock"), then
+  the until on "371e9 unlocked" stayed 0 after all fourteen attempts with nothing logged: the run cannot separate an input that never
+  drives the menu from angles that missed. Also seen: hold-key answers "holding" at once and the next move ran inside the hold's last
+  second (wait 1 against a 2,000 ms hold). v5 cc50b014: the instrument read first (screenshots after a 3,000-count move left, after
+  300 counts right, during a 3 s hold of A, 3 s after; the record's Lockpick count through server.inventory), then a fine sweep with A
+  (0 to 900 by 75) and a coarse one with D (0 to 2,600 by 200), each attempt waiting 2.5 s out of its hold, a screenshot and the count
+  before the until. Runs on a locks restage after x-prop-launch v2 (numidium; the physics stage had passed the point of no return).
+- (11:03 PDT 2026-10-31) m5-perks: the fork's Formatting check refused afd12dae at verb-stage's step 1b (ConditionsEvaluator.cpp 92 to 96, the
+  effect-conditions fold 445ae376); formatted with clang-format 21.1.8 and pushed server-only: 1f3d0adf (ConditionsEvaluator.cpp; my
+  `fork-lint | tail` hid a second FAIL on MpActor.cpp, so that head is still red), then a71a9ba7 (MpActor.cpp; fork-lint exit 0 read
+  without a pipe). a71a9ba7 stages with REUSE_DIST from afd12dae's dist, after physics, locks v5, dedupe, containers and the talk guard.
+- (11:37 PDT 2026-10-31) x-prop-launch v2 ce95029f RED at step 18 (20261031-181848 on m3-prop-physics f923e0a7's build; an agent's
+  read): place-ref worked (0xff0009c3 at the host's feet), the trace saw one standing-capsule contact on the resting native Dynamic
+  basket (layer 4, motion 2, massInv 0.2) and PropService's "not a tracked prop, no claim", then nothing; 15 s later cell 0xbbb1's MISC
+  list was empty and nothing deleted it (the cleaner is actors-only). The spot is 110 units from the cell's southern edge and
+  refs-near lists one cell, so the basket left the cell under the contact; the size is unmeasured (the tracer's 78304 "impulse body"
+  rows read args[1] as motion 32, not a body). v3 3c0da75f: the basket 60 units south of the host, ids: [0x12fe7] searches at 1200
+  on every read with the host's y recorded, RAW on. prop-physics.md's launch section has the read. Runs on the physics restage after
+  locks v6.
+- (11:46 PDT 2026-10-31) lab/frida/prop-launch.js fixed from the re-analyst's Ghidra read of 78304 (bhkCharProxyController's
+  ObjectInteractionCallback body: rcx the controller, rdx the hkpCharacterObjectInteractionEvent with the body at +0x30, r8 the result
+  whose objectImpulse vector it scales; the push lands in 62648 after it returns): the hook reads the body at rdx+0x30 and logs the
+  event's objectImpulse, dt, projectedVelocity and massInv with the result vector before and after; `player` tags the player's proxy
+  controller (vtable 240560). Ids 240560, 79133, 62648 resolved by `just addr`. prop-physics.md's launch section has the read; the
+  physics restage's deploy-srv carries the script for x-prop-launch v3.
+- (11:50 PDT 2026-10-31) x-lockpick v6 7b767004 RED at the unlock until (20261031-183903 on 9ece63c2; numidium's read of the
+  lockpick-trace.js jsonl, 44,686 rows): the runtime offsets confirmed (sweet 42.6, damage 90, break 3 s, partial 50.05 = 22 times
+  2.275), pickAngle and lockAngle 0 in every row through all 27 attempts: the lab's injected mouse and held keys never reach the
+  Lockpicking Menu. Locks leaves the lab queue (physics v3, dedupe, containers, the talk guard, perks first). lockpick-trace.js v2
+  (main): hooks on the menu's own input handlers (MenuEventHandler slots through VTABLE_LockpickingMenu[1], 215606) to name the
+  dropping layer, and the TURN lever (lockAngle ramped with the pick snapped) beside SNAP; x-lockpick v7 49e1db9f (one move, one hold,
+  one tap for the handlers, then the lever, the until within 15 s) for a short locks restage if the lab has room tonight; else the
+  pick is Eli's at the sitting and b-lockpick claims the key, console and sync legs.
+- (12:34 PDT 2026-10-31) x-prop-launch v3 3c0da75f (20261031-190643 on the physics branch's build; red only at phase B's c2 listing) READ:
+  the launch is one engine push (objectImpulse 17.7 N s at 4.29 m/s approach, the clutter factor 2, the body to 476 units a second =
+  impulse times its inverse mass 0.2) and then the summit's west flank (refs-near: 243 to 267 units a second with z dropping); nothing
+  of ours moves the body. The defect found: the server's dropped copy was created at the dropper (the create word carried the actor's
+  position; the 64-ahead move after never reached the client), spawned inside the capsule and was ejected at the first Havok step after
+  the menu closed (595 units a second); and the copy read "asleep" under the paused menu. Fixed at m3-prop-physics 967ba8c8 (fork-lint
+  exit 0, tsc 0): PapyrusObjectReference::PlaceAt as the one creation path, DropItem creating the copy at the drop point (DropItemTest
+  reads the create word's position), the stir clock held while Utility.isInMenuMode(). The prop probes re-frame next (a walk into the
+  basket, not a run); numidium holds the physics restage for their shas. prop-physics.md has the read.
+- (12:38 PDT 2026-10-31) physics after the fix: pipeline 4258 (967ba8c8) red on one assertion of my DropItemTest addition (the create
+  word's position sits under "transform"); fixed and pushed server-only as bdad3572 (the dist is 967ba8c8's, REUSE_DIST). The prop
+  probes re-framed for the fixed build: x-prop-push v14 94e5f296 (the host faces north so the drop lands at (0, -136) on the strip, the
+  watcher at (0, -10), a walk toggle (DIK 58) and a 1 s walk north through the basket, nudge bounds > 16 and < 200), x-prop-pass v12
+  fd4e047c (the same drop; the host watches from (0, -250), c2 walks south from (0, -56)), x-prop-grab v8 7689e959 and x-prop-drop v6
+  34853faa unchanged. numidium restages physics on bdad3572 when the build lands: push, pass, drop, grab, the gate after.
+- (12:38 PDT 2026-10-31) x-quest-report-dedupe v1 0a281115 RED on its premise (20261031-192813 on d0085bb0's build; numidium's read): no
+  engine burst came in 150 s, each seat reported the controller's stage 0 once, the dedupe had nothing to drop (HYPOTHESIS: x-quest-mode
+  v5's bursts depend on the cell or the clock at login). v2 c8558fbb forces the repeat: three set-stage of the controller's stage 0 on
+  c1 a second apart, the flush line claimed 8 s later beside c1's one reported line; c2's drop claim gone; the relay leg unchanged.
+- (12:58 PDT 2026-10-31) x-container-rest v4 3817b193 (20261031-195055 on m4-containers-rest ae2cbfd6's build; numidium's read and
+  the consoles): every server line of the verb (open with 1 occupant, E_CONTAINER_REACH at 789 against 524, shut with 0 and the
+  release by the disconnect, the open again, saved open came back shut at load), the watcher's lid Open within a second of each
+  open and its lid Close at the shut, the opener's own lid line; the one red was the probe's count (three lid Opens on c2 where the
+  second occupant's join changes no isOpen: two). v5 7fbc6645 counts two; b-container-rest on main 2a74212f (its own commit, the
+  count three for its three opens). containers.md: both HYPOTHESIS tags CONFIRMED. Recommended to numidium: the containers gate with
+  the scenario, no probe rerun.
+- (13:48 PDT 2026-10-31) physics on bdad3572 (numidium, each probe twice): drop v6 GREEN (202154); push v14, pass v12, grab v8 RED on the
+  same shape: the dropped basket landed clear of the capsule and rolled off the summit's strip (no "stream asleep", listed on neither
+  seat), the grabbed basket rolled down the marker's slope out of the follower's reach. Not the verb's path: a round body on a ridge.
+  The lab's prop becomes an IronIngot 0x5ace4 (a box that slides and stops): x-prop-push v15, x-prop-pass v13, x-prop-grab v9 (the
+  same steps and bounds, shas in the next LOG line's message to numidium); drop v6 needs no rerun. The containers restage and gate run
+  meanwhile (about 75 min); a physics restage (16 min) with the three probes after.
+- (13:56 PDT 2026-10-31) the basket runs' full read (numidium's agent): push and pass were the roll (the settle 1,050 units west, past the
+  cell's edge; refs_near lists one cell; an untracked prop sends its last sample asleep without the line); grab was a PICKUP: c2's E on
+  a body still Keyframed activated it into the inventory (the tick returned before D73's rest branch whenever no sample was pending
+  and the touch fallback was off; no "at rest: Dynamic" in any run). Fixed at m3-prop-physics 37e960eb (TS only: the tick wants the
+  reference when the rest or the quiet is due); the physics restage takes this head with REUSE_DIST from 967ba8c8's dist; grab v9
+  depends on it, push v15 and pass v13 do not.
+- (14:53 PDT 2026-10-31) the containers gate (ae2cbfd6) RED on c-riverwood alone, 10 of 11 green, b-container-rest GREEN at its first run
+  (210801), T2 green. c-riverwood red four times (213214, 213550, 214040, 214510), three at claim 2's walker position: c1's last read of
+  0x13489 is taken before its relaunch and c2's after the pass, about 21 s apart (result.json: t+133.8 s against t+154.5 s), and a resident
+  walking to work covers 330 to 531 units in that time; the same shape was red at leveling's gate (160943) and green only when the
+  resident stood. Not containers' client change (one getType per isOpen apply). The scenario's claim measured the walk: fixed on main
+  9ee15ee2 in its own commit (the walker's two position lines removed from claim 2; Alvor, standing, keeps the continuity claim; claim 1's
+  paired reads 0.3 s apart stay). For Eli's eye: a claim removed from the M3 exit's watch item, with the measurement above. The fourth
+  red (213550) was the restart leg's Alvor 266 off after 30 s, the watch item's known shape. Containers re-gates on the new scenario
+  after physics' stage on 37e960eb (numidium's call: that stage's watch set is the comparison without containers' code).
+- (14:55 PDT 2026-10-31) c-riverwood 37a35d33 (its own commit): the walker's handoff check returns as the server's record snapshotted at the
+  pass against c2's read in the same breath, within the measured 256 (a handoff teleport would show; the walk cannot fail it);
+  numidium's suggestion, taken as the snapshot. Physics' stage on 37e960eb runs; containers re-gates after it.
+- (15:32 PDT 2026-10-31) physics on 37e960eb (the ingot): pass v13 GREEN (220942), grab v9 GREEN (221404): the Keyframed-rest fix holds.
+  push v15 RED twice at the restart leg alone (220439, 221908): the push and its stream held, the server loaded the copy's record
+  (3 ChangeForms), but after the restart neither seat listed the ingot and c1's console shows no create word for it in the new
+  session (the old session's copy tracked at the first word, gone 0.3 s later at the view's reset); six "treat it as Actor"
+  warnings before the restart are the host's movement stream naming the prop's idx (a separate client bug, noted). The load path
+  reads right on paper (LoadChangeForm's ApplyChangeForm places the record through SetPos; SetUserActor re-pairs the actor), so the
+  restart is a T0 now: DropItemTest's case drops a copy, reloads both records into a fresh server in both orders, sets the user's
+  actor and requires the copy's create word (m3-prop-physics b3c66e5f, server-only). x-prop-push v16 8e8d9377 keeps the world
+  copies (world-diff) for the saved record's read. Physics stages again after the containers gate once the pipeline reads.
+- (16:05 PDT 2026-10-31) the six "Specified Form is ObjectReference, but we tried to treat it as Actor" warnings in the push runs were the
+  lab's own reads, not a client bug: lab/gamemode's labState ref read a prop's record through the actor properties inside a try (six
+  reads = b0, r1, r2, r4 and the assert's two server.ref evaluations); it now asks the form's type first (the API's "type") and reads
+  the actor fields for an actor alone; gamemode tests 23 of 23 (a plain reference's case added). The lab host is down for Eli's GPU
+  swap (the second GTX 1050 into sky-c2, the RTX back to fenestrate); the containers re-gate was 6 of 11 green when it went off and
+  reruns whole after core's converge; GitLab is unreachable meanwhile, so b3c66e5f's T0 waits too.
+- (16:43 PDT 2026-10-31) the lab is back (both seats on 4 GB GTX 1050s at 582.78; the containers re-gate running since 23:38Z). Push's
+  restart cause found in the server log: "Skipping FF item 2 (type is MISC)": PartOne::AttachSaveStorage skips 0xff item references at
+  the load, and MpActor::DropItem deletes a dropped copy after two minutes and trims the dropper's queue at ten (upstream's clutter
+  policies). D75 under ADR-058: dropped items persist as props by default, the three policies behind the server setting propsPersist
+  (false restores them); m3-prop-physics a2e77f3d (server-only; DropItemTest's restart case through a file save storage and
+  AttachSaveStorage in both settings; the LoadChangeForm-only T0 b3c66e5f had passed because it never met the skip). thuum main
+  6bffd168 pushed to GitLab once it answered. Physics stages on a2e77f3d after the containers gate with push v16 8e8d9377, pass v13,
+  grab v9; b-prop-push promoted from push's green read, the gate on the same stage.
+
+### 2026-11-01
+
+- m4-containers-rest merged to fork parity ae2cbfd6 (2026-11-01T00:44Z): the gate 20261031-234944-merge-m4-containers-rest, 20261031-234944-smoke-two-players to 20261101-003856-c-riverwood (16 runs, 11 of 11 green); T2 skip on skymp-server:m4-containers-rest, the T2 of ae2cbfd6 run beside the 21:00Z gate green (T2_LOG); clones promoted (the stage on ae2cbfd6's own build 15442; c2's clean-m1 already carried NVIDIA 582.78 from its 23:26Z promote). Verbs: containers, M4's shared chests, the rest (the lid's Open and Close on the watcher's screen for the server's isOpen, the second occupant, a take from beyond reach refused, the release by a disconnect, a chest saved open coming back shut at the load; b-container-rest's T3, green at 20261031-235959). The first gate on the two GTX 1050 seats at Gen3. Reruns: b-duel red 235424 (step 65, c2's health not under 0.78), green on its relaunch 235707; b-npc-stream-voice E_RUN_GAME_REPLACED 001625, green 002154; b-npc-caster E_RUN_GAME 002723, red 002824 (step 57, c2's cast end line missing), green 003131; c-riverwood red 003413 on the restart leg's Alvor record (the watch item's known shape), green 003856. c1's game crashed three times in 17 minutes at one new site (SkyrimSE.exe+02AD242, the terrain upgrade's texture path; 00:11Z, 00:17Z, 00:28Z), none on the same build before the hardware change: to core. Before this gate: 20261031-210003 red on c-riverwood's walker continuity (fixed in 9ee15ee2, then 37a35d33), and 20261031-224153 cut at 6 of 11 by the host's power-off for the second GTX 1050.
+- (17:48 PDT 2026-10-31) m4-containers-rest MERGED to fork parity ae2cbfd6 (00:44Z, numidium: the gate 20261031-234944-merge-m4-containers-rest
+  11 of 11 after four in-set reruns on the new cards, b-container-rest green at its first gate run 210801 and again, T2 cited; both
+  clones promoted). The parity pass (merge-parity.sh, every push server-only, tsc green): m3-prop-physics 71092a64, m3-talk-console-guard
+  c832bb1a, m5-perks 891d046f, m3-quest-report-dedupe 0319870f, m5-skill-set a8651603, m4-locks b0dde345, m4-weather 49a278c8. Locks,
+  weather and perks met one conflict each in skymp5-client/src/view/modelApplyUtils.ts (locks' applyModelLock against containers'
+  lidState fields at the same spot), kept both. Physics stages on 71092a64 (REUSE_DIST 15505 with the TS overlay): push v16, pass v13,
+  grab v9, the gate on the same stage once push reads green and b-prop-push is on main.
+- (18:03 PDT 2026-10-31) lab fault, not a verb's: since the card swap c1's game crashed three times in the containers gate at one engine site
+  (SkyrimSE.exe+02AD242, mov rax, [rcx], TESObjectLAND 0xA7B3, the Tamriel.4.28.-20 terrain texture, BGSQueuedTerrainUpgrade: the
+  terrain upgrade path, 30 to 45 s into the NPC runs); core found correctable PCIe errors on c1's link at Gen3 (8 GT/s), none on c2,
+  and caps the port to 5 GT/s live; numidium replays the gate's crash window (b-npc-loot, b-npc-death, b-npc-stream-voice,
+  b-npc-caster, c-riverwood) before physics restages on 71092a64 (about 40 min). An E_RUN_GAME on c1 in that window is the link.
+- (18:53 PDT 2026-10-31) backlog (apocrypha's side finding from the c1 terrain-crash read, docs/research/terrain-upgrade-crash.md on
+  apocrypha/terrain-crash-read 23654f1c): nine deployed plugins override Tamriel's WRLD 0x3C with Dragonborn's copy unchanged, and the
+  winner (mihailatmoranremains.esp, slot 39) reverts USSEP's regenerated max-height data (MHDT, USSEP #27167) in 28 cells (18 around
+  Castle Volkihar); flight and camera ceilings only, not the crash. Fix shape offered: a plugin-patch.py kind forward-subrecord copying
+  MHDT from USSEP's copy into that plugin's record (same size, no group resize). Eli's call; nothing built. The c1 crash itself: one
+  intermittent engine site (terrain upgrade, LAND 0xA7B3, LOD tile Tamriel.4.28.-20), the link ruled out (5 GT/s replay green 5 of 5,
+  correctable errors on both seats at either speed), apocrypha's lead.
+- (18:55 PDT 2026-10-31) x-prop-push v16 8e8d9377 GREEN (20261101-014442 on m3-prop-physics 71092a64, REUSE_DIST 15505 with the TS
+  overlay), the restart leg included: the restored ingot back on both seats (c1's five create words at the reconnect, "tracked, 51
+  units off", "simulated here: Dynamic"; the server's load 4 ChangeForms, no "Skipping FF item"): D75 holds in the lab. b-prop-push on
+  main d140ff89 (its own commit). pass v13 and grab v9 replay on the stage; the physics gate runs on it (b-prop-push,
+  b-spell-placed-wall, b-npc-copy-fate, m0-inventory, always, watch, T2 beside). The c1 crash question closed on the infra side (the
+  5 GT/s replay green 5 of 5; the link ruled out; apocrypha's lead).
+- (19:03 PDT 2026-10-31) physics' three probes on 71092a64: push v16 GREEN 014442, pass v13 GREEN 014937, grab v9 red at 015410 and GREEN on its
+  cold rerun 015841 (the red was the aim: c2's E activated the moonstone ore vein 0x10e6cb, ACTI MineOreMoonstone03_LFallForestRocks,
+  260 units past the ingot, which sat untouched 70 units away; a grab scenario would check the crosshair's reference before the E). The
+  physics gate runs on the stage (b-prop-push d140ff89, b-spell-placed-wall, b-npc-copy-fate, m0-inventory, always, watch; T2 beside,
+  about 60 min).
+- (19:08 PDT 2026-10-31) the c1 terrain-upgrade crash classified (apocrypha, docs/research/terrain-upgrade-crash.md on apocrypha/terrain-crash-read
+  773b8a5e): an engine null dereference in the terrain-overlay sweep (a queued terrain task's completion walks every loaded land and
+  writes the LOD diffuse into each quad's landscape material through children[0] with no null check, SkyrimSE.exe+02AD23F..248), all
+  three at about 14 s of process uptime, the initial load: a load-time race (the mechanism HYPOTHESIS, the code read confirmed). Not
+  content, not the GPU link. Two levers offered to numidium: classify by signature and retry once, or a lab-only null-check patch at the
+  site. The lab's process call; nothing in a verb or a layer manifest.
+- (19:11 PDT 2026-10-31) for Eli's list (apocrypha, docs/research/terrain-upgrade-crash.md 254946c9): whether the terrain-overlay race gets
+  fixed for every client. The lab's side is settled (lab-api reruns the fault and will name the signature; no lab-only engine patch since
+  the seats run the players' game). Options written up: A) upstream the site to Scrambled Bugs or po3's Tweaks (both in the layer; slow,
+  not ours to time); B) a thuum engine-fixes SKSE DLL (CommonLibSSE-NG from the submodule, runtime 1.6.1170 per ADR-022, one detour at
+  REL::ID(18789)+0x14A routing a null children[0] to the next quad, about forty lines, ESP-less, a home for later lab-found fixes; the
+  test a run set on c1 with no +02AD242 fault). Recommendation B in a quiet slot after the pass; no urgency, the crash is intermittent
+  at the load and the lab's rerun covers the lab. In the summary for Eli.
+- (19:39 PDT 2026-10-31) physics' first gate on 71092a64 (run set 20261101-020334): 9 of 9 played green (b-prop-push 021111 among them) and
+  stopped early by numidium because its T2 was RED on the prop-physics session alone: four undeclared lines, the drop's create word at
+  the dropper's position on the legacy server against the drop point on the branch (967ba8c8's own change: 64 ahead along the heading
+  of 72 degrees and 48 up, the harness's f32 133927.875, -61110.22265625, 14710). Declared on c1 and c2, matched on the base as the
+  session's rule wants: m3-prop-physics 6414dcd2 (the session file alone, server-only push; numidium's SESSIONS=tree run of my tree
+  proves it). Taken A over B (a gate rule change mid-merge): the new head restages with REUSE_DIST, no probes, the full gate with T2
+  beside, ending near 04:00Z.
+- m3-prop-physics merged to fork parity 6414dcd2 (2026-11-01T04:03Z): the gate 20261101-031523-merge-m3-prop-physics, 20261101-031523-smoke-two-players to 20261101-035753-c-riverwood (13 runs, 11 of 11 green); T2 skip on skymp-server:m3-prop-physics, its T2 of 6414dcd2 beside the gate green (T2_LOG; prop-physics identical with 18 declared divergences); clones promoted (the stage on 37e960eb's own build 15505 by REUSE_DIST, skymp5-client.js built here at 6414dcd2's tree over it). Verbs: prop physics, ADR-058 slice one (a clutter prop claimed by touch, simulated by its claimant and streamed to the cell's other seat until it sleeps; the drop's copy created at the drop point, 967ba8c8, D75; a resting body returned to Dynamic so a grab holds it, 37e960eb; props persisting across a restart by the propsPersist setting, a2e77f3d: the save's loader keeps 0xff item references and MpActor::DropItem neither trims the dropper's queue nor deletes the copy after two minutes; the drop point's create word declared in the prop-physics session, 6414dcd2). b-prop-push's T3 green at 20261101-032302 (from x-prop-push v16 014442). The probes on 71092a64: push v16 014442, pass v13 014937, grab v9 red at 015410 (the aim: c2's E on the moonstone vein 0x10e6cb, the ingot untouched) and green on its cold rerun 015841. Reruns in the gate: b-npc-stream-voice red 034301 (E_RUN_TELEPORT, c1 never settled, the old client fault), green 034749; b-npc-caster red 035312 (step 15, c1's aiEnabled for 0x13483), green 035512; no crash on either seat. Before it: the gate 20261101-020334 stopped at 9 of 9 green when its T2 read the drop point's create word undeclared.
+- (21:07 PDT 2026-10-31) m3-prop-physics MERGED to fork parity 6414dcd2 (04:03Z, numidium: the gate 20261101-031523-merge-m3-prop-physics
+  11 of 11, b-prop-push green at its first run 032302, T2 green with 18 declared divergences; two in-set reds the known shapes:
+  b-npc-stream-voice 034301 E_RUN_TELEPORT (the old client fault, the move waiting on forceRemoveRagdollFromWorld), b-npc-caster 035312
+  the watch item's AI-switch timing; both green relaunched; neither seat crashed; both clones promoted). prop-physics.md says MERGED,
+  T3 ticked. The parity pass (server-only pushes, tsc and fork-lint green): m3-talk-console-guard 9b6c3836, m3-quest-report-dedupe
+  d822d7c7, m5-perks 0cfbb82d, m4-weather bf231bc1, m4-locks 701d8b20, m5-skill-set ee7f60d4; perks, weather and locks each met one
+  ScampServer.cpp conflict (their settings reads against physics' propsPersist read), kept both. PLAN's chart line written.
+- m3-talk-console-guard merged to fork parity 9b6c3836 (2026-11-01T05:01Z): the gate 20261101-042722-merge-m3-talk-console-guard, 20261101-042722-smoke-two-players to 20261101-045525-c-riverwood (9 runs, 8 of 8 green); T2 skip on skymp-server:m3-talk-console-guard, its T2 of 9b6c3836 beside the gate green (T2_LOG); clones promoted (the stage on 7be4eb41's own build 15448 by REUSE_DIST, skymp5-client.js built here at 9b6c3836 over it). Verbs: the talk guard (talkService takes no E while the Console, an inventory, a container or the Dialogue Menu is open; an e typed into the console had counted as a talk and logged a decline per key). x-talk-console green at 20261101-042516 on the stage; b-npc-talk green at 043503. One rerun: b-npc-death red at 043813 on its restart leg (step 44, the body's record against its snapshot, the watch item's known shape), green 044225 relaunched.
+- (22:03 PDT 2026-10-31) m3-talk-console-guard MERGED to fork parity 9b6c3836 (05:01Z, numidium: x-talk-console green 042516, the gate
+  20261101-042722 8 of 8 with b-npc-talk green at 043503, b-npc-death red 043813 and green relaunched 044225 (read pending), T2 green,
+  both clones promoted). The parity pass (clean merges, tsc green, server-only pushes): m3-quest-report-dedupe 3d3d68df,
+  m5-perks 3c220465, m4-weather 1780c8a0, m4-locks 1746ca67, m5-skill-set 356444cf. Next in the lab: dedupe v2 c8558fbb on 3d3d68df,
+  perks' probe on 3c220465, weather's gate on 1780c8a0.
+- (22:26 PDT 2026-10-31) x-quest-report-dedupe v2 c8558fbb RED twice on 3d3d68df (051908, 052159; numidium's read): the three set-stage calls
+  of the controller's stage 0 fired one report, since the engine fires nothing for a set of the stage a quest already stands at; the
+  dedupe meanwhile dropped the engine's own repeat in every run, Dawnguard's DLC1NPCMentalModel (QUST 0x02002b6e) stage 0 at the login
+  and again about 30 s later, "repeated 1 times in 34 s; dropped" at connect + 40 s on both seats (also in v1's 192813, unread then); the
+  controller's second report at 31.6 s was reported, outside the 30 s window. v3 d42cd5e5 claims the engine's own repeat on both seats
+  and drops the forced sets; one run on the laid stage; b-quest-report-dedupe promoted on its green (the draft rebuilt). quest-stage.md
+  carries the reads.
+- (22:29 PDT 2026-10-31) x-quest-report-dedupe v3 d42cd5e5 GREEN (20261101-052612 on 3d3d68df: both seats reported DLC1NPCMentalModel's
+  stage 0 once and dropped its repeat inside the window; the controller's own-start count at its per-login shape; the relay crossed).
+  b-quest-report-dedupe on main 354c7fef (its own commit); the dedupe gate runs on the stage with it (always, watch, b-quest-stage,
+  b-quest-stage-restart, b-quest-rumor, b-quest-report-dedupe; T2 beside).
+- (23:03 PDT 2026-10-31) numidium's git read: m5-perks 3c220465 carried an OLDER locks and weather (the stack branched before the prompt
+  deferral 28910a3d, the creation line 0fee1628, the console key 2d79199f, the weather apply deferral b8ebfb13 and the double-apply fix
+  79a74960). Restacked: m4-locks 1746ca67 merged into m4-weather (f7a0de44, server-only), that weather into m5-perks (2e0c03c6, pushed
+  with its client build; git confirms 1746ca67, f7a0de44 and 9b6c3836 as ancestors); the one conflict each time ScampServer.cpp's
+  settings block with one side empty, the fuller kept. Since perks' merge brings locks and weather to parity, its gate carries all three:
+  b-perk-pick (on x-perk-pick's green), b-weather, b-locks, p-level-up, a-actor-values, b-figure-values, always, watch, T2 beside. b-locks
+  written and on main c8dbc382 (its own commit): the lab-drivable legs of the lockpick draft plus a console relock and the persistence of
+  a locked state; the pick is the verb's declared T4. Order (numidium): dedupe's verdict, parity into perks (server-only), one stage on
+  2e0c03c6's own build with the overlay for the probe and the gate.
+- (23:28 PDT 2026-10-31) dedupe's gate (20261101-052926) 10 of 11 green, the four quest scenarios and T2 among them; c-riverwood RED 4 of 5
+  on claim 3's restart leg: the walking resident 0x13489 (Gerdur) comes back 800 to 1,200 units from the snapshot taken just before the
+  restart (060020: x 21181 against 22082, y -43496 against -44705; 061000; 062052) while standing Alvor's record equals its snapshot to
+  the hundredth (once Alvor too, 80 and 106 off, 060512). numidium's read, taken: the restart restores the last SAVED record, not the
+  live one; a resident walking at the stop comes back where the save last caught her (the watch item's known shape, Alvor 266 off at
+  213550; red now because Gerdur walks at this hour). Player-visible: an NPC appears up to 1,200 units back on her path after a server
+  restart. B taken (the pending list, not a claim change): c-riverwood pended in lab/gate.yaml by name (995dc7c3, its own commit); dedupe
+  merges by GATE_SET=20261101-052926 (a red allowed on a pending scenario only, the head unchanged, T2 green), perks follows. The owed
+  fix, its own R0 branch: the server flushes its records on a graceful stop (skymp5-server/ts/index.ts handles no SIGTERM; a flush of the
+  save storage's pending upserts before the exit), then c-riverwood un-pends.
+- (23:34 PDT 2026-10-31) the flush-on-stop fix built: fork m3-save-flush-on-stop 34a40459 off parity 9b6c3836 (server-only push, fork-lint
+  exit 0): ChangeFormGuard tracks an edit the saving policy skipped, MpObjectReference::FlushUnsavedEdit requests it, WorldState::
+  FlushSaveStorage asks every form and drives the save storage until nothing is pending or in flight within a budget, PartOne::FlushSaves
+  logs it, ScampServer exports flushSaves, skymp5-server/ts/index.ts handles SIGTERM and SIGINT with a 5 s flush before the exit;
+  SaveStorageTest's new case (two movement samples, the drained storage holds the first until the flush, then the second). ADR-053's R0
+  path when the pipeline is green; c-riverwood un-pends after a gate on the merged base. cell-host.md's open questions carry the read.
+- m3-quest-report-dedupe merged to fork parity 3d3d68df (2026-11-01T06:38Z): the gate 20261101-052926-merge-m3-quest-report-dedupe (cited, ADR-042), 20261101-052926-smoke-two-players to 20261101-062052-c-riverwood (15 runs, 10 of 11 green, red only on c-riverwood, pending at the merge: ADR-042b); T2 skip on skymp-server:m3-quest-report-dedupe, its T2 of 3d3d68df beside the gate green (T2_LOG); clones promoted (the stage on d0085bb0's own build 15436 by REUSE_DIST, skymp5-client.js built here at 3d3d68df over it). Verbs: the quest report dedupe (questStageService.ts, client only: a seat drops its repeated report of one quest stage inside a 30 s window). x-quest-report-dedupe v2 red twice (051908, 052159: a set of the stage a quest already stands at fires no event), v3 green 052612 on the engine's own repeat (DLC1NPCMentalModel 0x02002b6e's stage 0 at the login and about 30 s later), promoted as b-quest-report-dedupe (green in the gate, 054447). c-riverwood red four of five on claim 3's restart leg (the walker 0x13489's record restored 800 to 1,200 units off its pre-restart snapshot) and pended by name (995dc7c3), out of watch while pending (7453e709: a scenario on both lists kept the cite's check 1 failing on 'not green last'); its fix is m3-save-flush-on-stop. The first cite refused on that, and the full gate it began (20261101-062916) was stopped after three greens.
+- (23:39 PDT 2026-11-01) m3-quest-report-dedupe MERGED to fork parity 3d3d68df (06:38Z, numidium: GATE_SET 20261101-052926 cited under
+  ADR-042 with the red on c-riverwood alone, pending at the merge, ADR-042b; T2 green; both clones promoted). The cite had first been
+  refused because c-riverwood sat on both the pending and the watch lists; numidium's 7453e709 takes it out of watch while pended
+  (it returns when the flush fix un-pends it); owed tooling: gate-cite's check 1 should skip a pending scenario's last run. The parity
+  pass (clean merges, tsc green, server-only pushes): m5-perks e2363ec2 (the stage on 2e0c03c6's own build with the overlay),
+  m4-weather 07f6b3d7, m4-locks fff5f581, m5-skill-set 464c0881, m3-save-flush-on-stop d47a7dca.
+- (00:20 PDT 2026-11-01) x-perk-pick RED twice on m5-perks e2363ec2 (20261101-065822, 070024: no "perk state:" line within 25 s of the login)
+  and READ: c1's console threw "Cannot read properties of undefined (reading 'prototype')" at PerkService's slot in the update order
+  (right after WeatherService's line) and every 5 s after, its tick. The platform's fault, not the verb's: Sp3Api stamps a native's
+  result with the return type's class name, VmProvider::MakeValueType named kObject alone, so every ARRAY a native returns was stamped
+  "" and sp3.js's wrapObject read sp[""].prototype; ActorValueInfo.getPerks is the one array call on the path (apply() runs it before
+  its log line), and no client code had consumed an array result before, so the fault was never seen. Fixed in the platform, one shape
+  for every array-returning native: MakeValueType names the element class for kObjectArray (CommonLib's TypeInfo::GetTypeInfo reads it
+  for arrays), wrapObject maps an array per element, a single object's path unchanged; m5-perks 2b8c7592 (fork-lint exit 0; a node
+  check of the wrapper on an object array, a primitive array, a single object, a null). sp3.js is a cmrc resource inside the DLL, so
+  the stage needs the full dist build (no REUSE_DIST); the probe 5e0f733f stands. The flush fix's CI red (pipeline 4344,
+  SaveStorageTest.cpp:287) was the test's premise: a created form's Init requests a save of its own (WorldState::AddForm's comment;
+  RequestSave copies the change form then), so both movement samples fell inside IsLocationSavingNeeded's 30 s and the drained storage
+  held the creation's position; the case now claims that, 0 then 200 after the flush (m3-save-flush-on-stop 028a036a, server-only
+  push; R0 when its ctest is green). Skill-set 464c0881 merges R0 first on numidium's word (its T2 running); perks takes that parity
+  as a server-only merge before its gate, the full build's dist staying valid through the overlay.
+- m5-skill-set merged to fork parity 464c0881 (2026-11-01T07:32Z): R0 (ADR-053): T0 pipeline 4343 server-build 15719: 100% tests passed, 0 tests failed out of 13, no lab gate (the nightly is its T3); T2 skip on skymp-server:m5-skill-set, its T2 of 464c0881 green (T2_LOG, zero undeclared differences); clones not promoted (no client change). Verbs: leveling's skill set (a68d1b80: a server set of a skill's base moves the progress entry with it, so a console or lab SetAV no longer snaps back under leveling; the playtest's SetAV caveat lifts).
+- (00:53 PDT 2026-11-01) perks' first stage on 2b8c7592 FAILED before its probe: c1 crashed twice at launch (CrashLogger 07:37Z, 07:39Z,
+  EXCEPTION_ACCESS_VIOLATION in SkyrimPlatformImpl.dll while a native's signature was described; c2 launched on the same dist). The
+  cause is the array fix's use of CommonLib's TypeInfo::GetTypeInfo for an object array: it masks 0xB off the raw type (the class
+  pointer with bit 0 set), which also clears the pointer's bit 3, so a class at an 8-aligned address is read at a wrong one; the heap
+  layout decides per process. Fixed by masking the one bit and skipping a raw type below kArraysEnd. In the same head, a review
+  agent's eight findings on the branch (a read before its first lab run): an accepted actor values report rebuilt the record without
+  its perks (kept now, R0); the pick read client-written skill numbers (with leveling on, the report's skills, xp, threshold, level,
+  legendary and the skills' bases stay out of the record; off, the seat's bounded report stands, R1, declared); PerkState left the
+  server with `perks` off (WorldState::perksEnabled, read in SendPerkState); OR-flagged conditions were ANDed (wire-rules Clause and
+  FLAG_OR, groups ANDed, a two-parent perk takes with either); E_PERK_NO_RECORD left the engine's pick standing (the state resent);
+  perks load sorted and unique; AddPerkByServer stops at the wire's cap (perks_max); the client reads each tree's owned ranks (18
+  natives a tick, not 500) and re-applies at a save's load ('loadGame'). T0 cases for each (PerkTest, ActorValuesTest, wire-rules).
+  m5-perks c7c42de0 (both remotes; cargo test and clippy green; fork-lint exit 0; tsc clean on the service), the full dist building;
+  numidium stages it with x-perk-pick 5e0f733f when green. Lesson kept: the scratchpad's node_modules (cast-wt, symlinked into every
+  worktree) was pruned at midnight by macOS's /tmp cleaning, so the local tsc ran through a fetched typescript with the implicit
+  type packages off.
+- (01:05 PDT 2026-11-01) D77 TAKEN by Eli ("those recommendations work"): the playtest moves to Monday night or Tuesday, and the extra day
+  builds, one at a time behind switches: A the perk effects in the server's damage formula (the weapon schools' damage ranks and the
+  armor schools' rating ranks, read from the perk records' entry points, perks.md's second half; a branch stacked on m5-perks), then
+  B the word wall as a verb (the wall's word into the shout record at the chant, relayed, kept across a restart), then C traps and
+  the puzzle door as verbs if the second day is there; D (alchemy and enchanting benches) stays a memo. The lay waits for Eli's word;
+  the sweep runs on the merged base as each train lands.
+- m3-save-flush-on-stop merged to fork parity d73de274 (2026-11-01T08:18Z): R0 (ADR-053): T0 pipeline 4351 server-build 15740: 100% tests passed, 0 tests failed out of 13, no lab gate (the nightly is its T3); T2 skip on skymp-server:m3-save-flush-on-stop, its T2 of d73de274 green (T2_LOG); clones not promoted. Verbs: the save flush at a stop (ChangeFormGuard marks an edit the saving policy skipped, IsLocationSavingNeeded saving a position every 30 s at most; WorldState::FlushSaveStorage requests every such edit and drives the storage until nothing is pending; skymp5-server/ts/index.ts flushes for up to 5 s on SIGTERM and SIGINT; SaveStorageTest's case claims the creation's 0 before the flush and 200 after). The fix behind c-riverwood's pend (claim 3's walker record restored 800 to 1,200 units off); c-riverwood un-pends after a gate plays it green on this base.
+- (01:35 PDT 2026-11-01) x-perk-pick GREEN on m5-perks 7cefcb62's stage (20261101-082532; c1 launched on the mask-fixed dist without a crash,
+  CONFIRMING the array fix's shape and the review's client half); b-perk-pick promoted on main e9436a15 in its own commit (the probe's
+  53 steps). The flush fix MERGED by R0 (parity d73de274, 08:18Z; T0 4351, T2 green); perks takes it: m5-perks 479099cd, the gate's
+  head (server-only merge, 4352's dist 15746 by REUSE_DIST). c-riverwood un-pended and back in watch (main 05bb3009); numidium's
+  chain: the restage of 479099cd, c-riverwood alone on the merged base (a red sends it back to pending with its read), then the gate
+  (b-perk-pick, b-weather, b-locks, p-level-up, a-actor-values, b-figure-values, always, watch, T2 beside). D77 A BUILT: fork
+  m5-perk-effects 39eeb1e5 off 479099cd (server-only push): libespm reads a PERK's sections (PRKE, DATA, PRKC, CTDA by tab, EPFT, EPFD),
+  the Rust perk table holds the effects and applies an entry point over the held perks (owner tab by the pick's judge, subject tab by
+  HasKeyword against the weapon's or the armor piece's keywords, OR groups, priority order, Set/Add/Multiply), WorldState::
+  applyPerkEntryPoint installed by PartOne, TES5DamageFormula asks it for kModAttackDamage 35 on the weapon damage and
+  kModArmorRating 85 on each worn piece's rating; T0 in wire-rules, EspmTest (Armsman00 and Juggernaut00's entries as Skyrim.esm
+  holds them) and TES5DamageFormulaTest (7 to 8.4 and 9.8, the bow untouched, Iron Gauntlets 10 to 12); CI's ctest is the oracle.
+  Tab semantics and the per-piece armor application stay HYPOTHESIS until x-perk-damage measures the ratio. The train stages after
+  perks merges (it stacks on it).
+- (01:50 PDT 2026-11-01) D77 A at T0 GREEN: m5-perk-effects 456090e1 (39eeb1e5's pipeline 4363 failed on a compile error, a helper declared
+  below its first caller in PartOne.cpp; 4365 passed its ctest: EspmTest reads Armsman00's and Juggernaut00's entries as decoded from
+  lab/esm.py's dump, TES5DamageFormulaTest multiplies 7 to 8.4 and 9.8 and leaves the bow, Iron Gauntlets' 10 to 12). Stage-ready
+  after perks merges (REUSE_DIST), probes x-perk-damage v1 5c2aac7b (five phases of six swings on c2 at Health 1000: 7, 8.4, 9.8 and
+  never 11.76, 9.6824 in iron gauntlets, 9.65888 under Juggernaut) and x-word-wall-read v1 147f0ba8 (D77 B's read, never run). The
+  word wall's server half starts on m4-word-wall off parity d73de274; its contract is WordWall {wall} alone (word-wall.md).
+- (01:13 PST 2026-11-01; the clocks fell back at 02:00 PDT to 01:00 PST, so the stamps above between 02:0x and 02:1x "PDT" and this one are
+  in order) c-riverwood alone on the merged base RED twice (084608 on claim 2, 085158 on claim 3), back in pending (numidium's
+  38e55037), the perks gate running without it since 08:59Z. The reads: claim 2's red was a PREMISE, not a fault: Gerdur 0x13489 had
+  walked through door 0x13423 into her house 0x133c7 seven seconds before the handoff, an unhosted interior with no 3D on c2, so no
+  promote was due (Alvor, outdoors, went live); the claim now reads her switch against her 3D on c2 (`aiEnabled == is3DLoaded`,
+  b-npc-handoff-night's form; main 20e78923, its own commit, numidium's eye on it). Claim 3's red (Alvor 68 units off the 64 bound
+  after the restart) and the missing flush line share one cause: the lab runs the server under uutils' stdbuf (the compose's
+  line-buffering wrapper), which spawns node as a child (PID 7) and dies on SIGTERM without forwarding it, so docker's stop killed
+  node outright and the flush-on-stop handler never ran; the merged flush was inert in the lab. Fixes: fork m3-log-flush 265eea9c
+  (spdlog's console sink flushes on every info line, so the wrapper has no job; pipeline green, R0 after the perks gate), thuum main
+  2154a021 (the compose runs node as PID 1; sky-srv keeps the old file until a verb-merge's deploy-srv, and the first `compose up`
+  after it is the perk-effects stage's, on an image carrying the flush), then c-riverwood alone on that base and the un-pend on green.
+  D77 B's server half BUILT: fork m4-word-wall f32fcebc off 479099cd (WordWall MsgType 69, wire id 77, SCHEMA_VERSION 27, `{wall}`
+  alone; the server resolves the reported trigger per report through its WordWallTriggerScript's myWord property, the reference's
+  over its base's, wants the player in the wall's cell within the activation reach, writes the word once into the shout record and
+  tells the seat as the console's TeachWord does, every refusal by name; natives Game.TeachWord, UnlockWord, IsWordUnlocked and
+  Actor.AddShout on the server VM, R0; WordWallTest, the wire tests, a difftest session refused from another cell). It stays off the
+  lab until its client half (the hook x-word-wall-read decides) exists: a 27 server completes no handshake with the 26 dist.
+- (01:43 PST 2026-11-01) The perks gate STOPPED at 09:30Z red three ways (numidium): T2 red in every session on the locks verb's lock prop in
+  the spawn chest 0xf321a's create word (the locks branch never ran its own T2; wire props.lock against legacy's empty props):
+  two COMMON declarations in order on m5-perks 3dafcff9 (the wire's locked word set aside, then the legacy's bare word found
+  alone; the harness consumes a declaration's matches before the next looks; 35 two-client sessions at 4, the one-client
+  activation-reach at 2, exactly the counts). b-weather 091049 red at step 52 for a cause of the client's (the read): the drift
+  watcher stayed quiet while any blend was in progress and the lab's forcing is a 24 s blend the next slot word absorbed, so
+  "re-applied" could never fire; the guard is gone on m5-perks 395cdc49 (a drift re-forces the word as a cut at the next tick;
+  the login's word no longer applies twice in a tick), TypeScript alone, the scenario untouched. The reruns died on E_RUN_CONNECT:
+  the seats booted from a pre-fallback snapshot inside the ambiguous hour and ran an hour behind, netcode's connect token
+  expiring (numidium; no lab run before 10:00Z). The restage after 10:00Z on 395cdc49, REUSE_DIST with the overlay.
+  The word wall's T0 (pipeline 4383) refused the Sanctum's trigger as no wall: its word property is `myWord01` on the reference's
+  own WordWallTriggerScript (the VMAD decoded on sky-srv through esm.py's record reader; the base's copy of the script carries the
+  five shared properties); fixed at m4-word-wall 841e4ccc. D77 C's server half BUILT: fork m4-traps 702567ba off the word wall
+  (RelayedActivation MsgType 70, SCHEMA_VERSION 28; OnLinkedActivation: the host's report of a non-actor caster accepted for a pair
+  the target's activation parents name, at most eight a second, recorded through Activate's own path and relayed to the target's
+  listeners but the reporter; TrapRelayTest on Bleak Falls' plate, wall, lever and portcullis; the lever carries no XLKR, the
+  portcullis's XAPR names it). Both client halves wait on the reads riding the perk-effects stage.
+- (01:58 PST 2026-11-01) Two T0 reads on the new halves. Word wall (pipeline 4391): the trigger's bounds are the chamber (WordWallTrigger's OBND a
+  box of about 4,000 units a side), so a report from 2,600 units was "within reach"; the reach is measured to the WALL the trigger
+  script names (wordWall01, bounds about 320 units) when loaded, else the trigger: m4-word-wall bdeb086e. Traps (pipeline 4392): the
+  relay, the host check, the unlinked refusal and the budget held; the lever's portcullis never read open because NorPortcullisLarge01
+  is an ACTI, not a DOOR (its rise is each engine's script on the relayed activation; the server keeps no open state for it, a known
+  limit for d-bleak-falls' restart leg): the test claims the relay with the lever as caster, m4-traps 333a1cdc with the word wall's
+  fixes merged. Perks restages on 395cdc49 (numidium); the seats' clocks are UTC for good.
+- (02:10 PST 2026-11-01) D77 B and C at T0 GREEN: m4-word-wall bdeb086e (pipeline 4403: WordWallTest teaches once from 100 units off the trigger,
+  refuses 2,150 off the wall, another cell, the wall itself and no reference; the wire tests, the fixtures, the difftest session) and
+  m4-traps 333a1cdc (pipeline 4404: TrapRelayTest relays the plate's wall and the lever's portcullis to the guest alone, refuses the
+  guest's report, an unlinked pair and the ninth in a second). Each carries its client first cut (the word wall hook on OnTriggerEnter,
+  the traps' widened host report and the relay's handler) under HYPOTHESIS tags until x-word-wall-read and x-bleak-traps read on the
+  perk-effects stage; each raises SCHEMA_VERSION (27, 28), so its own stage needs its own full dist. Drafts ready in the scratchpad:
+  b-perk-damage (from the probe), b-word-wall (server.actor(c).wordsKnown == "0x13e22", the record's own fact, b-shout's form).
+- (02:12 PST 2026-11-01) Word wall, a static pre-answer for its read: FridaHooks.cpp's OnSendEventEnter dispatches the JS sendPapyrusEvent hook before
+  it reads the Papyrus event block, so the client's OnTriggerEnter hook fires on a seat that blocks Papyrus events while the wall's
+  own script (chant, camera, TeachWord) stays blocked. The read confirms the event; the design question after it is whether the
+  wall's scripts are let through the block on the seat (the push verb's exception as the precedent) so the chant plays, or the word
+  arrives silently by the server's snippet (word-wall.md's Dynamic plan).
+- (02:39 PST 2026-11-01) The compose change 2154a021 (node as PID 1, stdbuf out) REVERTED on main (77a31b0f): the perks restage's deploy-srv pushed it
+  from the checkout and the `compose up` recreated the server with it on the perks image, which lacks m3-log-flush's flush_on, so
+  stdout went block-buffered and the gate read the damage (b-locks red three times at step 26 on a server line that came late, the
+  gate's T2 red on attributes-across-restart and activation-reach with the legacy-goes-quiet tail; b-weather GREEN at 102038, the
+  drift fix reads). numidium's A taken: the old compose redeployed, the server recreated, the perks gate rerun on 395cdc49's stage as
+  laid with a fresh T2; after perks merges, m3-log-flush's R0, then the compose change returns in a new commit. Lesson: a deploy
+  config change on main lands at the next deploy-srv whatever its comment says; one that pairs with a fork change waits for that
+  change to reach parity before it is committed.
+- (03:12 PST 2026-11-01) The perks gate rerun on the restored compose (395cdc49's stage as laid): T2 of 395cdc49 GREEN, every session identical,
+  so the earlier T2 reds were the buffering; smoke, restart, duel, b-perk-pick (104931) and b-weather (105309) GREEN (the drift fix
+  reads). b-locks RED three times at step 26 on the scenario's premise: the typed `371e9.unlock` reached the game's console, which
+  read 371e9 as a number in exponent form and answered "Script command not found", so the server never heard an unlock; steps 1 to
+  22 held (the lock refusal, the prompt, the Lockpicking Menu). Fixed in its own commit (58f981f2: 000371e9.unlock) and pended by
+  name (aab61823) so perks merges by GATE_SET on this set when the remaining six are green; b-locks un-pends on its next green run.
+- m5-perks merged to fork parity 395cdc49 (2026-11-01T11:44Z): the gate 20261101-104201-merge-m5-perks (cited, ADR-042), 20261101-104201-smoke-two-players to 20261101-113751-b-npc-caster (17 runs, 11 of 12 green, red only on b-locks, pending at the merge: ADR-042b); T2 skip on skymp-server:m5-perks, its T2 of 395cdc49 beside the gate green (T2_LOG); clones promoted (the stage on c7c42de0's own build 15746 by REUSE_DIST, skymp5-client.js built here at 395cdc49 over it; clean-m1 now carries the guests' RealTimeIsUniversal key). Verbs: perks, with locks and weather in the same train (perks was stacked on weather on locks; restacked on their current heads, 2e0c03c6). Perks: the pick, the points, PerkState (b-perk-pick green at 104931, from x-perk-pick 082532); the stage's crash on c1 at 2b8c7592 was CommonLib's TypeInfo mask (0xB off an object array's raw type), fixed at c7c42de0 with the review's eight fixes. Weather: the drift guard removed, a drift re-forced as a cut at the next tick (395cdc49; b-weather green at 105309). Locks: the lock at creation, the activation refused, the Lockpicking Menu (b-locks' legs held at step 22; its console unlock typed 371e9, which the game's console reads as a number, so b-locks pended by name at aab61823 and fixed at 58f981f2; un-pends on its next green); the spawn chest's lock prop declared common in the difftest (3dafcff9). Along the way: the 10:06Z gate was stopped after the restage deployed the PID 1 compose (2154a021) on an image without m3-log-flush (block-buffered logs; reverted at 77a31b0f), and the 08:58Z gate lost its reruns to the DST fallback's clock skew on the seats (fixed: UTC RTC plus RealTimeIsUniversal, core).
+- (03:47 PST 2026-11-01) PERKS MERGED to fork parity 395cdc49 with locks and weather (11:44Z, numidium: GATE_SET 20261101-104201 cited under
+  ADR-042b, red only on the pending b-locks; T2 green; clones promoted). The parity pass into the four D77 and R0 branches, clean
+  merges, server-only pushes: m3-log-flush 8de9ada5 (its T2 and R0 merge are numidium's), m5-perk-effects 5623da30 (server-only over
+  parity: its stage reuses the perks dist and runs x-perk-damage 5c2aac7b, x-word-wall-read 147f0ba8 and x-bleak-traps a5335d63, with
+  b-locks riding before the probes for its un-pend), m4-word-wall f458ebb9 and m4-traps 47ba30ae (traps carries the word wall's head;
+  each stages with its own full dist once its read settles the hook). merge-parity.sh now runs tsc through
+  node_modules/typescript/bin/tsc (npx's "tsc" resolved to a placeholder package) and skips it for a merge without client change.
+- m3-log-flush merged to fork parity 8de9ada5 (2026-11-01T12:24Z): R0 (ADR-053): T0 pipeline 4414 server-build 15987: 100% tests passed, 0 tests failed out of 13, no lab gate (the nightly is its T3); T2 skip on skymp-server:m3-log-flush, its T2 of 8de9ada5 green (T2_LOG); clones not promoted. Verbs: the log flush (ScampServer.cpp's GetLogger: spdlog's console sink flushes on every info line, so the server's log needs no stdbuf and survives a kill; the prerequisite for the PID 1 compose, which returns as its own commit now that every branch that merges 8de9ada5 carries the flush).
+- (04:29 PST 2026-11-01) LOG-FLUSH MERGED by R0 (parity 8de9ada5, 12:24Z, numidium). The parity pass: m5-perk-effects 27f5c0a4, m4-word-wall bb901be7,
+  m4-traps 16d29f6c (server-only pushes), and the node-as-PID-1 compose back on main (48c2209a), paired now with an image carrying
+  the flush. The perk-effects stage on 5623da30 ran its four first runs RED, none on the server halves: b-locks 121404 (the eight-digit
+  ref.command form is as unknown to the engine's console as the short one; the client's console intercept takes the reference as
+  its first ARGUMENT and reads it with parseInt, so the typed line is `unlock 0x371e9`, main 8dad4492, b-locks still pending for its
+  next run); x-perk-damage 121726 (the probe listed no `artifacts:`, so the run kept no log to read: v2 0743f648 lists server.log,
+  c1.log, c2.log, screenshots); x-word-wall-read 121858 (the driver's papyrus-log passed an explicit undefined event pattern as the
+  hook's fourth argument, "Invalid argument" to Skyrim Platform: main 0578bbe6 adds the hook with three arguments when no pattern
+  is asked for; the stage's build-driver rebuilds it); x-bleak-traps 122019 (E_RUN_APPROACH: `approach` reads npc-state and is
+  actor-only, so the pillar and the lever get teleports 120 and 100 units south of their records: v2 b7b49295). The restage on
+  27f5c0a4 with b-locks before the probes.
+- (04:59 PST 2026-11-01) The perk-effects restage on 27f5c0a4 (the flush, the PID 1 compose, the rebuilt driver) ran the four RED again, every cause
+  now in the logs and none in the server halves. b-locks 124231: `unlock 0x371e9` reached the engine's own console ("Unknown
+  variable '0x371e9' for parameter Integer (Optional)"): the engine parses a typed command's arguments by ITS signature before the
+  client's intercept runs, and the engine's unlock takes no reference (it acts on the console's selected one), so a typed `unlock
+  <ref>` can never reach the server; the scenario unlocks through the server-console step (main 78c9ecc4, b-locks still pending),
+  and the typed path is a finding for the locks verb: `prid <ref>` then the bare command, with the intercept reading the console's
+  selected reference (Game.getCurrentConsoleRef) when no argument is typed. The seats' "command set was null in
+  setupServerOnlyCommands" line is the engine's `set` command alone, not the intercept's setup. x-perk-damage 124543: seven hits
+  landed at 6.4960003, the bare 7 under the armor penalty of the FULL IRON SET both seats log in wearing (c2's console: addItemEx
+  12e46, 12e49, 12e4b, 12e4d; rating 60, penalty 0.928): v3 f97d8803 claims 6.496, 7.795, 9.094 (never 10.91) and 8.953 with
+  Juggernaut over the whole set, the gauntlets phase gone. x-word-wall-read 124714: still "Invalid argument" with the driver at
+  0578bbe6, because Skyrim Platform's Handler takes `enter` AND `leave` as functions (Handler.cpp) and papyrus-log's handler had
+  `enter` alone: main 0844cbef. x-bleak-traps 124836: E_ACTIVATE_REACH "from 6246 units": v2's computed spot 120 units south of the
+  pillar's record was the void, c2 fell to z -7021 and the server teleported it back six times; v3 7858eaaa moves nobody, the v1
+  standing spots being 256 units from the pillar and 390 from the lever, inside the reach. All four rerun on the laid stage.
+
+- 05:08 PST 2026-11-01 (thuum-magnus): the locks typed-console follow-up needs no client change. Skyrim Platform's replaced console command
+  already receives the console's SELECTED reference as its first argument (ConsoleApi.cpp ConsoleComand_Execute pushes thisObj's
+  form id, 0 with none, before the typed parameters, each converted against the engine's own parameter list), so the typed form of
+  a server lock command is the engine's own: `prid 000371e9` then the bare `unlock` reaches consoleCommandsService as [0x371e9]
+  and `lock 50` as [0x371e9, 50]; what can never work is a reference typed as an argument (the engine's Unlock takes an optional
+  Integer, b-locks 124231). The earlier note's "intercept reading Game.getCurrentConsoleRef" is withdrawn: thisObj is that read.
+  Probe x-locks-typed v1 49de0098 (lab/.cache/probes; no code under test, the stage's m5-perks dist carries the locks client) claims
+  the unlock and the level-50 lock on both seats and reads what a bare `lock` does; handed to numidium to run after the four reruns
+  under the same hold. locks.md's engine-surface sentence corrected (the console pair IS intercepted since m4-locks) and the typed
+  form recorded there. On green, b-locks' claim 2 returns to the typed path in its own commit once the scenario un-pends.
+
+- 05:28 PST 2026-11-01 (thuum-magnus): the perk-effects restage's five runs (27f5c0a4, driver 0844cbef). x-perk-damage v3 131600 GREEN: six of six
+  hits at every number (6.496 bare under the iron set, 7.795 Armsman, 9.094 Armsman 20 with no 10.91, 8.953 Juggernaut on the target):
+  the perk records' effects are in the server's damage formula at T3; b-perk-damage promoted from it (main dd5ea0d9, its own commit),
+  the gate named to numidium (verb-merge m5-perk-effects b-perk-pick b-perk-damage). x-word-wall-read 131832: the trigger 0x709d2 gets
+  `OnTrigger` twice every half second while the seat stands in its box and nothing else (no OnTriggerEnter: the spot 400 units south
+  of the centre is inside the 4,000-unit primitive, so the entry preceded the logger), so the hook keys on OnTrigger with a per-wall
+  once; the word stayed unknown with the block lifted because WordWallTrigger02Script's Listening state is entered in OnLoad, which
+  the block swallowed at the cell's load (word-wall.md's Dynamic section; the chant decided for option one, the scripts admitted by
+  name, HYPOTHESIS until a layer probe). x-bleak-traps v3 132023: nothing runs anywhere (the plate, the pillar, the lever: no line on
+  any seat or the server beyond the sender's "Sent activation", every activate false): every trap and puzzle piece is a Papyrus script
+  (the pex read, traps.md) behind two blocks, BlockActivation on every ACTI and the Papyrus event block; the traps rows' "the host's
+  engine fires it" is falsified until the host runs those scripts; an ADR follows (world scripts on the cell's host). x-locks-typed
+  132414 GREEN (numidium): `prid 000371e9` then the bare `unlock` and `lock 50` reach the server through the intercept; b-locks'
+  claim 2 may return to the typed path after its un-pend. b-locks 131237 RED at step 30: after the server's unlock and c1's applied
+  line, c1's activation of the chest opened no ContainerMenu although the server opened the chest ("371e9 open with 1 occupant(s)")
+  and remoteServer's handler ran its activate; the engine refused the activation (false twice; nothing to the run's end). Two
+  readings, x-locks-open v1 a7645a8a handed to numidium: the lab's close-menu of the Lockpicking Menu (a kHide, not the menu's exit)
+  leaving the chest refused, or the lock path itself (c2, which never opened the minigame, activates after the unlock).
+
+- 05:43 PST 2026-11-01 (thuum-magnus): x-locks-open v1 (20261101-132837, green as a read) tells b-locks' red apart: the lab's close of the Lockpicking
+  Menu is clean (c1's second activation reopened the minigame, "the Lockpicking Menu is open" twice), and c2, which never opened it,
+  got no ContainerMenu either after the server's unlock: the server opened the chest ("371e9 open with 1 occupant(s)"), c2's handler
+  played the lid, took the inventory and gave up after 15 s ("gave up waiting for 'ContainerMenu open'"), c1's did the same at the end.
+  So the engine refuses the chest's activation once a lock has been set and lifted on it (setLockLevel 0 then lock false at creation
+  and at the apply), while the same chest with no lock prop opened on the same handler path the night before (b-container-rest
+  20261031-235959 green, the same three console lines in the same order). CommonLibSSE-NG shows nothing that would refuse it
+  (TESObjectREFR::IsLocked is GetLockLevel() != kUnlocked, REFR_LOCK::GetLockLevel returns kUnlocked unless the kLocked flag is set,
+  src/RE/E/ExtraLock.cpp:5-14, src/RE/T/TESObjectREFR.cpp:441-445, :714-717), so the engine's own facts are the next read: x-locks-open
+  v2 9659db08 types prid, GetLocked and GetLockLevel on the chest before and after the unlock (the console step's match collects the
+  ">>" replies) and tries the engine's console `activate` on the selected chest, a path with no Skyrim Platform call. Rule 8: no
+  guess at the engine's lock branch until it reads; a Frida read of the activation's return path follows a blank v2.
+- 05:43 PST 2026-11-01 (thuum-magnus): m4-word-wall e1b4288f (server-only push, CLIENT_BUILD_WINDOWS=0; its dist is c31208c0's client build): a
+  report from inside the trigger's primitive is accepted (the engine's own OnTrigger condition), the activation reach of the wall only
+  outside it; libespm reads XPRM's shape (type at byte 28: 1 box, 2 sphere, 3 portal box) and MpObjectReference judges a sphere trigger
+  by its radius (a rotated box of the sphere's extents reaches 2,920 on its diagonals where the engine's sphere fires at 2,065, so the
+  unit test's afar case at 2,400 would have passed a box). WordWallTest gains the inside-the-sphere-far-from-the-wall case. The
+  stage's probe: x-word-wall v1 (b-word-wall's draft by path, the empty-record claim moved before the teleport into the sphere, c2
+  parked in the Temple above until its leg). ADR-059 written (main c38a7add): world scripts run on the cell's host, the admitted list
+  gains names and a hosted-cell gate; the traps' remaining work is its slices.
+
+- 05:49 PST 2026-11-01 (thuum-magnus): ADR-059 slice 1, the read's enablers. papyrus-map.py reads a fourth tsv column that names the classes a
+  row admits (main afa69250, two tests); the layer branch layer-world-scripts 20877978 carries Skyrim.esm's named rows (the word wall's
+  three trigger scripts; Bleak Falls Temple's twelve trap and puzzle classes), never the plugin whole; fork m4-traps 20b1da65 (the word
+  wall's e1b4288f merged in) keeps the engine's activation on bases the client settings name (activationUnblockedBases, a list or a
+  hex string, default none). x-bleak-traps v4 6fc6748f sets the key on both seats at a relaunch and reads legs A to E (traps.md's Dynamic
+  plan). It needs the layer staged (the clones' papyrus-scripts.txt) under the m4-traps dist: numidium's sequence after the word
+  wall's stage. The driver's activate step prints false whether or not a menu opens (b-container-rest 235959's four), so that bool
+  reads nothing.
+
+- 05:53 PST 2026-11-01 (thuum-magnus): x-word-wall-chant v1 7babc547 written for the layer stage (word-wall.md's chant call): the show on screen,
+  the trigger's events with the scripts admitted, the server's one learn line, MS13 0x39645's stage 60 through the quest-stage verb.
+  m4-traps 20b1da65 carries the word wall verb (e1b4288f merged), so numidium may run x-word-wall 319db6c0 on the traps stage too.
+  Eli's checklist (items 3, 4, 9, 10) and the weekend summary carry the morning's state, including the open chest red.
+
+- 05:58 PST 2026-11-01 (thuum-magnus): m4-traps dc881a11 (server-only push): ADR-059 decision 2's links from script properties (the puzzle
+  lever's refActOn* and puzzleDoorActivator read from the VMAD into the activation table at init) and the caster by id (a STAT
+  marker the loader skips, named by the portcullis's activation parents, relays by its id; a never-loaded target stays
+  E_TRAP_NO_REF by design); TrapRelayTest's puzzle room case. x-bleak-traps v4 re-stamped 343f06bc (leg E now expects the darts
+  relayed, the marker target refused, the portcullis relayed with the marker as its caster). The traps stage should take dc881a11
+  once its T0 is green, with 20b1da65's dist (the client is unchanged since).
+- m5-perk-effects merged to fork parity 27f5c0a4 (2026-11-01T14:04Z): the gate 20261101-133134-merge-m5-perk-effects, 20261101-133134-smoke-two-players to 20261101-140020-b-npc-caster (10 runs, 8 of 8 green); T2 skip on skymp-server:m5-perk-effects, its T2 of 27f5c0a4 beside the gate green (T2_LOG); clones not promoted (no client change; the stage on 456090e1's GitHub build 41289964191 by REUSE_DIST with the weather TS overlay). Verbs: perk effects, D77 A (the perk records' entry points in the server's damage formula: Armsman and Juggernaut read from the esm; b-perk-damage green at 134214, from x-perk-damage v3 131600: the bare hit 6.496 against the target's iron set, 7.795 and 9.094 with Armsman, 8.953 with Juggernaut). Reruns: b-npc-caster red twice with relaunched seats (135504, 135746), green on a cold rollback 140020 (relaunch-carried state the suspect, ADR-036, a finding). The stage also read x-word-wall-read and x-bleak-traps v3 (green, D77 B and C), x-locks-typed (green: the typed lock commands reach the server through the console's selected reference) and x-locks-open v1 (the lock path leaves the engine refusing a chest whose lock was set and lifted; b-locks stays pending).
+
+- 06:07 PST 2026-11-01 (thuum-magnus): perk-effects MERGED by numidium (fork parity 27f5c0a4, gate 8 of 8; b-npc-caster red twice on relaunched
+  seats and green cold, ADR-036's relaunch-carried state the suspect). ADR-059 decision 1's platform half pushed on fork
+  m4-world-scripts-host 80616308 (off m4-traps dc881a11; a client build): host-scoped admitted rows, the hosted-cell set behind
+  TESModPlatform.SetCellHosted, hostService's calls at grant, release, clear and restore; papyrus-map's scope=host column on main
+  bf0296d9 writes the marker; the layer's traps row stays everywhere for v4's read. layer-world-scripts merged with main (a76e3653)
+  for layer-stage's tree check, at numidium's ask.
+
+- 06:13 PST 2026-11-01 (thuum-magnus): x-locks-open v2 (20261101-140443, green as a read) names the chest red's cause and finds a second fault.
+  The engine reads the chest unlocked on both seats after the server's unlock (console GetLocked 0, GetLockLevel 0, before it 1 and
+  0). c2, which never opened the minigame, OPENED the ContainerMenu on its activation: its dump-state 5 s later lists "ContainerMenu"
+  beside the HUD, while remoteServer's onOpenContainerMesage never saw it ("waiting for 'ContainerMenu open' to be true", then "gave
+  up" at 15 s and the closing activation): the handler's Utility.wait(0.1) loop checked once before the menu opened, the menu's pause
+  held the wait until the lab's close, and the deadline had passed, so the give-up path, not the open, released the occupant. A
+  finding of its own for the containers verb: a short open under that race keeps the occupant to the deadline (the wait is game
+  time; the poll belongs on the platform's tick). c1, whose Lockpicking Menu the lab closed twice with TESModPlatform.CloseMenu (a
+  kHide message), opened no ContainerMenu afterward by the handler's activate nor by the console's own `activate`, though its lock
+  reads the same: the kHide close leaves the seat unable to open the chest while the minigame still opens on it (v1). b-locks' red is
+  therefore the lab's close, not the verb; a player exits the minigame by its own key. x-locks-open v3 fa22708f reads the menu's own exit
+  keys through the lab (Tab on c1, Escape on c2, the chest relocked by the console between) and the open after each; if neither key
+  reaches the menu (x-lockpick v6's pick keys never did), the lab needs a Cancel-event close (a platform native), and b-locks either
+  reorders its legs or waits for it.
+
+- 06:16 PST 2026-11-01 (thuum-magnus): containers, a finding from x-locks-open v2: the open handler's Utility.wait poll is suspended in menu mode
+  (Skyrim Souls RE keeps the game running but the VM's menu mode stands), so the ContainerMenu's open was never observed and the
+  occupant was released by the 15 s give-up; fork m4-container-open-poll 5ee4d72b (off parity 27f5c0a4, a client build) polls with
+  Utility.waitMenuMode, as the closing delay already did. Its gate is the containers' scenarios; the probe read is the handler's
+  "to be false" and "menu closed" lines on any open. The seats' menus are read by the driver's dump-state (Ui.isMenuOpen over a
+  list, on its own loop), which is why the probe saw the open the handler missed.
+
+- 06:19 PST 2026-11-01 (thuum-magnus): m4-traps' T0 twice red on the new test's edges, both the stranger caster: dc881a11 (4450) threw at
+  TrapRelayTest's last check through the legacy hosted caster rule; a81ed148 (4459) refused it quietly and PartOne_ActivateTest's
+  "Activate with bad hoster" wanted the throw. 5a1a16b8 keeps the throw and the new test expects it; the puzzle lever's links and
+  the marker caster held in both runs' logs ("3e728 activates 3b9f1 ... relayed to 1 game(s)"). The traps stage waits on its T0.
+
+- 06:31 PST 2026-11-01 (thuum-magnus): m4-world-scripts-host 80616308's client build is green (pipeline 4456: the platform's host-scoped rows,
+  the hosted-cell set and SetCellHosted compile into the dist); its server-build red was the inherited stranger case of
+  TrapRelayTest (the branch was cut from dc881a11). m4-traps 5a1a16b8 merged into it (ae90b4d0, server-only push; 80616308's dist
+  is its dist). The traps head 5a1a16b8 itself is T0 green (4464) and is the traps stage's head.
+
+- 06:45 PST 2026-11-01 (thuum-magnus): three branches green in CI. m4-word-wall abb1b098 (parity 27f5c0a4 merged; the first merge 0ef96899 had
+  dropped WordOfWall's closing brace before the perk helper's namespace, both sides of the conflict ending on the shared brace:
+  pipeline 4466 red, fixed; T0 green on 4471; its dist is c31208c0's client build). m4-world-scripts-host ae90b4d0 (ADR-059
+  decision 1's platform half, client build green on 80616308's 4456, the server's inherited test red merged away; 4468 green).
+  m4-container-open-poll 5ee4d72b (4462 green, client build). The layer is staged (e2290f01, smoke green with it, 142841) and
+  the traps stage runs on 5a1a16b8 with x-word-wall, x-word-wall-chant and x-bleak-traps v4; x-locks-open v3 follows.
+
+- 06:54 PST 2026-11-01 (numidium): the traps stage (m4-traps 5a1a16b8 on the layer's clones, ed08c1ae) stopped at step 7:
+  client-driver exit 4, c2 not online after two launches, the game up with no crash log, the server never saw a connect. c2's
+  skyrim-platform.log ends "once('tick'): Invalid argument" right after skymp5-client's RunScript: the word wall's
+  sendPapyrusEvent handler (wordWallService.ts:32-41, since f3606ba0) has enter and no leave, and Skyrim Platform's
+  Handler.cpp:9-13 builds both persistents unconditionally, so the client's startup throws and no seat can log in on m4-word-wall,
+  m4-traps or m4-world-scripts-host. tsc passed because SP's typing declares SendPapyrusEventHook.Handler with enter only
+  (convert-files/skyrimPlatform.ts:1639-1641). The fix is the word wall's (every other hook add carries `leave() { },`), a
+  TypeScript change, so the restage takes the overlay over the branch's dist; the three probes rerun on the fixed head and
+  x-locks-open v3 follows. The stage's hold released.
+
+- 06:57 PST 2026-11-01 (thuum-magnus): the traps stage on 5a1a16b8 died at its start on both seats: wordWallService's Papyrus hook handler had
+  no `leave`, Skyrim Platform's Handler wraps enter and leave unconditionally (Handler.cpp), so the add threw "Invalid argument"
+  inside main() and the plugin never logged in (numidium's read of c2's skyrim-platform.log; the lab driver met the same fault in
+  0844cbef and I did not carry the lesson to the client's first cut). Fixed on m4-word-wall 2dece251 with the handler as a
+  variable (the published @skyrim-platform/skyrim-platform 2.8.0 typing declares enter alone and refuses an object literal with
+  leave; the fork's Definitions.txt and its regenerated skyrimPlatform.ts now declare both, fork-lint's codegen check green);
+  merged forward: m4-traps 346249e8 (the stage's head, 20b1da65's dist under the REUSE_DIST overlay), m4-world-scripts-host
+  9bb3d3ed. The restage runs the three probes and x-locks-open v3 after.
+
+- 07:52 PST 2026-11-01 (thuum-magnus): the traps stage on m4-traps 346249e8 under layer-world-scripts: GREEN three for three on the first run.
+  x-word-wall 153103 (every claim: the record, the once, the relaunch, c2, the restart). x-word-wall-chant 153506 (a read): the
+  wall's scripts ran on the seat (OnLoad, two OnTriggerEnter, OnUpdate) and set MS13 to stage 60, which the quest-stage verb
+  recorded and relayed; the screen unread (every screenshot E_PVE_FILE). x-bleak-traps v4 153828 (a read): the plate fires on the
+  host for its own press and for the guest's figure and the wall relays to the guest (twice a press, the engine's own shape), the
+  lever's portcullis relays (twice, 200 ms apart), the puzzle lever's four failure darts relay once each through the script-property
+  links, no marker on the failure path, no refusal of any code; the guest's pillar turn stays local (decision 2's next slice).
+  Scenarios on main in their own commits: b-word-wall 92c03ed9 (the draft unchanged), b-bleak-traps 0f5ced37 (A, B, D, E; the
+  switch written at the relaunch as v4 did). numidium's D1 taken as A: the pair gates on the full sweep, then PROMOTE=0
+  verb-merge m4-traps, the LAYER_RUN layer-merge, then the container fix on the merged base. x-locks-open v3 154444 (a read):
+  the minigame's own exit key through tap-key (Tab on c1, Escape on c2) cleans the seat: after it and the lab's close, both seats
+  opened the unlocked chest's ContainerMenu (the dump-states list it), where v2's kHide-only close had left c1 refusing; the
+  Lockpicking Menu still listed 2 s after the tap, so the scenario taps then closes. b-locks rewritten (its own commit: the typed
+  console form for claim 2, prid then the bare unlock, and the exit key before each close); it stays pending until a run turns it
+  green.
+
+- 07:56 PST 2026-11-01 (numidium): the traps restage's lab side. verb-stage's REUSE_DIST now counts Skyrim Platform's declaration
+  sources (codegen/convert-files) with the client's TypeScript (main ab44aadd): the DLLs glob skyrim_platform/ and
+  skyrim_platform_entry/ alone, pack copies skyrimPlatform.ts only into Data/Platform/Modules, which the game never loads, the
+  client compiles against npm's typing, and the codegen tools run only in the Formatting check (step 1b), so 2dece251's typing
+  edit took 16087's dist at 20b1da65 with skymp5-client.js built here instead of a 35 min Windows wait. The first restage attempt
+  lost 10 min: the failed stage's server (m4-traps 5a1a16b8, wire SCHEMA_VERSION 28) was still up when both seats rolled back to
+  the layer's clean-m1-next (parity's client, 26); the netcode protocol id carries the schema version, so both seats retried every
+  15 s, the server logged nothing, and client-rollback's online wait failed both. The stage script now rolls back by lab-api alone
+  (verb-stage's step 7 launch test proves the seats). The second attempt ran clean, STAGE EXIT 0. The pair's gate: main 0f5ced37
+  merged into layer-world-scripts (4731b6aa, both remotes), deploy-srv from it (both new scenarios on sky-srv at main's hashes),
+  run set 20261101-155215-pair-traps-layer, 111 scenarios, started 15:52Z; T2 for 346249e8 runs beside it. b-locks bd192c85 runs
+  by path after the set's last run and before the merges (a set leaves no gap between its runs for a hand run).
+
+- 07:58 PST 2026-11-01 (thuum-magnus): the pair's gate runs (run set 20261101-155215-pair-traps-layer, 111 scenarios, numidium; b-locks bd192c85
+  after it, then the two merges). Meanwhile ADR-059 decision 2's last piece on fork m4-puzzle-relay 283b0169 (off the traps head,
+  server-only): a guest's activation of a scripted ACTI or FURN in a cell it does not host is relayed to the host's engine with the
+  guest's actor as the activator (the pillar turns and counts there), the host's echo quiet, T0's pillar case; probe x-puzzle-relay v1
+  4f3fb26a (five relayed turns, the host's pull, the marker's portcullis on both) for a stage after the pair merges on the traps dist.
+
+- 08:01 PST 2026-11-01 (thuum-magnus): m4-puzzle-relay cf70e418 generalizes the relay: a player's activation of a scripted world object goes to
+  EVERY other game in the cell (the host's engine for the count, the guests' for the same script while the layer admits it
+  everywhere), not the host alone; probe x-puzzle-relay v1 f67fabe3 has the host turn the third pillar and claims its relay to the
+  guest. The earlier entry's "to the host" is superseded.
+
+- 08:03 PST 2026-11-01 (thuum-magnus): static pre-answers in traps.md for ADR-059's next slices: the platform's animation hook reaches every
+  reference with a graph (the holder's REFR is read 0x38 below rcx), so a host can report a pillar's or a gate's animation; a trap's
+  harm lands today only on the seat whose engine runs the script (DamageActor's cut spares the player's own body; the actor-values
+  report carries it), so TrapHit is required once the hosted-cell gate stops the guests' scripts; a count replay is for side-effect-free
+  scripts by name (pillars), never levers. numidium queues m4-puzzle-relay after the pair and the container fix.
+
+- 09:18 PST 2026-11-01 (thuum-magnus): the pair's sweep: b-bleak-traps GREEN on its first run (164226). b-container-rest RED (171504): the bandit
+  chest's Novice lock, which the locks verb stands since parity 395cdc49, met its first activation (E_ACTIVATE_LOCKED and the
+  Lockpicking Menu where the open was claimed); nobody had run it since locks merged. The premise fixed on main 97142e82 (an
+  Unlock through the server's console first, the claims unchanged); numidium reruns it by path with b-locks at the sweep's end.
+  The other scenarios' activation targets are being checked for the same moved premise.
+
+- 10:00 PST 2026-11-01 (thuum-magnus): the pair's sweep's second moved premise, b-magic-restart (red thrice, 175231, 175410, 175547, reading 30.2
+  to 30.9 s left against a bound of 30): the compose restart took 10.6 s while stdbuf swallowed the server's SIGTERM and 0.85 s since
+  node is PID 1 (numidium's measure), so the claim could no longer tell a clock that ran through the stop from one that paused; a
+  bound bump would have been rule 13's weakening. lab-api's restart step gains a deliberate downtime (main 91195ce5: `server:
+  restart {downtime: 15}` stops, holds, starts; the grammar bounded 1 to 120 s, tests green), and the scenario restarts with 15 s of
+  it, its bounds re-derived to 10 to 25 from the step's own numbers (main 046cb720, its own commit). numidium pended it (356c50bd)
+  beside b-container-rest (c7f0f2ee) for the pair's citation; the LABAPI deploy and the by-path reruns follow the pair's merges.
+
+- 11:31 PST 2026-11-01 (thuum-magnus): the pair's sweep, two more reads. b-npc-handoff-cross red once (182820, a follow margin, the watch's
+  class; the reruns decide it). b-papyrus-events red twice on relaunched seats (192624, 192736: a0f stayed 0, Survival's 5 s check
+  never ran) and GREEN on the cold rollback (192846): ADR-036's relaunch-carried state, as b-npc-caster this morning, counted green
+  by the rule; numidium ruled out the admission (c1's papyrus-scripts.txt carries Survival's 37 names and the layer's 14, the
+  platform admitted 51 from 3 lines) and the login (a0f is not a PlayerGlobals value). A finding by name for the relaunch: which of
+  its "9 files cleaned" carries the Creation's one-shot. The sweep is past 75 of 111 with no open red beyond the two pending.
+
+- 12:14 PST 2026-11-01 (thuum-magnus): the pair's sweep, b-shadowbond red twice on relaunched seats (200443, 200715: c1's y -317 where the swap
+  should have put it below -400; c2's half held). c1's console shows the client applying the swap's teleport (the ragdoll wait
+  answered) 350 ms after the Flames release and 330 ms before the equipped event, and the engine never moving: HYPOTHESIS, the
+  player's moveRefrToPosition is refused in the release-to-equipped transition and 10-30's green (203601) had other timings. Not the
+  pair's (no commit since 10-30 touched remoteServer's teleport, the ragdoll service or the movement files beyond the containers'
+  handler and locks' dealWithRef). The cold rerun decides the count; red means a pending with this cause and a read probe,
+  x-shadowbond-swap, on the cast's release against the swap's arrival.
+
+- 12:14 PST 2026-11-01 (thuum-magnus): b-shadowbond's cold rerun red too (200948, -317 again): deterministic, three of three. numidium's D2 taken
+  as A: b-shadowbond pended with the cause (the caster's own half of the swap not taken by the engine while the Flames release
+  transitions; the pair's client diff touches no movement path; parity's merges since 10-30 the suspects), the pair merges, and a
+  parity-at-27f5c0a4 probe stage after the container fix bisects it with x-shadowbond-swap (to write).
+
+- 13:26 PST 2026-11-01 m4-traps merged to fork parity 346249e8 (2026-11-01T21:22Z, numidium): the gate
+  20261101-155215-pair-traps-layer (cited, ADR-042; the traps train staged over the world-scripts layer as laid, ADR-042a),
+  20261101-155215-a-activation-reach to 20261101-211556-t2-fakeclient-restart (122 runs, 108 green, red only on three pending at
+  the merge); T2 skip on skymp-server:m4-traps, its T2 beside the gate green (37 sessions identical, the smoke, the mod-lock and
+  the attributes across a restart); clones not promoted (PROMOTE=0, the layer-merge promoted the pair). Verbs: traps (ADR-059
+  slice 1 and decision 2's property links: Bleak Falls Temple's plate, lever, portcullis and the puzzle lever's darts run on the
+  cell's host and relay to the guests, b-bleak-traps 0f5ced37) and the word wall (a wall teaches its word into the server's shout
+  record, b-word-wall 92c03ed9, with its leave fix 2dece251).
+
+- 13:26 PST 2026-11-01 layer-world-scripts (a mod layer) merged to main 01b1c7e3 by fast-forward (2026-11-01T21:25Z, numidium):
+  the full sweep 20261101-155215-pair-traps-layer (cited with m4-traps, ADR-042a; the layer's own run
+  20261101-142841-smoke-two-players; the eight checks ok), both clones promoted (clean-m1 is now the merged base). Plugins: none
+  added; lab/layer/papyrus-admitted.tsv gains a fourth column (`scripts`, ADR-059) and two Skyrim.esm rows, the word wall's three
+  trigger scripts and the temple's eleven trap and puzzle scripts, admitted on every seat until ADR-059's hosted-cell gate
+  (m4-world-scripts-host) has its train. The three pending reds and their causes are lab/gate.yaml's lines: b-container-rest (its
+  premise predates the locks verb's lock on 0x371e9; the fixed copy 97142e82 by path green on this stage, 20261101-211632, so it
+  leaves pending next), b-magic-restart (its bound assumed stdbuf's 10.6 s restart; node as PID 1 restarts in 0.85 s; the downtime
+  grammar 91195ce5 and 046cb720's copy land with the next stage's lab-api), b-shadowbond (the caster's half of the swap never
+  applied by its engine, three of three with a cold seat; not the pair's; x-shadowbond-swap bisects it on a parity-at-27f5c0a4
+  probe stage). A finding by name: b-papyrus-events red twice on relaunched seats and green cold (survival's 5 s check never ran
+  on the relaunched c1; the admission and the login apply ruled out). b-locks bd192c85 by path red at claim 17 (c1 logged no lock
+  at creation, c2 did; it stays pending).
+
+- 13:50 PST 2026-11-01 the race permit (Eli's go via apocrypha: rotfern's race for test client 1 alone): server half on fork
+  m5-race-permit e46d87d8 off parity 346249e8, apocrypha's client hide e54f69b0 merged into it; server setting
+  `restrictedRaces` ({"aa00:rotfern.esp": [1], "19d08:rotfern.esp": [1]}, the lab's line on main in its own commit, an
+  older image ignores the key), two facts on wire-rules' race rule (is_restricted, is_permitted), CreateActor's
+  restrictedRaces and permittedRaces (SCHEMA_VERSION 29) with their validator, legacy-absent reads and fixture, T0
+  RacePermitTest; docs/verbs/character-creation.md "The permit", WIRE.md. Scenario b-race-permit and difftest session
+  race-permit follow in their own commits; numidium stages the merged head with the client build. Also: b-locks out of
+  pending (55b9a3e8) on its cold green by path (20261101-212943, numidium).
+
+- 13:59 PST 2026-11-01 the landing race behind b-locks' red claim 17 fixed on fork m4-onceload-pending f3f27ce0 (client only): a
+  game-file reference's CreateActor props wait for the engine to load it (pendingLoads, swept on the update thread and at cell
+  load) instead of being dropped after 120 frames; docs/verbs/locks.md "The landing race". b-locks itself is green cold
+  (20261101-212943) and out of pending (55b9a3e8); numidium picks the fix's slot (its own stage after the permit, or a train
+  with it). The permit's server pipeline 4509 (e46d87d8) is green.
+
+- 14:15 PST 2026-11-01 ADR-059 decision 3 BUILT on fork m4-object-animation f317ef48 (off m4-world-scripts-host 9bb3d3ed, the hosted-cell
+  gate, so one train carries both): ObjectAnimation (MsgType 71, wire id 79, Both, SCHEMA_VERSION 30; the permit's 29 sits on
+  m5-race-permit, the two merge at parity with 30 kept), the host's world-object animation events recorded as lastAnimation and
+  relayed to the cell's other games; validator, fixtures, T0 ObjectAnimationTest, the client's ObjectAnimationService (the
+  hook matched in native to the trap and puzzle scripts' event family, HYPOTHESIS on the engine's exact names until
+  x-object-anim). docs/verbs/traps.md and WIRE.md carry it. Main's pipeline 4512 red was the settings' shape (layer-render's,
+  both files); a795cfcc green at 4513. Also on the fork: pipeline 4510 (m5-race-permit b59ab993, client build) green.
+
+- 14:23 PST 2026-11-01 the object-animation pair's names for numidium's queue: fork m4-object-animation e1db19c8 (f317ef48 plus the
+  animation family widened from the scripts' own names: the wall's 180For/Half/End/Back and Rearm, the plate's Down, the
+  activator's opened, read off the pex files and the bases' VMAD with vmad.py), thuum layer branch layer-world-scripts-host
+  8b7517f0 (the traps row host-scoped), probe x-object-anim v2 by path 5805d687 (adds decision 4's first read: the host's
+  figure of the guest after the wall's swing). ADR-059 decision 4's Dynamic plan written in traps.md (the wall's level table
+  75 to 200 by level 10 to 30, TrapHitBase's hit shape, the hypothesised RestoreActorValue path, the Frida trace to write; no
+  code until the read).
+
+
+- 14:37 PST 2026-11-01 m4-container-open-poll merged to fork parity 562bf934 (2026-11-01T22:37Z, numidium): the gate
+  20261101-215952-merge-m4-container-open-poll, 20261101-215952-smoke-two-players to 20261101-223315-b-npc-caster (11 runs, all
+  ten green; b-duel's Flames leg read 0.7878 for < 0.78 once and was green on its relaunched rerun 220653); T2 skip on
+  skymp-server:m4-container-open-poll with its T2 beside the gate green (37 sessions identical); both clones promoted. Verbs:
+  containers (the open handler polls the ContainerMenu with Utility.waitMenuMode, since Utility.wait stalls in menu mode). The
+  stage (562bf934 on its own GitLab build 16265, LABAPI=4494, so lab-api 046cb720 with the downtime grammar went live at its pull)
+  played b-magic-restart's downtime copy green by path (215540: the restart step 16.2 s, the effect at 15.2 s of the 10 to 25),
+  and b-locks ran cold by path green in the stage's wait (212943, claim 17's lock at creation on both seats), so both left pending
+  (thuum-magnus' commits). The gate deployed from a worktree at origin/main 55b9a3e8 so that restrictedRaces (held in the shared
+  checkout until then) did not ride it.
+
+- 14:42 PST 2026-11-01 parity moved to 562bf934 (the container fix, numidium's gate 11 of 11 with T2). Two reviewer agents read the
+  permit and ObjectAnimation diffs first (feedback-review-before-lab): the permit's client called natives inside the CreateActor
+  handler (a seat with a hidden race would have lost its own CreateActor), fixed with a deferral to the update thread, plus the
+  setting's key validation, one warning per unloaded plugin and the T2 session's echo and refr declarations (m5-race-permit
+  dd7586c0); ObjectAnimation's host would have re-reported its own lastAnimation replays, fixed with self-played marks, the hook's
+  native range split around the player, a game-file NPC case in T0 (m4-object-animation cd762ef2). Heads for numidium's queue,
+  parity 562bf934 in each: the permit train m5-train-permit-onceload ef404d98 (m5-race-permit dd7586c0 and m4-onceload-pending
+  f3f27ce0), m4-puzzle-relay 6a8d5ab0, m4-object-animation 4afe8d2a (SCHEMA_VERSION 30 kept) with layer-world-scripts-host
+  8b7517f0 and probe x-object-anim v2 5805d687. A stale worktree swallowed the first train cut behind a piped worktree add; the
+  old branch was reset to its remote, nothing pushed.
+
+- 14:59 PST 2026-11-01 b-shadowbond's deterministic red placed (numidium's correction: the SECOND half's claim 54, a run-out with nobody acting;
+  the first half's swap holds, 224953 and x-shadowbond-swap 224524): Apocalypse's WB_InvisProcTeleport_Script runs in the caster's
+  game under ADR-031's effect rule and swaps the actors itself when the server's run-out dispel makes the target visible first (the
+  race with the engine's 20 s expiry; c1's console: the dispel line, then "settle ff00081d: 153.0 units" as the relay returned the
+  moved figure). Fix: a never-admitted script list in Skyrim Platform's OnSendEventEnter, checked before any admission, with that one
+  name (fork m2-shadowbond-script-block; the swap's sound and effects in the caster's game are the documented loss). The bisect
+  stage is dropped. numidium's next train after the permit's: that fix with m4-puzzle-relay 6a8d5ab0 (gate always + b-shadowbond,
+  b-bleak-traps, b-papyrus-events, a-activation-reach + watch; probes b-shadowbond by path, x-puzzle-relay). Also: a frida trace
+  for decision 4 (lab/frida/trap-hit-trace.js) rides x-object-anim v3 4107f964.
+
+- 15:35 PST 2026-11-01 b-race-permit's first run (20261101-232833, the permit train's stage) held every claim but the hide's two: c2 decided
+  its lists right and callNative("Race", "MakeUnplayable") threw "Function is not native" (SKSE's Race.psc defines MakeUnplayable
+  as a script wrapper around the native ClearRaceFlag, apocrypha's read). Taken as B for tonight: the hide call out (fork
+  m5-race-permit 0594f294, the lists and E_RACE_PERMIT kept), b-race-permit without its two hide claims (9de7a6a7, its own
+  commit), the permit train re-merged as m5-train-permit-onceload 64ec9666 and the bondblock train as m4-train-bondblock-puzzle
+  5f891310 (both pushed with their client builds). The hide returns as race.clearRaceFlag(1) with isRaceFlagSet(1) (Skyrim
+  Platform's typed Race, no callNative), apocrypha's commit next, merged into the bondblock train before its stage with the
+  scenario's hide claims back by path there. ObjectAnimation's T0 red of 4522 was the test's bandit (never loaded); fixed
+  2717fe64 (Alvor under npcEnabled), T0 green in 16369.
+
+- 15:40 PST 2026-11-01 the permit train's T2 read every session red: the player's own CreateActor carries props.restrictedRaces on the wire
+  server and the bare word on legacy, undeclared outside the race-permit session (numidium's read). Declared once as a common
+  divergence in difftest's divergences.yaml, the lock's two-step shape (fork m5-race-permit ee9fdec5); paper-only heads with the
+  server-only knob: the permit train 25c00758 (64ec9666's dist stands, its stage continues) and the bondblock train a29a421b
+  (15281798 plus the declaration; 15281798 carries apocrypha's hide 26ebe040: race.clearRaceFlag(1) through the typed Race, the
+  seats' Race.pex being SKSE's with MakeUnplayable a script wrapper). The hide's two claims run by path at the bondblock stage
+  (x-race-permit-hide d567a586) and return to b-race-permit on main after the permit merges.
+
+- 17:30 PST 2026-11-01 b-duel's Flames leg read (two reds, two green reruns today): the server counted 1.95 s of the 4 s hold in the red run
+  against 3.45 in the green, from the stream's first report (1.23 s after the cast, counted at MAX_TICK_MS 0.25) and its last
+  (after the cast's end, refused as E_SPELL_NO_CAST); neither the claim's margin (spell-cast.md, "b-duel's Flames leg"). The rule's
+  half fixed on fork m2-stream-end-grace a1bd3908 (an ended stream takes one last report within HOLE_MS; R0 after the bondblock
+  train, numidium's order); the premise's half is b-duel's own commit (a look at c2 before the hold) once the permit train has
+  merged. Meanwhile the permit's gate was green 12 of 12 with T2 38 of 38 on 7fe600e6, and verb-merge refused it on two builds in
+  the runs (the T2's tag pull moved the lab's image mid-gate; numidium's restage and regate run now, its tooling fix owed).
+
+
+### 2026-11-02
+
+- m5-train-permit-onceload merged to fork parity 7fe600e6 (2026-11-02T02:16Z, numidium): the gate
+  20261102-013806-merge-m5-train-permit-onceload, 20261102-013806-smoke-two-players to 20261102-021256-b-npc-caster (12 runs, all
+  green on the first run); T2 skip on skymp-server:m5-train-permit-onceload, citing the T2 of 7fe600e6 green beside the first gate
+  (38 sessions identical, after the permit's create word was declared common in divergences.yaml and race-permit's departure echo
+  moved to c1, refr:ff000003); clones promoted. Verbs: the race permit (restrictedRaces: rotfern's aa00 and its vampire race 19d08
+  for profile 1 alone; the server refuses another profile's pick with E_APPEARANCE_RACE; b-race-permit 94787ef1 claims the
+  refusal, the client's menu hide is apocrypha's next slice, since Race.MakeUnplayable is a script wrapper in SKSE's Race.pex and
+  threw "not native") and onceLoad (a game-file reference's CreateActor props wait for its 3D instead of dropping after 120
+  frames: b-locks claim 17's slow landing). The first gate (20261102-002715) was green 12 of 12 and refused by gate-cite check 2:
+  the T2 beside it pulled the branch's bare tag after 7fe600e6's pipeline had pushed a new image, and the lab's next server
+  recreate took it (054b5d43 for five runs, 534c49dc after), so the train was restaged on 7fe600e6 and gated again; T2 runs on the
+  per-sha tag since.
+
+- 18:18 PST 2026-11-01 the race permit MERGED: fork parity 7fe600e6 (the train m5-train-permit-onceload: the permit's server half, apocrypha's
+  client half with the hide off, the onceLoad landing fix; numidium's regate 12 of 12 after the tooling's two-builds refusal, T2 38 of
+  38). b-race-permit green four times on the train. Follow-ups: parity merged into m4-object-animation (SCHEMA_VERSION 30 kept over the
+  permit's 29; an interim head, server-only), b-duel's premise commit (a look at c2 before the Flames hold, the bound unchanged), the
+  hide's claims back on main after the bondblock train, b-shadowbond's un-pend on that train's green.
+
+- 18:37 PST 2026-11-01 b-shadowbond on the bondblock train's first stage (023146): the swap landed (the run-out bug is gone) and the
+  caster's game never saw the invisibility: CastBondProc had skipped the caster's game, where the now-blocked script used to cast
+  both procs. Fixed on m2-shadowbond-script-block 9aeaeace (the relay reaches every game; BondTest updated); numidium gates nothing on
+  84f87370 (a green there would have carried the regression), the stage's x-race-permit-hide and x-puzzle-relay reads finish, then
+  the train re-cuts on 9aeaeace (REUSE_DIST on a29a421b's dist) with all three probes by path again.
+
+- 18:42 PST 2026-11-01 the bondblock train's first stage read (84f87370, no gate): x-race-permit-hide GREEN (apocrypha's clearRaceFlag hide takes
+  rotfern's two races off c2's menu, none off c1's), x-puzzle-relay red on its own claim alone (the guest's pillar turn reaches the host
+  and runs there; the host's engine then activates the pillars' XMarker child 0x4fcdf, never loaded by the server, E_TRAP_NO_REF by
+  design; the probe names its codes from v2), b-shadowbond red on the caster's lost procs (fixed 9aeaeace). The train re-cut as
+  m4-train-bondblock-puzzle 400790b2 (server-only over 84f87370, REUSE_DIST on a29a421b's dist); numidium restages it with the three
+  probes by path.
+
+- m4-train-bondblock-puzzle merged to fork parity e6c5d01a (2026-11-02T04:05Z, numidium): the gate
+  20261102-031449-merge-m4-train-bondblock-puzzle (cited, ADR-042: its own fresh run on 400790b2, 12 of 12 green, b-npc-death
+  green on its relaunched rerun; e6c5d01a differs only in the shadowbond session's declarations, check 4),
+  20261102-031449-smoke-two-players to 20261102-035138-b-npc-caster; T2 skip, citing e6c5d01a's T2 on its per-sha tag (38 sessions
+  identical); clones promoted. Verbs: the shadowbond script block (WB_InvisProcTeleport_Script never admitted, so the run-out no
+  longer moves the caster; the server's proc relay now reaches the caster's own game, b-shadowbond green by path 025608 and out of
+  pending), the puzzle relay (a pillar or lever turn relays to every other game in the cell: x-puzzle-relay v3 030924, the XMarker
+  0x4fcdf's E_TRAP_NO_REF by design) and the race permit's menu hide (apocrypha: race.clearRaceFlag(1) through the typed Race,
+  x-race-permit-hide green twice). The first T2 on 400790b2 was red on that caster-side relay's two SpellCasts until declared.
+
+- 20:09 PST 2026-11-01 the bondblock train MERGED: fork parity e6c5d01a (Apocalypse's Shadowbond script blocked everywhere with the procs
+  relayed to the caster's game too, the puzzle relay both ways, apocrypha's clearRaceFlag hide, the permit train inside; gate
+  20261102-031449 12 of 12 on 400790b2, T2 38 of 38 on e6c5d01a, numidium). On main: b-race-permit's two hide claims back
+  (9826bcc1), b-puzzle-relay promoted from the probe (b133be9a), the verbs' Status ticks. Heads for numidium's queue: the end grace
+  m2-stream-end-grace 8eddb2c4 (parity merged, R0 by `R0=1 just verb-merge` on its per-sha T2), the object-animation pair
+  m4-object-animation 7c82e51e (parity merged, SCHEMA_VERSION 30 kept; a both-sides merge of ActionListener.cpp lost
+  OnObjectAnimation's closing brace, caught by the brace count against both parents and restored before the push; client build in
+  its pipeline) with layer-world-scripts-host e94ec494 (main merged) and x-object-anim v3 4107f964.
+
+- 20:51 PST 2026-11-01 the end grace's first T2 (8eddb2c4, numidium's R0 verb-merge) read: verb-merge's T2 step ran on the bare tag four minutes
+  before the head's server-build (pipeline 4568) finished, so it tested ea15e8bb's image, the grace without 9aeaeace; its shadowbond
+  line (c1 without the caster's two procs, CastBondProc "to 2 game(s)") is the pre-fix count and no code finding; its spell-cast line
+  is the grace's own tick, c2's health 0.908 after c1's 4.3 s report (300 ms after the end, its 500 ms gap counted), declared on
+  m2-stream-end-grace 235aad49 (within 0.001, legacy 0 wire 1; the header and the 0.68 reason follow). Tooling: main d4c528f7
+  (numidium) makes verb-merge wait for the head's server-build and run its T2 on the per-sha tag. The grace's push waits for the
+  object-animation pair's layer-merge (that parity merged in, server-only), then numidium's per-sha T2 and the R0=1 verb-merge.
+
+- 20:57 PST 2026-11-01 the object-animation pair's first stage (layer b0a5365b laid, LAYER EXIT 0, smoke 043530 green; train 7c82e51e over it): x-object-anim v3
+  RED at 045036, the host's plate never fired. c1's console: "HostService: SetCellHosted unavailable on this platform: Error: Native
+  function not found 'TESModPlatform.SetCellHosted'", so no seat told the platform which cells it hosts and the eleven host-scoped
+  trap scripts stayed blocked on the host too (the SP log's "11 of them on the hosting seat alone"). The native had its C++ binding
+  (PapyrusTESModPlatform.cpp) and its client call but no declaration in the compiled TESModPlatform.pex, which CI cannot compile
+  (lab/pex.py's rule; the quest-stage pair missed it the same way a day earlier, e0e3af03). Fixed: m4-object-animation 32795060
+  (lab/pex.py add-native plus the .psc line, dump-checked), a platform file, so a full client build; numidium restages the train
+  over the layer as laid with x-object-anim v3 by path. The layer branch stays still.
+
+- 21:17 PST 2026-11-01 decision 4 while the pair restages: the trap scripts read from their bytecode (lab/pex.py disasm on movingtrap.pex,
+  traphitbase.pex and trapbase.pex out of "Skyrim - Misc.bsa"): TrapBase.fireTrap resolves MovingTrap's leveled pick
+  (CalculateEncounterLevel(TrapLevel) against LvlThreshold1..5 picks LvlDamage1..6) into TrapHitBase's damage, and OnTrapHitStart
+  hands it to the engine native ProcessTrapHit (ghost ability and noHitFaction skip the hit; the disease, rumble and camera shake
+  are the player's alone), so the plan's Papyrus-damage HYPOTHESIS is retired and the trace's expectation corrected (lab/frida
+  trap-hit-trace.js). The server half of TrapHit built on fork m4-trap-hit c085a3ad (MsgType 72 C2S, SCHEMA_VERSION 31,
+  wire-rules traps::hit by table membership and REACH 512 UNMEASURED, ActionListener::OnTrapHit host-only with
+  TrapDamageTable over the VMAD, T0 TrapHitTest; docs/WIRE.md's section); the client half follows the trace's frames.
+
+- 21:34 PST 2026-11-01 x-object-anim v3 on the pair's restage (20261102-051618): A and B green (the host's and the guest's plate fire on the host's
+  engine, the wall's and plate's events reach the guest; H3 confirmed), decision 4's trace read (fourteen DamageActor calls on the
+  figure, no RestoreActorValue, the figure kept at 100 by the platform's cut; the trap's id needs ProcessTrapHit's native, an RE
+  brief), C red: the pillar never turned on the host because its OnCellLoad was blocked under the gate (the cell loaded 3.5 s before
+  c1 hosted it). Fix on m4-object-animation 63df9393 (local until the grace's parity merges): lifecycle events pass for host-scoped
+  scripts on every seat; the NiControllerManager family (PlayAnimation_Impl 14297) hooked into the same sendAnimationEvent.
+  lab/frida/pillar-anim-trace.js and probe v4 (2059c95e) read the pillar's family. The grace 235aad49 pushed server-only for
+  numidium's per-sha T2 and R0 merge (its parity goes into the pair's head). TrapHit's server half T0 green (pipeline 4581).
+
+- 21:54 PST 2026-11-01 decision 4's engine path read by the re-analyst (sky-re, Ghidra, REA down): the trace's frames were the task queue's, not
+  the trap's; the chain is the Havok listener's TESTrapHitEvent (no damage) → OnTrapHitStart → the ProcessTrapHit native 56212
+  (R8 target, R9 trap, [RSP+0x28] damage) → Actor::DoTrap1 37509 → ProcessHitVictim 38586 twice (deferred to the main thread) →
+  DamageActor with no attacker. The hook for the TrapHit client half is 56212's entry (HYPOTHESIS until trap-path-trace.js);
+  filed in traps.md's Dynamic plan.
+
+- 21:58 PST 2026-11-01 TrapHit's client half built on fork m4-trap-hit fd90067f (the ProcessTrapHit native's callback hooked AE-only at 56212 per the
+  re-analyst's read, the trapHit event's three declarations, TrapHitService reporting from the cell's host for another player's
+  figure; server-only push, the client build with its stage). The trace that confirms the hook point, lab/frida/trap-path-trace.js
+  (main 35a9692c), runs as x-trap-path 339985cd by path once numidium's layer deploy carries it; the pillar head waits for the
+  grace's parity.
+
+- 22:04 PST 2026-11-01 m2-stream-end-grace merged to fork parity 235aad49 (2026-11-02T06:03Z, numidium): R0 (ADR-053), no lab gate
+  (the nightly is its T3); T0 pipeline 4583 server-build 16546, 13 of 13 tests; T2 green on
+  skymp-server:m2-stream-end-grace-235aad49 (the per-sha tag); clones not promoted. Verbs: spell-cast's stream end grace (an ended
+  stream that counted a report keeps its hand for one more report within HOLE_MS, so a Flames hold's last report counts: b-duel's
+  Flames leg read 0.7878 and 0.8453 twice tonight for < 0.78; the spell-cast session declares the extra tick). Its first R0 on
+  8eddb2c4 stopped at T2 on a stale image: verb-merge's own T2 pulled the bare tag at 04:10:20Z, four minutes before 8eddb2c4's
+  server-build pushed, so it tested ea15e8bb (no proc relay fix, hence shadowbond's missing caster procs); verb-merge's T2 now
+  waits for the head's server-build and runs on its per-sha tag (main d4c528f7).
+
+- 22:08 PST 2026-11-01 the grace MERGED by numidium: fork parity 235aad49 (R0, T0 13 of 13, the per-sha T2). The pair's pillar-fix head cut on it:
+  m4-object-animation 64dbacfe (63df9393 plus parity, client build); numidium restages it with x-object-anim v4 (sha1 2a415dae).
+  x-trap-path v1 (055845) ran green on its premise but printed no trace row for the figure the wall swung at (traps.md); trace
+  and probe v2 (the native unfiltered, the TESTrapHitEvent dispatch hooked, the host's own body first) wait for the seats after v4.
+
+- 22:25 PST 2026-11-01 Eli: "you called M3 closed, im accepting it closed as far as building goes, but it still needs to be closed as of testing."
+  M3's state corrected to BUILT (T3 green, building over) with the T4 close open; PLAN's M3 header and chart line, docs/M3-CLOSE.md
+  as the closeout set for the turbo sittings, the checklist's item 7 pointing at it. Tonight is packaging, not building (Eli: turbo
+  starts tomorrow morning): the pair's stage runs to its verdict, the two open branches stay named, nothing new opens.
+
+- 22:43 PST 2026-11-01 x-object-anim v4 GREEN (063627) on the pair's head 64dbacfe: the pillar turns on the host (screenshots: eagle to snake), its
+  Trigger01 is reported, recorded and played on the guest; the plate's and wall's names confirmed; decision 1's lifecycle rule and
+  decision 3's second family hold. The pillar trace printed nothing: a Frida attach on a function the platform already Gum-attaches
+  never fires (the family stays HYPOTHESIS, immaterial). The sweep runs as the pair's gate; the merge is numidium's on its green.
+
+- 22:51 PST 2026-11-01 x-trap-path v2 (064240) green on its premise and silent in its trace for every hook, the god-mode host on the plate included
+  (traps.md: the two candidates). v3 by path, sha1 40c153a5: a liveness swing on the figure before the plate legs; runs in the first free
+  window after the pair's sweep. Tonight ends here (Eli: packaging, turbo in the morning); the pair's sweep is numidium's.
+
+- 23:19 PST 2026-11-01 D78's read (Eli: "prove or disprove that with a subagent"): the re-analyst on sky-re shows the Havok handoff is synchronous
+  inside Actor::KillImpl for every ragdoll-bearing actor and repeated by KillDying at the DeathStop tag; a_ragdollInstant never avoids
+  it; the one gate is TESRace::Flag::kImmobile on the race. Option A (the engine's own death animation, no Havok) is disproved as
+  drafted; A' (the race flag for the kill window) is a fragile trick; same-spot bodies are B's (pose replication) in M4, C closes M3's
+  row. Folded into docs/private/decisions-m4-bodies.md and npc-fate.md's Dynamic plan. Also: a-melee-cone 071410 errored on a c1
+  startup crash (terrain streaming at 14 s uptime, engine frames only, the seats' known family): a rerun, read to numidium.
+
+- 23:28 PST 2026-11-01 D78 decided by Eli: "ok C for m3, B goes in M4 with dragging with a note that if it becomes too much of a bugbear it can get thrown into the backlog." Recorded in DECISIONS (ADR-058), PLAN's M4 list, prop-physics.md's slice three (pose
+  replication, the root-only SetPosition retired), M3-CLOSE.md row 2 and the memo.
+
+- 02:18 PST 2026-11-02 the pair's sweep at 72 of 114 (numidium): two c1 startup crashes (terrain streaming, +0x2AD242) each green on the lab-fault
+  rerun; b-npc-talk red three times in two shapes (Sven's drift around the hold on relaunched seats; the Dialogue Menu not opening
+  after a granted claim on the cold run), green yesterday on its first run. Read: the pair was inert in those runs (no trap, animation
+  or E_OBJANIM line on the server, no "object animation" line on c1, the same zero as yesterday's green), so the scenario's two known
+  fragilities, not the pair's code; ADR-036's lone-red reruns, a watch item on two greens; if it stays red the merges hold and the
+  morning's fix is the scenario's premise in its own commit, never its claims.
+
+- 05:06 PST 2026-11-02 m4-object-animation merged to fork parity 64dbacfe (2026-11-02T13:04Z, numidium): the gate
+  20261102-064754-pair-objanim-host (cited, ADR-042; the train staged over the host layer as laid, ADR-042a), 126 runs, 114 of 114
+  green, verdict watch on b-npc-talk (red three times with two failures of its own, Sven's walk around the hold and the E's menu
+  after a granted claim, then green on both lone-red reruns; the pair inert in those runs: no traps, animates or object-animation
+  line); T2 green on skymp-server:m4-object-animation-64dbacfe (the per-sha tag); clones not promoted (PROMOTE=0, the layer-merge
+  promoted the pair). Verbs: ADR-059 decision 1's hosted-cell gate (SetCellHosted, declared in TESModPlatform.pex since 32795060:
+  its first stage read "Native function not found" and every host-scoped script stayed blocked) and decision 3's ObjectAnimation
+  (MsgType 71, SCHEMA_VERSION 30): the host's world-object animation events relayed to the guests (x-object-anim v4 063627: the
+  wall, the plate and the pillar), the lifecycle events admitted for host-scoped scripts on every seat (the pillar's OnCellLoad),
+  and PlayAnimation_Impl as a second observe point. Five c1 load crashes at SkyrimSE.exe+0x2AD242 (terrain streaming) in the
+  sweep, each green on its lab-fault rerun; b-spell-placed-wall a relaunch finding by name.
+
+- 05:06 PST 2026-11-02 layer-world-scripts-host (a mod layer) merged to main 8139d579 by merge commit (2026-11-02T13:06Z,
+  numidium): the full sweep 20261102-064754-pair-objanim-host (cited with m4-object-animation, ADR-042a; the layer's own run
+  20261102-043530-smoke-two-players; the eight checks ok), both clones promoted (clean-m1 is the merged base). Plugins: none
+  added; lab/layer/papyrus-admitted.tsv's traps row is host-scoped ("Skyrim.esm: 11 script class names (game, named, host)"), so
+  the temple's trap and puzzle scripts run on the cell's host alone and the guests see their animations through ObjectAnimation.
+
+- 05:09 PST 2026-11-02 the object-animation pair MERGED (numidium: parity 64dbacfe, layer-world-scripts-host to main 8139d579, clones promoted;
+  sweep 114 of 114 in 126 runs, watch on b-npc-talk). Mine after it: b-object-anim promoted from the probe (66607f91, its own
+  commit), traps.md's Status (decisions 1 and 3 whole, T2 green, the native hooks), PLAN's M4 state line, the turbo checklist's item 9
+  rewritten to the merged build; m4-trap-hit re-based on this parity (0b3dadc2, the hook-id conflict kept both; server-only push).
+  x-trap-path v3 runs by path on the merged base; its rows decide TrapHit's hook.
+
+- 05:16 PST 2026-11-02 x-trap-path v3 (130725, numidium): the liveness swing landed twice on the server and the trace still printed nothing, so
+  the trace, not the engine, is at fault (traps.md). Trace v3 proves itself (pid, resolved addresses and bytes, per-hook counts, a
+  Sleep pulse; main 173bff7d carried the script alone, this commit its docs); probe v4 c83f645a by path for the next free window.
+  The server's "Script 'TrapSwingingWall' not found" line is ADR-059's design, noise to filter later.
+
+- 05:23 PST 2026-11-02 x-trap-path v4 (131634) with the self-proving trace: pid 4188 against the game's 10704, so lab-api's Frida step injected
+  into another SkyrimSE.exe (numidium's read: `Get-Process SkyrimSE` plus a 5 s sleep takes whichever process is alive, intermittently
+  the wrong one). Every trace silence of the night is retracted as evidence (the pillar's family, the figure's physics); the trap-path
+  chain stands as HYPOTHESIS as before. numidium fixes lab-api after Eli's turbo; v4 reruns unchanged.
+
+- 11:38 PST 2026-11-02 TURBO 2 ON (numidium): Eli at the seats under a 300 min hold from about 19:40Z, profile lab/playtests/40.yaml; the build is
+  the merged base, fork parity 64dbacfe (image skymp-server:m4-object-animation-64dbacfe, dist client-build 16578 in both clean-m1s);
+  locks, weatherSync, perks and leveling OFF through the playtest overlay, each item's switch turned on at its turn; Survival off. The
+  build is frozen until Eli's report; findings come to thuum-magnus for fixes (client-hot for TS, a redeploy for the server). The
+  trap-path rerun waits for numidium's frida pid fix after the turbo.

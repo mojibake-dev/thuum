@@ -451,3 +451,25 @@ test("labState ref serves a plain reference's position with the actor fields nul
     [tankard.found, tankard.x, tankard.y, tankard.z, tankard.cell, tankard.isDead, tankard.healthPercentage, tankard.worn],
     [true, 19237.1, -47480.26, -132.67, "3c:Skyrim.esm", null, undefined, null]);
 });
+
+test("labState ref reads a plain reference's record without asking the actor's fields", () => {
+  global.mp = fakeMp();
+  mp.set(0xff000b01, "locationalData", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [5, 6, 7], rot: [0, 0, 0] });
+  mp.set(0xff000b01, "type", "MpObjectReference");
+  const get = mp.get;
+  let actorReads = 0;
+  mp.get = (id, k) => {
+    if (id === 0xff000b01 && (k === "percentages" || k === "isDead" || k === "equipment")) {
+      actorReads += 1;
+      throw new Error("Specified Form is ObjectReference, but we tried to treat it as Actor");
+    }
+    return get(id, k);
+  };
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  const r = mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0xff000b01 });
+  assert.strictEqual(r.found, true);
+  assert.deepStrictEqual([r.x, r.y, r.z], [5, 6, 7]);
+  assert.strictEqual(r.isDead, null);
+  assert.strictEqual(actorReads, 0);
+});

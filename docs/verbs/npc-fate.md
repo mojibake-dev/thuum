@@ -1408,6 +1408,20 @@ inventory, and a layer adding such lines reopens the read (layer-stage's
 check; the source is powerof3's Spell-Perk-Item-Distributor if the
 re-analyst needs the sites).
 
+- The death's Havok handoff, static (23:19 PST 2026-11-01; the re-analyst on sky-re, Ghidra 1.6.1170, for memo D78 "where a body lies on
+  every screen"; every id by `just addr`, HYPOTHESIS until the trace): Actor::KillImpl (37896, slot 0x10E) hands every ragdoll-bearing
+  actor to Havok synchronously at the kill (AddRagdollToWorld, SetMotionType kDynamic and ToggleConstraints(false) per graph,
+  ActionDeathWait performed, collision layer kDeadBip, the death force or the heading times fDeathForceForceMin 35); a_ragdollInstant
+  only trades DeathWait plus the 2 s fDyingTimer for ActionRagdollInstant plus no timer. The graph's DeathStop tag calls Actor::KillDying
+  (37317, slot 0xAA), which makes the body dynamic again; the dying state ends on the timer through KillImmediate (37735). Every kill
+  route reaches slot 0x10E (engine damage, a kill move's KillActorHandler 42838 through Actor::Kill 37316's task 0xA, Papyrus Kill, our
+  deathService kill). The only data gate is TESRace::Flag::kImmobile (bit 9 of TESRace+0x108) on the actor's race, read in both
+  KillImpl and KillDying: set, no ragdoll and no DeathWait perform, kDead after the timer with Havok untouched. SetLifeState(kDead) and
+  KillImmediate reach kDead with Havok untouched and play nothing. The trace to confirm: 37896, 38084, 38089, 77866, 77998, 39419, 37735,
+  37612, 42865, 37317 and 38447 through x-npc-death-host v5's sword kill, then once more with bit 9 written into the target's race.
+  Consequence for the verb: "bodies lie within a stride" is the engine's own limit (R2 fall per game); same-spot bodies are M4's pose
+  replication (D78), not a death-animation switch.
+
 - RE tasks for the re-analyst (REA on sky-re; CommonLib's names as seeds):
   - RE-1, the roll site: where a TESObjectREFR whose base is a TESLevCharacter
     resolves to a TESNPC, writes ExtraLeveledCreature (originalBase,
@@ -2382,3 +2396,107 @@ the kill path's completion on the puppet seat). The scenario is pending (lab/gat
 gate plays it green; playtest 39 carries the guest's loot as a declared limit (playtest 34's state). Noted beside it: after the
 death the host kept receiving causes for the dead body from the guest's late swings (c1's "cause on 39fe4: health 0.000 ... attacker
 ff000ceb", one per hit for 50 s), the server's OnWeaponHit at 0 -> 0 each time; harmless, a bound for a later train.
+
+The host's own open, read from b-npc-body-release's rest-set reruns (15:03 PDT 2026-10-30; 214710 and 215006, red at step 26, the
+scenario pending 428a2ee): c1's engine opened the body's menu itself (menuOpen true at +4 s) and the handler's admission line never
+came within the step: on the host the engine's native activation opens the ContainerMenu at once and the game pauses in it, so
+onOpenContainerMessage's first `Utility.wait(0.1)` (game time) stalls until the menu closes; the "waiting for 'ContainerMenu open'
+(a corpse) to be true" line prints after the close (the first sweep's cold run: 18:56:01.6 the activation, 18:56:08.4 the line),
+the checker then finds the menu closed, waits its 15 s and gives up ("gave up waiting ... releasing the occupant"), and only then
+sends the closing activation. So on a host the occupant release runs 15 s late, the "menu closed" line never prints, and the
+admission line is not a fact of the open's moment. A client defect, not the scenarios' premise: the fix rides the guest-loot train
+(the first wait as `Utility.waitMenuMode`, or the checker's loop entered without the game-time wait), the same file as the
+guest's open; the two scenarios' host claims (330124b, a8cd208) are re-timed with that train (the admission line after the close,
+the closing activation at the close), their reruns the train's gate. Before D52 this delay held the body against the other seat
+for 15 s after the looter closed it: playtest 34's "the non-host can't interact with the body" had this second cause beside the
+corpse's missing release.
+
+The guest-loot train begun (15:04 PDT 2026-10-30): fork m3-guest-loot off parity 0e23c820, first commit 39e5c2f5 (tsc clean, local
+until the physics train has staged): remoteServer.ts's open-container handler takes its first wait as `Utility.waitMenuMode(0.1)`, so
+on the host the checker sees the engine's open menu at once and the close sends the closing activation instead of the 15 s give-up;
+the two scenarios' host claims (the admission line within the step, the closing activation at the close) read this behavior as
+written. The guest's open (D71) joins the branch once x-body-open-guest v2 names H5 or H1.
+
+D71's read and fix (15:08 PDT 2026-10-30): x-body-open-guest v2 (215922) GREEN, H5 holds. Leg 1 (the server's kill) and leg 2 (the host's
+console kill, the engine's death and the host's report): the guest's Activate false, the body dead on c2 and the server, no menu. Leg 3
+(npc-ai on the body of leg 2): Activate true, the menu open, the body 45 units off within 5 s (H-54e's walk). Leg 4 (the AI on leg 1's
+body): the driver's Activate false yet the menu open, the server's path (the handler's activate with default processing) opening it.
+So a released body takes an activation only with its AI on, the player's E and the handler's alike. The fix (fork m3-guest-loot
+05ac32a9, tsc clean, unpushed until the physics stage): onOpenContainerMessage switches a dead NPC's AI on before its activate, polls
+the menu in menu mode (the open seen while the game pauses), and switches the AI off at the first open or after 2 s, one trace line
+each way ("body X: AI on for the server's open (D71)", "body X: AI off again, the menu is open (D71, H-54e)"); the game pauses in the
+menu, so nothing walks while it is open, and the bracket bounds the walk to the open's own frames. The promote's dead branch keeps
+the AI off (H-54e's no-drift rule). Its probe x-body-open-guest-fix v1 by path (cb798c4c, 73 steps): both kills, the guest's menu
+within 4 s with the two lines once per body and the AI off after, then the host's open after the guest's close with its handler line
+inside the step (39e5c2f5) and no second occupant counted. The train's gate: c-dungeon-enemies, b-npc-body-release and this probe
+(b-body-open-guest promoted on green); M3's exit closes with it.
+
+x-body-open-guest-fix v1 (041249, 21:18 PDT read; the guest-loot stage, m3-guest-loot 05ac32a9, dist 14946) RED 1 of 5 at step 28: the
+fix fired ("body 39fe4: AI on for the server's open (D71)" at 04:15:38.085, the handler's "waiting for 'ContainerMenu open' (a corpse)"
+in the same millisecond), the menu never opened, no later handler line came within the run (the 2 s off line should have), and the
+dump read the body's AI off. Two candidates: the enable and the activate in one frame, the engine taking the AI state a frame later
+(v2's green read had the lab's npc-ai seconds before a separate activate); or the enable never took (the dump's off with no off line
+of ours). The fix's v2 (fork m3-guest-loot, the head after 05ac32a9): the AI state logged at the switch, the activate deferred to the
+next update callback with the state logged right before it, and the state logged at the off; a read either way. D69's stage takes
+the lab while it builds.
+
+The fix's v2 (e1235544) RED twice (22:03 PDT read; x-body-open-guest-fix 045522 cold, 045859 relaunched, step 28 alone): the AI read
+TRUE at the switch, the "one update later" line printed in the switch's own millisecond (a once('update') registered inside an update
+callback runs in the same pass), so the activate still landed in the enable's frame and the menu never opened; at the dump the AI read
+off again (whether by our deadline's off or another hand is the next run's question: the off line's presence in 045522's console).
+The server sent OpenContainer each time and logged nothing about the body. v3 (0547e5d4, pushed): a real latent beat between the
+switch and the activate (await Utility.waitMenuMode(0.2), which runs while paused), the AI state logged right before the activate,
+the off deadline 3 s. In x-body-open-guest v2's green leg the lab's npc-ai had switched the AI on seconds before a separate activate,
+so the beat the engine needs is somewhere under five seconds and above a frame. D69's restage takes the lab while v3 builds.
+
+The loop's death (22:06 PDT read, numidium's grep): in 045522 and 045859 the "AI off again, no menu within 2000 ms" line printed in
+neither, so the handler's loop never iterated after the activate; the AI's off at the dump is another hand's (unread). Two observations
+frame it: the handler's first wait, Utility.waitMenuMode(0.1), resolved on the guest with no menu open (the handler ran 220 ms after
+the activation), and in x-prop-push v9's console Skyrim Platform logged "onResult called: Utility.waitMenuMode (call 1)" at the give-up
+while the 150 iterations of the loop's Utility.wait(0.1) logged nothing: Utility.wait is Skyrim Platform's own frame wait, waitMenuMode a
+VM latent. HYPOTHESIS (the next run's onResult lines decide): a second VM latent from the same handler never resolves on the guest, or
+waitMenuMode advances only in menu mode past its first call. v3 (0547e5d4) put the beat on waitMenuMode too and would have hung before
+the activate; superseded before any run by v4 (ce1df68b, pushed, the restage's head): the beat Utility.wait(0.15), the open-poll back on
+Utility.wait(0.1) as the original loop (its 15 s give-up printed on schedule in earlier runs), the first wait alone in menu mode for the
+host's open menu. Under the game-time poll a guest's menu, once open, pauses the game and the poll resumes at the close, so the AI's
+off for a guest's open lands at the close (nothing walks under the pause). The probe stays cb798c4c.
+
+The fix's v4 (ce1df68b) RED twice (22:40 PDT read; 053012 cold, 053335 relaunched, step 28 alone): the activation went out, the AI
+switched on ("reads true at the switch"), and the handler never logged again: no "after the wait" line, no error; c2.log's only latent
+completion the handler's first waitMenuMode, 58 ms before the switch. With v2's stall two awaits after the switch and v4's at the first
+(a game-time Utility.wait), the kind of wait is not the fault: after enableAI(true) on the released body this handler's next await
+never resumes, whatever it awaits, while cast-action and npc-stream keep logging. A second pattern, kept: "Trying to get server mods,
+attempt 2" after a "Request/parse error ... Could not establish connection" 13 to 15 s after the switch in every run. v5 (80188d13,
+tsc clean, local until D69's merge): a released body's open runs on the TimersService with no await after the switch (its callbacks
+run inside the game's update when the player exists): the switch and its read; a 150 ms timer that activates and logs the activate's
+return; a 100 ms poll for the ContainerMenu; at the open the AI off ("AI off again, the menu is open") and a poll for the close that
+sends the closing activation ("closing activation sent, the menu closed"); with no open within 3 s the AI off and the closing
+activation as the give-up. The other paths keep the async loop, which now has a catch that logs a throw. The probe (x-body-open-
+guest-fix v2 by path) and the two pending scenarios (c-dungeon-enemies, b-npc-body-release, their own commits) read the guest's
+admission and release through these lines; the host's open, its body never a puppet and its AI on, keeps the generic handler's lines.
+D69 merges alone meanwhile (numidium: a restage of dc3ec679, its gate always plus b-quest-rumor, b-quest-stage, b-story-arrival plus
+watch, T2 beside); the union m3-pass-train-4 is re-cut on v5 after.
+
+The fix's v5 (b878b2a6, parity dc3ec679 merged in) RED twice (00:1x PDT 2026-10-31; x-body-open-guest-fix v2 aba01c6f, 065444 cold,
+065821 relaunched, step 28 alone; numidium's read): the timers path ran whole, "AI on for the server's open (D71); reads true at the
+switch" at 07:00:20.015, "AI reads true after 150 ms; activating" at .150, "activate returned false" at .151, the 3 s give-up and the
+closing activation after; no menu. The one green read of H5 (x-body-open-guest v2 215922, leg 4) had the lab's npc-ai switch the AI on
+five seconds and more before the server's open took the body's activate; v1, v2 and v5 all activated within a frame to 150 ms of the
+switch. HYPOTHESIS (v6's run decides): the dead actor's process wants more than 150 ms after EnableAI before it takes an activation (the
+engine's own promotion of the actor's process, not a flag our switch sets). v6 (m3-guest-loot d10789f7, pushed 00:09 PDT): the activate
+retried every 200 ms for up to 5 s after the switch, each return logged with the body's state ("activate returned <bool> at +N ms
+(attempt K; AI, dead, 3D, health)"); the first true, or an open ContainerMenu regardless of the return, starts the menu poll as v5; the
+refusals to the deadline switch the AI off ("the activate refused K times over N ms") and release the occupant. The time of the first
+true is the measurement; a run of refusals falsifies the hypothesis and sends the read to Actor::ActivateRef (rule 8; the re-analyst
+on sky-re, CommonLibSSE-NG TESObjectREFR.h:367 names it). The probe stays aba01c6f.
+
+v6 GREEN (00:5x PDT 2026-10-31; x-body-open-guest-fix v2 aba01c6f, 20261031-074043 on d10789f7's stage, a cold run; numidium's read):
+the engine takes a released body's activation about 2.1 s after its AI is switched on. c2's lines: the switch at 07:43:36.379 ("reads
+true at the switch"), nine "activate returned false" at +164, +384, +608, +818, +1027, +1271, +1475, +1690 and +1904 ms, each with
+AI true, dead true, 3D true, health 0, then "activate returned true at +2127 ms (attempt 10)", "the ContainerMenu is open" 54 ms later,
+the AI off, and "closing activation sent, the menu closed" at the close. MEASURED once; H5's hypothesis stands (the engine's own
+promotion of the actor's process after EnableAI, not a flag of ours), the beat between 1.9 and 2.13 s here, the gate's reruns adding
+samples. The cost a player feels: a guest's body opens about two seconds after its E; a known limit of this slice, named in the
+checklist. A later refinement, if the lag matters at turbo 2: the AI on at the body's release instead of the open, with H-54e's drift
+(45 units in 5 s) as its price. M3's exit gate runs on v6 (c-dungeon-enemies, b-npc-body-release, b-npc-loot, b-npc-death-report,
+m0-inventory, a-activation-reach, a-sleep, always, watch; T2 beside).

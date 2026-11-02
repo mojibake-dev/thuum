@@ -310,7 +310,7 @@ def describe(rec: Record) -> str:
             parts.append(f"{name}[4] {u:#010x} (float {f:g})")
         elif len(data) % 4 == 0 and 0 < len(data) <= 64:
             floats = struct.unpack(f"<{len(data) // 4}f", data)
-            parts.append(f"{name}[{len(data)}] floats {['%g' % v for v in floats]}")
+            parts.append(f"{name}[{len(data)}] floats {['%g' % v for v in floats]} hex {data[:32].hex()}")
         else:
             parts.append(f"{name}[{len(data)}] {data[:32].hex()}")
     return head + ("\n  " + "\n  ".join(parts) if parts else "")

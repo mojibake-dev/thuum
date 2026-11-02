@@ -683,6 +683,8 @@ function nearbyActors(player: Actor): Actor[] {
 // the NPC a solo reference's place-npc step put down (ADR-031): {other}
 // names it, not the nearest actor a random search finds
 let placedId = 0;
+// the papyrus-log step's hook, removed by {stop: true} or replaced by the next
+let papyrusLogId: number | null = null;
 // every NPC placed this session (place-npc), oldest first: a watch names
 // them all (r-npc-fight's random search missed one of two bandits,
 // docs/research/m3 readings 2026-10-18); placedId stays the last for the
@@ -1519,6 +1521,12 @@ function run(step: Step, player: Actor): unknown {
           out[String(Number(id))] = Game.isWordUnlocked(word) ? 1 : 0;
           continue;
         }
+        // thuum docs/verbs/perks.md: a perk reads 1 when the player holds it
+        const perk = Perk.from(form);
+        if (perk) {
+          out[String(Number(id))] = player.hasPerk(perk) ? 1 : 0;
+          continue;
+        }
         if (Spell.from(form)) {
           out[String(Number(id))] = hasSpell(player, Number(id)) ? 1 : 0;
           continue;
@@ -1810,7 +1818,8 @@ function run(step: Step, player: Actor): unknown {
         const info = ActorValueInfo.getActorValueInfoByName(n);
         out[n] = info ? { base: info.getBaseValue(player), xp: info.getSkillExperience(), legendary: info.getSkillLegendaryLevel() } : null;
       }
-      return { skills: out, level: player.getLevel() };
+      // the perk points the engine holds (thuum docs/verbs/perks.md: the server's word under its switch)
+      return { skills: out, level: player.getLevel(), perkPoints: Game.getPerkPoints() };
     }
     case "av-table": {
       // thuum docs/verbs/actor-values.md: the engine's actor value list, the
@@ -2113,9 +2122,14 @@ function run(step: Step, player: Actor): unknown {
     }
     case "weather": {
       // the weather forced on this client (Weather.setActive, override and
-      // accelerate) or released ({release: true}): {form}; the current one
-      // comes back (Weather.getCurrentWeather)
-      if (a.release) {
+      // accelerate) or released ({release: true}): {form}; or read alone with
+      // {read: true} (thuum docs/verbs/weather.md's probe x-weather). The
+      // current one comes back (Weather.getCurrentWeather) with the outgoing
+      // one and the blend's progress (getCurrentWeatherTransition, 1 once
+      // settled, HYPOTHESIS until the probe reads it)
+      if (a.read) {
+        // nothing changes
+      } else if (a.release) {
         Weather.releaseOverride();
       } else {
         const w = Weather.from(Game.getFormEx(num(a.form)));
@@ -2123,7 +2137,12 @@ function run(step: Step, player: Actor): unknown {
         w.setActive(true, true);
       }
       const now = Weather.getCurrentWeather();
-      return { current: now ? now.getFormID() : 0 };
+      const out = Weather.getOutgoingWeather();
+      return {
+        current: now ? now.getFormID() : 0,
+        outgoing: out ? out.getFormID() : 0,
+        transition: Weather.getCurrentWeatherTransition(),
+      };
     }
     case "favorite": {
       // thuum docs/verbs/favorites.md: mark a favorite as the player would in
@@ -2413,6 +2432,25 @@ function run(step: Step, player: Actor): unknown {
       placedIds.push(placedId);
       return { formId: placedId };
     }
+    case "place-ref": {
+      // An engine-native reference of an item base (thuum docs/verbs/
+      // prop-physics.md, x-prop-launch v2): Papyrus PlaceAtMe of {base} by the
+      // player, {count} of them (1), moved to {x, y, z} from lab-spawn when
+      // given (place-npc's frame), else left where the engine put it. The
+      // console's placeatme never reaches the engine under skymp5-client
+      // (consoleCommandsService's schema sends it to the server and returns
+      // false; x-prop-launch v1 20261031-071449), so this is the one way to a
+      // reference the server does not own; the world cleaner leaves
+      // non-actors alone. Returns the reference's form id.
+      const base = Game.getFormEx(num(a.base));
+      if (!base) return { error: "no such base" };
+      const ref = player.placeAtMe(base, Math.max(1, num(a.count, 1)), false, false);
+      if (!ref) return { error: "the base placed no reference" };
+      if (a.x !== undefined || a.y !== undefined || a.z !== undefined) {
+        ref.setPosition(LAB_SPAWN.pos[0] + num(a.x), LAB_SPAWN.pos[1] + num(a.y), LAB_SPAWN.pos[2] + num(a.z));
+      }
+      return { formId: ref.getFormID(), baseId: base.getFormID(), pos: [ref.getPositionX(), ref.getPositionY(), ref.getPositionZ()] };
+    }
     case "npc-puppet": {
       // thuum docs/verbs/npc-puppet.md: the placed or named NPC made a puppet
       // ({puppet: true}) or live again through the fork's Skyrim Platform
@@ -2582,6 +2620,44 @@ function run(step: Step, player: Actor): unknown {
         // then a new poll, so a claim reads them on a second npc-state (gazeOf)
         ...gazeOf(npc.getFormID()),
       };
+    }
+    case "papyrus-log": {
+      // thuum docs/verbs/word-wall.md's read: every Papyrus event the engine
+      // sends to a script on the references in [minSelfId, maxSelfId] (or
+      // matching {eventPattern}), printed as it happens through Skyrim
+      // Platform's sendPapyrusEvent hook (skyrimPlatform.ts SendPapyrusEventHook:
+      // the self id and the event's name; no arguments, a known limit of the
+      // hook), so a probe can read which event a wall's trigger raises and
+      // when. {stop: true} removes the logger (YAML reads `on` and `off` as
+      // booleans, so neither names an argument). The block on Papyrus events
+      // (papyrus-events {block: false}) must be lifted first in a connected
+      // game, or the engine sends nothing to the script at all
+      if (a.stop === true) {
+        if (papyrusLogId !== null) hooks.sendPapyrusEvent.remove(papyrusLogId);
+        papyrusLogId = null;
+        return { logging: false };
+      }
+      if (papyrusLogId !== null) hooks.sendPapyrusEvent.remove(papyrusLogId);
+      const minId = a.minSelfId !== undefined ? num(a.minSelfId) : 0;
+      const maxId = a.maxSelfId !== undefined ? num(a.maxSelfId) : 0xffffffff;
+      const pattern = typeof a.eventPattern === "string" ? a.eventPattern : undefined;
+      // Skyrim Platform's Handler takes both `enter` and `leave` as functions
+      // (skyrim-platform Handler.cpp); a handler with `enter` alone is
+      // "Invalid argument" (x-word-wall-read 20261101-124714, step 7)
+      const handler = {
+        enter: (ctx: { papyrusEventName: string; selfId: number }) => {
+          printConsole(`lab-driver: papyrus event ${ctx.papyrusEventName} on ${ctx.selfId.toString(16)}`);
+        },
+        leave: () => {},
+      };
+      // the hook's add takes the pattern as an optional fourth argument: an
+      // explicit undefined there is "Invalid argument" to the native binding
+      // (x-word-wall-read 20261101-121858, step 7), so the call carries three
+      // arguments when no pattern is asked for
+      papyrusLogId = pattern === undefined
+        ? hooks.sendPapyrusEvent.add(handler, minId, maxId)
+        : hooks.sendPapyrusEvent.add(handler, minId, maxId, pattern);
+      return { logging: true, minSelfId: minId, maxSelfId: maxId, eventPattern: pattern ?? null };
     }
     case "papyrus-events": {
       // Skyrim Platform's Papyrus event block. skymp5-client turns it on at

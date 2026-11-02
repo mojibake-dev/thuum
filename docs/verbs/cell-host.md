@@ -1065,3 +1065,14 @@ walk, plus the host's 500 ms sample). The claim's 64 is the relay's bound, not t
 later train): a graceful stop that drains the in-flight batch and writes the pending changes before the process exits, which the
 restart step would then wait on; until then a scenario that restarts under walking residents reads a lag of this size once in a
 while. Not a loosening candidate: the bound stays, the watch closes on a green gate or on the flush.
+
+## Open questions
+
+- Restart persistence of a moving record (23:34 PDT 2026-10-31, c-riverwood's restart leg in dedupe's gate 20261101-052926, red 4 of
+  5): a resident walking at the server's restart came back 800 to 1,200 units behind her pre-restart snapshot while standing Alvor's
+  record matched to the hundredth. Cause: the Node process had no SIGTERM handler (Docker's restart sends one, then SIGKILL after 10 s),
+  so the save storage's batch in flight and every edit the movement policy left to the record alone (MpObjectReference::
+  IsLocationSavingNeeded requests a position save every 30 s at most) were lost. Fix on fork m3-save-flush-on-stop 34a40459 (R0:
+  ChangeFormGuard marks a skipped edit, MpObjectReference::FlushUnsavedEdit, WorldState::FlushSaveStorage drains the storage within a
+  budget, PartOne::FlushSaves, the addon's flushSaves, index.ts's SIGTERM and SIGINT handlers with a 5 s flush; SaveStorageTest's case).
+  c-riverwood is pended in lab/gate.yaml until the fix is on parity and a gate plays it.

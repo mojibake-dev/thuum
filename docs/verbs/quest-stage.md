@@ -38,7 +38,7 @@ is the first slice's evidence.
 | two stages of one quest set within a second on the talker (the fragment's chain) | x-quest-stage | pending |
 | the same stage set on both seats at once (both talk to the same NPC) | x-quest-stage | pending (one record, two no-op reports) |
 | a stage set while the other seat is in another cell, then both meet | x-quest-stage | pending |
-| a stage set, the server restarted, a login | b-quest-stage-restart | pending |
+| a stage set, the server restarted, a login | b-quest-stage-restart | GREEN standalone 20261031-135330 (v2, main 2d920040, on parity e713862c's quest code); in dedupe's gate |
 | an unlisted quest's stage | x-quest-stage | pending (refused in the log, the seat keeps its own) |
 | a stage lower than the quest's current one (SetStage out of order) | x-quest-stage | pending (recorded as done, GetStage unchanged on the applying seat) |
 
@@ -244,7 +244,13 @@ source (Skyrim Platform's Quest has no Start Game Enabled getter, the comment at
 after D69's (client only; m3-quest-report-dedupe off the merged base): in QuestStageService.onQuestStage, a per-quest memory of the
 last stage reported and when; a report equal to the last one within REPORT_REPEAT_MS (30 s, UNMEASURED beyond the burst's shape)
 is dropped and counted, with one logTrace per quest per window ("stage N of quest X repeated K times in 30 s; dropped"); the
-server loses nothing, since a repeated (quest, stage) is its no-op already (QuestStageTest). The T3 claims for the probe
+server loses nothing, since a repeated (quest, stage) is its no-op already (QuestStageTest). Lab reads (22:26 PDT 2026-10-31): a set of the stage a
+quest already stands at (the driver's set-stage, Quest.SetCurrentStageID) fires no stage event, so a forced repeat cannot be made that
+way (x-quest-report-dedupe v2 051908 and 052159: three sets, one report); the engine's own repeat exists on every login: Dawnguard's
+DLC1NPCMentalModel (QUST 0x02002b6e) fires its stage 0 at the login and again about 30 s later on every seat, and the dedupe dropped it
+in every run so far ("stage 0 of quest 2002b6e repeated 1 times in 34 s; dropped" at connect + 40 s on both seats in 192813, 051908,
+052159); the controller 201a428's second report 31.6 s after its first was reported, outside the 30 s window, as designed. v3 claims
+the engine's own repeat (d42cd5e5); b-quest-report-dedupe follows its green. The T3 claims for the probe
 (x-quest-report-dedupe, both seats in Riverwood for 90 s, the controller's bursts as the premise): c1.log_count("repeated
 [0-9]+ times in [0-9]+ s; dropped") >= 1 on each seat; server.log_count("E_QUEST_OWN_START: .* of 1a428:Dawnguard.esm: .*
 ([3-9][0-9]|[1-9][0-9][0-9]) such report") == 0 (no window of thirty or more held); the mode-all relay unchanged (x-quest-mode v5's
@@ -369,3 +375,29 @@ An agent's rules review of the train (ee44f7d1..0b49a28e) found eight things; si
 
 T0 green locally on the crate (246 cases) and the bridge; clippy, fork-lint and tsc green; the C++ compiles on CI (the push
 pipeline, whose difftest builds on the crate change); the Windows half on P2-win's pipeline.
+
+D69's T3, first reads (21:46 PDT 2026-10-30; x-quest-rumor v1 on the m3-quest-sge-stages dc3ec679 stage, 043546 cold and 044055
+relaunched, RED on two claims alike): the rumor half holds (DB01Misc's stage relayed in mode all, the denied MQ102 kept per seat) and
+FreeformHeartwoodMill's stage 20, unflagged, was recorded and relayed once with c2 done: D69 B's point. The red: no E_QUEST_OWN_START
+for stage 10 of e3ea5 and c2's stage 10 done. The chain trace (quest-stage-chain.js on both seats) says why: on c1 EnsureQuestStarted
+returned 1 and SetStage(e3ea5, 10) returned 0 with no stage event, so nothing reached the server; on c2 stage 10 reads done with no
+set in the trace's window. A start-up stage is done by the quest's own start at login on every seat, and the engine refuses a console
+set of a done stage, so the probe's forced report could never exist: the premise, not the server (QuestStageTest's refusal of the
+flagged stage stands at T0). v2 by path (the sha1 in the LOG): the start-up stage read as done on both seats before any set, stage 20's
+relay kept, and the server's OWN_START refusal reached through the reports the engine makes by itself, the vampire controller's
+stage-0 reports at its restarts (DLC1VCController 1a428, within 150 s; the churn item's own evidence), never recorded.
+
+D69's T3 (22:20 PDT 2026-10-30): x-quest-rumor v2 GREEN, 20261031-051455 on m3-quest-sge-stages dc3ec679's restage (the union's dist by
+REUSE_DIST_FROM): the rumor quest's stage relayed in mode all and applied on c2, the denied MQ102 kept per seat, FreeformHeartwoodMill's
+start-up stage 10 done on both seats by the quest's own start and its unflagged stage 20 recorded and relayed once with c2 done, the
+server's OWN_START refusal of the vampire controller's own stage-0 reports within the window. Promoted unchanged as b-quest-rumor
+(main 1b4dde1c, its own commit) and held pending in lab/gate.yaml (ebfbe115) until the train merges, since parity under D62 refuses
+the HeartwoodMill relay; the merge's commit un-pends it. The merge: a union of m3-guest-loot and m3-quest-sge-stages under one gate
+(always, c-dungeon-enemies, b-npc-body-release, b-quest-rumor, the quest-stage scenarios, watch; T2 beside it) if the guest-loot rerun
+is green, D69 alone otherwise. The Status box "T3 scenario green" ticks at the merge, when b-quest-rumor plays green in the gate.
+
+Debt noted (22:23 PDT 2026-10-30): b-quest-stage-restart is named above as the verb's restart scenario and is not in lab/scenarios; the
+quest records' persistence across a restart rides a-restart-persistence's world today and QuestStageTest's restart case at T0. It
+is written after D69's merge (rule 6's shape: the recorded stages read back after a server restart on both seats).
+Written 05:38 PDT 2026-10-31 (thuum main 7c9cc309): the stage set and relayed, the restart, both seats' reads after the reconnect with
+the login replay lines, a relaunched c2 reading the stage at its login. Its first run is owed before any gate that lists it.

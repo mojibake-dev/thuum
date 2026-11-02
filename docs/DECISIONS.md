@@ -2899,6 +2899,11 @@ exit open until the fix's gate plays it green. The read: x-body-open-guest by pa
 death, then the body's AI switched on before a third try) in the first lab gap after the rest set; the fix the train after
 (client, Promote's dead branch or an AI-on at the server's OpenContainer, whichever the read names), gated with c-dungeon-enemies
 and b-npc-body-release.
+The read (15:08 PDT): x-body-open-guest v2 (20261030-215922) GREEN, H5 holds: the guest's copy refuses the activation with
+its AI off after both kills (the server's and the host's engine's), and takes it once the AI is on, the body shifting 45 units in
+5 s meanwhile (H-54e's walk). The fix, fork m3-guest-loot 05ac32a9 (client only): the AI on around the server's open and off again
+at the first sight of the menu or after 2 s; the promote's dead branch unchanged. With it the host handler's menu-mode wait
+(39e5c2f5). Gate: c-dungeon-enemies, b-npc-body-release, x-body-open-guest-fix (by path; b-body-open-guest on green).
 
 ## ADR-051: An engine that no longer loads a puppet releases it to its schedule, and the first engine to sight it moves the record
 
@@ -3398,6 +3403,40 @@ the scenario: the other seat sees a wall about 80 units off, a player-visible wr
 place blocks a gap the caster sees open, worse than no wall (playtest 38's state), and the fix is a train's worth. The verb's pose
 model becomes shape A: the caster's report, validated (reach from the caster, bounds, one report per accepted cast), the copies at
 the reported pose; the settings table keeps the forms and the lifetime, and loses the step.
+The read (19:36 PDT): x-raise-wall-pitch v1 (20261031-023141) GREEN: the caster's own MSTT sits at 206.25 from the caster and the
+ACTI at 196.875, the same at level, 200 counts down and 400 counts up, with the server placing nothing under the switch. The aim
+hypothesis falls: the engine places the wall at a fixed distance. The sweep's 248 to 262 from a watcher 366 behind the caster is
+therefore the caster's HEADING against the record's yaw (about 42 degrees off north by the law of cosines; the walkers' 20-degree
+drift is the same family; HYPOTHESIS until a heading read), plus 14 units of the table's 192 against the engine's 206. Shape A
+stands: the engine's own placement reported, the server validating it against the caster's record (the pose 150 to 260 from the
+caster, the measured 206 with the caster's own motion in the window; the bases of the spell's table; one report per accepted cast)
+and placing the copies there; the alternative, 206.25 along the record's yaw, would place along a heading the engine did not use.
+
+D74 (00:15 PDT 2026-10-31, the pass; taken under the pass's rule, Eli may veto): shape A's handshake. The caster's game must know
+which casts to watch and which bases to report, and the server must tie each report to one accepted cast. Options: A) the server asks
+(PlacedRequest to the caster alone at the accepted cast: the set's id, the entry's bases as form ids, the window) and the caster's game
+answers once per base (PlacedReport: set, base, pos, yaw), the server judging each report against its request; B) the caster reports
+unasked every MSTT or ACTI its engine places near it during a cast and the server matches spell and base from its table (one message,
+but the client watches every object load and needs the table's bases); C) the client holds the table (sent at login or baked into the
+build) and reports the listed bases alone (one message plus a settings transfer). Taken: A. The request carries the exact bases and
+the set, so the client searches only when asked and only for those bases (no objectLoaded subscription, rule 9 in spirit), the set id
+makes the server's matching exact (two casts of the same spell in two hands inside one window stay apart), and the caps are judged
+before any client work; the cost is a second message type. The band is 150 to 260 units from the caster's pose at the cast on the
+ground plane and 256 up (the pitch read's 206.25 and 196.875 with the caster's own motion inside the window); the window is 3 s (the
+rise of half a second, the settle, two trips). The table's forward and dz are read and ignored so the deploy settings, restored to the
+Raise Wall entry in both files, serve a server of either shape until the merge: a shape C server (parity meanwhile) places D70's
+known-wrong wall again, a shape A server places as reported; the playtest's item 8 keeps its limit until the merge. Built as fork
+m3-wall-pose (23e334b9, 69ca1221, 866ff864, 7ac26664); the probe x-raise-wall v4, the scenario's amendment after its read.
+
+D72 (01:0x PDT 2026-10-31, Eli): Survival Mode for the rest of testing. The memo (docs/verbs/player-globals.md, playtest 39's F1
+"survival doesnt kill"): A) leave the mod's rule and fix the set-up; B) make an engine drain reach the record; C) a server drain at the
+cold maximum. The read (x-survival-cold v1, 072242 and 072601; apocrypha's script read): hunger and exhaustion never kill by the
+Creation's own scripts, a minute at the top cold stage cost no health, and the one death is the cold's Kill() at 1000, which the
+server's own word (D51 B, built) reproduces. Eli: "knowing that about survival i say we deactivate survival for the rest of
+testing." Taken: A with the switch off: every lay puts the switch global 828:ccQDRSSE001-SurvivalMode.esl at 0 on both players'
+records and the start word neither switches it on nor zeroes the needs; the Creation stays in the load order (the load-order rule)
+and the deploy settings keep its globals; the checklist's build line names it. x-survival-cold v2 leaves the lab's queue; the
+server's cold kill word stays built, unproven while the mode is off.
 
 ## ADR-058: Physics props, the toucher simulates (Garry's Mod's shape without its server)
 
@@ -3461,7 +3500,43 @@ dungeons, the traps' bodies (M4's d-bleak-falls). Decision 4's slice two is ther
 loader's MSTT admission costs records and arrival messages for effect objects and buys nothing in the lab's cells), and head 3 of
 the pass continues on slice one: its proof at T3 (x-prop-push, x-prop-pass, prop-contact.js), its persistence (rule 6: the record's
 position is written by the asleep sample's SetPos, a PropTest case and x-prop-restart by path), a rules review of the branch, and the
-budgets measured at the stage. Slice three's ragdoll bodies keep their place (M4) unless playtest 39 ranks the bodies' drift first. Eli, 12:24 PDT 2026-10-30: "i think integrating the physics and bodies sooner rather than later will cause more problems than it will solve"; the playtest 39 clause is retired, slice three is M4's, and the read before its build (npc-fate's measured "a dead ragdoll takes no SetPosition" against the row's SetPosition hypothesis) waits with it.
+budgets measured at the stage. Slice three's ragdoll bodies keep their place (M4) unless playtest 39 ranks the bodies' drift first. Eli, 12:24 PDT 2026-10-30: "i think integrating the physics and bodies sooner rather than later will cause more problems than it will solve"; the playtest 39 clause is retired, slice three is M4's, and the read before its build (npc-fate's measured "a dead ragdoll takes no SetPosition" against the row's SetPosition hypothesis) waits with it. D78 (23:28 PST 2026-11-01, Eli: "ok C for m3, B goes in M4 with dragging with a note that if it becomes too much of a bugbear it can get thrown into the backlog."): the re-analyst's read (npc-fate.md's Dynamic plan) showed the death's Havok handoff is forced
+inside Actor::KillImpl for every ragdoll-bearing actor, so a deterministic death animation is no route to same-spot bodies; M3 closes
+its bodies row at "within a stride" (R0 standing point, R2 fall), and M4 builds the resting body as POSE REPLICATION with corpse
+dragging (slice three: the host's settled bone transforms keyframed on every other seat and re-applied at a cell reload, the stream
+dragging needs anyway), with Eli's clause that it goes to the backlog if it becomes too much of a bugbear. Corpse-as-prop's root-only
+SetPosition is retired (a dead ragdoll takes none).
+
+D73 (19:56 PDT 2026-10-30, the pass; taken under the pass's rule from the physics stage's reads, Eli may veto): decision 3 refined, a
+body is Dynamic unless another seat streams it awake right now. Facts (m3-prop-physics dde874b5 on the merged base): x-prop-grab v8
+(20261031-024409): the guest's grab of a follower's Keyframed body released in the same instant it took (the claim's touch 1 and
+touch 2 logged together), the grant arrived after the hand had let go, and the held E's release fired an activation 1.3 s into the
+grant that the server took as a pickup ("Deleting 0xff item" at 02:47:38.003, the basket gone on both seats within 20 ms): a Keyframed
+body cannot be held. x-prop-pass v9's rerun (023534): the walker's contact on a Keyframed body moved nothing, the grant came 0.6 s
+later, the flip then; the body's later loss is read separately (v10b's record read). x-prop-push v9 (021439): a Dynamic body set
+without the wake flag took no contact at all. The old decision 3 (every follower Keyframed, the simulator Dynamic at the grant)
+therefore gave no local physics to the first touch of anything: the kick waited a round trip on a body that does not move, the grab
+could not close. The refinement: a follower's body is Keyframed only while another seat's stream is live (from the first awake sample
+to 150 ms after the asleep sample, or a second after the last awake one), and Dynamic with leave to wake otherwise; a freshly tracked
+body with no live stream is Dynamic; the simulator's body is Dynamic with leave to wake (46f1a2dc); the grant's flip sets no motion on
+a body already Dynamic and the loss of the simulation sets none (the next awake sample does). So a kick or a grab acts on a resting
+body at once, locally, and the claim and the stream follow from the moved pose; while a stream is live the body glides as before.
+Garry's Mod's shape, nearer: every body physical locally, the authority's stream correcting it. Built: fork m3-prop-physics 0bb02f74
+(tsc clean; the held-hand guess a2256945 reverted as unproven, the pickup being the vanish's cause). HYPOTHESIS until the probes on
+the next stage: the resting Dynamic copies settle alike on both seats (a small divergence of resting clutter is accepted, as ADR-058
+accepts a sample's lag), the glide holds under Keyframed as before, and a grab now closes on the Dynamic body so its E consumes no
+pickup. Probes: x-prop-push v11, x-prop-pass v10b, x-prop-grab v8, x-prop-drop v5 on the restage; b-prop-push promoted on green.
+The flight's read (20:00 PDT): x-prop-pass v10b (20261031-025124) at 1 s after the kick: the server's record of the basket unmoved at the
+premise's spot (133847.09, -61329.46, 14670.76), the host still listing it there, the claimant's own engine listing nothing. So the
+server and the stream are not the cause; the claimant's engine loses its copy at the grant's Dynamic set. Every copy that flew (pass
+v9, v10b, grab v7) had been placed by setPosition (the first track's snap, the asleep sample's jump); the drop's copy, created at its
+place and never placed, took the same Dynamic set and settled. HYPOTHESIS H-P4: setPosition leaves a Keyframed body's Havok collision
+where it was, and the Dynamic set resolves the mismatch violently (the engine's known pitfall with SetPosition on physics objects).
+The fix, fa225f01: a follower's jumps and the first placement move the body by the engine's keyframed translate (translateTo at a speed
+that lands within 100 ms when the 3D is loaded; setPosition only before it loads), and the rest-Dynamic set waits 300 ms for the
+translate. Probes on the restage: push v11 1e8203e4, pass v10c 02af9dc2 (the record recorded by snapshots, no pos claims: the evaluator
+evaluates every operand of an or, so a missing listing raises), grab v8 7689e959, drop v5 426cf923.
+
 
 Note under ADR-011, D64 (17:26 PDT 2026-10-29, the pass; numidium's memo, taken under the pass's rule): the idle client's packet
 cost. Facts: the gamemode loops `server.tick()` then a 1 ms setTimeout (skymp5-server/ts/index.ts:222-227), about 816 ticks a
@@ -3509,3 +3584,115 @@ and its later stages are the world's like any other quest's, the denylist the br
 stage's script off the applying seat; C) leave rumors per seat. Taken: B, built on fork m3-quest-sge-stages (dc3ec679, T0 green: the
 D62 test became D69's on FreeformHeartwoodMill, whose stage 10 carries the flag and whose 20 does not), the train after the union's
 merge, with its own T3 (a rumor's later stage crossing) before it merges.
+
+Note under ADR-058, D75 (16:43 PDT 2026-10-31, the pass; taken under the pass's rule): dropped items persist as props. Facts: the
+verb's record keeps a prop's rest across a restart (decision 2) and x-prop-push's restart leg claims it, yet upstream's server skips
+every 0xff item reference when it loads the save ("Skipping FF item 2 (type is MISC), will likely overwrite at some point", push v15
+220439 and 221908) and MpActor::DropItem deletes a dropped copy two minutes after the drop and trims the dropper's queue at ten: three
+clutter policies for a world where dropped items were transient. Options: A) keep upstream's policies and drop the restart claim (a prop
+lives two minutes); B) persist dropped items as props by default, the three policies behind a server setting (propsPersist false restores
+them), a cleanup lever for a crowded world later (a console sweep or a reloot-like rule, no timer); C) persist only while a seat is near.
+Taken: B (m3-prop-physics a2e77f3d: WorldState::propsPersist, PartOne::SetPropsPersist, DropItemTest through AttachSaveStorage in both
+settings). Known cost: every dropped item is a record for good until a lever says otherwise; the lab's worlds are clean per run.
+
+
+## ADR-059: World scripts run on the cell's host; the admitted list gains names and a hosted-cell gate (traps, puzzles, word walls)
+
+Status: PROPOSED 05:33 PST 2026-11-01 by the weekend pass (thuum-magnus), ACCEPTED under the pass's rule unless Eli vetoes. Forced by the
+traps read x-bleak-traps v3 (20261101-132023) and the word wall read x-word-wall-read (131832).
+
+Context. Every trap, pressure plate, lever, portcullis and puzzle pillar in Skyrim is a Papyrus script on a reference or its base:
+in Bleak Falls Temple the plate is PressurePlate (extends TrapTriggerBase, OnTriggerEnter, then Activate on itself so its activation
+parents fire), the spike wall TrapSwingingWall and TrapHitBase (playAnimation 90For and the Trans* events, the hit's damage from a
+level table), the lever TrapLever and NorLever01SCRIPT (FullPull, FullPush), the portcullis default2StateActivator (SetOpen,
+playAnimation open), the pillars defaultPuzzlePillarScript (onActivate, playAnimationandWait Trigger0N and Turned0N, a state per
+face, the solve counted on the linked lever's defaultPillarPuzzleLever, which activates the XMarker whose activation parents open
+the portcullis, or the dart traps on a wrong pull); the word wall's trigger carries WordWallTriggerScript and two listeners (the
+chant, the glow, the camera, Game.TeachWord, SetStage MS13 60). The names and properties are the master file's VMADs read by
+lab/esm.py and the string tables of the .pex files in "Skyrim - Misc.bsa" (lab/tools/bsa-extract.py); the engine's own "trap" is a
+script calling playAnimation and Activate. In a connected game none of it runs: skymp5-client blanks every Papyrus event to a script
+not on ADR-044's admitted list (blockPapyrusEventsService, FridaHooks.cpp OnSendEventEnter) and blocks activation on every ACTI,
+DOOR, CONT and FURN (objectReferenceEx.ts dealWithRef). The read measured the result: a host on the plate, a guest on the plate, a
+pillar turned, a lever pulled, and not one line on any seat or the server beyond the sender's "Sent activation"; every activate
+returned false. The server's half of docs/verbs/traps.md (RelayedActivation 70, the linked-activation report from the host) is a
+relay with nothing to relay. The Creation Kit's own words on the activation block: a blocked reference still sends OnActivate to its
+scripts, but "only on the same script which has the BlockActivation() function set", and a scripted Activate on a blocked reference
+runs "the OnActivate block on that script" without the normal processing (ck.uesp.net/wiki/BlockActivation_-_ObjectReference,
+mirrored at papyrus.bellcube.dev/skyrimse/script/objectreference/function/blockactivation/); Skyrim Platform sets the block
+natively, so which attached script hears an OnActivate under it is a HYPOTHESIS the first probe reads. Prior art: TES3MP has every
+client run the cell's scripts and syncs the consequences as object packets (ObjectActivate, ObjectAnimPlay, ObjectState, the
+script-local variables; TES3MP/TES3MP components/openmw-mp/Packets/Object), with the cell's authority the one whose word counts;
+upstream SkyMP's own answer for pillars is a reference's lastAnimation recorded by the server's VM when a server-side script calls
+PlayAnimation and replayed by every client (MpObjectReference::SetLastAnimation, remoteServer.ts "pillars in bleakfalls are not
+reliable"), which needs the vanilla scripts' .pex files on the server and a VM that implements their natives (1,310 missing in
+docs/NATIVES.md). The design law decides between the two: a host client owns SIMULATION for its cell, we do not reimplement what
+an engine runs for us, and the server owns STATE.
+
+Decision 1, who runs a world script. The cell's HOST runs the scripts of the cell's world objects (traps, plates, levers,
+portcullises, pillars, puzzle levers, dart traps): on the host, Papyrus events to a reference in a cell this game hosts pass the
+block; on every other seat they stay blanked. The gate is runtime and the client's word: hostService tells Skyrim Platform the
+set of hosted cells (a new native on TESModPlatform, setHostedCells, called at every grant and release), and OnSendEventEnter
+compares the event's self reference's parent cell against it before the name walk. A player's-own class stays as ADR-044 has it
+(the effects on the player and those it casts) and gains the word wall's three trigger scripts by NAME on every seat: the show is
+the reader's, the scripts gate themselves on Game.GetPlayer(), and a host's seat ignores a figure in the trigger for the same
+reason. The admitted list (Data/Platform/papyrus-scripts.txt, built from lab/layer/papyrus-admitted.tsv by papyrus-map.py) therefore
+gains two row kinds beside ADR-044's whole plugins: a plugin's scripts by name admitted everywhere, and a plugin's scripts by name
+admitted on the hosting seat alone (the row's marker; the tsv's scripts column). Skyrim.esm never gets a whole-plugin row.
+
+Decision 2, activation. A guest's activation of a world object travels as today (Activate C2S); the server, finding the target a
+scripted ACTI in a cell the sender does not host, relays it to the HOST (RelayedActivation 70 toward the host, caster the guest's
+figure id as the host's game knows it), whose engine activates the reference as that actor; the host's engine then runs the
+script, and the activations the script and the activation parents make are the host's report (the linked-activation report built
+on m4-traps, widened to every activation the host's engine makes with a non-player caster in a hosted cell), which the server
+checks against the game files' links (XAPR, XLKR, the scripts' properties where a link is a property: refActOnSuccess01,
+puzzleDoorActivator, refActOnFailure0N are read from the VMAD into the link table) and records. The host's own press of a plate or
+pull of a lever needs the engine's processing on that seat: dealWithRef lifts BlockActivation on a scripted ACTI while this game
+hosts its cell (the same runtime set) and restores it at release. HYPOTHESIS H1: under the native block a relayed scripted
+activate reaches no attached script, so the lift is needed for the relay's target too (the first probe reads both forms).
+
+Decision 3, what guests see. Guests run no world script, so the host reports what its engine SHOWS: a world object's animation
+event (the sendAnimationEvent hook on game-file references in hosted cells, the Trigger0N, Turned0N, FullPull, open, 90For
+family) travels as ObjectAnimation {refr, event} (C2S from the host, S2C to the cell's other listeners; a wire row with its
+validator and fixtures in one commit, rule 4; budget per reference), the server writes it as the reference's lastAnimation
+(the existing record field and CreateActor prop) and every other seat plays it (remoteServer's lastAnimation replay, its retry
+kept); a DOOR's open stays isOpen. This is TES3MP's ObjectAnimPlay and upstream's lastAnimation with the host's engine, not the
+server's VM, as the player of the animation. R2: the host computes, the server records and relays.
+
+Decision 4, harm. A trap's damage to a player is the host's engine's number on that player's figure, reported by the host
+(TrapHit {refr, target, damage}: the next wire row, with the validator reading the trap script's level table from its VMAD
+properties, LvlDamage1..6 by LvlThreshold1..5 against the target's level, and the trap's trigger volume against the target's
+recorded position), applied by the server to the record (R1), shown on the hit seat by the server's ChangeValues; a kill is
+ADR-048's hazard death with the trap as the activation beside the body. The guest's own engine runs no trap script, so nothing
+hurts twice (the read's double-fire hazard closes by construction).
+
+Decision 5, state. A scripted ACTI's logic lives in the host's engine's script state for the session; the server keeps two things
+so another engine can rebuild it: the reference's lastAnimation (the visual) and its ACTIVATION COUNT since the cell's record
+began (scriptedActivations on the change form: a migration, rule 6, and a restart-persistence scenario). A new host (a hand-off,
+a reconnect, a restart) receives the counts at the cell's load and its engine is fed that many relayed activations per
+reference, spaced by the script's own busy window (defaultPuzzlePillarScript ignores an activation while it turns; the spacing
+is the first probe's measurement, UNMEASURED), so a pillar reaches the same face and the lever's solved count the same value
+from the same initial state: a Papyrus script here is a function of its activation history. A word wall's word is the record's
+already (docs/verbs/word-wall.md).
+
+Decision 6, the lab. lab/layer/papyrus-admitted.tsv gains the two row kinds; the first rows: Skyrim.esm everywhere
+WordWallTriggerScript WordWallTrigger02Script WordWallTriggerBleakFallsScript; Skyrim.esm host PressurePlate TrapTriggerBase
+TrapSwingingWall TrapHitBase MovingTrap TrapLever NorLever01SCRIPT default2StateActivator defaultPuzzlePillarScript
+defaultPillarPuzzleLever traplever DartTrap. A layer-stage carries the file (lab-plugins-write-reloads: the clones take it at the
+relaunch); d-bleak-falls stays M4's exit; x-bleak-traps v4 is the first read on the layer: the plate under the host, the plate
+under a guest (the host's engine fires once, the guest's never), a pillar from a guest (the relay to the host, the animation back),
+the lever, the puzzle's darts and portcullis, a hand-off mid-puzzle, a restart.
+
+Consequences. Three wire rows over the weekend's one (RelayedActivation stays; ObjectAnimation, TrapHit, the counts in the
+record); one Skyrim Platform change (the hosted-cell set, the two admission markers, the animation hook's reference range; a
+Windows build); client: hostService's set, dealWithRef's lift, the animation report, the relay's handler toward the host;
+server: the relay's host branch, the link table from VMAD properties, the animation and hit handlers with their validators, the
+counts and their replay. Built in slices, each probed on the layer before the next, traps.md's rows re-tagged as each read lands.
+What this rejects: running the vanilla scripts on the server's VM (the .pex files would have to leave the game's folder, the VM
+lacks their natives, and it is the server simulating a cell, which the law forbids); admitting Skyrim.esm whole (every quest and
+alias script would run on every seat, ADR-044's reason).
+
+Risks. H1 above; H2, the sendAnimationEvent hook sees a non-actor reference's NotifyAnimationGraph (Skyrim Platform's
+hook is on IAnimationGraphManagerHolder, which every animated reference holds; UNREAD); H3, a guest's figure on the host's
+engine enters a plate's primitive as an actor (the copy's character controller is a real one; the voice slice saw figures trigger
+nothing because nothing ran); H4, the replay's spacing and the count's drift when a relayed activation is refused by the
+script's busy window (the server counts what the host's engine confirms through the animation report, not what it relayed).

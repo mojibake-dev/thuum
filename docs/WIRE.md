@@ -642,3 +642,151 @@ any other pairing is E_VAL_RANGE in validate_server, and the transport refuses t
 The caster's own game skips a form naming itself while the script's own copy stands at the pose; every other game
 places it as any server form. The removal is the usual DestroyActor 5 s after the cast's end. Fixtures
 33-CreateActor-0 and -1 carry the field; WireJsonContractTest reads them through CreateActorMessage.h.
+
+### PlacedRequest (t 61) and PlacedReport (t 62): the caster's engine names the pose (spell-placed-object, M3; ADR-057 shape A, D70)
+
+Shape C's fixed step fell at T3 (D70: the engine stands Raise Wall 206 ahead along a heading the record's yaw does not carry), so
+since fork m3-wall-pose 23e334b9 (SCHEMA_VERSION 22, 2026-10-31) the server asks and the caster answers. PlacedRequest (id 69,
+MsgType 61), server to client, reliable, to the caster alone at its accepted cast of a listed spell: `{ set: u64 (the set's id the
+reports name), bases: [u32] (the entry's bases as form ids in the load order both ends share, one to eight, none 0), windowMs: u32
+(1 to 10,000; the rule's 3,000) }`. PlacedReport (id 70, MsgType 62), client to server, reliable, once per base per set: `{ set: u64,
+base: u32 (never 0), pos: [f32; 3] (engine units, inside the world), yaw: f32 (degrees) }`; validator: finite, E_VAL_RANGE on a base
+of 0, E_VAL_OUT_OF_WORLD, a budget of 8 then 2 a second (UNMEASURED; two bases a cast, two sets a caster). The rule (wire-rules
+placements, through the bridge's take_requests and report_placed) judges the rest: the set this caster's own request and still open
+(the window from the cast, the set's linger and maxS), the base one the set asked for and not yet reported, the pose 150 to 260 units
+from where the caster stood at the cast on the ground plane and within 256 of its height; refusals are logged by name (E_PLACED_SET,
+E_PLACED_LATE, E_PLACED_BASE, E_PLACED_REPEAT, E_PLACED_NAN, E_PLACED_RANGE with the distance and the height). An accepted report
+places that one base at the reported pose through the CreateActor path above (placedBy the caster); no report within the window
+places nothing ("nothing placed, the caster's game reported no base within the window"). The table's `forward` and `dz` are read and
+ignored, so one settings file serves a server of either shape until the train merges. Fixtures 61-PlacedRequest-0 and -1,
+62-PlacedReport-0 and -1; WireJsonContractTest reads them through PlacedRequestMessage.h and PlacedReportMessage.h.
+
+### SkillUse (t 63): a player's skill uses for the server's formulas (leveling, M5)
+
+Since fork m5-leveling 553863f8 (SCHEMA_VERSION 23, 2026-10-31): SkillUse (id 71, MsgType 63), client to server, reliable, once a
+second while the player acts: `{ uses: [{ skill: u8 (the skill's ActorValue, 6 One-handed to 23 Enchanting), amount: f32 (the action's
+base amount as the engine computed it, summed over the second) }] }`, one to eighteen entries, each skill once. Validator: no use,
+a skill outside 6 to 23 or listed twice, an amount of 0 or below or over 100,000 are E_VAL_RANGE; non-finite E_VAL_NONFINITE; a
+budget of 8 then 2 a second (UNMEASURED). The server (PartOne::ApplySkillUse through wire-rules leveling) drops every use while its
+`leveling` setting is false, refuses a use before the player's first ActorValues report (E_SKILL_NO_RECORD), and otherwise runs the
+game's formulas with the AVIF constants read from the game files at start (the eighteen skill records 0x44c to 0x45d): the skill's
+experience and level, the base the game shows, the character's experience, threshold and level; a level moved sends the record back
+as ActorValues (t 40). Fixtures 63-SkillUse-0 and -1; WireJsonContractTest reads them through SkillUseMessage.h.
+
+### LockReport (t 64), LockPrompt (t 65) and CreateActor's lock prop (locks, M4)
+
+Since fork m4-locks c324c015 (SCHEMA_VERSION 24, 2026-10-31): the server holds every door's and container's lock (the REFR's XLOC read
+by libespm, then the record). CreateActor (t 33) gains the optional prop `lock: { level: u8 (the XLOC byte: 0 or 1 Novice, 25
+Apprentice, 50 Adept, 75 Expert, 100 Master, 255 requires its key), key: u32 (the key's base form id, 0 none), locked: bool }`, absent
+for a reference the game files leave unlocked; the same three fields travel as UpdateProperty "lock" at a change. The client applies
+it to its own reference instead of stripping the lock. LockPrompt (id 73, MsgType 65), server to client, reliable, to the activating
+player alone: `{ refr: u32 }`, sent when a player's Activate meets a locked reference without its key (E_ACTIVATE_LOCKED in the log);
+the client runs the engine's own activation on the locked local reference, which opens the lockpicking menu or the requires-key box.
+LockReport (id 72, MsgType 64), client to server, reliable, once per attempt: `{ refr: u32 (never 0), outcome: u8 (0 the lock turned,
+1 picks broke and the lock stands, 2 the menu left), broken: u8 (0 to 8) }`; validator E_VAL_RANGE on a refr of 0, an outcome past 2 or
+over 8 broken; a budget of 8 then 2 a second (UNMEASURED). The rule (wire-rules locks) judges the report: locked (E_LOCK_OPEN), within
+the activation reach (E_LOCK_REACH), 500 ms since the player's last report on it (E_LOCK_RATE), a key lock refusing picks (E_LOCK_KEY),
+a Lockpick (MISC 0xa) held for a pick (E_LOCK_NO_PICK), a broken count of 1 to 8 (E_LOCK_RANGE); an accepted pick unlocks the record
+(the property to every listener), accepted broken picks leave the record's inventory, bounded by the count held. A key in the record
+opens at the activation (R0, "opens <refr> with its key"). The server's `locks` setting (default false) keeps every lock off the
+record and the props absent, today's behavior. Fixtures 64-LockReport-0 and -1, 65-LockPrompt-0 and -1; the legacy reader spends no
+bit on the lock prop (wire-legacy LEGACY_ABSENT).
+
+### SetWeather (t 66): the server's sky for the place a player stands in (weather, M4)
+
+Since fork m4-weather (SCHEMA_VERSION 25, 2026-10-31): the server picks one weather per worldspace on its game clock (wire-rules
+weather: the worldspace's pool is its weather regions' lists from the game files, REGN RDWT, chances summed, or server-settings.json's
+`weather.pools` pin; slots of `weather.changeGameMinutes` from the clock's day 0, default 120; a chance-weighted draw by a hash of the
+seed, the worldspace and the slot that never repeats the previous slot's weather when the pool has two or more entries). SetWeather
+(id 74, MsgType 66), server to client, reliable, to one player: `{ place: u32 (the worldspace, or the interior cell a release is for;
+never 0), weather: u32 (the WTHR form id; 0 releases the game's override), transition: bool (blend into it, or cut) }`, sent at login
+after the player's own CreateActor, when the player enters a place (the server sees the cell change at its half-second tick), and at
+each change of the pick for its worldspace; an interior or a worldspace without a pool hears one release on entering. Validator
+E_VAL_RANGE on a place of 0; the transport refuses it from a client by direction. The client forces the weather on a cut, blends on a
+transition, keeps a word for a place it is not in yet, and re-forces a settled drift every two seconds. The server's `weatherSync`
+setting (default false) sends nothing, today's behavior. Fixtures 66-SetWeather-0 and -1. T2 declares one SetWeather per client at
+login (difftest divergences.yaml) with lab/tools/test-proto.sh pinning one weather over Tamriel for the run.
+
+### PerkPick (t 67) and PerkState (t 68): perks as the server's transactions (perks, M5)
+
+Since fork m5-perks (SCHEMA_VERSION 26, 2026-10-31): the server holds a player's perks on its actor value record and judges
+every pick by the perk record's own conditions (the CTDAs before its first PRKE section: HasPerk for the tree's lines and the rank
+before, GetBaseActorValue for the skill's level, GetLevel; UESP "Skyrim Mod:Mod File Format/PERK") and the points left, one a
+level past the first less the perks held (wire-rules perks). PerkPick (id 75, MsgType 67), client to server, reliable, once per
+perk the game's Skills menu took: `{ perk: u32 (never 0) }`; validator E_VAL_RANGE on 0; a budget of 8 then 2 a second
+(UNMEASURED). The rule's refusals, each logged by name: E_PERK_UNKNOWN (no such perk), E_PERK_HIDDEN (not playable, or hidden),
+E_PERK_OWNED, E_PERK_POINTS, E_PERK_PREREQ (a HasPerk condition, the perk it names), E_PERK_SKILL (an actor value condition, the
+value it names), E_PERK_LEVEL, E_PERK_CONDITION (a function the rule cannot judge, by rule 5), E_PERK_FULL (512 held). PerkState
+(id 76, MsgType 68), server to client, reliable, to one player: `{ perks: [u32] (at most 512, none 0), points: u16 }`, at login
+after the player's actor values, after every pick accepted or refused, after a level change and after the console's AddPerk,
+RemovePerk or SetLevel; validator E_VAL_RANGE on a 0 in the set. The client sets the engine's perk points, adds the set's perks it
+lacks and removes a TREE perk the set lacks (a refused pick undone); perks the trees do not list are never touched. The server's
+`perks` setting (default false) drops picks and sends no state, today's behavior. Fixtures 67-PerkPick-0 and -1, 68-PerkState-0
+and -1. T2 declares one PerkState per client at login (difftest divergences.yaml) when the deployed settings turn perks on.
+
+### WordWall (t 69): a word wall's trigger reported, the word the server's (word-wall, M4)
+
+Since fork m4-word-wall (01:13 PST 2026-11-01, SCHEMA_VERSION 27): WordWall (id 77, MsgType 69), client to server, reliable, once per
+wall trigger a player's game fires: `{ wall: u32 (the trigger reference, never 0) }`; validator E_VAL_RANGE on 0; a budget of
+2 then 1 a second (UNMEASURED). Nothing of the word travels: the server reads it from the trigger reference's own record (the
+WordWallTriggerScript's myWord property, the reference's value over its base ACTI's, a WOOP or nothing), wants the player in the
+wall's cell within the activation reach (the lock report's idiom), writes the word into the shout record once (RecordShoutEntry
+WordKnown) and tells the seat as the console's TeachWord does (SpSnippet Game.TeachWord). Refusals, each logged by name:
+E_WORDWALL_NO_REF, E_WORDWALL_NOT_A_WALL, E_WORDWALL_CELL, E_WORDWALL_REACH; a word known already is a no-op. Fixtures
+69-WordWall-0 and -1. The difftest session word-wall reports from another cell (refused; the legacy server drops the type).
+
+### RelayedActivation (t 70): a linked activation the cell's host reported, to the cell's other games (traps, M4)
+
+Since fork m4-traps (01:43 PST 2026-11-01, SCHEMA_VERSION 28): RelayedActivation (id 78, MsgType 70), server to client, reliable, to the
+target's listeners but the reporting host: `{ target: u32, caster: u32 }` (neither 0; validator E_VAL_RANGE). The host's game
+reports its engine's non-player activation as today's Activate {caster, target}; the server accepts it from the cell's host
+alone, for a pair the target's activation parents name (XAPR), at most eight a second, records it through Activate's own path
+(a door's open, the hazard note) and relays it so each other engine plays it with the caster the host's did. Fixtures
+70-RelayedActivation-0 and -1. No session triggers it (the fake clients activate no linked pair), so nothing is declared.
+
+### CreateActor's restrictedRaces and permittedRaces (character-creation, the permit; M5)
+
+CreateActor (t 33) gains the optional props `restrictedRaces: [u32]` and `permittedRaces: [u32]` (SCHEMA_VERSION 29; fork
+m5-race-permit e46d87d8, 2026-11-01): the races the server restricts to listed profiles (server setting `restrictedRaces`,
+docs/verbs/character-creation.md, the permit) and, of those, the ones the receiving player's own profile may wear, as form ids
+in the load order both ends share, cap RACES 128. They travel on a player's own CreateActor (`isMe`) alone and only while the
+server restricts a race; a figure's CreateActor never carries them. validate_server: both or neither, `isMe` true, no id 0 or
+repeated, every permitted race among the restricted, else E_VAL_RANGE; the transport refuses the message from a client by
+direction. The rule stays the server's (wire-rules appearance::race_allowed, two new facts): the client's RacePermitService
+only takes the difference off its race menu. wire-legacy reads both as absent (LEGACY_ABSENT); fixture 33-CreateActor-2
+carries them, WireJsonContractTest reads it through CreateActorMessage.h.
+
+### ObjectAnimation (t 71): the host's world-object animations to the guests (traps, M4; ADR-059 decision 3)
+
+Since fork m4-object-animation (14:2x PST 2026-11-01, SCHEMA_VERSION 30; 29 is the permit's): ObjectAnimation (id 79, MsgType 71),
+both directions, reliable: `{ refr: u32 (the animated game-file reference, never 0), event: string (the behavior graph event
+name, at most ANIM_EVENT 128 bytes, never empty) }`; validator E_VAL_RANGE on either, the sender's budget 32 then 8 a second
+(E_VAL_RATE, UNMEASURED). The cell's host reports its engine's animation event on a world object (a puzzle pillar's Turned01, a
+lever's FullPull, a portcullis's Open: the hook matched in native to that family); the server takes it from the host alone for a
+reference that is no actor (E_OBJANIM_NOT_HOST and kin, logged by name), drops a DOOR's quietly (its open is isOpen's), caps a
+reference at 8 a second (E_OBJANIM_RATE), writes the event as the reference's lastAnimation (CreateActor's prop, so a late joiner
+replays it) and relays the same message to the cell's other listeners, whose engines run no world script under ADR-059's
+hosted-cell gate and play it through PlayAnimation. Fixtures 71-ObjectAnimation-0 and -1; WireJsonContractTest reads them
+through ObjectAnimationMessage.h. No difftest session triggers it yet (the fake clients host no cell).
+
+### TrapHit (t 72): the host's report of a trap's hit on another player's body (traps, M4; ADR-059 decision 4)
+
+Since fork m4-trap-hit c085a3ad (21:17 PST 2026-11-01, SCHEMA_VERSION 31): TrapHit (id 80, MsgType 72), client to server, reliable:
+`{ refr: u32 (the trap, a game-file world object, never 0), target: u32 (the hit actor, another player's, never 0), damage: f32
+(the number the host's engine dealt; finite, 0 or above) }`; validator E_VAL_NONFINITE, E_VAL_RANGE, the sender's budget 16 then
+8 a second (E_VAL_RATE, UNMEASURED). The cell's host's engine runs the trap's scripts (TrapBase.fireTrap resolves MovingTrap's
+leveled pick by the engine's CalculateEncounterLevel into TrapHitBase's damage, which OnTrapHitStart hands to the engine's
+ProcessTrapHit); the host reports what it dealt a guest's figure, and the server, which owns the guest's health, judges it by
+wire-rules traps::hit: the number must be one the trap's scripts could pick (MovingTrap's LvlDamage1 to LvlDamage6 and
+TrapHitBase's damage where a record sets it, read from the base's and the reference's VMAD by the core, E_TRAPHIT_TABLE for a
+reference without one, E_TRAPHIT_DAMAGE for a number off it) and the target's recorded position within traps::REACH 512 of the
+trap (E_TRAPHIT_REACH, UNMEASURED: the probe reads the real distance); the encounter level itself is never recomputed. The core
+takes it from the cell's host alone (E_TRAPHIT_NOT_HOST), for a game-file world object (E_TRAPHIT_NO_REF, E_TRAPHIT_ACTOR) and a
+target that is another player's actor in the trap's cell (E_TRAPHIT_TARGET: the host's own body is its own actor-values report,
+an NPC's values are the host's HostedActorState; E_TRAPHIT_CELL), at most 8 reports a second per trap (E_TRAPHIT_RATE, counted
+before the rule), and applies the table's value through OnWeaponHit's CalculateCurrentHealthPercentage and NetSetPercentages (god
+mode and an ethereal target take nothing; a kill is the server's own, credited to nobody), so ChangeValues reaches the hit seat.
+Fixtures 72-TrapHit-0 and -1. No difftest session triggers it (the fake clients host no cell); T0 unit/TrapHitTest.cpp. The
+client half (where the host's engine takes afDamage: the DamageActor replacement or ProcessTrapHit's own implementation) follows
+x-object-anim v3's trap-hit trace.
+

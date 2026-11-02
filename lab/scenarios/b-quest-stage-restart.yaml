@@ -1,0 +1,83 @@
+# b-quest-stage-restart (thuum-magnus, drafted 05:37 PDT 2026-10-31; docs/verbs/quest-stage.md, ADR-056: the verb's restart scenario,
+# named in its Tests since 2026-10-29 and noted as a debt on 10-30): the world's quest stages survive a server restart and reach a
+# fresh seat at its login. The frame is b-quest-stage's (mode all with the main quest's intro chain and the DLC starts denied, the
+# deploy's settings): c1 sets stage 10 of MS10MiscObjPointer 0x10d3bb (Skyrim.esm, not start-game-enabled, in no list) through the
+# game's own console, the server records it on the world's journal (the server-made XMarker 0xffffff00's change form, questStages)
+# and relays it to c2. Then the server restarts (WorldState::LoadChangeForm recreates the journal from its change form) and both
+# seats reconnect: the login's replay (PartOne::SetUserActor after SendPlayerGlobals: "QuestStage: actor ... N stages after a login")
+# carries the stage to both games again; then c2 relaunches (a fresh game, no memory of the stage) and reads the stage done at its
+# login: the record, not the seat, holds the world's journal. Recorded, not claimed: the fragment skip lines, the screenshots.
+# Claims (the verb doc's Tests), each with what it proves:
+# 1. Before anything: neither seat has the stage (the clean world's journal is empty for this quest).
+# 2. c1's setstage: the server's "set 10d3bb:Skyrim.esm stage 10: recorded, relayed to 1" line, both seats read the stage done:
+#    the stage is the world's (b-quest-stage's claim, the premise here).
+# 3. After the restart and both reconnects: the login replay lines name at least one stage for each actor, both seats still read
+#    the stage done, no refusal line but the designed one (E_QUEST_OWN_START once per seat at every login, D62 and D69: the
+#    engine's own start of a start-game-enabled quest is each seat's own; v2's first run 20261031-125456 read exactly those two):
+#    the journal came back from its change form (rule 6's restart shape).
+# 4. c2 relaunched (a fresh game) reads the stage done after its login: the record alone put it there.
+# v2 (2026-10-31, after the first run 125456 on parity e713862c: every claim held but "no E_QUEST_ line", which counted the two
+# designed E_QUEST_OWN_START login lines): the refusal claims leave that code out.
+# Assertions are evaluated by lab-api only (ADR-009). Its own commit (rule 13).
+id: b-quest-stage-restart
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 600
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: quest-stage {quests: [0x10d3bb], stages: [10]}
+  - c2: quest-stage {quests: [0x10d3bb], stages: [10]}
+  - assert:
+      # 1. the clean world's journal has no such stage
+      - c1.quest(0x10d3bb).stageDone(10) == false
+      - c2.quest(0x10d3bb).stageDone(10) == false
+  # 2. the stage set and relayed (b-quest-stage's premise)
+  - c1: console {text: "setstage 10d3bb 10"}
+  - until: {within: 15, expect: ['server.log_count("\\[verb:quest-stage\\] ff[0-9a-f]+ set 10d3bb:Skyrim.esm stage 10: recorded, relayed to 1") >= 1']}
+  - wait: 5
+  - c1: quest-stage {quests: [0x10d3bb], stages: [10]}
+  - c2: quest-stage {quests: [0x10d3bb], stages: [10]}
+  - assert:
+      - c1.quest(0x10d3bb).stageDone(10) == true
+      - c2.quest(0x10d3bb).stageDone(10) == true
+      - 'server.log_count("E_QUEST_(?!OWN_START)") == 0'
+  # 3. the restart: the journal back from its change form, the login replay to both
+  - wait: 5
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - c2: reconnect
+  - wait: 15
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: quest-stage {quests: [0x10d3bb], stages: [10]}
+  - c2: quest-stage {quests: [0x10d3bb], stages: [10]}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - c1.quest(0x10d3bb).stageDone(10) == true
+      - c2.quest(0x10d3bb).stageDone(10) == true
+      - 'server.log_count("QuestStage: actor ff[0-9a-f]+ sent mode .* [1-9][0-9]* stages after a login") >= 2'
+      - 'server.log_count("E_QUEST_(?!OWN_START)") == 0'
+  # 4. a fresh game reads the world's stage at its login
+  - c2: relaunch {until: gone}
+  - c2: connect
+  - wait: 15
+  - c2: close-menu {name: MessageBoxMenu}
+  - c2: quest-stage {quests: [0x10d3bb], stages: [10]}
+  - c2: screenshot
+  - c1: dump-state
+  - c2: dump-state
+  - assert:
+      - c2.quest(0x10d3bb).stageDone(10) == true
+      - c2.quest(0x10d3bb).stage() == 10
+artifacts: [server.log, c1.log, c2.log, screenshots]

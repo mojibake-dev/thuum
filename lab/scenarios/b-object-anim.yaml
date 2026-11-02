@@ -1,0 +1,92 @@
+# b-object-anim (thuum docs/verbs/traps.md, ADR-059 decisions 1 and 3; promoted 05:08 PST 2026-11-02 from probe x-object-anim v4, green
+# 20261102-063627 on fork m4-object-animation 64dbacfe over the host-scoped layer, MERGED to parity 64dbacfe and main 8139d579
+# the same night). Under the hosted-cell gate the cell's host runs Bleak Falls Temple's scripts and the guest's engine runs none;
+# what the guest sees is what the host's engine shows, relayed as ObjectAnimation. A) the host c1 on the plate 0x567f2: its
+# engine's PressurePlate fires ("567f2 activates 54b15"), the wall 0x54b15's events (180For, 180Back, Rearm) and the plate's Down
+# are reported by c1 and played by c2. B) the guest c2 on the plate: c2's own engine fires nothing ("Sent a trigger's own
+# activation" stays 0 on c2) while the host's engine fires for the figure, and c2 plays the wall again. C) the host turns the
+# first puzzle pillar 0xaa8cb: its Trigger01 is reported, recorded as the pillar's lastAnimation and played on c2; the pillars'
+# XMarker 0x4fcdf is E_TRAP_NO_REF by design (b-puzzle-relay). Claimed: the lines above, c2's silent plate, no E_OBJANIM_ and no
+# E_TRAP_ refusal in A, no E_ACTIVATE_REACH in C. Spots are b-bleak-traps' and x-bleak-traps v4's.
+id: b-object-anim
+milestone: M4
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: relaunch {until: gone, files: [{json: "Data/Platform/Plugins/skymp5-client-settings.txt", key: "activationUnblockedBases", value: "1a4bb c6440 21513 3e726 aa8ce b7db4 173fc 2079f"}]}
+  - c2: relaunch {until: gone, files: [{json: "Data/Platform/Plugins/skymp5-client-settings.txt", key: "activationUnblockedBases", value: "1a4bb c6440 21513 3e726 aa8ce b7db4 173fc 2079f"}]}
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c1: teleport {cell: "371de:Skyrim.esm", x: -4200, y: 850, z: 650, rot: [0, 0, 90]}
+  - wait: 20
+  - c2: teleport {cell: "371de:Skyrim.esm", x: -4100, y: 850, z: 650, rot: [0, 0, 90]}
+  - wait: 20
+  - assert:
+      - server.host(0x371de).client == "c1"
+  # A. the host onto the plate; the guest 200 units back, facing it
+  - c2: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5538, z: -2054, rot: [0, 0, 0]}
+  - wait: 6
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5338, z: -2054, rot: [0, 0, 0]}
+  - until: {within: 5, every: 0.5, expect: ['server.log_count("567f2 activates 54b15 in cell 371de") >= 1']}
+  - wait: 4
+  - c1: screenshot
+  - c2: screenshot
+  - c1: log-count {pattern: "object animation 54b15 .* reported"}
+  - c2: log-count {pattern: "object animation 54b15 .* played"}
+  - c2: log-count {pattern: "Sent a trigger.s own activation"}
+  - assert:
+      - 'c1.log_count("object animation 54b15 .* reported") >= 1'
+      - 'c2.log_count("object animation 54b15 .* played") >= 1'
+      - 'c2.log_count("Sent a trigger.s own activation") == 0'
+      - 'server.log_count("54b15 animates 54b15") >= 1'
+      - 'server.log_count("E_OBJANIM_") == 0'
+      - 'server.log_count("E_TRAP_") == 0'
+  # the host off the plate, the wall resets; B. the guest onto it: the host's engine fires for the figure, the guest's engine
+  # runs no script of its own under the gate. (v3 carried decision 4's trap-hit trace here; read 20261102-051618: fourteen
+  # Actor::DamageActor calls on the figure, none through RestoreActorValue, the figure's health kept by the platform's cut.)
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5738, z: -2054, rot: [0, 0, 0]}
+  - wait: 6
+  - c2: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5338, z: -2054, rot: [0, 0, 0]}
+  - until: {within: 5, every: 0.5, expect: ['server.log_count("567f2 activates 54b15 in cell 371de") >= 2']}
+  - wait: 4
+  - c1: screenshot
+  - c2: screenshot
+  - c2: log-count {pattern: "Sent a trigger.s own activation"}
+  - c2: log-count {pattern: "object animation 54b15 .* played"}
+  # decision 4's read, recorded not claimed: the wall swung at c2's FIGURE on c1's engine (god mode is c2's own game's, not
+  # the figure's); whether the figure's health dropped there says which path a trap's harm takes (TrapHitBase on the host)
+  - c1: av-read {other: true, names: [health]}
+  - c2: av-read {names: [health]}
+  - assert:
+      - 'c2.log_count("Sent a trigger.s own activation") == 0'
+      - 'c2.log_count("object animation 54b15 .* played") >= 2'
+      - 'server.log_count("E_OBJANIM_") == 0'
+  # C. the puzzle room: the host turns the first pillar once, the guest watches it
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 5400, y: -900, z: -768, rot: [0, 0, 90]}
+  - c2: teleport {cell: "371de:Skyrim.esm", x: 5300, y: -1200, z: -768, rot: [0, 0, 90]}
+  - wait: 8
+  - c2: look-at {formId: 0xaa8cb}
+  - wait: 2
+  - c1: screenshot
+  - c2: screenshot
+  - c1: activate {refId: 0xaa8cb}
+  - wait: 4
+  - c1: screenshot
+  - c2: screenshot
+  - c1: log-count {pattern: "object animation aa8cb .* reported"}
+  - c2: log-count {pattern: "object animation aa8cb .* played"}
+  - assert:
+      - 'c1.log_count("object animation aa8cb .* reported") >= 1'
+      - 'c2.log_count("object animation aa8cb .* played") >= 1'
+      - 'server.log_count("aa8cb animates aa8cb") >= 1'
+      - 'server.log_count("E_OBJANIM_") == 0'
+      - 'server.log_count("E_ACTIVATE_REACH") == 0'
+artifacts: [server.log, c1.log, c2.log, screenshots]

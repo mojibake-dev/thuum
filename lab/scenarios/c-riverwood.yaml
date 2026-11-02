@@ -39,6 +39,14 @@
 # start; b-npc-death reads the record after a reconnect). God mode does not survive a relaunch or a
 # restart on the server, so it is set again after each (lab-relaunch-loses-god-mode, b-cell-host). Its own
 # commit (rule 13).
+# 02:1x PDT 2026-11-01 (thuum-magnus): claim 2's live switch on the walker 0x13489 read against her 3D on c2 (she can be indoors in
+#     an unhosted cell at the handoff, run 084608); the premise, not the claim's strength.
+# 14:53 PDT 2026-10-31 (thuum-magnus): claim 2's two position lines on the walker 0x13489 removed; they compared c1's read before
+# its relaunch with c2's after the pass, about 21 s apart, and a walking resident covers 330 to 531 units in that time (four gate
+# reds on three builds with the identical shape, green only when the resident stood). Alvor, standing, keeps the continuity claim;
+# the walker keeps its live-switch claims and claim 1's paired reads 0.3 s apart. 14:55 PDT: the walker's handoff check comes back in
+# a form the walk cannot fail: the server's record at the pass against c2's read taken in the same breath, within the measured 256
+# (numidium's suggestion of a bound the walk cannot cross, taken as the record's snapshot).
 id: c-riverwood
 milestone: M3
 clients: [c1, c2]
@@ -111,6 +119,14 @@ steps:
   - c1: npc-state {formId: 0x13489}
   - c1: relaunch {until: gone}
   - until: {within: 12, expect: [server.host(0x9732).client == "c2"]}
+  # the walker at the pass: the server's record (the last host sample) against c2's read in the same breath, so a handoff
+  # teleport on the walker would show while its walk cannot (a third of a second of walking is under 50 units); the record's
+  # position and the seat's read are both absolute (lab-api's frames)
+  - server: snapshot {name: w89, of: "server.ref(0x13489)"}
+  - c2: npc-state {formId: 0x13489}
+  - assert:
+      - abs(c2.npc_state(0x13489).x - snapshot("w89").x) < 256
+      - abs(c2.npc_state(0x13489).y - snapshot("w89").y) < 256
   - wait: 3
   - c2: npc-state {formId: 0x13482}
   - c2: npc-state {formId: 0x13489}
@@ -119,12 +135,18 @@ steps:
       - server.host(0x9732).hosted == true
       - server.host(0x9732).client == "c2"
       - c2.npc_state(0x13482).aiEnabled == true
-      - c2.npc_state(0x13489).aiEnabled == true
-      # continuity across the handoff within the same measured 256 (c1's last read is seconds older)
+      # the walker's switch is read where she stands: her schedule can walk her through a door into her house
+      # (0x133c7), a cell nobody hosts, before the handoff (20261101-084608: Gerdur indoors with no 3D on c2, no
+      # promote due, Alvor live), so the live switch is claimed against her being loaded on c2, the form
+      # b-npc-handoff-night reads (thuum-magnus, 02:1x PDT 2026-11-01; the standing resident's line stays as it was)
+      - c2.npc_state(0x13489).aiEnabled == c2.npc_state(0x13489).is3DLoaded
+      # continuity across the handoff within the same measured 256 for the standing subject (Alvor at his forge; c1's last
+      # read is seconds older). The walker 0x13489 carries no position claim here: c1's last read comes before its relaunch
+      # and c2's after the pass, about 21 s apart in the gate runs of 2026-10-31 (containers' 213214, 214040, 214510 and
+      # leveling's 160943), and a resident walking to work covers 330 to 531 units in that time; the claim measured the walk,
+      # not the sync (claim 1's paired reads of the same walker, 0.3 s apart, held every time)
       - abs(c2.npc_state(0x13482).x - c1.npc_state(0x13482).x) < 256
       - abs(c2.npc_state(0x13482).y - c1.npc_state(0x13482).y) < 256
-      - abs(c2.npc_state(0x13489).x - c1.npc_state(0x13489).x) < 256
-      - abs(c2.npc_state(0x13489).y - c1.npc_state(0x13489).y) < 256
   # the relaunched game logs in where it stood and must not take the village from a live host
   # (b-host-quit); god mode again, since a relaunch loses the server's tgm
   - c1: connect

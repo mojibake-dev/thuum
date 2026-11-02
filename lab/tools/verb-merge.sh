@@ -7,7 +7,10 @@
 #      T2=skip when a T2 of this head is already recorded, or with
 #      T2_LOG=<log> when one runs beside the gate: step 3b waits for that log
 #      to end green before parity moves);
-#   3. the gate: lab/gate.yaml's `always`, the scenarios named here (the verb's
+#   3. (R0=1: ADR-053's fast path instead, for an R0 change no seat runs: refused
+#      when the fork diff touches seat code, else T0 is the head's server-build
+#      with its ctest green, and no lab gate runs; the nightly is its T3)
+#      the gate: lab/gate.yaml's `always`, the scenarios named here (the verb's
 #      own and the touched verbs'), and `watch` (the open ADR-027 items), as one
 #      run set; a red stops everything before parity moves. GATE_SET=<run set id>
 #      cites a finished set instead (ADR-042: a nightly or a layer's sweep of this
@@ -44,15 +47,72 @@ just deploy-srv 2>&1 | tail -1
 if [ "${T2:-}" = skip ]; then
   echo "== 2. T2 skipped (T2=skip): cite the T2 of $head in the merge commit"
 else
-  echo "== 2. T2 on skymp-server:$branch $(date +%H:%M:%S)"
+  # T2 on the head's own image: its server-build pushes skymp-server:<branch>-<sha8>, so wait for that, then test the per-sha
+  # tag and never the bare one, which can still name the previous head's image (m2-stream-end-grace's R0, 2026-11-02: T2 at
+  # 04:10:20Z ran ea15e8bb's image, 8eddb2c4's server-build finished 04:14:29Z) and whose pull re-points the lab's own image
+  # mid-gate (the permit gate 20261102-002715, two builds)
+  sb=""
+  for _ in $(seq 1 60); do
+    sb=$(python3 - "$sha" <<'PY' || true
+import sys
+sys.path.insert(0, "lab/tools")
+import glab
+t = glab.token("skymp")
+st = set()
+for p in glab.get(t, f"/projects/7/pipelines?sha={sys.argv[1]}&per_page=10"):
+    for j in glab.get(t, f"/projects/7/pipelines/{p['id']}/jobs?per_page=50"):
+        if j["name"] == "server-build":
+            st.add(j["status"])
+live = {"created", "waiting_for_resource", "preparing", "pending", "running"}
+print("success" if "success" in st else "live" if st & live else "failed" if st else "none")
+PY
+)
+    case "$sb" in success|failed|none) break;; esac
+    sleep 30
+  done
+  [ "$sb" = success ] || { echo "== no successful server-build at $head (${sb:-unread}): its image is not pushed, so no T2; parity not moved" >&2; exit 1; }
+  echo "== 2. T2 on skymp-server:$branch-$head $(date +%H:%M:%S)"
   t2log=lab/results/runsets/t2-$branch-$head.log; mkdir -p lab/results/runsets
-  if ! just test-proto "$branch" > "$t2log" 2>&1; then
+  if ! just test-proto "$branch-$head" > "$t2log" 2>&1; then
     tail -8 "$t2log"; echo "== T2 not green ($t2log): parity not moved" >&2; exit 1
   fi
   grep -q '^T2 green' "$t2log" || { tail -4 "$t2log"; echo "== T2 did not end green: parity not moved" >&2; exit 1; }
   echo "   $(grep '^T2 green' "$t2log")"
 fi
 
+setfile=""; cited=""; runs=""; watch=""; r0=""
+if [ "${R0:-}" = 1 ]; then
+  # ADR-053's rung fast path: a change whose state is R0 (the server computes) and that changes no engine behavior on any
+  # seat merges on T0 and T2 alone, the nightly its T3. Refused mechanically when the fork's diff against parity touches
+  # seat code (the client, Skyrim Platform, the front end, the gamemode's libraries and scripts, the wire's client FFI);
+  # T0 is the head's server-build, whose image build runs ctest, read from its trace (the job skips ctest without the esm)
+  echo "== 3. R0 (ADR-053): T0 and T2, no lab gate $(date +%H:%M:%S)"
+  seat=$(git -C "$fork" diff --name-only origin/parity "$sha" | grep -E '^(skymp5-client|skyrim-platform|skymp5-front|skymp5-functions-lib|skymp5-scripts|skymp-wire/crates/wire-client-ffi)/' || true)
+  if [ -n "$seat" ]; then
+    echo "== R0 refused: $head changes seat code against parity (merge it with its gate):" >&2
+    printf '   %s\n' $seat >&2; exit 2
+  fi
+  t0=$(python3 - "$sha" <<'PY'
+import sys, urllib.request
+sys.path.insert(0, "lab/tools")
+import glab
+tok = glab.token("skymp"); sha = sys.argv[1]
+for p in glab.get(tok, f"/projects/7/pipelines?sha={sha}&per_page=20"):
+    for j in glab.get(tok, f"/projects/7/pipelines/{p['id']}/jobs?per_page=100"):
+        if j["name"] != "server-build" or j["status"] != "success":
+            continue
+        req = urllib.request.Request(f"{glab.G}/projects/7/jobs/{j['id']}/trace", headers={"PRIVATE-TOKEN": tok})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            trace = r.read().decode("utf-8", "replace")
+        line = next((l.strip() for l in trace.splitlines() if "100% tests passed" in l), "")
+        if line:
+            print(f"pipeline {p['id']} server-build {j['id']}: {line[line.index('100%'):]}"); sys.exit(0)
+sys.exit(1)
+PY
+  ) || { echo "== R0 refused: no successful server-build at $head whose ctest ran green (T0)" >&2; exit 2; }
+  echo "   T0: $t0"
+  r0=" R0 (ADR-053): T0 $t0, no lab gate (the nightly is its T3)"
+else
 echo "== 3. the gate $(date +%H:%M:%S)"
 # lab/gate.yaml is two lists, `always: [a, b]` and `watch:` with one `- name` a
 # line (comments allowed); read with the standard library alone, since the Mac's
@@ -104,6 +164,7 @@ if [ -z "$setfile" ]; then
 fi
 runs=$(python3 -c 'import json,sys; rs=json.load(open(sys.argv[1])); r=[e["run"] for s in rs["scenarios"] for e in rs["runs"].get(s,[]) if e.get("run")]; print(f"{r[0]} to {r[-1]} ({len(r)} runs)" if r else "")' "$setfile")
 watch=$(python3 -c 'import json,sys; print(", ".join(json.load(open(sys.argv[1]))["watch"]))' "$setfile")
+fi
 
 if [ -n "${T2_LOG:-}" ]; then
   # a T2 run beside the gate (T2=skip with T2_LOG=<its log>): parity moves only once that log ends green
@@ -136,7 +197,11 @@ else
   echo "== 5. no client change on the branch: clones not promoted (PROMOTE=1 to force)"
 fi
 
-entry="- $branch merged to fork parity $head ($(date -u +%Y-%m-%dT%H:%MZ)): the gate $(basename "${setfile%.json}")$cited, $runs${watch:+; watch items: $watch}; T2 ${T2:-green} on skymp-server:$branch; clones $([ "$promote" = 1 ] && echo promoted || echo 'not promoted'). Verbs: (fill in)."
+if [ -n "$r0" ]; then
+  entry="- $branch merged to fork parity $head ($(date -u +%Y-%m-%dT%H:%MZ)):$r0; T2 ${T2:-green} on skymp-server:$branch; clones $([ "$promote" = 1 ] && echo promoted || echo 'not promoted'). Verbs: (fill in)."
+else
+  entry="- $branch merged to fork parity $head ($(date -u +%Y-%m-%dT%H:%MZ)): the gate $(basename "${setfile%.json}")$cited, $runs${watch:+; watch items: $watch}; T2 ${T2:-green} on skymp-server:$branch; clones $([ "$promote" = 1 ] && echo promoted || echo 'not promoted'). Verbs: (fill in)."
+fi
 today="### $(date -u +%Y-%m-%d)"
 grep -q "^$today\$" docs/LOG.md || printf '\n%s\n\n' "$today" >> docs/LOG.md
 printf '%s\n' "$entry" >> docs/LOG.md

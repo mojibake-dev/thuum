@@ -1,0 +1,142 @@
+# b-prop-push (thuum-magnus, 13:50 PDT 2026-10-31, promoted from x-prop-push v16 8e8d9377; docs/verbs/prop-physics.md, ADR-058 slice one,
+# D73; fork m3-prop-physics): a clutter item the cell's host walks into moves on both screens and rests where the host's rests, and
+# the server holds the rest across a restart. The prop appears by the verb's own path: the server gives the host an iron ingot
+# (IngotIron 0x5ace4, MISC with Havok; a box that slides and stops, where a basket rolls off lab-spawn's strip) and the host drops it
+# from the inventory menu; the server's copy is created 64 ahead and 48 above the host's feet (the drop point (0, -136) at lab-spawn,
+# absolute (133857, -61266)), falls onto the strip, the dropper's touch-2 claim is granted and its fall streams and sleeps. The host
+# then toggles walk and walks north through it; the watcher stands at the strip's north end.
+# Claims (the verb doc's Tests), each with what it proves:
+# 1. The premise after the drop: the claim granted once, the copy tracked and simulated Dynamic on the host, tracked on the watcher,
+#    its stream asleep, one runtime copy per seat, enabled, within 32 of each other and within 64 of the drop point (the drop fix:
+#    the copy is created at the drop point, never inside the capsule).
+# 2. The nudge: the walker passed the ingot (its own y moved more than 60); the owner's stream started and slept a second time;
+#    the watcher applied the stream; the server's record moved more than 16 from its pre-kick snapshot; the copies within 32 of each
+#    other and within 200 of the drop point (a walk's push, not a flight); no E_PROP_STEP or E_PROP_REACH (the review's budgets),
+#    E_PROP_KIND recorded.
+# 3. The rest survives a restart: the created reference is back on both screens at one place, more than 16 from the drop point
+#    (D75: dropped items persist as props; the save's loader keeps the 0xff item, the drop deletes nothing).
+# Known limits (prop-physics.md): the kick's size is the engine's (a run shoves a 5 kg body at 7 m/s); a round body rolls off the
+# summit, so the lab's prop is a box and the basket is the playtest's at Riverwood's camp; translateTo's smoothing on the watcher
+# is read, not claimed. Assertions are evaluated by lab-api only (ADR-009). Its own commit (rule 13).
+id: b-prop-push
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: false
+  gameHour: 7.9
+timeout_s: 600
+steps:
+  # the client switch: propPhysics is off by default (rule 3, D68); the probe turns it on, both seats, at a relaunch
+  - c1: relaunch {until: gone, files: [{json: "Data/Platform/Plugins/skymp5-client-settings.txt", key: "propPhysics", value: true}]}
+  - c2: relaunch {until: gone, files: [{json: "Data/Platform/Plugins/skymp5-client-settings.txt", key: "propPhysics", value: true}]}
+
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  # the watcher at the strip's north end facing south, the host at (0, -200) facing NORTH: the drop goes 64 ahead, onto the strip
+  - c2: teleport {cell: lab-spawn, x: 0, y: -10, z: 0, rot: [0, 0, 180]}
+  - c1: teleport {cell: lab-spawn, x: 0, y: -200, z: 0, rot: [0, 0, 0]}
+  - wait: 8
+  - assert:
+      - server.host(0xbbb1).hosted == true
+      - server.host(0xbbb1).client == "c1"
+  # the basket by the verb's own path: one Basket01 from the server, dropped from the inventory menu (DropItemService acts
+  # while the InventoryMenu is open; the console drops under it), the server's copy 64 ahead and 48 up, falling onto the strip
+  - c1: server-console {name: AddItem, args: [0x14, 0x5ace4, 1]}
+  - wait: 3
+  - c1: hold-key {code: 23, ms: 100}
+  - wait: 1
+  - c1: console {text: "player.drop 5ace4 1"}
+  - wait: 1
+  - c1: close-menu {name: InventoryMenu}
+  - wait: 8
+  - c1: log-count {pattern: "prop ff[0-9a-f]+ tracked"}
+  - c1: log-count {pattern: "prop ff[0-9a-f]+ simulated here: Dynamic"}
+  - c1: log-count {pattern: "stream ff[0-9a-f]+ asleep"}
+  - c2: log-count {pattern: "prop ff[0-9a-f]+ tracked"}
+  - c1: refs-near {radius: 400, formTypes: [32]}
+  - c2: refs-near {radius: 400, formTypes: [32]}
+  - assert:
+      # the premise: the drop's claim granted to the host, tracked and Dynamic on the host, its fall's stream asleep; the basket
+      # listed on both seats, one runtime copy each, enabled, within 32 of each other and within 64 of the drop point (0, -264)
+      - 'server.log_count("ff000000 claims prop ff[0-9a-f]+ by touch 2: granted") == 1'
+      - 'c1.log_count("prop ff[0-9a-f]+ tracked") >= 1'
+      - 'c1.log_count("prop ff[0-9a-f]+ simulated here: Dynamic") >= 1'
+      - 'c1.log_count("stream ff[0-9a-f]+ asleep") >= 1'
+      - 'c2.log_count("prop ff[0-9a-f]+ tracked") >= 1'
+      - c1.refs_near().has(0x5ace4) == true
+      - c2.refs_near().has(0x5ace4) == true
+      - c1.refs_near().runtime_of(0x5ace4) == 1
+      - c2.refs_near().runtime_of(0x5ace4) == 1
+      - c1.refs_near().disabled(0x5ace4) == false
+      - 'abs(c1.refs_near().pos(0x5ace4).x - c2.refs_near().pos(0x5ace4).x) < 32'
+      - 'abs(c1.refs_near().pos(0x5ace4).y - c2.refs_near().pos(0x5ace4).y) < 32'
+      - 'abs(c1.refs_near().pos(0x5ace4).x - 133857) + abs(c1.refs_near().pos(0x5ace4).y - (-61266)) < 64'
+  # the basket's place is the drop point, 64 north of the host at lab-spawn (0, -136): absolute (133857, -61266), guests.yaml's origin
+  - server: snapshot {name: c1start, of: "server.actor(c1)"}
+  - server: snapshot {name: b0, of: "server.ref(0xff000002)"}
+  # the push: the host toggles walk and walks north through the basket (1 s, about 100 units; a run's kick is 7 m/s)
+  - c1: tap-key {code: 58}
+  - wait: 1
+  - c1: hold-key {code: 17, ms: 1000}
+  # the kick read: both seats' listings and the server's record at 1, 2 and 4 s
+  - wait: 1
+  - c1: refs-near {radius: 1200, formTypes: [32]}
+  - c2: refs-near {radius: 1200, formTypes: [32]}
+  - server: snapshot {name: r1, of: "server.ref(0xff000002)"}
+  - wait: 1
+  - c1: refs-near {radius: 1200, formTypes: [32]}
+  - c2: refs-near {radius: 1200, formTypes: [32]}
+  - server: snapshot {name: r2, of: "server.ref(0xff000002)"}
+  - wait: 2
+  - c1: refs-near {radius: 1200, formTypes: [32]}
+  - c2: refs-near {radius: 1200, formTypes: [32]}
+  - server: snapshot {name: r4, of: "server.ref(0xff000002)"}
+  - wait: 2
+  - c1: refs-near {radius: 400, formTypes: [32]}
+  - c2: refs-near {radius: 400, formTypes: [32]}
+  - c1: log-count {pattern: "stream ff[0-9a-f]+ started"}
+  - c1: log-count {pattern: "stream ff[0-9a-f]+ asleep"}
+  - c2: log-count {pattern: "applied ff[0-9a-f]+ from the stream"}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      # the walker passed the basket (a miss here is the frame's, not the verb's)
+      - server.actor(c1).y - snapshot("c1start").y > 60
+      # the owner streamed the kick and slept (the second stream after the ejection's); the follower applied the stream
+      - 'c1.log_count("stream ff[0-9a-f]+ started") >= 2'
+      - 'c1.log_count("stream ff[0-9a-f]+ asleep") >= 2'
+      - 'c2.log_count("applied ff[0-9a-f]+ from the stream") >= 1'
+      # the record moved with the nudge, and rests where both seats have it, within 200 of the drop point (a flight is a red)
+      - 'abs(server.ref(0xff000002).x - snapshot("b0").x) + abs(server.ref(0xff000002).y - snapshot("b0").y) > 16'
+      - 'abs(c1.refs_near().pos(0x5ace4).x - c2.refs_near().pos(0x5ace4).x) < 32'
+      - 'abs(c1.refs_near().pos(0x5ace4).y - c2.refs_near().pos(0x5ace4).y) < 32'
+      - 'abs(c2.refs_near().pos(0x5ace4).x - 133857) + abs(c2.refs_near().pos(0x5ace4).y - (-61266)) < 200'
+      - 'server.log_count("E_PROP_STEP") == 0'
+      - 'server.log_count("E_PROP_REACH") == 0'
+      - 'server.log_count("E_PROP_KIND") >= 0'
+  # the rest survives a restart: the created reference is back on both screens, at one place (its record), away from
+  # the placement point (the kick's rest)
+  - server: restart
+  - wait: 20
+  - c1: connect
+  - c2: connect
+  - wait: 20
+  - c1: refs-near {radius: 400, formTypes: [32]}
+  - c2: refs-near {radius: 400, formTypes: [32]}
+  - c2: screenshot
+  - assert:
+      - c1.refs_near().has(0x5ace4) == true
+      - c2.refs_near().has(0x5ace4) == true
+      - 'abs(c1.refs_near().pos(0x5ace4).x - c2.refs_near().pos(0x5ace4).x) < 32'
+      - 'abs(c1.refs_near().pos(0x5ace4).y - c2.refs_near().pos(0x5ace4).y) < 32'
+      - 'abs(c2.refs_near().pos(0x5ace4).x - 133857) + abs(c2.refs_near().pos(0x5ace4).y - (-61266)) > 16'
+  - c1: dump-state
+  - c2: dump-state
+artifacts: [server.log, c1.log, c2.log, screenshots, world-diff]

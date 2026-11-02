@@ -1,0 +1,173 @@
+# b-locks (thuum-magnus, 23:03 PDT 2026-10-31; 07:52 PST 2026-11-01: claim 2 on the typed console form and every Lockpicking Menu exit through its own key, from x-lockpick's legs the lab can drive, v3 164727 to v6 183903; docs/verbs/locks.md, M4;
+# fork m4-locks): locks on two seats. The server owns a reference's lock (level, key, locked: the REFR's XLOC at first touch, the record
+# after), travels it as a property, refuses an activation without the key (E_ACTIVATE_LOCKED: the seat's own game then runs the engine's
+# activation, the Lockpicking Menu or the "requires key" box), unlocks for the key in the record (R0), and runs the game's own console
+# `lock` and `unlock` on the server under the console table's rank (the lab server runs enableConsoleCommandsForAll, so a typed `unlock`
+# on c1 is an owner's; the non-owner's refusal is T0's, locks.rs and ConsoleCommandTest). The subject: Bleak Falls Temple 0x371de's
+# bandit chest TreasBanditChest 0x371e9 (a Novice lock, level byte 0, no key); the key lock is the console's `Lock [ref, 255, key]`
+# (m4-locks 2d79199f) with RiverwoodAlvorHouseKey 0x36a3d (a vanilla KEYM; lab/esm.py), handed by AddItem. The minigame itself is
+# Eli's at the sitting: the lab's injected mouse and keys never reach the Lockpicking Menu (x-lockpick v6's trace, the pick and lock
+# angles flat through 27 attempts), so the pick's report ("picked", "broken N") is the verb's declared T4 (locks.md).
+# The server's lines: "E_ACTIVATE_LOCKED: <player> activates 371e9", "371e9 unlocked (level L, key K, N broken)", "<player> opens
+# 371e9 with its key", "371e9 locked (level L"; the client's: "lock 371e9 set at creation: locked", "lock 371e9 applied: locked|unlocked,
+# ...", "lock prompt 371e9: the engine's activation run", "lock 371e9: the Lockpicking Menu is open".
+# Claims (the verb doc's Tests), each with what it proves:
+# 1. The lock stands on both games at creation; c1's activation meets it: E_ACTIVATE_LOCKED once, the prompt line, the Lockpicking Menu
+#    open within 5 s and no ContainerMenu (R0 the state, R3 the menu).
+# 2. c1's TYPED console unlock runs on the server: `prid 000371e9` selects the chest as a click would, the bare `unlock` reaches
+#    skymp5-client's intercept with the selection as its first argument (Skyrim Platform's ConsoleComand_Execute; x-locks-typed
+#    20261101-132414 green), travels as ConsoleCommand and runs on the server under the lab's rank. A reference typed as an
+#    argument never works (the engine parses `unlock 0x371e9` by its own signature: 'Unknown variable', 20261101-124231). The
+#    claim: "371e9 unlocked" once, c2's applied unlocked within 3 s, and c1's next activation opens the ContainerMenu with no new
+#    E_ACTIVATE_LOCKED: the console is the server's, the state one for both seats.
+# 3. The key lock: Lock [371e9, 255, key] relocks it (c2's applied line names level 255); c1's activation without the key is refused and
+#    opens neither menu within 3 s (the engine's "requires key" box); with the key (AddItem) the activation unlocks ("371e9 unlocked
+#    (level 255, key 36a3d") and opens the ContainerMenu, c2's applied unlocked: the key path is the record's inventory.
+# 4. Relocked at Novice by the console: the server's line once, c2's applied line names it, no E_LOCK_ refusal.
+# 5. c2 relaunched hears the locked state at creation; a server restart keeps it: c1's activation after the reconnect is refused a third
+#    time and opens the Lockpicking Menu, not the chest. Assertions are evaluated by lab-api only (ADR-009). Its own commit (rule 13).
+id: b-locks
+milestone: M4
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: false
+  gameHour: 7.9
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c1: teleport {cell: "371de:Skyrim.esm", x: -4200, y: 850, z: 650, rot: [0, 0, 90]}
+  - wait: 20
+  - c2: teleport {cell: "371de:Skyrim.esm", x: -4100, y: 850, z: 650, rot: [0, 0, 90]}
+  - wait: 20
+  - assert:
+      - server.host(0x371de).client == "c1"
+  # the chest's spot by teleport, not approach: approach reads its target through the driver's npc-state, an actor's read, so a
+  # container has no position for it (x-lockpick 20261031-134255, E_RUN_APPROACH); these are the numbers approach would have
+  # computed from the landing spots: 90 and 110 units from TreasBanditChest 0x371e9 at (-3420, 732, 575) on each seat's line to
+  # it, facing it (the engine's angle Z, 0 north, clockwise)
+  - c1: teleport {cell: "371de:Skyrim.esm", x: -3509.0, y: 745.5, z: 575, rot: [0, 0, 98.6]}
+  - c2: teleport {cell: "371de:Skyrim.esm", x: -3528.4, y: 750.8, z: 575, rot: [0, 0, 99.8]}
+  - wait: 3
+  # 1. the lock stands on both games; the activation meets it
+  - c1: log-count {pattern: "lock 371e9 set at creation: locked"}
+  - c2: log-count {pattern: "lock 371e9 set at creation: locked"}
+  - assert:
+      - 'c1.log_count("lock 371e9 set at creation: locked") >= 1'
+      - 'c2.log_count("lock 371e9 set at creation: locked") >= 1'
+  - c1: activate {refId: 0x371e9}
+  - until: {within: 5, every: 0.5, expect: ['c1.state.menuOpen("Lockpicking Menu") == true']}
+  - c1: screenshot
+  - c1: log-count {pattern: "lock prompt 371e9: the engine.s activation run"}
+  - assert:
+      - 'server.log_count("E_ACTIVATE_LOCKED: ff[0-9a-f]+ activates 371e9") == 1'
+      - 'c1.log_count("lock prompt 371e9: the engine.s activation run") == 1'
+      - 'c1.state.menuOpen("Lockpicking Menu") == true'
+      - 'c1.state.menuOpen("ContainerMenu") == false'
+  # the menu's own exit first (Tab, DIK 15; Escape works too), then the lab's close: a kHide alone leaves the seat unable to
+  # open the chest afterward (x-locks-open v1 and v2), the exit key cleans it (v3 20261101-154444, both seats)
+  - c1: tap-key {code: 15}
+  - wait: 2
+  - c1: close-menu {name: Lockpicking Menu}
+  - wait: 1
+  # 2. the typed unlock runs on the server (the lab's rank), one state for both: the console's selected reference (prid, as a
+  #    click selects it) then the bare command, which Skyrim Platform hands the intercept with the selection first
+  #    (x-locks-typed 20261101-132414)
+  - c1: console {text: "prid 000371e9"}
+  - wait: 1
+  - c1: console {text: "unlock", match: "unlock"}
+  - until: {within: 5, every: 0.5, expect: ['server.log_count("371e9 unlocked") >= 1']}
+  - wait: 3
+  - c2: log-count {pattern: "lock 371e9 applied: unlocked"}
+  - c1: activate {refId: 0x371e9}
+  - until: {within: 5, every: 0.5, expect: ['c1.state.menuOpen("ContainerMenu") == true']}
+  - c1: screenshot
+  - assert:
+      - 'server.log_count("371e9 unlocked") == 1'
+      - 'c2.log_count("lock 371e9 applied: unlocked") >= 1'
+      - 'server.log_count("E_ACTIVATE_LOCKED: ff[0-9a-f]+ activates 371e9") == 1'
+  - c1: close-menu {name: ContainerMenu}
+  - wait: 1
+  # 3. the key lock: refused without the key, opened by the key in the record
+  - c1: server-console {name: Lock, args: [0x371e9, 255, 0x36a3d]}
+  - wait: 2
+  - c2: log-count {pattern: "lock 371e9 applied: locked, level 255"}
+  - assert:
+      - 'server.log_count("371e9 locked \\(level 255") == 1'
+      - 'c2.log_count("lock 371e9 applied: locked, level 255") >= 1'
+  - c1: activate {refId: 0x371e9}
+  - wait: 3
+  - c1: screenshot
+  - assert:
+      - 'server.log_count("E_ACTIVATE_LOCKED: ff[0-9a-f]+ activates 371e9") == 2'
+      - 'c1.state.menuOpen("Lockpicking Menu") == false'
+      - 'c1.state.menuOpen("ContainerMenu") == false'
+  - c1: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: AddItem, args: [0x14, 0x36a3d, 1]}
+  - wait: 2
+  - c1: activate {refId: 0x371e9}
+  - until: {within: 5, every: 0.5, expect: ['c1.state.menuOpen("ContainerMenu") == true']}
+  - wait: 2
+  - c2: log-count {pattern: "lock 371e9 applied: unlocked"}
+  - c1: screenshot
+  - assert:
+      - 'server.log_count("371e9 unlocked \\(level 255, key 36a3d") == 1'
+      - 'server.log_count("E_ACTIVATE_LOCKED: ff[0-9a-f]+ activates 371e9") == 2'
+      - 'c2.log_count("lock 371e9 applied: unlocked") >= 2'
+      - 'server.inventory(c1).count("0x36a3d") == 1'
+  - c1: close-menu {name: ContainerMenu}
+  - wait: 1
+  # 4. relocked at Novice by the server's console: one state for both, the watcher's applied line names it
+  - c1: server-console {name: Lock, args: [0x371e9, 0, 0]}
+  - wait: 2
+  - c2: log-count {pattern: "lock 371e9 applied: locked, level 0"}
+  - assert:
+      - 'server.log_count("371e9 locked \\(level 0") == 1'
+      - 'c2.log_count("lock 371e9 applied: locked, level 0") >= 1'
+      - 'server.log_count("E_LOCK_") == 0'
+  # 5. a relaunched seat hears the locked state at creation; a server restart keeps it (the lock stands, the minigame opens)
+  - c2: relaunch {until: gone}
+  - c2: connect
+  - wait: 15
+  - c2: close-menu {name: MessageBoxMenu}
+  - c2: server-console {name: TGM}
+  - c2: teleport {cell: "371de:Skyrim.esm", x: -3528.4, y: 750.8, z: 575, rot: [0, 0, 99.8]}
+  - wait: 3
+  - c2: log-count {pattern: "lock 371e9 set at creation: locked"}
+  - assert:
+      # the relaunch truncates c2's log: the creation line is the new session's
+      - 'c2.log_count("lock 371e9 set at creation: locked") >= 1'
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - c2: reconnect
+  - wait: 15
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c1: teleport {cell: "371de:Skyrim.esm", x: -3509.0, y: 745.5, z: 575, rot: [0, 0, 98.6]}
+  - wait: 3
+  - c1: activate {refId: 0x371e9}
+  - wait: 4
+  - c1: screenshot
+  - c1: dump-state
+  - c2: dump-state
+  - assert:
+      # the lock stood through the restart: the activation is refused and the minigame opens, no ContainerMenu
+      - 'server.log_count("E_ACTIVATE_LOCKED: ff[0-9a-f]+ activates 371e9") == 3'
+      - 'c1.state.menuOpen("Lockpicking Menu") == true'
+      - 'c1.state.menuOpen("ContainerMenu") == false'
+      - 'server.log_count("E_LOCK_") == 0'
+  # the menu's own exit first (Tab, DIK 15; Escape works too), then the lab's close: a kHide alone leaves the seat unable to
+  # open the chest afterward (x-locks-open v1 and v2), the exit key cleans it (v3 20261101-154444, both seats)
+  - c1: tap-key {code: 15}
+  - wait: 2
+  - c1: close-menu {name: Lockpicking Menu}
+artifacts: [server.log, c1.log, c2.log, screenshots]

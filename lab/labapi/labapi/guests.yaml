@@ -10,6 +10,10 @@
 # RakNet baseline clean-sp, which stays underneath. Proxmox rolls a ZFS disk
 # back only to its newest snapshot, so lab-api must target clean-m1; the way
 # back to RakNet is deleting clean-m1 and setting these two to clean-sp.
+# clean-sp predates the RTC key and its config section deliberately keeps
+# the local-time RTC; if it is ever retaken, add RealTimeIsUniversal=1 to
+# the disk and set localtime 0 in its section together (2026-11-01: every
+# other section of 711 and 712 is localtime 0 with a keyed disk)
 # A branch whose client a parity server refuses (another wire schema) runs
 # its T3 on a stacked clean-m1-<branch> that these two name meanwhile; when
 # it lands, thuum-mundus promotes that state to clean-m1 (`sky-lab client

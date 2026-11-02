@@ -1,0 +1,151 @@
+# b-container-rest (thuum-magnus, drafted HH:MM PDT 2026-10-31 from x-container-rest 69f2ad68; docs/verbs/containers.md, M4's row;
+# fork m4-containers-rest): the rest of the container row on two seats. The frame is x-shared-chest's (c1 hosts Bleak Falls Temple
+# 0x371de, c2 beside), the subject the bandit camp's chest TreasBanditChest 0x371e9 at (-3420, 732, 575) (lab/esm.py cellrefs), a
+# CONT with a lid. The server's lines: "[verb:containers] 371e9 open with N occupant(s)" and "371e9 shut with 0 occupant(s)" at
+# SetOpen, "<player> released from 371e9 by its disconnect", "371e9 saved open came back shut at load", "E_CONTAINER_REACH: <player>
+# takes 371e9" at a take from beyond the occupation reach; the client's: "container 371e9 lid Open played for the server's isOpen"
+# and "lid Close played" on a change of the applied state. server.ref carries no open state, so the claims read the lines; the lids
+# are in the screenshots. The lab's teleport is the server's and the engine's menu stays open through it, so the walk off with the
+# menu open is a teleport of 100 units past the reach.
+# Claims (the verb doc's Tests), each with what it proves:
+# 1. c1 opens: its ContainerMenu, the server's "open with 1 occupant", no reach refusal, c2's "lid Open played" once within 3 s: the
+#    open is the server's state and the watcher's engine plays it (R0 the state, the lid native from the property).
+# 2. c2 opens too: two occupants (D52), no "doesn't occupy" line; c2 moved 100 units off with its menu open takes all (R, DIK 19): the
+#    take is refused from beyond the reach (E_CONTAINER_REACH), the chest's items stay (c1's open menu in the screenshot, recorded).
+# 3. Both close: the server's "shut with 0 occupant" and c2's "lid Close played" within 3 s: the lid follows the last occupant out.
+# 4. c1 opens and relaunches with its menu open: the disconnect releases it ("released from 371e9 by its disconnect"), the chest shuts,
+#    c2's lid Close line again within 5 s.
+# 5. c1 back and the chest open again, the server restarted (5 s after the open, past the save tick): "saved open came back shut at
+#    load" once and no NEW "lid Open played" on either seat at the reconnect (a reconnect keeps the logs: c2's count stays at the
+#    run's four opens, c1's at the one since its relaunch, the opener's game playing the line too; a shut chest at creation plays
+#    nothing). The reloot's moment across a restart is the T0's (the lab has
+#    no lever for a looted chest with a short reloot here); not claimed.
+# Recorded, not claimed: both seats' screenshots at each lid state, both dumps. Assertions are evaluated by lab-api only (ADR-009).
+# Its own commit (rule 13).
+id: b-container-rest
+milestone: M4
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: false
+  gameHour: 7.9
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  # the chest holds something to take (its leveled list may roll nothing): ten gold into its server inventory by the console's
+  # AddItem on the reference, so the take from afar has a move to refuse
+  - c1: server-console {name: AddItem, args: [0x371e9, 0xf, 10]}
+  # the chest is a Novice lock in the game files, which the locks verb stands since parity 395cdc49 (2026-11-01): the activation
+  # below met E_ACTIVATE_LOCKED and the Lockpicking Menu instead of the open (20261101-171504), so the premise unlocks it first
+  # through the server's console, as b-locks' claim 2 does; the lock itself is b-locks' claim, not this scenario's
+  - c1: server-console {name: Unlock, args: [0x371e9]}
+  - wait: 2
+  - c1: teleport {cell: "371de:Skyrim.esm", x: -4200, y: 850, z: 650, rot: [0, 0, 90]}
+  - wait: 20
+  - c2: teleport {cell: "371de:Skyrim.esm", x: -4100, y: 850, z: 650, rot: [0, 0, 90]}
+  - wait: 20
+  - assert:
+      - server.host(0x371de).client == "c1"
+  # the chest's spot by teleport, not approach: approach reads its target through the driver's npc-state, an actor's read, so a
+  # container has no position for it (x-lockpick 20261031-134255, E_RUN_APPROACH); these are the numbers approach would have
+  # computed from the landing spots: 90 and 110 units from TreasBanditChest 0x371e9 at (-3420, 732, 575) on each seat's line to
+  # it, facing it (the engine's angle Z, 0 north, clockwise)
+  - c1: teleport {cell: "371de:Skyrim.esm", x: -3509.0, y: 745.5, z: 575, rot: [0, 0, 98.6]}
+  - c2: teleport {cell: "371de:Skyrim.esm", x: -3528.4, y: 750.8, z: 575, rot: [0, 0, 99.8]}
+  - wait: 3
+  # 1. the host opens; the watcher's lid
+  - c1: activate {refId: 0x371e9}
+  - wait: 3
+  - c2: screenshot
+  - c1: screenshot
+  - c2: log-count {pattern: "container 371e9 lid Open played"}
+  - assert:
+      - 'c1.state.menuOpen("ContainerMenu") == true'
+      - 'server.log_count("371e9 open with 1 occupant") == 1'
+      - 'server.log_count("E_ACTIVATE_REACH") == 0'
+      - 'c2.log_count("container 371e9 lid Open played") == 1'
+  # 2. the second occupant, then the move and the take from afar
+  - c2: activate {refId: 0x371e9}
+  - wait: 3
+  - assert:
+      - 'c2.state.menuOpen("ContainerMenu") == true'
+      - 'server.log_count("doesn.t occupy") == 0'
+  - c2: teleport {cell: "371de:Skyrim.esm", x: -4200, y: 850, z: 650, rot: [0, 0, 90]}
+  - wait: 2
+  - c2: tap-key {code: 19}
+  - wait: 3
+  - c2: screenshot
+  - c1: screenshot
+  - c2: dump-state
+  - assert:
+      - 'server.log_count("E_CONTAINER_REACH: ff[0-9a-f]+ takes 371e9") >= 1'
+  # 3. both close: the lid follows the last occupant out
+  - c2: close-menu {name: ContainerMenu}
+  - wait: 2
+  - c1: close-menu {name: ContainerMenu}
+  - wait: 3
+  - c2: log-count {pattern: "container 371e9 lid Close played"}
+  - c2: screenshot
+  - assert:
+      - 'server.log_count("371e9 shut with 0 occupant") >= 1'
+      - 'c2.log_count("container 371e9 lid Close played") >= 1'
+  # 4. the host's disconnect with its menu open releases it; the watcher's lid shuts again
+  - c1: teleport {cell: "371de:Skyrim.esm", x: -3509.0, y: 745.5, z: 575, rot: [0, 0, 98.6]}
+  - wait: 2
+  - c1: activate {refId: 0x371e9}
+  - wait: 3
+  - assert:
+      - 'c1.state.menuOpen("ContainerMenu") == true'
+      - 'server.log_count("371e9 open with 1 occupant") == 2'
+  - c1: relaunch {until: gone}
+  - until: {within: 15, every: 1, expect: ['server.log_count("released from 371e9 by its disconnect") >= 1']}
+  - wait: 5
+  - c2: log-count {pattern: "container 371e9 lid Close played"}
+  - c2: screenshot
+  - assert:
+      - 'server.log_count("371e9 shut with 0 occupant") >= 2'
+      - 'c2.log_count("container 371e9 lid Close played") >= 2'
+  # 5. the restart with the chest open
+  - c1: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c1: teleport {cell: "371de:Skyrim.esm", x: -3509.0, y: 745.5, z: 575, rot: [0, 0, 98.6]}
+  - wait: 3
+  - c1: activate {refId: 0x371e9}
+  - wait: 3
+  - assert:
+      - 'c1.state.menuOpen("ContainerMenu") == true'
+  # the lid counts before the restart (a reconnect keeps both seats' logs, so the claim after it is "no new line"); the open saved
+  # before the restart (the save storage ticks every server tick, the write is asynchronous)
+  - c1: log-count {pattern: "container 371e9 lid Open played"}
+  - c2: log-count {pattern: "container 371e9 lid Open played"}
+  - wait: 5
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - c2: reconnect
+  - wait: 15
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: log-count {pattern: "container 371e9 lid Open played"}
+  - c2: log-count {pattern: "container 371e9 lid Open played"}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - 'server.log_count("371e9 saved open came back shut at load") == 1'
+      # no new lid Open on either seat at the reconnect: c2 heard three opens (claims 1, 4 and 5's; claim 2's second occupant joins an
+      # open chest, so isOpen does not change and the watcher plays nothing, x-container-rest v4 195055) and c1 one since its relaunch
+      # (claim 5's own: the opener's game runs the apply too); one more would be the saved-open chest playing at creation
+      - 'c2.log_count("container 371e9 lid Open played") == 3'
+      - 'c1.log_count("container 371e9 lid Open played") == 1'
+  - c1: dump-state
+  - c2: dump-state
+artifacts: [server.log, c1.log, c2.log, screenshots]

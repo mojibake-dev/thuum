@@ -43,7 +43,10 @@ SRV = "eli@10.10.70.10"
 # mounts instead (lab-api's runner writes the same file for a run's npcEnabled, ADR-035 point 9)
 SETTINGS = "/srv/lab/server/server-settings.json"
 OVERLAY = "/srv/lab/server/server-settings-run.json"
-SERVER_KEYS = {"npcEnabled", "gameHour"}
+# the turbo switches (docs/private/playtest-turbo-2.md: the merged base carries every switch OFF, each item turns
+# its own on): the deployed settings keep them ON for the gates' scenarios, a playtest's overlay says otherwise
+SWITCHES = ("locks", "weatherSync", "perks", "leveling")
+SERVER_KEYS = {"npcEnabled", "gameHour", *SWITCHES}
 PLAYER = 20  # the console's word for the player itself (0x14)
 BARS = ("health", "magicka", "stamina")
 
@@ -80,11 +83,16 @@ def check_profile(p: Any, n: int) -> dict[str, Any]:
         raise ProfileError("hold.minutes is 1 to 600")
     if not isinstance(hold.get("reason", ""), str):
         raise ProfileError("hold.reason is text")
+    # lab-api's perks step (app.py seat_perks) refuses a hold whose reason is not a playtest's (E_NO_PLAYTEST): profile
+    # 40's first setup gave no perks under "turbo 2: ..." (2026-11-02)
+    if hold.get("reason") and not str(hold["reason"]).startswith("playtest"):
+        raise ProfileError(f"hold.reason starts with 'playtest' (lab-api's perks step needs it), got {hold['reason']!r}")
     server = p.get("server") or {}
     if not isinstance(server, dict) or set(server) - SERVER_KEYS:
         raise ProfileError(f"server takes {sorted(SERVER_KEYS)}, got {server!r}")
-    if "npcEnabled" in server and not isinstance(server["npcEnabled"], bool):
-        raise ProfileError(f"server.npcEnabled is true or false, got {server['npcEnabled']!r}")
+    for key in ("npcEnabled", *SWITCHES):
+        if key in server and not isinstance(server[key], bool):
+            raise ProfileError(f"server.{key} is true or false, got {server[key]!r}")
     hour = server.get("gameHour", 0)
     if isinstance(hour, bool) or not isinstance(hour, (int, float)) or not 0 <= hour < 24:
         raise ProfileError(f"server.gameHour is an hour from 0 up to 24, got {server['gameHour']!r}")
@@ -143,8 +151,9 @@ def overlay_text(settings_text: str, server: dict[str, Any], now: float | None =
     clock's hour as its time block (wire-rules clock.rs: a pure function of the wall clock that reads start.hour at the
     epoch, so the epoch is setup's own time)."""
     d = json.loads(settings_text)
-    if "npcEnabled" in server:
-        d["npcEnabled"] = server["npcEnabled"]
+    for key in ("npcEnabled", *SWITCHES):
+        if key in server:
+            d[key] = server[key]
     if "gameHour" in server:
         block = dict(d.get("time") or {})
         block["epoch"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(time.time() if now is None else now))
@@ -346,7 +355,10 @@ def setup(n: int) -> int:
         if seat.get("by_hand"):
             rep.note(f"by hand, in the seat's own game: {seat['by_hand']}")
     print(f"== Sunshine {time.strftime('%H:%M:%S')}", flush=True)
-    ps = "Restart-Service SunshineService -Force; Start-Sleep -Seconds 3; 'sunshine ' + (Get-Service SunshineService).Status"
+    # polled to 20 s, not read once at 3: on sky-c2's RTX the service read Stopped 3 s after its restart and Running
+    # 12 s later (playtest 39, 2026-10-30)
+    ps = ("Restart-Service SunshineService -Force; $s = ''; foreach ($i in 1..20) { Start-Sleep -Seconds 1; "
+          "$s = [string](Get-Service SunshineService).Status; if ($s -eq 'Running') { break } }; 'sunshine ' + $s + ' after ' + $i + ' s'")
     for client, vmid in sorted(_clients().items()):
         d = _guest_exec(vmid, ps)
         out = (d.get("out-data") or "").strip()
@@ -400,7 +412,15 @@ def ready(n: int) -> int:
     for name, port in (p.get("streams") or {}).items():
         r = subprocess.run(["pgrep", "-f", f"Moonlight stream core.gaussing.tv:{port}"], capture_output=True, text=True)
         pids = r.stdout.split()
-        (rep.ok if len(pids) == 1 else rep.fail)(f"stream {name} ({port}): {'pid ' + pids[0] if len(pids) == 1 else (str(len(pids)) + ' windows' if pids else 'no window')}")
+        if len(pids) != 1:
+            rep.fail(f"stream {name} ({port}): {str(len(pids)) + ' windows' if pids else 'no window'}")
+            continue
+        # a window that outlived a Sunshine restart (setup's own) or a clone rollback is a dead session that pgrep
+        # still lists: it holds no socket, a live stream holds several (playtest 40, 2026-11-02: playtest 39's two
+        # windows passed this check with 0 sockets each and showed nothing; the fresh ones held 3)
+        s = subprocess.run(["lsof", "-nP", "-a", "-p", pids[0], "-i"], capture_output=True, text=True)
+        socks = max(len(s.stdout.splitlines()) - 1, 0)
+        (rep.ok if socks else rep.fail)(f"stream {name} ({port}): pid {pids[0]}, {socks} sockets" + ("" if socks else ": a dead session, close it and open a fresh stream, then playtest-ready again"))
     for seat in p["seats"]:
         if seat.get("by_hand"):
             rep.note(f"profile {seat['profile']} by hand: {seat['by_hand']}")

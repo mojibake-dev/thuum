@@ -107,6 +107,11 @@ steps:
   - wait: 2
   - assert:
       - server.actor(c2).healthPercentage > 0.99
+  # the stream's first hit report is the aim's: after the power attack and the shout c1's view may have drifted off c2
+  # (its figure 100 units north), and a first report late by a second counts a quarter second at most (spell-cast.md,
+  # "b-duel's Flames leg", 2026-11-01), so c1 looks at c2 before the hold
+  - c1: look {pitch: 0, heading: 0}
+  - wait: 1
   - c2: watch-start
   - c1: hold-key {code: 199, ms: 4000}
   - wait: 5.5

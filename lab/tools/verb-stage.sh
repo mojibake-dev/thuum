@@ -54,30 +54,48 @@ echo "== 1. the Windows build of $sha8"
 # 39217995449's (9fb0732f, the same client source), and its inline source map's sources, mappings and all 105
 # sourcesContent entries matched (2026-10-19).
 # package.json, yarn.lock and webpack.config.js sit outside src/, so a dependency or bundler change keeps the wait.
-dist_sha=$sha; overlay=
+# Skyrim Platform's declaration sources (skyrim-platform/src/platform_se/codegen/convert-files/) count with that
+# TypeScript: the DLLs glob skyrim_platform/ and skyrim_platform_entry/ alone (src/platform_se/CMakeLists.txt:88,110);
+# pack copies skyrimPlatform.ts into Data/Platform/Modules (tools/dev_service/index.js:209-225), a declaration file
+# the game never loads (SkyrimPlatform.cpp:173,177 read -settings.txt and .js only), so the reused dist's older copy
+# runs nothing; the client compiles against npm's 2.8.0 typing (skymp5-client/tsconfig.json:15); and the codegen tools
+# run only as the Formatting check's CodegenCheck (linter-config.json:80-117), step 1b's gate, so a const enum edit
+# without its regenerated skyrim_platform/ConstEnumApi.cpp stops there, and one with it keeps the wait (2026-11-01,
+# m4-traps 346249e8: 2dece251's leave declaration cost a 35 min build for that file alone)
+dist_sha=$sha; overlay=; dist_branch=$branch
 if [ "${REUSE_DIST:-}" = 1 ]; then
-  server_only='^(skymp5-server/|unit/|docs/|skymp-wire/difftest/|skymp-wire/fuzz/|skymp-wire/crates/(wire-rules|wire-bridge|wire-legacy|wire-fakeclient)/|ci/|\.gitlab-ci\.yml$)'
+  # libespm/ is server-only too: its static espm library is linked by server_guest_lib and unit alone
+  # (skymp5-server/cpp/CMakeLists.txt:81, unit/CMakeLists.txt:34), never by skyrim-platform or the client (2026-11-01)
+  server_only='^(skymp5-server/|libespm/|unit/|docs/|skymp-wire/difftest/|skymp-wire/fuzz/|skymp-wire/crates/(wire-rules|wire-bridge|wire-legacy|wire-fakeclient)/|ci/|\.gitlab-ci\.yml$)'
+  overlay_ok='^(skymp5-client/src/|skyrim-platform/src/platform_se/codegen/convert-files/)'
   # the builds walked are both sources' (lab/tools/client-builds.py: the fork's client-build job on sky-build and
   # the mirror's Parity Windows run, newest first, GitLab first for a commit both built); step 7's `just build-client`
-  # downloads from whichever source built the commit it is given
-  while read -r rsrc rid rsha; do
-    [ -n "$rid" ] && [ "$rsha" != "$sha" ] || continue   # the head's own build is the wait below
-    git -C "$fork" cat-file -e "$rsha^{commit}" 2>/dev/null || continue
-    git -C "$fork" merge-base --is-ancestor "$rsha" "$sha" || continue
-    changed=$(git -C "$fork" diff --name-only "$rsha" "$sha")
-    client=$(printf '%s\n' "$changed" | grep -v '^$' | grep -Ev "$server_only" || true)
-    if [ -z "$(printf '%s\n' "$client" | grep -v '^$' | grep -Ev '^skymp5-client/src/' || true)" ]; then
-      dist_sha=$rsha
-      if [ -z "$client" ]; then
-        echo "   REUSE_DIST: $rsrc build $rid at ${rsha:0:8} has this head's client; since then only server-side files changed ($(printf '%s\n' "$changed" | grep -c .) files)"
-      else
-        overlay=1
-        echo "   REUSE_DIST: $rsrc build $rid at ${rsha:0:8}, then $(printf '%s\n' "$client" | grep -c .) TypeScript file(s) in skymp5-client/src: its dist, with skymp5-client.js built here at $sha8 over it (step 7)"
+  # downloads from whichever source built the commit it is given, on the branch that built it
+  reuse_walk() { # <branch>: the newest build there whose commit is an ancestor of this head with this head's client
+    while read -r rsrc rid rsha; do
+      [ -n "$rid" ] && [ "$rsha" != "$sha" ] || continue   # the head's own build is the wait below
+      git -C "$fork" cat-file -e "$rsha^{commit}" 2>/dev/null || continue
+      git -C "$fork" merge-base --is-ancestor "$rsha" "$sha" || continue
+      changed=$(git -C "$fork" diff --name-only "$rsha" "$sha") || continue   # errexit is off in a function under ||
+      client=$(printf '%s\n' "$changed" | grep -v '^$' | grep -Ev "$server_only" || true)
+      if [ -z "$(printf '%s\n' "$client" | grep -v '^$' | grep -Ev "$overlay_ok" || true)" ]; then
+        dist_sha=$rsha; dist_branch=$1
+        if [ -z "$client" ]; then
+          echo "   REUSE_DIST: $rsrc build $rid at ${rsha:0:8} on $1 has this head's client; since then only server-side files changed ($(printf '%s\n' "$changed" | grep -c .) files)"
+        else
+          overlay=1
+          echo "   REUSE_DIST: $rsrc build $rid at ${rsha:0:8} on $1, then $(printf '%s\n' "$client" | grep -c .) TypeScript file(s) (skymp5-client/src, SP's declarations): its dist, with skymp5-client.js built here at $sha8 over it (step 7)"
+        fi
+        return 0
       fi
-      break
-    fi
-  done < <(python3 lab/tools/client-builds.py "$branch")
-  [ "$dist_sha" != "$sha" ] || echo "   REUSE_DIST: no earlier build has this head's client; waiting for its own"
+    done < <(python3 lab/tools/client-builds.py "$1")
+    return 1
+  }
+  # REUSE_DIST_FROM=<branch>: a server-only branch with no client build of its own (its pushes carry
+  # CLIENT_BUILD_WINDOWS=0) takes an ancestor's dist from the branch that built it, under the same checks
+  # (m3-quest-sge-stages off the union, whose 0e23c820 dist m3-pass-train-3-win built, 2026-10-31)
+  reuse_walk "$branch" || { [ -n "${REUSE_DIST_FROM:-}" ] && reuse_walk "$REUSE_DIST_FROM"; } || true
+  [ "$dist_sha" != "$sha" ] || echo "   REUSE_DIST: no earlier build has this head's client${REUSE_DIST_FROM:+ (on $branch or $REUSE_DIST_FROM)}; waiting for its own"
 fi
 reruns=0
 for i in $(seq 1 120); do
@@ -105,6 +123,25 @@ for i in $(seq 1 120); do
       echo "   run $win_id failed, rerun $reruns $(date +%H:%M:%S)"
       gh run rerun "$win_id" -R mojibake-dev/skymp --failed >/dev/null 2>&1 || true
       sleep 60;;
+    completed:cancelled)
+      # a newer push to the branch cancels the mirror's run (cancel-in-progress) while the fork's own client-build of this
+      # head goes on building it on sky-build, which the loop's top takes once it succeeds (m5-train-permit-onceload
+      # 64ec9666, 2026-11-01: the 25c00758 push cancelled run 41362790349 and stopped the stage, then job 16373 succeeded)
+      live=$(python3 - "$sha" <<'PY' || true
+import sys
+sys.path.insert(0, "lab/tools")
+import glab
+t = glab.token("skymp")
+for p in glab.get(t, f"/projects/7/pipelines?sha={sys.argv[1]}&per_page=5"):
+    for j in glab.get(t, f"/projects/7/pipelines/{p['id']}/jobs?per_page=50"):
+        if j["name"] == "client-build" and j["status"] in ("created", "waiting_for_resource", "preparing", "pending", "running"):
+            print(j["id"])
+            sys.exit(0)
+PY
+)
+      [ -n "$live" ] || { echo "== Windows run $win_id ended cancelled and no GitLab client-build of $sha8 is live" >&2; exit 1; }
+      [ -n "${said_cancelled:-}" ] || echo "   run $win_id cancelled (a newer push); GitLab's client-build $live of $sha8 is live: waiting for it $(date +%H:%M:%S)"
+      said_cancelled=1; sleep 60;;
     completed:*) echo "== Windows run $win_id ended $con" >&2; exit 1;;
     *) sleep 60;;
   esac
@@ -183,7 +220,7 @@ echo "== 7. the client on both clones $(date +%H:%M:%S)"
 # client-dist stages the built driver bundle with the dist (stage-client.sh), so build it first: a fresh
 # worktree has none, and the main checkout's would be whatever was built last
 echo "   driver bundle: $(just build-driver 2>&1 | tail -1 | awk '{print $5, $NF}')"
-just build-client "$branch" "$dist_sha" 2>&1 | grep -E "^(run|github|gitlab) [0-9]+ " | cut -c1-120   # the build of this head (or of the one REUSE_DIST took), not the branch's newest; build-client names its source first since verb-stage-gitlab (main f7f4bf1), and a filter that matched nothing stopped train-29's stage at step 7 under pipefail (2026-10-20 01:31)
+just build-client "$dist_branch" "$dist_sha" 2>&1 | grep -E "^(run|github|gitlab) [0-9]+ " | cut -c1-120   # the build of this head (or of the one REUSE_DIST took, on the branch that built it), not the branch's newest; build-client names its source first since verb-stage-gitlab (main f7f4bf1), and a filter that matched nothing stopped train-29's stage at step 7 under pipefail (2026-10-20 01:31)
 # where build-client put it: the tree's own skymp/ (a worktree's is not the fork checkout FORK_DIR names)
 if [ -n "$overlay" ]; then
   blog=lab/results/runsets/overlay-$branch-$sha8.log; mkdir -p lab/results/runsets

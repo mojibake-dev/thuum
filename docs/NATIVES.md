@@ -14,11 +14,11 @@ Status meanings:
 
 | Status | Count |
 | --- | --- |
-| implemented | 97 |
+| implemented | 104 |
 | delegated | 33 |
 | stub | 2 |
 | gamemode | 18 |
-| missing | 1310 |
+| missing | 1303 |
 | total | 1460 |
 
 | Native | Status | Rung | Reason / notes | Verb |
@@ -72,8 +72,8 @@ Status meanings:
 | `ActiveMagicEffect.UnregisterForTrackedStatsEvent` (method) | missing |  |  |  |
 | `ActiveMagicEffect.UnregisterForUpdate` (method) | missing |  |  |  |
 | `ActiveMagicEffect.UnregisterForUpdateGameTime` (method) | missing |  |  |  |
-| `Actor.AddPerk` (method) | missing |  |  |  |
-| `Actor.AddShout` (method) | missing | R3 | Not on the server VM yet. The server itself sends it to a player's own client as an SpSnippet: after an admin's AddShout and after every login, for each shout in the server's record (docs/verbs/shouts.md); the shout list in that game follows the record, which is R0. | shouts |
+| `Actor.AddPerk` (method) | implemented | R0 | writes the perk into the server's record and sends the player its perk state (docs/verbs/perks.md; fork m5-perks, 2026-10-31); no rule: a script's or the console's word | perks |
+| `Actor.AddShout` (method) | implemented | R0 | Since fork m4-word-wall (f32fcebc, the word wall's server half): writes the shout into the actor's record (RecordShoutEntry) and tells its game by SpSnippet Actor.AddShout, as the console does; true when the record grew. The login replays the record (docs/verbs/shouts.md). | word-wall |
 | `Actor.AddSpell` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:782]; the server also sends it after a sleep to grant Rested (ActionListener::GrantRested) [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1020]; the console's AddSpell (an admin's) sends it to the target's game after recording the spell (docs/verbs/cast-teleport.md) [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1020] | sleep |
 | `Actor.AddToFaction` (method, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1016] |  |
 | `Actor.AllowBleedoutDialogue` (method) | missing |  |  |  |
@@ -160,7 +160,7 @@ Status meanings:
 | `Actor.HasMagicEffect` (method) | missing |  |  |  |
 | `Actor.HasMagicEffectWithKeyword` (method) | missing |  |  |  |
 | `Actor.HasParentRelationship` (method) | missing |  |  |  |
-| `Actor.HasPerk` (method) | missing |  |  |  |
+| `Actor.HasPerk` (method) | implemented | R0 | the server's record (docs/verbs/perks.md; fork m5-perks, 2026-10-31); false for an actor without a record | perks |
 | `Actor.HasSpell` (method) | missing |  |  |  |
 | `Actor.IsAIEnabled` (method) | missing |  |  |  |
 | `Actor.IsAlarmed` (method) | missing |  |  |  |
@@ -212,7 +212,7 @@ Status meanings:
 | `Actor.RegenerateHead` (method) | missing |  |  |  |
 | `Actor.RemoveFromAllFactions` (method) | missing |  |  |  |
 | `Actor.RemoveFromFaction` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1019] |  |
-| `Actor.RemovePerk` (method) | missing |  |  |  |
+| `Actor.RemovePerk` (method) | implemented | R0 | takes the perk off the server's record and sends the player its perk state (docs/verbs/perks.md; fork m5-perks, 2026-10-31) | perks |
 | `Actor.RemoveShout` (method) | missing | R3 | Not on the server VM yet. The server itself sends it to a player's own client as an SpSnippet when that game reports a shout in its voice slot that the server's record lacks (docs/verbs/shouts.md): the shout leaves that game, whose list follows the record (R0). | shouts |
 | `Actor.RemoveSpell` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:783]; the server also sends it when a Rested grant's eight game hours end [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1021] | sleep |
 | `Actor.ReplaceHeadPart` (method) | missing |  |  |  |
@@ -225,7 +225,7 @@ Status meanings:
 | `Actor.SendLycanthropyStateChanged` (method) | missing |  |  |  |
 | `Actor.SendTrespassAlarm` (method) | missing |  |  |  |
 | `Actor.SendVampirismStateChanged` (method) | missing |  |  |  |
-| `Actor.SetActorValue` (method) | implemented | R0 on a player; R2 delegated otherwise | a player: the base set, held against stale reports, sent (wire-rules actor_values set_ok); any other actor, and names the lab confirmed no index for: run by the host as before (CONFIRMED, x-av-probe 20261008-101643: the game sets the base). [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:998] | actor-values |
+| `Actor.SetActorValue` (method) | implemented | R0 on a player; R2 delegated otherwise | a player: the base set, held against stale reports, sent (wire-rules actor_values set_ok); a skill's set moves the leveling progress entry with the base (m5-skill-set, docs/verbs/leveling.md); any other actor, and names the lab confirmed no index for: run by the host as before (CONFIRMED, x-av-probe 20261008-101643: the game sets the base). [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:998] | actor-values |
 | `Actor.SetAlert` (method) | missing |  |  |  |
 | `Actor.SetAllowFlying` (method) | missing |  |  |  |
 | `Actor.SetAllowFlyingEx` (method) | missing |  |  |  |
@@ -757,7 +757,7 @@ Status meanings:
 | `Game.IsPlayerSungazing` (global) | missing |  |  |  |
 | `Game.IsPluginInstalled` (global) | missing |  |  |  |
 | `Game.IsSneakingControlsEnabled` (global) | missing |  |  |  |
-| `Game.IsWordUnlocked` (global) | missing |  |  |  |
+| `Game.IsWordUnlocked` (global) | implemented | R0 | Since fork m4-word-wall: the default actor's record (HasShoutEntry WordUnlocked). | word-wall |
 | `Game.LoadGame` (global) | missing |  |  |  |
 | `Game.ModPerkPoints` (global) | missing |  |  |  |
 | `Game.PlayBink` (global) | missing |  |  |  |
@@ -802,10 +802,10 @@ Status meanings:
 | `Game.ShowTitleSequenceMenu` (global) | missing |  |  |  |
 | `Game.ShowTrainingMenu` (global) | missing |  |  |  |
 | `Game.StartTitleSequence` (global) | missing |  |  |  |
-| `Game.TeachWord` (global) | missing | R3 | Not on the server VM yet (a global with no player until a word wall's activation names one; the word walls' slice). The server sends it to a player's own client as an SpSnippet after an admin's TeachWord; a login restores a known word by Form.SetPlayerKnows instead, as TeachWord shows the game's word-of-power message (docs/verbs/shouts.md). | shouts |
+| `Game.TeachWord` (global) | implemented | R0 | Since fork m4-word-wall: the default actor's record (RecordShoutEntry WordKnown) and its game told by SpSnippet Game.TeachWord, as the console does; a script's own word wall on the server teaches the same way. A login restores a known word by Form.SetPlayerKnows instead (docs/verbs/shouts.md). | word-wall |
 | `Game.TriggerScreenBlood` (global) | missing |  |  |  |
 | `Game.UnbindObjectHotkey` (global) | missing |  |  |  |
-| `Game.UnlockWord` (global) | missing | R3 | As Game.TeachWord, for each unlocked word in the server's record (docs/verbs/shouts.md). | shouts |
+| `Game.UnlockWord` (global) | implemented | R0 | Since fork m4-word-wall: as Game.TeachWord, for the unlocked set (WordUnlocked). | word-wall |
 | `Game.UpdateHairColor` (global) | missing |  |  |  |
 | `Game.UpdateThirdPerson` (global) | missing |  |  |  |
 | `Game.UpdateTintMaskColors` (global) | missing |  |  |  |
@@ -1042,10 +1042,10 @@ Status meanings:
 | `ObjectReference.GetItemCount` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:947] |  |
 | `ObjectReference.GetItemHealthPercent` (method) | missing |  |  |  |
 | `ObjectReference.GetItemMaxCharge` (method) | missing |  |  |  |
-| `ObjectReference.GetKey` (method) | missing |  |  |  |
+| `ObjectReference.GetKey` (method) | implemented | R0 | the key the lock names, as a form; none without one (docs/verbs/locks.md; fork m4-locks) | locks |
 | `ObjectReference.GetLength` (method) | missing |  |  |  |
 | `ObjectReference.GetLinkedRef` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:972] |  |
-| `ObjectReference.GetLockLevel` (method) | missing |  |  |  |
+| `ObjectReference.GetLockLevel` (method) | implemented | R0 | the XLOC level byte (0 or 1 Novice, 25, 50, 75, 100, 255 requires key), 0 without a lock (docs/verbs/locks.md; fork m4-locks) | locks |
 | `ObjectReference.GetMass` (method) | missing |  |  |  |
 | `ObjectReference.GetNthForm` (method) | missing |  |  |  |
 | `ObjectReference.GetNthLinkedRef` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:973] |  |
@@ -1083,11 +1083,11 @@ Status meanings:
 | `ObjectReference.IsIgnoringFriendlyHits` (method) | missing |  |  |  |
 | `ObjectReference.IsInDialogueWithPlayer` (method) | missing |  |  |  |
 | `ObjectReference.IsLockBroken` (method) | missing |  |  |  |
-| `ObjectReference.IsLocked` (method) | missing |  |  |  |
+| `ObjectReference.IsLocked` (method) | implemented | R0 | the server's lock record (docs/verbs/locks.md; fork m4-locks, 2026-10-31) | locks |
 | `ObjectReference.IsMapMarkerVisible` (method) | missing |  |  |  |
 | `ObjectReference.IsOffLimits` (method) | missing |  |  |  |
 | `ObjectReference.KnockAreaEffect` (method) | missing |  |  |  |
-| `ObjectReference.Lock` (method) | missing |  |  |  |
+| `ObjectReference.Lock` (method) | implemented | R0 | writes the server's lock record; abAsOwner ignored (no ownership on the server) | locks |
 | `ObjectReference.MoveTo` (method, latent) | gamemode |  | [overrides the C++ implemented at skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:969; skymp5-functions-lib/index.ts:350] |  |
 | `ObjectReference.MoveToInteractionLocation` (method, latent) | missing |  |  |  |
 | `ObjectReference.MoveToMyEditorLocation` (method, latent) | missing |  |  |  |
@@ -1126,7 +1126,7 @@ Status meanings:
 | `ObjectReference.SetItemCharge` (method) | missing |  |  |  |
 | `ObjectReference.SetItemHealthPercent` (method) | missing |  |  |  |
 | `ObjectReference.SetItemMaxCharge` (method) | missing |  |  |  |
-| `ObjectReference.SetLockLevel` (method) | missing |  |  |  |
+| `ObjectReference.SetLockLevel` (method) | implemented | R0 | writes the level byte into the server's lock record (docs/verbs/locks.md; fork m4-locks) | locks |
 | `ObjectReference.SetMotionType` (method, latent) | missing |  |  |  |
 | `ObjectReference.SetNoFavorAllowed` (method) | missing |  |  |  |
 | `ObjectReference.SetOpen` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:970] |  |

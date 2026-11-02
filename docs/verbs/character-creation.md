@@ -95,6 +95,64 @@ Rate limit / bounds: unchanged; one accepted result per race menu open.
   open-race-menu command and its record of the server's verdicts
   (onUpdateAppearanceAttempt), which labState reports.
 
+## The permit (M5, 2026-11-01)
+
+Eli's call, relayed by apocrypha: rotfern's race is for test client 1 alone;
+test client 2 cannot use it. A server may restrict a playable race to the
+profiles it lists, in server-settings.json:
+
+```json
+"restrictedRaces": {"aa00:rotfern.esp": [1], "19d08:rotfern.esp": [1]}
+```
+
+Keys are FormDescs ("<shortid>:<plugin>", resolved against the load order
+when judged, since the settings are read before the game files load; a race
+from a plugin the server does not load restricts nothing); values are the
+profile ids that may wear the race. rotfern.esp's two RACE records are
+rotfern (0xaa00) and rotfernRaceVampire (0x19d08), both Playable (lab/esm.py
+races on sky-srv, 2026-11-01). The lab's seats are profiles 1 (c1) and 2 (c2).
+
+- Rung: R1 as the verb's (the menu makes the look, the server judges it);
+  the profile is the login's, never the client's word (rule 5).
+- The rule (wire-rules appearance::race_allowed, fork m5-race-permit
+  e46d87d8) gains two facts, is_restricted and is_permitted: a restricted
+  race passes for a listed profile alone, a permit makes no unplayable race
+  playable, and the recorded race stays allowed as before (so a seat already
+  wearing the race keeps it through the menu). IsAllowedRace gathers them
+  from WorldState::RestrictedRaceIds and PermittedRaceIds(profile);
+  E_APPEARANCE_RACE names the profile.
+- The wire (SCHEMA_VERSION 29): CreateActor's props `restrictedRaces` and
+  `permittedRaces` (form ids in the shared load order, cap RACES 128) travel
+  on a player's own CreateActor while the server restricts a race, nothing
+  otherwise. The validator wants both or neither, isMe only, no id 0 or
+  repeated, every permitted race among the restricted (E_VAL_RANGE);
+  wire-legacy reads both as absent; fixture 33-CreateActor-2 goes through
+  WireJsonContractTest.
+- The menu side (apocrypha, fork apocrypha/race-permit-client e54f69b0,
+  merged into m5-race-permit): skymp5-client's RacePermitService reads the
+  two lists at login and names the races to take off the menu (never the one
+  the player's base already wears). Its lines: "restricted races [...]
+  permitted here [...] hidden [...]" at login, E_RACE_PERMIT for a restricted
+  id that is no race in the game's load order. The hide itself is OFF since
+  15:35 PST 2026-11-01 (fork 0594f294): the seats' loaded Race.pex defines MakeUnplayable
+  as a script function, not a native one, so callNative threw "Function is
+  not native" and nothing came off the menu (b-race-permit 20261101-232833,
+  c2's console 23:30:02Z); the service logs "stays listed; the hide awaits
+  its native" instead. The enforcement is the server's refusal alone, which
+  is what Eli asked for. The hide returns in the bondblock train (apocrypha
+  26ebe040, 15:40 PST 2026-11-01): the seats load SKSE's own loose Data\Scripts\Race.pex
+  (6,634 bytes, sha256 ecdf2b18..., byte-identical to lab/.cache/skse-1.6.1170's;
+  lab/pex.py dump: IsRaceFlagSet, SetRaceFlag and ClearRaceFlag native,
+  IsPlayable and MakeUnplayable two- and three-instruction wrappers over them),
+  so the hide is race.clearRaceFlag(1) with isRaceFlagSet(1) through Skyrim
+  Platform's typed Race, no callNative; the isPlayable() that passed on c2 was
+  Form's, through the binding's inheritance. The per-race line "taken off the
+  menu; playable now: false" returns with it. Courtesy only, then as now: the
+  plugin bytes and load order stay identical on every seat.
+- T2's lesson: a prop on the player's own CreateActor is a login-time
+  divergence in EVERY difftest session, declared once in difftest's
+  divergences.yaml as the lock's is (fork ee9fdec5), not per session.
+
 ## Not in this verb
 
 The rest of the appearance is still recorded as the client sends it: sex,
@@ -131,6 +189,27 @@ applyAppearanceCommon, src/sync/appearance.ts). Candidates for a later verb.
   cannot fail on a server without the check, since the stock menu offers no
   other race, so the refusal's evidence is T2.
 
+- The permit's T0: unit/RacePermitTest.cpp (OrcRace 0x13747 restricted to
+  profile 1 on the lab's master files): profile 1 wears it, profile 2 is
+  refused it with the record untouched and the menu still open, then takes
+  Nord; each player's own CreateActor carries restrictedRaces and its
+  permittedRaces; an unloaded plugin restricts nothing; bad settings throw.
+  The rule's own cases in wire-rules appearance.rs; the validator's in
+  wire-validate (race_permit_tests).
+- The permit's T2: difftest session race-permit (profile 9, a new character,
+  sends rotfern's race, which T2's settings restrict to profile 1, then Orc:
+  the legacy server takes the first and refuses the second, the fixed server
+  the reverse; every relay declared, the fixed server's echo of the accepted
+  look to its sender included). No T2 client is a listed profile, so the
+  acceptance path has T0 coverage alone (the reviewer's note, 2026-11-01).
+- The permit's T3: lab/scenarios/b-race-permit.yaml (c1 keeps rotfern's race
+  through its menu, the permitted seat; c2 picks the same race, which its
+  menu still lists while the hide is off, and the server refuses the result:
+  E_APPEARANCE_RACE once, the record and c1's view of c2 unchanged; both
+  seats log the permit's lists, neither E_RACE_PERMIT). Its first run
+  20261101-232833 held every claim but the hide's two, which left with the
+  hide (9de7a6a7).
+
 ## Status
 
 - [x] the flag sourced (UESP, libespm, CommonLibSSE-NG) and read from the
@@ -142,3 +221,22 @@ applyAppearanceCommon, src/sync/appearance.ts). Candidates for a later verb.
   Eli with the commits through 9e87c65, confirmed 2026-10-04; its race-pick
   revision 97834ad approved 2026-10-08)
 - [x] on fork parity (c104128f, 2026-10-03)
+- [x] the permit's rule, setting, wire props and validator built (fork
+  m5-race-permit e46d87d8; T0, cargo test --workspace, clippy, fork-lint
+  green on 2026-11-01); the client's hide merged from apocrypha's e54f69b0;
+  a reviewer agent's read folded in at dd7586c0 (14:42 PST 2026-11-01: the client's
+  apply() deferred to the update thread, the setting's keys validated and
+  lower-cased with one warning per unloaded plugin, the T2 session's echo
+  declaration); the train for the lab is m5-train-permit-onceload ef404d98
+  (parity 562bf934 with the onceLoad fix)
+- [x] the permit at T2 (session race-permit, 38 of 38 identical on 7fe600e6)
+  and T3 (b-race-permit green four times on the train: 20261102-000425 by
+  path, 003638 in the first gate, 013345 by path on the restage, 014505 in
+  the regate; the gate 12 of 12 twice, the first refused by the tooling's two
+  builds)
+- [x] the permit on fork parity 7fe600e6 (18:18 PST 2026-11-01, the train
+  m5-train-permit-onceload with the onceLoad fix); the menu hide
+  (apocrypha 26ebe040, clearRaceFlag) MERGED to parity e6c5d01a in the
+  bondblock train (20:09 PST 2026-11-01; x-race-permit-hide green 023428 and 025940,
+  b-race-permit green in that gate too), its two claims back in
+  b-race-permit (9826bcc1)

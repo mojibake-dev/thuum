@@ -977,6 +977,40 @@ class SkillTests(unittest.TestCase):
             ev.evaluate("c2.level() == 1")
 
 
+class WeatherViews(NearViews):
+    """c1's last weather step: SkyrimCloudy settled; c2's: blending into
+    SkyrimClear from SkyrimCloudy, a third of the way."""
+
+    def __init__(self):
+        super().__init__()
+        self.read = {"c1": {"current": 0x12F89, "outgoing": 0, "transition": 1.0},
+                     "c2": {"current": 0x81A, "outgoing": 0x12F89, "transition": 0.34}}
+
+    def weather(self, observer):
+        return self.read.get(observer)
+
+
+@needs_deps
+class WeatherTests(unittest.TestCase):
+    def test_weather_reads_the_last_weather_step(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(RichServer(), WeatherViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c1.weather().current == 0x12f89"))
+        self.assertTrue(ev.evaluate("c1.weather().outgoing == 0"))
+        self.assertTrue(ev.evaluate("c1.weather().transition == 1"))
+        self.assertTrue(ev.evaluate("c2.weather().current != c1.weather().current"))
+        self.assertTrue(ev.evaluate("c2.weather().outgoing == c1.weather().current"))
+        self.assertTrue(ev.evaluate("c2.weather().transition < 1"))
+
+    def test_a_seat_without_a_weather_step_is_a_data_error(self):
+        from labapi.assertions import AssertionData, AssertionSyntax, Evaluator
+        ev = Evaluator(RichServer(), WeatherViews(), ["c1", "c2", "c3"])
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c3.weather().current == 0")
+        with self.assertRaises(AssertionSyntax):
+            ev.evaluate("c1.weather().wind == 0")
+
+
 class NodeScaleViews(NearViews):
     """c1 read its own head at 1.6; c2 read every actor near it: a stale
     disabled reference and a live figure where the server has c1 (290, 0, 0),

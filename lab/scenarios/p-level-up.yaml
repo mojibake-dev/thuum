@@ -1,0 +1,167 @@
+# p-level-up (thuum-magnus, drafted 08:18 PDT 2026-10-31 from x-skill-use v4 7db1a600, green at 20261031-151449; docs/verbs/leveling.md, M5's exit; fork
+# m5-leveling): skills rise by use on the server and the character levels by skill gains. The engine's one skill-experience function
+# (UseSkill, the fork's Skyrim Platform replacement) fires once per landed hit with the weapon's base damage as points
+# (x-skill-use-read v3: 7.0 for an iron sword); skillUseService sends each second's sum as SkillUse 63; the server's formulas (UESP's,
+# leveling.rs) add points times the skill's use mult (One-handed 6.3 from the AVIF) toward the next level, whose cost is
+# 2 * level^1.95 (improve mult 2), raise the base on the record and send it (actor-values' path, the seat applying the record's skill
+# level, experience and threshold through SetPlayerSkill), and grant the character the new skill level as experience toward
+# (level + 3) * 25 (100 at level 1). The engine's own experience stays 0 (DisableSkillAdvance's zeroed mults; the hook passes the call
+# through), so the bar reads the carry the server writes into the record: experience is claimed 0 before the first swing only. The
+# frame is the probe's: c1 swings an iron sword (0x12eb7) at c2 standing 120 units south under both seats' god mode (a figure takes
+# the hit the server already judges; the hook firing for a hit on a figure is x-skill-use's read). The server's lines:
+# "[verb:leveling] <player> skill 6 reaches level N", "<player> reaches character level N"; the client's: "skill uses sent: 6:7.0
+# (N use(s))". The premise is the clean character's One-handed 20 (a-actor-values; the console's SetActorValue writes the record's
+# base, not the leveling standing the engine's PlayerSkills report, so the doc's "15 to 16" runs as 20 to 21): the step costs 688
+# experience, sixteen hits; the character's level 2 comes with the fifth skill level (21 + 22 + 23 + 24 = 90, plus 25 makes 115 over
+# the 100), 4,160 experience from 20, about 95 hits; level 3 (125 more) is out of a run's reach, and so is skill 27 (6,372).
+# v3 (08:24 PDT 2026-10-31): the swings in batches of twelve with c2 teleported back between them (each hit nudges the target back; after
+# a dozen it stands out of reach, x-skill-use 151817). v2 (08:23 PDT 2026-10-31, before its first run): c2 at 80 units, not 120; x-skill-use v5 (151817) landed 13 of 36 swings at 120, the
+# sword's reach edge, under the sixteen the step needs.
+# Claims (the verb doc's Tests), each with what it proves:
+# 1. The premise: One-handed 20 on the seat, experience 0, level 1 (the clean world's character, read through SKSE).
+# 2. Three batches of twelve swings, the target put back between them: the batches sent, "skill 6 reaches level 21" once on the server and never 23, the seat's base at least 21
+#    within 10 s, no character level yet, no E_SKILL_ line: a skill rises by use through the server and nowhere else (the engine's
+#    own mults are zero; 12 of 20 swings landed in the probe's read, so the counts hold at any landing rate from 45%).
+# 3. Eleven more batches of twelve (168 swings in all): the skill reaches 25 (once) and never 28, the character reaches level 2 exactly once and
+#    never 3, the seat reads level 2 and the base at least 25: the character curve and the carry hold as the formulas say.
+# 4. c2's One-handed stays 20: two records, no crosstalk (the target's record never moved).
+# 5. A relaunch of c1 keeps the base and the level (the record's values at login); 6. a server restart keeps them too.
+# Recorded, not claimed: c1's screenshots after claims 2 and 3 (the Skills menu is Eli's T4), both dumps. Assertions are evaluated
+# by lab-api only (ADR-009). Its own commit (rule 13).
+id: p-level-up
+milestone: M5
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: false
+  gameHour: 7.9
+timeout_s: 1200
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 12
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c1: server-console {name: AddItem, args: [0x14, 0x12eb7, 1]}
+  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0, rot: [0, 0, 180]}
+  # v2: c2 at 80 units, inside the sword's reach (at 120 the probe landed 13 to 16 of 20 and 13 of 36 swings: the reach's edge)
+  - c2: teleport {cell: lab-spawn, x: 0, y: -80, z: 0, rot: [0, 0, 0]}
+  - wait: 6
+  - c1: equip {formId: 0x12eb7}
+  - wait: 1
+  - c1: draw-weapon
+  - wait: 3
+  # 1. the premise
+  - c1: skills {names: ["OneHanded"]}
+  - c2: skills {names: ["OneHanded"]}
+  - assert:
+      - 'c1.skill("OneHanded").base == 20'
+      - 'c1.skill("OneHanded").xp == 0'
+      - c1.level() == 1
+      - 'c2.skill("OneHanded").base == 20'
+  # 2. thirty-six swings: 20 to 21 through the server (sixteen hits at 44.1 each; 12 of 20 swings landed in x-skill-use 151047, so
+  #    the counts hold from 45% to every swing landing: at least 21, never 23)
+  # v3: in batches of twelve with c2 put back at 80 units between them: each hit nudges the target back, and after about a dozen it
+  # stands out of reach (x-skill-use 151817: all 13 landed hits in the first 14 s of 36 swings)
+  - c1: repeat {times: 12, gapMs: 1200, step: {anim-event: {name: attackStart}}}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -80, z: 0, rot: [0, 0, 0]}
+  - wait: 2
+  - c1: repeat {times: 12, gapMs: 1200, step: {anim-event: {name: attackStart}}}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -80, z: 0, rot: [0, 0, 0]}
+  - wait: 2
+  - c1: repeat {times: 12, gapMs: 1200, step: {anim-event: {name: attackStart}}}
+  - wait: 4
+  - c1: log-count {pattern: "skill uses sent: 6:"}
+  - until: {within: 15, every: 1, expect: ['server.log_count("ff[0-9a-f]+ skill 6 reaches level 21") >= 1']}
+  - wait: 6
+  - c1: skills {names: ["OneHanded"]}
+  - c1: screenshot
+  - assert:
+      - 'c1.log_count("skill uses sent: 6:") >= 12'
+      - 'server.log_count("ff[0-9a-f]+ skill 6 reaches level 21") == 1'
+      - 'server.log_count("ff[0-9a-f]+ skill 6 reaches level 23") == 0'
+      - 'server.log_count("reaches character level") == 0'
+      - 'server.log_count("E_SKILL_") == 0'
+      - 'c1.skill("OneHanded").base >= 21'
+      - c1.level() == 1
+  # 3. eleven more batches of twelve (168 swings in all): skill 25 (4,160 xp, 94 hits) at a 56% landing rate and, every swing landing
+  #    (7,409 xp), under 28 (7,608): the skill at least 25 and never 28, the character 2 (21 + 22 + 23 + 24 + 25 = 115 over the 100)
+  #    and never 3 (26 and 27 add 53 to the 15 carried, under the 125)
+  - c2: teleport {cell: lab-spawn, x: 0, y: -80, z: 0, rot: [0, 0, 0]}
+  - wait: 2
+  - c1: repeat {times: 12, gapMs: 1200, step: {anim-event: {name: attackStart}}}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -80, z: 0, rot: [0, 0, 0]}
+  - wait: 2
+  - c1: repeat {times: 12, gapMs: 1200, step: {anim-event: {name: attackStart}}}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -80, z: 0, rot: [0, 0, 0]}
+  - wait: 2
+  - c1: repeat {times: 12, gapMs: 1200, step: {anim-event: {name: attackStart}}}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -80, z: 0, rot: [0, 0, 0]}
+  - wait: 2
+  - c1: repeat {times: 12, gapMs: 1200, step: {anim-event: {name: attackStart}}}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -80, z: 0, rot: [0, 0, 0]}
+  - wait: 2
+  - c1: repeat {times: 12, gapMs: 1200, step: {anim-event: {name: attackStart}}}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -80, z: 0, rot: [0, 0, 0]}
+  - wait: 2
+  - c1: repeat {times: 12, gapMs: 1200, step: {anim-event: {name: attackStart}}}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -80, z: 0, rot: [0, 0, 0]}
+  - wait: 2
+  - c1: repeat {times: 12, gapMs: 1200, step: {anim-event: {name: attackStart}}}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -80, z: 0, rot: [0, 0, 0]}
+  - wait: 2
+  - c1: repeat {times: 12, gapMs: 1200, step: {anim-event: {name: attackStart}}}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -80, z: 0, rot: [0, 0, 0]}
+  - wait: 2
+  - c1: repeat {times: 12, gapMs: 1200, step: {anim-event: {name: attackStart}}}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -80, z: 0, rot: [0, 0, 0]}
+  - wait: 2
+  - c1: repeat {times: 12, gapMs: 1200, step: {anim-event: {name: attackStart}}}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -80, z: 0, rot: [0, 0, 0]}
+  - wait: 2
+  - c1: repeat {times: 12, gapMs: 1200, step: {anim-event: {name: attackStart}}}
+  - wait: 4
+  - until: {within: 30, every: 1, expect: ['server.log_count("ff[0-9a-f]+ reaches character level 2") >= 1']}
+  - wait: 6
+  - c1: skills {names: ["OneHanded"]}
+  - c2: skills {names: ["OneHanded"]}
+  - c1: screenshot
+  - assert:
+      - 'server.log_count("ff[0-9a-f]+ skill 6 reaches level 25") == 1'
+      - 'server.log_count("ff[0-9a-f]+ skill 6 reaches level 28") == 0'
+      - 'server.log_count("ff[0-9a-f]+ reaches character level 2") == 1'
+      - 'server.log_count("ff[0-9a-f]+ reaches character level 3") == 0'
+      - 'server.log_count("E_SKILL_") == 0'
+      - 'c1.skill("OneHanded").base >= 25'
+      - c1.level() == 2
+      # 4. no crosstalk
+      - 'c2.skill("OneHanded").base == 20'
+  # 5. a relaunch keeps the level
+  - c1: relaunch {until: gone}
+  - c1: connect
+  - wait: 15
+  - c1: close-menu {name: MessageBoxMenu}
+  - c1: skills {names: ["OneHanded"]}
+  - assert:
+      - 'c1.skill("OneHanded").base >= 25'
+      - c1.level() == 2
+  # 6. a server restart keeps it
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - c2: reconnect
+  - wait: 15
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: skills {names: ["OneHanded"]}
+  - c2: skills {names: ["OneHanded"]}
+  - c1: dump-state
+  - c2: dump-state
+  - assert:
+      - 'c1.skill("OneHanded").base >= 25'
+      - c1.level() == 2
+      - 'c2.skill("OneHanded").base == 20'
+artifacts: [server.log, c1.log, c2.log, screenshots]
