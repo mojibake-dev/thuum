@@ -6170,3 +6170,31 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   added to the precondition; the re-analysts split: numidium's on the change forms' SaveGame/LoadGame mid-game and the cell-load
   apply path, mine on the Papyrus per-object state and the event gate (docs/research/adr065-papyrus-state-2026-11-03.md, in
   progress).
+- 03:28 PST 2026-11-03 (11:28Z 11-03) (numidium): Eli's goal for the night (a breakthrough that makes scripts, containers and
+  physics easy; better use of the RE box) taken as one idea, the engine's own change tracking. Three pieces.
+  - The RE box: the Ghidra project held 100,419 functions, no engine names, no RTTI class names and 573 data types. lab/relids.tsv
+    already named 17,941 Address Library ids, and they had only ever gone to REA (whose MCP did not connect tonight). A labeler
+    agent is putting CommonLib's names and vtable slot names into the project, behind a backup.
+  - The static read (re-analyst, pyghidra-mcp): every persistent mark lands in one function, BGSSaveLoadGame's AddChange
+    (AL 35576). It sits behind TESForm's slot 0x0A (AL 14607, shared by 145 vtables) and the forced entry 14608; TESNPC
+    overrides (24385); RemoveChange goes to 35581. The engine also has its own materialize path: AL 35570 stores a reference's
+    record at unload in save-file format, and the cell's init applies it with LoadGame before the 3D loads (AL 35569).
+  - The census (lab/frida/change-census.js, main 5bcead1b, deployed; probe x-change-census by path; Eli: "stop the nightly now, i
+    dont feel like we're gaining anything from it. run the census"). The nightly was stopped at 9 of 118, all green, and can
+    resume. v1 (20261103-111425) went red before the attach: the teleport step needs a server. v2 (20261103-111808) went GREEN in
+    Riverwood:
+    - a container's open and close are kOpenState add and remove, every time;
+    - the equip is the player's kInventory;
+    - Sven's Papyrus kill is kLifeState twice, KillImpl's kHavokMoved, kInventory, kGameOnlyExtra and kFlags;
+    - each Havok drop is a creation mark, then kHavokMoved every frame until it sleeps;
+    - a global's write marks nothing, as thuum-cf's decompile said;
+    - the AI alone reaches it: NPCs' doors, locks, package data, cell changes and dialogue;
+    - 57,513 calls in about 170 s, no crash.
+    The script's fresh review (FIX FIRST, on v1) found what v2 cannot see: 14608's six callers, TESNPC counted twice, the sum
+    rows' 80-key cap, and BGSMovableStatic's [0] vtable, which is TESFullName's (an RTTI pointer was hooked; the rollback
+    restored it). These are v3's fixes. The model is docs/engine/change-forms.md; ADR-065's draft is in numidium's scratchpad,
+    with thuum-cf's sharpening (the save's serializers are the wire) and thuum-cf's four risks as its HYPOTHESIS rows.
+  - Also: death-reentry v5 (20a6c65d) drops leg B's claim on 654d3b2a's trace line and adds round seven's reviewer's claim on
+    the hold's release line. Round seven's review was FIX FIRST; round eight is a4a7805c, and its evidence stage is running with
+    no gate and no merge (door v21, swap v19, death-reentry v5, death-freeze v3, scene-guest v2.1; lab-api 4947). Containers:
+    container-menu.js (6d4cbab2) reviewed GO; the transfer step (cf8032d9) reviewed FIX FIRST and is with its builder.
