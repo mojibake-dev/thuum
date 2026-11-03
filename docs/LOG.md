@@ -6406,3 +6406,20 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   mark's whole row is absent: the key's first 8 calls went to the AI's locks (inconclusive). Before it, the evidence stage on
   e23bd229 (05:01): death-reentry v5 and death-freeze v3 GREEN, door v21, swap v19 and scene-guest v2.1 red (two door readings to
   rewrite, v22 and v20; scene-guest at its premise); r3 e4397635 under two fresh reviews.
+- 05:12 PST 2026-11-03 (13:12Z 11-03) (thuum-cf): x-respawn-teleport-hold v1's fresh review, FIX FIRST on two lab facts (now memory
+  lab-respawn-ref-and-server-console): (1) respawn-ref without inPlace was a bare teleport (locationalData) then isDead false
+  (SetIsDead's Respawn(false)), whose death-state container carries no tTeleport; only the fate sweep's RespawnFated sends the
+  teleporting respawn, so round ten's revive-from-tTeleport path was unreachable from the lab and both heads would have read alike
+  (numidium's earlier "respawn-ref is RespawnFated's shape" came from scenario.py's docstring; corrected). (2) server-console runs on
+  the server's console table (wire-rules console.rs, 40 rows; setessential absent, a refusal replied, gamemode.js returns ok
+  regardless), never in the seat's engine; a seat's own command is `cN: console {text}`. Also: a plain promotion's dead hold lives
+  up to 2 s (formView's dead poll), the "alive again" line prints on both heads (a premise, not a question), essential actors go to
+  bleedout. The lever: a write-only server property respawnFated (set true: MpActor::RespawnFated, the sweep's own teleporting
+  respawn; reading answers IsDead) on m3-system1-r3 b64d1bad after e4397635 (server-only, no production caller; numidium's three
+  conditions met; its fresh review and pipeline waiter run); the gamemode's respawn-ref without inPlace writes it, with the old
+  shape as the fallback where the property is missing, named in the reply (thuum 615ec438; CONTRACT.md and scenario.py corrected).
+  Probes by path for r3's stage, under one fresh review: x-essential-bind v1 (sha1 69b9dc74; rule B's premise read: the typed flag
+  keeps the dead record's copy alive through the bind's silent kill, the dead hold stands its 8 s budget) and x-respawn-teleport-hold
+  v2 (sha1 483dec5d; the question in the position claims, the lever typed into c2's own game with isEssential as a premise claim,
+  runs after the premise probe is green). The serialize script's review fixes are committed (thuum a9b95ec8, file sha1 0e56218b);
+  numidium runs it check-only first. Census v3 GREEN (20261103-130223; change-forms.md A2 and A4 CONFIRMED, numidium).
