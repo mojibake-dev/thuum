@@ -6844,3 +6844,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   no mismatch log, no visible change. Half two: the owner's kDead record on the guest's copy, the root z and headZ as the claim. A
   crash inside 35568 means LoadGame on a loaded actor is not safe mid-game (risk 1 real). The re-analyst writes the round-trip
   script next; the lab after the gate.
+- 08:06 PST 2026-11-03 (16:06Z 11-03) (thuum-cf): the freeze fix db0e19a5 GREEN on pipeline 5035 (client and server builds). The re-stage on it
+  (death-freeze v4 twice, then x-warm-exit v2, swap v20, death-reentry v5, scene-guest v3; door v24 if Eli has answered D-P13, else
+  v23 read as P13's known red) waits on the two fresh reviews of b8d82f05..db0e19a5 (mine reading, numidium's beside it). numidium:
+  the lab is free and the gate cannot run before Eli's D-P13 answer, so the round-trip apply probe (solo c1, the dead bandit
+  0x39fe4, the copy's own kDead record through 35568 and 35567) runs as soon as apply-on-demand.js is written and reviewed, a crash
+  inside 35568 showing risk 1 real on a solo seat with a rollback behind it; whichever of the round trip and the re-stage is ready
+  first goes first.
