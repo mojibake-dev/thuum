@@ -2072,7 +2072,19 @@ and about 120 below the eye (about 13 counts a degree on this seat; the rune pro
   lab's gap was 3 s; the hole-free shape is clearing the stamp at the word's own kill); and the guest's own kill move on a puppet it
   hits is already touched by the hook (the engine's paired start on the puppet victim is blanked, so no local kill at the tag, while
   the guest's attacker half plays against a victim that never enters the paired state), its look unread, HYPOTHESIS, in
-  x-npc-death-guest's frame. Pre-existing and not these rounds: the stand-up pass re-arms the deferred kill on a still-dead body. The read is
+  x-npc-death-guest's frame. Follow-ups from numidium's GO review of df9e1009 (2026-11-03), for a later round: (a) the guest
+  player's own kill move on a puppet loses its victim half (0x14 passes the hook, the victim is flagged), so the guest stabs a bandit
+  that stays standing or the engine refuses the pair, and whether the guest's graph locks is unread (a Dynamic line; playtest 42's
+  item 3 notes); (b) the same tick's reconcile calls startDeferredKill on the still-dead body before Resurrect(true, true) runs, and
+  if Resurrect resets inDeferredKill (MiddleHighProcessData, unread) a respawned puppet is left unheld and never re-armed (the
+  comment "the next pass" is stale); (c) the figures' handler blanks KillMove* on every 0xff id, so a copy its own host simulates
+  loses its victim half on that host; (d) dragon kill grabs carry no pa_ event (Skyrim.esm 0xfdbec Ground_KillMove_Bite_Grapple;
+  0xc9a1f to 0xc9a21 to_Flight_Kill_Grab_*), their victim's event name unread, so a dragon grabbing a puppet may still kill the copy
+  early (HYPOTHESIS); (e) the hook blanks silently, so the event-relay path and the three new name families have no witness line:
+  one logLab per actor in the enter would give probes one. Confirmed by that review: the range and pattern are checked in C++ before
+  JS; isPuppet is a set read under a short lock with no game call; a pre-blanked "" cannot match (StartsWith needs at least 8
+  characters); all 379 kill-move pa_ idles in the five masters fall inside the four patterns, the nine outside being hugs, feeds and
+  quest scenes. Pre-existing and not these rounds: the stand-up pass re-arms the deferred kill on a still-dead body (follow-up b). The read is
   x-npc-death-freeze v4 on db0e19a5 (the re-stage) and v5 (c2's drop line and no resurrect, numidium's) on 7d0d4d7e. First proof on
   two seats (db0e19a5's re-stage): v4 GREEN twice, 20261103-161847 and 162349, both with the mechanism shown: c2's "the host's
   KillMoveShortB not replayed on the puppet" and "... KillMoveShortD ..." one each, "resurrected 13491" 0, the body down; so four

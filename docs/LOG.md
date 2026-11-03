@@ -6972,3 +6972,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   19535/19538; a hang points to a lock left by an earlier converted fault or to 35567's global spinlock. Notes carried: a
   bhkRigidBodyT's override may undercount the SetPosition/SetRotation witnesses; the FORMS log's first argument as the format string
   is HYPOTHESIS, read inside a try.
+- 08:36 PST 2026-11-03 (16:36Z 11-03) (numidium's review): db0e19a5..df9e1009 GO, holding once pipeline 5052 (df9e1009) is green (5046 passed).
+  Both findings of its round-one review are fixed (the clear on the not-mine live path, the stamp moving to the second death and the
+  release 4.0 s after it; the range and pattern checked in C++ before JS, isPuppet a set read under a short lock, figures never
+  flagged, a pre-blanked "" unable to match; all 379 kill-move pa_ idles in the five masters inside the four patterns by esm.py, the
+  nine outside hugs, feeds and quest scenes). Four follow-ups filed in npc-fate.md for a later round: the guest player's own kill move
+  on a puppet loses its victim half (a Dynamic line; playtest 42's item 3 notes, numidium's); the same tick's startDeferredKill on
+  the still-dead body before Resurrect runs, the re-arm unread if Resurrect resets inDeferredKill; a host's own 0xff copy loses its
+  victim half on that host; dragon kill grabs carry no pa_ event, their victim's event name unread (HYPOTHESIS); and the hook's silent
+  blank wants one logLab per actor as a witness. death-freeze v5 is e77a1806; the df9e1009 re-stage (v5 twice, then the regression
+  set) follows 5052's green and the current re-stage's end.
