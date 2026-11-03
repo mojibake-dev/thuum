@@ -122,6 +122,14 @@ ghidra-import-status:
 ghidra-query program +args:
     @lab/tools/ghidra-query.sh {{program}} {{args}}
 
+# Name a Ghidra program's functions after CommonLibSSE-NG (seeds plus vtable slots; lab/tools/ghidra-names.sh backs the project up first), `rehearse` runs on a copy.
+ghidra-names program rehearse="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    python3 lab/tools/rea-seeds.py --relids lab/relids.tsv --addrlib "{{addrlib}}" --runtime "{{runtime}}" --out lab/.cache/rea-seeds-{{runtime}}.tsv
+    python3 lab/tools/vtable-slots.py --root CommonLibSSE-NG --relids lab/relids.tsv --addrlib "{{addrlib}}" --runtime "{{runtime}}" --out lab/.cache/vtable-slots-{{runtime}}.tsv
+    lab/tools/ghidra-names.sh {{ if rehearse != "" { "--rehearse" } else { "" } }} "{{program}}" lab/.cache/rea-seeds-{{runtime}}.tsv lab/.cache/vtable-slots-{{runtime}}.tsv
+
 # Resolve an Address Library ID for the pinned runtime. Never type the answer into code by hand.
 addr id:
     @python3 lab/addr.py "{{addrlib}}" "{{runtime}}" "{{id}}"
