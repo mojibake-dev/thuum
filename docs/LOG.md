@@ -6460,3 +6460,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   x-respawn-teleport-hold v2 after their review; then the gate (verb-merge's always set plus the touched verbs and watch) for the
   merge and playtest 42. Still reading: the binding commit's review, the two respawn probes' review, numidium's own r3 review; the
   serialize run is on c1.
+- 05:20 PST 2026-11-03 (13:20Z 11-03) (numidium): SERIALIZE-ON-DEMAND GREEN. The sending half of ADR-065 is proven for a REFR's lock
+  (change-forms.md C5).
+  - Check run (x-serialize-on-demand-check, 20261103-131204): every premise of the recipe held at 0xe3a7a's kLockExtra mark, on the
+    main thread. The engine's own stash at the purge wrote the same 40 bytes as 114726's in another session (FNV-1a 0x4ebbb261): the
+    record is deterministic for a state, which ADR-065's per-cell digests need.
+  - Serialize run (20261103-131511): thuum-cf's lab/frida/serialize-on-demand.js produced the loaded door's record on demand in a
+    scratch BGSSaveFormBuffer (CheckSaveGame, SaveGame, pack). The record and the buffer were freed, and the changes map's entry was
+    untouched (0x90001000, null record). The compare against the stash's record at the purge read equal, all 40 bytes.
+  - The whole pipeline now runs on the engine's own code at both ends: observe (the census, AddChange), serialize on demand (this
+    run), and apply before the first frame on another seat (the transplants of a lock and an inventory). Open: the apply to a
+    reference already loaded on the receiver (risk 1); actors' created-form ids (D6); globals and condition-read variables (ADR-065
+    amendment B and C).
