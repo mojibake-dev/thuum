@@ -7448,3 +7448,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   body as a prop, the dragger streams the record's Havok block at a few Hz, the watcher applies each; read 2 gates the live apply).
   Eli on the hold's scope, verbatim: "m4-container-exclusive works for me." (D-C1 to D-C5 as recommended, the b-container-rest
   rewrite included). b-prop-push GREEN on today's build (numidium, 223344): the prop regression Eli saw is not that scenario's.
+- 15:02 PST 2026-11-03 (23:02Z 11-03) (thuum-cf): The physics-objects arm's two acceptance cases, Eli's words via numidium ("yeah the 2 big tests of physics
+  are can someone drag a body, and if i cast hailstone at a cart of cabbages from down the road, do they all fly the same directions
+  for everyone"), written into prop-physics.md's slice three beside the drag's two halves: a body dragged by one player is seen pulled
+  on the other's screen and lies at the same rest (b-corpse-drag); Hailstone from down the road at a cart of cabbages, every cabbage
+  flying the same way on both screens and resting at the same place (b-cabbage-hailstone), playtest 41's cabbage read (E_PROP_REACH,
+  E_PROP_STEP against the record that never moved) the red it turns green. numidium writes both scenarios when the arm's branch exists.

@@ -514,6 +514,18 @@ Two props the engine owns differently from clutter, written so the row kind "pro
   physics-objects arm's first items after the slice (ADR-067 decision 7's third place); the stage's probe may add a drag leg as a
   reading only (the owner's grab on its own ragdoll, the watcher's copy unmoved, the E_BODY_AT_REST count), since the code already
   says what it will show.
+- THE ARM'S TWO ACCEPTANCE CASES (Eli, 2026-11-03, verbatim via numidium: "yeah the 2 big tests of physics are can someone drag a
+  body, and if i cast hailstone at a cart of cabbages from down the road, do they all fly the same directions for everyone"). The
+  physics-objects arm (ADR-067 decision 7's third place) is done when both hold on two screens, each as its own scenario in its own
+  commit, with claims per prop on both seats' positions against the server's record:
+  1. A body dragged by one player is seen pulled on the other player's screen and lies at the same rest afterwards (the (a) and (b)
+     halves above, b-corpse-drag): the dragger's seat is the body's owner for the drag (the toucher's rule), the other follows its
+     stream, and the rest after the release is the record's.
+  2. Hailstone (the spell b-hailstone casts) cast from down the road at a cart of cabbages: every cabbage flies the same way on both
+     screens and comes to rest at the same place (b-cabbage-hailstone), each prop's owner the simulating seat with the others following
+     its stream; the caster is far (the spell's reach, not the contact's), so the claim is an impulse touch from the release. Playtest
+     41's cabbage read below (E_PROP_REACH from the contact stand-in's 256 against the shout's 735 to 1400 units; E_PROP_STEP on the
+     host against the record that never moved) is the red this case turns green.
 - Not slice three's: traps' bodies (M4's dungeon work, with the MSTT admission ADR-058's note defers there), horses (mount.md).
 
 ## The physics stage's first reads (19:30 PDT 2026-10-30; m3-prop-physics 3586f2db on the merged base, LABAPI 4021)
