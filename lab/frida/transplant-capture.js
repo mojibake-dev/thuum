@@ -3,7 +3,11 @@
 // record in the changes map (CheckSaveGame, the initial data, SaveGame, packed by AL 36081, written by AL 35509); on its leave for
 // the form FORM this script reads the map's entry back (AL 35503) and prints the entry's change flags and the record's bytes as
 // hex, with the header decoded, for transplant-inject.js on another seat. Every id, signature and layout is the re-analyst's
-// decompile (2026-11-03) and a HYPOTHESIS until this trace reads as expected (rule 2). Params: FORM (the form id, required).
+// decompile (2026-11-03) and a HYPOTHESIS until this trace reads as expected (rule 2). v2 (for an actor's record, the dead NPC):
+// inside the stash for FORM, every ref id the record writes is logged in the engine's own encoding (AL 35928, which 36048, 36047
+// and the initial data's writer 35715 all reach: rcx the 3-byte output, edx the id; its fresh review), with the initial-data type the chooser picks (AL 35708) and the plain data before packing (AL 36081's buffer: data at
+// +0x08, size at +0x14), and the record row says whether every id is a game-file direct id (type 1, portable) or not (a created
+// 0xFF form, type 2, or another file's, type 0). Params: FORM (the form id, required).
 const PARAMS = (typeof LAB_PARAMS === 'object' && LAB_PARAMS) ? LAB_PARAMS : {};
 const FORM = Number(PARAMS.FORM);
 function emit(obj) {
@@ -19,6 +23,9 @@ const OFFSETS = {
     write: 0x600e20, // 35509 the changes map's write (map, form id, const Value*): insert or overwrite, frees nothing
     apply: 0x6037a0, // 35569 the record's apply at a cell's init (manager, form, BGSLoadFormBuffer*) -> bool
     decode: 0x628210, // 36080 the record's decode, run inside the apply
+    setNumericId: 0x620240, // 35928 BGSNumericIDIndex::SetNumericID (BGSNumericIDIndex.h:28): every ref id a record writes
+    chooseInitial: 0x60dac0, // 35708 the initial-data type for a form's flags
+    pack: 0x6283e0, // 36081 the record's pack (compression and header)
     singleton: 0x317aba8, // 403330 BGSSaveLoadGame** (BGSSaveLoadGame.h:71)
     heap: 0x11bba0, // 11141 MemoryManager::GetSingleton (MemoryManager.h:29)
     allocate: 0xcc40c0, // 68115 MemoryManager::Allocate (MemoryManager.h:36)
@@ -100,14 +107,55 @@ if (off === undefined || !(FORM > 0)) {
     }
     emit(row);
   };
+  // the stash's thread and depth gate every inner hook (its fresh review: 35708 also runs inside every apply, and 35570 has a
+  // caller on the move path)
+  let stashTid = -1;
+  let depth = 0;
+  let ids = [];
+  let kinds = { type0: 0, type1: 0, type2: 0, nil: 0 };
+  let initialType = -1;
+  let plain = null;
+  const gated = function (tid) { return depth === 1 && tid === stashTid; };
   Interceptor.attach(at('stash'), {
-    onEnter(args) { this.id = u32(args[1], FORM_ID); this.ret = this.returnAddress; },
-    onLeave() { if (this.id === FORM) { emit({ event: 'stash', form: hex(FORM), caller: hex(this.ret.sub(exe.base).toUInt32()) }); entry('after the stash'); } },
-  });
-  Interceptor.attach(at('write'), {
     onEnter(args) {
-      if (args[1].toUInt32() !== FORM) return;
-      emit({ event: 'write', form: hex(FORM), flags: hex(u32(args[2], 0)), record: String(ptrAt(args[2], 8)), caller: hex(this.returnAddress.sub(exe.base).toUInt32()) });
+      this.id = u32(args[1], FORM_ID); this.ret = this.returnAddress;
+      if (this.id === FORM && depth === 0) {
+        stashTid = this.threadId; ids = []; kinds = { type0: 0, type1: 0, type2: 0, nil: 0 }; initialType = -1; plain = null;
+      }
+      if (this.threadId === stashTid) depth += 1;
+    },
+    onLeave() {
+      if (this.threadId === stashTid) depth -= 1;
+      if (this.id !== FORM || depth !== 0) return;
+      stashTid = -1;
+      emit({ event: 'stash', form: hex(FORM), caller: hex(this.ret.sub(exe.base).toUInt32()), initialType: initialType,
+        kinds: kinds, ids: ids, portable: kinds.type0 + kinds.type2 === 0, plain: plain });
+      entry('after the stash');
+    },
+  });
+  Interceptor.attach(at('setNumericId'), {
+    onEnter(args) { if (gated(this.threadId)) { this.out = args[0]; this.form = args[1].toUInt32(); } else { this.out = null; } },
+    onLeave() {
+      if (this.out === null) return;
+      const b = new Uint8Array(this.out.readByteArray(3));
+      const t = b[0] >> 6;
+      const v = ((b[0] & 0x3f) << 16) | (b[1] << 8) | b[2];
+      const kind = t === 0 && v === 0 ? 'nil' : (t === 1 ? 'type1' : (t === 2 ? 'type2' : 'type0'));
+      kinds[kind] += 1;
+      if (ids.length < 400) ids.push({ form: hex(this.form), kind: kind, encoded: hex(t) + ':' + hex(v) });
+    },
+  });
+  Interceptor.attach(at('chooseInitial'), {
+    onLeave(retval) { if (gated(this.threadId)) initialType = retval.toUInt32() & 0xff; },
+  });
+  Interceptor.attach(at('pack'), {
+    onEnter(args) {
+      if (!gated(this.threadId)) return;
+      try {
+        const data = ptrAt(args[1], 0x08);
+        const size = u32(args[1], 0x14);
+        if (!data.isNull() && size > 0) plain = size <= 65536 ? { size: size, hex: toHex(data, size) } : { size: size, truncated: true };
+      } catch (e) { plain = { error: String(e) }; }
     },
   });
   Interceptor.attach(at('apply'), {

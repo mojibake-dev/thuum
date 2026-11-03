@@ -74,6 +74,8 @@ only with the run that saw it. The run ids are the lab's.
 | D4 | The queued sub buffers (BGSSaveLoadGame.h's queuedSubBuffersMap) only defer 3D-dependent data: animation, character controller and Havok (AL 36024, 36026, 36031, "queued havok data"). They are not the materialize path. | HYPOTHESIS | The re-analyst. |
 | D5 | The changes map can be walked under its read lock (BGSSaveLoadGame.h:94, entries of 0x20 bytes: form id, flags, unknown, record pointer), as the engine's SaveGame (AL 35599) does. | HYPOTHESIS | The re-analyst. |
 
+| D6 | An actor's record carries the actor block whatever its flags (C3), its handles written as ref ids. For a templated or leveled base (most of Skyrim's NPCs: all three of Bleak Falls Temple's campfire bandits, base TPLT to LCharBanditOnlyNordM), InitItemImpl clones a runtime TESNPC and marks kLeveledActor (0x40000), and the record names that clone as a created form (type 2). That id means nothing on another seat, so an actor's transplant needs the server's id map for created forms (ADR-065 amendment F) first. Also, Actor::LoadGame puts the life state back to its pre-load value after its raw reads, so where a death is restored at load is unread. | HYPOTHESIS | The re-analyst; the dead-NPC capture's fresh review (lab/esm.py id on 0x39fe3). x-transplant-capture-npc v1 (by path) reads it: kLeveledActor and a type-2 id are expected, so the record is not portable. |
+
 ### (e) What the census could not see (its review's findings on v1, unfixed in v2)
 
 - AL 14608's six callers (A4), so no kAnimation marks from them.

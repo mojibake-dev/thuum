@@ -6,7 +6,7 @@
 // frees nothing. The apply (35569) and the decode (36080) are hooked for FORM, so the trace shows whether the engine took it.
 // Every id, signature and layout is the re-analyst's decompile (2026-11-03) and a HYPOTHESIS until this trace and the seat's
 // read of the reference agree (rule 2). Its fresh review (FIX FIRST, applied as written): the record is checked in JS before any
-// engine call (hex form, type 0, size code under 3, the engine's own version from AL 35740, 2 + 2n + length1 equal to the bytes,
+// engine call (hex form, type 0 or 1 (REFR or ACHR), size code under 3, the engine's own version from AL 35740, 2 + 2n + length1 equal to the bytes,
 // length2 0 or a plausible inflated size (a compressed record is copied verbatim, since the decode inflates it), no move, cell-change or promoted flag, a game-file form id, and the capture's FNV-1a); an existing entry is refused,
 // never freed (a free outside the map's write lock can race a stash, an apply or a save); the write is refused while the
 // manager loads or saves; Frida's 'bool' arguments take 0 or 1, not JS booleans; the ready row comes before the write, and the
@@ -17,6 +17,9 @@ const FORM = Number(PARAMS.FORM);
 const FLAGS = Number(PARAMS.FLAGS);
 const HEX = typeof PARAMS.HEX === 'string' ? PARAMS.HEX : '';
 const SUM = Number(PARAMS.SUM);
+// an actor's record (type 1) carries the actor block and maybe a leveled clone's created id, so its inject needs the capture's
+// portable verdict copied in as PORTABLE: true (its fresh review)
+const PORTABLE = PARAMS.PORTABLE === true;
 function emit(obj) {
   obj.t = Date.now();
   send(obj);
@@ -40,7 +43,10 @@ const OFFSETS = {
 const CHANGES_MAP = 0x330; // BGSSaveLoadGame.h:94: BGSSaveLoadChangesMap* saveLoadChanges
 const FORM_ID = 0x14; // TESForm.h:354
 const MANAGER_FLAGS = 0x340; // BGSSaveLoadGame.h:96; kLoading 1 << 1, kSaving 1 << 2 (:61-62)
-const FORBIDDEN_FLAGS = 0x0200000e; // kMoved, kHavokMoved, kCellChanged, kPromoted: initial data 4 or 6, which needs a cell registration
+// kCellChanged and kPromoted make the chooser (AL 35708) write initial data 6, which a destination cell may need registered
+// (+0xC8); kMoved and kHavokMoved alone write type 4, which the cell's init applies with no registration (the re-analyst,
+// 2026-11-03: AL 35717 sets the angle and position, and queues the Havok blob, the ragdoll's pose)
+const FORBIDDEN_FLAGS = 0x02000008;
 const fnv1a = function (bytes) { let h = 0x811c9dc5; for (const b of bytes) { h ^= b; h = Math.imul(h, 0x01000193) >>> 0; } return h >>> 0; };
 function fileVersion(path) {
   const ver = Module.load('version.dll');
@@ -123,7 +129,10 @@ if (off === undefined || !(FORM > 0) || !(FLAGS >= 0) || !(SUM >= 0) || !/^([0-9
     // the record checked before any engine call (the review's finding 2)
     const b0 = bytes[0];
     const sizeCode = b0 >> 6;
-    if ((b0 & 0x3f) !== 0) throw new Error('not a REFR record: type ' + (b0 & 0x3f));
+    // type 0 is a REFR's record and 1 an ACHR's (UESP's change-form order); the apply (AL 35569) checks it against the live
+    // form's own type through its table (AL 35929), so only these two are admitted here
+    if ((b0 & 0x3f) > 1) throw new Error('not a REFR or ACHR record: type ' + (b0 & 0x3f));
+    if ((b0 & 0x3f) === 1 && !PORTABLE) throw new Error('an ACHR record needs the capture\'s portable verdict (PORTABLE: true)');
     if (sizeCode > 2) throw new Error('size code ' + sizeCode);
     const n = sizeCode === 0 ? 1 : (sizeCode === 1 ? 2 : 4);
     const le = function (o) { let v = 0; for (let k = n - 1; k >= 0; k--) v = v * 256 + bytes[o + k]; return v; };
@@ -135,7 +144,7 @@ if (off === undefined || !(FORM > 0) || !(FLAGS >= 0) || !(SUM >= 0) || !/^([0-9
     // a compressed record (length2 > 0) is copied verbatim: the apply's decode (AL 36080) inflates length1 bytes into length2
     // (the re-analyst; its review: 2 + 2n + length1 holds for one too); an implausible length2 is refused
     if (length2 !== 0 && (length2 < length1 || length2 > 1048576)) throw new Error('length2 ' + length2 + ' against length1 ' + length1);
-    if ((FLAGS & FORBIDDEN_FLAGS) !== 0) throw new Error('flags ' + hex(FLAGS) + ' carry a move, cell or promoted bit');
+    if ((FLAGS & FORBIDDEN_FLAGS) !== 0) throw new Error('flags ' + hex(FLAGS) + ' carry a cell-change or promoted bit');
     if (FORM >= 0xff000000) throw new Error('a created form');
     const sum = fnv1a(bytes);
     if (sum !== SUM) throw new Error('checksum ' + hex(sum) + ', the capture printed ' + hex(SUM));
