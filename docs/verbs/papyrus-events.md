@@ -267,8 +267,10 @@ research table's RVA (docs/research/adr062/papyrus-native-entries.md: 16 by row 
 EnableNoWait 0xa2cd10, Disable 0xa2ca70, DisableNoWait 0xa2caa0, Kill 0x9e90c0, KillSilent 0x9e9090, PlaceActorAtMe 0xa2e6d0,
 SetCurrentStageID 0xa46fd0), so the table's entry addresses are CONFIRMED by a run id while every behaviour row (the calling
 convention, the self probe's meaning, the latent note's self) stays HYPOTHESIS; the first census flush "1743 tallied native call(s)
-in 30 s over 22 row(s) flushed to the census" at 20:53:10.967Z; zero live "native GlobalVariable.SetValue on" lines, so the direct
-path's mark holds for the clock's own SetValue (H-1b2's first evidence, not its proof). Unread: the per-row census and the
+in 30 s over 22 row(s) flushed to the census" at 20:53:10.967Z; zero live "native GlobalVariable.SetValue on" lines, which is no
+evidence for H-1b2 after all: a global's or a quest's call is tallied and never raised per call (ScriptNatives.cpp's Form and Alias
+kinds), so that zero cannot fail; the census rows carry the evidence (a "(platform)" row present, no unmarked row for the same
+self). Unread: the per-row census and the
 "(platform)" and "(not hosted)" keys (ScriptNativeService's summary follows the platform's flush by up to 30 s and the run had
 stopped 39 s before the flush). x-script-natives v2 (by path) gives every seat claim its own log-count step, waits two flushes, claims
 the platform's flush and the service's summary apart, and adds the guest leg (a second seat in the host's cell: "(not hosted)"
@@ -277,10 +279,11 @@ tallies and no live row for cell 9732); the relayed quest stage read for H-1b1 i
 The second lab read (two seats, probe x-script-natives v3 as run 20261103-062800 on d3d28dd8's stage, numidium's read): every
 claim held but one. Both seats' 24 hooks attached and none stood down; the platform's flush ran 7 times on c1 and the service's
 summary 6 in the census window; "GlobalVariable.SetValue (platform)" 3 with no live SetValue line; the host's console stage set
-relayed ("set 10d3bb:Skyrim.esm stage 10: recorded, relayed to 1"), the stage done on both seats, no live
-"native Quest.SetCurrentStageID on" line on the guest, and c2.log carried the fragment's skip ("fragment of 10d3bb stage 10 entry 0
-skipped: the stage is the world's, applied from the relay; 0 mark(s) left for the pair") and the latent apply's onResult: H-1b1's
-positive evidence. The one red was the lab's: the console log cuts a line near 100 characters and the guest's
+relayed ("set 10d3bb:Skyrim.esm stage 10: recorded, relayed to 1"), the stage done on both seats, and c2.log carried the fragment's
+skip ("fragment of 10d3bb stage 10 entry 0 skipped: the stage is the world's, applied from the relay; 0 mark(s) left for the
+pair") and the latent apply's onResult: H-1b1's positive evidence (the guest's zero live "native Quest.SetCurrentStageID on" lines
+is none: a quest's call never raises a per-call event, so a leak would show as an unmarked census row "Quest.SetCurrentStageID on
+10d3bb", which the probe claims absent since v5). The one red was the lab's: the console log cuts a line near 100 characters and the guest's
 "Quest.SetCurrentStageID (platform)" row sat past the cut of the summary line. m4-scripts-work 15e01a0e writes the census one row
 per line ("census <Class.Name> N in 30 s") and names the self of a quest's, global's or alias's call in its row ("Quest.Start on
 <id> N"), so the census says which script calls; the probe v4 reads the rows. Two numbers the census showed on BOTH seats, kept as
@@ -290,8 +293,11 @@ with an isOpen model about every 133 ms; whether the engine's SetOpen is idempot
 a HYPOTHESIS for Eli's inventory flicker: an open state re-applied under an open menu); a fix applies the state on change alone,
 behind ADR-064's containers freeze until its doc exists. H-1b5, "Quest.Start" about 40 per 30 s unmarked on the host AND the guest:
 a script calls Quest.Start about 1.3 times a second on every seat, D-S1's data point (a quest has no cell, so the hosted filter
-cannot stand it down); the self-naming census row tells which quest, and whether any such start reaches the server as a report
-is the next read (the census counts attempts, not effects).
+cannot stand it down); the run's driver logs name it already ("questStart quest 30002859 (and 13 more in the last 10 s)" on both
+seats), a quest of load-order index 0x30, finding 77's shape (Reading List's RL_DetectionQuest starting every half second,
+LOG.md's 10-29 entry); the self-naming census row ("Quest.Start on 30002859 N", the platform's commit after 15e01a0e, at most
+eight selves a row a window) confirms it from the native's side, and whether any such start reaches the server as a report is the
+next read (the census counts attempts, not effects).
 
 ## Status
 
