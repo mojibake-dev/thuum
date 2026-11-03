@@ -1,0 +1,65 @@
+# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle;
+# 2026-11-03): a resident through a door between two LIVE hosts stays with the
+# host of the cell he walked into. Playtest 41 (02:08Z, Hod 0x1348a at the
+# Sleeping Giant's door 0x13419, Prisoner hosting the inn and rotfern the
+# street): the pass promoted the street's game with its copy still inside, its
+# first report handed him straight back, and the two games traded him twice a
+# second ("hod just tried to leave the sleeping giant inn... cannot seem to").
+# The fix (fork m3-handoff-settle): the passing report goes to the new host
+# reliably ahead of the hoster word, so its promote places the copy at the
+# door's far side; and the new host's report back out of the cell within
+# PASS_SETTLE_MS is dropped as a stale copy's sample (verdict Stale), never a
+# pass. The gate never held two hosts on a door's two sides (the audit's case 3
+# on npc-handoff). Shape: b-npc-handoff-night's first half with c2 INSIDE
+# Alvor's house 0x133c8 and so its host (the landing of its door 0x13420 read
+# from Skyrim.esm by lab/esm.py door: (-513, -206, 240) facing north; two steps
+# into the room so the landing stays clear for Alvor), c1 at the landing
+# hosting 0x9732 and Riverwood's squares, the clock at 23.0 so Alvor 0x13482
+# walks home. Claims: c1 hosts 0x9732 and c2 hosts 0x133c8 (the PREMISE); his
+# record indoors within the night scenario's 420 s; exactly one pass of him
+# into 0x133c8 and none back into a 0x97xx square, 30 s on; the record still
+# indoors; c2 runs him (aiEnabled) and both engines have him in the same cell.
+# Its own commit (rule 13).
+id: b-npc-handoff-door-hosts
+milestone: M3
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 23.0
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 17225, y: -47204, z: -128, rot: [0, 0, 0]}
+  - c2: teleport {cell: "133c8:Skyrim.esm", x: -513, y: -206, z: 240, rot: [0, 0, 0]}
+  - wait: 5
+  - c2: move {dy: 150, duration_s: 2}
+  - wait: 20
+  - assert:
+      - server.host(0x9732).client == "c1"
+      - server.host(0x133c8).client == "c2"
+  # home for the night: his host's engine walks him through the door and its report from indoors
+  # passes him to c2 (D9); the pass's own line is the server's "passes 13482 into cell 133c8"
+  - until: {within: 420, expect: [server.ref(0x13482).cell == "133c8:Skyrim.esm"]}
+  - wait: 5
+  - c1: npc-state {formId: 0x13482}
+  - c2: npc-state {formId: 0x13482}
+  - assert:
+      - 'server.log_count("passes 13482 into cell 133c8") == 1'
+  # the settle: 30 s on, no pass back out and the record still indoors (playtest 41 traded him within
+  # a second); the stale copy's dropped report, if any, is the server's "dropped as a stale copy's
+  # sample" line, read in the log
+  - wait: 30
+  - c1: npc-state {formId: 0x13482}
+  - c2: npc-state {formId: 0x13482}
+  - c2: screenshot
+  - assert:
+      - server.ref(0x13482).cell == "133c8:Skyrim.esm"
+      - 'server.log_count("passes 13482 into cell 133c8") == 1'
+      - 'server.log_count("passes 13482 into cell 97") == 0'
+      - c2.npc_state(0x13482).aiEnabled == true
+      - c1.npc_state(0x13482).cell == c2.npc_state(0x13482).cell
+artifacts: [server.log, c1.log, c2.log, screenshots]
