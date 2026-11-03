@@ -6048,3 +6048,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   record on c1, so a "not placed" with the engine near the record would point at the capsule's push (a SetPos a few units off c1
   the remedy). The swap probe v17 (e9bf42aa, 36 steps). The m3-system1-r2 stage's chain: door v19, swap v17, the settle-0 read
   re-derived from v19; the parent's red run of v19 is the mutation proof.
+- 02:13 PST 2026-11-03 (10:13Z 11-03) (thuum-cf): two corrections from numidium to the chain's inputs. b926a7d4 is playtest 41's break-3 server
+  (union-srv-3, the rewritten 35509f7a), not m3-system1-r2's parent (its merge-base is parity 188a8dea); the reviewer's "red on the
+  parent" was read against break 3, which the lab has staged under R4, so door v19 runs frozen there as the red run on the build
+  Eli played (no restage), and on parity proper after if the thaw condition wants it (numidium widens non-owning-seat.md's
+  condition to "a build without the promote fix" if the break-3 red reads right). No settle-0 read on m3-system1-r2: the branch
+  carries half (a) alone (no window, no Stale verdict, no handoffPassSettleMs), the overlay key is inert there and v19's own run is
+  the placement-alone read. The stage: 4ccb4259 with LABAPI=4922 (headZ, scene, the live until counts), probes door v19, swap
+  v17, x-npc-death-freeze v2 and x-scene-guest v2 (numidium's reviewer; their pins moved by my remap, comment lines only) and
+  x-npc-death-reentry v4 (ded49599; R5 and D1 on the merge head); it launches on 4923's green client build and the two reviews.
+  v19's header corrected (header only). 

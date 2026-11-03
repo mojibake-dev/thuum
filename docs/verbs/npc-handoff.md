@@ -804,7 +804,8 @@ from a jump is the door line (a walk logs "door 13407: 1348a's host ... walks it
 logged none), and a walk out once placed home would be P4 refuted and a premise finding for leg A, not the bounce. The bounce's
 return: 36 ms by a pass back (055217), 1.0 s by the follow's stale rule (065955's "moves 1348a into cell 133c7" after the refused
 report back; 070357 the same shape). T3: b-npc-handoff-door-hosts v19 (thuum 8d11a67f, 2026-11-03, READY FOR THE GREENS and the parent's red run by ADR-064's
-re-check of v18 639f65ec: every claim holds on m3-system1-r2 4ccb4259 and the set goes red on the parent b926a7d4 for the bedside
+re-check of v18 639f65ec: every claim holds on m3-system1-r2 4ccb4259 and the set goes red on a build without the fix (the red
+run plays first on break 3, union-srv-3 b926a7d4, the staged build Eli played; parity 188a8dea is the merge's formal parent) for the bedside
 copy's second report into 133c7; v18 and v19 took the review of v17: the gate's line at the create-word promotion as the stale
 case's witness, the hold's placed line and its asks as the cure's, the record claimed in absolute units, the 10 s read; v17 ff9be106
 with the fresh reviewer; its leg A makes P8's condition server-side after 084006 showed a fresh seat's engine spawning him home at the house's load
