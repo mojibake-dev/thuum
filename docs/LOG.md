@@ -7494,3 +7494,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   a refused activation still fires ActivateChilds and the server's OnActivate (the lock gate's shape); the shut line's listener count
   includes hosted NPC listeners. Verified by the reviewer: compile idioms, the refusal order, the close-time send on every shut path
   (corpses carry baseContainerAdded from spawn, so bodies sync at close too), the five T0 cases, clang-format 21.1.8.
+- 15:29 PST 2026-11-03 (23:29Z 11-03) (thuum-cf): STAGING (numidium's word): m3-turbo3-sys2-container 2225c932 pinned, the branch held; T2 on
+  m3-turbo3-sys2-container-2225c932 running (the corpse slice's own T2 on 436ce96b GREEN, every difftest session identical with declared
+  divergences only); the stage beside it under decision 8 (LABAPI 5124, the dist from pipeline 5134's client once it lands, probes
+  x-corpse-record v2 0ee1ea9c and x-container-hold v1 d925582f), T2 gating the merge. The three scenario rewrites committed alone for
+  the gate: b-container-rest v2 f5992770 (claim 2 the refusal; red on parity until the merge), c-dungeon-enemies v2 f6467b15 and
+  b-npc-body-release v3 7f704ffc (no E_CONTAINER_BUSY for 39fe4 in place of the vanished occupant count). Pipeline 5132 (4fb20983)
+  GREEN on both builds, so the client half compiles; 5134 is the head's build. The client half's fresh review still running.
