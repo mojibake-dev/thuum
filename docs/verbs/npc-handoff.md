@@ -62,7 +62,7 @@ The parity scenario (ADR-031) is c-riverwood's handoff leg (cell-host.md:
 | --- | --- | --- |
 | the cell handed over again at a person's rhythm (the host out past the grace, back, out again, three times in two minutes; the keyframe each time) and interrupted: the old host back inside the grace (no pass, the epochs unchanged); the new host relaunching during the grace (unhosted at the kept epoch); a restart between the keyframe and the grant | b-npc-handoff | |
 | two seats walking the west column's boundary at a person's rhythm for two minutes (the flicker) | x-handoff-flicker, b-npc-handoff | |
-| an actor across each boundary: into nobody's cell the host loads (105a35's shape), into the same host's cell, into the other host's cell, through a door into an unloaded interior and out of one by schedule; the boundary wanderer back and forth inside the tenure | x-handoff-ring; b-npc-handoff (the predator, the night); x-handoff-door; x-handoff-cross | |
+| an actor across each boundary: into nobody's cell the host loads (105a35's shape), into the same host's cell, into the other host's cell, through a door into an unloaded interior and out of one by schedule; the boundary wanderer back and forth under D22's margin and the settle | x-handoff-ring; b-npc-handoff (the predator, the night); x-handoff-door; x-handoff-cross | |
 | after a login (a late joiner's CreateActor is its keyframe: transform, animation, equipment, the word; PartOne.cpp:957-1060) and after a restart (every cell unhosted; the split by (f); the records indoors by (g); the first grant's keyframe from the record) | b-npc-handoff | |
 
 ## Authority
@@ -655,7 +655,7 @@ carries H1 meanwhile.
   indoors (no roster line: the client; a drop line: the server).
   x-handoff-sit (Alvor at the forge, a handoff at his work idle): H2 by
   getSitState and the furnitureEvent. x-handoff-cross (the predator): H3
-  and the wanderer inside the tenure. x-handoff-return (r-cell-leave's
+  and the wanderer under the margin and the settle. x-handoff-return (r-cell-leave's
   shape, the old host 60 s away then back): H7 and cell-host's H8. H4 is
   read from the log in every run.
 - Breakpoint plan for a human session: none unless x-handoff-door falsifies
