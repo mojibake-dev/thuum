@@ -5648,3 +5648,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   for H-1b1 after v2's census. lab/frida/prop-sleep.js (E10) written; havok-props E2 row corrected (the contact tracer carries
   tid). Lesson: a patch script that collects every file's new text and writes at the end leaves nothing half-applied when an
   anchor the formatter reflowed fails.
+- 21:30 PST 2026-11-02 playtest 41's door bounce REPRODUCED in the lab on the unfixed parent (union-srv-3 35509f7a, the union's dist), by
+  x-handoff-door-hosts-swap (20261103-052100, door v6's leg B on a clean world, c1 hosting Hod's house 0x133c7 and c2 the
+  street): at Hod's own house door 13407, 05:22:16.593 "door 13407: 1348a's host ff000000 walks it through to 3c", 05:22:17.325
+  "ff000000 passes 1348a into cell 9731 (D9)", and 56 ms later "ff000001 passes 1348a into cell 133c7 (D9)", the same pair at
+  05:22:31.9, :45.9, 05:23:34.7, :48.6 (he retries the door about every 14 s and never gets out), the run red at the premise's
+  until (the record never reached the inn). The bounce came 56 ms after the pass, inside m3-handoff-settle's 1 s window. Leg A's
+  orientation (20261103-051454, c2 hosting the house) logged no house-door pass and went red on a premise claim's shape (Hod had
+  crossed the street during the wait before the until for his record in 3c), so the precondition depends on which seat holds a
+  stale indoor copy. Door v7 (thuum-cf) restructures around the house door, red already shown on the parent, then the greens on
+  the settle head and the run at handoffPassSettleMs 0.
