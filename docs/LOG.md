@@ -6951,3 +6951,24 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   resurrect landed and before the view's update (improbable; the hole-free shape is clearing the stamp at the word's own kill); and
   the guest's own kill move on a puppet it hits is already touched by the hook (the puppet victim's paired start blanked, no local
   kill at the tag), its look unread.
+- 08:36 PST 2026-11-03 (16:36Z 11-03) (thuum-cf): apply-on-demand.js's fresh review: FIX FIRST, two blocking, both about keeping a script fault
+  distinguishable from the engine's (the round trip's purpose), five notes, being applied by the author as written. Every one of the
+  script's 38 ids resolves by addr.py (190275 is VTABLE_bhkRigidBody; the three vtables); the ownership model sound (the record is the
+  engine's from the moment 35568 is entered, `rec` nulled before the call, a single free on every path, the refusal path restoring
+  {old flags, NULL}; a type-mismatch erase leaves a one-record leak chosen over a double free); the premises hold against the headers
+  (slot 0x0F at vt+0x78; the 3D through loadedData +0x68 then data3D +0x68; lifeState at Actor +0xC8 bits 21 to 24; the pending
+  count at +0x328, BSTArray's size after the allocator; kInitingForms bit 3); the round trip's record is always kDead (made from the
+  live state after the premise). The blocking items: (1) a converted fault inside the 'before' snapshot's 19533 pre-pass (the one
+  engine call no sibling has run) was caught into liveBodiesError and the run went on to the write and 35568 on a thread that had
+  just unwound an engine function (a lock held, a hang possible); it now refuses before any write; (2) nothing was emitted between the
+  'before' and 'after apply' snapshots, so a hard crash in the recipe, the write or 35568 read identically; step rows now print
+  before 35568 and before 35567, surviving a death in the flushed log. Notes applied: the entry Value's +4 read and written back on
+  the refusal path; a defensive null of the entry if it still holds the script's record after a 1 (a leak at worst); the suppress
+  bit restored after a throw inside 35567; the two vtable-derived first-bytes reads guarded; the pitch and roll DataView bounded;
+  writeByteArray on the documented input; the apply half's header says the operator hands a kDead record and the sender's
+  writtenFlags. Reading rule for the run: a death before the 'before' row or a liveBodiesError in it is the script's; a death after
+  "step: apply 35568" and before "after apply" is the engine's risk 1 (Actor::LoadGame on a loaded actor, 37502's MoveToHigh, the
+  biped and controller rebuilds); a death after "step: finish 35567" is FinishLoadGame's physics block or the flush into
+  19535/19538; a hang points to a lock left by an earlier converted fault or to 35567's global spinlock. Notes carried: a
+  bhkRigidBodyT's override may undercount the SetPosition/SetRotation witnesses; the FORMS log's first argument as the format string
+  is HYPOTHESIS, read inside a try.
