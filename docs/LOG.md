@@ -7514,3 +7514,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   kill, the bind kill, the resurrect, the reanimation within one poll, the unload), the gameThrQ order that makes the two-tick re-block
   sound, rule 9's cost, the handler's two paths, the counted lines, tsc. containers.md's hold paragraph carries the corpse half and
   the two hypotheses.
+- 15:39 PST 2026-11-03 (23:39Z 11-03) (thuum-cf): Eli's ASAP question, verbatim via numidium: "additionally, are those estimates at the pace with all the ceremony
+  and the nightly build? or ASAP mode. id like them to be in ASAP mode w/out the nightly taking up so much time". The answer
+  (docs/private/asap-estimates.md): scripting and quests first playtest day 1 (the flip's remaining half and the rumor probe),
+  complete day 4 to 5 (was 8 to 9); physics objects first playtest day 1, complete day 4 to 5; the one lab's stage slots set the
+  calendar (11-04 scripting day 1, 11-05 to 11-07 scripting, 11-08 to 11-10 physics). numidium disabled the nightly for good
+  (NIGHTLY_SWEEP_UTC emptied, the stage's lab-api recreate 1f148730). Physics day 1 reshaped on numidium's caution (W5: three prop
+  changes in one arm, none read on two seats): the impulse probe FIRST on today's working build, then only what its red demands, one of
+  turbo 2's five prop branches per stage (the arbitration, the blast pair, statics and range). Eli's five-minute prop check on today's
+  build (r3's dist, the F1 server), verbatim: "physics mostly works- regressions though- runes no longer show up, and inventory menues
+  pause the game. also we had a frozen frodnar until prisoner walked up to him": runes are m2-rune-glyph dd5aa100, never in r3 (it
+  played on 41's union), conflicting with the hold's wire-schema lib.rs (SCHEMA 32 against 33), to merge on the next head at SCHEMA 34
+  with its 44186 item still open; the paused menus are apocrypha's layer-souls, not on main; F10 (Frodnar 0x1348b frozen until Prisoner
+  walked up) reads as the orphan-copy class (the move rule fires at a sighting report), HYPOTHESIS until the check's server log is
+  grepped for 1348b; the recorder was off. The stage of 2225c932 relaunched with x-corpse-record v2 and x-container-hold v2 after the
+  check; pipeline 5134 green on both builds.
