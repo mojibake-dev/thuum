@@ -6653,3 +6653,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   71), so the hooks are live. The re-analyst reads 40266 (whose vtable, does it call 37649, what it adds), admits it beside 37649 for a
   Character, and looks for a per-frame main-thread trigger for the deferred run so the recipe runs within a frame or two of the
   mark; the probe reruns unchanged after.
+- 06:46 PST 2026-11-03 (14:46Z 11-03) (thuum-cf): the warm-exit fix's fresh review (31167a9b): NOTES ONLY. Its reads: the detach branch
+  records both leavers (a null form is re-read harmlessly and expires); the re-attach pass runs after the own-cell fallback, so the
+  player's cell is reported once; the server takes the re-report as a fresh fact (Cells::loaded idempotent after the earlier
+  unloaded) and grants at the kept epoch plus one, which the client's monotonic check accepts; the exit's burst (at most 25 re-attach
+  reports, the own cell and a colliding refresh) is under the 128 burst; no refusal path; the lab line stable for the probe's regex;
+  the 3D red untouched (no native on any actor, no puppet path). Notes applied as written in b8d82f05 on m3-system1-r3 (r3's head for
+  the stage): the watched set count-bound to the newest 64 detached cells like the engine's exterior cell buffer (uExterior Cell
+  Buffer, 36 by default), the time window an hour's backstop, so a stay indoors longer than ten minutes no longer brings the gap
+  back and the per-second natives are bounded; a cell detached in this very poll is not re-read in the same tick; the event path
+  clears a cell's detach at once. 31167a9b's own pipeline GREEN (5014); b8d82f05's reruns under a waiter. cell-host.md carries the
+  count bound and the fact that the client has no report budget of its own (the server's bucket is the one).
