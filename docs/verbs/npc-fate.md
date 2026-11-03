@@ -2039,7 +2039,10 @@ and about 120 below the eye (about 13 counts a degree on this seat; the rune pro
   host yet", "the dead sample is another host's", "this host's earlier login", "N ms before the death ... past its 3000 ms window").
   The client sends the alive-to-dead flip reliable (hostedStateService's fellDead) so the stamp lands before the report; a live word
   turns a dead hold back into a placing hold, and a respawn that teleports gives the revived hold the teleport's place as its record
-  ahead of the standalone live word. Named for its own round: the server still accepts a dead record's movement and actions. The lab
+  ahead of the standalone live word (PROVEN on two seats, r3's stage on 5e0e975b: x-respawn-teleport-hold v3 20261103-141513, c2's copy
+  of the chicken 0x1066df 3 units from the record at its placement after the fate's own respawn through the lab's respawnFated lever,
+  "placed at the record" 1 and "not placed" 0 where the parent would have asked the copy back to the corpse's place 3,200 units away;
+  its premise x-essential-bind v2 20261103-141231 held the dead hold's 8 s budget with the copy alive under a typed essential flag). Named for its own round: the server still accepts a dead record's movement and actions. The lab
   read is numidium's evidence stage on e23bd229 (door v21, swap v19, death-reentry v5, death-freeze v3, scene-guest v2.1).
   HYPOTHESIS (the fresh review of x-essential-bind v1 and x-respawn-teleport-hold v2, 2026-11-03, a static read of
   ActionListener.cpp's stamping and standing branches): an actor whose ENGINE refuses the death (an essential base, set by the game
