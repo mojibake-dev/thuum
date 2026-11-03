@@ -7329,3 +7329,19 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   either seat, all copies agreeing at the end. MECHANISM ONLY: the lab never reproduced playtest 42's six-minute frozen copy (213538
   with the restart made no stray; r3 also converged in 213118), so playtest 43 is the proof in play. The cross-seat apply earlier
   (210713) is unrelated to this push.
+- 13:49 PST 2026-11-03 (21:49Z 11-03) (thuum-cf): The corpse slice (ADR-067 by ADR-065's path), four branches off df9e1009: adr067-corpses-srv (the body's rest) reviewed GO, its
+  four notes applied at 58ab7a0a (the refusal throttle keyed by code, a seventh T0 case for the override path, the clock slack out of
+  case 4, the foreign stream counter), pushed, and merged into the slice's branch m3-adr065-system1 (64ea7876, local); the reviewer's
+  two reading rules in npc-fate.md (ba840b21). adr067-corpses-client (changeFormService: the owner's at-rest trigger, the send with
+  the acked-hash compare, the apply after the seat's own kill; MsgType 72 ChangeForm, 73 ChangeFormAck, 74 ChangeFormApply; f8827b09)
+  reviewed FIX FIRST, three blocking: the kill is deferred (Actor.Kill queues a task, papyrus-native-entries.md:73), so the apply
+  "right after the kill" never ran and the push beat the lay, and on the owner's seat a bind record was dropped and re-recorded from the
+  spawn point; `laid` separate from `applied`; the natives' shapes; plus hold-and-resend when no epoch names the actor's cell, the
+  bind's coordinate move kept, a re-served record deduped; being applied. adr065-sys1-native (2ea234cd): SerializeChangeForm and
+  ApplyChangeForm as TESModPlatform Papyrus statics returning JSON strings through callNative (no object or array crosses a native),
+  every id through REL::ID with its source, the census hook on 35928 gated to the recipe, a startup proof line with each id's first
+  bytes as the slice's T1; H1 for the first lab call: the natives run on the platform's update thread, not the main thread the Frida
+  scripts deferred to (the fork's rerollActor drops and rebuilds a 3D there), reported not enforced; its fresh review runs.
+  adr065-sys1-wire writing, with the reconciliation (the body a hex string of the whole record, remap offsets record offsets, MsgType
+  72 to 74; the verb doc's contract corrected at acf5a931). The merged branch stages when all four are GO and the fork's Windows job
+  has built the client.
