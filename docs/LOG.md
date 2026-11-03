@@ -7548,3 +7548,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   files (server T0 first: the running-state record, the own-start refusal deleted, the journal's questRuns migration; the wire's word
   u8 on QuestStage with its validator; the client's start and stop reports and applies; the globals stream last). The first probe's
   frame is x-scene-guest v3's with the relay counts and two guest distances.
+- 15:53 PST 2026-11-03 (23:53Z 11-03) (thuum-cf): numidium's catch: m3-adr065-system1 was cut from df9e1009 BEFORE turbo3-sys1-f1, so the pinned 2225c932 lacks
+  F1's move fix (c1600f98) and playtest 44 on it would bring back the hidden duplicates. Two clean merges (merge-tree showed no overlap
+  between the sighting code and the hold's edits): tonight's server-only head m3-turbo3-sys2-container-f1 68da0cdb (2225c932 plus
+  c1600f98; the client stays 5134's dist, c1600f98 changes no wire), to turbo-srv onto the stage's dist for playtest 44; and the next
+  stage's head m3-turbo3-sys2-container-r2 4465679b (the client follow-ups, the rune glyph at SCHEMA 34 and the F1 fix). fork-lint
+  clean on both. Lesson for the memory: a branch cut from a stage's base carries no later live fix; check the turbo fixes' ancestry
+  before pinning.
