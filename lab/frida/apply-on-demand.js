@@ -32,7 +32,7 @@
 // only CONVERTED to a JS exception (a lock taken inside stays held): the premises are the real safety. Every id, offset, slot and layout is
 // the static read's (the sections' id tables, CommonLib, `just addr`): HYPOTHESIS until a run reads as expected (rule 2). LAB_PARAMS: FORM
 // (required), MODE, TRIGGER, FLAG (0x400), RECORD, FLAGS, SUM, FORCE (false), SUPPRESS (false: 19378 around 35567), PARK (false), RUNS (1).
-// Ready prints Process.id. Size: above the 20 KiB cap: wait: 15 after the frida step, and read the ready t against the kill's step first.
+// Ready prints Process.id. wait: 15 after the frida step (lab-api's fixed 5 s sleep plus the attach, not the size) and read the ready t first.
 const PARAMS = (typeof LAB_PARAMS === 'object' && LAB_PARAMS) ? LAB_PARAMS : {};
 const FORM = Number(PARAMS.FORM);
 const MODE = PARAMS.MODE === 'apply' ? 'apply' : 'roundtrip';
@@ -90,15 +90,20 @@ const OFFSETS = {
     set3DWrapper: 0x17a6e0, // 12358 the lock-wrapped slot 0x6C call (ref, node, queue3DTasks) (h: who releases the 3D)
     setData3D: 0x2e5380, // 19730 the data3D setter (ref, node) (h: when the 3D goes and comes)
     rigidBodyVtable: 0x17aeb58, // 190275 VTABLE_bhkRigidBody[0]: slots 0x35 SetPosition, 0x36 SetRotation (bhkRigidBody.h:43-44) (h)
+    savedHavokVtable: 0x1770e70, // 186773 VTABLE_ExtraSavedHavokData[0] (read only: the lock-free chain match in hooks)
   },
 };
 // TESForm.h:353-356; BGSSaveLoadGame.h:61-63 (kLoading 2, kSaving 4, kInitingForms 8), :93 (the BSTArray at +0x318: data, capacity +8, size +0x10),
 // :94, :96; BGSSaveLoadManager.h:114; TESDataHandler.h:76-88 (HYPOTHESIS); Main.h:78, :87; BGSSaveGameBuffer.h:30-32, BGSSaveFormBuffer.h:23-25;
-// the queued sub-buffers at mgr + 0x208: three 0x30 blocks, the hash map at +8 of each (36027: capacity +4, free count +8, entries +0x20, 0x18 each:
-// key, value, chain; chain nonzero marks an occupied slot), so kind 2's map is at mgr + 0x270 (HYPOTHESIS, the decompiles of 36023, 36026, 36027)
+// the queued sub-buffers at mgr + 0x208: three BSTScatterTables of 0x30 (BSTHashMap.h:575-581: _capacity +0x0C, _free +0x10, _sentinel +0x18; the heap
+// allocator's _entries at +0x28, :647-648; an entry is key, value, next: 0x18, next nonzero marking an occupied slot as 36027 walks them), indexed by
+// kind * 0x30 (36023, 36026), so kind 2's table is at mgr + 0x268 (HYPOTHESIS for the address only). ExtraDataList on 1.6.629 and later: the virtual
+// dtor at +0, data +8, presence +0x10 (ExtraDataList.h:41-45, the second column), the lock at +0x18 (:202); PresenceBitfield bits[0x18] (:28);
+// BSExtraData::next +8 (BSExtraData.h:32)
 const FORM_FLAGS = 0x10, FORM_ID = 0x14, IN_GAME_FLAGS = 0x18, FORM_TYPE = 0x1a;
 const CHANGES_MAP = 0x330, MANAGER_FLAGS = 0x340, PENDING_COUNT = 0x328, DRY_RUN = 0x120, CLEARING_DATA = 0xda5, RESET_GAME = 0x11, MAIN_THREAD = 0x28;
-const KIND2_MAP = 0x270, MAP_CAP = 0x04, MAP_FREE = 0x08, MAP_ENTRIES = 0x20, MAP_ENTRY = 0x18;
+const KIND2_TABLE = 0x268, HT_CAPACITY = 0x0c, HT_FREE = 0x10, HT_ENTRIES = 0x28, HT_ENTRY = 0x18;
+const XL_DATA = 0x08, XL_PRESENCE = 0x10, XD_NEXT = 0x08;
 const BUF = { data: 0x08, pos: 0x14, header: 0x18, flags: 0x1b, form: 0x28, size: 0x30 };
 const LBUF = { data: 0x08, size: 0x20, pos: 0x24 }; // BGSLoadGameBuffer.h:24-29: buffer +0x08, size +0x20 (unk20), bufferPosition +0x24
 const SLOT_CHECK = 0x0d, SLOT_SAVE = 0x0e, SLOT_LOAD = 0x0f, SLOT_SET_POS = 0x35, SLOT_SET_ROT = 0x36; // TESForm.h:136-138; bhkRigidBody.h:43-44
@@ -239,23 +244,43 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
     for (let i = 0; i < n; i++) { const c = ptrAt(data, i * 8); if (c.isNull()) continue; const r = findNode(c, name, depth + 1, budget); if (!r.isNull()) return r; }
     return NULL;
   };
-  const savedExtra = function (form) { // the ExtraSavedHavokData on the reference: present, and its sub-buffer's header and block hash
+  const savedExtra = function (form) { // GetByType (12329) on the reference's extraList: main-thread snapshots only (it takes the list's lock)
     const x = nf.getByType(form.add(R_EXTRA), X_SAVED_HAVOK);
     if (x.isNull()) return { present: false };
     const sub = ptrAt(x, X_BUFFER);
     return { present: true, extra: String(x), sub: String(sub), header: sub.isNull() ? null : subHeader(sub) };
   };
-  const kind2 = function (form) { // the kind-2 queue map's occupancy and whether FORM's block is queued (36027's layout, HYPOTHESIS)
-    const s = singletons();
-    if (s.game.isNull()) return null;
-    const m = s.game.add(KIND2_MAP), cap = u32(m, MAP_CAP), free = u32(m, MAP_FREE), entries = ptrAt(m, MAP_ENTRIES);
-    const r = { capacity: cap, occupancy: entries.isNull() || cap < 0 || free < 0 ? 0 : cap - free, hasForm: false };
-    if (!entries.isNull() && cap > 0 && cap <= 4096) for (let i = 0; i < cap; i++) { const e = entries.add(i * MAP_ENTRY); if (!ptrAt(e, 0x10).isNull() && ptrAt(e, 0).equals(form)) { r.hasForm = true; r.sub = String(ptrAt(e, 8)); break; } }
+  const safeExtra = function (f) { try { return savedExtra(f); } catch (e) { return { error: String(e) }; } };
+  const extraNoLock = function (form) { // lock-free, for hooks on any thread: the presence bit, then the chain node whose vtable is ExtraSavedHavokData's
+    const list = form.add(R_EXTRA), presence = ptrAt(list, XL_PRESENCE);
+    const r = { presenceBit: presence.isNull() ? -1 : (u8(presence, X_SAVED_HAVOK >> 3) >> (X_SAVED_HAVOK & 7)) & 1, present: false };
+    let node = ptrAt(list, XL_DATA);
+    for (let i = 0; i < 256 && !node.isNull(); i++) {
+      if (ptrAt(node, 0).equals(at('savedHavokVtable'))) { const sub = ptrAt(node, X_BUFFER); r.present = true; r.extra = String(node); r.sub = String(sub); r.header = sub.isNull() ? null : subHeader(sub); break; }
+      node = ptrAt(node, XD_NEXT);
+    }
     return r;
   };
-  const holder = Memory.alloc(8); // a BGSLoadGameSubBuffer* slot for 36016 and 11977
+  const kind2 = function (form) { // kind 2's table: occupancy and whether FORM's block is queued, the key read both as a pointer and as an id
+    const s = singletons();
+    if (s.game.isNull()) return null;
+    const t = s.game.add(KIND2_TABLE), cap = u32(t, HT_CAPACITY), free = u32(t, HT_FREE), entries = ptrAt(t, HT_ENTRIES);
+    const r = { capacity: cap, free: free, occupancy: entries.isNull() || cap < 0 || free < 0 ? 0 : cap - free, hasForm: false };
+    if (!entries.isNull() && cap > 0 && cap <= 4096) {
+      for (let i = 0; i < cap; i++) {
+        const e = entries.add(i * HT_ENTRY);
+        if (ptrAt(e, 0x10).isNull()) continue;
+        if (ptrAt(e, 0).equals(form)) r.keyShape = 'form pointer'; else if (u32(e, 0) === FORM) r.keyShape = 'form id'; else continue;
+        r.hasForm = true; r.sub = String(ptrAt(e, 8)); break;
+      }
+    }
+    return r;
+  };
+  const safeKind2 = function (f) { try { return kind2(f); } catch (e) { return { error: String(e) }; } };
+  const holder = Memory.alloc(8); // a BGSLoadGameSubBuffer* slot for 36016 (holder in rcx, form in rdx; 36020 writes the pointer through it) and 11977
   const livePoseHash = function (form) { // the copy's own pose through the engine's own serializer (36016: 36035, 36037 flags 4, 19534, 36020), then freed
     holder.writePointer(NULL);
+    emit({ event: 'step', step: 'livePose 36016' });
     nf.livePose(holder, form);
     const sub = holder.readPointer();
     if (sub.isNull()) return { note: '36016 produced no sub-buffer' };
@@ -263,7 +288,7 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
     try { nf.deallocate(nf.heapOf(), sub, 0); } catch (e) { h.freeError = String(e); }
     return h;
   };
-  const snapshot = function (form, label, withLive) {
+  const snapshot = function (form, label, withLive, more) {
     const proc = ptrAt(form, A_PROCESS), high = proc.isNull() ? NULL : ptrAt(proc, P_HIGH), root = rootOf(form), st1 = u32(form, A_STATE1);
     const s = singletons(), map = s.game.isNull() ? NULL : ptrAt(s.game, CHANGES_MAP), e = map.isNull() ? { found: false, flags: 0, record: NULL } : readEntry(map);
     const life = st1 < 0 ? -1 : (st1 >>> 21) & 0xf;
@@ -277,6 +302,7 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
       try { row.liveBodies = liveBodies(form); } catch (err) { row.liveBodiesError = String(err); }
       if (withLive) { try { row.livePose = livePoseHash(form); } catch (err) { row.livePoseError = String(err); } }
     }
+    if (more !== undefined) Object.assign(row, more);
     emit(row);
     return row;
   };
@@ -343,19 +369,20 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
     return r;
   };
 
-  // the witnesses: per 19535 call on any thread (keyed by thread), the probe's window only for the log's inWindow flag
-  const watch = { active: false, tid: -1, logs: [] };
+  // the witnesses: per 19535 call on any thread (keyed by thread); the probe's window only tags rows
+  const watch = { active: false, tid: -1 };
   const reads = {}; // threadId -> the 19535 call in flight: bodies, setPos, setRot, live
-  const result = { applied: false, recordBlockHash: null, liveHash: null, lastRead: null, parkHash: null, lastStored: null, extraAtFinish: null }; // for the result row after the reload
+  const result = { applied: false, recordBlockHash: null, liveHash: null, lastRead: null, parkHash: null, lastStored: null, lastStoredCaller: null, extraAtFinish: null };
+  let parking = false; // true around our own 11977 call, so its hook row is tagged ours
   const run = function (form, p, q) {
     const row = { event: 'apply', mode: MODE, park: PARK, form: hex(FORM), thread: q.runThread, markThread: q.markThread, deferredMs: q.deferredMs, deferredVia: q.via, entryFlags: hex(p.entry.flags) };
     const before = snapshot(form, 'before', true);
     result.liveHash = before.livePose && before.livePose.blockHash ? before.livePose.blockHash : null;
     const s = singletons(), map = p.map;
-    let buf = null, rec = NULL, flagsOut = 0, body = null, step = 'start', suppressSet = false;
-    watch.active = true; watch.tid = q.runThread; watch.logs = [];
+    let buf = null, rec = NULL, flagsOut = 0, body = null, step = 'start', suppressSet = false, parkSub = NULL, parked = false;
+    watch.active = true; watch.tid = q.runThread;
     try {
-      if (before.liveBodiesError !== undefined) throw new Error('the pre-pass 19533 faulted in the before snapshot (' + before.liveBodiesError + '): refused before any write');
+      if (before.liveBodiesError !== undefined || before.livePoseError !== undefined) throw new Error('an engine read faulted in the before snapshot (' + (before.liveBodiesError || before.livePoseError) + '): refused before any write');
       if (MODE === 'roundtrip') { // the actor script's recipe, the record kept for the entry
         step = 'ctor 36035';
         const raw = Memory.alloc(BUF.size);
@@ -406,85 +433,94 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
       result.recordBlockHash = row.havok.blockHash || null;
       row.liveBodies = before.liveBodies === undefined ? null : before.liveBodies.count;
       if (row.havok.count !== undefined && row.liveBodies !== null && row.havok.count !== row.liveBodies && !FORCE) throw new Error('body count ' + row.havok.count + ' in the record, ' + row.liveBodies + ' live: refused without FORCE');
+      const preKind2 = safeKind2(form), preExtra = safeExtra(form); // read before the write: nothing but the emit sits between 35509 and 35568
       step = 'write 35509'; // THE engine-state write; the record pointer is the engine's from here unless 35568 refuses
       const w = writeEntry(map, flagsOut, p.entry.mid, rec);
       row.written = { flags: hex(w.flags), record: String(w.record) };
       if (!w.record.equals(rec)) throw new Error('the entry does not hold our record after the write');
       step = 'apply 35568';
       const ours = rec; rec = NULL; // from here the engine owns it (its decode frees it); never freed by us after the call
-      emit({ event: 'step', step: 'apply 35568', record: String(ours), header: row.record, writtenFlags: row.writtenFlags, pending: u32(s.game, PENDING_COUNT), kind2: kind2(form), extra: savedExtra(form) }); // the last row a death leaves
+      emit({ event: 'step', step: 'apply 35568', record: String(ours), header: row.record, writtenFlags: row.writtenFlags, pending: u32(s.game, PENDING_COUNT), kind2: preKind2, extra: preExtra }); // the last row a death leaves
       row.applyReturn = nf.applyWrap(s.game, form);
+      emit({ event: 'step', step: '35568 returned', applyReturn: row.applyReturn });
       const a = readEntry(map);
-      row.afterApply = { flags: hex(a.flags), record: String(a.record), pending: u32(s.game, PENDING_COUNT), kind2: kind2(form), extra: savedExtra(form) };
       if (row.applyReturn === 0) {
         if (a.record.equals(ours)) { writeEntry(map, p.entry.flags, p.entry.mid, NULL); nf.deallocate(nf.heapOf(), ours, 0); row.restored = 'the entry put back with its old flags and a null record, our record freed'; }
         throw new Error('35568 returned 0 (no entry, no record, a type mismatch or kLoading): read the formsLog rows');
       }
       if (a.record.equals(ours)) { writeEntry(map, a.flags, a.mid, NULL); row.dangling = 'the entry still held our record after a 1: nulled, not freed'; }
+      row.afterApply = { flags: hex(a.flags), record: String(a.record), pending: u32(s.game, PENDING_COUNT), kind2: safeKind2(form), extra: safeExtra(form) };
       result.applied = true;
       snapshot(form, 'after apply', false);
       if (PARK) { // the record's block into the queue's own sub-buffer shape, handed to 11977 (it takes the pointer; an existing extra is replaced with the log)
         step = 'park 11977';
-        const blk = body.subarray(row.havok.blockStart, row.havok.blockStart + row.havok.blockLen);
-        const lenBytes = viBytes(blk.length), total = 1 + lenBytes.length + blk.length;
-        const sub = nf.allocate(nf.heapOf(), total, 0, 0);
-        if (sub.isNull()) throw new Error('the engine heap gave no memory for the park');
-        const bytes = new Uint8Array(total); bytes[0] = nf.saveVersion(); bytes.set(lenBytes, 1); bytes.set(blk, 1 + lenBytes.length);
-        sub.writeByteArray(bytes.buffer);
-        row.park = { before: savedExtra(form), sub: String(sub), bytes: total, blockHash: row.havok.blockHash };
-        holder.writePointer(sub);
-        nf.savedHavokSet(form.add(R_EXTRA), holder);
-        row.park.after = savedExtra(form);
-        result.parkHash = row.havok.blockHash;
+        if (!rootOf(form).isNull()) row.park = { skipped: 'the root is present: no rebuild to feed' };
+        else {
+          const blk = body.subarray(row.havok.blockStart, row.havok.blockStart + row.havok.blockLen);
+          const lenBytes = viBytes(blk.length), total = 1 + lenBytes.length + blk.length;
+          parkSub = nf.allocate(nf.heapOf(), total, 0, 0);
+          if (parkSub.isNull()) throw new Error('the engine heap gave no memory for the park');
+          const bytes = new Uint8Array(total); bytes[0] = nf.saveVersion(); bytes.set(lenBytes, 1); bytes.set(blk, 1 + lenBytes.length);
+          parkSub.writeByteArray(bytes.buffer);
+          row.park = { before: safeExtra(form), sub: String(parkSub), bytes: total, blockHash: row.havok.blockHash };
+          holder.writePointer(parkSub);
+          emit({ event: 'step', step: 'park 11977', sub: String(parkSub), bytes: total, blockHash: row.havok.blockHash });
+          parking = true;
+          try { nf.savedHavokSet(form.add(R_EXTRA), holder); parked = true; } finally { parking = false; }
+          row.park.after = safeExtra(form);
+          result.parkHash = row.havok.blockHash;
+        }
       }
       step = 'finish 35567';
       if (SUPPRESS) { row.suppressWasClear = nf.suppress(s.game, 0); suppressSet = true; }
-      emit({ event: 'step', step: 'finish 35567', suppress: SUPPRESS, pending: u32(s.game, PENDING_COUNT), kind2: kind2(form), extra: savedExtra(form) });
+      emit({ event: 'step', step: 'finish 35567', suppress: SUPPRESS, pending: u32(s.game, PENDING_COUNT), kind2: safeKind2(form), extra: safeExtra(form) });
       nf.finishPass(s.game, 0);
       if (suppressSet && row.suppressWasClear === 1) { nf.suppress(s.game, 1); suppressSet = false; }
-      const f = readEntry(map);
-      row.afterFinish = { flags: hex(f.flags), record: String(f.record), pending: u32(s.game, PENDING_COUNT), kind2: kind2(form), extra: savedExtra(form) };
+      const fe = readEntry(map);
+      row.afterFinish = { flags: hex(fe.flags), record: String(fe.record), pending: u32(s.game, PENDING_COUNT), kind2: safeKind2(form), extra: safeExtra(form) };
       result.extraAtFinish = row.afterFinish.extra;
       row.result = 'ok, the reload watched: the result row follows the settled snapshot';
     } catch (e) { row.error = 'at ' + step + ': ' + e; }
     if (suppressSet && row.suppressWasClear === 1) { try { nf.suppress(s.game, 1); } catch (e) { row.suppressRestoreError = String(e); } } // a throw inside 35567 must not leave the bit set
     watch.active = false;
     try { if (!rec.isNull()) { nf.deallocate(nf.heapOf(), rec, 0); row.recordFreed = 'refused before the write: our record freed'; } } catch (e) { row.freeError = String(e); }
+    try { if (!parkSub.isNull() && !parked) { nf.deallocate(nf.heapOf(), parkSub, 0); row.parkFreed = 'the park sub-buffer freed: 11977 never ran'; } } catch (e) { row.parkFreeError = String(e); }
     try { if (buf !== null) { nf.bufDestroy(buf); row.bufferDestroyed = true; } } catch (e) { row.destroyError = String(e); }
-    row.logsInWindow = watch.logs;
     emit(row);
     snapshot(form, 'after', false);
-    if (result.applied) poll = { form: form, started: Date.now(), rebuiltAt: 0, done: false };
+    if (result.applied) poll = { form: form, started: Date.now(), rootSeenAt: 0, rootSeenAtReturn: 0, rebuiltAt: 0, done: false };
   };
-  // the reload watched on PlayerCharacter::Update's returns: "rebuilt" when the root returns (or 20 s), "settled" 5 s later, then the result row
+  // the reload watched on PlayerCharacter::Update's returns: "rebuilt" one return after the root first appears (or when 19535 ran, or at 20 s),
+  // "settled" 5 s later, then the result row
   let poll = null;
-  const sourceOf = function () { // judged by the bytes 19535 read (the load buffer's data), else by the last store and the extra after the finish
+  const sourceOf = function () { // the block 19535 read first, then the extra after the finish, then the last 11977 store with its caller
     const r = result.lastRead;
-    if (r === null) return 'no 19535 ran for the form after the apply: the pose is the load path\'s own';
-    let h = r.saved && r.saved.blockHash !== undefined ? r.saved.blockHash : undefined;
-    if (h === undefined && result.extraAtFinish && result.extraAtFinish.header) h = result.extraAtFinish.header.blockHash;
-    if (h === undefined && result.lastStored) h = result.lastStored.blockHash;
-    if (h === undefined) return '19535 ran but no block bytes were readable: the buffer, the extra after the finish and the last store were all unreadable';
-    if (h !== undefined && h === result.recordBlockHash) return 'the record\'s block (hash ' + h + ')' + (result.parkHash ? ', parked by PARK' : ', parked by the flush or identical to the live pose');
-    if (h !== undefined && h === result.liveHash) return 'the copy\'s own live pose (hash ' + h + '): Set3D\'s store at the release, not the record';
-    return 'a block of hash ' + h + ' matching neither the record (' + result.recordBlockHash + ') nor the live pose (' + result.liveHash + ')';
+    if (r === null) return { source: 'no 19535 ran for the form after the apply: the pose is the load path\'s own' };
+    const cands = [];
+    if (r.saved && r.saved.blockHash !== undefined) cands.push({ from: 'the block 19535 read', hash: r.saved.blockHash });
+    if (result.extraAtFinish && result.extraAtFinish.header && result.extraAtFinish.header.blockHash !== undefined) cands.push({ from: 'the extra after the finish', hash: result.extraAtFinish.header.blockHash });
+    if (result.lastStored && result.lastStored.blockHash !== undefined) cands.push({ from: 'the last 11977 store (caller ' + result.lastStoredCaller + ')', hash: result.lastStored.blockHash });
+    if (cands.length === 0) return { source: '19535 ran but no block bytes were readable from the buffer, the extra or a store' };
+    const c = cands[0];
+    const name = c.hash === result.recordBlockHash ? 'the record\'s block' + (result.parkHash !== null ? ' (parked by PARK)' : '') : (c.hash === result.liveHash ? 'the copy\'s own live pose: the engine\'s store at the release, not the record' : 'a block matching neither the record nor the live pose');
+    return { source: name, hash: c.hash, judgedBy: c.from, candidates: cands };
   };
   const pollStep = function () {
     if (poll === null || poll.done) return;
     const now = Date.now();
     if (poll.rebuiltAt === 0) {
       const root = rootOf(poll.form);
-      if (!root.isNull() || now - poll.started >= REBUILD_WAIT_MS) {
-        poll.rebuiltAt = now;
-        const snap = snapshot(poll.form, root.isNull() ? 'rebuilt (timeout, no root)' : 'rebuilt', true);
-        snap.rebuildMs = now - poll.started;
-      }
+      if (!root.isNull() && poll.rootSeenAt === 0) { poll.rootSeenAt = now; poll.rootSeenAtReturn = counts.playerUpdate; }
+      const due = (poll.rootSeenAt !== 0 && (counts.playerUpdate > poll.rootSeenAtReturn || result.lastRead !== null)) || now - poll.started >= REBUILD_WAIT_MS;
+      if (!due) return;
+      poll.rebuiltAt = now;
+      snapshot(poll.form, root.isNull() ? 'rebuilt (timeout, no root)' : 'rebuilt', true, { rebuildMs: poll.rootSeenAt === 0 ? null : poll.rootSeenAt - poll.started, waitedMs: now - poll.started, readRan: result.lastRead !== null });
       return;
     }
     if (now - poll.rebuiltAt < SETTLE_MS) return;
     poll.done = true;
     snapshot(poll.form, 'settled', true);
-    emit({ event: 'result', form: hex(FORM), mode: MODE, park: PARK, recordBlockHash: result.recordBlockHash, liveHash: result.liveHash, parkHash: result.parkHash, lastStored: result.lastStored, extraAtFinish: result.extraAtFinish, lastRead: result.lastRead, poseSource: sourceOf() });
+    emit({ event: 'result', form: hex(FORM), mode: MODE, park: PARK, recordBlockHash: result.recordBlockHash, liveHash: result.liveHash, parkHash: result.parkHash, lastStored: result.lastStored, lastStoredCaller: result.lastStoredCaller, extraAtFinish: result.extraAtFinish, lastRead: result.lastRead, poseSource: sourceOf() });
   };
 
   const counts = { innerAdd: 0, innerAddForm: 0, triggers: 0, runs: 0, refused: 0, playerUpdate: 0, formsLog: 0, havokRead: 0, havokReadForm: 0, havokBody: 0, havokPrePass: 0, flushEntry: 0, savedHavokSet: 0, set3DWrapper: 0, setData3D: 0, rigidSetPosition: 0, rigidSetRotation: 0 };
@@ -549,14 +585,18 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
       if (!busy) { try { pollStep(); } catch (e) { emit({ event: 'error', where: 'poll', error: String(e) }); } }
     },
   });
-  attach('formsLog', { // the engine's verdicts: printed in the window, or whenever the line carries FORM's id or a known verdict string, on any thread
+  const fmtCache = {}; // 35519's format strings by address: read and matched once
+  let ungatedLogs = 0;
+  attach('formsLog', { // the engine's verdicts: printed in the window, or whenever the line carries FORM's id or a known verdict string, on any thread (200 at most outside the window)
     onEnter(args) {
       counts.formsLog += 1;
-      let fmt = ''; try { fmt = args[0].readUtf8String(240); } catch (e) { fmt = 'unreadable: ' + e; }
+      const key = args[0].toString();
+      let c = fmtCache[key];
+      if (c === undefined) { let fmt = ''; try { fmt = args[0].readUtf8String(240); } catch (e) { fmt = 'unreadable: ' + e; } c = { fmt: fmt, verdict: VERDICTS.test(fmt) }; fmtCache[key] = c; }
       const inWindow = watch.active && this.threadId === watch.tid, carriesForm = argId(args[1]) || argId(args[2]) || argId(args[3]);
-      if (!inWindow && !carriesForm && !VERDICTS.test(fmt)) return;
-      if (inWindow) watch.logs.push(fmt);
-      emit({ event: 'formsLog', fmt: fmt, a1: String(args[1]), a2: String(args[2]), a3: String(args[3]), thread: this.threadId, inWindow: inWindow, carriesForm: carriesForm });
+      if (!inWindow && !carriesForm && !c.verdict) return;
+      if (!inWindow) { ungatedLogs += 1; if (ungatedLogs > 200) return; }
+      emit({ event: 'formsLog', fmt: c.fmt, a1: String(args[1]), a2: String(args[2]), a3: String(args[3]), thread: this.threadId, inWindow: inWindow, carriesForm: carriesForm, verdict: c.verdict });
     },
   });
   attach('havokRead', { // 19535 per call, any thread: the saved count from the buffer, the live count from 19533's hook, the per-body calls, the caller
@@ -567,7 +607,7 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
       counts.havokReadForm += 1;
       let saved = null; // the block 19535 reads: the load buffer's data from its position, hashed whole (36019's scrap copy of the sub-buffer's block)
       try { const pos = u32(args[1], LBUF.pos), size = u32(args[1], LBUF.size), d = ptrAt(args[1], LBUF.data).add(pos), n = Math.min(size - pos, CAP); const b = new Uint8Array(d.readByteArray(n)); saved = { blockFlags: hex(b[0]), count: vi(b, 1)[0], bytes: n, blockHash: hex(fnv1a(b)) }; } catch (e) { saved = { error: String(e) }; }
-      let extra = null; try { extra = savedExtra(args[0]); } catch (e) { extra = { error: String(e) }; }
+      let extra = null; try { extra = extraNoLock(args[0]); } catch (e) { extra = { error: String(e) }; } // lock-free: 11979 holds the list's write lock across this call
       reads[this.threadId] = { bodies: 0, setPos: 0, setRot: 0, live: null };
       this.row = { event: 'havokRead', form: hex(FORM), thread: this.threadId, caller: rva(this.returnAddress), inWindow: watch.active && this.threadId === watch.tid, saved: saved, extraAtEntry: extra, afterApply: result.applied };
       emit(this.row);
@@ -594,8 +634,9 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
       counts.savedHavokSet += 1;
       if (!isForm(args[0].sub(R_EXTRA))) return;
       let h = null; try { h = subHeader(ptrAt(args[1], 0)); } catch (e) { h = { error: String(e) }; }
-      if (h !== null && h.error === undefined) result.lastStored = h;
-      emit({ event: 'savedHavokSet', form: hex(FORM), caller: rva(this.returnAddress), thread: this.threadId, sub: h, matchesRecord: h !== null && h.blockHash === result.recordBlockHash, matchesLive: h !== null && h.blockHash === result.liveHash });
+      const ours = parking && this.threadId === watch.tid, caller = ours ? 'ours (PARK)' : rva(this.returnAddress); // our NativeFunction call returns into a Frida thunk, not an exe RVA
+      if (h !== null && h.error === undefined) { result.lastStored = h; result.lastStoredCaller = caller; }
+      emit({ event: 'savedHavokSet', form: hex(FORM), ours: ours, caller: caller, thread: this.threadId, sub: h, matchesRecord: h !== null && h.blockHash === result.recordBlockHash, matchesLive: h !== null && h.blockHash === result.liveHash });
     },
   });
   attach('set3DWrapper', { onEnter(args) { counts.set3DWrapper += 1; if (!isForm(args[0])) return; emit({ event: 'set3D', form: hex(FORM), node: String(args[1]), caller: rva(this.returnAddress), thread: this.threadId }); } });

@@ -7067,3 +7067,22 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
     and the pose's source is undecided (change-forms.md C4, corrected by thuum-cf's pose read).
   - The gate waits for Eli's D-P13 (door leg B's claim after a warm exit).
   - Earlier, c2 went silent during a stage's client copy (heartbeat 86 s stale); a snapshot rollback brought it back.
+- 09:42 PST 2026-11-03 (17:42Z 11-03) (thuum-cf): apply-on-demand.js v2.1: the fresh review's FIX FIRST (3 blocking, 10 notes) applied as written by the re-analyst (55,305 bytes,
+  655 lines; node --check clean; no em dashes; unrun). The engine calls between the script's own engine-state steps are guarded
+  (safeExtra and safeKind2 wrap 12329 GetByType and the table read; the apply row's kind-2 and extra reads happen before the 35509
+  write, so nothing but the emit sits between 35509 and 35568; the after-apply reads sit after the return-0 branch); step rows at
+  livePose 36016, 35568 returned (with the return) and park 11977 (with the sub, the bytes and the block hash), so a crash's last
+  row names the engine's call or the script's; 36016's prototype (BGSLoadGameSubBuffer** holder in rcx, TESForm* form in rdx;
+  its own log string names it SaveAnimation while the body serializes the Havok block) and the data3D setter's (ref, node) order
+  are in the note's id table, HYPOTHESIS from the decompile, the script's argument order standing. The kind-2 table is read as
+  CommonLib's BSTScatterTable (BSTHashMap.h:575-581, :647-648), its key compared as the form pointer and as the form id with the
+  matching shape recorded; the 19535 hook reads the ExtraSavedHavokData lock-free (the PresenceBitfield bit, then the chain node
+  whose vtable is VTABLE_ExtraSavedHavokData 186773), with data at +8 and presence at +0x10 (ExtraDataList.h:44-45's second
+  column: the list's destructor is virtual on 1.6.629 and later; the review's +0 and +8 were the SE column); the PARK is skipped
+  with a row when the root is present and a parked sub-buffer 11977 never took is freed; the rebuilt snapshot is taken one Update
+  return after the root appears (or as soon as 19535 has run for the form), the 20 s cap unchanged; poseSource ranks three
+  candidates (the block 19535 read, the extra after the finish, the last 11977 store with its caller) and names which judged;
+  our own 11977 row carries ours: true; the refusal also fires on before.livePoseError; the 35519 format reads are memoized per
+  address and the ungated rows capped at 200 outside the window; the header says wait: 15 stands because the lateness is lab-api's
+  fixed 5 s sleep plus the attach; watch.logs and logsInWindow are gone. Rule A: a reviewer's fix applied as written needs no
+  second review. The run is after the merge, PARK false first.
