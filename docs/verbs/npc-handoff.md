@@ -732,6 +732,29 @@ door into rotfern's hosted inn: the walk, the pass, the new host live, the old d
 T3: x-handoff-door-pass, then a hosted-interior leg of the door scenario, its own commit. mp.get(0, "cellFollows") for
 the lab. H5 held (x-handoff-door 025527).
 
+D9's settle (18:36 PST 2026-11-02; playtest 41 02:08Z, Hod 0x1348a at the Sleeping Giant's door 0x13419, Prisoner hosting the inn
+0x133c6 and rotfern the street 0x9712; Eli: "hod just tried to leave the sleeping giant inn... cannot seem to... i thought we
+fixed this"): the pass promoted the street's game with its copy still INSIDE. The door walk itself flips nothing (the record
+follows the host's report); the host's first report after the transit is the pass, and its movement rode the unreliable channel
+behind the reliable hoster word, so the new host's promote placed its copy at the puppet's last sample, the pre-door one
+(puppetService's "the record's last point and heading first"), the sample that carried him through landed on a live actor and was
+ignored, and the copy's first report from the unloaded interior (8 s later) was judged a door pass back (an interior is deep by
+definition). Two owners a second, ADR-063's H2. Fork m3-handoff-settle 019921fb (off union-srv-3 35509f7a), server-side only:
+(a) impose at promotion: OnUpdateMovement's pass block sends the passing report's bytes to the new host's game reliably ahead of
+the hoster word, same channel, so its promote reads the door's far side as the last sample (no client change: the model's
+movement updates before the view's promote); (b) the settle: wire-rules cells.rs remembers each pass (actor, cell, new host, when;
+`passes`), and the judge answers the new host's report OUT of the passed-into cell within PASS_SETTLE_MS (1 s, UNMEASURED, the
+follow's window) with MoveVerdict::Stale (= 4, new; the follow's stale rule of FOLLOW_SETTLE_MS gives the same word now), which
+the core logs as "dropped as a stale copy's sample (D9's settle)" and counts, never as "may not move"; a stranger's late report
+stays Refuse; the door's pre-check treats Stale as a refusal; a real return after the window passes as before, with its own
+window. No wire change (no epoch travels; numidium's epoch shape is the alternative if the window proves too blunt). T0:
+cells.rs `a_passed_actors_report_back_within_the_settle_window_is_a_stale_copys_sample` and the cross test's teleport moved past
+the window; CellHostTest's door case reads the report's reliable send ahead of the word, the stale drop and the exit after the
+window. T3: b-npc-handoff-door-hosts (thuum 019b0cd3, its own commit): c2 inside Alvor's house 0x133c8 at its door 0x13420's
+landing (lab/esm.py door), c1 at Riverwood's landing, the clock at 23.0; claims one "passes 13482 into cell 133c8", none into a
+0x97xx square 30 s on, the record indoors, c2 running him, both engines in one cell. HYPOTHESIS until that run: the mechanism
+above (every stamp fits it), and whether 1 s covers the promote on the lab's LAN.
+
 - [x] doc complete, inventory listed with a disposition per row, rung declared (2026-10-22 draft; the decisions as ADR-047 PROPOSED 2026-10-23, D6 to D11)
 - [x] engine surface cited or delegated (the cell getters through Skyrim Platform and libespm's CELL and record flags; moveRefrToPosition the player's own cross-cell call; no new native)
 - [x] server logic + T0, first slice (D6, D10, e: fork m3-train-40 89c35590 the table with three tests, e4474bcf the core with CellHostTest's follow case, the include fix 97d08da7 compiled and ctest green in pipeline 2756, 2026-10-23 14:14 PDT, 424 cases; the head 1c3c0699 merges train-39's 4 s; D7 to D9 open)

@@ -5512,3 +5512,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   playtest-turbo-2-arm2-end-evidence-20261103T022433Z (not a base); logs at results/playtest-41/ (after break 3), -break3/ (01:10Z
   to 02:11Z, with server-pre-swap.log) and -break2/ (to 01:10Z). The hold released; the lab server back on parity-6d7fcc84 (the
   match of clean-m1's 64dbacfe client) for the nightly, the seats' schema-32 games offline until its first rollback.
+- 18:36 PST 2026-11-02 (thuum-cf): after playtest 41's close. m3-handoff-settle 019921fb pushed off union-srv-3 (D9's settle: the passing
+  report to the new host reliably ahead of the hoster word; PASS_SETTLE_MS 1 s; MoveVerdict::Stale = 4 shared with the follow's
+  stale rule; the Stale drop logged as "dropped as a stale copy's sample", never "may not move"), pipeline 4768; its scenario
+  b-npc-handoff-door-hosts committed alone (019b0cd3; the premise from Skyrim.esm by the new `lab/esm.py door`: Alvor's door 0x13420
+  lands in 0x133c8 at (-513, -206, 240)). ADR-062 slice 1b f7ce5b37 (the first head c9596809 red at T0 on the old cause-3 refusal
+  case; dropped), pipeline 4769, full client build. ADR-063 gains its decision-4 outcomes (the settle row; the props rule to write
+  before any prop code). union-srv-3 35509f7a was green (4764) and laid at break 3 (02:15Z) before the close.

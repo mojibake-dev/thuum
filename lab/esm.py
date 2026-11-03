@@ -20,6 +20,7 @@ field's size is the uint32 that XXXX carried.
     esm.py ref <plugin> <form id>
     esm.py id <plugin> <form id>
     esm.py scripts <plugin> <form id> [<form id> ...]   (the VMAD's script and property names)
+    esm.py door <plugin> <form id> [<form id> ...]      (a load door's XTEL: the destination door, its cell, the landing)
     esm.py races <plugin>
     esm.py attacks <plugin> <race editor id substring>
     esm.py quests <plugin> [sge|all]
@@ -145,7 +146,9 @@ def headers(buf: bytes, start: int, end: int, top: set[str] | None, world: int |
         if buf[pos:pos + 4] == b"GRUP":
             _, gsize, label, gtype, *_ = GROUP.unpack_from(buf, pos)
             if gtype != 0 or top is None or label.decode("latin-1") in top:
-                inner = struct.unpack("<I", label)[0] if gtype == 1 else world
+                # a worldspace's children carry its id; an interior cell's children (type 6
+                # under no worldspace) carry the cell's, so a placement inside knows its cell
+                inner = struct.unpack("<I", label)[0] if gtype == 1 or (gtype == 6 and world is None) else world
                 yield from headers(buf, pos + GROUP.size, pos + gsize, None, inner)
             pos += gsize
             continue
@@ -242,7 +245,7 @@ def cellrefs(buf: bytes, cell_id: int, types: set[str]) -> list[Placed]:
 
 def ref(buf: bytes, form_id: int) -> tuple[Record, int | None] | None:
     """A placed reference (REFR or ACHR) by form id, exterior or interior,
-    with the worldspace it is placed in (None inside a cell)."""
+    with the worldspace it is placed in (the interior cell's id inside one)."""
     for t, fid, off, world in headers(buf, 0, len(buf), {"WRLD", "CELL"}):
         if fid == form_id and t in ("REFR", "ACHR"):
             return record_at(buf, off)[0], world
@@ -368,6 +371,39 @@ def main(argv: list[str]) -> int:
         for fid in sorted(want - seen):
             print(f"{fid:#010x}: not found")
         return 0 if seen else 1
+    if len(argv) >= 4 and argv[1] == "door":
+        # a door's teleport: the destination door (XTEL: form id, position,
+        # rotation in radians), the cell or worldspace each door is placed in
+        # (the group label the headers walk yields), and the landing in degrees;
+        # the two-host door scenario's premise (b-npc-handoff-door-hosts,
+        # 2026-11-03) stands a seat inside the destination cell at the landing
+        with open(argv[2], "rb") as f:
+            buf = f.read()
+        want = [int(a, 0) for a in argv[3:]]
+        where: dict[int, tuple[str, int, int | None]] = {}
+        for t, fid, off, label in headers(buf, 0, len(buf), {"WRLD", "CELL"}):
+            if t in ("REFR", "ACHR"):
+                where[fid] = (t, off, label)
+        found = 0
+        for fid in want:
+            hit = where.get(fid)
+            if not hit:
+                print(f"{fid:#010x}: not a placed reference")
+                continue
+            found += 1
+            t, off, label = hit
+            rec = record_at(buf, off)[0]
+            xtel = rec.get("XTEL")
+            cell = f"{label:#x}" if label is not None else "?"
+            if not xtel or len(xtel) < 28:
+                print(f"{fid:#010x} {t} in {cell}: no XTEL (not a load door)")
+                continue
+            dest, x, y, z, rx, ry, rz = struct.unpack_from("<I6f", xtel)
+            dhit = where.get(dest)
+            dcell = f"{dhit[2]:#x}" if dhit and dhit[2] is not None else "?"
+            deg = [round(r * 180.0 / 3.141592653589793, 1) for r in (rx, ry, rz)]
+            print(f"{fid:#010x} {t} in {cell}: teleports to door {dest:#010x} in {dcell}, landing ({x:.0f}, {y:.0f}, {z:.0f}) rot {deg}")
+        return 0 if found else 1
     if len(argv) == 3 and argv[1] == "races":
         with open(argv[2], "rb") as f:
             buf = f.read()

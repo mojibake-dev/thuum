@@ -1460,6 +1460,12 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   formula MERGED 27f5c0a4 (b-perk-damage: kModAttackDamage and kModArmorRating with their keyword conditions; other entry points
   and conditions stay a documented limit); the console's SetLevel and AdvSkill on the server (m5-skill-set); enchanting, alchemy
   and pickpocketing as transactions: not begun (memo D77 D, the benches after the playtest); vampirism: the design owed.
+- STATE (18:36 PST 2026-11-02, thuum-cf): playtest 41 closed (numidium's LOG entry). Heads for the gate, none to a seat: m3-handoff-settle
+  019921fb (npc-handoff D9's settle: the passing report imposed on the new host ahead of the word, a stale copy's report back out
+  within 1 s dropped as Stale; its scenario b-npc-handoff-door-hosts 019b0cd3 waits for deploy-srv and the gate) and m4-scripts-work
+  f7ce5b37 (ADR-062 slice 1b: the natives' entry hooks, the scriptNative event, the client census and script-kill marks, cause 3
+  the host's word). Props: BROKEN, worse than at arm one; no live change again; the arbitration rule under ADR-063 decision 4 is
+  written in prop-physics.md first, then props.rs with T0, the two-seat probe and its scenario (prop-physics not-done until then).
   The race permit (Eli, 2026-11-01: rotfern's race for test client 1 alone) MERGED to fork parity 7fe600e6 (18:18 PST 2026-11-01; the gate 12 of
   12, T2 38 of 38; the menu hide follows in the bondblock train), BUILT WHOLE on fork m5-race-permit b59ab993 (13:56 PST 2026-11-01:
   server setting restrictedRaces, two facts on the race rule, CreateActor's restrictedRaces and permittedRaces at SCHEMA_VERSION 29,

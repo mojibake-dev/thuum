@@ -4034,3 +4034,16 @@ on one prop in the same frame, a host leaving mid-fight, a commander quitting), 
 two-seat scenario of the collision itself (the gate audit's case 2, both players on one object at once, is asserted in 4 of 56
 rows today). H3: an engine path no channel covers (the AI's night lock reached no native) shows up as a desync in play; the fix
 is a channel, a row in ADR-062's table, never a name.
+
+Outcomes under decision 4 (18:36 PST 2026-11-02):
+- The hand-off's settle is the first arbitration row written after the retirements: npc-handoff D9's settle (fork
+  m3-handoff-settle 019921fb; docs/verbs/npc-handoff.md "D9's settle"): the server imposes the passing report on the new owner
+  ahead of the ownership word, and a report from the new owner that moves the actor back out of the cell within PASS_SETTLE_MS
+  is a stale copy's sample (MoveVerdict::Stale), dropped and logged as such, never a pass; playtest 41's Hod traded between two
+  games twice a second without it. Two owners colliding is exactly what decision 4 keeps the server for.
+- Props (playtest 41's close, Eli: "item physics sync is more broken than it was when we STARTED testing"): retiring E_PROP_CELL
+  and E_PROP_REACH left no arbitration at all, and the newest touch from any copy took the prop (13 of 13 claims granted after
+  break 3, a blasted prop's owner refused while it flew). The rule is written in docs/verbs/prop-physics.md before any code
+  moves again: a grab beats a touch; a non-owner's contact never takes a moving prop; ownership returns to the host only at rest
+  on the owner's screen, by the owner's own final sample, never by a timer. No prop change reaches a seat except through a gate
+  with a two-seat scenario (numidium and thuum-cf, 2026-11-03 02:36Z).
