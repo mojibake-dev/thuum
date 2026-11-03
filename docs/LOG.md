@@ -5952,3 +5952,19 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   arming predicate 41565 against the stored threshold the server rewrites) and docs/engine/ai-world-state.md (6bd043a0; 23 rows,
   none fully confirmed; the night lock a package procedure on the Sleep template through SetLocked 12401 and 19512; the esm's pair
   lock against locks.md's per-REFR seed) filed from the re-analyst agents; containers.md in progress. Slice 1b: 788f18a4 pushed.
+- 01:04 PST 2026-11-03 (09:04Z 11-03) (numidium): the round-two chain's other two reads RED the same way: the settle-0 read
+  20261103-084329 and the swap probe v12 20261103-085226, each an until of 400 s on the pass to the street seat with Hod never
+  walking out; in the swap run c2's state line at 08:54:15.790 reads "target ff000001 package 734cd": Hod's combat target was
+  the visiting player, so combat held him indoors (070357's attack reproduced; cause unread: trespass, the late fate's redress
+  or relayed hostility), and the house seat was granted twice (epochs 2 and 3) in both runs; neither read can decide the settle
+  (no pass happened). The system-1 branch m3-system1 at 88b07f57 (thuum-cf): the scene stop, deaths2, the follow vouch and the
+  pass's T0 case added on my word, round four on top (r3's review: deferred reports run on the next update and a demote drops
+  them with a line, the word's isDead guards the hold and the gate, three asks a second apart, the gate defers to a hold, a
+  re-sent word keeps its hold); its fresh review running. The follow vouch merges only with a two-seat scenario of the
+  collision: x-host-restart-follow is FIX FIRST (its thin loaded set is never set up, so it would pass on parity). FIX FIRST
+  too: x-npc-late-join v2 (R3's claims cannot fail under the 130 ms stream; playtest 42's item 6 out), x-npc-death-freeze (the
+  reference z cannot tell a frozen body; headZ), x-scene-guest (an until never re-counts a seat); that grammar is building.
+  lab-api: inventory {ref} and c.inventory(<ref>) on main 8f8f4c08. All five engine model docs now exist (thuum-cf:
+  progression-ui, ai-world-state and containers static halves), none thawed; playtest 41's kept logs do not cover the chest
+  phantom's 23:18Z window, so containers' R3 needs a run. R4 staging on the break-3 build (union-srv-3 35509f7a, the union's
+  dist, the 12f199e6 bundle next).
