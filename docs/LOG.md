@@ -6363,3 +6363,27 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   lock's mark runs on Main.threadID, clearingData's offset, the dry-run byte's meaning, that 0x0D and 0x0E leave the entry untouched,
   the byte equality with the stash. Its fresh review runs before the first run (check mode first, on c1 with the capture probe's
   steps, when numidium's stage frees the lab).
+- 05:03 PST 2026-11-03 (13:03Z 11-03) (thuum-cf): door v21's red (123800, e23bd229) READ: two readings of the scenario, not a fault of the
+  fix (the run reader; c1's clock 874 ms behind the server's). (1) The MoveTo's create word reached c1 at 12:41:57.098; the hold asked
+  the move at +21 ms with "the engine at (-506, -177, -0) in 133c7" (the stale copy, witnessed), the engine landed the copy in 3c within
+  a frame, and the view's gate one frame later read the same cell, so its line said "not moved here (the same cell)": the claimed
+  witness ("moved to the record below") cannot print on this head; the hold's ask line is the witness. The first ask landed 114 units
+  off (c1's own capsule pushed him, v19's header's prediction), the re-ask at +1537 ms put him on the record, "placed after 1553 ms
+  (asked 2 time(s))", reports flowed. (2) Hod greeted c1 and walked home under ACCEPTED reports ("ff000000 moves 1348a into cell 9731,
+  which it hosts" at 12:42:06.139); at the assert the record (23316, -46038.6) lay on the way to door 13423 (1240 short of it, 228 from
+  Stump's placement by esm.py), while c1.npc_state in an assert is the LAST npc-state step's value (assertions.py, NpcStateView), read
+  16.3 s earlier before nine log-counts and the screenshot: the 150-unit bars compared a stale sample with the live record. Refuted:
+  the record frozen while reports were held or refused (the cell-change line; the record moved 1721 units after the placement; no
+  second word or hold after 12:41:58.666; the second "placed" line was the settle phase's promotion in the first server session,
+  "placed after 4 ms (never asked)", counted because a seat's log has no baseline across the restart). Also: the teleport flag's
+  swallow of the first report prints nothing (MovementValidation's snapBack returns false silently). Open HYPOTHESIS: that the copy
+  and the record never parted by more than a few units while he walked (no per-report positions are logged). v22 drafted (sha1
+  0d8d74c8, parses and lints, uncommitted): the stale case claimed on `hold 1348a: asked the move at .* in 133c7` above a seat-count
+  baseline read before the MoveTo, the gate's line kept recorded, `c1: npc-state` moved to right before the assert, every other bar
+  unchanged; its fresh review runs (rule A), then its own commit (rule 13) and deploy-srv before r3's stage. The serialize script's
+  fresh review: FIX FIRST, one blocking (the compare's backward varint search accepted a zero-length match, so every difference
+  would be named "extras" on a record ending in 00 00) and eleven notes (the pack's out pointer 16 bytes pre-zeroed, firstBytes
+  before the attach, buf assigned after the ctor, a run counted only when the premises pass, hex capped at 65536, an actor's bytes
+  HYPOTHESIS-incomplete without slot 0xF2 so the first run is type 0x3D only, a fault converted not prevented, citations); every
+  one of its nineteen ids resolves by addr.py to the RVA declared; the re-analyst applies them as written. Lab step note: wait 15 s
+  after the frida step before the lock (a 21 KB script goes ready late).

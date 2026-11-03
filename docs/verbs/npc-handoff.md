@@ -828,7 +828,7 @@ with the fresh reviewer; its leg A makes P8's condition server-side after 084006
 and the review of v16 refused the visitor shape three ways: a hosted cell never passes to a nearer seat in steady state, `approach
 {cell: record}` goes to the seat's own copy, and the visitor's indoor copy is neither indoors after its own door report nor frozen past
 D11's 4 s release; v17 starts at gameHour 2.0, the street seat's engine copy at his bed, and the server's MoveTo of the RECORD to that
-seat's feet promotes it against the bedside copy: the hold's line naming both places is the stale case's witness, the parent's red
+seat's feet promotes it against the bedside copy: the hold's ASK line naming the bed's cell for the engine's copy is the stale case's witness (123800: the ask lands the copy within a frame, so the gate's line reads "not moved here (the same cell)" and cannot be the witness; v22 claims the ask line above a seat-count baseline), the parent's red
 the bedside copy's report into 133c7; then the sleep package walks him home by 13423 under the follow; leg B unchanged, its exit until
 carrying the fight as its own red after 085226 and 084329 showed Hod fighting the visiting player indoors; v16 16fa2613, v15 73fdb632,
 v14 f9977b84 READY FOR THE GREENS by the re-check of v13 70d36451, whose two nits v14 carried; v13 70d36451, v12 54bb96cf, v11 3ae65081, v10 ab631049, v9 4bb5d18c, v8 c999ebb2, v7 9fc01da4). v6's two red runs on the fix's parent b926a7d4 settled the
