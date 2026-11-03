@@ -7529,3 +7529,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   walked up) reads as the orphan-copy class (the move rule fires at a sighting report), HYPOTHESIS until the check's server log is
   grepped for 1348b; the recorder was off. The stage of 2225c932 relaunched with x-corpse-record v2 and x-container-hold v2 after the
   check; pipeline 5134 green on both builds.
+- 15:42 PST 2026-11-03 (23:42Z 11-03) (thuum-cf): The next head after the stage: fork m3-turbo3-sys2-container-r2 3999bb0e (off the pinned 2225c932): the client
+  review's notes 1, 3 and 4 applied (d9836510: the detach clears the body's block marks, since a re-entered cell respawns the reference
+  alive and unblocked; a dying body's block holds through the ragdoll settle window, IsDead at kDying a HYPOTHESIS; one open path for
+  every dead NPC_ through openBodyOnTimers with the AI switch conditional, the host's counted handler lines logged at the same moments;
+  tsc clean) and m2-rune-glyph dd5aa100 merged (the build that played on 41's union; SCHEMA_VERSION 34, since a 33 image without the
+  decal field is on the lab; the one conflict the schema block; cargo test 489 green, clippy 1.99 clean, fork-lint clean). Pushed for
+  its full build. F10's evidence is lost (numidium: the check ran without the recorder and the stage's server recreate took the
+  23:30 to 23:38Z lines); it stays the F1-class reading, HYPOTHESIS; playtest 44 records from the start (numidium's standing rule).
+  The stage of 2225c932 is past its server step, into the dist.
