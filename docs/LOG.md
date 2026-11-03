@@ -5757,3 +5757,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   relayed quest absent, the never-failing live-line zeros gone; papyrus-events.md's evidence sentences corrected (a quest's or
   global's call never raises a per-call event; the census rows carry the evidence) and H-1b5 named from the driver's questStart
   lines: quest 0x30002859 fourteen times per 10 s on both seats, finding 77's shape (Reading List's detection quest).
+- 23:16 PST 2026-11-02 Eli's four decisions, verbatim "B, A, A, B": ADR-064 ACCEPTED with its refinement (decision 4's rule, a relaxed or rewritten
+  claim goes to Eli, applies from a scenario's first green run or its entry into the gate set; a draft's claim changes before that
+  are the fresh reviewer's); D-S1 A and D-S2 A, written into ADR-063 decision 3 as its dated amendment (a non-owner runs a world
+  object's lifecycle handlers, their state-changing natives filtered at the entry, the unhooked natives the open set, the size
+  measured on a guest before slice 2); ADR-063's outcome notes kept as a PROPOSED amendment and corrected with the night's
+  finding (the settle is not the fix; the promotion's stale copy is the cause; the fix places the copy at the record at every
+  promotion and holds the actor's reports until applied, fork m3-promote-record). Deferred until the door fix merges: the
+  b-npc-handoff-cross claim restore and ADR-047 D9's retirement note.

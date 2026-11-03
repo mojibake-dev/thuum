@@ -4013,6 +4013,12 @@ Decision.
    it works with no new code.
 3. Non-owners render; they never simulate. A copy on a non-owner plays back the owner's results. A non-owner's engine running
    its own AI, Havok, death or script for an owned thing is a bug.
+   Amended 23:16 PST 2026-11-02 by Eli, verbatim: "B, A, A, B" (D-S1 A and D-S2 A of docs/private/decisions-after-slice-1b.md): one bounded
+   exception. A non-owner runs a world object's Papyrus lifecycle handlers (OnInit, OnLoad, OnCellAttach, OnCellDetach, OnReset,
+   OnUnload), because the engine fires them before a host is known; their consequences through the state-changing natives are
+   filtered at the entry (counted "(not hosted)", never reported), and the natives ADR-062 has not hooked are the open set,
+   closed native by native as slice 2 lands. The exception's size is measured on a guest (x-script-natives with its second
+   seat) before slice 2 starts.
 4. The server records, relays and arbitrates the hand-offs. It validates consistency only: two owners colliding, item
    conservation, bounds that would break the world for the others (the wire's shapes and caps). It does not check the owner's
    engine against the record's idea of where the owner stands or what it may touch. R2 is the default rung for new state; R0
@@ -4043,12 +4049,16 @@ two-seat scenario of the collision itself (the gate audit's case 2, both players
 rows today). H3: an engine path no channel covers (the AI's night lock reached no native) shows up as a desync in play; the fix
 is a channel, a row in ADR-062's table, never a name.
 
-Outcome notes under decision 4 (PROPOSED by thuum-cf, added after Eli's acceptance; an accepted ADR's text changes by Eli's word or a dated amendment marked PROPOSED, so these stand as notes until Eli's word; written 18:36 PST 2026-11-02):
-- The hand-off's settle is the first arbitration row written after the retirements: npc-handoff D9's settle (fork
-  m3-handoff-settle 019921fb; docs/verbs/npc-handoff.md "D9's settle"): the server imposes the passing report on the new owner
-  ahead of the ownership word, and a report from the new owner that moves the actor back out of the cell within PASS_SETTLE_MS
-  is a stale copy's sample (MoveVerdict::Stale), dropped and logged as such, never a pass; playtest 41's Hod traded between two
-  games twice a second without it. Two owners colliding is exactly what decision 4 keeps the server for.
+Outcome notes under decision 4 (PROPOSED by thuum-cf, added after Eli's acceptance; an accepted ADR's text changes by Eli's word or a dated amendment marked PROPOSED, so these stand as notes until Eli's word; written 18:36 PST 2026-11-02; kept as a PROPOSED amendment and corrected by Eli's D4 B, 23:16 PST 2026-11-02):
+- The hand-off's settle (fork m3-handoff-settle; docs/verbs/npc-handoff.md "D9's settle") is NOT the fix and stays a branch
+  (corrected by Eli's D4 B): three runs on the unfixed parent (20261103-052100, -055217, -060106) and R1's instrumented read
+  (20261103-065955, -070357) put the bounce's cause in the promotion itself, at a D9 pass and at a cell grant alike: the new
+  owner's engine reports the copy where that seat's own game had it (the record frozen at home, the engine's day package
+  elsewhere) before the client's move to the record lands, and the server takes that report as a pass (docs/engine/
+  non-owning-seat.md P1, P2, P2a, P2b, P8). A settle window would protect the false exit such a report makes. The fix places the
+  copy at the record at every promotion, with the server's record ahead of the ownership word and that actor's reports held
+  until the placement is applied (fork m3-promote-record); the settle is a safety net after that. Two owners colliding is still
+  what decision 4 keeps the server for; the collision here is a stale copy's, and its cure is the record's, not a timer's.
 - Props (playtest 41's close, Eli: "item physics sync is more broken than it was when we STARTED testing"): retiring E_PROP_CELL
   and E_PROP_REACH left no arbitration at all, and the newest touch from any copy took the prop (13 of 13 claims granted after
   break 3, a blasted prop's owner refused while it flew). The rule is written in docs/verbs/prop-physics.md before any code
@@ -4058,7 +4068,8 @@ Outcome notes under decision 4 (PROPOSED by thuum-cf, added after Eli's acceptan
 
 ## ADR-064: The burden of proof flips: an engine claim needs a trace, a gate reads the other screen, done means seen
 
-Status: PROPOSED about 19:05 PST 2026-11-02 by numidium, from the root-cause plan Eli approved after playtest 41
+Status: ACCEPTED 23:16 PST 2026-11-02 by Eli, verbatim: "B, A, A, B" (D1 B: accepted with decision 4's refinement below). PROPOSED about
+19:05 PST 2026-11-02 by numidium, from the root-cause plan Eli approved after playtest 41
 (docs/research/root-cause-plan-2026-11-02.md). Eli's ask, verbatim: "how we can end up building a feature without knowing
 how it works underneath in the engine or how we're over validating, or how we had the allow list conceptualization of
 scripting inverted." Eli's two calls inside the plan: freeze the five break-prone systems until each has its engine
@@ -4097,7 +4108,9 @@ Decision.
    premises the deploy has.
 4. The reviewer is not the author or the merger. A scenario commit that relaxes or rewrites a claim goes to Eli (this
    ends numidium's standing approval of 2026-10-13 for that kind); any other scenario commit, and every branch before its
-   first lab run, gets a fresh reviewer agent against the rules and the two-seat contract.
+   first lab run, gets a fresh reviewer agent against the rules and the two-seat contract. Eli's refinement at the acceptance
+   (D1 B): the rule applies from a scenario's first green run or its entry into the gate set; before that, a draft's claim
+   changes are the fresh reviewer's call, recorded in the scenario's header.
 5. Status has three words: VERIFIED IN PLAY (Eli saw it, or a two-seat claim asserted the player's view), MECHANISM ONLY,
    BROKEN. Nothing else is "done" or "works", in PLAN, the LOG or a report.
 6. Playtests (Eli's call): one per fixed system, at most eight items, each with its green two-seat run id. In an arm, a
