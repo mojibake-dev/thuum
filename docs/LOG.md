@@ -6922,3 +6922,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   wire change; its pipeline and both fresh reviews run. numidium's round-trip probe is written by path (x-apply-roundtrip.yaml: the
   actor capture's placement, the frida step with the defaults, wait 15, npc-kill, the dead assert, a 10 s wait, a dead-after assert),
   waiting on apply-on-demand.js's review verdict (the script on main fef08b18, sha1 539bac69).
+- 08:28 PST 2026-11-03 (16:28Z 11-03) (thuum-cf): round two of the freeze fix, m3-system1-r3 7d0d4d7e, GREEN on pipeline 5046 (client and server
+  builds). The next re-stage (death-freeze v5 twice as the proof, then x-warm-exit v2, swap v20, death-reentry v5, scene-guest v3;
+  the door scenario by Eli's D-P13) waits on its two fresh reviews (mine reading; numidium's beside it). The apply script's review is
+  still reading; numidium's round-trip probe waits on its verdict.
