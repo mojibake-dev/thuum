@@ -803,11 +803,13 @@ line, and the hold places the next promoted copy at the stale record outdoors, s
 from a jump is the door line (a walk logs "door 13407: 1348a's host ... walks it through to 3c" first; 055217's and 060106's jumps
 logged none), and a walk out once placed home would be P4 refuted and a premise finding for leg A, not the bounce. The bounce's
 return: 36 ms by a pass back (055217), 1.0 s by the follow's stale rule (065955's "moves 1348a into cell 133c7" after the refused
-report back; 070357 the same shape). T3: b-npc-handoff-door-hosts v20 (thuum b056d01d, 2026-11-03, with the fresh reviewer: leg A gains a settle phase after v19's red
+report back; 070357 the same shape). T3: b-npc-handoff-door-hosts v21 (thuum 4a707799, 2026-11-03, READY by the fresh reviewer; the settle phase waits for the
+record to leave, P10's sighting, before waiting for it home, then claims the walk by the door line and c1's copy in 133c7; the header
+5b57bc1c cites P9 to P11; the swap probe v19 e88aed7e; v20 b056d01d gained the settle phase after v19's red
 run on break 3 at the PREMISE, 101556, where c1's engine had Hod outdoors with 3D at 02:00 because the seat's rollback save holds him
 at the mill from 17.x and the sighting path took the record out before the MoveTo; v20 lets his sleep package walk the engine's copy
 home under c1's follow, an until on the record back in 133c7 within 300 s, then restarts the server at 2.0, which forgets the hosts
-and the follows and keeps the world, and claims the premise after the reconnects; the swap probe v18 1fa4f825 matches; v19 8d11a67f
+and the follows and keeps the world, and claims the premise after the reconnects; the swap probe v18 1fa4f825 was v20's; v19 8d11a67f
 READY FOR THE GREENS and the parent's red run by ADR-064's re-check of v18 639f65ec: every claim holds on m3-system1-r2 4ccb4259 and the set goes red on a build without the fix (the red
 run plays first on break 3, union-srv-3 b926a7d4, the staged build Eli played; parity 188a8dea is the merge's formal parent) for the bedside
 copy's second report into 133c7; v18 and v19 took the review of v17: the gate's line at the create-word promotion as the stale

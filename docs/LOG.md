@@ -6104,3 +6104,19 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   days: the ADR-031 recorder drafts, the fsmp series, the cast and melee reads, the relaunch report drafts), 276 left, 271 of them
   named by a doc. The remote branch deletions (231 fork, 98 thuum merged branches) wait on Eli's go, numidium's ask. Process point
   (numidium's, taken): a premise fact the lab teaches goes into docs/engine as a row first and the scenario cites it.
+- 02:39 PST 2026-11-03 (10:39Z 11-03) (thuum-cf): door v20's fresh review said FIX FIRST on one race: the settle phase's until on the record home could
+  hold at its first poll, before the roster's sighting (the client reports unknown high-process actors every 2 s; the server moves
+  the record once the reporter hosts the sighted cell) had taken the record out, and the premise would have read c1's copy outdoors
+  again; v21 (main 4a707799; the header-only 5b57bc1c cites non-owning-seat.md's P9, P10 and P11 and names the amended rule A) waits
+  for the record to LEAVE (an until on the record in 3c within 90 s), snapshots the street door's line, waits for the record home
+  (300 s) and claims the walk (the door line above its snapshot, c1's copy in 133c7); the package named as 101556 read it (0x1cb15
+  DefaultSleepEditorLoc22x7, the esm's 0x1b210 beside it); the re-check: READY, no finding; the swap probe v19 (e88aed7e, 50 steps).
+  ADR-064 decision 4 amended on Eli's yes ("Find the thing, and Build the thing"): (A) a fresh review for a NEW probe or scenario,
+  for new or changed fork code before its first run, and for a claim relaxed or rewritten, not for a reviewer's own fix applied as
+  written, a premise change that leaves every claim, header edits or a sha remap, the author naming which; (B) one question per
+  probe, a multi-leg scenario assembled from green parts; (C) the engine model first: a premise fact a run teaches becomes a row
+  with its run id before a scenario relies on it (numidium wrote P9 the save's placement, P10 the sighting's move, P11 the
+  visitor's fight). Round six's pipeline 4933: RED on T0, ActorDeathTest's finding-48 reanimate case sent the host's live sample
+  with no dead sample before it and the new rule refused it by design (one failed assertion, :176); the test now samples the body
+  dead first (the necromancer's host had it dead on its engine before the spell), e46d7e9f on m3-system1-r2, test only, pipeline
+  running. numidium: the merged remote branches deleted on Eli's go (fork 225 and 228, thuum 96 each), my clones pruned.
