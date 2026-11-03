@@ -3,10 +3,25 @@
 const test = require("node:test");
 const assert = require("node:assert");
 
-function fakeMp() {
+function fakeMp(opts = {}) {
   const props = new Map();
-  const set = (id, k, v) => props.set(`${id}.${k}`, v);
   const get = (id, k) => props.get(`${id}.${k}`);
+  // the server's respawnFated lever (RespawnFatedBinding): a true write on a dead non-player actor is the fate's own
+  // respawn, at its spawn point; a false write and a player's actor throw; a legacy server (opts.legacy) has no such
+  // property and throws the addon's text, which the gamemode's fallback matches
+  const set = (id, k, v) => {
+    if (k === "respawnFated") {
+      if (opts.legacy) throw new Error("Property 'respawnFated' doesn't exist");
+      if (v !== true) throw new Error("respawnFated takes true: the write is the lever");
+      if (id >= 0xff000000) throw new Error("respawnFated is the fate's path: not a player's actor");
+      if (!get(id, "isDead")) return;
+      const spawn = get(id, "spawnPoint");
+      if (spawn) props.set(`${id}.locationalData`, spawn);
+      props.set(`${id}.isDead`, false);
+      return;
+    }
+    props.set(`${id}.${k}`, v);
+  };
   set(0xff000001, "locationalData", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [1, 2, 3], rot: [0, 0, 72] });
   set(0xff000001, "percentages", { health: 1, magicka: 0.5, stamina: 0.25 });
   set(0xff000001, "isDead", false);
@@ -365,6 +380,8 @@ test("respawn-ref puts a dead game-file actor up at its spawn point, or in place
   require("./gamemode.js");
   const r = mp.onHttpRpcRunAttempt("labCommand", { kind: "respawn-ref", profileId: 1, formId: 0x85547 });
   assert.strictEqual(r.ok, true);
+  // the fate's own path (the server's respawnFated lever), the sweep's wire
+  assert.strictEqual(r.shape, "respawnFated");
   assert.strictEqual(mp.get(0x85547, "isDead"), false);
   assert.deepStrictEqual(mp.get(0x85547, "locationalData").pos, [123400, -80300, 10705]);
   assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labCommand", { kind: "respawn-ref", profileId: 1, formId: 0x85547 }), { ok: false, formId: 0x85547, error: "not dead" });
@@ -372,9 +389,37 @@ test("respawn-ref puts a dead game-file actor up at its spawn point, or in place
   mp.set(0x85549, "spawnPoint", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [9, 9, 9], rot: [0, 0, 0] });
   mp.set(0x85549, "locationalData", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [5, 5, 5], rot: [0, 0, 0] });
   const inPlace = mp.onHttpRpcRunAttempt("labCommand", { kind: "respawn-ref", profileId: 1, formId: 0x85549, inPlace: true });
-  assert.strictEqual(inPlace.spawn, null);
+  assert.strictEqual(inPlace.shape, "inPlace");
   assert.deepStrictEqual(mp.get(0x85549, "locationalData").pos, [5, 5, 5]);
   assert.strictEqual(mp.get(0x85549, "isDead"), false);
+});
+
+test("respawn-ref on a server without the respawnFated property falls back to the old shape and says so", () => {
+  global.mp = fakeMp({ legacy: true });
+  mp.set(0x85547, "isDead", true);
+  mp.set(0x85547, "spawnPoint", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [123400, -80300, 10705], rot: [0, 0, 0] });
+  mp.set(0x85547, "locationalData", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [1, 1, 1], rot: [0, 0, 0] });
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  const r = mp.onHttpRpcRunAttempt("labCommand", { kind: "respawn-ref", profileId: 1, formId: 0x85547 });
+  assert.strictEqual(r.ok, true);
+  assert.match(r.shape, /^locationalData\+isDead \(no respawnFated property: /);
+  assert.strictEqual(mp.get(0x85547, "isDead"), false);
+  assert.deepStrictEqual(mp.get(0x85547, "locationalData").pos, [123400, -80300, 10705]);
+});
+
+test("respawn-ref surfaces the lever's own refusal instead of falling back (a player's actor)", () => {
+  global.mp = fakeMp();
+  mp.set(0xff000001, "isDead", true);
+  mp.set(0xff000001, "spawnPoint", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [9, 9, 9], rot: [0, 0, 0] });
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  const r = mp.onHttpRpcRunAttempt("labCommand", { kind: "respawn-ref", profileId: 1, formId: 0xff000001 });
+  assert.notStrictEqual(r.ok, true);
+  assert.match(String(r.error), /not a player's actor/);
+  // the fallback did not run: the player stays dead where it was
+  assert.strictEqual(mp.get(0xff000001, "isDead"), true);
+  assert.deepStrictEqual(mp.get(0xff000001, "locationalData").pos, [1, 2, 3]);
 });
 
 test("labState ref reads the record's worn armor and weapons, as a seat's npc-state counts them", () => {
