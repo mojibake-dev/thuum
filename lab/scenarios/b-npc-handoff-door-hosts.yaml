@@ -1,4 +1,5 @@
-# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v6 2026-11-03 after numidium's two reviews
+# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v6 2026-11-03 after numidium's two reviews;
+# the header's mutation sentence reworded after its fresh review, no step or claim changed;
 # of v4 974a9484 and v5 0f9f84b0, the second reading Hod's schedule from Skyrim.esm: the clock starts at 19.0 so his exit at
 # 22:00 comes well after the premise in both legs; the premise is claimed in order (his record not in the inn before the
 # house's seat lands, the walk out of the house and the walk into the inn as two waits, the street host's follow into the
@@ -53,10 +54,11 @@
 # npc-handoff.md's timeline the playtest's stale report came about 8 s after the pass, so at the 5 s read the counts
 # may still hold on the parent and the reds expected there are the street seat's engine claims (its copy still
 # indoors: is3DLoaded false, cell 0x133c6, x and y far from the record); a run stops at its first red, so the 65 s
-# counts are never read on the parent; if the street seat's copy was moved at the promotion after all, the parent
-# can stay green through the 5 s step and the move line tells which happened (that rests on a listener set the
-# grammar cannot see: the grant refreshes no listeners and an interior stays on one 4096-unit square, so the street's
-# seat keeps its indoor model of him). Leg B's roles run on the parent as the by-path probe x-handoff-door-hosts-swap
+# counts are read on the parent only if the 5 s step holds: with no bounce the parent stays green and the mutation
+# has failed, and the move line tells whether the street seat's copy was moved at the promotion after all (that
+# rests on a listener set the grammar cannot see: the grant refreshes no listeners and an interior stays on one
+# 4096-unit square, so the street's seat keeps its indoor model of him). Leg B's roles run on the parent as the
+# by-path probe x-handoff-door-hosts-swap
 # (the second leg never reaches the parent here). Its own commit (rule 13); ADR-064's fresh review before the gate
 # plays it.
 id: b-npc-handoff-door-hosts
