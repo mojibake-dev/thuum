@@ -4070,6 +4070,21 @@ Outcome notes under decision 4 (PROPOSED by thuum-cf, added after Eli's acceptan
   on the owner's screen, by the owner's own final sample, never by a timer. No prop change reaches a seat except through a gate
   with a two-seat scenario (numidium and thuum-cf, 2026-11-03 02:36Z).
 
+Amended 11:34 PST 2026-11-03 by Eli, verbatim via numidium: "fine go with those decisions" (D-F1 C, docs/private/decisions-after-fnv-read.md): a quest has no owner.
+Its stages, objectives and running state are the server's record at R0, the design law's leveling-and-economy class. A seat's
+quest native (SetStage, SetCurrentStageID, Start, Stop, the objective and alias natives) is a request the server records,
+idempotently (a stage goes where the script sends it), and relays to every seat; each seat's VM applies it, so a quest fragment
+runs on every seat behind ADR-062's native gates: its AddItem lands only on the item's owner, its MoveTo only on the reference's
+owner, its Kill only on the actor's host. Where a fragment's input is the acting player (Game.GetPlayer()), the cure is the
+acting-player scope on the relayed interaction (docs/research/fnv-multiplayer-2026-11-03.md item 8), not an owner. The world
+globals table and the script variables other seats' conditions read (TESCondition 629 and 630) keep ADR-065 amendment B's one
+streaming seat, named and handed on by ADR-066 decision 6; it streams values and decides nothing. Risk, HYPOTHESIS until a
+two-seat run: a relayed SetStage runs the fragment on the receiving seat as the engine's own does. The first scenario is
+b-quest-stage-two-seats (a dialogue on c1 advances a stage; c2's journal shows it within a round trip; the fragment's item lands
+once; the condition-read variable moves on c2). Rejected: one story owner (fnv-coop's; a request channel and a round trip for
+every stage set away from it) and the quest following its driver (NVCoop's table; ownership churn, and a definition of "driver"
+the engine does not give).
+
 ## ADR-064: The burden of proof flips: an engine claim needs a trace, a gate reads the other screen, done means seen
 
 Status: ACCEPTED 23:16 PST 2026-11-02 by Eli, verbatim: "B, A, A, B" (D1 B: accepted with decision 4's refinement below). PROPOSED about
@@ -4158,7 +4173,9 @@ states it as HYPOTHESIS in its header and is not the first read of it.
 
 ## ADR-065: The save is the state: the engine's own change tracking is the observe point, and the server's record is a save game owned piece by piece
 
-Status: PROPOSED 03:48 PST 2026-11-03 (numidium), under Eli's goal for the night, verbatim: "make a serious breakthrough that will pave the
+Status: ACCEPTED 11:34 PST 2026-11-03 by Eli, verbatim via numidium: "fine go with those decisions" (A of numidium's memo: the direction accepted; STATE.md and the
+owner's observe-and-serialize half may be built; the receiver's mid-game apply stays gated on the cross-seat run, and nothing
+reaches a seat before its row is CONFIRMED, ADR-064). PROPOSED 03:48 PST 2026-11-03 (numidium), under Eli's goal for the night, verbatim: "make a serious breakthrough that will pave the
 way for the rest of this project to be easy. if that means some breakthrough in how we understand how to assign ownership in the
 engine, or we get some big blocker on scripts to lift making versions of a lot of the other features possible", and its list,
 "scripts (all), containers, physics". It applies ADR-063 (ownership, not permission) to state rather than permission, and it
@@ -4328,7 +4345,8 @@ read for design only, rule 7) adds or sharpens these:
 
 ## ADR-066: The hand-off is a two-phase protocol: one owner epoch per piece of the world, stamped on every word and every report, and the new owner is passive until it has applied the record and acked
 
-Status: PROPOSED 04:29 PST 2026-11-03 (12:29Z 11-03) by thuum-cf, as ADR-065's amendment D names it ("ADR-063's protocol and thuum-cf's to
+Status: ACCEPTED 11:34 PST 2026-11-03 by Eli, verbatim via numidium: "fine go with those decisions" (D-F2 A: accepted as proposed; its build waits on system 1's
+merge, as its build order says). PROPOSED 04:29 PST 2026-11-03 (12:29Z 11-03) by thuum-cf, as ADR-065's amendment D names it ("ADR-063's protocol and thuum-cf's to
 write"), from Eli's lead on the Fallout multiplayer projects (docs/research/fnv-multiplayer-2026-11-03.md, item 4) and from system
 1's ten review rounds on the merge candidate m3-system1-r2 (e23bd229). Build order: nothing here moves until that candidate merges
 or fails on numidium's evidence stage; m3-system1-r3 carries review fixes only, and no hold-timing round follows it. Nothing here
