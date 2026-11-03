@@ -6577,3 +6577,20 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the info row), then serialize with RUNS 2 (kDying and kDead), then coc riverwood and pcb expecting no stash row for 0x39fe4. A
   .prettierignore at the root now keeps the post-edit hook's prettier off lab/frida/*.js (the first write came back 36 KB and 1,030
   lines; the dense form was reinstalled by cp).
+- 06:19 PST 2026-11-03 (14:19Z 11-03) (thuum-cf; numidium's stage report, STAGE EXIT 0 at 06:17:53 PST): r3's stage on m3-system1-r3 5e0e975b
+  done, five of seven GREEN. swap v20 GREEN (135554): the cure's swap orientation holds with v20's claims. death-reentry v5 GREEN
+  (140046), the second time: D4's fix held on r3. scene-guest v3 GREEN (141000): arm two's first finding fixed, one scene played by the
+  host and seen by both (the placement premise was the whole of v2.1's red). essential-bind v2 GREEN (141231): the typed essential
+  flag kept the dead record's copy alive through the bind's silent kill and the dead hold ran its 8 s budget; the respawn probe's
+  premise holds. respawn-teleport-hold v3 GREEN (141513), step 39's sixteen claims: c2's copy of the chicken at (20212.6, -46111.0)
+  against the record's (20215.7, -46111.2), isDead false, "placed at the record after" 1, "not placed after" 0: round ten's revive
+  from tTeleport is proven on two seats (the parent would have asked the copy back to the landing 3,200 units away). An observation
+  for the esm notes: the respawn's placement read about 286 units from Skyrim.esm's DATA for the ACHR (20478, -45997); esm.py reads
+  one plugin and the game's value is the winning override, so a later master likely moves the chicken; within the claims' 512.
+  Two reds: door v22 (134832) at step 82, leg B's premise (server.host(0x9731).client read "" with 0x9712 c1's, and c1's copy of Hod
+  3D-loaded with the record in 133c6, the inn), leg A and all of v22's new claims having held; a run reader is on it (the host lines
+  for 0x9731 after the restart, the connect order, the grace and cold-start windows, the last run where leg B held). death-freeze v3
+  (140538) at step 110, the head-height claim (c2's headZ -93.9 not below its snapshot minus 75; the death report, isDead on all
+  three and the two bodies 37 apart held); GREEN on e23bd229 (125136) and r3 touches nothing in a fall, so numidium reruns it cold on
+  r3's seats before any word. The gate (verb-merge: the always set, the touched verbs, watch) waits on both answers; then the merge
+  and playtest 42.
