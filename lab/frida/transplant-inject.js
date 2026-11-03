@@ -7,7 +7,7 @@
 // Every id, signature and layout is the re-analyst's decompile (2026-11-03) and a HYPOTHESIS until this trace and the seat's
 // read of the reference agree (rule 2). Its fresh review (FIX FIRST, applied as written): the record is checked in JS before any
 // engine call (hex form, type 0, size code under 3, the engine's own version from AL 35740, 2 + 2n + length1 equal to the bytes,
-// length2 0, no move, cell-change or promoted flag, a game-file form id, and the capture's FNV-1a); an existing entry is refused,
+// length2 0 or a plausible inflated size (a compressed record is copied verbatim, since the decode inflates it), no move, cell-change or promoted flag, a game-file form id, and the capture's FNV-1a); an existing entry is refused,
 // never freed (a free outside the map's write lock can race a stash, an apply or a save); the write is refused while the
 // manager loads or saves; Frida's 'bool' arguments take 0 or 1, not JS booleans; the ready row comes before the write, and the
 // apply and decode calls are counted for every form, with a liveness row every 10 s.
@@ -132,7 +132,9 @@ if (off === undefined || !(FORM > 0) || !(FLAGS >= 0) || !(SUM >= 0) || !/^([0-9
     const length1 = le(2);
     const length2 = le(2 + n);
     if (2 + 2 * n + length1 !== bytes.length) throw new Error('length1 ' + length1 + ' disagrees with ' + bytes.length + ' bytes');
-    if (length2 !== 0) throw new Error('a compressed record (length2 ' + length2 + ')');
+    // a compressed record (length2 > 0) is copied verbatim: the apply's decode (AL 36080) inflates length1 bytes into length2
+    // (the re-analyst; its review: 2 + 2n + length1 holds for one too); an implausible length2 is refused
+    if (length2 !== 0 && (length2 < length1 || length2 > 1048576)) throw new Error('length2 ' + length2 + ' against length1 ' + length1);
     if ((FLAGS & FORBIDDEN_FLAGS) !== 0) throw new Error('flags ' + hex(FLAGS) + ' carry a move, cell or promoted bit');
     if (FORM >= 0xff000000) throw new Error('a created form');
     const sum = fnv1a(bytes);
