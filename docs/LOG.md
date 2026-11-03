@@ -6851,3 +6851,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   0x39fe4, the copy's own kDead record through 35568 and 35567) runs as soon as apply-on-demand.js is written and reviewed, a crash
   inside 35568 showing risk 1 real on a solo seat with a rollback behind it; whichever of the round trip and the re-stage is ready
   first goes first.
+- 08:06 PST 2026-11-03 (16:06Z 11-03) (numidium's launch): the re-stage is launched on m3-system1-r3 db0e19a5 (LABAPI 4992, deploy-srv from
+  current main) as evidence while both fresh reviews of b8d82f05..db0e19a5 read: death-freeze v4 (96ae3e4c) twice, x-warm-exit v2
+  (702a3e9e), swap v20 (75bd28b9), death-reentry v5 (20a6c65d), scene-guest v3 (4ffaf665); the door scenario waits for Eli's D-P13.
+  The gate and the merge wait for both GOs; the branch is held.
