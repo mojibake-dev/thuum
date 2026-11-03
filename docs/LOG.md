@@ -5632,3 +5632,19 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   timeline per seat; x-prop-arbitration v4 arms it on both seats through the relaunch steps' frida (E13, E14, E15; E31 and A2's
   Held wait for a concurrent step, a serial script cannot overlap two seats' acts). The verb docs and the model doc describe
   door-hosts v6 and x-prop-arbitration v4 (a89ac7bb). Props 14ad24e3 still on 4811 (the client build).
+- 21:28 PST 2026-11-02 (05:28Z 11-03) (thuum-cf): settle afdb587d GREEN on 4817 (round three, merge-ready by numidium's review).
+  Props 14ad24e3 GREEN on 4811 but FIX FIRST by its fresh review (F1 blocking): the host never claims a prop it simulates, so its
+  kick wrote the row with the host's id and no word while every seat held (0, E), and the takeover did the same; at a host change
+  the old host's client read itself as no owner and stopped without a final sample, the new host's samples were refused and
+  answered with the old host's name, and nobody streamed. Round four 9a2a2491 (full build pending): the host's awake sample of a
+  prop that is not its live row is a wake (Woken, bridge 7) whose word names the host BY ID, the live row survives host_changed so
+  the old host streams until its rest (the word 0 returning the prop to the new host), the subscription word names the live owner
+  by id, the takeover is gone as a lease by another name (its causes do not occur), a past-cap grab sampled by the host before the
+  tick is a wake not a silent clear; rules and PropTest cases; the texts. x-prop-arbitration v6 by path (the review's probe
+  findings: seat owner lines and the host's stream start counted not claimed, grants1 gone, the dropped(58) claims gone, refusals
+  and wake lines counted at the end); prop-physics.md A7 and havok-props.md's probe row (2aec030d). Door v6 cleared its fresh
+  review (the header's mutation sentence reworded, b05e6939; the W4 relaxation and the ADR-047 D9 note on Eli's list); its red run
+  on the parent and the swap probe v4 are numidium's, in progress. x-script-natives v3 by path adds the relayed quest stage read
+  for H-1b1 after v2's census. lab/frida/prop-sleep.js (E10) written; havok-props E2 row corrected (the contact tracer carries
+  tid). Lesson: a patch script that collects every file's new text and writes at the end leaves nothing half-applied when an
+  anchor the formatter reflowed fails.
