@@ -7015,3 +7015,27 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   19535 against a form with no 3D instead of being parked, what released the 3D and when the rebuild ran, and whether a park (11977
   by the script before 35567) or a re-apply (19535 after the root returns) carries the owner's pose, the route for the cross-seat
   apply and item 3. df9e1009's re-stage runs (death-freeze v5 twice, then the regression set).
+- 09:10 PST 2026-11-03 (17:10Z 11-03) (thuum-cf): the re-analyst's read of the pose after the apply's 3D reload is in the serialize note (121 lines,
+  40 ids by addr.py's reverse pass; two of its own inferences corrected before the report: Update3DPosition is 19517, the leveled
+  template builder 14375). It corrects the round trip's reading first: the probe's "bodies 0, setPosition 0, setRotation 0" and the
+  empty FORMS log were gated on the run window, so the 19535 at +14 ms on thread 4560 (outside it) was NOT a flush against a form with
+  no 3D: the flush tests TESObjectREFR::Get3D2 (slot 0x70), parks when NULL and feeds 19535 when not, so the probe's 35567 cannot have
+  called 19535; by the xrefs the +14 ms call came from 36014, which only 11979 calls, which only 19742 calls: the 3D init of the
+  freshly loaded node on the task thread, consuming a saved Havok extra fed either by Set3D's own release path (a ragdolling actor's
+  live pose serialized through 36016 and stored with 11977 when the entry carries kHavokMoved) or by the flush's park of the record's
+  block. Whether the rebuilt body wore the record's pose or the copy's own is undecided by the run (the run section corrected). The
+  RELEASER: ExtraDataList::LoadGame's case 0x2D (kLeveledCreature): outside a game load it calls the lock-wrapped Set3D(nullptr) for a
+  reference with 3D, rebuilds the base NPC from the templates (14375, unread) and swaps it in through slot 0x84; the bandit's
+  kLeveledActor bit selects that extra, so every mid-game apply of a LEVELED actor's record releases its 3D and rebuilds its base
+  (37502 releases only at level 0xFFFFFFFF; Actor::InitLoadGame only for level 2 or 3; 35717's branch cannot fire at cellState 7). The
+  rebuild completes on the task thread: 13355 detaches under the reset flag, runs 37501, the cell's 3D build 18978, attaches, then
+  19742 applies the saved extra and removes it. The park route: 11977(ref + 0x70, &sub) takes ownership of an engine-heap sub-buffer
+  in the queue's shape (u8 version 0x4E, the varint length, 19534's block), after 35568 returns and before the load completes (14 ms in
+  the run), on the main thread; 19742 consumes it. The re-apply route: 36014(holder, form) on the main thread after the root returns
+  (poll until data3D is non-null and the live body count equals the record's), 11979's body without the extra; 19535 needs the 3D,
+  the count match, the REFR position at the record's, a dead actor and the ragdoll driving (HYPOTHESIS: safe from either thread). For
+  the cross-seat apply the park is cheaper and safer; the re-apply the fallback for a non-leveled actor (whose LoadGame does not
+  release the 3D) and the idempotence check. The first run must read: the 12358 and 19730 return addresses, the extra's presence and
+  block hash at every snapshot and at 19535's entry, the three verdict logs ungated, the kind-2 map occupancy around 35568 and
+  35567, 19538 and the two setters counted per 19535 call on any thread (18 pairs for 19 bodies), the root's return time, headZ
+  against the owner's. C4's "the record's pose isn't used on this path" is therefore undecided, not false.

@@ -921,12 +921,136 @@ a body lying on the temple floor. So, by this run:
   crash);
 - CONFIRMED: the apply RELEASES the loaded actor's 3D (the root NULL right after 35568) and the engine rebuilds it from the applied
   state within 10 s, the body lying at the record's position in the engine's own death pose;
-- CONFIRMED: the Havok blob was handed to 19535 on the physics thread 14 ms after the finish against a form with no 3D, which counted 0
-  bodies and set nothing, and no park into an ExtraSavedHavokData followed: the record's pose is dropped on this path;
-- HYPOTHESIS: what released the 3D (Actor::LoadGame's biped rebuild, 37502's MoveToHigh, or the movement controller reload) and when
-  the rebuild ran; why the flush tested the 3D present yet 19535 found no bodies; whether a park (11977 by the script before 35567) or
-  a re-apply (19535 after the root returns) would carry the owner's pose. The next static read takes these.
+- CORRECTED by the static read below: the rows "havokReadDone bodies 0, setPosition 0, setRotation 0" and the empty FORMS log were the
+  probe's own artifacts, gated on its run window, not observations; the 19535 at +14 ms on thread 4560 ran outside the window and, by
+  the xrefs, can only have come from the rebuilt 3D's init (19742 through 11979 and 36014) consuming a saved Havok extra, fed either
+  by Set3D's own release path (the live pose of a ragdolling actor) or by the flush's park of the record's block. Whether the rebuilt
+  body got the record's pose or the copy's own is NOT decided by this run;
+- HYPOTHESIS, answered statically below: the releaser is ExtraDataList::LoadGame's kLeveledCreature case (a leveled actor's mid-game
+  apply releases its 3D and rebuilds its base), the rebuild runs on the task thread with 19742 applying the saved extra; the park
+  (11977 after 35568, before the load completes) and the re-apply (36014 after the root returns) are the two routes for a pose.
 
 What it means for ADR-065: the pipeline is the engine's at both ends for a loaded actor too (observe, serialize, apply, rebuild); a corpse
 arriving by the apply lies at the record's position in the engine's own pose, acceptable for a corpse, a visible pop for a live actor.
 For item 3's pose (the guest's body in the owner's pose) the blob must be parked or re-applied after the rebuild: the next read.
+
+## The pose after the apply's 3D reload: why the blob was not parked, and the re-apply (static read)
+
+Written 17:1x UTC 2026-11-03 (the re-analyst) after x-apply-roundtrip 20261103-164416 (c1 solo, the dead bandit 0x39fe4, apply-on-demand.js
+8fc23fc3; change-forms.md C4). Sources and rule as above; ids by addr.py (forward and the reverse pass), bodies by pyghidra, members by the
+headers; nothing renamed. One correction before the reading: the run's `havokReadDone bodies 0, setPosition 0, setRotation 0` and its empty
+`formsLog` are artifacts of the probe, not observations. Those counters and that hook are gated on the probe's window (`watch.active` on the
+probe's thread); the 19535 at +14 ms ran on thread 4560 outside the window, so its per-body calls and the engine's log lines around it were
+not counted or printed. What the rows do establish: the root went NULL inside 35568, the pending count went 1 then 0, no verdict log fired
+inside the window, 19535 ran for the form 14 ms later on a task thread, and the body came back lying at the record's position. Whether the
+rebuilt 3D got the record's pose or the copy's own is NOT decided by the rows; the reading below says what the code does and what the next
+run must print.
+
+### Id rows added (1.6.1170; RVA; how found)
+| Function (CommonLib name where it has one) | RVA | id | Found by |
+| --- | --- | --- | --- |
+| the lock-wrapped slot 0x6C call (ref, node, queue3DTasks) under the reference's spinlock at +0x90; TESObjectREFR::Set3D (TESObjectREFR.h:304; stores the live Havok pose in an ExtraSavedHavokData at a release); Actor::Set3D (Actor.h:316, slot 0x6C of 207511 and 207886); the data3D setter (loadedData +0x68 -> +0x68); Character's slot 0x6B Release3DRelatedData | 0x17a6e0, 0x2e47c0, 0x65ebd0, 0x2e5380, 0x2e4350 | 12358, 19729, 37178, 19730, 19728 | the literal search for `+ 0x360))(` over the decompiled index; read_bytes on 207886 + 0x358 and + 0x360 (CONFIRMED-STATIC); xrefs of 11977 and 19730 |
+| the live-pose sub-buffer (36035, 36037 with flags 4, 19534, 36020), the live-animation sub-buffer, the sub-buffer pack, the old sub-buffer's free; the varint width, write and read (35529 writes the 36052 encoding); the load buffer's data setter | 0x6259a0, 0x6258c0, 0x625d00, 0x17fae0, 0x601a30, 0x601a60, 0x601ab0, 0x624f00 | 36016, 36015, 36020, 12617, 35528, 35529, 35530, 35997 | callees of 19729, 11977, 36023, 36019 |
+| ExtraDataList::LoadGame (the extras loader 19529 calls: three slot-0x6C sites, the kLeveledCreature case 0x2D at 0x140170b89 and 0x140172974, the kModelSwap case 0x58 at 0x140172b72); InventoryChanges::LoadGame; Actor::InitLoadGame (Actor.h:277; releases a level 2 or 3 actor's 3D in the finish pass); TESObjectREFR::FinishLoadGame (TESObjectREFR.h:221); the leveled template builder the 0x2D case calls (unread) | 0x170380, 0x239350, 0x687720, 0x2dac30, 0x1d7880 | 12095, 16143, 37651, 19531, 14375 | callees of 19529 and of 12095's case 0x2D; xrefs of 12358 |
+| the 3D load's completion (detach the old node under the reset flag, 37501, the cell's 3D build 18978, 19742): the task thread's attach; the other data3D setters and 19742's other callers; the reset-flag test, test and set on formFlags bit 19; Actor::Update3DPosition (Actor.h:286) and the base's; the havok warp; the dead-bip attach | 0x1a0920, 0x1a0bc0, 0x18d850, 0x18dd90, 0x2bbe70, 0x2c8420, 0x2de450, 0x2de4b0, 0x2de4c0, 0x664ee0, 0x2d9800, 0xe87310, 0x2e2270 | 13355, 13356, 13005, 13015, 19061, 19220, 19587, 19589, 19590, 37315, 19517 (TESObjectREFR::Update3DPosition, Ghidra's name; the reverse pass of 0x2d9800), 77867, 19706 | xrefs of 19742 and 19730; read_bytes on 207886 + 0x1F8 |
+| Actor_IsInRagdollState (Ghidra's name, confirmed by the reverse pass; Actor.h:597), the four-flag reset's siblings in the Set3D callers (the AI high and middle updaters, the ragdoll-exit updater, the model updater's caller, the criticalStage handler, the player's Set3D wrapper) | 0x675150, 0x6d3c10, 0x718f90, 0x6eb630, 0x6637f0, 0x665fc0, 0x680f40, 0x6e3b70, 0x734fe0 | 37491, 39108, 40072, 39457, 37292, 37323, 37616, 39395, 40465 | callees of 19729 and 37652; the literal search |
+
+### Q1. The flush's has-3D test, why the blob was not parked, what released the 3D, and when the engine rebuilt it
+**The test.** 36031 (the flush's per-entry handler) decides with `TESObjectREFR::Get3D2(ref)` (slot 0x70: loadedData +0x68 then data3D +0x68, the
+same pointer the probe's `root` reads): NULL parks (kind 2 to an ExtraSavedHavokData through 11977), non-null feeds 19535. With the root NULL after
+35568, the flush inside the probe's 35567 cannot have called 19535; and the 19535 of the rows ran 14 ms later on thread 4560, outside the window.
+Its caller, by the xrefs, can only be 36014, which only 11979 calls, which only 19742 calls: the 3D init of a freshly attached node, run by the load
+completion 13355 on the task thread that loaded the model. So the sequence the rows fit is: the 3D released inside 35568; the probe's 35567
+flushed the queued record block into an ExtraSavedHavokData (the park) or found the extra already there; the reload completed 14 ms later;
+19742 applied whatever the extra held to the new 3D and removed it (11979: GetByType 0x3C, 36014, RemoveByType 0x3C, under the list's write lock).
+Two stores compete for that extra (HYPOTHESIS, decompile): (1) TESObjectREFR::Set3D's release path: when the node is being released, formFlags
+bit 5 is clear and the entry carries kHavokMoved (35577 GetChange with 4), and the reference is not an actor or the actor IsInRagdollState (37491:
+true for a dead actor unless reanimating) or a limb is dismembered, it serializes the LIVE pose (36016: a scratch BGSSaveFormBuffer with flags 4,
+19534, packed into a sub-buffer by 36020) and stores it (11977); otherwise it strips kHavokMoved from the entry (slot 0x0B); likewise for the
+animation data (36015, 11973, or the strip of 0x10000000). (2) The flush's park of the record's block. 11977 on a list that already holds one logs
+"SetSavedHavokData() is being called when there is already saved havok data.", frees the old sub-buffer (12617) and keeps the new. The static
+chain therefore predicts, for the round trip: Set3D stores the copy's live pose, the flush replaces it with the record's block (the same pose,
+same bytes up to velocities), 19742 applies the record's block to the new 3D. The run's hooks on 36031 and 11977 reported neither call for the
+form and the in-window log never printed: if the liveness totals for `flushEntry` and `savedHavokSet` are zero across a run in which a 3D was
+released and a finish pass ran, those two hooks were not live (the ready row's `attachErrors` says), and the next probe must read the state
+instead of trusting hooks: GetByType (12329) for 0x3C on the extra list at every snapshot, with the sub-buffer's [version, varint length] header
+and the FNV-1a of its block against the record's block and against a fresh 36016 of the live pose; and the kind-2 map's occupancy (capacity at
++4 minus the free count at +8 of the map at mgr + 0x208 + 8 + 2 * 0x30). If instead the hooks were live, the record's block never reached the
+map: the disassembly at 0x1406038db shows r8d carrying the entry's flags into 35716, and 35717's call into 35587 zeroes r9 (0x14060edec), so the
+block is queued under the form by 36023 (the key is the form 35987 resolves from the BGSLoadFormData) and the flush walks every occupied slot
+(36026 empties the map: entry[2] nonzero marks an occupied slot); a silent flush then has no static explanation, and the map occupancy row settles it.
+
+**The releaser.** Nothing in 35569, 35717, 37650 or 37502 releases a level-0 actor's 3D (37502 releases only for level 0xFFFFFFFF, when it destroys
+the process; 35717's Set3D branch needs the TES cell test 13308 to fail, which it cannot for cellState 7; Actor::Update3DPosition only moves the
+character controller and the node). The release is in **ExtraDataList::LoadGame (12095), case 0x2D kLeveledCreature** (HYPOTHESIS, decompile):
+the saved extra's two bases are read as 3-byte ids and a u32 after them; then `if ((ref && Get3D2(ref) && newTemplate && newTemplate != stored) ||
+kLoading is CLEAR) 12358(ref, 0, 0)`: outside a game load the 3D is released unconditionally for a reference that carries the extra; then, when
+both bases resolve and the original has templates, a NEW leveled TESNPC is built from them (14375, the template builder, unread), the reference's base is replaced through slot
+0x84 (`SetObjectReference`, TESObjectREFR.h) after the old created base is released, the saved NPC_ change flags (the u32) are loaded into the new
+base through its own slot 0x0F with the buffer's flags swapped in for the call, and a race change releases the 3D once more. The bandit's entry
+carries kLeveledActor (bit 18), which selects the 0x2D extra (the mask table, Q1 of the REFR read), so every mid-game apply of a leveled actor's
+record releases its 3D and rebuilds its base. Other releasers in the apply tree, not taken here: 12095's case 0x58 kModelSwap (Set3D plus the
+removal of a saved Havok extra), 19529's base-object change (bit 7), 19799's cell move, 37502 at level 0xFFFFFFFF, and in the finish pass
+Actor::InitLoadGame (37651) for an actor at level 2 or 3 or whose process flags a model update (AIProcess::Update3DModel 39395 through 12358).
+
+**The rebuild.** The release leaves the actor loaded without 3D in an attached cell; the engine's own loader (the actor's update queues the model on
+the task pool: HYPOTHESIS, the request is not in the apply's tree) completes 14 ms later with the model cached, on the task thread: 13355 detaches
+an old node under the reset flag (19587, 19589, 19590: formFlags bit 15 and bit 19), runs 37501 (the process-level update: the persistent bandit
+stashes nothing, Q5 and Q7 above), 18978 (the cell's 3D build: a second finish pass under the suppress bit, nothing pending), attaches the node
+(19730), 19742 (the 3D init: NiAVObject::Update, the actor's 37644, slot 0x66, then 11979: the saved Havok data applied and the extra removed, then
+the actor's 37616, 37364 and the process re-attach), and queues the actor's post-load work (41343). FinishLoadGame (37652) had run inside the probe's
+35567 WITHOUT 3D, so its physics block (layer, motion type, the world re-add) did nothing; the new node's physics came from the load path, and the
+pose from the extra at +14 ms. lab-api's `is3DLoaded true, isDead true` 10 s later is that node.
+
+### Q2. The park route: the script creating the ExtraSavedHavokData itself
+11977 is `(ExtraDataList* list, BGSLoadGameSubBuffer** holder)` (HYPOTHESIS, decompile): under the list's write lock (+0x18; ExtraDataList.h:41,
+:202), a null `*holder` removes the 0x3C extra; otherwise GetByType 0x3C, or allocate 0x18 bytes, set VTABLE_ExtraSavedHavokData (186773) and
+ExtraDataList::Add; an existing one logs the "already saved havok data" line and frees its old sub-buffer; then `extra->havokBuffer = *holder`
+(ExtraSavedHavokData.h:17): the pointer is TAKEN, not copied, so the script allocates it on the engine heap (68115) in the queue's own shape, the
+one 36023 builds and 36019 reads: `u8 version (35740's 0x4E), varint length (35529's encoding, 36052's: value << 2 | width), the 19534 block`, the
+block being the bytes between the initial data's fixed part and the end of the record's initial data (the actor script's `havok.blockStart` and
+`blockLen`: flags, varint count, pitch and roll, the bodies). The consumer is 19742 through 11979 and 36014: 36019 copies the block into scrap memory,
+sets the buffer's version from byte 0 and FREES the sub-buffer (MemoryManager::Deallocate) and nulls the holder, 19535 applies it with its own
+rules (the live count against the varint count, the REFR position within 4096 of each body, dynamic motion for a dead actor, the mismatch logs),
+35994 frees the scrap data, 12354 removes the extra. Thread: 19742's, the task thread 13355 runs on or the main thread of a cell attach (19061,
+19220). Timing: the call must land AFTER the release (so Set3D's own store, if any, is the one replaced: the "already saved" log is the proof it
+was) and BEFORE the load completes, that is right after 35568 returns and before 35567, on the main thread; the window was 14 ms in the run,
+long enough for one call but not for a poll. The record's block already parks itself through the flush when the flush sees the map entry; the
+script's own 11977 is the belt to that brace, and the log line distinguishes the two.
+
+### Q3. The re-apply route: handing the block to 19535 after the 3D returns
+The clean call is **36014(holder, form)**: it is 11979's body without the extra: a stack BGSLoadFormBuffer (35993, 35984, VTABLE_BGSLoadFormBuffer),
+36019 from the sub-buffer (consumed and freed), AsReference1, 19535(ref, buf) or the log "Form '%s' %08X with queued havok data is not a reference",
+35994. So the script allocates the same [version, varint length, block] sub-buffer on the engine heap, polls the root on PlayerCharacter::Update's
+returns until data3D is non-null (and, to be sure the init is done, until a liveBodies count equals the record's), then calls 36014 on the main
+thread. What 19535 needs around it (HYPOTHESIS, decompile): the 3D present (else only the log); the pre-pass count equal to the saved count (else
+the "bone count differs" log and no body touched); the REFR position already at the record's (35717 set it; each saved body farther than 4096 units
+is skipped); the actor dead or dying, so the node's motion type is set dynamic (a living actor is set keyframed and the animation keeps the pose);
+and the ragdoll driving, since the mismatch between saved and live kAnimTargeted bits logs "Behavior ragdoll save/load state mismatch" and an
+animation-driven body overwrites the written transform on the next step. No bhkWorld lock is taken by 19535 or 19538; the engine runs this exact
+path from the task thread (13355) and from the main thread (the flush), so the main thread at an Update return is a place the engine itself uses
+(HYPOTHESIS: safe). Risks: a second apply after the 3D init already applied the extra moves the bodies twice (harmless if the bytes are the same);
+a 19535 on a copy whose bodies are still keyframed by the death animation changes nothing visible; the velocities in the block are the owner's at
+its kDead mark (near zero for a settled corpse).
+
+### Q4. Which route for the cross-seat apply, and what the first run must read
+The park route is the engine's own and costs one call: after 35568 returns (the 3D gone) and before 35567, `11977(ref + 0x70, &sub)` with the
+owner's block; the reload then applies it where the engine applies a save's corpse pose, with the engine's count check and logs. The re-apply
+route (36014 after the root returns) is the fallback for the case the reload does not happen (a record without the 0x2D extra, that is a
+non-leveled actor whose LoadGame does not release the 3D) and the check for the case it does (a second, idempotent apply). Cheaper and safer is the
+park; the re-apply needs the poll and a decision about doubling. The first run must read, with the witnesses moved off the window: (1) the
+releaser: 12358's and 19730's return addresses when the form's 3D goes (expect inside 12095's 0x2D case); (2) the extra: GetByType 0x3C at every
+snapshot and at 19535's entry, with the sub-buffer header and the block's FNV-1a against the record's and against 36016's live pose; (3) the
+"already saved havok data" log and the two mismatch logs, printed for the whole run (35519 ungated); (4) the kind-2 map occupancy before 35568,
+after it (expect one more) and after 35567 (expect empty); (5) 19538, SetPosition and SetRotation counted per 19535 call for the form on any
+thread (expect one pair per non-root body, 18 for 19 bodies); (6) the root's return time (the first Update return with data3D non-null) and the
+pending count across the reload's second finish pass; (7) headZ and the root z against the owner's after the reload settles.
+
+### What this read settles and what stays HYPOTHESIS
+- CONFIRMED-STATIC: the slot 0x6C addresses (Actor::Set3D 37178 on both vtables), the Set3D wrapper 12358, 13355 as the data3D setter's caller on the
+  load path, the queue's key (the form) and the flush's full walk (36026 and 36027), the flags register into 35716 and the zeroed r9 into 35587.
+- HYPOTHESIS until a run: that 12095's 0x2D case is the releaser on this seat (a hook on 12358 with its return address decides); that Set3D stored
+  the live pose and the flush replaced it (the log and the extra's bytes decide); that 19742 applied the record's block at +14 ms (the per-body
+  counts decide); the thread of 19742 (4560 by the run); the safety of 36014 on the main thread.
+- Open: who queues the model reload after the release (the actor's update or the base swap), whether 19742's apply precedes or follows the
+  process re-attach for the ragdoll's motion type, and the content of 36016's block for a settled corpse against the record's.
