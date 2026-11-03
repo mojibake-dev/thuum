@@ -6141,3 +6141,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   neither), its own round with T0. Eli's new goal for the night: a breakthrough that makes scripts, containers and physics easy and
   uses the RE box better; numidium's lead is the engine's own change tracking, TESForm::AddChange (TESForm.h:133, SaveGame and
   LoadGame beside it), as the one observe point for every persistent state change, whoever made it.
+- 03:09 PST 2026-11-03 (11:09Z 11-03) (thuum-cf): round seven c605a8e0 GREEN on 4944 (client and server; the T0 suite with the host-change case
+  backdated, the engine-death-first case, the clean-quit case and the reanimate exemption beside the F9 and finding-48 cases); the
+  superseded f048ebcb's 4943 was red on the host-change case at the grace (ActorDeathTest.cpp:259), the review's item 1, as
+  expected. The merge candidate's stage follows numidium's fresh review of c605a8e0 and the Formatting check, with door v21 and
+  swap v19, x-npc-death-reentry v5 (numidium's), x-npc-death-freeze v3 and x-scene-guest v2.1.
