@@ -5790,3 +5790,22 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   SetPos), 7c4b1ed1 red at compile time (a stray call to the removed Move helper), badca627 the head with the test on the
   load-report path and the last three texts; 41300469 stays the stage head (numidium's check: behaviour unchanged since). Slice 1b
   0ea79994 GREEN on 4861, staged with x-script-natives v6.
+- 23:44 PST 2026-11-02 (07:44Z 11-03) (numidium): the fresh review of m3-promote-record 82bd282b says FIX FIRST, relayed to
+  thuum-cf, and the door chain waits for the fixed head. The hold releases in the first update's finally whether or not the copy
+  was placed (remoteServer.ts:1157-1165); in P8's shape nothing places but the gate's move (formView unflags the copy earlier in
+  the same update, so puppetService's reconcile returns), and the stale report goes out on the next update. A host swap's
+  Release flips the new host before its keyframe (cells.rs returns Release then Grant after grant set the new host;
+  PartOne.cpp:1739-1742). Death, shot and cast origins, hits, speech, talk and activation are not held; a promotion inside
+  CreateActor gets no hold. On a working fix, door v11's leg A can still go red through his day package 0x734cd once he is
+  placed home; P8 says the record home under that package is the parent's red condition, so a premise refusing it refuses the
+  parent's red too, and the claim has to tell a walk from a jump (the author's call with a fresh reviewer, ADR-064 decision 4).
+  Slice 1b staged on 0ea79994: x-script-natives v6 RED on one claim in 20261103-073235 (c2's "Quest.SetCurrentStageID on others"
+  1 line, 2 calls, in the guest's load window, eight named selves filling the cap three minutes before the relay); at the relay
+  c2.log shows the fragment of 10d3bb skipped as the world's and the platform's apply, with no guest row for 10d3bb in any later
+  window (H-1b1's positive evidence again). D-S1's measurement on the guest (c2 in c1's 9732, five minutes): 83 calls filtered
+  "(not hosted)" over 8 natives, all within 90 s of the arrival (RemoveItem 48, MoveTo 16, PlaceAtMe 8, DisableNoWait 5, Disable
+  2, EnableNoWait 2, Lock 1, SetLockLevel 1); live global natives Quest.Start 401 and Quest.Stop 403 on 30002859,
+  GlobalVariable.SetValue 118, ReferenceAlias.ForceRefTo 57, SetCurrentStageID 11 at load; SetOpen (platform) 12037, about 40 a
+  second. Only the 24 hooks count, so the open set is at least this. The probe ran v6 under v5's pin (the stage reads the file
+  at step 9, twenty minutes after the check); my wrapper now runs a copy frozen at the check. Props: badca627 (behaviour
+  41300469's; since then comments, two verdict strings and PropTest) staging on 9a2a2491's dist (gitlab 17277) with probe v11.
