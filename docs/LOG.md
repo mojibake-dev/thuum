@@ -5558,3 +5558,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the runner's). Handed to numidium's gate behind b-npc-handoff-door-hosts v2's red run on 35509f7a. docs/engine/havok-props.md on
   main (a587a782, an agent's write: 38 claims, 17 CONFIRMED, 21 HYPOTHESIS; the rule rests on E10, E31, E14 and E15, unread); two
   prop-physics.md tags settled from their runs (d505f2e5).
+- 19:57 PST 2026-11-02 (thuum-cf): lab/esm.py gained refs-of (every placement of a base with its cell and position; Delphine 0x13478 is 0x13485 in
+  0x133c6 at (-495, 155, 0), the essential base ActorDeathTest's cause-3 case stands on). Slice 1b's round two pushed on
+  m4-scripts-work (the latent calls noted by row and self; the timed flush; the reference probe; the MayDie case); the lifecycle
+  question to Eli in docs/private/decisions-after-slice-1b.md (D-S1, D-S2), numidium carrying it.

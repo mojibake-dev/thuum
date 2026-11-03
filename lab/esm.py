@@ -21,6 +21,7 @@ field's size is the uint32 that XXXX carried.
     esm.py id <plugin> <form id>
     esm.py scripts <plugin> <form id> [<form id> ...]   (the VMAD's script and property names)
     esm.py door <plugin> <form id> [<form id> ...]      (a load door's XTEL: the destination door, its cell, the landing)
+    esm.py refs-of <plugin> <base form id>             (every placement of a base, with its cell or worldspace and position)
     esm.py races <plugin>
     esm.py attacks <plugin> <race editor id substring>
     esm.py quests <plugin> [sge|all]
@@ -404,6 +405,26 @@ def main(argv: list[str]) -> int:
             deg = [round(r * 180.0 / 3.141592653589793, 1) for r in (rx, ry, rz)]
             print(f"{fid:#010x} {t} in {cell}: teleports to door {dest:#010x} in {dcell}, landing ({x:.0f}, {y:.0f}, {z:.0f}) rot {deg}")
         return 0 if found else 1
+    if len(argv) == 4 and argv[1] == "refs-of":
+        # every placement (REFR or ACHR) of one base, with the cell or worldspace it
+        # is placed in and its position: an essential resident's reference for a test,
+        # a scripted object's copies (2026-11-03, slice 1b's MayDie case)
+        with open(argv[2], "rb") as f:
+            buf = f.read()
+        base_id = int(argv[3], 0)
+        hits = 0
+        for t, fid, off, label in headers(buf, 0, len(buf), {"WRLD", "CELL"}):
+            if t not in ("REFR", "ACHR"):
+                continue
+            rec = record_at(buf, off)[0]
+            name, data = rec.get("NAME"), rec.get("DATA")
+            if not name or len(name) < 4 or struct.unpack("<I", name[:4])[0] != base_id:
+                continue
+            pos = struct.unpack_from("<3f", data) if data and len(data) >= 12 else (float("nan"),) * 3
+            where = f"{label:#x}" if label is not None else "?"
+            print(f"{fid:#010x} {t} in {where} at ({pos[0]:.0f}, {pos[1]:.0f}, {pos[2]:.0f})")
+            hits += 1
+        return 0 if hits else 1
     if len(argv) == 3 and argv[1] == "races":
         with open(argv[2], "rb") as f:
             buf = f.read()
