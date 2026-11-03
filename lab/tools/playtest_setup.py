@@ -123,6 +123,10 @@ def check_profile(p: Any, n: int) -> dict[str, Any]:
             _int(it.get("id"), f"profile {prof}'s item id")
             if _int(it.get("count", 1), f"profile {prof}'s item count") < 1:
                 raise ProfileError(f"profile {prof}'s item count is at least 1")
+        for g in s.get("globals") or []:
+            form, v = (g or {}).get("form"), (g or {}).get("value")
+            if not isinstance(form, str) or not re.fullmatch(r"[0-9A-Fa-f]{1,8}:[^:\s]+\.(esm|esp|esl)", form) or isinstance(v, bool) or not isinstance(v, (int, float)):
+                raise ProfileError(f"profile {prof}'s global is {{form: \"<hex>:<plugin>\", value: <number>}}, got {g!r}")
         for k, v in (s.get("percentages") or {}).items():
             if k not in BARS or isinstance(v, bool) or not isinstance(v, (int, float)) or not 0 <= v <= 1:
                 raise ProfileError(f"profile {prof}'s percentage {k}: {v!r} (health, magicka, stamina from 0 to 1)")
@@ -186,6 +190,10 @@ def seat_commands(seat: dict[str, Any], have: dict[int, int] | None = None) -> l
         n = it.get("count", 1) - (have or {}).get(it["id"], 0)
         if n > 0:
             out.append((f"AddItem {it['id']:#x} {n}", {"kind": "console", "profileId": prof, "name": "AddItem", "args": [PLAYER, it["id"], n]}))
+    # a listed player global through the server's SetGlobal (ConsoleCommands.cpp's ExecuteSetGlobal): Survival off is
+    # 828:ccQDRSSE001-SurvivalMode.esl at 0 on both records (Eli, 2026-10-31), which playtest 42's profile lacked
+    for g in seat.get("globals") or []:
+        out.append((f"SetGlobal {g['form']} {g['value']}", {"kind": "console", "profileId": prof, "name": "SetGlobal", "args": [PLAYER, g["form"], g["value"]]}))
     return out
 
 

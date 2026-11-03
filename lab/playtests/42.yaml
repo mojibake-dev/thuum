@@ -1,0 +1,46 @@
+# Playtest 42 (numidium, 11:37 PST 2026-11-03): ADR-064's first per-system playtest, system 1 (a reference's life on a non-owning
+# seat), on the STAGED build with the gate after it (ADR-053's stage slot; Eli, 2026-11-03 11:3x PST: "fine go with those
+# decisions", then "is the playtest ready?"). The build: fork m3-system1-r3 df9e1009 (rounds six to eleven, the warm-exit fix and
+# the half-up-body fix's two rounds), staged 08:56 to 09:35 PST: the server image skymp-server:m3-system1-r3, the dist the GitLab
+# client-build of df9e1009 (SkyrimPlatformImpl.dll a82f61d945dd1524, js 4a47aa5ab9cf41b4) in both clones' clean-m1-next, lab-api
+# thuum pipeline 4992. Props and containers stay BROKEN and out of scope (systems 2 and 3 frozen). The world: 39's end, as 41 began
+# (41's own world is evidence only). Survival off, perks and leveling as 41 ended them, locks and weatherSync off. The clock starts
+# just before 19:00 for item 1 (Hod leaves the Sleeping Giant); item 8's scene wants 08:00 later, set server-side when you get there.
+# Both seats at the Riverwood guard camp; everything server-side; no god mode (tgm is yours).
+id: 42
+build: "fork m3-system1-r3 df9e1009 (staged 08:56 to 09:35 PST 2026-11-03), server skymp-server:m3-system1-r3, dist client-build of df9e1009 (SkyrimPlatformImpl a82f61d945dd1524, js 4a47aa5ab9cf41b4), lab-api pipeline 4992, thuum main 93699f36 or later"
+world: playtest-m3-39-paused-20261031T014638Z   # 39's end, as 41 began
+hold:
+  minutes: 240
+  reason: "playtest 42: system 1, a reference's life on a non-owning seat"
+server:
+  npcEnabled: true
+  gameHour: 18.75
+  locks: false
+  weatherSync: false
+  perks: true
+  leveling: true
+camp:
+  teleports:
+    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [19087, -47480, -128], rot: [0, 0, 90]}
+    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [19237, -47380, -128], rot: [0, 0, 270]}
+seats:
+  - profile: 1
+    name: "test 1"
+    perks: []   # F7 (playtest 42): Overdraw40 given directly ran against the perks R0 switch, E_PERK_POINTS and a state resend every 5 s
+    spells: []
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]   # Survival off (Eli, 2026-10-31); playtest 42's lay missed it
+    values:
+      Marksman: 60
+    percentages: {health: 1, magicka: 1, stamina: 1}
+  - profile: 2
+    name: "test 2"
+    perks: []   # none
+    spells: []
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]
+    percentages: {health: 1, magicka: 1, stamina: 1}
+streams:
+  test1: 48989
+  test2: 49989
+after:
+  readback: percentages

@@ -57,6 +57,17 @@ class PlaytestProfile(unittest.TestCase):
         two = seat_commands(p["seats"][1])
         self.assertEqual(two[-1][1], {"kind": "console", "profileId": 2, "name": "AddItem", "args": [20, 0x12E4D, 1]})
 
+    def test_a_seats_globals_go_out_as_the_servers_set_global(self):
+        from playtest_setup import ProfileError, seat_commands
+
+        text = PROFILE.replace("    by_hand:", "    globals: [{form: \"828:ccQDRSSE001-SurvivalMode.esl\", value: 0}]\n    by_hand:")
+        one = seat_commands(self.load(text)["seats"][0])
+        self.assertEqual(one[-1], ("SetGlobal 828:ccQDRSSE001-SurvivalMode.esl 0",
+                                   {"kind": "console", "profileId": 1, "name": "SetGlobal", "args": [20, "828:ccQDRSSE001-SurvivalMode.esl", 0]}))
+        for bad in ("{form: 828, value: 0}", "{form: \"828\", value: 0}", "{form: \"828:x.esl\", value: true}"):
+            with self.assertRaises(ProfileError):
+                self.load(PROFILE.replace("    by_hand:", f"    globals: [{bad}]\n    by_hand:"))
+
     def test_an_item_is_topped_up_to_its_count_not_added_again(self):
         from playtest_setup import seat_commands
 
