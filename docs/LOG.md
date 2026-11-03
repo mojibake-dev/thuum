@@ -5562,3 +5562,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   0x133c6 at (-495, 155, 0), the essential base ActorDeathTest's cause-3 case stands on). Slice 1b's round two pushed on
   m4-scripts-work (the latent calls noted by row and self; the timed flush; the reference probe; the MayDie case); the lifecycle
   question to Eli in docs/private/decisions-after-slice-1b.md (D-S1, D-S2), numidium carrying it.
+- 19:58 PST 2026-11-02 the root-cause plan's first night under its review rule (ADR-064 decision 4, PROPOSED): a fresh reviewer agent read
+  every branch and scenario before its first lab run, and every one came back FIX FIRST before any lab time: the door
+  scenario v1 tested the wrong direction (in, where playtest 41 failed out), v2 carried four false-red groups and a leg the
+  parent run would never reach (v3 abb4d8bc under review); slice 1b f7ce5b37 had no caller-is-a-script filter (the client's
+  own applies of the server's word would echo back as host reports), its round one closed the direct path and not the
+  latent one (DispatchMethodCall2 only enqueues), round two d80b21a3 under review, a one-seat stage allowed; the prop
+  arbitration aafb26ba's probe searched a log line the server never prints, its T2 session was undeclared, and a refused
+  claimant's own Havok still moves the copy (ADR-063 decision 3). The lab staged union-srv-3 35509f7a on the union's dist
+  (clean-m1-next 19:40) for the door scenario's red run and waits on the reviews. Eli's decision owed: D-S1 and D-S2 in
+  docs/private/decisions-after-slice-1b.md (a guest running world objects' lifecycle handlers against ADR-063 decision 3).
