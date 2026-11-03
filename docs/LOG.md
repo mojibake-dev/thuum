@@ -7099,3 +7099,17 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   within 11 units after 5 s: poseSource the record's block; PARK not needed for a leveled actor (C4, numidium 1d527cec). Corrected: the
   setter pair ran once, not 18 times; 11977 and the hooked flush entry never fired (other paths). Open: the cross-seat apply (the record
   and the live pose are the same bytes in a one-seat run), the release's block differing from 36016's 2 ms earlier, the non-leveled actor.
+- 10:30 PST 2026-11-03 (18:30Z 11-03) (thuum-cf): serialize-on-demand-actor.js v2.1, the id census for numidium's D6 (the record's ids across seats), written by the re-analyst and
+  reviewed fresh (GO, ten notes applied as written): inside the serialize recipe only, 35928 (BGSNumericIDIndex::SetNumericID, 0x620240;
+  rcx the 3-byte struct, edx the id, the bytes big-endian, by the disassembly) is hooked on the recipe's thread with Interceptor.flush after
+  the attach, and every id the recipe writes becomes a row (seq, id, kind from the top two bits, the 22-bit value, the encoded bytes, the
+  type-0 index, the plugin byte, the caller RVA, the landing offset and its section, the form's type byte through the engine's LookupByID
+  14617 at 0x1e01a0, whose decompile is CommonLib's inline TESForm.h:210-220 under the all-forms read lock), emitted after the detach
+  (cap 400), then an idCensus summary (counts by kind, every type-0, type-2 and type-3 id with form type, plugin and caller, the dropped
+  other-thread count, the myKiller row by the fixed block's last three bytes). The reading rule in the header: type 1 portable, type 2 a
+  created form and seat-local, type 0 a seat-and-session index, only three zero bytes null everywhere, kind 3 an aliasing or a hook fault.
+  42,960 bytes, node --check clean, unrun; its run is after the merge on the dead promoted bandit 0x39fe4 (a leveled base) and a Riverwood
+  resident; the headline is byKind[2]. The research note gains the D6 subsection (the rule, the census as built, the two subjects'
+  expectations, the wire options: type 0 re-encoded per seat plugin-relative as ADR-043 stores forms, type 2 through the server's
+  created-form map or a rewrite of the one base field) and the reviewer's citation corrections (BGSNumericIDIndex.h:25-30 and its Flags at
+  :10-14; TESForm.h:210-220; 14617 unnamed in Ghidra, its lock body the evidence; the six other 35928 callers).

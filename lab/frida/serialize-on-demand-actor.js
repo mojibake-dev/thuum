@@ -1,4 +1,4 @@
-// serialize-on-demand-actor.js (thuum, the re-analyst 2026-11-03; docs/research/adr065-serialize-on-demand-2026-11-03.md, "The actor
+// serialize-on-demand-actor.js v2.1, the id census after its review (thuum, the re-analyst 2026-11-03; docs/research/adr065-serialize-on-demand-2026-11-03.md, "The actor
 // Runs 20261103-153648 (check) and 153929 (serialize, RUNS 2): GREEN on the promoted bandit 0x39fe4 through Character's slot 0x0E
 // 40266, deferred through PlayerCharacter::Update in 1 and 17 ms; 4,795 and 4,481 bytes at kDying and kDead, the entry untouched.
 // class", Q7): serialize-on-demand.js's recipe (GREEN, run 20261103-131511) for a LOADED actor FORM (ACHR 0x3E only). At AddChange's
@@ -35,11 +35,39 @@
 // expected (rule 2); slots and singletons CONFIRMED-STATIC. LAB_PARAMS: FORM (required), MODE, FLAG (0xffffffff: any mark), RUNS (1),
 // DEFER (true). Ready prints Process.id. Size: above the 20 KiB cap (the REFR skeleton alone is 20.7 KB): put wait: 15 after the frida
 // step before the kill, and read the trace's ready t against the kill's console step before trusting a negative.
+// CENSUS (default true), numidium's D6 for the cross-seat apply: a record names forms as 3-byte numeric ids whose top two bits are the kind
+// (BGSNumericIDIndex::SetNumericID 35928, the note's "Evidence (the form-id map)": a load-index-00 form is type 1 with its 22-bit id, a created
+// FF form is type 2, anything else is type 0 with a seat-and-session-local index from the form-id map 35554 at mgr + 0x298; three zero bytes
+// are null everywhere, the seeded index 0). A leveled actor's record is expected to name its runtime clone (type 2) as the base, so before any
+// cross-seat apply we need the census of which ids a subject's record carries and of which kind. For the recipe's duration only (attached after
+// the scratch buffer's ctor and before 36037, which writes the header's own id; detached after the pack) 35928 is hooked and one `id` row is
+// emitted per call on the recipe's thread, in order and never deduplicated (the caller RVA and the sequence are how a reader maps ids to
+// fields: 36037 the header, 35715 the initial data's cell ids, 36048 and 36047 the body's; other callers exist (24098, 24258, 24290, 25235,
+// 53826, 53831; 36077 is the save stream's): a caller outside the four names a field the decode does not section, not a hook fault): the
+// id (edx), the kind and value read back from the three bytes written through rcx (BGSNumericIDIndex.h:25-30 declares SetNumericID(FormID)
+// on the 3-byte struct, RELOCATION_ID(35027, 35928) at :28, the union of the three bytes :33-46; the kind bits are CommonLib's Flags, :10-14:
+// kDefault 1 << 6 for load index 0x00, kCreated 1 << 7 for 0xFF, IsCreated and IsDefault :16-17; the disassembly at 35928: plugin 0x00
+// below 0x1000000 ors 0x400000, 0xFF ors 0x800000, any other plugin or a zero id takes the map at mgr+0x298 through 35554, then the low
+// byte lands at [rbx+2], bits 16-23 at [rbx] and bits 8-15 at [rbx+1], big-endian, the plugin byte dropped), the form's type byte through the engine's
+// TESForm::LookupByID (14617: the note's id table; the decompile at 0x1e01a0 takes LockForRead and UnlockForRead on
+// TESForm::GetAllForms::allFormsMapLock (400517) around the hash walk of allForms (400507), CommonLib's inline TESForm.h:210-220 in the
+// binary, GetAllForms :190-198 with the two ids at :195-196 and the guard at :213; HYPOTHESIS until the run by rule 2; this tree's
+// src/RE/T/TESForm.cpp has no LookupByID) on the serializing thread, which under DEFER is Main.threadID, the engine's own thread for that
+// lookup (the hook otherwise reads only; a native fault inside 14617 is stolen by NativeFunction's default exceptions 'steal' with the
+// all-forms read lock still counted, so a later LockForWrite anywhere would hang, the same caveat the header states for 0x0D and 0x0E); no
+// editor id, since TESForm::GetFormEditorID (slot 0x32, TESForm.h:173) is a virtual returning "" on most forms and a call this script cannot
+// cite as safe on every form. The rows are collected inside the hook and emitted after the detach, outside the engine's call stack; at the
+// recipe's end an `idCensus` row totals the kinds and lists every non-type-1 id with its form type, plugin index and caller; the per-call
+// rows are capped at 400 and the summary says so. Reading rule: type 1 portable (the same masters), type 2 seat-local (a created form), type
+// 0 an index of this seat and session, only three zero bytes null everywhere; a load-index-00 id with bit 22 or 23 set aliases to kind 3
+// (or kind 1 short a bit), and no vanilla master reaches 0x400000, so a kind-3 row on this load order is that aliasing or a hook fault,
+// aliasing first.
 const PARAMS = (typeof LAB_PARAMS === 'object' && LAB_PARAMS) ? LAB_PARAMS : {};
 const FORM = Number(PARAMS.FORM);
 const MODE = PARAMS.MODE === 'serialize' ? 'serialize' : 'check';
 const FLAG = PARAMS.FLAG === undefined ? 0x400 : Number(PARAMS.FLAG); // Actor.h:234 kLifeState = 1 << 10
 const RUNS = PARAMS.RUNS === undefined ? 1 : Number(PARAMS.RUNS);
+const CENSUS = PARAMS.CENSUS === undefined ? true : (PARAMS.CENSUS !== false && PARAMS.CENSUS !== 'false'); // the id census inside the recipe (D6)
 const DEFER = PARAMS.DEFER === undefined ? true : (PARAMS.DEFER !== false && PARAMS.DEFER !== 'false'); // serialize only: see the header
 function emit(obj) {
   obj.t = Date.now();
@@ -77,6 +105,8 @@ const OFFSETS = {
     actorStateSave: 0x6cea60, // 38987 the ActorState block (mark actorState)
     modifiersSave: 0x6cff40, // 39009 a Modifiers block (mark modifiers, four times)
     avStorageSave: 0x6d1030, // 39023 the ActorValueStorage block (mark avStorage)
+    setNumericId: 0x620240, // 35928 BGSNumericIDIndex::SetNumericID (rcx the 3-byte struct, edx the form id; first bytes 40 53 48 83: push rbx, sub rsp,0x20) (hooked inside the recipe only: the id census)
+    lookupByID: 0x1e01a0, // 14617 TESForm::LookupByID (the note's id table; CommonLib's is an inline, TESForm.h:210-218) (called by the census for the form type)
   },
 };
 // TESForm.h:353-356 (:73 kPersistent, bit 10); BGSSaveLoadGame.h:61-62, :94, :96; BGSSaveLoadManager.h:114; TESDataHandler.h:76-88
@@ -91,7 +121,7 @@ const SLOT_CHECK = 0x0d, SLOT_SAVE = 0x0e, SLOT_MOVETO_LOW = 0xf2, SLOT_UPDATE =
 const ACHR = 0x3e, PLAYER_ID = 0x14 /* the player's form id, not an offset; FORM_ID's 0x14 (TESForm.h:354) is a coincidence */, A_BOOLBITS = 0xe8, A_PROCESS = 0xf8, A_MOVEMENT = 0x150, A_BOOLFLAGS = 0x204, A_STATE1 = 0xc8;
 const P_HIGH = 0x10, P_LEVEL = 0x137, H_FAR = 0x468, K_PROMOTED = 1 << 25;
 const LIFE = ['kAlive', 'kDying', 'kDead', 'kUnconcious', 'kReanimate', 'kRecycle', 'kRestrained', 'kEssentialDown', 'kBleedout']; // ActorState.h:9-17
-const CAP = 65536, REFUSED_ROWS = 8;
+const CAP = 65536, REFUSED_ROWS = 8, CENSUS_CAP = 400;
 
 function fileVersion(path) {
   const ver = Module.load('version.dll');
@@ -183,6 +213,7 @@ if (off === undefined || !(FORM > 0)) {
     saveVersion: new NativeFunction(at('saveVersion'), 'uint8', []),
     heapOf: new NativeFunction(at('heap'), 'pointer', []),
     deallocate: new NativeFunction(at('deallocate'), 'void', ['pointer', 'pointer', 'bool']),
+    lookupByID: new NativeFunction(at('lookupByID'), 'pointer', ['uint32']),
   };
   const slotFn = function (p, ret) { return new NativeFunction(p, ret, ['pointer', 'pointer']); };
   const singletons = function () {
@@ -261,12 +292,37 @@ if (off === undefined || !(FORM > 0)) {
     const row = { event: 'serialize', form: hex(FORM), thread: q.runThread, markThread: q.markThread, deferredMs: q.deferredMs, deferredVia: q.via, entryFlags: hex(p.entry.flags), live: p.info };
     row.stashExpected = (p.entry.flags & K_PROMOTED) !== 0 ? 'no stash row expected: a promoted reference never stashes (kPromoted; change-forms.md D7)'
       : (((p.fflags >>> 10) & 1) !== 0 ? 'no stash row expected: a persistent reference never stashes (kPersistent, TESForm.h:73; the unload walk 19230 skips it)' : 'yes, at the purge');
-    let buf = null, out = null, step = 'ctor 36035';
+    let buf = null, out = null, step = 'ctor 36035', census = null, censusDropped = 0;
+    const ids = []; // the census: one entry per 35928 call on the recipe's thread, in order; emitted after the detach
     try {
       const raw = Memory.alloc(BUF.size); // ours; the engine owns only the data at +0x08
       for (let o = 0; o < BUF.size; o += 8) raw.add(o).writeU64(0);
       nf.bufCtor(raw);
       buf = raw; // only once the ctor returned: a throw inside it must not send an unconstructed object to 36044
+      if (CENSUS) { // D6: every numeric id the recipe writes, read back from the three bytes 35928 stores through rcx; a census fault never costs the record
+        step = 'census attach 35928';
+        try {
+          census = Interceptor.attach(at('setNumericId'), {
+            onEnter(args) {
+              this.hit = this.threadId === q.runThread;
+              if (!this.hit) { censusDropped += 1; return; }
+              this.out = args[0]; this.id = args[1].toUInt32(); this.ret = this.returnAddress;
+              this.pos = buf === null ? -1 : u32(buf, BUF.pos); // HYPOTHESIS: 36047 and 36048 call 35928 before appending the three bytes, so the entry position is the landing offset
+            },
+            onLeave() {
+              if (!this.hit) return;
+              try {
+                const b = new Uint8Array(this.out.readByteArray(3)), kind = b[0] >> 6, value = ((b[0] & 0x3f) << 16) | (b[1] << 8) | b[2];
+                const r = { event: 'id', seq: ids.length, id: hex(this.id), kind: kind, value: hex(value), encoded: bytesHex(b), plugin: this.id >>> 24, caller: rva(this.ret), offset: this.pos, formType: null, thread: this.threadId };
+                if (kind === 0) r.index = value;
+                if (this.id !== 0) { try { const f = nf.lookupByID(this.id); r.formType = f.isNull() ? 'no form' : hex(u8(f, FORM_TYPE)); } catch (e) { r.formTypeError = String(e); } }
+                ids.push(r);
+              } catch (e) { ids.push({ event: 'id', seq: ids.length, kind: 'error', error: String(e), thread: this.threadId }); }
+            },
+          });
+          Interceptor.flush(); // a pending attach commits when the thread leaves the runtime or send()s; commit it before 36037's call (frida docs, Interceptor.flush)
+        } catch (e) { row.censusAttachError = String(e); census = null; }
+      }
       step = 'header 36037';
       nf.bufInit(buf, FORM, p.entry.flags, p.type, nf.saveVersion());
       buf.add(BUF.form).writePointer(form);
@@ -315,6 +371,12 @@ if (off === undefined || !(FORM > 0)) {
       }
     } catch (e) { row.error = 'at ' + step + ': ' + e; }
     tracing = null;
+    if (census !== null) { try { census.detach(); } catch (e) { row.censusDetachError = String(e); } } // nothing outside the recipe's window
+    if (CENSUS) { // the rows, in order, outside the engine's call stack, each with the section its landing offset falls in (36037's lands in the header at +0x18 with pos 0)
+      const regs = row.decoded && row.decoded.regions ? row.decoded.regions : null, b0 = at('bufInit'), b1 = b0.add(0x50); // 36037 spans 0x626ce0 to its ret at 0x626d26 (the disassembly; 36038 begins at 0x626d30 by addr.py), its 35928 call at 0x626cfc with rcx = buf+0x18
+      for (const r of ids) { if (r.kind === 'error' || r.offset === undefined) continue; const ra = exe.base.add(parseInt(r.caller, 16)); r.section = ra.compare(b0) >= 0 && ra.compare(b1) < 0 ? 'header (+0x18, 36037)' : (regs !== null && r.offset >= 0 ? sectionAt(r.offset, regs) : 'unsectioned (no decode)'); }
+      ids.slice(0, CENSUS_CAP).forEach(emit);
+    }
     try { const r = out === null ? NULL : out.readPointer(); if (!r.isNull()) { nf.deallocate(nf.heapOf(), r, 0); row.recordFreed = true; } } catch (e) { row.freeError = String(e); } // re-read from out: a fault after 36081's allocation must not leak
     try { if (buf !== null) { nf.bufDestroy(buf); row.bufferDestroyed = true; } } catch (e) { row.destroyError = String(e); }
     try {
@@ -322,6 +384,20 @@ if (off === undefined || !(FORM > 0)) {
       row.entryAfter = { found: after.found, flags: hex(after.flags), record: String(after.record) };
       row.entryUntouched = after.found && after.flags === p.entry.flags && after.record.isNull();
     } catch (e) { row.entryAfterError = String(e); }
+    if (CENSUS) { // the summary: the kinds, every non-type-1 id with its form type, plugin and caller, and the fields the decode can name
+      const byKind = { 0: 0, 1: 0, 2: 0, 3: 0 };
+      for (const r of ids) { if (byKind[r.kind] !== undefined) byKind[r.kind] += 1; else byKind.error = (byKind.error || 0) + 1; }
+      const pick = function (k) { return ids.filter(function (r) { return r.kind === k; }).slice(0, CENSUS_CAP).map(function (r) { return { seq: r.seq, id: r.id, index: r.index, formType: r.formType, plugin: r.plugin, caller: r.caller, offset: r.offset, section: r.section }; }); };
+      const hints = {};
+      const fx = row.decoded && row.decoded.regions && row.decoded.regions.fixed;
+      if (fx) { // the fixed block ends with myKiller's three bytes, so the id row whose landing offset is fixed end minus 3 names it
+        const m = ids.filter(function (r) { return r.offset === fx[1] - 3; }).map(function (r) { return { seq: r.seq, id: r.id, kind: r.kind, formType: r.formType }; });
+        hints.myKiller = m.length === 1 ? m[0] : (m.length === 0 ? 'no census row lands at the fixed block\'s last three bytes' : m);
+        const mk = row.decoded.fixed && typeof row.decoded.fixed.myKiller === 'string' ? row.decoded.fixed.myKiller.slice(0, 6) : null;
+        if (mk !== null && m.length === 1) hints.myKillerBytesAgree = ids.filter(function (r) { return r.seq === m[0].seq; })[0].encoded === mk;
+      }
+      emit({ event: 'idCensus', form: hex(FORM), total: ids.length, rowsEmitted: Math.min(ids.length, CENSUS_CAP), capped: ids.length > CENSUS_CAP, droppedOtherThreads: censusDropped, byKind: byKind, type0Total: byKind[0], type0: pick(0), type2: pick(2), type3: pick(3), fieldHints: hints });
+    }
     emit(row);
   };
 
@@ -359,7 +435,7 @@ if (off === undefined || !(FORM > 0)) {
   };
   const firstBytes = function (name) { return rva(at(name)) + ':' + toHex(at(name), 4); };
   const hookBytes = {}; // every hook's resolved address and first bytes, read before the attach (the pitfalls rule)
-  ['innerAdd', 'stash', 'mapWrite', 'movetoLow', 'refrSave', 'processSave', 'actorStateSave', 'modifiersSave', 'avStorageSave', 'playerUpdate'].forEach(function (n) { hookBytes[n] = firstBytes(n); });
+  ['innerAdd', 'stash', 'mapWrite', 'movetoLow', 'refrSave', 'processSave', 'actorStateSave', 'modifiersSave', 'avStorageSave', 'playerUpdate', 'setNumericId', 'lookupByID'].forEach(function (n) { hookBytes[n] = firstBytes(n); });
   const mainTid = function () { const m = ptrAt(at('main'), 0); return m.isNull() ? -1 : u32(m, MAIN_THREAD); };
   const runPending = function (threadId, via, id) { // the deferred run, on Main.threadID only, never inside the arming call
     if (pending === null || busy || threadId !== mainTid()) return;
@@ -437,7 +513,7 @@ if (off === undefined || !(FORM > 0)) {
   const s0 = singletons();
   let ver0 = -1;
   try { ver0 = nf.saveVersion(); } catch (e) { attachErrors.push('saveVersion: ' + e); }
-  emit({ event: 'ready', version: version, pid: Process.id, base: String(exe.base), form: hex(FORM), mode: MODE, flag: hex(FLAG), runs: RUNS, defer: DEFER, hooks: hookBytes,
+  emit({ event: 'ready', version: version, pid: Process.id, base: String(exe.base), form: hex(FORM), mode: MODE, flag: hex(FLAG), runs: RUNS, defer: DEFER, census: CENSUS, hooks: hookBytes,
     game: String(s0.game), manager: String(s0.manager), main: String(s0.main), handler: String(s0.handler), player: String(s0.player), playerUpdateSlot: s0.player.isNull() ? 'no player' : rva(ptrAt(ptrAt(s0.player, 0), SLOT_UPDATE * 8)),
     managerFlags: s0.game.isNull() ? -1 : hex(u32(s0.game, MANAGER_FLAGS)), dryRun: s0.manager.isNull() ? -1 : u8(s0.manager, DRY_RUN),
     deflateSetting: u8(at('deflateSetting'), 0), mainThread: s0.main.isNull() ? -1 : u32(s0.main, MAIN_THREAD), saveVersion: ver0, attachErrors: attachErrors });

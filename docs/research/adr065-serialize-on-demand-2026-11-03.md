@@ -44,7 +44,7 @@ renamed. Names beyond CommonLib's are HYPOTHESIS names and read as such.
 | --- | --- | --- | --- |
 | TESObjectREFR::CheckSaveGame, SaveGame, LoadGame, InitLoadGame, FinishLoadGame, Revert, InitItemImpl (TESObjectREFR.h:217-223) | 0x2da4f0, 0x2da5c0, 0x2da720, 0x2daad0, 0x2dac30, 0x2daee0, 0x2d8730 | 19527, 19528, 19529, 19530, 19531, 19532, 19507 | slots 0x0D to 0x13 of 190259 (CONFIRMED-STATIC) |
 | Actor::SaveGame, LoadGame, InitLoadGame, FinishLoadGame, Revert, InitItemImpl (Actor.h:275-279); Actor's slot 0x0D is TESObjectREFR's 19527 (no override) | 0x686710, 0x686de0, 0x687720, 0x687a80, 0x688aa0, 0x692560 | 37649, 37650, 37651, 37652, 37653, 37791 | slots 0x0D to 0x13 of 207511 (CONFIRMED-STATIC) |
-| TESForm::CheckSaveGame default (returns 1, TESForm.h:136's comment), TESForm::SaveGame default, TESForm::FinishLoadGame default, TESForm::LookupByID | 0x1e0030, 0x1e0040, 0x1e0180, 0x1e01a0 | 14611, 14612, 14615, 14617 | Ghidra's imported names; callees of 19527 and 19528 |
+| TESForm::CheckSaveGame default (returns 1, TESForm.h:136's comment), TESForm::SaveGame default, TESForm::FinishLoadGame default, TESForm::LookupByID | 0x1e0030, 0x1e0040, 0x1e0180, 0x1e01a0 | 14611, 14612, 14615, 14617 | Ghidra's imported names for the three defaults; 0x1e01a0 is unnamed there (LookupByID is CommonLib's inline, TESForm.h:210-220) and its decompile takes LockForRead and UnlockForRead on allFormsMapLock (400517) around the allForms (400507) walk, the inline in the binary (HYPOTHESIS); all four callees of 19527 and 19528 |
 | TESForm::AddChange (slot 0x0A body), the forced entry, BGSSaveLoadGame's AddChange inner, RemoveChange inner, GetChange (BGSSaveLoadGame.h:78), GetChange inner | 0x1dff90, 0x1dffc0, 0x604320, 0x6044c0, 0x604400, 0x600a70 | 14607, 14608, 35576, 35581, 35577, 35505 | change-forms.md A1 to A4; CommonLib |
 | BGSSaveFormBuffer ctor; BGSSaveGameBuffer ctor (the base); header init (id, flags, type, version); destroy (frees the data); stream write (9-byte header, lengths, data); record allocate | 0x626a90, 0x626e00, 0x626ce0, 0x626e20, 0x626ad0, 0x626760 | 36035, 36043, 36037, 36044, 36036, 36032 | 36035 by the xrefs of VTABLE_BGSSaveFormBuffer; the rest callees of the stash, the walk and the pack |
 | BGSSaveGameBuffer::SaveDataEndian (BGSSaveGameBuffer.h:25); the buffer grow; form pointer as a 3-byte id; FormID value as a 3-byte id; string (u16 length, bytes); varint placeholder; varint patch; varint direct; byte insert for the patch | 0x627400, 0x627570, 0x627000, 0x626f80, 0x627090, 0x627170, 0x6272e0, 0x6271d0, 0x6276d0 | 36053, 36056, 36048, 36047, 36049, 36050, 36052, 36051, 36057 | CommonLib; callees of 19528, 12094, 35599 |
@@ -1109,3 +1109,44 @@ bytes as the static read gave them. The rows (frida/c1-apply-on-demand-...-7.js.
   differs from the 36016 block of 2 ms earlier at the same length (the bodies detached from the world before the store, or a changing field
   in the block); a dump of both blocks in the next version decides. And the non-leveled actor (no release, no rebuild): there the flush
   feeds 19535 directly on the standing 3D, unread.
+
+## D6: the record's ids across seats (numidium's premise before any cross-seat actor apply; the census to run)
+
+A change form names other forms as 3-byte numeric ids (BGSNumericIDIndex, "Evidence (the form-id map)" above): the top two bits are the
+kind. Type 1 is a load-index-00 form with its 22-bit id: portable to any seat with the same masters. Type 2 is a created form (0xFF): the id
+is this seat's, assigned by its own engine at creation; another seat's clone of the same thing has another id, or none. Type 0 is an index
+into this seat's and this session's form-id map (35554 at mgr + 0x298), assigned in first-encounter order or the loaded save's order: it means
+nothing on another seat, and only the seeded index 0 (three zero bytes) is null everywhere. So before a record crosses seats, which ids it
+carries decides what must be rewritten. The REFR round trip (131511) never met the question: a door's record names its base and cell by
+type 1 and its lock key by the null. An ACHR's record is where it bites: a leveled actor's base is a runtime clone (type 2 by the rule), its
+inventory and spells may come from plugins (type 0 on this load order: SPID distributes forms into every NPC's record), and
+Actor::LoadGame's base swap with a wrong form is worse than with a null one (the null leaves the base as it was, the REFR note's silent
+case).
+
+**The census (serialize-on-demand-actor.js v2, CENSUS default true; new code, its fresh review before its first run).** Inside the
+serialize recipe only (attached after the scratch buffer's constructor and before 36037, which writes the header's own id; detached after
+the pack), 35928 is hooked on the recipe's thread: onEnter takes edx as the id and rcx as the 3-byte output (BGSNumericIDIndex.h:25-30
+declares SetNumericID(FormID) on the 3-byte struct, its kind bits are CommonLib's Flags::kDefault 1 << 6 for load index 00 and kCreated
+1 << 7 for 0xFF at :10-14, and the disassembly at 0x620240 stores the three bytes big-endian through rcx with edx the id); onLeave reads
+the bytes back and emits one `id` row (seq, id, kind, the 22-bit value, the encoded bytes, the type-0 index, the plugin byte, the caller's
+RVA, the form's type byte through the engine's own LookupByID 14617 at 0x1e01a0, the thread), capped at 400, then an `idCensus` summary at
+the recipe's end (total, counts by kind, every type-0, type-2 and type-3 id with its form type, plugin and caller, and the myKiller field
+matched by its bytes). The caller RVA maps a row to its writer (36037 the header, one site; 35715 the initial data's cell ids, five sites; 36048 and 36047
+the body's; 35928 has six more code callers, 24098, 24258, 24290, 25235, 53826 and 53831, vtable-only or save-impl helpers, and 36077 is
+the save stream's: a caller outside the four names a field the decode does not section, not a hook fault); CommonLib's LookupByID (TESForm.h:210-220) is an inline over GetAllForms() under its read lock, and the decompile at 0x1e01a0 (14617, which
+Ghidra leaves unnamed) takes LockForRead and UnlockForRead on allFormsMapLock (400517) around the hash walk of allForms (400507): the inline
+in the binary (HYPOTHESIS until the run, rule 2). The read lock returns at once to its own writer thread and otherwise waits only on a held
+write bit (BSAtomic.h:70-91), so the census adds the wait any main-thread LookupByID has; the recipe thread holds no all-forms lock (inside
+12094 it holds the subject's ExtraDataList read lock), and it runs on the serializing thread, Main's under DEFER. HYPOTHESIS until the run: that every 35928 of the
+recipe is on the recipe's thread (the gate would drop another thread's silently; total against the record's id-bearing fields tells).
+
+**Subjects and expectations.** The dead promoted bandit 0x39fe4 (a leveled base): a type-2 base (the clone), type-1 cell and template ids,
+type-0 indices for any plugin form in its inventory or effects. A Riverwood resident (a game-file base): type 1 throughout except the plugins'
+distributed forms. The census decides whether "a subject whose record is all type 1" exists on this load order at all.
+
+**Consequences, as options for the ADR (no decision here).** Type 0: re-encode per seat; the sender's reverse map (GetNumericID 35927 through
+35555) gives the plugin form id, the wire carries it plugin-relative (as ADR-043 already stores every form; each seat resolves it to its own runtime
+id), and the receiver's SetNumericID assigns its own index at the apply. Type 2: the server's created-form map (each seat
+reports its clone's id for the actor; the server translates on relay), or, when the census shows the clone is the record's only type-2 id,
+a receiver-side rewrite of that one field to the receiver's own clone. Type 3 should not occur for any vanilla id: a load-index-00 id with bit 22 or 23 set would alias to kind 3 (or to kind 1 short a bit),
+and no vanilla master reaches 0x400000, so a kind-3 row on this load order is that aliasing or a hook fault, aliasing first; never a form.
