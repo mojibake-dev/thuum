@@ -6120,3 +6120,24 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   with no dead sample before it and the new rule refused it by design (one failed assertion, :176); the test now samples the body
   dead first (the necromancer's host had it dead on its engine before the spell), e46d7e9f on m3-system1-r2, test only, pipeline
   running. numidium: the merged remote branches deleted on Eli's go (fork 225 and 228, thuum 96 each), my clones pruned.
+- 02:55 PST 2026-11-03 (10:55Z 11-03) (thuum-cf): numidium's fresh review of round six (23fb0c73 and e46d7e9f): FIX FIRST, ten points, two blocking.
+  (1) the new host-change T0 never backdated the death, so its last live sample fell inside kPendingDeathMs (3 s) and the
+  resurrection branch refused it by the grace, not the stamp; (2) x-npc-death-reentry v4's leg B claims a trace line from a commit
+  not on the head (numidium's v5); (3) the stamp's premise was "the host's engine had the body dead" where the server's was "a dead
+  sample arrived while the record was dead": under ADR-050's order the engine's death comes first and the host's zero can reach a
+  still-alive record, floored with no stamp, so a later stand-up with no claimed hit (a script's Resurrect, the console) would be
+  refused; (4) a clean quit sends no Release flip and the same id hosting again keeps the old stamp (D4 again; the lab's
+  Stop-Process path clears it, so leg B cannot see this); (5) the client's 8 s counted from the word, and movement and actions for
+  a dead record are not held or refused; (6) a dead hold kept dead: true under a live word; (7) any queued action dropped while dead
+  (as intended); (8) the stamp survived a TickFateRespawns respawn; (9) rules 4 and 12 clean; (10) the lines claimed the bind and
+  the stamp. Round six's f048ebcb added the exemption's T0 (an accepted reanimate stands the body without the host's dead sample;
+  neither stands nothing) in answer to its question whether the test's new premise hid a refusal of a legitimate reanimate: the
+  exemption's path is the guard's reanimated term. Round seven (c605a8e0): the host-change T0 backdated; the stamp from ANY zero
+  sample of a fate-respawned actor from its host, record dead or alive, with the engine-death-first T0; a player's disconnect clears
+  the stamps of the actors it saw whose noted hoster it was (HosterNoted, NoteHoster(0) beside cells->gone), with the clean-quit T0
+  (Leave, the same id arrives and hosts, stands nothing until a dead sample); the dead hold's budget from the copy's 3D load under a
+  120 s cap; a live word on a dead hold turns it back into a placing hold; RespawnFated clears the stamp; the lines reworded. Named
+  follow-up: the server accepts a dead record's movement and actions (OnUpdateMovement has no dead-record check; the action relay
+  neither), its own round with T0. Eli's new goal for the night: a breakthrough that makes scripts, containers and physics easy and
+  uses the RE box better; numidium's lead is the engine's own change tracking, TESForm::AddChange (TESForm.h:133, SaveGame and
+  LoadGame beside it), as the one observe point for every persistent state change, whoever made it.
