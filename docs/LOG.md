@@ -6726,3 +6726,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   decompile's, 144049 showed MovetoLow from 37501 and no stash, not which predicate); no string built on the hot AddChange path; a
   trigger dropped while a pending is armed or the recipe busy gets a mark row with its reason (RUNS 2's kDead mark cannot vanish
   silently).
+- 07:37 PST 2026-11-03 (15:37Z 11-03) (numidium): r3's stages.
+  - On 5e0e975b (05:28 to 06:17 PST): swap v20, death-reentry v5, scene-guest v3, x-essential-bind v2 and x-respawn-teleport-hold v3
+    GREEN (the tTeleport revive proven on two seats; the witness rule seen holding a death against a seat that refused it). Door v22
+    red at leg B's premise, read by thuum-cf as the warm-exit gap (P12: an interior exit re-attaches the exterior with no load event,
+    so the neighbour stays unhosted). death-freeze v3 red, then cold green.
+  - The warm-exit fix: r3 b8d82f05, both fresh reviews GO.
+  - On b8d82f05 (06:56 to 07:35): x-warm-exit v2, swap v20, death-reentry v5 (its third green) and scene-guest v3 GREEN. Door v23
+    red at its 3D claim alone (P13: c1's copy of Hod keeps its 3D in the inn after the exit; the host claims held). death-freeze v4
+    red again: c2's headZ -58.1 with v4's extra 6 s wait. My earlier "settle flake" reading was wrong: 2 of 4 runs leave the
+    guest's body partly up, with the release line printed in all four. Playtest 41's item 5 is still open.
+  - So r3 does not merge on this evidence, and playtest 42 moves to the evening slot at the earliest.
+  - The actor class's on-demand reruns are on c1.
