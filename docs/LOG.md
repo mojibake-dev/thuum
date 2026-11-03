@@ -5897,3 +5897,17 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   agents writing docs/engine/containers.md, progression-ui.md and ai-world-state.md (REA down, pyghidra up), uncommitted until
   read. numidium wrote the Play lines (ADR-064 decision 5, main 71f14350): 12 BROKEN, perks VERIFIED IN PLAY, weather MECHANISM
   ONLY.
+- 00:46 PST 2026-11-03 (08:46Z 11-03) (numidium): Eli's goal (/goal): "cooking till we're realigned for a new playtest on the
+  things we need to catch back up with"; the first is playtest 42, system 1's (a reference's life on a non-owning seat), eight
+  items each with its green two-seat run (docs/private/playtest-42.md). The merge shape, agreed with thuum-cf:
+  m3-promote-record-r3 carries 45 commits over parity (the turbo 2 union 08b530d5, union-srv-3's retired prop checks, the settle
+  window f609a339, the containers default), so frozen systems' code and the settle ADR-063 keeps a branch would ride it;
+  thuum-cf cut m3-system1 e1420d29 off parity 6d7fcc84 by cherry-pick -x (R1's lines, the promote fix's three rounds, the
+  redress wait 12f199e6 as a3f236d1, fix-ups bf1c88db, the settle's half (a) alone), the scene stop, deaths2, the follow vouch
+  and the pass's T0 case to add; r3's chain dropped. Door v14 on round two 0b61fc80 RED on the hour alone, 20261103-084006: the
+  hold placed Hod at the record at each of three promotions (49, 29 and 46 ms, the engine already within a unit of the record
+  each time), then his day package walked him out through door 13407 at 17.96 with the door's line, the street seat took him by
+  D9 with the report sent ahead of the word, and nothing passed him back (no bounce); the stale-copy case was never reached
+  (both seats fresh), so the leg needs a rewrite that makes it (thuum-cf's v15). Reviews: the swap probe v12 READY; props v12
+  and x-prop-static FIX FIRST (legs 5 and 6 repeat the short walk, leg 1's walk ends at c1; two claims that cannot fail);
+  x-npc-death-reentry v2 by thuum-cf's reviewer.
