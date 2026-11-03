@@ -2028,6 +2028,19 @@ and about 120 below the eye (about 13 counts a degree on this seat; the rune pro
   beside the bind's own four events; whether those carry the death sound stays HYPOTHESIS, Eli's ear or a Frida read of the
   sound's play). T0: ActorDeathTest's new case (the host changes; the new host's first live sample stands nothing; its dead then
   live samples stand the body). The lab read is x-npc-death-reentry v4's leg B on the merge head.
+  Rounds seven to ten on m3-system1-r2 (c605a8e0; a4a7805c and 817f78d0; f1c954d7; e23bd229; ActorDeathTest 22 cases, each a
+  rule's own proof), under numidium's fresh reviews: the stamp is the WITNESS's (host form id plus a process-wide login serial set
+  at SetUserActor, plus the sample's time), made by any zero sample of a fate-respawned actor (record dead or alive) and by the
+  host's reliable death report (the already-dead branch too), cleared by Respawn and RespawnFated, never by a change of host; a live
+  sample stands a dead body only when the same witness stamped it within kPendingDeathMs (3000 ms) before the death, the window
+  anchored since round ten at the earlier of the recorded death and the pending death's start (the host's engine dies at the
+  DamageCause sent beside BeginPendingDeath and its flip lands within half a second, while TickDeaths records the death 3 to 4 s
+  later), any stamp counting for a body dead since before this process; the refusal's line names its gap ("no dead sample from any
+  host yet", "the dead sample is another host's", "this host's earlier login", "N ms before the death ... past its 3000 ms window").
+  The client sends the alive-to-dead flip reliable (hostedStateService's fellDead) so the stamp lands before the report; a live word
+  turns a dead hold back into a placing hold, and a respawn that teleports gives the revived hold the teleport's place as its record
+  ahead of the standalone live word. Named for its own round: the server still accepts a dead record's movement and actions. The lab
+  read is numidium's evidence stage on e23bd229 (door v21, swap v19, death-reentry v5, death-freeze v3, scene-guest v2.1).
 - Where the fixes stand (14:44 PST 2026-11-02): F5 MERGED with wall-range (fork parity 4fdb2d31, 21:12Z); F9 MERGED as the R0 train
   m4-turbo2-r0-train (parity 188a8dea, 22:42Z, with skill books; T0 13 of 13, T2 green); F3 and F4 ride the client train
   m4-turbo2-train 11e6b00e (with prop-statics and the settle head), arm two's build, its gate after the arm (Eli's turbo order). The

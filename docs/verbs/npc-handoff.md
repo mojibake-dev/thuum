@@ -789,7 +789,14 @@ carries a position (the death report, a shot's and a cast's origin) gate on Host
 together; the view's gate may move at every promotion; and the server sends each actor's record as a movement message reliably to
 the game the word names ahead of every hoster word, a grant's, a claim's, a release's and a lease's end's, the host swap included
 (PartOne::SendActorKeyframe to PlayerActor(SimulatorOf); the pass keeps sending the passing report); CellHostTest reads a grant's
-and a swap's keyframe ahead of its word. Kept with its risk named: the gate's one-shot reset at every promotion (P2b) would
+and a swap's keyframe ahead of its word. The hold as the merge branch m3-system1-r2 carries it (rounds one to ten under numidium's
+fresh reviews, e23bd229): it asks the move on its second check and re-asks every 1.5 s up to five asks (about 6 s, covering a cold
+login's 4 to 5 s load block in which MoveRefrToPosition is a no-op), releases 2 s after the last ask with a line naming the asks
+and both places; a DEAD word makes a dead hold that never moves a body and releases when the engine's copy is dead here (8 s from
+the 3D load, a 120 s cap); the view's gate defers to a standing hold (one mover); a demote releases the hold and drops its deferred
+reports with a line; a live word turns a dead hold back into a placing hold, and a respawn that teleports gives the revived hold
+the TELEPORT's place as its record ahead of the standalone live word (round ten), so it never asks the corpse's place over the
+spawn point. Kept with its risk named: the gate's one-shot reset at every promotion (P2b) would
 teleport the copy across the door at every pass if the ping-pong is not cured, which R1's lines would show.
 The settle's window stays as the safety net it was meant to be. The scenario claims it since v9 (thuum 4bb5d18c) across EACH grant
 (the street seat's visit's and the interior seat's), baselines right before the teleport in and equal after the grant, so the case
