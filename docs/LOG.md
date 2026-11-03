@@ -6664,3 +6664,21 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   back and the per-second natives are bounded; a cell detached in this very poll is not re-read in the same tick; the event path
   clears a cell's detach at once. 31167a9b's own pipeline GREEN (5014); b8d82f05's reruns under a waiter. cell-host.md carries the
   count bound and the fact that the client has no report budget of its own (the server's bucket is the one).
+- 06:52 PST 2026-11-03 (14:52Z 11-03) (thuum-cf): the re-analyst's read of the actor script's two refusals (runs 143818 and 144049). AL 40266
+  (0x727d40) is Character::SaveGame: CommonLib names the override (Character.h:31, "Actor::SaveBuffer(a_buf)"), VTABLE_Character
+  (207886) holds it at slot 0x0E, CONFIRMED-STATIC; every NPC is a Character and VTABLE_Actor is nobody's live vtable, so "slot 0x0E is
+  37649" held for the class and for no NPC. It does not call 37649: the compiler inlined Actor::SaveGame whole, so 40266 is a second
+  copy of Q2's sequence field for field (HYPOTHESIS by decompile); the five block writers stay calls, so the script's marks bound the
+  same sections. One refinement: the four casters write one presence byte, then the present blocks. PlayerCharacter's slot 0x0E is
+  40538 (calls 40266), so the player stays refused; Character's 0x0D is 19527 (no override). The premise now reads "slot 0x0E is
+  Actor::SaveGame 37649 or Character's 40266", exact match, anything else refusing. The deferred run (the kill's kLifeState marks
+  fire OFF the main thread, threads 1056, 1964, 3292, 6872) now fires at PlayerCharacter::Update's return (AL 40447, VTABLE_PlayerCharacter
+  slot 0xAD, CommonLib's name, the address CONFIRMED-STATIC; Actor's and Character's 0xAD both 37348) or the next main-thread
+  AddChange, whichever first, through one guarded runPending; the hook counts every call (about 60 a second expected) with its first
+  bytes, and the ready row prints the player's live slot 0xAD against 0x732660. MovetoLow ran on the promoted bandit at the player's
+  exit from 37501, whose decompile stashes through 35570 only when IsPersistent (19593) is false and the cell is neither held nor
+  passing a TES check: D7's mechanism. The note gained Q7 and its id rows (40266, 40538, 19527, 37348, 40447, 37501). The script is
+  32,960 bytes, node --check clean, committed; its fresh review (the new per-frame hook is new code on a hot path) runs before
+  numidium's rerun (check with FLAG 0xffffffff and RUNS 8, then serialize with FLAG 0x400 and RUNS 2; expected: the slot premise
+  passing, deferredVia PlayerCharacter::Update with deferredMs under about 50, the serialize row's level 0, lifeState against live,
+  and length2).

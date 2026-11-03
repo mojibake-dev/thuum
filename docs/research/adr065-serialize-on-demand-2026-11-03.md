@@ -615,6 +615,51 @@ actor not forced is instead queued to 0x1420fc1b0 for a later forced demotion (c
 and the quest finish, HYPOTHESIS). So kPromoted clears when the last holder lets go, not when a stage moves: for MS13's bandit the alias
 clear or the quest's finish, with a stash only if its cell is then unloaded.
 
+### Id rows added for Q7 (1.6.1170; RVA; how found)
+| Function (CommonLib name where it has one) | RVA | id | Found by |
+| --- | --- | --- | --- |
+| Character::SaveGame (Character.h:31; slot 0x0E of VTABLE_Character 207886); PlayerCharacter::SaveGame (slot 0x0E of VTABLE_PlayerCharacter 208040; calls 40266 at 0x14073a322); Character's slot 0x0D (19527, no override) | 0x727d40, 0x73a2f0, 0x2da4f0 | 40266, 40538, 19527 | read_bytes on 207886 + 0x68 and + 0x70 and on 208040 + 0x70 (CONFIRMED-STATIC); Ghidra names 0x727d40 Character::SaveGame and leaves 0x73a2f0 unnamed; run 143818 read 0x727d40 on the bandit |
+| Actor::Update, which Character does not override (slot 0xAD, Actor.h:371); PlayerCharacter::Update (the same slot of 208040): the script's per-frame main-thread trigger | 0x667d40, 0x732660 | 37348, 40447 | read_bytes on 207511 + 0x568, 207886 + 0x568, 208040 + 0x568 (CONFIRMED-STATIC for the slots; the names are CommonLib's, Ghidra has none for either) |
+| the MovetoLow caller at the player's exit (run 144049's return address 0x675fb7 lies inside 37501, the process-level update of the actor's own path, Q5) | 0x675c70 | 37501 | addr.py's reverse pass; the decompile in Q7 |
+
+### Q7. Character's slot 0x0E is 40266, an inlined copy of Actor::SaveGame; what runs 143818 and 144049 showed
+Written 15:1x UTC 2026-11-03 (the re-analyst) after serialize-on-demand-actor.js's first runs (check 20261103-143818, serialize 20261103-144049,
+RUNS 2 and DEFER true, the promoted bandit 0x39fe4): the recipe never ran because two premises refused, "on Main.threadID" and "slot 0x0E is
+37649". Every NPC is a Character (Character.h:7, `class Character : public Actor`), and VTABLE_Actor (207511) is nobody's live vtable, so the
+row "Actor's slot 0x0E is 37649" above holds for the class and not for any NPC: the bandit's slot 0x0E read 0x727d40, which VTABLE_Character
+holds at +0x70 (the DATA xref 0x1418a55c8 = 207886 + 0x70; CONFIRMED-STATIC) and Ghidra names Character::SaveGame; CommonLib declares the
+override (Character.h:31, with the comment `{ Actor::SaveBuffer(a_buf); }`). The body (HYPOTHESIS, decompile): it does NOT call 37649; the
+compiler inlined Actor::SaveGame whole, so 40266 is a second copy of Q2's sequence field for field (the level from AIProcess +0x137 or
+0xFFFFFFFF, boolBits +0xE8, the far-skin undo 37287 under the level-0 predicate 39583, TESObjectREFR::SaveGame 19528, AIProcess::SaveGame
+39429, the fixed fields +0x278, +0xEC, +0x110, now minus +0x260, +0x10C, +0x11C, +0x120, +0x124, +0x174, +0x178, +0xF0, +0x118, +0x264,
+TESNPC +0x1FC, myKiller +0x108 through 12922 and 36048, ActorState 38987 on +0xC0, +0x1F0 through 12331, the casters, selectedSpells
++0x1C8, selectedPower +0x1E8, Modifiers 39009 on +0x230, +0x23C, +0x248, +0x254, ActorValueStorage 39023 on +0x208, addedSpells +0x190
+counted, the movement byte under kSaving with movementController +0x150's slot 0x12, boolFlags +0x204, the combat controller +0x160 through
+33243, 38743, +0x184, +0x114, +0x228 through 36048, +0x27B bit 0). The five block writers are calls, not inlined, so the script's marks bound
+the same sections under 40266. One refinement to Q2 step 6 from this read: the four casters are written as ONE presence byte (the
+SaveGameMagicCasterVisitor's first pass over the four slots) and then the present casters' blocks (its second pass), not a byte per caster,
+so the span between the ActorState block and the first Modifiers block is 3 (the +0x1F0 id) + 1 + the blocks + 12 + 3 bytes. Character's
+slot 0x0D is 19527 (the vtable at +0x68, no override) and its slot 0xF2 is 37622 (the check run's premise passed). PlayerCharacter's slot
+0x0E is 40538, which calls 40266, so a Character's record and the player's share the body; the player stays refused. The script's premise
+now reads "slot 0x0E is Actor::SaveGame 37649 or Character's 40266", an exact match on either, anything else refusing.
+
+Two more facts from the runs. (1) A kill's kLifeState marks fire OFF the main thread: 143818's marks for 0x39fe4 (lifeState 0 then 1, process
+level 0, farGeometry 0) came on threads 1056, 1964 and 3292 and 144049's on 6872, against Main.threadID; the engine's death path marks from
+its own threads, so the script's DEFER exists for this, and its deferred run now fires at the first of PlayerCharacter::Update's return
+(40447, VTABLE_PlayerCharacter's slot 0xAD by Actor.h:371: once per frame on the main thread, HYPOTHESIS until the row prints its thread) or
+the next main-thread AddChange (alone it waited 13,115 ms in 144049 while the player stood still; the host mark was form 0x38ab1's). (2) D7
+again, now with its mechanism seen live: at the player's exit the engine ran MovetoLow on 0x39fe4 from 0x675fb7, inside 37501, whose body
+(decompile, HYPOTHESIS) computes the actor's target level, calls that level's move slot (0xF1 for 0, 0xF4 for 1, 0xF3 for 2, 0xF2 for 3) and,
+for levels 2 and 3, stashes through 35570 only when IsPersistent (19593) is false and the cell is neither held (cellState 2) nor passing a
+TES check (unread), after the four-flag reset 38754; the promoted bandit is persistent, so MovetoLow ran and no stash followed (stashForm 0,
+the writers meanwhile firing for other forms: stash 4,087, refrSave 339, processSave 66, actorStateSave 71, modifiersSave 284, avStorageSave
+71). The entry flags at the kill read 0x9a040427 with a null record: 0x9a040022 plus kFlags (bit 0), kHavokMoved (bit 2) and kLifeState (bit
+10).
+
+What the next run must show: the slot premise passing on the bandit, the deferred run within a frame or two (deferredMs under about 50,
+deferredVia PlayerCharacter::Update, thread equal to Main.threadID), 0x0D's dropped bits, the kind, the level u32 (0 expected, the bandit in
+high process) and the lifeState byte of the ActorState block against the live info, and length2.
+
 ### What a first actor run must read
 1. A dead lab NPC (not the player), serialize mode: 0x0D's dropped bits, 35715's kind, the level u32, length2, lifeState 2, myKiller, the
    Modifiers.
