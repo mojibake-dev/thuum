@@ -5746,3 +5746,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   papyrus-events.md: H-1b4 SetOpen about 48 a second on every seat (modelApplyUtils's frame-rate apply; Eli's flicker?), H-1b5
   Quest.Start about 1.3 a second on every seat (D-S1's data point). npc-handoff.md's T3 text at v11. Lesson repeated and written
   to memory: read every check's exit status directly before a push, never through a pipe.
+- 23:00 PST 2026-11-02 (07:00Z 11-03) (thuum-cf): the instrument m3-promote-record d66de5fd GREEN on 4849 (its client built);
+  numidium stages it with the parent's server for door v11's leg A (v10's, the deployed tree is main's) and the swap probe v9.
+  Door v11 cleared its quick review (READY FOR THE GREENS ONCE THE FIX EXISTS; the risk: a seat that reads the mill's state could
+  run the conditioned sawmill package inside 17 to 19, which the package claims would name; then leg A needs a premise outside
+  08:00 to 19:00, the inn exit); its three header nits fixed (d307274). Props round seven 41300469 GREEN on 4856. Slice 1b's
+  census rows reviewed (FIX FIRST): the self was never read ("on 0") and unbounded once read; 0ea79994 reads a form's id and an
+  alias's quest's id under SEH, caps eight selves a row a window ("on others" past them), documents the row keys in
+  Definitions.txt and regenerates the typings; x-script-natives v5 claims the four numbers and the guest's census row for the
+  relayed quest absent, the never-failing live-line zeros gone; papyrus-events.md's evidence sentences corrected (a quest's or
+  global's call never raises a per-call event; the census rows carry the evidence) and H-1b5 named from the driver's questStart
+  lines: quest 0x30002859 fourteen times per 10 s on both seats, finding 77's shape (Reading List's detection quest).
