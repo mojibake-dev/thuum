@@ -756,25 +756,31 @@ stays Refuse; the door's pre-check treats Stale as a refusal; a real return afte
 window. No wire change (no epoch travels; numidium's epoch shape is the alternative if the window proves too blunt). T0:
 cells.rs `a_passed_actors_report_back_within_the_settle_window_is_a_stale_copys_sample` and the cross test's teleport moved past
 the window; CellHostTest's door case reads the report's reliable send ahead of the word, the stale drop and the exit after the
-window. T3: b-npc-handoff-door-hosts v6 (thuum 3c15a559, 2026-11-03; v1 019b0cd3 played a walk INTO a hosted house, which worked
-before the fix, v2 dd472cc6 had four claim groups a working fix could still fail, v3 abb4d8bc and v4 974a9484 took the reads'
-order and the baselines, v5 0f9f84b0 the premise miss of the parent run 20261103-041145 (Hod's clean-world record stands in his
-house 0x133c7, unhosted and frozen), and v6 numidium's schedule read, all caught by ADR-064's fresh reviews): Hod 0x1348a OUT of
-the Sleeping Giant by its inn-side door 0x13419 to the street 0x9712 at 22:00, when his inn package (HodSleepingGiant19x3
-0x35696, 19:00 to 22:00) ends and the fallback sandbox near his editor location takes him out; the clock at 19.0; the inn's seat
-begins INSIDE his house and hosts it so his AI walks him out (a pass to the street's host) and into the unhosted inn (the street
-host's follow, claimed), then teleports to the inn's door 0x13424's landing (-250, -360, 0), steps in and is granted the inn (the
-follow's end claimed); the street's seat on Riverwood's road hosts 0x9712 and 0x9731; both roles on a restarted clock. Per leg:
-the premise in order (his record claimed before the house's seat lands, the hosts, the hour, the two walks as two waits, his 3D
-and AI on the inn's seat, the street seat's own copy of him standing indoors with no 3D: the precondition the parent's bounce
-rests on), the counts read against baselines snapshotted at the premise with the door line first (his walk into the inn is
-itself a pass into 133c6), the exit waited on the pass line itself, then at 5 s the door walk's line, one more "now simulates
-1348a in cell 97xx" and no more for 133c6, the hour past 21.5, the record outdoors, the street's seat running him loaded in 0x9712
-or 0x9731 within 150 units of the record (his walk home crosses the square edge in 5 to 7 s; a RELAXATION of v5's claim, Eli's
-word under ADR-064's W4), the inn's seat with no 3D of him and its copy out of the inn; at 65 s the counts again and nobody's copy
-in the inn. The mutation run is the fix's parent 35509f7a (leg A), the by-path probe x-handoff-door-hosts-swap v4 plays leg B's
-roles on the parent (a run stops at its first red), and a third run at handoffPassSettleMs 0 reads the reliable placement alone.
-HYPOTHESIS until those runs:
+window. T3: b-npc-handoff-door-hosts v7 (thuum 1c8f3455, 2026-11-03). v6's two red runs on the fix's parent 35509f7a settled the
+shape (numidium's reads): leg A 20261103-051454 was red at its premise with fresh seats and NO pass logged at Hod's house door, while
+the swap probe 20261103-052100 REPRODUCED playtest 41's bounce at the house door ("ff000000 passes 1348a into cell 9731 (D9)" at
+05:22:17.325, "ff000001 passes 1348a into cell 133c7 (D9)" 56 ms later, the pair every 14 s as he retried his door), the street
+seat's game having been inside the house in the run before. The bounce's precondition is a street seat whose engine holds a model of
+the resident indoors (it loaded the interior earlier in the session; playtest 41's street seat had been in the inn), and the house
+door reproduces it at any exit hour; 56 ms sits inside the 1 s settle as well as being the placement's case. v7 builds the
+precondition in and claims the door it tests. Leg A, the house door at 08:00 (the sawmill package ends his night at home; the clock
+starts at 6.5 so the visit finds him home and the exit comes about two real minutes after the house's seat hosts him; c2 the
+street's seat, c1 the house's, 052100's orientation): his record in 0x133c7; the street's seat teleports to the house door's
+landing (-506, -177, 0), is granted the house, sees him with 3D (following false), teleports to the street, the house unhosts
+behind it, and its copy of him is claimed indoors with no 3D beside its hosting of 0x9712 and 0x9731; the house's seat enters by the
+same landing, is granted the house, his 3D and AI there and the street seat's copy still indoors claimed; the baselines (the door
+line first); the exit waited on the pass line itself; at 5 s the counts with the hour past 7.9 (the door 13407 line beyond its
+baseline, one more "now simulates 1348a in cell 97xx", no "passes 1348a into cell 133c7" and no pass, follow or move of him into the
+house beyond the baseline), then the seats read back to back and the engine claims (the record in 3c, the street's seat running him
+loaded within 150 units both ways, the house's seat with no 3D and its copy out of the house); at 65 s the counts again and nobody's
+copy in the house. Leg B, the inn door at 22:00, playtest 41's own, the roles swapped (c1 the street's, c2 the inn's): a restart at
+20.0 keeps the world (his record claimed not in the inn), the street's seat lands first, hosts his cell and his inn package walks him
+into the unhosted inn under its follow (claimed), then the same visit shape on the inn (the grant ends the follow, claimed), the inn's
+seat enters, and at 22:00 the fallback sandbox near his editor location walks him out by 0x13419 (the door 13419 line, "passes 1348a
+into cell 133c6" as the bounce line, the hour past 21.9). The exterior cell claim of v5 and v6 is dropped (the record outdoors and
+the 150-unit bound carry it). The by-path probe x-handoff-door-hosts-swap v5 plays leg A with the roles swapped on the parent (a run
+stops at its first red, so the scenario's second leg never reaches the parent); a third run at handoffPassSettleMs 0 reads the
+reliable placement alone. HYPOTHESIS until those runs:
 the mechanism above (every stamp fits it), and that the street seat's copy stands indoors at the promote (the precondition,
 claimed). What the two halves carry (20:13 PST 2026-11-02, the settle branch's fresh review): the playtest's first bounce came about 8 s after
 the promote, outside any 1 s window, so the reliable copy of the passing report ahead of the word carries the playtest's case
