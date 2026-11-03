@@ -1055,6 +1055,18 @@ function gazeOf(formId: number): Record<string, number | boolean | null> {
   };
 }
 
+// npc-state's scene (x-scene-guest; playtest 41: the guest's own DialogueRiverwoodIntroScene ran over the host's
+// Sven and Hilde): the scene this game runs the reference in (Papyrus ObjectReference.GetCurrentScene), 0 for none;
+// a read that throws answers null, which lab-api reads as missing data, never the 0 a claim of no scene passes on,
+// and the step's other fields stand
+function sceneOf(ref: ObjectReference): number | null {
+  try {
+    return ref.getCurrentScene()?.getFormID() ?? 0;
+  } catch (e) {
+    return null;
+  }
+}
+
 // face-keyframes's read (playtest 37's face probe, 2026-10-28): the fork's Skyrim Platform reads an actor's three
 // FaceGen keyframe sets (BSFaceGenAnimationData's expression, modifier and phoneme, CommonLib
 // RE/B/BSFaceGenAnimationData.h:39-42) on the game thread when pollFaceKeyframes(id) asks, and faceKeyframes(id)
@@ -2635,6 +2647,9 @@ function run(step: Step, player: Actor): unknown {
           NetImmerse.getNodeWorldPositionY(npc, head, false),
           NetImmerse.getNodeWorldPositionZ(npc, head, false),
         ],
+        // the scene this game runs it in, 0 for none, null when the read threw (sceneOf): a guest's own engine
+        // playing a scene over the host's puppets (x-scene-guest)
+        scene: sceneOf(npc),
         // the gaze and the face as this game holds them (npc-stream slice 5, train 54): the previous poll's values,
         // then a new poll, so a claim reads them on a second npc-state (gazeOf)
         ...gazeOf(npc.getFormID()),

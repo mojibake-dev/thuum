@@ -2480,6 +2480,17 @@ steps:
       - c1.log_count("claim 13491") == 2
 """
 
+# a seat's pattern inside an until with no log-count step first, named by two expressions
+UNTIL_LOGCOUNT = """
+id: x-until-logcount
+clients: [c1]
+server: {snapshot: clean}
+timeout_s: 30
+steps:
+  - c1: connect
+  - until: {within: 30, every: 0.1, expect: ['c1.log_count("scene [0-9a-f]+ started") >= 1', 'c1.log_count("scene [0-9a-f]+ started") < 3']}
+"""
+
 
 class LogCount(RunTests):
     """log-count copies the seat's Skyrim Platform log and lab-driver's console tee with a read that shares write
@@ -2517,6 +2528,66 @@ class LogCount(RunTests):
         self.assertNotEqual(body["verdict"], "green", body)
         tries = [c for c in pve.calls if c[:2] == ("exec", 901) and any("logcount-" in a and ".log.copy" in a and "-console" not in a for a in c[2])]
         self.assertEqual(len(tries), 3, pve.calls)
+
+    def _counting(self, pve, land):
+        """The seat's exec with its Skyrim Platform log copies counted: land(n) runs after the nth copy."""
+        real_exec = pve.exec
+        copies = {"n": 0}
+
+        def exec_(guest, command, timeout):
+            res = real_exec(guest, command, timeout)
+            if any("logcount-" in a and ".log.copy" in a and "-console" not in a for a in command):
+                copies["n"] += 1
+                land(copies["n"])
+            return res
+
+        pve.exec = exec_
+        return copies
+
+    def test_an_until_counts_a_seats_logs_anew_each_poll(self):
+        """x-npc-death-freeze and x-scene-guest: a seat's log_count inside an until is counted anew before each poll by
+        a log-count step's own copies, so a line that lands mid-until holds it with no step first; a pattern two
+        expressions name is copied once a poll."""
+        pve = self._seat()
+        log = self.settings.client_driver_log
+        pve.files[log] = "nothing yet\n"
+
+        def land(n):
+            if n == 2:  # the line lands after the second poll's copy
+                pve.files[log] += "scene 7e3b1 started on 13483\n"
+
+        copies = self._counting(pve, land)
+        run_id, body = self._run(UNTIL_LOGCOUNT)
+        self.assertEqual(body["verdict"], "green", body)
+        until = next(s for s in body["steps"] if s.get("kind") == "until")
+        self.assertIn("held after", until["note"], until)
+        self.assertIn("3 poll(s)", until["note"], until)
+        self.assertEqual(copies["n"], 3, "one copy of the log a poll, though two expressions name the pattern")
+        self.assertEqual(self.services.board.log_count("c1", "scene [0-9a-f]+ started"), 1)  # kept as a step's count is
+
+    def test_an_assert_reads_its_log_count_step_and_counts_nothing(self):
+        """an assert keeps the seat's last log-count step: a line that lands after the step is not counted, and the
+        assert copies no log (LOGCOUNT claims the step's 2)."""
+        pve = self._seat()
+        log = self.settings.client_driver_log
+        pve.files[log] = "claim 13491 sent on E\nclaim 13491 granted\n"
+
+        def land(n):
+            if n == 1:  # right after the step's copy: a count taken anew at the assert would read 3
+                pve.files[log] += "claim 13491 again\n"
+
+        copies = self._counting(pve, land)
+        run_id, body = self._run(LOGCOUNT)
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertEqual(copies["n"], 1, pve.calls)
+
+    def test_the_live_patterns_are_named_once_for_the_holders_given(self):
+        from labapi.runner import _log_count_patterns
+
+        exprs = ['c1.log_count("a") >= 1 and server.log_count("b") == 0', 'c1.log_count("a") < 3', 'c2.log_count("c") == 0',
+                 "c1.log_count(", 'c1.view(c2).x == 0']
+        self.assertEqual(_log_count_patterns(exprs, ["server"]), [("server", "b")])
+        self.assertEqual(_log_count_patterns(exprs, ["server", "c1"]), [("c1", "a"), ("server", "b")])
 
 
 RESET = """

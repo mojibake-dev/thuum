@@ -1344,16 +1344,27 @@ class Runner:
                 return False, last
             await asyncio.sleep(1.0 * self.s.time_scale if self.s.time_scale else 0.01)
 
-    async def _evaluate(self, rec: RunRecord, index: int, exprs: list[str]) -> tuple[list[dict[str, Any]], str, str | None]:
+    async def _evaluate(self, rec: RunRecord, index: int, exprs: list[str],
+                        seat_counts: bool = False) -> tuple[list[dict[str, Any]], str, str | None]:
         """`exprs` evaluated once against fresh views (a dump-state from each
         client an expression reads): the failures, as an assert records them,
         the readings as text, and the client whose dump-state timed out, if
-        one did (nothing is evaluated then)."""
+        one did (nothing is evaluated then). With `seat_counts` (an until's
+        poll) the seats' log counts the expressions name are taken anew too."""
         # server.log_count("<regex>") is live: the run's server log counted anew before each evaluation, an
-        # until's every poll included (x-host-quit: the leave's line inside the until right after the quit)
-        for pattern in _server_log_patterns(exprs):
+        # until's every poll included (x-host-quit: the leave's line inside the until right after the quit). In an
+        # until a seat's c.log_count("<regex>") is live too: each poll copies that seat's logs anew by a log-count
+        # step's own path (_log_count, its count kept as the step's is), each pattern once a poll and about 1.5 s of
+        # guest-agent reads a pattern, so a line that lands mid-until holds it (x-npc-death-freeze, x-scene-guest).
+        # An assert counts no seat's log: it reads the last count taken (a log-count step's, or an until's last
+        # poll's), the moment its scenario chose to count at
+        holders = ["server", *(rec.scenario.clients if seat_counts else [])]
+        for holder, pattern in _log_count_patterns(exprs, holders):
             try:
-                await self._server_log_count(rec, index, pattern)
+                if holder == "server":
+                    await self._server_log_count(rec, index, pattern)
+                else:
+                    await self._log_count(rec, index, holder, pattern)
             except re.error:
                 pass  # no count stored, so the expression's own read reports it
         needed: set[str] = set()
@@ -1468,13 +1479,14 @@ class Runner:
         slowest case (the process plan's B7). Past `within` (seconds, never
         scaled, as the judged teleport's cap) the step fails as an assert
         does, each failure of kind "until" with its last readings; a syntax
-        error fails at once."""
+        error fails at once. Each poll counts the server's log and the seats'
+        logs its expressions name anew first (_evaluate)."""
         started = self._clock()
         deadline = started + (step.seconds or 0.0)
         polls = 0
         while True:
             polls += 1
-            failed, read, slow = await self._evaluate(rec, index, step.assertions)
+            failed, read, slow = await self._evaluate(rec, index, step.assertions, seat_counts=True)
             if not failed and not slow:
                 note = f"{len(step.assertions)} held after {self._clock() - started:.1f}s, {polls} poll(s)" + (f" ({read})" if read else "")
                 return True, note
@@ -2313,10 +2325,11 @@ def _client_relaunch_ps(lab_dir: str, driver_log: str, presets: list[str], stop:
     ])
 
 
-def _server_log_patterns(exprs: list[str]) -> list[str]:
-    """The regexes `server.log_count("<regex>")` names in `exprs`, each once, in order: the live server-log reads
-    an evaluation makes first (an unparsable expression names none; its syntax error is the evaluator's)."""
-    out: list[str] = []
+def _log_count_patterns(exprs: list[str], holders: list[str]) -> list[tuple[str, str]]:
+    """The (holder, regex) pairs `<holder>.log_count("<regex>")` names in `exprs` for a holder among `holders` (the
+    server, or a seat in an until), each once, in order: the live log reads an evaluation makes first (an unparsable
+    expression names none; its syntax error is the evaluator's)."""
+    out: list[tuple[str, str]] = []
     for text in exprs:
         try:
             tree = ast.parse(text, mode="eval")
@@ -2324,9 +2337,9 @@ def _server_log_patterns(exprs: list[str]) -> list[str]:
             continue
         for node in ast.walk(tree):
             if (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "log_count"
-                    and isinstance(node.func.value, ast.Name) and node.func.value.id == "server"
+                    and isinstance(node.func.value, ast.Name) and node.func.value.id in holders
                     and node.args and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str)):
-                out.append(node.args[0].value)
+                out.append((node.func.value.id, node.args[0].value))
     return list(dict.fromkeys(out))
 
 

@@ -36,6 +36,16 @@ class ProbeCheck(unittest.TestCase):
         text = HEAD + "  - assert:\n      - 'server.log_count(\"E_EQUIP_REFUSED: ff[0-9a-f]+\") == 0'\n"
         self.assertEqual(check(text), [])
 
+    def test_a_seats_log_count_is_live_in_an_until_and_not_in_an_assert(self):
+        # x-scene-guest: an until counts a seat's logs before each poll; an assert still reads a log-count step's count
+        check = _module().check
+        until = HEAD + "  - until: {within: 30, expect: ['c2.log_count(\"scene [0-9a-f]+ started\") >= 1']}\n"
+        self.assertEqual(check(until), [])
+        claim = HEAD + "  - assert:\n      - 'c2.log_count(\"scene [0-9a-f]+ started\") >= 1'\n"
+        findings = check(claim)
+        self.assertEqual(len(findings), 1, findings)
+        self.assertIn("no earlier log-count step", findings[0])
+
     def test_assert_syntax_is_caught_before_a_run(self):
         # x-body-loot v3 20261027-000612: refs_near is a method
         check = _module().check

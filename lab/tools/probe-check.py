@@ -3,11 +3,11 @@
 
 For each file:
   - it loads through labapi.scenario.load_scenario, the runner's own parse;
-  - every <client>.log_count("<p>") in an assert or until expression must name a pattern that an earlier log-count
-    step counted for that client, byte for byte: lab-api reads a seat's log_count claim only from such a step
+  - every <client>.log_count("<p>") in an assert expression must name a pattern that an earlier log-count step
+    counted for that client, byte for byte: lab-api reads a seat's log_count claim in an assert only from such a step
     (x-npc-bow and x-npc-spell 20261026-221512 and 221906, x-npc-copy-fate 20261027-041406: a claim's "server.s"
     against the step's "server's"); server.log_count is live, counted anew before each evaluation (runner.py's
-    _evaluate), so it needs no step;
+    _evaluate), and so is a seat's inside an until, counted anew before each poll, so neither needs a step;
   - every expression is dry-run through labapi.assertions.Evaluator against facades that answer nothing, so a missing
     fact (AssertionData) is the expected outcome and E_ASSERT_SYNTAX is a finding (x-body-loot v3 20261027-000612:
     `c1.refs_near.count(26)` for `c1.refs_near().count(26)`).
@@ -72,6 +72,8 @@ def check(text: str) -> list[str]:
             for holder, pattern in _log_count_calls(expr):
                 if holder == "server":
                     continue  # live: runner.py counts the server log before each evaluation
+                if st.kind == "until" and holder in sc.clients:
+                    continue  # live in an until: runner.py counts a seat's logs before each poll
                 seen = counted.get(holder, set())
                 if pattern not in seen:
                     near = difflib.get_close_matches(pattern, sorted(seen), n=1, cutoff=0.6)

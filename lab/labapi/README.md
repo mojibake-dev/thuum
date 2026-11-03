@@ -54,7 +54,14 @@ text file beside the PNG because the guest-agent file API carries text
 only), and a `request-screenshot` client verb on an unmanaged one.
 `wait: N` sleeps N times `TIME_SCALE`. Before an `assert:` block, every
 client the block reads through `.sees()` or `.view()` gets a `dump-state`
-step so the view is fresh.
+step so the view is fresh. `server.log_count("<regex>")` is counted from the
+run's server log anew before every `assert:` and every poll of an `until:`. A
+seat's `c1.log_count("<regex>")` is counted anew before each poll of an
+`until:` that names it, by a `log-count {pattern}` step's own copies of the
+seat's logs: each pattern once a poll, about 1.5 s of guest-agent reads each,
+so a poll takes that much longer than its `every`. An `assert:` counts no
+seat's log itself: it reads the last count taken, a `log-count` step's or an
+until's last poll's, the moment its scenario chose to count at.
 
 Server steps take the `server:` key: `- server: restart` restarts the server
 container and waits for its UI port; `- server: fakeclient {as: c1, moves: 5,
@@ -78,7 +85,9 @@ rides the same overlay: its `time` block starts the server's clock at that hour
 when the run's server starts (the epoch is the run's start; wire-rules
 clock.rs). NPC steps for docs/verbs/npc-puppet.md: `npc-state {formId}` is kept
 per seat and read as `c.npc_state(<id>).aiEnabled` (and .inCombat, .package,
-.combatTarget, .staggering, .x, .y, .z); `refs-near {formTypes: [43]}` then
+.combatTarget, .staggering, .x, .y, .z; .headX, .headY, .headZ, its head node's
+world position, so `headZ - z` tells a body lying from one upright; .scene, the
+scene that seat's game runs it in, 0 for none); `refs-near {formTypes: [43]}` then
 `c.refs_near().runtime_of(<base id>)` counts that base's runtime copies (ids
 from 0xff000000); a `weather {read: true}` step's sky is read as
 `c.weather().current` (the engine's current weather, a form id), `.outgoing`

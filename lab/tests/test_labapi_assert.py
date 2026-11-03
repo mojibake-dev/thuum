@@ -948,6 +948,32 @@ class PuppetFactsTests(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(AssertionData):
                 ev.evaluate(bad)
 
+    def test_a_bodys_head_height_and_the_scene_its_seat_runs(self):
+        """x-npc-death-freeze: npc-state's head node against the reference tells a body lying (the head near it) from
+        one standing or frozen upright (the head about 124 above); x-scene-guest: the scene a seat's own engine runs
+        the NPC in, 0 for none. An answer without the head, or a scene read that threw (null), is missing data."""
+        from labapi.assertions import AssertionData, Evaluator
+
+        class BodyViews(PuppetViews):
+            def __init__(self):
+                super().__init__()
+                # the host's Hod upright in no scene; the guest's copy dead, lying, in a scene its own engine plays
+                self.states["c1"][0x13483].update(head=[17302.0, -47098.0, 4.0], scene=0)
+                self.states["c2"][0x13483].update(head=[17340.0, -47080.0, -112.0], scene=0x7E3B1, is3DLoaded=True)
+                # an answer without the head, and a scene read that threw
+                self.states["c1"][0x13482].pop("head")
+                self.states["c1"][0x13482]["scene"] = None
+
+        ev = Evaluator(RichServer(), BodyViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c2.npc_state(0x13483).headZ - c2.npc_state(0x13483).z < 60"))    # lying
+        self.assertFalse(ev.evaluate("c1.npc_state(0x13483).headZ - c1.npc_state(0x13483).z < 60"))   # upright
+        self.assertTrue(ev.evaluate("abs(c1.npc_state(0x13483).headX - c1.npc_state(0x13483).x) < 8 "
+                                    "and c1.npc_state(0x13483).headY == -47098"))
+        self.assertTrue(ev.evaluate("c1.npc_state(0x13483).scene == 0 and c2.npc_state(0x13483).scene == 0x7e3b1"))
+        for bad, field in (("c1.npc_state(0x13482).headZ < 0", "headZ"), ("c1.npc_state(0x13482).scene == 0", "scene")):
+            with self.subTest(bad=bad), self.assertRaisesRegex(AssertionData, f"{field} was not reported"):
+                ev.evaluate(bad)
+
 
     def test_a_watched_actors_signed_rotation_and_where_it_stood_at_the_stop(self):
         from labapi.assertions import AssertionData, Evaluator

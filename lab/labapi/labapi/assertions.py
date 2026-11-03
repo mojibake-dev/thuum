@@ -15,8 +15,11 @@ the lab can grep (E_ASSERT_*).
   <client>.npc_state(<id>).aiEnabled | .inCombat | .package | .combatTarget | .staggering | .x | .y | .z
     | .isDead | .healthPercentage | .isEssential | .isProtected | .activationBlocked | .cell | .raceId | .worn
     | .gazeTarget | .gazeSlot | .emotionType | .emotionValue | .exprOverride | .exprIndex | .exprValue
+    | .headX | .headY | .headZ | .scene
                                                      that seat's engine state of an NPC, from its last npc-state {formId};
-                                                     the gaze and face fields carry the poll before it (train 54)
+                                                     the gaze and face fields carry the poll before it (train 54); head*
+                                                     is its head node's world position (headZ - z tells a body lying
+                                                     from one upright), scene the scene that game runs it in (0 for none)
   <client>.quest(<id>).stage() | .stageDone(<n>) | .running()
                                                      that seat's game's quest: its current stage, whether stage n is
                                                      done (n among the step's stages), whether it runs; from its last
@@ -45,7 +48,8 @@ the lab can grep (E_ASSERT_*).
                                                      "Dialogue Menu" when a talk opened
   <client>.state.crosshairRef                        the form id under that client's crosshair, what E acts on (0 for none)
   <client>.log_count("<regex>")                      lines of that client's Skyrim Platform log matching the regex,
-                                                     at its last log-count {pattern} step of that same pattern
+                                                     at its last log-count {pattern} step of that same pattern; in an
+                                                     until, counted anew before each poll (runner.py _evaluate)
   server.fate(<id>).fated | .baseId | .level | .raceId | .worn
                                                      the server's roll for a game-file actor (npc-fate, ADR-046); worn
                                                      a sorted tuple of form ids, compared with == to a seat's
@@ -866,6 +870,16 @@ class NpcStateView:
     exprOverride: bool | None = None
     exprIndex: int | None = None
     exprValue: float | None = None
+    # the head node's world position in that game (NetImmerse's "NPC Head [Head]", read since npc-state's first
+    # version): its height over z tells a body lying, the head near the reference, from one standing or frozen upright,
+    # the head about 124 above it (x-npc-death-freeze); None on an answer without it
+    headX: float | None = None
+    headY: float | None = None
+    headZ: float | None = None
+    # the scene that game runs it in (ObjectReference.GetCurrentScene's form id, 0 for none): a guest's own engine
+    # playing a scene over the host's puppets (playtest 41's DialogueRiverwoodIntroScene over Sven and Hilde,
+    # x-scene-guest); None on a driver without the read or one whose read threw
+    scene: int | None = None
 
 
 class QuestView:
@@ -1679,6 +1693,7 @@ class _ClientRef:
             raise AssertionData(f"{self.name} has not reported an npc-state step for {int(form_id):#x}")
         try:
             pos = data.get("pos") or [None, None, None]
+            head = data.get("head") or [None, None, None]
             return NpcStateView(bool(data["aiEnabled"]), bool(data["inCombat"]), int(data.get("package") or 0),
                                 int(data.get("combatTarget") or 0), bool(data.get("staggering")),
                                 float(pos[0]), float(pos[1]), float(pos[2]),
@@ -1690,17 +1705,20 @@ class _ClientRef:
                                 gazeTarget=_opt_int(data.get("gazeTarget")), gazeSlot=_opt_int(data.get("gazeSlot")),
                                 emotionType=_opt_int(data.get("emotionType")), emotionValue=_opt_float(data.get("emotionValue")),
                                 exprOverride=_opt_bool(data.get("exprOverride")), exprIndex=_opt_int(data.get("exprIndex")),
-                                exprValue=_opt_float(data.get("exprValue")))
+                                exprValue=_opt_float(data.get("exprValue")),
+                                headX=_opt_float(head[0]), headY=_opt_float(head[1]), headZ=_opt_float(head[2]),
+                                scene=_opt_int(data.get("scene")))
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s npc-state of {int(form_id):#x} lacks {e}") from e
 
     def log_count(self, pattern: str) -> int:
         """c.log_count("<regex>"): the lines of that client's Skyrim Platform log matching the regex at its last
-        log-count step of that same pattern."""
+        log-count step of that same pattern, or an until's last poll naming it (each poll counts it anew)."""
         fn = getattr(self._views, "log_count", None)
         n = fn(self.name, pattern) if fn else None
         if n is None:
-            raise AssertionData(f"{self.name} has no log-count of {pattern!r} (a log-count {{pattern}} step first)")
+            raise AssertionData(f"{self.name} has no log-count of {pattern!r} (a log-count {{pattern}} step first, or an "
+                                "until naming it; an unmanaged seat or an unread log keeps none)")
         return int(n)
 
     def figure_spells(self) -> FigureSpellsView:
@@ -1973,7 +1991,8 @@ _ATTRS = {
                 "turned", "endX", "endY", "endZ"},
     NpcStateView: {"aiEnabled", "inCombat", "package", "combatTarget", "staggering", "x", "y", "z", "isDead", "healthPercentage",
                    "isEssential", "isProtected", "activationBlocked", "cell", "is3DLoaded", "raceId", "worn",
-                   "gazeTarget", "gazeSlot", "emotionType", "emotionValue", "exprOverride", "exprIndex", "exprValue"},
+                   "gazeTarget", "gazeSlot", "emotionType", "emotionValue", "exprOverride", "exprIndex", "exprValue",
+                   "headX", "headY", "headZ", "scene"},
     MarkerView: {"visible", "canTravel"},
     ProjectileView: {"distance"},
     PosView: {"x", "y", "z"},
