@@ -74,8 +74,7 @@ steps:
       - 'server.log_count("follows 1348[23] into cell .* within the pass margin") >= 1'
       - 'server.log_count("passes 13483 into cell") <= 6'
       - 'server.log_count("passes 13482 into cell") <= 6'
-      # recorded: the passes, zero while nobody walks 256 deep
-      - 'server.log_count("passes 13483 into cell") >= 0'
-      - 'server.log_count("passes 13482 into cell") >= 0'
+      # the passes are bounded above (<= 6, the lines before); their literal >= 0 reads are gone (the gate audit,
+      # 2026-11-02): zero while nobody walks 256 deep is no claim
       - c1.npc_state(0x13483).aiEnabled != c2.npc_state(0x13483).aiEnabled
 artifacts: [server.log, c1.log, c2.log, screenshots]
