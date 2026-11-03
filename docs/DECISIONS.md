@@ -3757,9 +3757,11 @@ the lease from the duration, permanent for 0, the release at the death and at th
 NpcFateTest's reanimate case turned from the snippet to the claim; T2: difftest's reanimate session declares the UpdateHoster
 pair instead of the snippet. Client: nothing new in principle; the reconcile already promotes a puppet to a live actor at
 UpdateHoster (AI on) and demotes the former host's. HYPOTHESIS H2, the one the probe reads first: the commander's engine applied
-the Reanimate effect at its own hit on a dead puppet (AI off) before the grant arrived; whether the effect took (the actor
-resurrected in that game, then re-killed by the server's dead word, or kept) decides whether the client re-casts the spell on
-the body at the grant (castSpellImmediate by the commander on its now-live actor, the engine entry remoteServer already uses).
+the Reanimate effect at its own hit on a dead puppet (AI off) before the grant arrived; the platform's HostedResurrect gate
+(Hooks.cpp) takes only a hosted body with its AI off and never a puppet, so on paper the engine reanimates the puppet copy with
+its AI off, the grant's promote turns the AI on and the commander's first live sample stands the record inside the reanimate
+window; the probe reads the race between the puppet's deferred kill and the grant, and a re-cast at the grant
+(castSpellImmediate by the commander on its now-live actor) is the fallback if the kill wins.
 Probe x-reanimate-claim (two seats, Riverwood): c1 kills a c2-hosted resident, c1 casts Reanimate Corpse at the body; the
 server's claim line and the UpdateHoster pair; c1's console shows the actor mine and alive within 3 s, c2's shows the puppet's
 Resurrect; npc-state isDead false on both; c1 walks 20 m away and the thrall's distance to c1 on the server shrinks (it follows

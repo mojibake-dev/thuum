@@ -2441,9 +2441,12 @@ departure, a dialogue claim giving way).
 
 HYPOTHESIS H1 (ADR-060): the former host's engine, whose copy of the body is a puppet (AI off) from the grant on, does not
 stand its copy by its own effect from the relayed cast; the copy stands by the server's live word and follows the stream.
-HYPOTHESIS H2: the commander's own engine applied the Reanimate effect at its hit on the dead puppet before the grant arrived;
-whether the effect took (the actor resurrected and kept, or re-killed by the server's dead word) decides whether the client
-re-casts the spell on the body at the grant. HYPOTHESIS H3: the deaths2 client's released-body branch (AI off 4 s through the
+HYPOTHESIS H2 (narrowed by the platform's code, the same evening): the commander's own engine applies the Reanimate effect at
+its hit on the dead puppet before the grant arrives; Hooks.cpp's HostedResurrect gate takes only a hosted body with its AI off
+and never a puppet, so the engine's reanimation (38820) runs on the puppet copy with its AI off (finding 54's "stands but gets no
+npc"), the grant's promote turns the AI on, and the commander's first live sample stands the record inside the reanimate window
+NoteReanimateAccepted opens at the hit. On paper no re-cast at the grant is needed; what the probe reads is the race between
+the puppet's deferred kill (a puppet standing against a dead record) and the grant's arrival, one round trip after the hit. HYPOTHESIS H3: the deaths2 client's released-body branch (AI off 4 s through the
 ragdoll) races the grant; the reconcile must read the server's word over its own dead branch. Probe x-reanimate-claim (c1
 kills a c2-hosted resident, c1 casts Reanimate Corpse at the body: the claim line and the UpdateHoster pair, c1's actor mine
 and alive within 3 s, c2's puppet Resurrect, npc-state isDead false on both, the thrall's server distance to c1 shrinking as
