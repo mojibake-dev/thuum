@@ -6552,3 +6552,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   a deferred forced demotion (callers ClearTargetImpl and Finish: an alias clear, a quest finish, HYPOTHESIS). Caveat for the script's
   actor mode: a deflated record (length2 nonzero) must be inflated (35932's gate) before decoding. The section closes with the five
   reads a first actor run must make.
+- 05:51 PST 2026-11-03 (13:51Z 11-03) (thuum-cf): thuum main GREEN again, pipeline 5002 on 32eb322e (lab-tests, labapi-tests, scenario-lint,
+  docs-lint, scenario-gate all success); the gate stage runs again on main. labapi-image did not run on it (its rules want a
+  lab/labapi change; 32eb322e touched lab/gamemode), so b5e02c05's fakes.py reply shape is not in an image yet; nothing on the lab
+  reads that key, a ci-run thuum builds it when numidium wants it. The actor-mode serialize script is being written by the
+  re-analyst (a second script, the REFR one at its budget) for a promoted, loaded actor at its kLifeState mark, serialize only, no
+  compare; its fresh review follows; the lab is booked by r3's stage and gate until about 16:30Z.
