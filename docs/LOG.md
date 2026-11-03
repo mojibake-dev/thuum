@@ -7378,3 +7378,27 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   relaunch came back on, and my re-send right after a relaunch froze c2 (hang-dump in 214134's results); the 22:00 window missed. Eli's
   calls after it: ADR-067 decisions 6 to 8 (54da0163): the exclusive container hold, the work order (containers, scripting and quests,
   physics objects), turbo mode without the full ceremony before a playtest.
+- 14:30 PST 2026-11-03 (22:30Z 11-03) (thuum-cf): ADR-065 system 1's corpse slice is WHOLE on fork m3-adr065-system1 7852cea4, pushed for its full build (the
+  Windows job builds the client). The two remaining fresh reviews came back GO: the native layer (0 blocking, two fixes before merge
+  applied at 54c31311: Serialize and Apply under a catch, since a throw past TESModPlatform::Add leaves the JS pool thread waiting
+  forever in PushToWorkerAndWait, a frozen seat; the serialize reads every remap row back from the packed record, H3's varint shift
+  refusing on the owner with the reason logged instead of dying at the server's E_CHANGEFORM_REMAP; the premise rows at info; ParseNumber
+  never octal) and the wire and server layer (0 blocking, notes applied at 36efff6d: SCHEMA_VERSION 33 because 31 is TrapHit's and 32
+  rune-glyph's; the t numbers 72 to 74 and wire ids 80 to 82 STAY, being positional, the wire id t plus 8 pinned by
+  skymp_wire_ids_are_msg_type_plus_offset, so the collision with TrapHit's 72 in WIRE.md renumbers when the second branch lands on parity;
+  the refusal counter foreign only for OWNER and EPOCH; the raw-rows comment on ADR-065 risk 2; the header doc and a dropped duplicate
+  RANGE test; the difftest comment's typo). The reviewer's note 7 landed on the client half (2f878eab): a record whose remap list is
+  incomplete (remapTruncated or census.dropped above 0) never travels. cargo test 489 green, clippy clean, fork-lint clean on every branch
+  and on the merge (one conflict, both property bindings kept). Docs: WIRE.md's ChangeForm section after TrapHit's; change-form.md's
+  contract (the completeness and read-back rules, the follow case refused E_CHANGEFORM_OWNER in this slice per the wire review's finding
+  2, 1.7.104's 0x4E a HYPOTHESIS, three Status boxes ticked); NATIVES.md regenerated at 7852cea4 with the two natives' rows (R2,
+  change-form); the research note's Q7 corrected (Character::SaveGame 40266 and LoadGame 40267 are jump thunks to 37649 and 37650, the
+  bytes e9cbe9f5ff and e98bf0f5ff at 0x727d40 and 0x727d50 read in Ghidra, not inlined copies). The probe x-corpse-record v2 (by path,
+  lab/.cache/probes, sha1 0ee1ea9c) adds leg R, rule 6's restart persistence (the wire review's finding 5): the server restarts, both seats
+  reconnect, changeFormFnv and changeFormAt equal leg A's snapshot, both copies dead within 32 units of the record; parsed by lab-api
+  (107 steps, 48 claims). apply-on-demand.js v2.4 (LIVE premise, the sit and furniture witnesses, KillImpl 37896, the timed snapshots;
+  sha1 b1ca1c86) is written and in its fresh review, uncommitted until it passes. ADR-067 amended by Eli (54da0163, numidium): decisions
+  6 to 8, the exclusive container hold first, then scripting and quests, then physics objects, in turbo mode; the container hold's map
+  (what exists, the gaps, the smallest real fix) is being read now. numidium's F9 read of playtest 43's scene (c2's own scene line
+  spoken before c1 arrived, the host's scene producing no lines after the fix's stop, the watcher's say refused on its own quest state)
+  is scripting's, the next arm's, as Eli said.

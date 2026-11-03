@@ -43,7 +43,11 @@ cell another owns; two seats loading the cell in either order. Each a leg of the
 
 The actor's cell's host owns the actor and reports its record; the epoch on every report is the cell's host epoch the client
 holds (ADR-066's stamp; the two-phase hand-off itself is ADR-066's build after system 1 merges). Non-owners render the record
-and never simulate. The server records, relays, arbitrates and validates consistency only.
+and never simulate. The server records, relays, arbitrates and validates consistency only. The owner the server judges by is
+the cells table's host of the actor's cell (GetCellHost), not WorldState::HostOf's simulator: a follow's record (npc-handoff
+decision a, the actor in a cell nobody hosts under the host that moved it, a body that ragdolls across a boundary) is refused
+E_CHANGEFORM_OWNER in this slice and counted; its acceptance is ADR-066's, with the follow row's origin epoch as the stamp (the
+wire layer's review, finding 2).
 
 ## Authority
 
@@ -94,8 +98,13 @@ Nothing new: a non-owner's marks are counted, never swallowed (amendment F). The
 - C2S ChangeForm (reliable): epoch u32; formId u32 (the shared load order's id); formType u8; flags u32; version u8; body:
   the WHOLE record (its header included) as a lowercase hex string on the JSON wire, two characters per byte, cap 65536 bytes
   (131072 characters); fnv1a u32 (FNV-1a 32, basis 0x811c9dc5, prime 0x01000193) over the decoded record bytes; remap: list of
-  {offset u32 (a RECORD offset, the header's width included), formId u32, index u32} (cap 256). The validator (same commit, rule
-  4): formId within the load order's ranges and not a player's; version 0x4E; the hex even and [0-9a-f]; the decoded record's
+  {offset u32 (a RECORD offset, the header's width included), formId u32, index u32} (cap 256). An owner whose remap list is
+  incomplete (the native's remapTruncated at its 256-row cap, or census.dropped above 0: id writes past its census cap) sends
+  nothing, since a seat-local id the receiver cannot remap would land as a foreign id; a row the serialize cannot read back from
+  its own record (H3: a varint placeholder patched after an id write shifts the tail a byte) refuses the serialize on the owner,
+  the reason in its log. The validator (same commit, rule
+  4): formId within the load order's ranges and not a player's; version 0x4E (1.6.1170's 35740; whether 1.7.104 writes 0x4E is
+  HYPOTHESIS, and a seat on it would be refused E_CHANGEFORM_HEADER, ADR-025); the hex even and [0-9a-f]; the decoded record's
   header (byte 0 on) with a type byte matching formType and lengths matching the decoded size; the fnv over the decoded bytes
   equal to fnv1a; every remap row's offset inside the decoded body with its three bytes decoding to kind 0 and the row's index;
   the sender the host of the actor's cell at `epoch` (the cells table); caps. Refusals: E_CHANGEFORM_RANGE, E_CHANGEFORM_HEADER,
@@ -119,8 +128,9 @@ the server: nothing of the body in this slice (the sections the server validates
 Native (Skyrim Platform C++), as built on adr065-sys1-native for the corpse trigger: two TESModPlatform Papyrus statics called
 through callNative in the update context and returning JSON strings (a Papyrus native returns no object and callNative takes no
 array): SerializeChangeForm(refr) runs the on-demand recipe with the 35928 census and returns {formId, formType, flags, version,
-bodyHex (the whole record), fnv1a, remap [{offset, formId, index}], census, thread, ...} or "" with the reason in the platform
-log; ApplyChangeForm(refr, bodyHex, flags, version, remapRows "offset:formId:index,...") runs the REMAP step through 35928 then
+bodyHex (the whole record), fnv1a, remap [{offset, formId, index}], remapTruncated, census {rows, type0.., dropped}, thread, ...}
+or "" with the reason in the platform log (a premise refused, a remap row that did not read back, or the body threw: every throw
+is caught inside the native, since one past TESModPlatform::Add leaves the JS pool thread waiting forever); ApplyChangeForm(refr, bodyHex, flags, version, remapRows "offset:formId:index,...") runs the REMAP step through 35928 then
 35509, 35568 and 35567 and returns {applied, reason, fnvPatched, ...}; every address proven in a startup line with its first bytes
 (the slice's T1). H1, read first on the lab: the natives run on the platform's update thread, not the main thread (the scripts
 deferred to Main's); the fork's own 3D drop and rebuild runs there (rerollActor), so the premise is reported, not enforced. The
@@ -157,10 +167,10 @@ Four reads on the lab, each a Frida run on the existing scripts before the recei
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared
 - [x] engine surface cited or delegated
-- [ ] server logic + T0
-- [ ] message + validator (same commit)
-- [ ] native hook + T1
-- [ ] TS handler
+- [x] server logic + T0 (adr065-sys1-wire, the fresh review GO; adr067-corpses-srv, GO)
+- [x] message + validator (same commit) (t 72, 73, 74 and wire ids 80 to 82, positional; SCHEMA_VERSION 33; the collision with TrapHit's 72 in WIRE.md renumbers at the parity merge)
+- [ ] native hook + T1 (built on adr065-sys1-native, review GO; T1 is the ready log's proof line, unread)
+- [x] TS handler (adr067-corpses-client, the fresh review FIX FIRST applied)
 - [ ] T2 green
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)

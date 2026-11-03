@@ -622,14 +622,16 @@ clear or the quest's finish, with a stash only if its cell is then unloaded.
 | Actor::Update, which Character does not override (slot 0xAD, Actor.h:371); PlayerCharacter::Update (the same slot of 208040): the script's per-frame main-thread trigger | 0x667d40, 0x732660 | 37348, 40447 | read_bytes on 207511 + 0x568, 207886 + 0x568, 208040 + 0x568 (CONFIRMED-STATIC for the slots; the names are CommonLib's, Ghidra has none for either) |
 | the MovetoLow caller at the player's exit (run 144049's return address 0x675fb7 lies inside 37501, the process-level update of the actor's own path, Q5) | 0x675c70 | 37501 | addr.py's reverse pass; the decompile in Q7 |
 
-### Q7. Character's slot 0x0E is 40266, an inlined copy of Actor::SaveGame; what runs 143818 and 144049 showed
+### Q7. Character's slot 0x0E is 40266, a jump thunk to Actor::SaveGame (37649); what runs 143818 and 144049 showed
 Written 15:1x UTC 2026-11-03 (the re-analyst) after serialize-on-demand-actor.js's first runs (check 20261103-143818, serialize 20261103-144049,
 RUNS 2 and DEFER true, the promoted bandit 0x39fe4): the recipe never ran because two premises refused, "on Main.threadID" and "slot 0x0E is
 37649". Every NPC is a Character (Character.h:7, `class Character : public Actor`), and VTABLE_Actor (207511) is nobody's live vtable, so the
 row "Actor's slot 0x0E is 37649" above holds for the class and not for any NPC: the bandit's slot 0x0E read 0x727d40, which VTABLE_Character
 holds at +0x70 (the DATA xref 0x1418a55c8 = 207886 + 0x70; CONFIRMED-STATIC) and Ghidra names Character::SaveGame; CommonLib declares the
-override (Character.h:31, with the comment `{ Actor::SaveBuffer(a_buf); }`). The body (HYPOTHESIS, decompile): it does NOT call 37649; the
-compiler inlined Actor::SaveGame whole, so 40266 is a second copy of Q2's sequence field for field (the level from AIProcess +0x137 or
+override (Character.h:31, with the comment `{ Actor::SaveBuffer(a_buf); }`). The body IS 37649's: 0x727d40 holds `e9 cb e9 f5 ff`, a
+jmp rel32 to 0x686710 = 37649, and 0x727d50 (40267) holds `e9 8b f0 f5 ff`, a jmp to 0x686de0 = 37650 (read_bytes on the unpacked
+image at the native layer's review, 2026-11-03, CONFIRMED-STATIC; Ghidra's decompiler shows the target's body under a thunk, which this
+section first read as an inlined copy), so 40266 runs Q2's sequence field for field (the level from AIProcess +0x137 or
 0xFFFFFFFF, boolBits +0xE8, the far-skin undo 37287 under the level-0 predicate 39583, TESObjectREFR::SaveGame 19528, AIProcess::SaveGame
 39429, the fixed fields +0x278, +0xEC, +0x110, now minus +0x260, +0x10C, +0x11C, +0x120, +0x124, +0x174, +0x178, +0xF0, +0x118, +0x264,
 TESNPC +0x1FC, myKiller +0x108 through 12922 and 36048, ActorState 38987 on +0xC0, +0x1F0 through 12331, the casters, selectedSpells
@@ -715,7 +717,7 @@ is unproven is the result on screen.
 | the initial data: reader (buf, form, flags) -> kind, its body, the fixed-part decoder, the type decision, the writer; TESObjectREFR::SetAngle and SetPosition (HYPOTHESIS names), the cell move, the cell-or-worldspace resolver, the grid cell, the ACHR registration, the actor predicate before editorLocForm, the position check, the TES cell check, the worldspace registrations | 0x60e5e0, 0x60e630, 0x60df60, 0x60dac0, 0x60e1c0, 0x2ea6a0, 0x2ea960, 0x2eb8c0, 0x21f1b0, 0x1af5c0, 0x607aa0, 0x663ea0, 0xd17350, 0x19cdf0, 0x30af40, 0x30aca0, 0x30a120 | 35716, 35717, 35714, 35708, 35715, 19786, 19790, 19799, 15903, 13641, 35607, 37301, 70171, 13308, 20542, 20541, 20526 | callees of 35569 and 35717 |
 | the Havok block writer (ref, buf), its pre-pass (ref, state), its pre-pass callback, its per-body writer, the collision-object traversal (node, state, callback); the block READER (ref, buf) and its per-body reader; the body's motion-type set, the collision object's update, the body activate; the keyframe predicate on a living actor; the character controller getter | 0x2db2c0, 0x2db1b0, 0x2dbc00, 0x2dbce0, 0xe87df0, 0x2db450, 0x2dbfc0, 0xe92b20, 0xea59b0, 0xe93140, 0x674f50, 0x6628f0 | 19534, 19533, 19536, 19537, 77883, 19535, 19538, 78077, 78384, 78088, 37484, 37258 | callees of 35715, 19534, 19535; xrefs of 19535 |
 | the queued sub-buffers at the manager's +0x208: the enqueue (mgr, kind, buf, id), the queue read (queue, kind, buf, id), the flush of all three kinds, the flush of one kind, the per-entry handler (kind*, form, subBuffer), the sub-buffer alloc, the hash insert; the ExtraSavedHavokData setter and its applier (from the 3D init, two call sites), the ExtraSavedAnimation setter, the animation reader, the character-controller reader, the discard | 0x6053f0, 0x625ef0, 0x626020, 0x6261b0, 0x6264e0, 0x626760, 0x626250, 0x16aa00, 0x16ab60, 0x625800, 0x2e8140, 0x16a7d0, 0x2f5fe0, 0x715f90, 0x5b4050 | 35587, 36023, 36024, 36026, 36031, 36032, 36027, 11977, 11979, 36014, 19742, 11973, 20099, 40045, 34201 | callees of 35717, 35567, 36031; xrefs of 19535 and 11979 |
-| Actor::LoadGame, Character::LoadGame (slot 0x0F of 207886 at +0x78; an inlined copy sharing 37650's tail), Actor::FinishLoadGame, the ActorState reader, the Modifiers reader, the ActorValueStorage reader, AIProcess::LoadGame, its finish, the set-process-level, the target-level chooser, the cached-values invalidation; the penetration util getter (middleHigh +0x258, MiddleHighProcessData.h:184) and its bhk setup; the per-graph callbacks; IsInRagdollState (Ghidra's name) | 0x686de0, 0x727d50, 0x687a80, 0x6ced00, 0x6cffc0, 0x6d1200, 0x6e67c0, 0x6e97b0, 0x6760d0, 0x676370, 0x67fac0, 0x70f6d0, 0xe98d40, 0x541590, 0x54e2b0, 0x54e400, 0x66afa0 | 37650, 40267, 37652, 38988, 39010, 39024, 39430, 39432, 37502, 37503, 37592, 39859, 78210, 32710, 32956, 32963, 37364 | read_bytes on 207886 + 0x78 (CONFIRMED-STATIC); callees of 37650, 37652, 19535 |
+| Actor::LoadGame, Character::LoadGame (slot 0x0F of 207886 at +0x78; a jump thunk to 37650, `e9 8b f0 f5 ff` at 0x727d50), Actor::FinishLoadGame, the ActorState reader, the Modifiers reader, the ActorValueStorage reader, AIProcess::LoadGame, its finish, the set-process-level, the target-level chooser, the cached-values invalidation; the penetration util getter (middleHigh +0x258, MiddleHighProcessData.h:184) and its bhk setup; the per-graph callbacks; IsInRagdollState (Ghidra's name) | 0x686de0, 0x727d50, 0x687a80, 0x6ced00, 0x6cffc0, 0x6d1200, 0x6e67c0, 0x6e97b0, 0x6760d0, 0x676370, 0x67fac0, 0x70f6d0, 0xe98d40, 0x541590, 0x54e2b0, 0x54e400, 0x66afa0 | 37650, 40267, 37652, 38988, 39010, 39024, 39430, 39432, 37502, 37503, 37592, 39859, 78210, 32710, 32956, 32963, 37364 | read_bytes on 207886 + 0x78 (CONFIRMED-STATIC); callees of 37650, 37652, 19535 |
 | the suppress-bit helper (mgr, clear) -> was-clear; the "FORMS:" log; the unload queue; the cell detach; the quit predicate; ProcessLists' queued move | 0x2cfe60, 0x601770, 0x63b120, 0x2ba0b0, 0x648cb0, 0x76e5c0 | 19378, 35519, 36459, 19032, 36600, 41343 | callees of 35569, 35567, 37652 |
 
 ### Q1. The engine's own paths that apply a record to a form, and which of them reach a loaded actor
@@ -844,7 +846,7 @@ applied to the guest's bodies (a corpse's are near zero; a dying one's are not);
 the dead record is the one to send, both for the ActorState block and for the dynamic motion type.
 
 ### Q4. Actor::LoadGame on a loaded actor, and what it would undo on a guest's puppet
-37650 (and Character's 40267, an inlined copy with a shared tail; HYPOTHESIS, decompile) writes, in order: race (+0x1F8 from the base);
+37650 (and Character's 40267, a jump thunk to it; read_bytes 2026-11-03) writes, in order: race (+0x1F8 from the base);
 the process level through 37502 (0xFFFFFFFF destroys the process; a level creates one when missing and moves to it when it differs:
 MoveToHigh for 0); boolBits (+0xE8) whole; TESObjectREFR::LoadGame (19529); AIProcess::LoadGame (39430) when a process exists; +0x278,
 +0xEC, +0x110; the live lifeState bits are put back over whatever 19529 and 39430 left (actorState1 &= 0xFE1FFFFF then |= the saved
@@ -1217,7 +1219,7 @@ fills from the Value's flags, so the apply script's FLAGS parameter is exactly `
    the queue read 36023, the ONLY length-prefixed section (a varint length, skippable); kOpenDefaultState for non-actors (no bytes); an
    unconditional no-byte tail. So a flag bit cleared without its bytes cut either changes nothing (the other bit of a combined mask still
    consumes the section) or starts the next reader on the wrong bytes.
-2. Actor::LoadGame (37650, 0x686de0) and Character's (40267, 0x727d50, an inlined copy that jumps into 37650's tail) read the actor block
+2. Actor::LoadGame (37650, 0x686de0) and Character's (40267, 0x727d50, a jump thunk to 37650) read the actor block
    UNCONDITIONALLY and check nothing: u32 level to 37502 first (the process destroyed or created), u32 boolBits, then 19529, then
    AIProcess::LoadGame (39430) whenever a process exists (no flag test, no count check), then fixed fields, ActorState (18 bytes applied
    whole, lifeState included), handles and MagicItem ids by 3-byte id, four Modifiers blocks, ActorValueStorage (39024: varint counts into

@@ -797,6 +797,36 @@ Fixtures 72-TrapHit-0 and -1. No difftest session triggers it (the fake clients 
 client half (where the host's engine takes afDamage: the DamageActor replacement or ProcessTrapHit's own implementation) follows
 x-object-anim v3's trap-hit trace.
 
+### ChangeForm (t 72), ChangeFormAck (t 73) and ChangeFormApply (t 74): an actor's change form as its owner's engine wrote it (change-form, ADR-065 system 1; ADR-067's corpse first)
+
+Since fork adr065-sys1-wire 36efff6d (15:0x PST 2026-11-03, SCHEMA_VERSION 33; 31 is TrapHit's above and 32 m2-rune-glyph's): the
+three share TrapHit's t 72 and wire id 80, because the wire's numbers are positional (the wire id is t plus 8, the variant index,
+pinned by wire-schema's tests), so the second of the two branches to land on parity renumbers; the schema number is distinct so no
+two builds at 31 disagree on what a 72 means. ChangeForm (id 80, MsgType 72), client to server, reliable: `{ epoch: u32 (the
+cell's host epoch the sender holds, ADR-066's stamp), formId: u32 (a game-file actor's, never 0 or a player's), formType: u8,
+flags: u32 (the record header's flags as CheckSaveGame kept them), version: u8 (0x4E, 1.6.1170's 35740), body: String (the WHOLE
+packed record, header included, as lowercase hex, two characters a byte, at most 131072 characters for 65536 bytes), fnv1a: u32
+(FNV-1a 32, basis 0x811c9dc5, prime 0x01000193, over the decoded bytes), remap: [{ offset: u32 (a RECORD offset), formId: u32,
+index: u32 }] (at most 256) }`. The validator (wire-validate check_change_form, codes 208 to 212 on the transport): formId 0, a
+player's or formType above 0x3f E_CHANGEFORM_RANGE; a body under four bytes, over the cap or over 256 rows E_CHANGEFORM_SIZE; a
+character that is not lowercase hex, a size code the pack never writes, the type byte against formType, a version other than
+0x4E or the lengths against the body E_CHANGEFORM_HEADER; the hash E_CHANGEFORM_HASH; a row outside the data, its three bytes not
+kind 0 with the row's index (big-endian, the kind in the top two bits, D6), a form of 0, load index 00 or a created form, or an
+offset twice E_CHANGEFORM_REMAP; the sender's budget 32 then 8 a second (E_VAL_RATE, UNMEASURED). Nothing of the body beyond the
+header and the rows' three bytes is read anywhere on the server. The core (ActionListener::OnChangeForm) takes it from the host
+of the actor's cell at the named epoch alone (E_CHANGEFORM_OWNER, E_CHANGEFORM_EPOCH; a follow's record is refused in this slice,
+docs/verbs/change-form.md's Ownership), for an actor it holds (RANGE by name), writes it on the actor's change form as
+changeFormRecord (an optional key, the fork's migration idiom; labState's ref reads changeFormFnv and changeFormAt), refuses once a
+minute per sender and form in the log and counts the rest, and answers ChangeFormAck (id 81, MsgType 73), server to client,
+reliable: `{ formId: u32, fnv1a: u32 }`, the owner's compare baseline. ChangeFormApply (id 82, MsgType 74), server to client,
+reliable: `{ formId, formType, flags, version, body, remap }` (the sender's rows untranslated: the receiver re-encodes its own
+indices through the engine's 35928), sent behind CreateActor on subscribe and once per CellLoaded for the cell's actors with a
+record, so the record reaches a seat before the actor's first frame there; the client applies it through TESModPlatform.
+ApplyChangeForm after its own kill of the copy (docs/verbs/change-form.md). Fixtures 72-ChangeForm-0 to -6 (0 and 1 valid, 2 to 6
+one refusal each by name), 73-ChangeFormAck-0 and -1, 74-ChangeFormApply-0 and -1; WireJsonContractTest reads them through the three
+C++ headers. difftest/sessions/change-form.yaml: a fake client's well-formed record for an actor the server never holds (the core's
+RANGE by name, nothing sent) and the same record with a wrong hash (the edge's 210); T0 unit/ChangeFormTest.cpp.
+
 ### SpellCast (t 23) gains `decal` (the rune's glyph on the observer; queued by Eli 2026-11-02)
 
 Since fork m2-rune-glyph dd5aa100 (dd5aa100 plus its client build's two fixes) (14:02 PST 2026-11-02, SCHEMA_VERSION 32; 31 is m4-trap-hit's): SpellCastData gains the optional
