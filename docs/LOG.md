@@ -7345,3 +7345,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   adr065-sys1-wire writing, with the reconciliation (the body a hex string of the whole record, remap offsets record offsets, MsgType
   72 to 74; the verb doc's contract corrected at acf5a931). The merged branch stages when all four are GO and the fork's Windows job
   has built the client.
+- 13:57 PST 2026-11-03 (21:57Z 11-03) (thuum-cf): F1's fix LIVE (numidium: turbo-srv m3-turbo3-sys1-f1-c1600f98 at 13:41 PST, the world saved as
+  playtest-turbo-m3-turbo3-sys1-f1-c1600f98-20261103T214107Z): x-stray-copy-moved GREEN 20261103-214134 (9 of 9) on the P10
+  construction, the server printing "ff000000's own copy of 3550c told to move to the record at (23254, -44472, -10) in 3c (the
+  record's cell 9712 is another game's; the copy stood at (-211, 203, 0) in 133c6 here)" (c1's own inside copy against the porch
+  record, F1's direction reversed), no snippet failure on either seat, every copy agreeing at the end; r3's same construction printed the
+  old "own copy of 3550c hidden" (213118). MECHANISM ONLY: playtest 42's frozen copy never reproduced (213538's restart made no stray),
+  so playtest 43 (up since 13:48 PST on that server and r3's dist; Hod's 22:00 exit, a restart on Eli's word, the dialogue, Sven and
+  Hilde; the hold to 00:47Z) is the proof, its findings as F8 onward. ADR-067's cite fixed to ADR-063 decision 1 (8c5ba967).
