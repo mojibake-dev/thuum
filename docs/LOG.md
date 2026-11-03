@@ -7307,3 +7307,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   adr067-corpses-srv unchanged: the owner's post-death samples to rest as the record's position), one merged branch for the stage,
   fresh reviews each; about five working days. docs/verbs/change-form.md's status says so. F1's image turbo3-sys1-f1-6cce828e is
   built (pipeline 5096) and goes to the lab first.
+- 13:37 PST 2026-11-03 (21:37Z 11-03) (thuum-cf): F1's image built: fork m3-turbo3-sys1-f1 at c1600f98 (6cce828e's PartOne.cpp plus the finding-38 unit case asserting the move
+  snippet instead of the Disable: its REQUIRE(hidden) went red on pipeline 5099), pipeline 5101 green with server-build 18095 and the
+  unit run green; the turbo-srv tag is m3-turbo3-sys1-f1-c1600f98, with numidium for the F1 probe's review and Eli's go. Two lessons
+  of the hour: the fork's server-build runs only on parity, a merge request, a schedule or a branch named m<digit>-... (turbo3-sys1-f1's
+  pushes built the wire alone and an API pipeline did not help; the same commit under m3-turbo3-sys1-f1 built), and a piped test
+  (`(... | tail) &&`) hid a lab-test invocation's error while a commit went through (the tests were green when run the CI way).
+  numidium's F1 probe on r3 (211844, 212407) showed a MoveTo construction cannot make F1 (the server's MoveTo informs the watcher); the
+  deterministic reproduction is the sighting path (the record parked outside with the inn empty, c2 hosting the street, c1 entering the
+  inn so its engine's own Embry stands inside and its roster moves the record in, P10), else the play proof tonight with the fix's line.
