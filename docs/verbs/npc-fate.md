@@ -2054,16 +2054,20 @@ and about 120 below the eye (about 13 counts a degree on this seat; the rune pro
   nothing ticking the graph and the skeleton stopped where it was (c2's head 12.8 and 54.6 units above the root, identical across
   three reads; the green's head 4.8 below the root after a full settle). The deferred kill was armed and did not hold against the
   kill move's route (KillActorHandler to Actor::Kill to KillImpl), so the graph's door is the puppet's real guard. The rule, as
-  ADR-050 decision 2 already says: a puppet's death is the server's word. The fix (m3-system1-r3 db0e19a5, both fresh reviews NOTES
-  ONLY): replayActions drops a KillMove* event for a puppet ("<id>: the host's <event> not replayed on the puppet, a puppet's death
-  is the server's word", once per puppet per process), the puppets' analogue of deathService.hookDisableKillMoves for the figures;
-  and onResurrected clears deadFlaggedSince, so the settle clock restarts at the last death. What the guest sees: a kill move only on
-  the killer's screen; the victim stands through it until the word, then drops with the engine's full death (the figures'
-  precedent; playtest 42's checklist line). Left for the next train, with its own read in x-npc-death-guest's frame: the puppet
-  graph's second mouth, the event relay, still carries a kill move to a puppet by a creature's events, a humanoid event outside the
-  PerformAction entry, or the guest's own kill move on a puppet it hits (HYPOTHESIS, all three); the shape is the figures' hook
-  widened to puppets (isPuppet read inside a sendAnimationEvent hook on the game-file range); and two unread names before the match
-  widens, the exe's "pa_KillingBlow" and the IDLE records' ENAMs. The read is x-npc-death-freeze v4 twice on the re-stage.
+  ADR-050 decision 2 already says: a puppet's death is the server's word. The fix, two rounds on m3-system1-r3: db0e19a5
+  (replayActions drops a KillMove* event for a puppet, "<id>: the host's <event> not replayed on the puppet, a puppet's death is the
+  server's word", once per puppet per process; onResurrected cleared deadFlaggedSince), then 7d0d4d7e after numidium's review found
+  the clear undone in the same tick (the fate's resurrect is queued past the JS tick and reconcile restamped the still-dead body) and
+  the drop missing kill moves by name and by channel: the settle clock is now cleared in reconcile's live path, where the body is
+  SEEN alive, and deathService.hookDisableKillMoves is widened to the game-file range with the puppet read inside the hook (the
+  animation.ts idiom; the range and the patterns filter in native) for KillMove*, KillingBlow*, 2HWKillMove* and KillWerewolf*, the
+  idles' ENAMs less "pa_" (KillMoveD and KillMove1HMStabUpFace seen; the rest in the tree, HYPOTHESIS beyond the two), which covers
+  the event relay's mouth too (a creature's events, a humanoid event outside the PerformAction entry); the replay drop stays as the
+  cheap first filter with its lab line. What the guest sees: a kill move only on the killer's screen; the victim stands through it
+  until the word, then drops with the engine's full death (the figures' precedent; playtest 42's checklist line). The deeper shape,
+  a later round with its own read: refusing a puppet's own KillActor kill while the victim animation plays, so the guest sees the
+  victim half. Pre-existing and not these rounds: the stand-up pass re-arms the deferred kill on a still-dead body. The read is
+  x-npc-death-freeze v4 on db0e19a5 (the re-stage) and v5 (c2's drop line and no resurrect, numidium's) on 7d0d4d7e.
   HYPOTHESIS (the fresh review of x-essential-bind v1 and x-respawn-teleport-hold v2, 2026-11-03, a static read of
   ActionListener.cpp's stamping and standing branches): an actor whose ENGINE refuses the death (an essential base, set by the game
   files or by a typed setessential on the host's seat) answers a server kill with bleedout, so the host's zero sample stamps the body

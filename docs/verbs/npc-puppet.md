@@ -611,11 +611,13 @@ word (ADR-050 decision 2), so the host's kill move is NOT replayed on a puppet's
 at its KillActor tag 3 s before the word (x-npc-death-freeze 140538 and 152912), the dead check stood it up, the word killed it again
 and the puppet's release clock, counting from the first death, froze the second ragdoll mid-fall. formView.replayActions drops a
 KillMove* event for a puppet (said once per puppet, "<id>: the host's <event> not replayed on the puppet, a puppet's death is the
-server's word"), the puppets' analogue of deathService's hook that blanks the figures' kill moves; onResurrected clears the settle
-clock. On the viewing seat the victim stands through the host's kill move until the word, then drops with the engine's full death.
-The graph's other mouth, the event relay (a creature's events, a humanoid event outside the PerformAction entry, the guest's own kill
-move on a puppet it hits), still carries a kill move (HYPOTHESIS, no run yet); the figures' hook widened to puppets is the next
-train's, with its read in x-npc-death-guest's frame.
+server's word"), and since 7d0d4d7e the figures' hook itself is widened to the game-file range with the puppet read inside it
+(KillMove*, KillingBlow*, 2HWKillMove*, KillWerewolf*), which covers the graph's other mouth, the event relay (a creature's events, a
+humanoid event outside the PerformAction entry); the settle clock is cleared where reconcile sees the body alive (the onResurrected
+clear was undone in the same tick). On the viewing seat the victim stands through the host's kill move until the word, then drops
+with the engine's full death. The guest's own kill move on a puppet it hits (HYPOTHESIS, no run yet) and the deeper shape, the
+victim animation playing while the puppet's own KillActor kill is refused, are a later round's with their read in x-npc-death-guest's
+frame.
 
 ## Message contract
 
