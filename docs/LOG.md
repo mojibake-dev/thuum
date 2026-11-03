@@ -7086,3 +7086,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   address and the ungated rows capped at 200 outside the window; the header says wait: 15 stands because the lateness is lab-api's
   fixed 5 s sleep plus the attach; watch.logs and logsInWindow are gone. Rule A: a reviewer's fix applied as written needs no
   second review. The run is after the merge, PARK false first.
+- 09:46 PST 2026-11-03 (17:46Z 11-03) (thuum-cf): docs/engine/non-owning-seat.md D5 (rule C, before any scenario relies on it): a relaunched host's bind of a dead record re-settles
+  the body about 280 units down the slope (x-npc-death-reentry v5 leg B on r3: 172752 288 in distance, 281 in x; its cold rerun 173535
+  279 in distance split 173 and 219 across the axes, GREEN by the letter; b-npc-death 112539's 360 at a cell reload), no resurrection
+  and no second death; the mechanism (the silent kill's ragdoll from a standing pose at the resting point) HYPOTHESIS. R4 updated
+  with the r3 read (D4's fix held). The probe's leg B bound of 256 is a premise cut from fresh deaths: 512 at the relaunch goes to
+  Eli as D-P14 (a looser bar, W4), with the v6 draft ready by path; leg A keeps 256.
