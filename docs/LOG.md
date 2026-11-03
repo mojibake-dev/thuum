@@ -6058,3 +6058,17 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   v17, x-npc-death-freeze v2 and x-scene-guest v2 (numidium's reviewer; their pins moved by my remap, comment lines only) and
   x-npc-death-reentry v4 (ded49599; R5 and D1 on the merge head); it launches on 4923's green client build and the two reviews.
   v19's header corrected (header only). 
+- 02:18 PST 2026-11-03 (10:18Z 11-03) (numidium): R4 v4 (x-npc-death-reentry, ded49599, the 256 bounds and leg B read while c1's
+  game is down) on the break-3 build, 20261103-100946, ran all three legs, RED at leg B on a NEW break: a relaunched host
+  resurrects the dead (server 10:14:54.626 "resurrection by its host's engine: 35534 stands again with health 1.000 on
+  ff000000's sample, 171 s after its death; the record's death cleared"): the fresh process's engine loads her alive, its own
+  hosted copy gets no bind, and the server reads its first sample as a resurrection; non-owning-seat.md D4, playtest 42's item
+  6, for m3-system1-r2. Leg W named D1's events: the watcher's late load binds her dead and the silent kill plays
+  IdleFurnitureExit, SneakStop and two Ragdoll events (the sound's carrier HYPOTHESIS); leg A again nothing; R5's guard again 13
+  lines, no crash. Door v19 (e6c14501) on the same build, 20261103-101556, RED on its premise (c1's engine had Hod outdoors at
+  02:00, sighted at (19179, -44737) while the record stood home), so not yet the parent's red; v20 is thuum-cf's. Eli's second
+  ask: a pre-push guard (~/.config/git/personal-hooks/pre-push) refuses any gusto.com author or committer from every repo under
+  ~/Code/mojibake (an includeIf pins the mojibake.dev identity and the guard; a wrapper in each of 24 repos' hooks dirs covers
+  sessions without the global config); the three core repos keep their own .githooks and need it there. m3-system1-r2 4ccb4259
+  green on 4923, staging now with LABAPI=4922 (headZ, scene, live until counts) and the death read; the lab held from 10:07Z for
+  these runs, so the 10:30Z nightly yields to them.
