@@ -166,6 +166,49 @@ first build counts the rate with a Frida tracer, ADR-044 decision 3).
 - Breakpoint plan for a human session: none needed.
 - Owner: agent (lab probes).
 
+## ADR-062, slice 1: the hosted cell's scripts run (17:12 PST 2026-11-02; BUILD PENDING, the next build after turbo 2's arm two)
+
+Eli (playtest 41): "shouldn't 'scripts work' be a holistic fix? something structural is just not working"; at the sign-off:
+"shouldn't every script incident be transmitted and accepted? skyrim is not a competative game. trust should LARGELY be the
+default". ADR-059's name list (the layer's host rows) failed every dungeon; ADR-062 flips the default and moves the safety to the
+natives that change server-owned state, each a record-and-relay row (R2, declared unvalidated by rule 5).
+
+The gate's new rule (Skyrim Platform FridaHooks.cpp OnSendEventEnter, replacing AdmittedByChain's host-scoped walk):
+- the event's self is read for its cell in every case the VM hands a reference OR an actor (today the actor branch sets selfId
+  alone and selfCell stays 0, so an actor's script, the spider's masterAmbushScript, never saw the hosted-cell rule);
+- in a cell this game hosts (g_hostedCells, hostService's SetCellHosted at every grant and release): a WORLD OBJECT's event
+  passes whatever its script's name (ACTI, DOOR, CONT, FURN, MSTT, STAT, FLOR, TREE, LIGH, any non-actor reference); an ACTOR's
+  event passes when this game simulates the actor (Hosted::Is and not Puppets::Is: the host's live NPCs; never a player's figure,
+  whose scripts stay ADR-044's player rows); a puppet's stays blanked;
+- outside a hosted cell nothing changes: ADR-044's plugin rows (the player's own effects), the per-name exceptions (RaceMenu, Lost
+  Grimoire's marker, Apocalypse's placed visuals, defaultDisableHavokOnLoad), the lifecycle events of decision 1 and the
+  never-admitted list stand as they are;
+- the layer's host-scoped rows (papyrus-admitted.tsv's fifth column, g_hostAdmittedScripts) retire: papyrus-map.py stops writing the
+  marker, the loader ignores one it finds, the six MS13 names of 2026-11-02 go with them.
+
+The client's lift (objectReferenceEx.ts dealWithRef): a scripted world object in a cell this game hosts keeps the engine's own
+activation (blockActivation false) whatever its base; the setting activationUnblockedBases retires with its list. The lift
+follows the hosting: hostService's grant and release pass over the cell's loaded references (the view's bound ones and the
+engine's own, the cell's reference list) and set the block again at release, so a guest's seat blocks as before and a new host's
+seat lifts at its grant. ADR-059 decision 2's relay stays the guest's way in (RelayedActivation toward the host, the host's
+engine activating as the guest's figure) and decision 3's ObjectAnimation relay the guest's eyes.
+
+The hooks of slice 1 (the natives whose verbs exist; the entries from docs/research/adr062/papyrus-native-entries.md, the
+re-analyst's read, rule 1): Quest.SetStage (the quest-stage sink already hooked: QuestStageSinkReplacement reports the host's
+stage), ObjectReference.AddItem and RemoveItem (the host's report into the inventory record of an NPC or a container the host
+simulates; the player's own is the existing inventory report), Activate (the linked-activation report exists), PlayAnimation and
+PlayAnimationAndWait (the sendAnimationEvent hook carries them), Lock and SetLockLevel (the locks verb's report), SetOpen (isOpen),
+Actor.Kill (a new death-report evidence kind, "a host-run script killed it", recorded), Spell.Cast (the cast hooks), the weather's
+ForceActive (the weather report). Each hook filters in native before the bridge (rule 9: the self reference's cell hosted here,
+the caller a script frame, not the engine's own call) and gets its docs/NATIVES.md line with its rung (rule 10).
+
+Tests: T0 for each verb's new report path where one is new (the scripted kill's evidence in ActorDeathTest; an NPC's scripted
+AddItem recorded in PartOne_ActivateTest's shape); T1 none; T2 difftest's sessions unchanged (the reports are the same messages);
+T3 the baseline first (b-object-anim on the union's dist against the morning's 64dbacfe green, the spike wall's regression), then
+the Bleak Falls walk by hand on slice 1's stage (the plate and the wall, the pillars and the lever, the spider's drop, Arvel's web
+and run, the alcove draugr waking), then q-golden-claw and q-embershard as slice 3's scenarios. Status boxes below stay as they
+are until the slice is built; the build opens its fork branch as m4-scripts-work off parity.
+
 ## Status
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared

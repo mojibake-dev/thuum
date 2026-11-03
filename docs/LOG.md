@@ -5435,3 +5435,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   competative game. trust should LARGELY be the default"): decision 2 amended to R2 by default (transmitted, accepted, recorded and
   relayed, declared unvalidated per rule 5; the existing R0 and R1 verbs stay; no new validators for script effects). Re-estimated at
   six and a half working days in three slices after the re-analyst's day; in PLAN as the next build after the arm.
+
+- 17:12 PST 2026-11-02 ADR-062 slice 1 designed in docs/verbs/papyrus-events.md (the gate's new rule in OnSendEventEnter with the actor case, the client's
+  lift by hosted cell, what retires, the hooks whose verbs exist, the tests; BUILD PENDING on m4-scripts-work after the arm); the
+  re-analyst reads the natives' Papyrus entries into docs/research/adr062/papyrus-native-entries.md.
