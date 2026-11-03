@@ -6697,3 +6697,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   door v23 (main 5976e426, file c9bed211), x-warm-exit v2 702a3e9e, swap v20 75bd28b9, with numidium's death-reentry v5, death-freeze
   v4 96ae3e4c and scene-guest v3 4ffaf665; the fork head b8d82f05 (its pipeline watched). The actor script's premise fix is on main
   a12c3069 (sha1 f28d6ab9), its per-frame hook under fresh review before the rerun.
+- 06:55 PST 2026-11-03 (14:55Z 11-03) (thuum-cf): m3-system1-r3 b8d82f05 GREEN on pipeline 5019 (client and server builds); r3 is ready for its
+  stage: the fork head b8d82f05, door v23 (main 5976e426, file c9bed211), swap v20 (75bd28b9), x-warm-exit v2 (702a3e9e), death-reentry
+  v5, death-freeze v4 (96ae3e4c), scene-guest v3 (4ffaf665); main at ebdb52e5 for the deploy-srv. The branch is held through the stage
+  and the gate. Still running: the fresh review of the actor script's per-frame hook (before its rerun, after the gate).
