@@ -1248,6 +1248,64 @@ fills from the Value's flags, so the apply script's FLAGS parameter is exactly `
    its only other reader, 39430's re-equip, is then skipped (the guest keeps its own equipment). Not before the census; a record whose own
    0x0D cleared both bits needs no cut.
 
+### D6 process-block read: what reads the census's spell ids, and what a null or foreign form does there (re-analyst, 19:4xZ 11-03)
+
+The censuses' type-0 ids (five spells, offsets inside the process region) are read by AIProcess::LoadGame (39430, 0x6e67c0), entered from
+Actor::LoadGame right after 19529 whenever the actor has a process, with no change-flag test. Framing: 36048 (form pointer to 3-byte id,
+0x627000; its 35928 call at 0x627030) writes every pointer field of the block, so the census tells fields apart by offset order only;
+36047 (a FormID value, 0x626f80) writes the active effects' targets and the knowledge keys. Everything below from the decompiles,
+HYPOTHESIS by rule 2.
+
+1. The walk, in order (AIProcess.h, MiddleHighProcessData.h, HighProcessData.h offsets): the AIProcess part (two u32, the cached values,
+   currentPackage through 38966 with a 3-byte id kept beside 36000's "nonzero bytes, null form" flag, `if (!IsCreated(id)) { pkg =
+   LookupByID(id); if (pkg == NULL || pkg->formType != 0x4F) pkg = NULL; }`, flags and timers, unk100 as TESBoundObject, unk120 as
+   BGSListForm, a varint count of genericLocations as TESObjectREFR pushed only when non-null, equippedForms as a u32 count of pairs
+   whose object is `LookupByID(id)` with NO cast and whose slot is a BGSEquipSlot cast, then two more untyped ids straight into
+   equippedObjects[0] and [1], unk128 as TESTopic); the middle-high part (24 scalars, idles as TESIdleForm, commandingActor and
+   occupiedFurniture as handles, the deadDetectList of Actor handles, runOncePackage, the re-equip under `(f & 0x8000020) != 0`, THE
+   ACTIVE EFFECTS through 34077 (0x5ad8b0), currentPackageSpell as MagicItem, the QueuedItems, an Actor handle, scalars); the high part
+   (58 scalars, handles and TESIdleForms, the greet topic's responses, the pathing entries whose count the writer patches to 0, the
+   detection event, the kind-1 sub-buffer, the greetings, the knowledge keys stored as the decoded FormID with no lookup, currentShout as
+   TESShout, a TESPackage, strings, the action block, the animation streams, reanimateCaster as a handle, reanimateSpell as MagicItem, a
+   TESTopicInfo). The actor block's own magic ids (selectedSpells at Actor +0x1C8, the power at +0x1E8, addedSpells) are written by
+   37649 AFTER 39429 returns and land after the process region, so the census's spells inside 1201 to 4448 are the active effects (or
+   currentPackageSpell): "0xFE014817 three times" reads as one ability with three magic effects, three ActiveEffects naming it; each
+   spell row is followed by [u8 effect index][varint archetype][varint length] and a payload whose first two id rows are the caster
+   (36048) and the target (36047), the owner's own id or the null.
+2. The handling. 34077 per effect: `spell = RTDynamicCast<MagicItem>(LookupByID(id)); idx = u8; arch = varint; len = varint; have =
+   (spell && idx < spell->effects.size && spell->effects[idx]) ? effect->baseEffect->data.archetype : -1; if (have == arch) { ae =
+   34501(...); ae->LoadGame(buf); } buf->pos = max(buf->pos, start + len); if (!ae) 35519("Could not load active effect with effect index
+   %i, and archetype ID %i", idx, arch); else insert sorted`. An unresolved id (a receiver's missing index) or a form that is not a
+   MagicItem gives have -1, the effect is NOT built, the line is logged and the payload skipped by its own length: DROPPED, ALIGNED. A
+   foreign MagicItem whose effect at idx has the same archetype builds a real, engine-valid effect of THAT spell (the wrong buff, no
+   fault). Nothing derives a count, an allocation or a raw index from any id in the block: every loop count comes from the record.
+   Inside ActiveEffect::LoadGame (34071): the caster as an Actor handle, the target through 34538 (two virtuals, NULL for a missing id,
+   stored unchecked), displacementSpell and source as typed casts, the hit effects (type 9 or 10; any other value logs "Unknown
+   reference effect type: %i" WITHOUT consuming the payload, a desync for a corrupt record only). currentPackageSpell, reanimateSpell and
+   currentShout: typed casts, null-tolerant. equippedObjects[0..1] and the equippedForms pairs: `LookupByID(id)` with NO cast, the block's
+   only untyped stores of a magic-capable field (a null is an empty hand; a foreign form of any type becomes the hand's object).
+3. Later crashes. For the census's spell ids: none; an effect never exists with a null spell, Actor::FinishLoadGame's 34072 and the first
+   ProcessLists tick walk resolved pointers only, and a foreign MagicItem that passed the archetype test is legitimately built. The
+   crash-shaped fields are elsewhere: the effect's TARGET (+0x50, stored unchecked, read by the first Update and EvaluateConditions; the
+   target is the record's own owner, type 1 and the same on every seat, so it resolves whenever the receiver's copy carries the record's
+   FormID, the apply's precondition anyway; real only for a type-2 clone whose id differs across seats), and a FOREIGN form of a
+   non-equippable type in a hand (consumers reach it as TESForm* and most test formType before casting; unread). A plugin spell in a
+   hand resolving to null merely unequips it. Verdict for the REMAP run: with the remap right the spells resolve to the right forms;
+   with a miss the worst outcome is a logged, dropped ability or a wrong-but-valid one. The two 35519 lines are the run's watch: add
+   "Could not load active effect" and "Unknown reference effect type" to apply-on-demand.js's VERDICTS so the formsLog hook prints them.
+4. The writer's call sites (39429, 0x6e4710, for mapping census offsets to fields): AIProcess 0x6e47fb unk100, 0x6e48aa unk120,
+   0x6e48d4 genericLocations (looped), 0x6e4937 and 0x6e494e the equippedForms pairs, 0x6e4968 and 0x6e497a equippedObjects, 0x6e49a9
+   unk128; 38965 (0x6cdb90) for the packages (0x6cdbbe the package, 0x6cdd6e the target); middle-high 0x6e4d03 lastIdlePlayed, 0x6e4d19
+   unk210, 0x6e4d4f commandingActor, 0x6e4daa occupiedFurniture, 0x6e4de2 furnitureIdle, 0x6e4f12 deadDetectList, 34076 (0x5ad7a0) the
+   active effects (0x5ad7f2 the spell; inside 34070: 0x5acf6e the caster, the target as 36047 of 34537's FormID, 0x5acfc1
+   displacementSpell, 0x5acfd0 source), 0x6e4f77 currentPackageSpell, 40106 (0x7214e0) the QueuedItems (0x721526 the object), 0x6e5037 the
+   Actor handle; high 0x6e59a7, 0x6e59f8 (always 000000), 0x6e5a30 fadeTrigger, 0x6e5a63 lastTarget, 0x6e5ab8, 0x6e5af0
+   currentProcessIdle, 0x6e5b23, 0x6e5b78 pathLookAtTarget, 0x6e5bdf headTrackTarget[6], 35240 (0x5ddea0) the greet topic, 0x6e5cdd the
+   pathing refs, 0x6e5da8 the detection event's ref, 40044 (0x715c70) the kind-1 block, 0x6e5ebc and 0x6e5ecb the greetings, the knowledge
+   keys through 36047, 0x6e5f68 currentShout, 0x6e60bb unk358, 0x6e60ee lastExtDoorActivated, 36049 (0x627090) the strings, 43629
+   (0x7c6080) the animation streams, 0x6e6621 reanimateCaster, 0x6e6656 reanimateSpell, 0x6e66c1 the TESTopicInfo. A census row's caller
+   is always 36048's or 36047's own 35928 site, so the mapping is by offset order against this list.
+
 ## Frida's listener guard: a recipe run inside a hook callback sees none of its own callees' hooks (read 18:4xZ 11-03)
 
 frida-gum's interceptor (gum/guminterceptor.c at main c73c1bbf, 2026-11-02) sets a thread-local guard key at the start of every hooked

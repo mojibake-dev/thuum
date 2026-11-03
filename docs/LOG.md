@@ -7166,3 +7166,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   0x23a94bd1), the position equal before and after, 2 units at settled, no crash: C4's two paths both run (the leveled release and park,
   174905; the fixed base's direct feed, 193005). DECISIONS.md 93699f36 (numidium): ADR-065 ACCEPTED, ADR-066 ACCEPTED, ADR-063 amended by
   D-F1 C. Playtest 42 readies on the staged r3 (Eli's ask), the gate after it; the lab held; v2.3's cross-seat run after.
+- 11:38 PST 2026-11-03 (19:38Z 11-03) (thuum-cf): docs/research/adr065-serialize-on-demand: the D6 process-block read (re-analyst): the censuses' type-0 spells are the active
+  effects' spell ids inside AIProcess::LoadGame's walk (39430; 34077 per effect); an unresolved or non-MagicItem form makes the engine
+  skip the effect with the 35519 line "Could not load active effect with effect index %i, and archetype ID %i" and the payload skipped by
+  its own length (DROPPED, ALIGNED); a foreign MagicItem with the same archetype builds a wrong-but-valid effect; no count or allocation
+  derives from an id; the crash-shaped fields are the untyped hand slots (equippedObjects, LookupByID with no cast) and an effect's
+  target (the record's own owner, type 1), neither a spell of this census; the writer's 36048 call sites listed for mapping offsets to
+  fields. Verdict: with the REMAP right the spells resolve; with a miss, a logged drop; the two 35519 lines go into the apply script's
+  VERDICTS for the cross-seat run.
