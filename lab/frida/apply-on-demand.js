@@ -1,4 +1,4 @@
-// apply-on-demand.js v2.2 (thuum, the re-analyst 2026-11-03; docs/research/adr065-serialize-on-demand-2026-11-03.md, "(c)" and "The pose after
+// apply-on-demand.js v2.3 (thuum, the re-analyst 2026-11-03; v2.3 adds REMAP, this header's last paragraph; docs/research/adr065-serialize-on-demand-2026-11-03.md, "(c)" and "The pose after
 // the apply's 3D reload"): the (c) probe. On one seat, for a DEAD actor FORM, at its kDead mark (TRIGGER mark: AddChange's inner 35576 with
 // FLAG, deferred into PlayerCharacter::Update's REPLACEMENT as serialize-on-demand-actor.js v2.2 does; TRIGGER now: the first Update
 // return after the replace, the form by TESForm::LookupByID), on Main.threadID: MODE roundtrip (default) serializes the copy's own record with the actor
@@ -31,7 +31,7 @@
 // record's Havok body count equal to the live count from 19533 unless FORCE (both print). Every engine call is wrapped, but a fault inside is
 // only CONVERTED to a JS exception (a lock taken inside stays held): the premises are the real safety. Every id, offset, slot and layout is
 // the static read's (the sections' id tables, CommonLib, `just addr`): HYPOTHESIS until a run reads as expected (rule 2). LAB_PARAMS: FORM
-// (required), MODE, TRIGGER, FLAG (0x400), RECORD, FLAGS, SUM, FORCE (false), SUPPRESS (false: 19378 around 35567), PARK (false), RUNS (1).
+// (required), MODE, TRIGGER, FLAG (0x400), RECORD, FLAGS, SUM, FORCE (false), SUPPRESS (false: 19378 around 35567), PARK (false), RUNS (1), REMAP ('', v2.3: the last paragraph).
 // Ready prints Process.id. wait: 15 after the frida step (lab-api's fixed 5 s sleep plus the attach, not the size) and read the ready t first.
 // THE LISTENER GUARD (frida-gum main c73c1bbf, 2026-11-02, gum/guminterceptor.c, read 2026-11-03): _gum_function_context_begin_invocation
 // sets a thread-local guard key (gum_interceptor_guard_key, :2254) before the on_enter listeners run and clears it at :2364, and
@@ -60,6 +60,52 @@
 // row (runs spent, no poll; now trigger refused; result emitted; no Update return; ttl; TTL seconds, default 600, is the replacement's life without a result). The lab appends to the same
 // <script>.log across instances (runner.py:2354-2360), so align on the new ready row's t and pid; hookBytes.playerUpdate reads e9 when an
 // earlier attach already patched the prologue (attach and replace share one function context, guminterceptor.c:816-817; fine).
+// REMAP (v2.3, the receiver's half of a cross-seat record's id re-encode; the note's D6, "The receiver's half of the re-encode (the REMAP step)").
+// A change form names forms as 3-byte numeric ids whose top two bits are the kind (BGSNumericIDIndex::SetNumericID, 35928 at 0x620240: a
+// load-index-00 form type 1 with its 22-bit id, a created 0xFF form type 2, everything else type 0 with an index from the form-id map at
+// mgr + 0x298 through 35554, inserting on a miss; the note's "Evidence (the form-id map)"), and a type-0 index is the SENDER's seat's and
+// session's (192013 against 192345: 0xFE014817 is index 10582 in the bandit's session and 10583 in Sven's), so on the receiving seat the same
+// bytes mean another form or nothing. REMAP is a string of rows `offset:formId:index[:formType]` separated by commas (Sven's kDead record of
+// 192345: `2097:0x2B005373:10586`, the spell's bytes 00 29 5a at record offset 2097, index 0x295a = 10586 in that session, the AI process
+// block's one type-0 id). offset is the RECORD offset: the census's `offset` is the BGSSaveFormBuffer position at the write (a body offset),
+// so add the header's 6 bytes at size code 1 (parseRecord's bodyStart, 2 + 2 * n); formId is the sender's full runtime id (both lab seats
+// run one load order, the note's D6 paragraph 3); index is the sender's; formType (optional) is the form's type byte to compare on this
+// seat. Parsed at the start for shape only (a malformed or empty row, a non-integer field, a formId whose top byte is 00 or FF since 35928
+// encodes those as kind 1 or 2 on every seat, an index above 22 bits, a formType above a byte, two rows within 3 bytes of each other) and
+// refused at the premises by the check row named `remap`, whose value names the row; REMAP given in roundtrip mode refuses there too (the
+// copy's own record is never remapped). The step sits in the apply recipe after RECORD parses and the SUM over the sender's UNPATCHED bytes
+// is verified, and before 35509, in two halves. 'REMAP check', right after the parse, for EVERY row before any engine-state change: (a) the
+// three bytes at offset must lie in the body and decode to kind 0 with exactly the row's index (a kind 1, 2 or 3 decode is "nothing to
+// remap": a wrong row or a wrong offset; a wrong offset never patches; a deflated record refuses, its offsets would name compressed bytes);
+// (b) the form through the engine's own TESForm::LookupByID (14617 at 0x1e01a0; CommonLib's is the inline TESForm.h:210-220; the decompile
+// takes the all-forms read lock itself, the note's D6 census paragraph, HYPOTHESIS): null refuses (the encoder would mint an index for a
+// form this seat lacks and the reader would resolve it to null later), the returned form's id must be the row's, its formType byte
+// (TESForm.h:356, +0x1A) is recorded and compared when the row carries one. 'REMAP encode 35928', after the body-count and PARK checks and
+// right before 'write 35509', per row: (c) the engine's own encoder on an 8-byte scratch, nf.setNumericId(scratch, formId)
+// (BGSNumericIDIndex.h:25-30 declares SetNumericID(FormID) on the 3-byte struct: this in rcx, the id in edx; the disassembly stores the
+// three bytes big-endian through rcx, the actor script's census read them the same way), the bytes read back (a kind other than 0 refuses:
+// the static read of 35928 would be wrong for that id); (d) written at offset into the record's bytes, one `remap` row per id {offset,
+// formId, from, to, fromIndex, toKind, toIndex, formType, thread}; (e) after all rows the heap copy (68115's, allocated after the REMAP check) is
+// rewritten whole and the apply row gains remapRows, sumSender (the sender's SUM, equal to recordFnv1a) and fnvPatched (the bytes 35509
+// hands over, hashed from the heap copy; a mismatch with the patched bytes refuses). Fail-safe order: every check of the run (RECORD, REMAP
+// check, body count, PARK) precedes the first engine-state change; a REMAP refusal is a `refused` row with reason `remap: ...` and the step,
+// then the apply row's error names the step; nothing is patched, the entry is untouched, our heap record is freed. The encode's one
+// engine-state change is 35928's insert into the receiver's form-id map on a miss (35554 at mgr + 0x298), what the engine's save path does
+// for every referenced form: HYPOTHESIS, safe on the main thread outside a save (the next real save writes the grown table, as a save would
+// have); an encode refusal on a later row (a fault, a non-zero kind, the heap hash) leaves the earlier rows' inserts and nothing else. Each
+// engine call of the step is wrapped: a fault converted by Frida lands in the refusal row with the step's name (a lock taken inside stays
+// held, the header's caveat). Reading rule: one `remap` row per patched id, from against to (from equal to to means the receiver's index
+// coincides with the sender's, possible when both seats met the form in the same order); a refusal names the row; a `remap` row followed by
+// an apply row whose error names 'REMAP encode 35928' was never written: the heap rewrite follows the last row (a later row's refusal leaves
+// the copy unpatched and freed, nothing half-patched reaches the engine); fnvPatched differs from sumSender whenever any row changed bytes;
+// with no rows the apply row carries remapRows 0 and no sumSender or fnvPatched; the ready row's
+// hooks print the two callees' first bytes (35928 expected 40 53 48 83, 14617 40 57 48 83) and remap {rows, error, mode}.
+// Two 35519 format strings joined VERDICTS for the cross-seat apply (the formsLog hook otherwise prints only VERDICTS' strings and lines
+// whose varargs carry FORM's id; the coordinator's decompiles of 2026-11-03, HYPOTHESIS by rule 2): AIProcess::LoadGame's active-effect
+// loader (34077 at 0x5ad8b0, `just addr`) drops an effect whose spell id does not resolve on this seat and logs "Could not load active effect with
+// effect index %i, and archetype ID %i" (no form id among its arguments, so the FORM match never catches it): the REMAP's miss signal, a
+// type-0 spell the receiver could not resolve, dropped, aligned, benign; expected zero when the remap is right. ActiveEffect::LoadGame
+// logs "Unknown reference effect type: %i" for a corrupt hit-effect type: a record desync, expected zero always.
 const PARAMS = (typeof LAB_PARAMS === 'object' && LAB_PARAMS) ? LAB_PARAMS : {};
 const FORM = Number(PARAMS.FORM);
 const MODE = PARAMS.MODE === 'apply' ? 'apply' : 'roundtrip';
@@ -72,6 +118,7 @@ const flagOf = function (v) { return v === true || v === 'true'; };
 const FORCE = flagOf(PARAMS.FORCE), SUPPRESS = flagOf(PARAMS.SUPPRESS), PARK = flagOf(PARAMS.PARK);
 const RUNS = PARAMS.RUNS === undefined ? 1 : Number(PARAMS.RUNS);
 const TTL_S = PARAMS.TTL === undefined ? 600 : Number(PARAMS.TTL); // seconds the replacement may live without a result; an eternalized script never unloads, so the revert is ours or never
+const REMAP = PARAMS.REMAP === undefined || PARAMS.REMAP === null ? '' : String(PARAMS.REMAP); // v2.3: rows offset:formId:index[:formType], comma-separated (the header's REMAP paragraph); parsed below, after the helpers
 function emit(obj) {
   obj.t = Date.now();
   send(obj);
@@ -97,7 +144,8 @@ const OFFSETS = {
     main: 0x31872c0, // 403449 Main** (Offsets.h:383)
     dataHandler: 0x20f6320, // 400269 TESDataHandler** (Offsets.h:504)
     player: 0x31874f8, // 403521 NiPointer<PlayerCharacter> (Offsets.h:451)
-    lookupByID: 0x1e01a0, // 14617 TESForm::LookupByID (c, TRIGGER now)
+    lookupByID: 0x1e01a0, // 14617 TESForm::LookupByID (c, TRIGGER now; REMAP check: the receiver's form for each row's id) (the note's id table; CommonLib's is an inline, TESForm.h:210-220; first bytes 40 57 48 83 in the actor script's ready rows, 183149 and 192013)
+    setNumericId: 0x620240, // 35928 BGSNumericIDIndex::SetNumericID (rcx the 3-byte struct, edx the form id; first bytes 40 53 48 83: push rbx, sub rsp,0x20) (c under REMAP: the receiver's own encoding of each row's form id on a scratch; BGSNumericIDIndex.h:25-30)
     refrCheckSave: 0x2da4f0, // 19527 TESObjectREFR::CheckSaveGame = slot 0x0D of Actor and Character
     actorSave: 0x686710, // 37649 Actor::SaveGame, slot 0x0E of VTABLE_Actor
     characterSave: 0x727d40, // 40266 Character::SaveGame, slot 0x0E of VTABLE_Character (every NPC)
@@ -145,7 +193,7 @@ const X_SAVED_HAVOK = 0x3c, X_BUFFER = 0x10;
 const K_HAVOK = 1 << 2; // TESObjectREFR.h:142 kHavokMoved; 35708's kinds: created 5, kCellChanged or kPromoted (0x02000008) 6, kMoved or kHavokMoved (6) 4
 const LIFE = ['kAlive', 'kDying', 'kDead', 'kUnconcious', 'kReanimate', 'kRecycle', 'kRestrained', 'kEssentialDown', 'kBleedout']; // ActorState.h:9-17
 const HEAD = 'NPC Head [Head]';
-const VERDICTS = /Havok data|ragdoll save\/load|SetSavedHavokData|queued havok|queued char controller|Load Error|FORMS:/;
+const VERDICTS = /Havok data|ragdoll save\/load|SetSavedHavokData|queued havok|queued char controller|Load Error|FORMS:|Could not load active effect|Unknown reference effect type/; // the last two: v2.3, the header's REMAP paragraph
 const CAP = 65536, REFUSED_ROWS = 8, REBUILD_WAIT_MS = 20000, SETTLE_MS = 5000;
 
 function fileVersion(path) {
@@ -178,6 +226,30 @@ const toHex = function (p, n) { return bytesHex(new Uint8Array(p.readByteArray(n
 const fnv1a = function (bytes) { let h = 0x811c9dc5; for (const b of bytes) { h ^= b; h = Math.imul(h, 0x01000193) >>> 0; } return h >>> 0; };
 const vi = function (b, o) { const w = b[o] & 3; return w === 0 ? [b[o] >> 2, 1] : (w === 1 ? [((b[o + 1] << 8) | b[o]) >> 2, 2] : [((b[o] | (b[o + 1] << 8) | (b[o + 2] << 16) | (b[o + 3] << 24)) >>> 2), 4]); }; // 36052: value << 2 | width
 const viBytes = function (v) { return v < 0x40 ? [v << 2] : (v < 0x4000 ? [((v << 2) | 1) & 0xff, (v >> 6) & 0xff] : [((v << 2) | 2) & 0xff, (v >> 6) & 0xff, (v >> 14) & 0xff, (v >> 22) & 0xff]); }; // 35529's encoding, little-endian
+// v2.3 REMAP rows, shape only (the bytes and the forms are checked in the recipe): offset the RECORD offset, formId the sender's full id, index the
+// sender's 22-bit index, formType optional; a formId whose top byte is 00 or FF is refused here since 35928 encodes it as kind 1 or 2 on every seat
+const parseRemap = function (text) {
+  const rows = [], problems = [];
+  const parts = text.split(',').map(function (s) { return s.trim(); });
+  if (parts.length === 1 && parts[0] === '') return { rows: rows, error: null };
+  const num = function (s) { return /^(0x[0-9a-fA-F]+|[0-9]+)$/.test(s) ? Number(s) : NaN; };
+  parts.forEach(function (p, i) {
+    const where = 'row ' + (i + 1) + ' "' + p + '"';
+    if (p === '') { problems.push(where + ' is empty'); return; }
+    const f = p.split(':').map(function (s) { return s.trim(); });
+    if (f.length !== 3 && f.length !== 4) { problems.push(where + ' has ' + f.length + ' fields, offset:formId:index[:formType] expected'); return; }
+    const offset = num(f[0]), formId = num(f[1]), index = num(f[2]), formType = f.length === 4 ? num(f[3]) : null;
+    if (!Number.isInteger(offset) || offset < 0) problems.push(where + ': offset is not a non-negative integer');
+    if (!Number.isInteger(formId) || formId <= 0 || formId > 0xffffffff) problems.push(where + ': formId is not a form id');
+    else if ((formId >>> 24) === 0 || (formId >>> 24) === 0xff) problems.push(where + ': form ' + hex(formId) + ' encodes as kind ' + ((formId >>> 24) === 0 ? 1 : 2) + ' on every seat (35928): a type-0 row cannot name it');
+    if (!Number.isInteger(index) || index < 0 || index > 0x3fffff) problems.push(where + ': index is not a 22-bit integer');
+    if (formType !== null && (!Number.isInteger(formType) || formType < 0 || formType > 0xff)) problems.push(where + ': formType is not a byte');
+    rows.push({ row: i + 1, text: p, offset: offset, formId: formId, index: index, formType: formType });
+  });
+  for (let a = 0; a < rows.length; a++) for (let b = a + 1; b < rows.length; b++) if (Math.abs(rows[a].offset - rows[b].offset) < 3) problems.push('rows ' + rows[a].row + ' and ' + rows[b].row + ' overlap at offset ' + rows[a].offset);
+  return { rows: rows, error: problems.length === 0 ? null : problems.join('; ') };
+};
+const REMAP_PARSED = parseRemap(REMAP), REMAP_ROWS = REMAP_PARSED.rows, REMAP_ERROR = REMAP_PARSED.error;
 // a record (the pack 36081): type index and size code, version, length1, length2 (the inflated size, 0 when raw), the data inline
 const recordHeader = function (rec) {
   const b0 = rec.readU8();
@@ -239,6 +311,7 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
     allocate: new NativeFunction(at('allocate'), 'pointer', ['pointer', 'uint64', 'int32', 'bool']),
     deallocate: new NativeFunction(at('deallocate'), 'void', ['pointer', 'pointer', 'bool']),
     lookupByID: new NativeFunction(at('lookupByID'), 'pointer', ['uint32']),
+    setNumericId: new NativeFunction(at('setNumericId'), 'void', ['pointer', 'uint32']), // v2.3 REMAP: SetNumericID(FormID) on the 3-byte struct (this in rcx, the id in edx)
     applyWrap: new NativeFunction(at('applyWrap'), 'uint8', ['pointer', 'pointer']),
     finishPass: new NativeFunction(at('finishPass'), 'void', ['pointer', 'uint8']),
     suppress: new NativeFunction(at('suppress'), 'uint8', ['pointer', 'uint8']),
@@ -378,6 +451,7 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
     if (!map.isNull()) entry = readEntry(map);
     add('entry present', entry.found ? hex(entry.flags) : 'none', entry.found);
     add('entry record null (an engine record is never touched)', String(entry.record), entry.found && entry.record.isNull());
+    add('remap', REMAP_ERROR !== null ? REMAP_ERROR : (REMAP_ROWS.length !== 0 && MODE !== 'apply' ? 'REMAP given in roundtrip mode: the copy\'s own record is never remapped' : REMAP_ROWS.length + ' rows'), REMAP_ERROR === null && (REMAP_ROWS.length === 0 || MODE === 'apply')); // v2.3: the rows' shape; their bytes and forms are checked in the recipe
     return { ok: checks.every(function (c) { return c.ok; }), checks: checks, entry: entry, type: type, slotC: slotC, slotS: slotS, map: map, root: root };
   };
   // apply mode: RECORD checked before any engine call (transplant-inject's review's finding 2)
@@ -386,7 +460,7 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
     for (let i = 0; i < bytes.length; i++) bytes[i] = parseInt(RECORD.substr(2 * i, 2), 16);
     const b0 = bytes[0], s = b0 >> 6, n = s === 0 ? 1 : (s === 1 ? 2 : 4);
     const le = function (o) { let v = 0; for (let k = n - 1; k >= 0; k--) v = v * 256 + bytes[o + k]; return v; };
-    const r = { bytes: bytes, type: b0 & 0x3f, sizeCode: s, version: bytes[1], length1: le(2), length2: le(2 + n), bodyStart: 2 + 2 * n, total: bytes.length, fnv1a: hex(fnv1a(bytes)), problems: [] };
+    const r = { bytes: bytes, type: b0 & 0x3f, sizeCode: s, version: bytes[1], length1: le(2), length2: le(2 + n), deflated: le(2 + n) !== 0, bodyStart: 2 + 2 * n, total: bytes.length, fnv1a: hex(fnv1a(bytes)), problems: [] };
     const want = nf.saveVersion();
     if (r.type !== 1) r.problems.push('type ' + r.type + ' is not ACHR (1)');
     if (s > 2) r.problems.push('size code ' + s);
@@ -402,12 +476,61 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
   const reads = {}; // threadId -> the 19535 call in flight: bodies, setPos, setRot, live
   const result = { applied: false, recordBlockHash: null, liveHash: null, lastRead: null, parkHash: null, lastStored: null, lastStoredCaller: null, extraAtFinish: null };
   let parking = false; // true around our own 11977 call, so its hook row is tagged ours
+  // v2.3 REMAP. A refusal: a `refused` row with the reason and the step, then the throw the recipe's catch records in the apply row's error
+  const remapRefuse = function (step, reason, threadId) { emit({ event: 'refused', reason: reason, step: step, form: hex(FORM), thread: threadId }); throw new Error(reason); };
+  const decode3 = function (b) { return { kind: b[0] >> 6, value: ((b[0] & 0x3f) << 16) | (b[1] << 8) | b[2] }; }; // the 24 bits big-endian: the top two the kind, the rest the index or the 22-bit id
+  // (a) and (b) for EVERY row before any engine-state change: the pure decodes first, then 14617 per row (read-only; the decompile takes the
+  // all-forms read lock itself, the note's D6 census paragraph, HYPOTHESIS). Returns the rows with their sender bytes and the receiver's form
+  const remapCheck = function (r, q) {
+    const step = 'REMAP check', out = [];
+    const refuse = function (reason) { remapRefuse(step, reason, q.runThread); };
+    if (REMAP_ERROR !== null) refuse('remap: ' + REMAP_ERROR);
+    if (REMAP_ROWS.length === 0) return { rows: out };
+    if (r.deflated) refuse('remap: the record is deflated (length2 ' + r.length2 + '): the offsets would name compressed bytes');
+    for (const w of REMAP_ROWS) {
+      if (w.offset < r.bodyStart || w.offset + 3 > r.total) refuse('remap: offset ' + w.offset + ' is outside the record body (' + r.bodyStart + '..' + (r.total - 3) + '); the census\'s offset is a body offset, add the header\'s ' + r.bodyStart);
+      const b = r.bytes.subarray(w.offset, w.offset + 3), d = decode3(b);
+      if (d.kind !== 0) refuse('remap: bytes at ' + w.offset + ' decode to kind ' + d.kind + ' index ' + d.value + ', row says ' + w.index + ': nothing to remap (' + (d.kind === 1 ? 'a load-index-00 form, portable' : (d.kind === 2 ? 'a created form' : 'kind 3 is aliasing or a wrong offset')) + ')');
+      if (d.value !== w.index) refuse('remap: bytes at ' + w.offset + ' decode to kind 0 index ' + d.value + ', row says ' + w.index);
+      out.push({ row: w, from: bytesHex(b), fromIndex: d.value, form: NULL, formType: -1 });
+    }
+    for (const e of out) {
+      let f = NULL;
+      try { f = nf.lookupByID(e.row.formId); } catch (err) { refuse('remap: 14617 faulted for form ' + hex(e.row.formId) + ': ' + err); }
+      if (f.isNull()) refuse('remap: form ' + hex(e.row.formId) + ' is not on this seat');
+      const id = u32(f, FORM_ID), type = u8(f, FORM_TYPE);
+      if (id !== e.row.formId) refuse('remap: 14617 returned a form with id ' + hex(id) + ' for ' + hex(e.row.formId));
+      if (e.row.formType !== null && type !== e.row.formType) refuse('remap: form ' + hex(e.row.formId) + ' is type ' + hex(type) + ' on this seat, row says ' + hex(e.row.formType));
+      e.form = f; e.formType = type;
+    }
+    return { rows: out };
+  };
+  // (c), (d), (e): the engine's own encoder per row on a scratch, the three bytes read back and written into the record, the heap copy rewritten
+  // whole and hashed back; 35928's map insert on a miss (35554 at mgr + 0x298) is the save path's own effect, HYPOTHESIS safe here; the last step before 35509
+  const scratch = Memory.alloc(8); // the 3-byte BGSNumericIDIndex 35928 writes through rcx
+  const remapEncode = function (r, remap, row, rec, q) {
+    const step = 'REMAP encode 35928';
+    const refuse = function (reason) { remapRefuse(step, reason, q.runThread); };
+    emit({ event: 'step', step: step, rows: remap.rows.length, sumSender: r.fnv1a });
+    for (const e of remap.rows) {
+      scratch.writeU64(0);
+      try { nf.setNumericId(scratch, e.row.formId); } catch (err) { refuse('remap: 35928 faulted for form ' + hex(e.row.formId) + ': ' + err); }
+      const b = new Uint8Array(scratch.readByteArray(3)), d = decode3(b);
+      if (d.kind !== 0) refuse('remap: 35928 encoded form ' + hex(e.row.formId) + ' as kind ' + d.kind + ' (' + bytesHex(b) + '), not a type-0 index: the static read of 35928 is wrong for this id');
+      r.bytes.set(b, e.row.offset);
+      emit({ event: 'remap', offset: e.row.offset, formId: hex(e.row.formId), from: e.from, to: bytesHex(b), fromIndex: e.fromIndex, toKind: d.kind, toIndex: d.value, formType: hex(e.formType), thread: q.runThread });
+    }
+    rec.writeByteArray(r.bytes.buffer); // the heap copy carries the patched bytes 35509 hands over
+    row.remapRows = remap.rows.length; row.sumSender = r.fnv1a; row.fnvPatched = hex(fnv1a(r.bytes));
+    const heap = hex(fnv1a(new Uint8Array(rec.readByteArray(r.bytes.length))));
+    if (heap !== row.fnvPatched) refuse('remap: the heap copy hashes ' + heap + ', the patched bytes ' + row.fnvPatched);
+  };
   const run = function (form, p, q) {
     const row = { event: 'apply', mode: MODE, park: PARK, form: hex(FORM), thread: q.runThread, markThread: q.markThread, deferredMs: q.deferredMs, deferredVia: q.via, entryFlags: hex(p.entry.flags) };
     const before = snapshot(form, 'before', true);
     result.liveHash = before.livePose && before.livePose.blockHash ? before.livePose.blockHash : null;
     const s = singletons(), map = p.map;
-    let buf = null, rec = NULL, flagsOut = 0, body = null, step = 'start', suppressSet = false, parkSub = NULL, parked = false;
+    let buf = null, rec = NULL, flagsOut = 0, body = null, step = 'start', suppressSet = false, parkSub = NULL, parked = false, r = null, remap = null; // r and remap: apply mode's parsed RECORD and its checked REMAP rows (v2.3)
     watch.active = true; watch.tid = q.runThread;
     try {
       if (before.liveBodiesError !== undefined || before.livePoseError !== undefined) throw new Error('an engine read faulted in the before snapshot (' + (before.liveBodiesError || before.livePoseError) + '): refused before any write');
@@ -443,9 +566,11 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
         row.record = h; row.deflated = h.length2 !== 0; row.recordFnv1a = hex(fnv1a(new Uint8Array(rec.readByteArray(Math.min(h.total, CAP)))));
       } else {
         step = 'RECORD';
-        const r = parseRecord();
+        r = parseRecord();
         row.record = { type: r.type, sizeCode: r.sizeCode, version: r.version, length1: r.length1, length2: r.length2, total: r.total }; row.recordFnv1a = r.fnv1a; row.deflated = r.length2 !== 0;
         if (r.problems.length !== 0) throw new Error('RECORD refused: ' + r.problems.join('; '));
+        step = 'REMAP check'; // v2.3: (a) and (b) for every row, the SUM above verified over the unpatched bytes; a refusal throws with nothing patched and no engine state changed
+        remap = remapCheck(r, q); row.remapRows = remap.rows.length;
         flagsOut = FLAGS >>> 0; row.writtenFlags = hex(flagsOut);
         body = r.deflated ? null : r.bytes.subarray(r.bodyStart);
         step = 'allocate 68115';
@@ -461,6 +586,8 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
       result.recordBlockHash = row.havok.blockHash || null;
       row.liveBodies = before.liveBodies === undefined ? null : before.liveBodies.count;
       if (row.havok.count !== undefined && row.liveBodies !== null && row.havok.count !== row.liveBodies && !FORCE) throw new Error('body count ' + row.havok.count + ' in the record, ' + row.liveBodies + ' live: refused without FORCE');
+      if (remap !== null && row.havok.present === true) for (const e of remap.rows) if (e.row.offset + 3 > r.bodyStart + row.havok.blockStart && e.row.offset < r.bodyStart + row.havok.blockStart + row.havok.blockLen) throw new Error('remap: offset ' + e.row.offset + ' lies inside the Havok block (' + (r.bodyStart + row.havok.blockStart) + '..' + (r.bodyStart + row.havok.blockStart + row.havok.blockLen - 1) + '): no form id is written there');
+      if (remap !== null && remap.rows.length !== 0) { step = 'REMAP encode 35928'; remapEncode(r, remap, row, rec, q); } // v2.3: the last step before 35509, after every check of the run; the heap record then carries the patched bytes
       const preKind2 = safeKind2(form), preExtra = safeExtra(form); // read before the write: nothing but the emit sits between 35509 and 35568
       step = 'write 35509'; // THE engine-state write; the record pointer is the engine's from here unless 35568 refuses
       const w = writeEntry(map, flagsOut, p.entry.mid, rec);
@@ -468,7 +595,7 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
       if (!w.record.equals(rec)) throw new Error('the entry does not hold our record after the write');
       step = 'apply 35568';
       const ours = rec; rec = NULL; // from here the engine owns it (its decode frees it); never freed by us after the call
-      emit({ event: 'step', step: 'apply 35568', record: String(ours), header: row.record, writtenFlags: row.writtenFlags, pending: u32(s.game, PENDING_COUNT), kind2: preKind2, extra: preExtra }); // the last row a death leaves
+      emit({ event: 'step', step: 'apply 35568', record: String(ours), header: row.record, writtenFlags: row.writtenFlags, remapRows: row.remapRows, fnvPatched: row.fnvPatched, pending: u32(s.game, PENDING_COUNT), kind2: preKind2, extra: preExtra }); // the last row a death leaves
       row.applyReturn = nf.applyWrap(s.game, form);
       emit({ event: 'step', step: '35568 returned', applyReturn: row.applyReturn });
       const a = readEntry(map);
@@ -582,8 +709,8 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
   const firstBytesAt = function (p) { return rva(p) + ':' + toHex(p, 4); };
   const safeBytes = function (p) { try { return p.isNull() ? 'null slot' : firstBytesAt(p); } catch (e) { return 'unreadable: ' + e; } }; // a garbage slot must not fault the load
   const rbSetPos = ptrAt(at('rigidBodyVtable'), SLOT_SET_POS * 8), rbSetRot = ptrAt(at('rigidBodyVtable'), SLOT_SET_ROT * 8);
-  const hookBytes = {}; // every hook's resolved address and first bytes, read before the attach (the pitfalls rule)
-  ['innerAdd', 'playerUpdate', 'formsLog', 'havokRead', 'havokBody', 'havokPrePass', 'flushEntry', 'savedHavokSet', 'set3DWrapper', 'setData3D'].forEach(function (n) { hookBytes[n] = safeBytes(at(n)); });
+  const hookBytes = {}; // every hook's resolved address and first bytes, read before the attach (the pitfalls rule); plus v2.3's two REMAP callees, called not hooked (35928 expected 40 53 48 83, 14617 40 57 48 83: the actor script's ready rows in 183149 and 192013)
+  ['innerAdd', 'playerUpdate', 'formsLog', 'havokRead', 'havokBody', 'havokPrePass', 'flushEntry', 'savedHavokSet', 'set3DWrapper', 'setData3D', 'setNumericId', 'lookupByID'].forEach(function (n) { hookBytes[n] = safeBytes(at(n)); });
   hookBytes.rigidSetPosition = safeBytes(rbSetPos); hookBytes.rigidSetRotation = safeBytes(rbSetRot);
   const mainTid = function () { const m = ptrAt(at('main'), 0); return m.isNull() ? -1 : u32(m, MAIN_THREAD); };
   const runPending = function (threadId, via) { // the deferred run, on Main.threadID only, inside Update's replacement (never inside a listener: the guard)
@@ -704,7 +831,7 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
   const ready = { event: 'ready', version: version, pid: Process.id, base: String(exe.base), form: hex(FORM), mode: MODE, trigger: TRIGGER, flag: hex(FLAG), runs: RUNS, force: FORCE, suppress: SUPPRESS, park: PARK, updateReplaced: updateReplaced, hooks: hookBytes,
     game: String(s0.game), manager: String(s0.manager), main: String(s0.main), handler: String(s0.handler), player: String(s0.player),
     managerFlags: s0.game.isNull() ? -1 : hex(u32(s0.game, MANAGER_FLAGS)), pending: s0.game.isNull() ? -1 : u32(s0.game, PENDING_COUNT), dryRun: s0.manager.isNull() ? -1 : u8(s0.manager, DRY_RUN),
-    mainThread: s0.main.isNull() ? -1 : u32(s0.main, MAIN_THREAD), saveVersion: ver0, attachErrors: attachErrors };
+    mainThread: s0.main.isNull() ? -1 : u32(s0.main, MAIN_THREAD), saveVersion: ver0, remap: { rows: REMAP_ROWS.length, error: REMAP_ERROR, mode: MODE }, attachErrors: attachErrors };
   if (MODE === 'apply') { try { const r = parseRecord(); ready.record = { type: r.type, sizeCode: r.sizeCode, version: r.version, length1: r.length1, length2: r.length2, total: r.total, fnv1a: r.fnv1a, problems: r.problems, flags: hex(FLAGS >>> 0), havok: r.length2 === 0 ? havokOf(r.bytes.subarray(r.bodyStart), FLAGS >>> 0, FORM) : 'deflated' }; } catch (e) { ready.recordError = String(e); } }
   emit(ready);
 }

@@ -7199,3 +7199,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   Quest Static Data and Story Event Manager R0 by D-F1 C, Combat R3 (recomputed by each host), Form ID Array R3 (the REMAP step
   re-encodes a crossing record); undeclared with a note: TES, Created Objects, Process Lists, Location MetaData, Magic Favorites and
   Ingredient Shared (their verbs have no Rung line to cite), Visited Worldspace Array. The note gains the save path section.
+- 11:57 PST 2026-11-03 (19:57Z 11-03) (thuum-cf): apply-on-demand.js v2.3, the REMAP step (the receiver's half of a cross-seat record's id re-encode; D6): LAB_PARAM REMAP, rows
+  `offset:formId:index[:formType]` (Sven's 2097:0x2B005373:10586); 'REMAP check' right after the record parses and its SUM over the
+  sender's bytes: every row's three bytes must decode to kind 0 with exactly the row's index (kind 1, 2, 3 refuse: nothing to remap), the
+  record raw, the offset in the body, LookupByID (14617) non-null with the id and form type recorded; 'REMAP encode 35928' immediately
+  before 35509, after the body-count and PARK checks, so every refusal of the run precedes the first engine write: per row the engine's
+  own encoder 35928 on a 3-byte scratch, kind 0 required, the bytes written, a remap row (offset, formId, from, to, fromIndex, toKind,
+  toIndex, formType); the heap record rewritten whole and its read-back hashed (fnvPatched beside the sender's sumSender); a row inside
+  the Havok block refuses; VERDICTS carries the process reader's two 35519 lines ("Could not load active effect": the remap's miss
+  signal; "Unknown reference effect type": a desync). Fresh review FIX FIRST (1 blocking: parseRecord never set r.deflated, so the
+  deflated refusal was dead and the body view read undefined under FORCE since v2) and four notes, applied as written; the reviewer
+  verified the decode against 0x620240's disassembly, the ready-row bytes against the served census logs, and the example row against
+  Sven's served record (00 29 5a at 2097; the census's 2091 refused with the +6 hint). 79,795 bytes, node --check clean, unrun; its
+  cross-seat run (numidium's x-apply-cross-seat-sven v2 on 192345's kDead record) waits for the lab after playtest 42's turbo arm.
