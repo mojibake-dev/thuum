@@ -6767,3 +6767,20 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   save-shaped record to CONFIRMED. The initial data's Havok blob is the owner's corpse pose in the engine's own format, so the
   live-form apply of the owner's actor record on the guest ((c)) is a candidate cure for the guest's half-up body (playtest 41's
   item 3), HYPOTHESIS until a guest applies one; the re-analyst takes (c)'s static read with that target.
+- 07:52 PST 2026-11-03 (15:52Z 11-03) (thuum-cf): door v23's last red READ (151537's recorded reads, 150814's step 82, the cell-events record, c1's
+  console, puppetService's natives, the cold exits 055217 and 084006): H3. The inn's copy of Hod keeps its 3D because the warm exit is
+  served from the engine's cell buffer: the interior the seat just left is DETACHED (485 detach events, isAttached false from 0.9 s
+  after the exit to the end, the cell released by c1 and the server) yet retained with its actors' NiNode trees intact (the pose
+  frozen; the eight reads over 25 s identical to all digits: is3DLoaded true, cell 133c6, aiEnabled false, activationBlocked true),
+  while the 25 exterior cells re-attached within 320 ms with zero cellFullyLoaded. H1 falls: the cold exits ran the same demote with
+  the 3D present at the exit tick and lost it within about 3.5 s (D11's "no 3D here" release 7 s after); the puppet natives keep no
+  3D. H2 falls: the inn is never attached after the exit. What differs is the route: another worldspace (the cold exits) against the
+  buffered adjacent exterior (the warm). HYPOTHESIS: the keeper (the cell buffer against a door-proximity rule) and the eviction time
+  (at least 25 s); the discriminator is a pcb on c1 after a warm exit then one npc-state. P13 rewritten so. Consequence: the door
+  scenario's `c1.npc_state(0x1348a).is3DLoaded == false` 15 s after the exit is a stale premise about the engine (true on the cold
+  route only, false on the warm route two of two), not a client fault; no client code holds or drops a 3D, the retained puppet
+  stays AI-off until a promote (D11 needs !loadedHere), the record is frozen at the same spot, nothing diverges. The proposal for
+  v24 (a REWRITTEN claim, so a fresh review and, per W4, Eli's word): the witness of "the street seat's copy reads indoors, not
+  simulating" becomes the copy's cell 133c6 (held) plus a stream witness, c1's count of its hosted-state lines for 1348a snapshotted
+  after the exit's until and claimed equal 15 s later (the host's last state line in 151537 was 6 s before the exit, none after),
+  with is3DLoaded recorded, not claimed, and a LOG note on the route dependence.

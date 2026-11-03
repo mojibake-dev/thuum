@@ -222,7 +222,10 @@ crossings fill it, and from then every poll reads 64 forms and 64 attach flags (
 (HYPOTHESIS), and the late event then returns at the loaded check; x-warm-exit records the cell events beside the count, so a run
 tells the two apart. The client has no report budget of its own: a re-report shares the
 server's bucket (128 burst), and an exit's burst is at most the re-attached cells plus the own cell plus a colliding refresh. No
-wire change. Its read is x-warm-exit v1 (the host within 10 s of the exit and that line),
+wire change. The same buffer keeps the interior's copies' 3D after the warm exit (non-owning-seat.md P13, read from 151537: detached,
+retained, the pose frozen, the puppet flags on; the cold route to another worldspace loses it in about 3.5 s), so a scenario claim
+that the street seat's copy has no 3D indoors after the exit encodes the cold route and is false on the warm one; the witness of
+"indoors, not simulating" is the copy's cell and the absence of the seat's state lines, not its 3D. Its read is x-warm-exit v1 (the host within 10 s of the exit and that line),
 and b-npc-handoff-door-hosts v23 waits for 0x9731's host after the exit before its post-exit assert.
 
 ## Message contract
