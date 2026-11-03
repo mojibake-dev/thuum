@@ -105,7 +105,9 @@ services:
       SCENARIOS_DIR: /srv/lab/thuum/lab/scenarios
       REFERENCES_DIR: /srv/lab/thuum/lab/references   # ADR-031's reference traces, deployed with the tree
       FIXTURE_WORLDS_DIR: /srv/lab/thuum/lab/fixtures/worlds   # a scenario's `server: {world:}` fixtures (ADR-043), deployed with the tree
-      NIGHTLY_SWEEP_UTC: "10:30"
+      # the nightly sweep is off (Eli, 2026-11-03: "stop the nightly now, i dont feel like we're gaining anything from it", then
+      # "id like them to be in ASAP mode w/out the nightly taking up so much time"); "HH:MM" UTC turns it back on
+      NIGHTLY_SWEEP_UTC: ""
       NIGHTLY_QUIET_S: "1800"
       # ADR-036's reset between runs (config.py's client_reset: rollback or relaunch), from sky-srv's .env so the
       # mode flips with a lab-api restart and no image; unset is rollback, the code's own default
