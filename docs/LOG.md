@@ -6989,3 +6989,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   roll read bounded; writeByteArray on the documented input; the operator's kDead record and writtenFlags for the apply half). The
   round trip (x-apply-roundtrip, solo c1, the promoted bandit 0x39fe4, the copy's own kDead record through 35568 and 35567) is
   numidium's on the free lab after a deploy-srv; the reading rule as logged above.
+- 08:40 PST 2026-11-03 (16:40Z 11-03) (thuum-cf): m3-system1-r3 df9e1009 GREEN on pipeline 5052 (client and server builds), so numidium's GO's hold
+  is released and both GOs stand on r3's head. r3 is final for the df9e1009 re-stage (death-freeze v5 e77a1806 twice, then x-warm-exit
+  v2, swap v20, death-reentry v5, scene-guest v3; after the current re-stage on db0e19a5 ends) and the gate (verb-merge's always set,
+  npc-handoff's, npc-fate's, cell-host's and npc-puppet's scenarios, and watch), the door scenario by Eli's D-P13 (v24's draft
+  20acc874 for A, v23 as it stands otherwise); then the merge and playtest 42 in the evening slot. The round trip
+  (apply-on-demand.js 8fc23fc3) runs on the lab when numidium fits it in.
