@@ -198,8 +198,8 @@ Status meanings:
 | `Actor.IsUnconscious` (method) | missing |  |  |  |
 | `Actor.IsWeaponDrawn` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:992] |  |
 | `Actor.KeepOffsetFromActor` (method) | missing |  |  |  |
-| `Actor.Kill` (method) | missing |  |  |  |
-| `Actor.KillSilent` (method) | missing |  |  |  |
+| `Actor.Kill` (method) | missing | R2 | hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): a host-run script's call on a simulated actor is raised to JS, never dropped by the budget; the death report's cause 3 (the script-kill mark) | papyrus-events |
+| `Actor.KillSilent` (method) | missing | R2 | hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): a host-run script's call on a simulated actor is raised to JS, never dropped by the budget; the death report's cause 3 (the script-kill mark) | papyrus-events |
 | `Actor.ModActorValue` (method) | implemented | R2 on a player (the player's game); R2 delegated otherwise | a permanent modifier changed in the game that hosts the actor, the player's own for a player; the base untouched (x-av-probe 20261008-101643, CONFIRMED; not in the record). [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1003] | actor-values |
 | `Actor.ModFactionRank` (method) | missing |  |  |  |
 | `Actor.MoveToPackageLocation` (method, latent) | missing |  |  |  |
@@ -220,7 +220,7 @@ Status meanings:
 | `Actor.ResetExpressionOverrides` (method) | missing |  |  |  |
 | `Actor.ResetHealthAndLimbs` (method) | missing |  |  |  |
 | `Actor.RestoreActorValue` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:997] |  |
-| `Actor.Resurrect` (method, latent) | missing |  |  |  |
+| `Actor.Resurrect` (method, latent) | missing | R2 | hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): a host-run script's call on a hosted cell's object or a simulated actor is raised to JS and counted, the platform's own calls apart; census-only until slice 2's report row | papyrus-events |
 | `Actor.SendAssaultAlarm` (method) | missing |  |  |  |
 | `Actor.SendLycanthropyStateChanged` (method) | missing |  |  |  |
 | `Actor.SendTrespassAlarm` (method) | missing |  |  |  |
@@ -811,7 +811,7 @@ Status meanings:
 | `Game.UpdateTintMaskColors` (global) | missing |  |  |  |
 | `Game.UsingGamepad` (global) | missing |  |  |  |
 | `GlobalVariable.GetValue` (method) | missing |  |  |  |
-| `GlobalVariable.SetValue` (method) | missing |  |  |  |
+| `GlobalVariable.SetValue` (method) | missing | R2 | hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): every seat runs the script, so the calls are tallied in native and flushed to the census every 30 s, no per-call event; slice 2's report row decides the owner | papyrus-events |
 | `HeadPart.GetHeadPart` (global) | missing |  |  |  |
 | `HeadPart.GetIndexOfExtraPart` (method) | missing |  |  |  |
 | `HeadPart.GetNthExtraPart` (method) | missing |  |  |  |
@@ -994,10 +994,10 @@ Status meanings:
 | `NetImmerse.SetNodeLocalRotationMatrix` (global) | missing |  |  |  |
 | `NetImmerse.SetNodeScale` (global) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusNetImmerse.cpp:83] |  |
 | `NetImmerse.SetNodeTextureSet` (global) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusNetImmerse.cpp:82] |  |
-| `ObjectReference.Activate` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:958] |  |
+| `ObjectReference.Activate` (method) | implemented | R2 | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:958]; hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): a host-run script's call on a hosted cell's object or a simulated actor is raised to JS and counted, the platform's own calls apart; census-only until slice 2's report row | papyrus-events |
 | `ObjectReference.AddDependentAnimatedObjectReference` (method) | missing |  |  |  |
 | `ObjectReference.AddInventoryEventFilter` (method) | missing |  |  |  |
-| `ObjectReference.AddItem` (method, latent) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:944] |  |
+| `ObjectReference.AddItem` (method, latent) | delegated | R2 | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:944]; hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): a host-run script's call on a hosted cell's object or a simulated actor is raised to JS and counted, the platform's own calls apart; census-only until slice 2's report row | papyrus-events |
 | `ObjectReference.AddToMap` (method) | missing | R3 | Not on the server VM yet (a quest revealing a marker needs a player to reveal it for; a later verb). With the map-markers verb (fork branch m1-map-markers until it lands), the server itself sends it to a player's client as an SpSnippet after a login, once per marker that player discovered (docs/verbs/map-markers.md): the map is client-local, the record is the server's. | map-markers |
 | `ObjectReference.ApplyHavokImpulse` (method, latent) | missing |  |  |  |
 | `ObjectReference.BlockActivation` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:955] |  |
@@ -1006,14 +1006,14 @@ Status meanings:
 | `ObjectReference.ClearDestruction` (method) | missing |  |  |  |
 | `ObjectReference.CreateDetectionEvent` (method) | missing |  |  |  |
 | `ObjectReference.CreateEnchantment` (method) | missing |  |  |  |
-| `ObjectReference.DamageObject` (method, latent) | missing |  |  |  |
-| `ObjectReference.Delete` (method, latent) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:954] |  |
-| `ObjectReference.Disable` (method, latent) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:953] |  |
-| `ObjectReference.DisableNoWait` (method) | implemented | R0 | decided (Eli, 2026-10-04): implement as Disable without the latent wait (the server sets the disabled state and persists it, listeners get the same snippet); two lines over Disable's body. [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:943] | enable-disable |
+| `ObjectReference.DamageObject` (method, latent) | missing | R2 | hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): a host-run script's call on a hosted cell's object or a simulated actor is raised to JS and counted, the platform's own calls apart; census-only until slice 2's report row | papyrus-events |
+| `ObjectReference.Delete` (method, latent) | implemented | R2 | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:954]; hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): a host-run script's call on a hosted cell's object or a simulated actor is raised to JS and counted, the platform's own calls apart; census-only until slice 2's report row | papyrus-events |
+| `ObjectReference.Disable` (method, latent) | implemented | R2 | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:953]; hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): a host-run script's call on a hosted cell's object or a simulated actor is raised to JS and counted, the platform's own calls apart; census-only until slice 2's report row | papyrus-events |
+| `ObjectReference.DisableNoWait` (method) | implemented | R0 | decided (Eli, 2026-10-04): implement as Disable without the latent wait (the server sets the disabled state and persists it, listeners get the same snippet); two lines over Disable's body. [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:943]; hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): a host-run script's call on a hosted cell's object or a simulated actor is raised to JS and counted, the platform's own calls apart; census-only until slice 2's report row | enable-disable |
 | `ObjectReference.DropObject` (method, latent) | missing |  |  |  |
-| `ObjectReference.Enable` (method, latent) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:952] |  |
+| `ObjectReference.Enable` (method, latent) | implemented | R2 | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:952]; hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): a host-run script's call on a hosted cell's object or a simulated actor is raised to JS and counted, the platform's own calls apart; census-only until slice 2's report row | papyrus-events |
 | `ObjectReference.EnableFastTravel` (method) | missing |  |  |  |
-| `ObjectReference.EnableNoWait` (method) | implemented | R0 | decided (Eli, 2026-10-04): implement as Enable without the latent wait, the same way as DisableNoWait. [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:942] | enable-disable |
+| `ObjectReference.EnableNoWait` (method) | implemented | R0 | decided (Eli, 2026-10-04): implement as Enable without the latent wait, the same way as DisableNoWait. [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:942]; hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): a host-run script's call on a hosted cell's object or a simulated actor is raised to JS and counted, the platform's own calls apart; census-only until slice 2's report row | enable-disable |
 | `ObjectReference.ForceAddRagdollToWorld` (method, latent) | missing |  |  |  |
 | `ObjectReference.ForceRemoveRagdollFromWorld` (method, latent) | missing |  |  |  |
 | `ObjectReference.GetActorOwner` (method) | missing |  |  |  |
@@ -1087,13 +1087,13 @@ Status meanings:
 | `ObjectReference.IsMapMarkerVisible` (method) | missing |  |  |  |
 | `ObjectReference.IsOffLimits` (method) | missing |  |  |  |
 | `ObjectReference.KnockAreaEffect` (method) | missing |  |  |  |
-| `ObjectReference.Lock` (method) | implemented | R0 | writes the server's lock record; abAsOwner ignored (no ownership on the server) | locks |
-| `ObjectReference.MoveTo` (method, latent) | gamemode |  | [overrides the C++ implemented at skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:969; skymp5-functions-lib/index.ts:350] |  |
+| `ObjectReference.Lock` (method) | implemented | R0 | writes the server's lock record; abAsOwner ignored (no ownership on the server); hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): a host-run script's call on a hosted cell's object or a simulated actor is raised to JS and counted, the platform's own calls apart; census-only until slice 2's report row | locks |
+| `ObjectReference.MoveTo` (method, latent) | gamemode | R2 | [overrides the C++ implemented at skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:969; skymp5-functions-lib/index.ts:350]; hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): a host-run script's call on a hosted cell's object or a simulated actor is raised to JS and counted, the platform's own calls apart; census-only until slice 2's report row | papyrus-events |
 | `ObjectReference.MoveToInteractionLocation` (method, latent) | missing |  |  |  |
 | `ObjectReference.MoveToMyEditorLocation` (method, latent) | missing |  |  |  |
 | `ObjectReference.MoveToNode` (method, latent) | missing |  |  |  |
-| `ObjectReference.PlaceActorAtMe` (method) | missing |  |  |  |
-| `ObjectReference.PlaceAtMe` (method) | delegated | R0 | decided (Eli, 2026-10-04): keep the server's placement; explosions (EXPL), the unsupported case, delegate to the listeners' clients as R2 rendering, since an explosion is an effect with no lasting state. [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:950] | place-at-me |
+| `ObjectReference.PlaceActorAtMe` (method) | missing | R2 | hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): a host-run script's call on a hosted cell's object or a simulated actor is raised to JS and counted, the platform's own calls apart; census-only until slice 2's report row | papyrus-events |
+| `ObjectReference.PlaceAtMe` (method) | delegated | R0 | decided (Eli, 2026-10-04): keep the server's placement; explosions (EXPL), the unsupported case, delegate to the listeners' clients as R2 rendering, since an explosion is an effect with no lasting state. [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:950]; hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): a host-run script's call on a hosted cell's object or a simulated actor is raised to JS and counted, the platform's own calls apart; census-only until slice 2's report row | place-at-me |
 | `ObjectReference.PlayAnimation` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:964] |  |
 | `ObjectReference.PlayAnimationAndWait` (method, latent) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:965] |  |
 | `ObjectReference.PlayGamebryoAnimation` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:967] |  |
@@ -1107,7 +1107,7 @@ Status meanings:
 | `ObjectReference.RemoveAllItems` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:946] |  |
 | `ObjectReference.RemoveDependentAnimatedObjectReference` (method) | missing |  |  |  |
 | `ObjectReference.RemoveInventoryEventFilter` (method) | missing |  |  |  |
-| `ObjectReference.RemoveItem` (method, latent) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:945] |  |
+| `ObjectReference.RemoveItem` (method, latent) | delegated | R2 | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:945]; hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): a host-run script's call on a hosted cell's object or a simulated actor is raised to JS and counted, the platform's own calls apart; census-only until slice 2's report row | papyrus-events |
 | `ObjectReference.Reset` (method, latent) | missing |  |  |  |
 | `ObjectReference.ResetInventory` (method) | missing |  |  |  |
 | `ObjectReference.Say` (method) | missing |  |  |  |
@@ -1118,7 +1118,7 @@ Status meanings:
 | `ObjectReference.SetAnimationVariableBool` (method) | missing |  |  |  |
 | `ObjectReference.SetAnimationVariableFloat` (method) | missing |  |  |  |
 | `ObjectReference.SetAnimationVariableInt` (method) | missing |  |  |  |
-| `ObjectReference.SetDestroyed` (method) | missing |  |  |  |
+| `ObjectReference.SetDestroyed` (method) | missing | R2 | hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): a host-run script's call on a hosted cell's object or a simulated actor is raised to JS and counted, the platform's own calls apart; census-only until slice 2's report row | papyrus-events |
 | `ObjectReference.SetDisplayName` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:978] |  |
 | `ObjectReference.SetEnchantment` (method) | missing |  |  |  |
 | `ObjectReference.SetFactionOwner` (method) | missing |  |  |  |
@@ -1126,10 +1126,10 @@ Status meanings:
 | `ObjectReference.SetItemCharge` (method) | missing |  |  |  |
 | `ObjectReference.SetItemHealthPercent` (method) | missing |  |  |  |
 | `ObjectReference.SetItemMaxCharge` (method) | missing |  |  |  |
-| `ObjectReference.SetLockLevel` (method) | implemented | R0 | writes the level byte into the server's lock record (docs/verbs/locks.md; fork m4-locks) | locks |
+| `ObjectReference.SetLockLevel` (method) | implemented | R0 | writes the level byte into the server's lock record (docs/verbs/locks.md; fork m4-locks); hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): a host-run script's call on a hosted cell's object or a simulated actor is raised to JS and counted, the platform's own calls apart; census-only until slice 2's report row | locks |
 | `ObjectReference.SetMotionType` (method, latent) | missing |  |  |  |
 | `ObjectReference.SetNoFavorAllowed` (method) | missing |  |  |  |
-| `ObjectReference.SetOpen` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:970] |  |
+| `ObjectReference.SetOpen` (method) | implemented | R2 | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:970]; hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): a host-run script's call on a hosted cell's object or a simulated actor is raised to JS and counted, the platform's own calls apart; census-only until slice 2's report row | papyrus-events |
 | `ObjectReference.SetPosition` (method, latent) | delegated |  | The server also sends it itself, to the other players' games at a cast teleport's landing: the caster's figure placed there at once, not glided (R3 there; the record moves with the caster's own report; docs/verbs/cast-teleport.md, the look on other screens). [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:962] | cast-teleport |
 | `ObjectReference.SetScale` (method, latent) | stub | R0 | decided (Eli, 2026-10-04): a verb, not a stub fix: the reference's scale becomes server state with a property on the wire and a renderer on the client (CreateActor carries node scale, not reference scale); GetScale returns 1.0 until then. [returns None; skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:941] | scale |
 | `ObjectReference.SplineTranslateTo` (method) | missing |  |  |  |
@@ -1203,12 +1203,12 @@ Status meanings:
 | `Quest.IsStopping` (method) | missing |  |  |  |
 | `Quest.Reset` (method) | missing |  |  |  |
 | `Quest.SetActive` (method) | missing |  |  |  |
-| `Quest.SetCurrentStageID` (method, latent) | missing |  |  |  |
+| `Quest.SetCurrentStageID` (method, latent) | missing | R2 | hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): every seat runs the script, so the calls are tallied in native and flushed to the census every 30 s, no per-call event; slice 2's report row decides the owner | papyrus-events |
 | `Quest.SetObjectiveCompleted` (method) | missing |  |  |  |
 | `Quest.SetObjectiveDisplayed` (method) | missing |  |  |  |
 | `Quest.SetObjectiveFailed` (method) | missing |  |  |  |
-| `Quest.Start` (method, latent) | missing |  |  |  |
-| `Quest.Stop` (method) | missing |  |  |  |
+| `Quest.Start` (method, latent) | missing | R2 | hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): every seat runs the script, so the calls are tallied in native and flushed to the census every 30 s, no per-call event; slice 2's report row decides the owner | papyrus-events |
+| `Quest.Stop` (method) | missing | R2 | hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): every seat runs the script, so the calls are tallied in native and flushed to the census every 30 s, no per-call event; slice 2's report row decides the owner | papyrus-events |
 | `Quest.UpdateCurrentInstanceGlobal` (method) | missing |  |  |  |
 | `Race.ClearRaceFlag` (method) | missing |  |  |  |
 | `Race.GetDefaultVoiceType` (method) | missing |  |  |  |
@@ -1224,7 +1224,7 @@ Status meanings:
 | `Race.SetSkin` (method) | missing |  |  |  |
 | `ReferenceAlias.AddInventoryEventFilter` (method) | missing |  |  |  |
 | `ReferenceAlias.Clear` (method) | missing |  |  |  |
-| `ReferenceAlias.ForceRefTo` (method) | missing |  |  |  |
+| `ReferenceAlias.ForceRefTo` (method) | missing | R2 | hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): every seat runs the script, so the calls are tallied in native and flushed to the census every 30 s, no per-call event; slice 2's report row decides the owner | papyrus-events |
 | `ReferenceAlias.GetReference` (method) | missing |  |  |  |
 | `ReferenceAlias.RemoveAllInventoryEventFilters` (method) | missing |  |  |  |
 | `ReferenceAlias.RemoveInventoryEventFilter` (method) | missing |  |  |  |

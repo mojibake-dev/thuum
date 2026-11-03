@@ -143,7 +143,11 @@ Rung: R0 for the fate (the roll, the death, the body's point, the respawn, the l
   sample under cell-host's bounds). R2, declared: the death pose and where
   the body rolled, as each game's physics plays them, and the host's
   deathStart or TESDeathEvent report of a death the server did not decide
-  (counted, never applied, H5). R3, declared: each game's death camera and
+  (counted, never applied, H5); and, since ADR-062 decision 2 (slice 1b,
+  2026-11-03), a host-run script's kill reported as cause 3: the host's
+  word, recorded and applied as the death, never validated (not MayDie, not
+  the body's distance to the record: owner checks, ADR-063 decision 4). R3,
+  declared: each game's death camera and
   kill move choice, the dying line's audio, the Papyrus and story-manager
   events a kill fires in that game.
 - Why not R1 for the roll: a game's roll cannot be validated into one roll;
@@ -746,8 +750,10 @@ units in the host's own movement samples within 4 s (MpActor::RecordHeight
 at every hosted sample, DropTo the highest minus the body's), 2 by an
 activation within 512 units of the body within 5 s (the listener's recent
 activations, NoteActivation at every first activation), 0 by any of the
-three; 3 (a script's kill is the server's to run, scripted-effects.md) and
-any other code refused. Then MpActor::Kill with the killer, the death's
+three; 3 (a host-run script's kill) taken as the host's word since ADR-062
+decision 2 (R2 above; before it refused as the server's to run, which
+scripted-effects.md's own kills still are), any other code refused. Then
+MpActor::Kill with the killer, the death's
 travel as every death's. A refusal is one warn a minute per actor with its
 code (E_DEATH_OFF, NO_ACTOR, PLAYER, NOT_HOST, IMMORTAL, FAR, NO_KILLER,
 UNCHECKED, SCRIPT, CAUSE), a report for an actor already dead an info line

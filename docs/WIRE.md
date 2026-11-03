@@ -396,7 +396,11 @@ essential never, a protected one never by a report), the body lies within
 cause 4 by a hit from the named killer the server numbered within 3 s, 1 by
 a drop of 200 units in the host's own movement samples within 4 s, 2 by an
 activation within 512 units of the body within 5 s, 0 by any of the three;
-cause 3 and any other code refused. The hazard evidence rides Activate (6)
+cause 3, a host-run script's kill, taken as the host's word (R2, ADR-062
+decision 2, 2026-11-03: the platform's hook on Actor.Kill marks the actor
+and the host's deathStart names the cause; MayDie and the body's distance
+do not apply to it, ADR-063 decision 4); any other code refused. The hazard
+evidence rides Activate (6)
 unchanged in shape: a reference's activation of itself (caster and target
 the same, not the player) is a trap trigger's firing, forwarded by the game
 hosting the trigger's cell (every vanilla trigger script activates itself

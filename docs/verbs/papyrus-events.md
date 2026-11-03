@@ -212,6 +212,29 @@ readable until slice 3's scenarios drop their relaunch writes. HYPOTHESIS H1a: C
 cell's activators on a loaded cell (Papyrus's own, UESP "Cell Script"); H1b: a blocked activator's own press reaches its script
 (playtest 41's pillars say yes) and a lifted one's default processing fires its activation parents once per press (the spike wall).
 
+Built in slice 1b (fork m4-scripts-work, 19:34 PST 2026-11-02; the first head f7ce5b37 went through numidium's fresh rules review, FIX
+FIRST, and this is the round after it): the platform's ScriptNatives (24 natives of the table hooked at their own entries,
+resolved by class and name from the VM's bindings at kDataLoaded, the hook's callbacks registered at plugin load so the attach
+never inserts into the map the live hooks read; each attach counted by Gum's answer), the event scriptNative (native, self, arg,
+value, cell, actor, stackId, count), ScriptNativeService (the census per 30 s, the first five live calls per native logged, the
+script-kill marks consumed by DeathReportService's cause 3) and the server taking cause 3 as the host's word (R2 in npc-fate.md,
+MayDie and the body distance lifted for it). The review's blocking finding and its answer: the platform's own calls (callNative's
+direct path on the worker, the latent path through VmCall::Run, every SpSnippet, so the client applying the server's word through
+setOpen, lock, activate, kill, setCurrentStageID and setValue) reach the same entries, so a thread-local mark (PlatformCall.h)
+wraps them and the hook counts them apart as "<native> (platform)". Rule 9: a quest's, a global's or an alias's call (every seat
+runs those scripts) and every call filtered as not hosted here are tallied in native and flushed as one census event per row
+every 30 s; a kill row is never dropped by the 64/s budget. The convention HYPOTHESIS (self at argument 2) is guarded: the first
+three calls of each row probe the self under SEH and a row whose self is no form of its kind stands down with one warn line, so a
+wrong row is a log line, not a crash; the trace still confirms it. Kept as they are, with the reason: guests run the lifecycle
+handlers of every world object (slice 1a's decision; the engine fires OnInit, OnLoad and OnCellAttach before a host is known, and
+the tally " (not hosted)" is the census of what those handlers then attempt through the hooked natives, read on a guest first).
+HYPOTHESIS rows this slice adds: H-1b1 a latent native's body runs inside VmCall's dispatch, so the mark covers it (if not, the
+census on a guest shows "Quest.SetCurrentStageID" live events at a relayed stage); H-1b2 PlatformCall covers every SpSnippet
+(they run through callNative); H-1b3 the self probe's form-type read is enough to tell a wrong row (a register holding another
+form of the right kind passes it). Known limits: the entry hook sees the call, not its effect (a refused Kill still leaves a 10 s
+mark; the census counts attempts); AddItem, RemoveItem, Lock, SetOpen and the weather are census-only in this slice; a MovableStatic
+is blocked like the other scripted kinds when not hosted (objectReferenceEx), so every seat agrees with the host's release.
+
 Tests: T0 for each verb's new report path where one is new (the scripted kill's evidence in ActorDeathTest; an NPC's scripted
 AddItem recorded in PartOne_ActivateTest's shape); T1 none; T2 difftest's sessions unchanged (the reports are the same messages);
 T3 the baseline first (b-object-anim on the union's dist against the morning's 64dbacfe green, the spike wall's regression), then
@@ -231,4 +254,4 @@ are until the slice is built; the build opens its fork branch as m4-scripts-work
 - [ ] T3 scenario green, no HYPOTHESIS tags (b-papyrus-events approved by Eli 2026-10-20 and on main, d1d8370, asserting the Creation's check ran connected with the prompt flag from the per-player default; its first run is the layer-merge sweep; x-mcm-register's HUD count still to read)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031): not applicable, no player action
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
-- [x] ledger and suppression registry updated (no native; the Suppress section above is the registry entry; NATIVES.md unchanged)
+- [x] ledger and suppression registry updated (no server native; the Suppress section above is the registry entry; slice 1b's 24 hooked natives carry their rung and reason in NATIVES.md's hand-maintained columns, R2, verb papyrus-events, 19:34 PST 2026-11-02)

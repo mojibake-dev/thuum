@@ -5546,3 +5546,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the playtest's direction with both roles (the fresh review's seven findings). The 29 T3 boxes unticked (932b0f8d). m3-handoff-
   settle 9606963e: two CellHostTest cases moved past the settle window (4768, 4773), then a SIGABRT in PartOne_ActivateTest's
   reloot case at 287 of the suite (4778), read as a flake under a loaded runner; rerun.
+- 19:34 PST 2026-11-02 (thuum-cf): ADR-062 slice 1b's review round pushed on m4-scripts-work (numidium's fresh rules review of f7ce5b37: FIX
+  FIRST, one blocking finding, nine should-fix): the platform's own native calls marked thread-locally (PlatformCall.h around
+  callNative's worker call and VmCall's dispatch) and counted apart; the hook registered at load and attached at kDataLoaded by
+  Gum's answer; native-side tallies for the quest, global and alias rows and the filtered calls, flushed as census events (count);
+  a kill row exempt from the budget; the self probed under SEH for the first three calls per row; kill marks consumed; a
+  MovableStatic blocked when not hosted; cause 3 exempt from MayDie and the body distance; the ActorDeath contract text, WIRE.md,
+  npc-fate.md's Authority row and NATIVES.md's 24 rows. Stale tags settled by an agent (bce99a91: npc-fate H-54f and the loader
+  row, weather:88, spell-cast:1032, shouts:180, from their runs).
