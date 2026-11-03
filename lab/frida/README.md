@@ -342,6 +342,17 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   seat shows no call and handle 0 throughout, and a second hand on the same
   body shows a call with the handle still 0 or no call. Written 2026-11-03
   for x-prop-arbitration leg 3 on both seats; never run.
+- prop-sleep.js: the engine's own sleep of a prop against the client's
+  500 ms stir test (docs/engine/havok-props.md row E10; prop-physics.md A3,
+  A4). Finds the clutter bodies the player's capsule touches through
+  prop-contact.js's two hooks and polls each every 100 ms: motion type,
+  speed, hkpMotion's deactivationIntegrateCounter and
+  deactivationNumInactiveFrames (5 frames deactivate, hkpMotion.h:23), the
+  island's isInActiveIslandsArray and activeMark bits (hkpSimulationIsland.h
+  +0x32), emitted on change and once a second while awake. Expected on the
+  simulating seat: the frames reach 5 and the island leaves the active array
+  within one sample interval of the seat's "stream ... asleep" line; the
+  non-owner's Keyframed copy reads type 4. Written 2026-11-03; never run.
 - prop-launch.js: prop-contact.js plus the body's motion at each contact and before and after every impulse push (the hkpEntity's
   embedded motion: type, position, linear velocity and its length, angular speed, inverse mass; offsets from hkpEntity.h, hkpMotion.h,
   hkMotionState.h, hkTransform.h), for D73's open item: a resting Dynamic basket thrown out of reach by a standing capsule contact (push
