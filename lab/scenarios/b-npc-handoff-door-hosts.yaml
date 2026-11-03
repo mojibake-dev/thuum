@@ -1,5 +1,6 @@
-# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v11 2026-11-03 after numidium's quick review of
-# v10 (READY FOR THE RED RUN, three fixes before the greens): 17:00 to 19:00 lies inside the CONDITIONED sawmill window (08:00 for
+# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v11 2026-11-03, its header's three nits fixed after
+# its quick review (READY FOR THE GREENS ONCE THE FIX EXISTS; header only, no step or claim changed); v11 after numidium's quick
+# review of v10 (READY FOR THE RED RUN, three fixes before the greens): 17:00 to 19:00 lies inside the CONDITIONED sawmill window (08:00 for
 # 660 min), so if a seat meets the mill's condition the sawmill package outranks the fallback and walks him out at a grant or before
 # 19:00, a red with a working fix that would read as the grant bounce unless the door line were checked; so each premise block
 # claims his package is neither sawmill package (0x1e604, 0x734ce) on the seat running him; the clock's numbers corrected (four runs
@@ -7,7 +8,8 @@
 # interior seat's premise ends 17.56 to 18.06, the exit comes 169 to 259 s after the baselines and the 400 s until ends 141 to
 # 231 s past 19:00); v10 after numidium's fresh review of v8 and v9: no build has ever shown the 08:00 exit (055217 logged no door
 # walk for 400 s up to about 9.3 h, the hosts running Hod on DefaultEatEditorLoc6x1 0x1e618), and docs/engine/non-owning-seat.md
-# P7 or P4 says why, both HYPOTHESIS (P7: the conditioned packages; P4: no package after a double promote): his sawmill packages HodSawmillSawLog8x11
+# P7 or P4 says why, both HYPOTHESIS (P7: the conditioned packages; P4: after a double promote the package does not take him
+# out): his sawmill packages HodSawmillSawLog8x11
 # 0x1e604 and HodSawmillLoadLog8x11 0x734ce are CONDITIONED (kGetVMScriptVariable on 0x71dfc's ::ResourceState_var, 2 and 0),
 # so the 08:00 exit rests on the simulating seat's VM holding the mill script's state, while the inn package 0x35696 has no
 # condition. Leg A's exit is therefore 19:00, the house-door walk toward the inn that reproduced the bounce in 052100: the clock
@@ -58,7 +60,7 @@
 # street's seat running him loaded within 150 units of the record both ways, the interior's seat with no 3D of him and its copy
 # out of the interior); at 65 s the counts again and nobody's copy in the interior. Informational: "moved 1348a into 3c (the
 # engine had it in <interior>", formView's line at the promotion. Mutation: leg A on the parent; the swap probe
-# x-handoff-door-hosts-swap v8 plays the house door with the roles swapped on the parent (a run stops at its first red, so the
+# x-handoff-door-hosts-swap v9 plays the house door with the roles swapped on the parent (a run stops at its first red, so the
 # scenario's second leg never reaches the parent). Its own commit (rule 13); ADR-064's fresh review before the gate plays it.
 id: b-npc-handoff-door-hosts
 milestone: M3
