@@ -6533,3 +6533,22 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   doesn't exist"), the gamemode's fallback matches that full text (GetFormAt's "Form with id ... doesn't exist" no longer falls back,
   numidium's catch), and the test gains the fated shape, the legacy fallback and the refusal (26 node tests and the lab unit tests
   green locally); the pipeline is watched. Lesson: a reply shape change in the gamemode needs its fake's model in the same commit.
+- 05:46 PST 2026-11-03 (13:46Z 11-03) (thuum-cf): the re-analyst's actor-class read for ADR-065's (b) is in the serialize note (a 120-line section,
+  58 ids by addr.py, bodies by pyghidra). (1) The stash's pre-call, Actor's slot 0xF2, is Actor::MovetoLow (37622, CONFIRMED-STATIC
+  against Actor.h), the unload's AI demotion (packages and combat ended, KillImmediate on a dying actor, process list 3,
+  RemoveChange(kTempModifiers)), not a flush for SaveGame; the save walk never calls it, so the on-demand recipe adds NO pre-call for a
+  live actor. (2) Actor::SaveGame (37649) keys nothing on the change flags: the actor block is state-driven (process level, boolBits,
+  the REFR body, AIProcess::SaveGame when a process exists, the 18-byte ActorState block carrying lifeState, the four Modifiers,
+  ActorValueStorage, addedSpells, the kSaving-gated movement byte, boolFlags, the combat controller), decoded field by field with
+  CommonLib names; kLifeState is read only by Actor::Revert on the old flags. (3) Actor's slot 0x0D is the REFR's 19527, no override;
+  Actor's 0x7A returns 0, so kAnimation drops for every actor on demand. (4) The recipe extends with no pre-call and two premises (not
+  the player; farGeometry printed), but the record is SAVE-shaped (process level, the middle-high and high blocks present), not
+  unload-shaped: the reader (37650) hands that level to 37502, which calls MoveToHigh inside LoadGame on the receiving actor, the
+  actor transplant's risk 1, run-only. Initial data: kind 4 for a dead NPC in place (kMoved), kind 6 for one that changed cells. (5)
+  D7 explained: the unload's set walk (19230) skips IsPersistent references and promotion sets kPersistent, so a promoted actor never
+  reaches the stash; at a save there is no promoted branch, and the on-demand recipe applies to a promoted loaded reference unchanged
+  (HYPOTHESIS). (6) 15330 promotes (the forced kPromoted entry at 0x1ff362 is census v3's 0x1ff367) and 15331 demotes:
+  RemoveChange(kPromoted) when the last ExtraPromotedRef owner releases, a stash only if the cell is then unloaded; actors queued for
+  a deferred forced demotion (callers ClearTargetImpl and Finish: an alias clear, a quest finish, HYPOTHESIS). Caveat for the script's
+  actor mode: a deflated record (length2 nonzero) must be inflated (35932's gate) before decoding. The section closes with the five
+  reads a first actor run must make.

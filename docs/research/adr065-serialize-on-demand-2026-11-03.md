@@ -503,3 +503,123 @@ the same 40 bytes and the compare row read equal. So, by this run:
 What it means for ADR-065: the sending half (b) is proven on the engine's own code, and with the transplants (change-forms.md D1 to D3,
 C5) the whole pipeline runs on the engine at both ends: observe at AddChange, serialize on demand through a scratch buffer, apply
 before the reference's first frame. The next reads: the actor class (0xF2), then (c).
+
+## The actor class: the stash's pre-call and Actor::SaveGame (static read)
+Written 13:45Z 2026-11-03 (the re-analyst) after run 131511, for the actor class and for D7 (numidium's x-transplant-capture-npc v1: the
+promoted MS13 bandit 0x39fe4 took no stash). Sources and rule as above; nothing renamed. Actor offsets are CommonLib's plus 8 (Actor.h:712).
+
+### Id rows added (1.6.1170; RVA; how found)
+| Function (CommonLib name where it has one) | RVA | id | Found by |
+| --- | --- | --- | --- |
+| VTABLE_Actor[0] slots 0x7A, 0x7B, 0x7C: Actor::ShouldSaveAnimationOnUnloading (returns 0), ShouldSaveAnimationOnSaving (currentProcess at kHigh), ShouldPerformRevert (Actor.h:325) | 0x6a39d0, 0x6a39e0, 0x6a3a10 | 38055, 38056, 38057 | read_bytes on 207511 (CONFIRMED-STATIC); Ghidra's import names agree |
+| slots 0xF1 to 0xF4: Actor::MoveToHigh, MovetoLow (the stash's pre-call), MovetoMiddleLow, MoveToMiddleHigh (Actor.h:439-442); slot 0x109 CreateMovementController (:463) | 0x681d80, 0x6826d0, 0x682f20, 0x683590, 0x692650 | 37621, 37622, 37623, 37624, 37793 | read_bytes on 207511 (CONFIRMED-STATIC) |
+| the actor's set-process-level (37650's first call); the process-level update that stashes a demoted actor; the far-skin undo, its predicate and setter (high +0x468); the cached-values invalidation; the four-flag reset | 0x6760d0, 0x675c70, 0x663610, 0x6ef270, 0x6ef250, 0x67fac0, 0x6c3720 | 37502, 37501, 37287, 39583, 39582, 37592, 38754 | callees of 37650, 37649, 37622; xrefs of 35570 |
+| AIProcess::SaveGame, LoadGame; the AIProcess ctor (level 3) and dtor; ProcessLists add-to-list, remove-from-list | 0x6e4710, 0x6e67c0, 0x6d3af0, 0x6dd4f0, 0x767ba0, 0x767c50 | 39429, 39430, 39107, 39250, 41290, 41291 | callees of 37649, 37650, 37502 |
+| the block writers and readers: ActorState, Modifiers, ActorValueStorage, the +0x188 list; CombatController's writer; the cached values, ActorPackage and unk108 writers; the handle lookups (reference, actor) | 0x6cea60, 0x6ced00, 0x6cff40, 0x6cffc0, 0x6d1030, 0x6d1200, 0x6c28c0, 0x6c29c0, 0x559db0, 0x725de0, 0x6cdb90, 0x724360, 0x1795f0, 0x18a9b0 | 38987, 38988, 39009, 39010, 39023, 39024, 38743, 38744, 33243, 40221, 38965, 40167, 12331, 12922 | callees of 37649, 37650, 39429 |
+| promotion: promote, demote, the owner add and remove on ExtraPromotedRef, IsPersistent (two bodies), the kRefOriginalPersistent test, SetPersistent, the large-STAT test, the post-promotion call (unread), the unload queue (unread) | 0x1ff290, 0x1ff470, 0x16da10, 0x16db10, 0x2de550, 0x2de560, 0x2de5a0, 0x2de5b0, 0x28b680, 0x2e0da0, 0x63b120 | 15330, 15331, 12058, 12059, 19593, 19594, 19596, 19597, 18219, 19669, 36459 | xrefs of 14608 and 35570; callees of 15330 and 15331 |
+| the cell unload, its collector, the set walk with the persistence filter, the file predicate in it, TESForm::GetFile | 0x2bfae0, 0x2ca090, 0x2c9800, 0x1c8d10, 0x1e0420 | 19113, 19235, 19230, 14001, 14621 | `just addr 19113`; xrefs of 35570; callees of 19113 and 19235 |
+
+### Q1. The pre-call is Actor::MovetoLow, the unload's demotion, not a serialization step
+35570 reads the entry, then `if (formType == 0x3E && *(actor + 0xF8) != 0) vtable[0xF2](actor)`. Slot 0xF2 of 207511 is 0x1406826d0 =
+37622, Ghidra's Actor::MovetoLow, Actor.h:440: CONFIRMED-STATIC. `bool MovetoLow(Actor*)`, returns 1, takes no buffer. Body (HYPOTHESIS):
+under the process spinlock shared with 37502 and 37501, a high-process actor gets the far-skin undo 37287, a package flush and
+StopCombatAndAlarmOnActor; every actor gets iIsInSneak zeroed on its graph, its interrupt package ended, its cast interrupted (38757), the
+four-flag reset 38754, kEssentialDown returned to alive, KillImmediate when lifeState is kDying, the move to process list 3 (41291 out,
+41290 in), the movement controller's slots 2 and 4, meleeAttackState cleared, boolBits bit 13 set, boolFlags bits 3, 11, 14 cleared (4 too
+for a high actor, 8 set for a middle or low one), and RemoveChange(0x100000) (slot 0x0B, TESForm.h:134), which strips kTempModifiers from
+the entry. It flushes nothing for
+SaveGame's sake: it is the AI demotion the unload performs anyway, placed before 0x0D so the record reads level 3. The save walk 35599 has
+no such call (LookupByID, header, 0x0D, fix-up, 35715, 0x0E, 36036 at whatever level the actor holds; HYPOTHESIS). Thread: main
+(HYPOTHESIS). It never reads kSaving. So the pre-call is no prerequisite of 0x0E, and it is the one call the recipe must NOT add for a
+live actor: it ends packages and combat, kills a dying actor at once and demotes the AI until 37501 re-promotes it.
+
+### Q2. Actor::SaveGame (37649): the actor block, in order
+Nothing in 37649 reads the header flags at +0x1b: the actor block is state-driven. The change flags gate only TESObjectREFR::SaveGame's
+sections (the type-0x3E extras mask, Q1) and Revert (below). The body (HYPOTHESIS; CommonLib names, 1170 offsets):
+1. u32 process level (currentProcess ? AIProcess +0x137, AIProcess.h:225, kHigh 0 to kLow 3 : 0xFFFFFFFF); u32 boolBits (+0xE8). Then, if
+   kHigh and high->farGeometry (+0x468, HighProcessData.h:357), 37287 removes the base's farSkin (TESNPC.h:280) by RemoveItem (slot 0x56)
+   and clears the flag: a 3D side effect of 0x0E.
+2. TESObjectREFR::SaveGame (19528), Q1's body. 3. If currentProcess, AIProcess::SaveGame (39429): unk048, unk04C, a byte and the cached
+   values (40221), currentPackage (38965), lowProcessFlags, essentialDownTimer, unk100 as an id, numberItemsActivate, deathTime,
+   trackedDamage, skippedTimeStampForPathing, unk134, unk108 (40167), unk120 as an id, genericLocations and equippedForms as counted ids,
+   equippedObjects[2], ignoringCombat, unk128 as an id (AIProcess.h:195-227); then middleLow's first u32, a middle-high block of about
+   sixty fields and a high block of about a hundred, each only if present; one byte of the high block is 37362(actor): Actor's 0x7A
+   (38055, returns 0) under kSaving clear, so the animation sub-block is absent on demand, 0x7B (38056, high process only) under a save.
+4. u8 soundCallBackSet (+0x278; Actor.h:697-698's comments are swapped), u32 updateTargetTimer, voiceTimer, float now minus lastUpdate
+   (+0x260; an age the reader re-bases), checkMyDeadBodyTimer, actionValue, timerOnAction, unk11C, emotionType, emotionValue,
+   criticalStage, thiefCrimeStamp, lastSeenTime (+0xEC, +0x110, +0x10C, +0x11C, +0x120, +0x124, +0x174, +0x178, +0xF0, +0x118, +0x264),
+   float TESNPC::weight (base +0x1FC, TESNPC.h:277; a change rebuilds both bipeds on load), myKiller (+0x108) as an id.
+5. ActorState (38987 on +0xC0, 18 bytes): u16 actorState1 bits 0 to 13, u8 sitSleepState, flyState, lifeState, knockState,
+   meleeAttackState, eleven u8 of actorState2 (ActorState.h:101-135). A dead NPC's lifeState byte is 2 (kDead, ActorState.h:11).
+6. unk1E8 (+0x1F0) as a reference id (so an ObjectRefHandle, HYPOTHESIS), the four magic casters (SaveGameMagicCasterVisitor: a presence
+   byte, then blocks), selectedSpells[4] (+0x1C8) and selectedPower (+0x1E8) as ids.
+7. Modifiers (39009: u32 3, three floats) for health, magicka, stamina, voicePoints (+0x230, +0x23C, +0x248, +0x254); ActorValueStorage
+   (39023 on +0x208): varint-counted (av minus 1, value) base values and (av minus 1, three floats) modifiers; counted addedSpells
+   (+0x190) ids.
+8. u8 movement block present (1 only with movementController and kSaving, then its slot 0x12; 0 on demand); u32 boolFlags (+0x204); u8
+   combatController present (+0x160) then 33243's block; 38743: counted (id, u32) pairs of the list at +0x188 (unk180; the decompile
+   re-emits the head node, a quirk for a run); u32 intimidateBribeDayStamp (+0x184), underWaterTimer (+0x114), exclusiveBranch (+0x228) as
+   an id, u8 unk273 bit 0 (+0x27B); the reader gates these last three on versions above 0x27, 0x2A, 0x2C (today 0x4E).
+Two reader facts for the dead NPC. 38988 applies the ActorState block whole, lifeState included, with no flag test. kLifeState (bit 10) is
+read in none of 37649, 37650, 38988; its reader is Actor::Revert 37653: `if (old flags bit 10 && lifeState != 0) 0x680bf0(actor)` (a
+resurrection reset, HYPOTHESIS), beside `(flags | old) & 0x8000020` (inventory reset) and old bit 17 without new bit 17 (limbs restored).
+So kLifeState keeps the entry alive and tells Revert to undo a death; the death itself travels in the ActorState bytes. And the first u32
+goes to 37502(actor, level) before anything else is read: 0xFFFFFFFF destroys the process (41291, 39250); any other level creates one when
+missing (39107 sets +0x137 to 3, 41290 adds it to list 3) and, when the current level differs, calls MoveToHigh (0), MoveToMiddleHigh (1),
+MovetoMiddleLow (2) or MovetoLow (3) on the spot; the process block is read only if a process exists.
+
+### Q3. Actor's slot 0x0D
+Slot 0x0D of 207511 reads 0x1402da4f0 = TESObjectREFR::CheckSaveGame 19527: CONFIRMED-STATIC, no override. The difference is in the
+virtuals it calls: Actor's 0x7A (38055) returns 0, so with kSaving clear kAnimation (bit 28) is dropped for every actor with 3D and no
+ExtraSavedAnimation; under a save 0x7B (38056) keeps it for a high-process actor. The inventory rule is the REFR's. Nothing else.
+
+### Q4. Extending the recipe to an actor
+The recipe holds with one change and one caveat. The change: no slot-0xF2 call. The premises stay, plus two: not the player (0x14 is no
+transplant class), and high->farGeometry read and printed before 0x0E (a set flag makes 0x0E remove the far skin, HYPOTHESIS). kSaving
+stays clear: three readers change the bytes otherwise (0x0D's 0x7B, 37649's movement byte, 39429's 37362 byte) and the receiver consumes
+unload-shaped records. The caveat: without 37622 the record is save-shaped, not unload-shaped; the expected differences from a stash of
+the same actor (HYPOTHESIS until a run): the first u32 (0 or 1, not 3), the process block (middleHigh and high present, hundreds of bytes,
+deflated when the setting byte is set: length2 nonzero), boolBits bit 13, boolFlags bits 3, 4, 8, 11, 14, meleeAttackState, kTempModifiers
+in the entry flags. The engine's save walk writes exactly this shape for every loaded actor, and 37650 consumes it by moving the
+receiver's actor to the record's level inside LoadGame: on the receiving seat that is MoveToHigh (37621) on an actor whose cell is still
+initializing, outside kLoading. That is the actor transplant's risk 1; only a run reads it.
+Initial data for an ACHR (35708, Q1): created 5; kCellChanged or kPromoted 6 (the editor cell id and grid, 13678); kMoved or kHavokMoved 4
+(the save parent cell 35719 as an id, position, angle: 27 bytes); else 0. A living NPC carries kMoved (D7's 0x39fe4 read 0x9a040022), so a
+dead NPC in place is kind 4 with its current cell, and one that changed cells is kind 6 keyed on where the plugin placed it, while the
+stash's own map registration keys on the current parentCell (+0x60) or worldspace (19816). The receiver's apply registers from the record
+(35908, 35903); D3 exercised kind 0 only, so kinds 4 and 6 are unproven on the receiving side.
+
+### Q5. A promoted reference at a save, and why it never stashes (D7)
+The cell unload 19113 collects its victims with 19235, whose set walk 19230 skips a reference when IsPersistent (19593: formFlags bit 10,
+TESForm.h:73) or when TESForm::GetFile (14621) names a file 14001 rejects (unread), then calls TryUpdateActorLastSeenTime (slot 0x95), the
+stash 35570 and the unload queue 36459 on each survivor. Promotion sets kPersistent (15330 calls SetPersistent 19597 with 1), so a
+promoted actor is never in the set: no stash, no record, its state stays live (decompile; HYPOTHESIS; D7 is the consistent observation).
+The actor's own path, 37501, stashes an actor it demoted to level 2 or 3 only when IsPersistent is false and its cell is not held
+(cellState +0x44, TESObjectCELL.h:259). At a save the walk has no promoted branch: every entry with a null record is serialized live,
+promoted or not, under kSaving with the two-way fix-up; a promoted record differs from a plain one only through its flags (kPromoted
+selects the kPromotedRef extra 0x8C through the mask and initial kind 6). So the on-demand recipe applies to a promoted, loaded reference
+unchanged (HYPOTHESIS), and (c), the apply to a live form, is the only half that differs.
+
+### Q6. Who sets and who clears kPromoted
+15330 (HYPOTHESIS name PromoteReference(ref, owner); its forced entry at 0x1ff362 is census v3's return address 0x1ff367): when
+GetAllowPromoteToPersistent (slot 0x47, TESObjectREFR.h:267; Projectile.h:179 says no) allows: SetPersistent(1) unless persistent, 12058
+adds the owner to ExtraPromotedRef::promotedRefOwners (ExtraPromotedRef.h:22); unless kRefOriginalPersistent (19596, inGameFormFlags bit
+6) a stored record is applied to the now-live form by 35568, and kStillLoading cleared when there was none; then, unless 18219 (a Static
+or MovableStatic, FormType 0x22 or 0x24, above a radius setting), the forced entry 14608 with kPromoted and 19669 (unread); for an actor a
+pending deferred demotion is dropped from the array at 0x1420fc1b0. One caller Ghidra names Start (the quest side: TESQuest::promotedRefs,
+TESQuest.h:282; BGSLocation.h:131). 15331 (HYPOTHESIS name DemoteReference(ref, owner, force)): for a non-actor, or forced, or under
+kLoading without kInitingForms (BGSSaveLoadGame.h:60-62): 12059 removes the owner and returns 1 when the owners array is empty (removing
+the extra); then RemoveChange(kPromoted) (slot 0x0B) clears the bit from the entry, and unless kRefOriginalPersistent: the stash 35570
+when the cell is null or its cellState is 0, SetPersistent(0), and the unload queue 36459 when stashed or when kWantsDelete without 3D. An
+actor not forced is instead queued to 0x1420fc1b0 for a later forced demotion (callers include ClearTargetImpl and Finish: the alias clear
+and the quest finish, HYPOTHESIS). So kPromoted clears when the last holder lets go, not when a stage moves: for MS13's bandit the alias
+clear or the quest's finish, with a stash only if its cell is then unloaded.
+
+### What a first actor run must read
+1. A dead lab NPC (not the player), serialize mode: 0x0D's dropped bits, 35715's kind, the level u32, length2, lifeState 2, myKiller, the
+   Modifiers.
+2. The same actor's stash after `coc riverwood` and `pcb`, aligned by sections: Q4's predicted differences and nothing else.
+3. The receiving side, in a later inject: 37502 and 37621 hooked on c2 (MoveToHigh at a cell-init apply), then lifeState and cell once
+   loaded.
+4. The unload filter: 19230 hooked to log IsPersistent per reference at a `pcb` (D7's promoted actor logs 1 and never reaches 35570).
+5. The deferred demotion: 15331 hooked at the quest's finish for a promoted actor, reading RemoveChange(kPromoted) and the stash.
