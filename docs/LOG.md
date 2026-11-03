@@ -6095,3 +6095,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   x-shared-chest-phantom's fresh review is mine when the step lands. Lesson: a lab seat's rollback save places its NPCs where
   they stood at the snapshot's hour, whatever the server's clock; a premise about an NPC's place must wait for the engine to
   settle him by his schedule, or make the place by a server move.
+- 02:32 PST 2026-11-03 (10:32Z 11-03) (thuum-cf): the chaff pass on Eli's note ("a lot of chaff has built up"), numidium's rules (remove what is merged
+  or superseded, move drafts, delete nothing): 8 of my fork worktrees removed with `git worktree remove` (merged into parity:
+  m2-stream-end-grace, m4-object-animation, m5-perks, m4-turbo2-r0-train, m4-turbo2-restart-dead, m5-skill-books,
+  m4-turbo2-wall-range; superseded: m3-promote-record-r3), 23 kept (the in-flight branches and the unmerged ones not yet called
+  superseded), three dead directories left (no .git; a recursive delete is outside my rules); 44 probe drafts moved to
+  lab/.cache/probes/archive/ (an older numbered copy beside its current, and 43 no doc under docs/ names, untouched 12 to 16
+  days: the ADR-031 recorder drafts, the fsmp series, the cast and melee reads, the relaunch report drafts), 276 left, 271 of them
+  named by a doc. The remote branch deletions (231 fork, 98 thuum merged branches) wait on Eli's go, numidium's ask. Process point
+  (numidium's, taken): a premise fact the lab teaches goes into docs/engine as a row first and the scenario cites it.
