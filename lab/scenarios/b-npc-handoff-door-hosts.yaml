@@ -1,4 +1,8 @@
-# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v21 2026-11-03 after ADR-064's fresh review of v20
+# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v21 2026-11-03. Under ADR-064 decision 4 as amended
+# (Eli, 2026-11-03: rules A to C): v21 is the reviewer's own fix applied as written, so no new review is due (rule A); its premise facts
+# are docs/engine/non-owning-seat.md's rows P9 (a seat's engine places a resident by its own save at any hour; 101556), P10 (a host's
+# sighting moves the record to the cell it hosts; 101556) and P11 (a visitor indoors draws the resident into combat; 085226, 070357),
+# cited here as rule C asks. v21 after ADR-064's fresh review of v20
 # (FIX FIRST, one race): the settle phase's until on the record home could hold at its first poll, before the roster's sighting (the
 # client reports unknown high-process actors every 2 s and the server moves the record once the reporter hosts the sighted cell) had
 # taken the record out, and then the premise would have read c1's copy outdoors again. v21 waits for the record to LEAVE first (an
