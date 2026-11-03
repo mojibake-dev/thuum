@@ -210,8 +210,17 @@ detached map (cell id to the time it left the loaded set, persisted with the rel
 cell once a second; a cell standing attached again is added back and reported, with the line "cell <id> re-attached without its load
 event, reported N ms after its detach". Since b8d82f05 the watched set is count-bound to the newest 64 detached cells, as the
 engine's exterior cell buffer is (uExterior Cell Buffer, 36 by default; the eviction order HYPOTHESIS), with the hour's window a
-backstop, so a long stay indoors brings no gap back and the per-second natives are bounded; a cell detached in the same poll is
-read next second; the event path clears a detach at once. The client has no report budget of its own: a re-report shares the
+backstop, so a stay indoors under an hour brings no gap back and the per-second natives are bounded; a cell detached in the same
+poll is read next second; the event path clears a detach at once. Limits numidium's GO review named (2026-11-03), for after the
+merge: (1) the hour's backstop can reopen P12: a seat inside for over an hour drops its exterior detaches from the watch while the
+engine's buffer still holds them (count-bound with no time purge, HYPOTHESIS), so that exit re-attaches silently again; the count
+bound already caps the reads, so the window buys nothing and should go; (2) the 64-entry watch is the steady state, not the worst
+case: entries leave only by re-attach, the event or the hour, and each border crossing detaches about five cells, so about 13
+crossings fill it, and from then every poll reads 64 forms and 64 attach flags (each a worker round trip) beside the loaded loop's
+50, once a second, UNMEASURED: the poll's cost wants a counted line before a long session relies on it; (3) the lab line means
+"attached before any event", not "no event ever": a cold reload whose attach precedes its cellFullyLoaded would print it too
+(HYPOTHESIS), and the late event then returns at the loaded check; x-warm-exit records the cell events beside the count, so a run
+tells the two apart. The client has no report budget of its own: a re-report shares the
 server's bucket (128 burst), and an exit's burst is at most the re-attached cells plus the own cell plus a colliding refresh. No
 wire change. Its read is x-warm-exit v1 (the host within 10 s of the exit and that line),
 and b-npc-handoff-door-hosts v23 waits for 0x9731's host after the exit before its post-exit assert.

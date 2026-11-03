@@ -6706,3 +6706,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (20a6c65d), death-freeze v4 (96ae3e4c), scene-guest v3 (4ffaf665). The branch is held; numidium's fresh review of the warm-exit
   diff (5e0e975b..b8d82f05) is reading; the gate follows its GO and the stage's reads, then the merge and playtest 42 (the evening
   slot if the morning is gone).
+- 06:59 PST 2026-11-03 (14:59Z 11-03) (numidium's review): the warm-exit fix (5e0e975b..b8d82f05) GO from numidium too (pipeline 5019 green:
+  server-build 133 s, client-build 556 s), so r3 has GO from both and the gate follows the stage's reads. Its three notes, not
+  blocking, for after the merge, now in cell-host.md: the hour's backstop can reopen P12 after a stay indoors over an hour (the
+  engine's buffer is count-bound with no time purge, HYPOTHESIS), so the window should go; the 64-entry watch is the steady state
+  after about 13 border crossings, its per-second cost (64 getFormEx and 64 isAttached round trips beside the loaded loop's 50)
+  UNMEASURED; the lab line means "attached before any event", a cold reload's early attach would print it too (HYPOTHESIS), the
+  recorded cell events tell them apart. Clean by its read: the server re-runs the election on the re-report, cancels silently inside
+  the grace, grants E+1 after it; no double report; the reload pairs persisted; rules 4 and 12; no em dashes.
