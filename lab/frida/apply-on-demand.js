@@ -1,4 +1,4 @@
-// apply-on-demand.js v2.3 (thuum, the re-analyst 2026-11-03; v2.3 adds REMAP, this header's last paragraph; docs/research/adr065-serialize-on-demand-2026-11-03.md, "(c)" and "The pose after
+// apply-on-demand.js v2.4 (thuum, the re-analyst 2026-11-03; v2.3 added REMAP, v2.4 the LIVE premise variant and its witnesses: this header's last two paragraphs; v2.4's review added the second kill dispatcher, Actor::KillImmediate 37735, beside KillImpl; docs/research/adr065-serialize-on-demand-2026-11-03.md, "(c)" and "The pose after
 // the apply's 3D reload"): the (c) probe. On one seat, for a DEAD actor FORM, at its kDead mark (TRIGGER mark: AddChange's inner 35576 with
 // FLAG, deferred into PlayerCharacter::Update's REPLACEMENT as serialize-on-demand-actor.js v2.2 does; TRIGGER now: the first Update
 // return after the replace, the form by TESForm::LookupByID), on Main.threadID: MODE roundtrip (default) serializes the copy's own record with the actor
@@ -31,7 +31,7 @@
 // record's Havok body count equal to the live count from 19533 unless FORCE (both print). Every engine call is wrapped, but a fault inside is
 // only CONVERTED to a JS exception (a lock taken inside stays held): the premises are the real safety. Every id, offset, slot and layout is
 // the static read's (the sections' id tables, CommonLib, `just addr`): HYPOTHESIS until a run reads as expected (rule 2). LAB_PARAMS: FORM
-// (required), MODE, TRIGGER, FLAG (0x400), RECORD, FLAGS, SUM, FORCE (false), SUPPRESS (false: 19378 around 35567), PARK (false), RUNS (1), REMAP ('', v2.3: the last paragraph).
+// (required), MODE, TRIGGER, FLAG (0x400), RECORD, FLAGS, SUM, FORCE (false), SUPPRESS (false: 19378 around 35567), PARK (false), RUNS (1), REMAP ('', v2.3: the REMAP paragraph), LIVE (false, v2.4: the LIVE paragraph).
 // Ready prints Process.id. wait: 15 after the frida step (lab-api's fixed 5 s sleep plus the attach, not the size) and read the ready t first.
 // THE LISTENER GUARD (frida-gum main c73c1bbf, 2026-11-02, gum/guminterceptor.c, read 2026-11-03): _gum_function_context_begin_invocation
 // sets a thread-local guard key (gum_interceptor_guard_key, :2254) before the on_enter listeners run and clears it at :2364, and
@@ -106,6 +106,47 @@
 // effect index %i, and archetype ID %i" (no form id among its arguments, so the FORM match never catches it): the REMAP's miss signal, a
 // type-0 spell the receiver could not resolve, dropped, aligned, benign; expected zero when the remap is right. ActiveEffect::LoadGame
 // logs "Unknown reference effect type: %i" for a corrupt hit-effect type: a record desync, expected zero always.
+// LIVE (v2.4, default false): the premise variant for two reads that share this run shape. Read 2 of docs/verbs/change-form.md's Dynamic
+// plan: a DEAD record applied onto a LIVE loaded copy (the watcher's late-load case of F3 and F4): does 35568's ActorState and Havok block lay
+// the body with no kill event and no fall? F8 (playtest 43: "embry is standing in his chair", then Sven sat where Embry was sitting): a SITTING
+// host's record (its ActorState's sitSleepState and the process block's occupiedFurniture) applied onto a STANDING live puppet copy: does the
+// engine seat the copy by its own path? With LIVE true, MODE apply and TRIGGER now, the premise "actor dead (lifeState 2)" is waived (its check
+// row stays, named waived, its value the live state); every other premise stands (the form loaded with its 3D, the entry present with a null
+// record, kInitingForms clear, no save in progress, RECORD parsed, REMAP's checks). Why it is safe to try: the round trips' apply (164416,
+// 174905) and the cross-seat applies never faulted through 35568 and 35567 on a dead copy, and a live copy differs only in the state the record
+// overwrites (ActorState whole through 38988, the process block through 39430 after 37502 moves the level; the note's Q2): the unread case,
+// HYPOTHESIS, so LIVE is opt-in and the check rows print what the copy was. Witnesses added to every snapshot (before, after apply, after,
+// rebuilt, settled, and two timed ones, 'finish+1s' and 'finish+5s', emitted by the poll inside Update's replacement once 35567 returned):
+// sitSleepState beside lifeState, both from ActorState's actorState1 (ActorState.h:203, +8 of the ActorState at Actor +0xC0: sitSleepState bits
+// 14-17, :112; lifeState bits 21-24, :114), the names from SIT_SLEEP_STATE (:65-79: kNormal 0, kWantToSit 1, kWaitingForSitAnim 2, kIsSitting 3,
+// which kRidingMount shares, kWantToStand 4, kWantToSleep 5, kWaitingForSleepAnim 6, kIsSleeping 7, kWantToWake 8); the process's
+// occupiedFurniture: currentProcess (Actor.h:651, the runtime block, +0xF8 at 1.6.1170 as the repo's memory has it), middleHigh (AIProcess.h:196,
+// +0x08), occupiedFurniture (MiddleHighProcessData.h:172, +0x208, an ObjectRefHandle), resolved lock-free the way the reference handle lookup
+// 12331 at 0x1795f0 resolves one in its decompile (CommonLib's LookupReferenceByHandle is its twin 12332 at 0x179710, BSPointerHandle.h:220, the same math): index = handle & 0xFFFFF into the handle entries (400622 at 0x20fc600, 16 bytes each: the
+// bits u32 at +0, the NiPointer<BSHandleRefObject> at +8, BSPointerHandleManager.h:23-25), valid when bit 26 of the entry's bits is set, its
+// bits 20-25 equal the handle's, and the object's word at +0x28 shifted right by 11 equals the index; the stored pointer is the BSHandleRefObject
+// at TESObjectREFR +0x20 (TESObjectREFR.h:110), so the reference is 0x20 below it; no refcount is touched (12331's NiPointer out-parameter
+// would need the atomic release) and the raw handle prints beside the resolved id (BSPointerHandle.h:12's template defaults <21, 5> disagree
+// with the engine's 20 index bits and 6 age bits here; BSPointerHandleManager.h:17-19's Entry comments agree with the engine; HYPOTHESIS);
+// a KillImpl count: Actor::KillImpl 37896 (0x6972d0, VTABLE_Actor slot 0x10E, Actor.h:468: attacker, damage, sendEvent, ragdollInstant) hooked
+// ungated like 19535, one `killImpl` row per call for FORM with the attacker's id, sendEvent (r9b) and ragdollInstant (the fifth argument, from
+// the stack through Frida's args[4], HYPOTHESIS for the ABI read), and the count in every snapshot and the result row; the review added the second
+// dispatcher, Actor::KillImmediate 37735 (0x68e640, Actor.h:610, Actor.cpp:943: the dead=1 TESDeathEvent and SetLifeState(2); KillImpl dispatches
+// dead=0 and sets kDying; its callers include MovetoLow, MovetoMiddleLow, MoveToMiddleHigh gated on kDying, Disable and KillImpl), hooked the same
+// way with `killImmediate` rows and counts (expected hookBytes 0x68e640:40555657); the havok rows as before;
+// the position at +1 s and +5 s after the finish in the two timed snapshots beside rebuilt and settled; the two 35519 strings kept. Not added:
+// the animation events the copy's graph receives (the note's id tables name no sendAnimationEvent entry, only the per-graph callbacks 32710 and
+// 32956 of the Havok read's tail; the fork's hook is Skyrim Platform's), so that witness is skipped and said so here. The result row gains
+// `seated`: lifeState, sitSleepState and occupiedFurniture before (the 'before' snapshot) and after (the 'settled' snapshot) with the position of
+// each, the killImpl count, and a verdict: "no change", or "<before> then <after>", the after reading "kIsSitting at the furniture <id>" when
+// the copy sat. Reading rules. Read 2 (a dead record on a live copy): seated.after.lifeState kDead with killImpl 0 and killImmediate 0 (no kill event: both dispatchers silent), havokRead rows applying the
+// record's block (bodies equal to its count) and 'finish+1s' and 'finish+5s' positions within a unit of the record's and of each other means
+// the body was laid by the state write with no kill event and no fall; a killImpl or killImmediate row with inWindow true is the apply's own
+// synchronous kill through 35568 or 35567; with inWindow false, a later engine path (read its caller); a z drop across the timed snapshots means a fall. F8 (a sitting record on a standing copy): verdict "kAlive/kNormal then
+// kIsSitting at the furniture <id>" with occupiedFurniture.after resolving to the chair means the engine seated the copy by its own path;
+// occupiedFurniture.after set with sitSleepState still kNormal means the handle landed but no sit played (the furniture path wants its package
+// or the animation event, HYPOTHESIS); kWantToSit or kWaitingForSitAnim at settled means the sit was still in progress; "no change" means the
+// record's ActorState and process block did not reach the copy's state (read the 35519 rows).
 const PARAMS = (typeof LAB_PARAMS === 'object' && LAB_PARAMS) ? LAB_PARAMS : {};
 const FORM = Number(PARAMS.FORM);
 const MODE = PARAMS.MODE === 'apply' ? 'apply' : 'roundtrip';
@@ -119,6 +160,8 @@ const FORCE = flagOf(PARAMS.FORCE), SUPPRESS = flagOf(PARAMS.SUPPRESS), PARK = f
 const RUNS = PARAMS.RUNS === undefined ? 1 : Number(PARAMS.RUNS);
 const TTL_S = PARAMS.TTL === undefined ? 600 : Number(PARAMS.TTL); // seconds the replacement may live without a result; an eternalized script never unloads, so the revert is ours or never
 const REMAP = PARAMS.REMAP === undefined || PARAMS.REMAP === null ? '' : String(PARAMS.REMAP); // v2.3: rows offset:formId:index[:formType], comma-separated (the header's REMAP paragraph); parsed below, after the helpers
+const LIVE = flagOf(PARAMS.LIVE); // v2.4: the live-copy premise variant (the header's LIVE paragraph)
+const LIVE_WAIVE = LIVE && MODE === 'apply' && TRIGGER === 'now'; // the one waiver: the dead premise, only for an apply at TRIGGER now
 function emit(obj) {
   obj.t = Date.now();
   send(obj);
@@ -167,6 +210,9 @@ const OFFSETS = {
     setData3D: 0x2e5380, // 19730 the data3D setter (ref, node) (h: when the 3D goes and comes)
     rigidBodyVtable: 0x17aeb58, // 190275 VTABLE_bhkRigidBody[0]: slots 0x35 SetPosition, 0x36 SetRotation (bhkRigidBody.h:43-44) (h)
     savedHavokVtable: 0x1770e70, // 186773 VTABLE_ExtraSavedHavokData[0] (read only: the lock-free chain match in hooks)
+    killImpl: 0x6972d0, // 37896 Actor::KillImpl (this, attacker, damage, sendEvent, ragdollInstant), VTABLE_Actor slot 0x10E (Actor.h:468) (h, v2.4: ungated, the kill witness for a LIVE copy)
+    killImmediate: 0x68e640, // 37735 Actor::KillImmediate (this), Actor.h:610, Actor.cpp:943 RELOCATION_ID(36723, 37735) (h, v2.4: the dead=1 TESDeathEvent dispatcher, the second kill path)
+    handleEntries: 0x20fc600, // 400622 BSPointerHandleManager::GetHandleEntries::entries (BSPointerHandleManager.h:30; 16-byte entries: bits +0, NiPointer<BSHandleRefObject> +8) (read only, v2.4: occupiedFurniture's handle resolved lock-free as 12331 does)
   },
 };
 // TESForm.h:353-356; BGSSaveLoadGame.h:61-63 (kLoading 2, kSaving 4, kInitingForms 8), :93 (the BSTArray at +0x318: data, capacity +8, size +0x10),
@@ -192,6 +238,8 @@ const R_ANGLE = 0x48, R_LOCATION = 0x54, R_LOADED = 0x68, L_DATA3D = 0x68, R_EXT
 const X_SAVED_HAVOK = 0x3c, X_BUFFER = 0x10;
 const K_HAVOK = 1 << 2; // TESObjectREFR.h:142 kHavokMoved; 35708's kinds: created 5, kCellChanged or kPromoted (0x02000008) 6, kMoved or kHavokMoved (6) 4
 const LIFE = ['kAlive', 'kDying', 'kDead', 'kUnconcious', 'kReanimate', 'kRecycle', 'kRestrained', 'kEssentialDown', 'kBleedout']; // ActorState.h:9-17
+const SIT = ['kNormal', 'kWantToSit', 'kWaitingForSitAnim', 'kIsSitting', 'kWantToStand', 'kWantToSleep', 'kWaitingForSleepAnim', 'kIsSleeping', 'kWantToWake']; // v2.4: SIT_SLEEP_STATE, ActorState.h:65-79 (kRidingMount shares 3); sitSleepState is actorState1 bits 14-17 (:112)
+const P_MIDDLE_HIGH = 0x08, MH_FURNITURE = 0x208, HANDLE_REF_BASE = 0x20, HANDLE_INDEX_MASK = 0xfffff, HANDLE_AGE_MASK = 0x3f00000, HANDLE_INUSE_BIT = 1 << 26, REF_HANDLE_WORD = 0x28; // v2.4: AIProcess.h:196, MiddleHighProcessData.h:172, TESObjectREFR.h:110, 12331's decompile (20 index bits, age bits 20-25, in-use bit 26, the object's word at +0x28 >> 11 is the index)
 const HEAD = 'NPC Head [Head]';
 const VERDICTS = /Havok data|ragdoll save\/load|SetSavedHavokData|queued havok|queued char controller|Load Error|FORMS:|Could not load active effect|Unknown reference effect type/; // the last two: v2.3, the header's REMAP paragraph
 const CAP = 65536, REFUSED_ROWS = 8, REBUILD_WAIT_MS = 20000, SETTLE_MS = 5000;
@@ -334,6 +382,23 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
   const state = Memory.alloc(0x30); // 19533's state: flags u8, two counts at +4 and +8, the form, the node, the root's collision object, the buffer
   const liveBodies = function (form) { for (let o = 0; o < 0x30; o += 8) state.add(o).writeU64(0); nf.prePass(form, state); return { flags: hex(u8(state, 0)), a: u32(state, 4), b: u32(state, 8), count: u32(state, 4) + u32(state, 8), node: String(ptrAt(state, 0x18)) }; };
   const rootOf = function (form) { const ld = ptrAt(form, R_LOADED); return ld.isNull() ? NULL : ptrAt(ld, L_DATA3D); };
+  const refOfHandle = function (h) { // v2.4: lock-free, the way the reference handle lookup 12331 at 0x1795f0 resolves a handle in its decompile (CommonLib's LookupReferenceByHandle is its twin 12332 at 0x179710, the same math); no refcount touched (HYPOTHESIS for the layout, the header's LIVE paragraph)
+    if (!(h > 0)) return { handle: hex(h >>> 0), resolved: false, why: 'null handle' };
+    const idx = h & HANDLE_INDEX_MASK, e = at('handleEntries').add(idx * 16), bits = u32(e, 0), p = ptrAt(e, 8);
+    const r = { handle: hex(h >>> 0), index: idx, entryBits: hex(bits >>> 0), resolved: false };
+    if (p.isNull()) { r.why = 'no object in the entry'; return r; }
+    if ((bits & HANDLE_INUSE_BIT) === 0 || (bits & HANDLE_AGE_MASK) !== (h & HANDLE_AGE_MASK)) { r.why = 'the entry is free or its age differs: a stale handle'; return r; }
+    const ref = p.sub(HANDLE_REF_BASE), word = u32(ref, REF_HANDLE_WORD);
+    if (word < 0 || (word >>> 11) !== idx) { r.why = 'the object does not carry the index'; return r; }
+    r.resolved = true; r.ref = String(ref); r.formId = hex(u32(ref, FORM_ID)); r.formType = hex(u8(ref, FORM_TYPE));
+    return r;
+  };
+  const seatOf = function (form) { // v2.4: the sit witnesses: sitSleepState from actorState1, occupiedFurniture from the middle-high process
+    const st1 = u32(form, A_STATE1), sit = st1 < 0 ? -1 : (st1 >>> 14) & 0xf, proc = ptrAt(form, A_PROCESS), mh = proc.isNull() ? NULL : ptrAt(proc, P_MIDDLE_HIGH);
+    let furniture;
+    try { furniture = mh.isNull() ? { handle: proc.isNull() ? 'no process' : 'no middle-high process', resolved: false } : refOfHandle(u32(mh, MH_FURNITURE)); } catch (e) { furniture = { resolved: false, error: String(e) }; }
+    return { sitSleepState: sit, sitSleepStateName: SIT[sit] || '?', occupiedFurniture: furniture };
+  };
   const vec3 = function (p, o) { return [f32(p, o), f32(p, o + 4), f32(p, o + 8)]; };
   const nameOf = function (node) { try { const s = ptrAt(node, N_NAME); return s.isNull() ? '' : s.readUtf8String(64); } catch (e) { return ''; } };
   const findNode = function (node, name, depth, budget) { // a guarded walk of the NiNode children (HYPOTHESIS: a leaf's +0x110 reads past it, bounded by the size and depth checks)
@@ -392,8 +457,8 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
   const snapshot = function (form, label, withLive, more) {
     const proc = ptrAt(form, A_PROCESS), high = proc.isNull() ? NULL : ptrAt(proc, P_HIGH), root = rootOf(form), st1 = u32(form, A_STATE1);
     const s = singletons(), map = s.game.isNull() ? NULL : ptrAt(s.game, CHANGES_MAP), e = map.isNull() ? { found: false, flags: 0, record: NULL } : readEntry(map);
-    const life = st1 < 0 ? -1 : (st1 >>> 21) & 0xf;
-    const row = { event: 'snapshot', label: label, form: hex(FORM), lifeState: life, lifeStateName: LIFE[life] || '?', level: proc.isNull() ? 'none' : u8(proc, P_LEVEL),
+    const life = st1 < 0 ? -1 : (st1 >>> 21) & 0xf, seat = seatOf(form);
+    const row = { event: 'snapshot', label: label, form: hex(FORM), lifeState: life, lifeStateName: LIFE[life] || '?', sitSleepState: seat.sitSleepState, sitSleepStateName: seat.sitSleepStateName, occupiedFurniture: seat.occupiedFurniture, killImplCalls: counts.killImplForm, killImmediateCalls: counts.killImmediateForm, level: proc.isNull() ? 'none' : u8(proc, P_LEVEL),
       farGeometry: high.isNull() ? 'no high process' : u8(high, H_FAR), position: vec3(form, R_LOCATION), angle: vec3(form, R_ANGLE), root: String(root),
       rootWorld: root.isNull() ? null : vec3(root, N_WORLD_T), entry: { found: e.found, flags: hex(e.flags), record: String(e.record) }, pending: s.game.isNull() ? -1 : u32(s.game, PENDING_COUNT) };
     try { row.extra = savedExtra(form); } catch (err) { row.extraError = String(err); }
@@ -443,7 +508,9 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
     const root = rootOf(form);
     add('3D present (loadedData +0x68, data3D +0x68)', String(root), !root.isNull());
     const st1 = u32(form, A_STATE1), life = st1 < 0 ? -1 : (st1 >>> 21) & 0xf;
-    add('actor dead (lifeState 2)', life + ' ' + (LIFE[life] || '?'), life === 2);
+    add(LIVE_WAIVE ? 'actor dead (lifeState 2): waived under LIVE' : 'actor dead (lifeState 2)', life + ' ' + (LIFE[life] || '?'), LIVE_WAIVE || life === 2); // v2.4: the one waiver (the header's LIVE paragraph); the value as v2.3 printed it
+    const sit = st1 < 0 ? -1 : (st1 >>> 14) & 0xf;
+    add('sitSleepState (v2.4 witness)', sit + ' ' + (SIT[sit] || '?'), true);
     const pending = s.game.isNull() ? -1 : u32(s.game, PENDING_COUNT);
     add('pending array empty (+0x328; FORCE overrides)', pending, pending === 0 || (FORCE && pending >= 0));
     const map = s.game.isNull() ? NULL : ptrAt(s.game, CHANGES_MAP);
@@ -474,7 +541,7 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
   // the witnesses: per 19535 call on any thread (keyed by thread); the probe's window only tags rows
   const watch = { active: false, tid: -1 };
   const reads = {}; // threadId -> the 19535 call in flight: bodies, setPos, setRot, live
-  const result = { applied: false, recordBlockHash: null, liveHash: null, lastRead: null, parkHash: null, lastStored: null, lastStoredCaller: null, extraAtFinish: null };
+  const result = { applied: false, recordBlockHash: null, liveHash: null, lastRead: null, parkHash: null, lastStored: null, lastStoredCaller: null, extraAtFinish: null, finishedAt: null, before: null, settled: null, killImplRows: [] }; // v2.4: finishedAt, before, settled, killImplRows
   let parking = false; // true around our own 11977 call, so its hook row is tagged ours
   // v2.3 REMAP. A refusal: a `refused` row with the reason and the step, then the throw the recipe's catch records in the apply row's error
   const remapRefuse = function (step, reason, threadId) { emit({ event: 'refused', reason: reason, step: step, form: hex(FORM), thread: threadId }); throw new Error(reason); };
@@ -526,8 +593,9 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
     if (heap !== row.fnvPatched) refuse('remap: the heap copy hashes ' + heap + ', the patched bytes ' + row.fnvPatched);
   };
   const run = function (form, p, q) {
-    const row = { event: 'apply', mode: MODE, park: PARK, form: hex(FORM), thread: q.runThread, markThread: q.markThread, deferredMs: q.deferredMs, deferredVia: q.via, entryFlags: hex(p.entry.flags) };
+    const row = { event: 'apply', mode: MODE, park: PARK, live: LIVE, liveWaiver: LIVE_WAIVE, form: hex(FORM), thread: q.runThread, markThread: q.markThread, deferredMs: q.deferredMs, deferredVia: q.via, entryFlags: hex(p.entry.flags) };
     const before = snapshot(form, 'before', true);
+    result.before = before; // v2.4: the seated verdict's before
     result.liveHash = before.livePose && before.livePose.blockHash ? before.livePose.blockHash : null;
     const s = singletons(), map = p.map;
     let buf = null, rec = NULL, flagsOut = 0, body = null, step = 'start', suppressSet = false, parkSub = NULL, parked = false, r = null, remap = null; // r and remap: apply mode's parsed RECORD and its checked REMAP rows (v2.3)
@@ -634,6 +702,7 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
       const fe = readEntry(map);
       row.afterFinish = { flags: hex(fe.flags), record: String(fe.record), pending: u32(s.game, PENDING_COUNT), kind2: safeKind2(form), extra: safeExtra(form) };
       result.extraAtFinish = row.afterFinish.extra;
+      result.finishedAt = Date.now(); // v2.4: the clock of the timed snapshots
       row.result = 'ok, the reload watched: the result row follows the settled snapshot';
     } catch (e) { row.error = 'at ' + step + ': ' + e; }
     if (suppressSet && row.suppressWasClear === 1) { try { nf.suppress(s.game, 1); } catch (e) { row.suppressRestoreError = String(e); } } // a throw inside 35567 must not leave the bit set
@@ -643,7 +712,7 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
     try { if (buf !== null) { nf.bufDestroy(buf); row.bufferDestroyed = true; } } catch (e) { row.destroyError = String(e); }
     emit(row);
     snapshot(form, 'after', false);
-    if (result.applied) poll = { form: form, started: Date.now(), rootSeenAt: 0, rootSeenAtReturn: 0, rebuiltAt: 0, done: false };
+    if (result.applied) poll = { form: form, started: Date.now(), rootSeenAt: 0, rootSeenAtReturn: 0, rebuiltAt: 0, done: false, timed1: false, timed5: false };
   };
   // the reload watched on PlayerCharacter::Update's returns: "rebuilt" one return after the root first appears (or when 19535 ran, or at 20 s),
   // "settled" 5 s later, then the result row
@@ -660,9 +729,22 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
     const name = c.hash === result.recordBlockHash ? 'the record\'s block' + (result.parkHash !== null ? ' (parked by PARK)' : '') : (c.hash === result.liveHash ? 'the copy\'s own live pose: the engine\'s store at the release, not the record' : 'a block matching neither the record nor the live pose');
     return { source: name, hash: c.hash, judgedBy: c.from, candidates: cands };
   };
+  const seatedVerdict = function () { // v2.4: the sit witnesses before (the 'before' snapshot) against after (the 'settled' snapshot)
+    const b = result.before, a = result.settled;
+    if (b === null || a === null) return { verdict: 'no before or settled snapshot' };
+    const pick = function (s) { const f = s.occupiedFurniture; return { lifeState: s.lifeState, lifeStateName: s.lifeStateName, sitSleepState: s.sitSleepState, sitSleepStateName: s.sitSleepStateName, occupiedFurniture: f && f.resolved ? f.formId : (f && /^0x/.test(String(f.handle)) && f.handle !== '0x0' ? f.handle : null), furnitureResolved: !!(f && f.resolved), position: s.position }; };
+    const before = pick(b), after = pick(a);
+    const same = before.lifeState === after.lifeState && before.sitSleepState === after.sitSleepState && before.occupiedFurniture === after.occupiedFurniture;
+    const word = function (x) { return x.lifeStateName + '/' + x.sitSleepStateName + (x.occupiedFurniture && x.occupiedFurniture !== '0x0' ? ' at ' + x.occupiedFurniture : ''); };
+    return { before: before, after: after, killImpl: counts.killImplForm, killImmediate: counts.killImmediateForm, verdict: same ? 'no change' : word(before) + ' then ' + (after.sitSleepState === 3 ? 'kIsSitting at the furniture ' + (after.occupiedFurniture || 'none') : word(after)) };
+  };
   const pollStep = function () {
     if (poll === null || poll.done) return;
     const now = Date.now();
+    if (result.finishedAt !== null) { // v2.4: the timed witnesses at +1 s and +5 s after 35567 returned, independent of the root's return
+      if (!poll.timed1 && now - result.finishedAt >= 1000) { poll.timed1 = true; snapshot(poll.form, 'finish+1s', false, { sinceFinishMs: now - result.finishedAt }); }
+      if (!poll.timed5 && now - result.finishedAt >= 5000) { poll.timed5 = true; snapshot(poll.form, 'finish+5s', false, { sinceFinishMs: now - result.finishedAt }); }
+    }
     if (poll.rebuiltAt === 0) {
       const root = rootOf(poll.form);
       if (!root.isNull() && poll.rootSeenAt === 0) { poll.rootSeenAt = now; poll.rootSeenAtReturn = counts.playerUpdate; }
@@ -674,12 +756,12 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
     }
     if (now - poll.rebuiltAt < SETTLE_MS) return;
     poll.done = true;
-    snapshot(poll.form, 'settled', true);
-    emit({ event: 'result', form: hex(FORM), mode: MODE, park: PARK, recordBlockHash: result.recordBlockHash, liveHash: result.liveHash, parkHash: result.parkHash, lastStored: result.lastStored, lastStoredCaller: result.lastStoredCaller, extraAtFinish: result.extraAtFinish, lastRead: result.lastRead, poseSource: sourceOf() });
+    result.settled = snapshot(poll.form, 'settled', true); // v2.4: the seated verdict's after
+    emit({ event: 'result', form: hex(FORM), mode: MODE, park: PARK, live: LIVE, liveWaiver: LIVE_WAIVE, seated: seatedVerdict(), killImpl: counts.killImplForm, killImmediate: counts.killImmediateForm, recordBlockHash: result.recordBlockHash, liveHash: result.liveHash, parkHash: result.parkHash, lastStored: result.lastStored, lastStoredCaller: result.lastStoredCaller, extraAtFinish: result.extraAtFinish, lastRead: result.lastRead, poseSource: sourceOf() });
     scheduleCleanup('result emitted'); // after the result row: the JS-thread timer fires once this frame's rows are out
   };
 
-  const counts = { innerAdd: 0, innerAddForm: 0, triggers: 0, runs: 0, refused: 0, playerUpdate: 0, formsLog: 0, havokRead: 0, havokReadForm: 0, havokBody: 0, havokPrePass: 0, flushEntry: 0, savedHavokSet: 0, set3DWrapper: 0, setData3D: 0, rigidSetPosition: 0, rigidSetRotation: 0 };
+  const counts = { killImpl: 0, killImplForm: 0, killImmediate: 0, killImmediateForm: 0, innerAdd: 0, innerAddForm: 0, triggers: 0, runs: 0, refused: 0, playerUpdate: 0, formsLog: 0, havokRead: 0, havokReadForm: 0, havokBody: 0, havokPrePass: 0, flushEntry: 0, savedHavokSet: 0, set3DWrapper: 0, setData3D: 0, rigidSetPosition: 0, rigidSetRotation: 0 };
   let busy = false;
   let pending = null; // the armed trigger, run inside PlayerCharacter::Update's replacement on Main.threadID (no listener runs it: the guard)
   let updateThread = -1;
@@ -710,7 +792,7 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
   const safeBytes = function (p) { try { return p.isNull() ? 'null slot' : firstBytesAt(p); } catch (e) { return 'unreadable: ' + e; } }; // a garbage slot must not fault the load
   const rbSetPos = ptrAt(at('rigidBodyVtable'), SLOT_SET_POS * 8), rbSetRot = ptrAt(at('rigidBodyVtable'), SLOT_SET_ROT * 8);
   const hookBytes = {}; // every hook's resolved address and first bytes, read before the attach (the pitfalls rule); plus v2.3's two REMAP callees, called not hooked (35928 expected 40 53 48 83, 14617 40 57 48 83: the actor script's ready rows in 183149 and 192013)
-  ['innerAdd', 'playerUpdate', 'formsLog', 'havokRead', 'havokBody', 'havokPrePass', 'flushEntry', 'savedHavokSet', 'set3DWrapper', 'setData3D', 'setNumericId', 'lookupByID'].forEach(function (n) { hookBytes[n] = safeBytes(at(n)); });
+  ['innerAdd', 'playerUpdate', 'formsLog', 'havokRead', 'havokBody', 'havokPrePass', 'flushEntry', 'savedHavokSet', 'set3DWrapper', 'setData3D', 'setNumericId', 'lookupByID', 'killImpl', 'killImmediate'].forEach(function (n) { hookBytes[n] = safeBytes(at(n)); });
   hookBytes.rigidSetPosition = safeBytes(rbSetPos); hookBytes.rigidSetRotation = safeBytes(rbSetRot);
   const mainTid = function () { const m = ptrAt(at('main'), 0); return m.isNull() ? -1 : u32(m, MAIN_THREAD); };
   const runPending = function (threadId, via) { // the deferred run, on Main.threadID only, inside Update's replacement (never inside a listener: the guard)
@@ -815,6 +897,20 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
   });
   attach('set3DWrapper', { onEnter(args) { counts.set3DWrapper += 1; if (!isForm(args[0])) return; emit({ event: 'set3D', form: hex(FORM), node: String(args[1]), caller: rva(this.returnAddress), thread: this.threadId }); } });
   attach('setData3D', { onEnter(args) { counts.setData3D += 1; if (!isForm(args[0])) return; emit({ event: 'data3D', form: hex(FORM), node: String(args[1]), caller: rva(this.returnAddress), thread: this.threadId }); } });
+  attach('killImpl', { // v2.4: Actor::KillImpl 37896, ungated like 19535: the kill witness (this, attacker, damage in xmm2 unread, sendEvent in r9b, ragdollInstant the fifth argument on the stack)
+    onEnter(args) {
+      counts.killImpl += 1;
+      if (!isForm(args[0])) return;
+      counts.killImplForm += 1;
+      let attacker = null, ragdoll = -1;
+      try { attacker = args[1].isNull() ? null : hex(u32(args[1], FORM_ID)); } catch (e) { attacker = 'unreadable: ' + e; }
+      try { ragdoll = args[4].toUInt32() & 0xff; } catch (e) { ragdoll = 'unreadable: ' + e; }
+      const r = { event: 'killImpl', form: hex(FORM), attacker: attacker, sendEvent: args[3].toUInt32() & 0xff, ragdollInstant: ragdoll, caller: rva(this.returnAddress), thread: this.threadId, inWindow: watch.active && this.threadId === watch.tid, afterApply: result.applied };
+      result.killImplRows.push(r);
+      emit(r);
+    },
+  });
+  attach('killImmediate', { onEnter(args) { counts.killImmediate += 1; if (!isForm(args[0])) return; counts.killImmediateForm += 1; const r = { event: 'killImmediate', form: hex(FORM), caller: rva(this.returnAddress), thread: this.threadId, inWindow: watch.active && this.threadId === watch.tid, afterApply: result.applied }; result.killImplRows.push(r); emit(r); } }); // v2.4's review: Actor::KillImmediate 37735, the dead=1 TESDeathEvent dispatcher and SetLifeState(2), the second kill path
   let noUpdateRefusals = 0;
   setInterval(function () { // the watchdog: an armed run that Update's replacement has not taken in 2 s is refused ('no Update return'); a mark may re-arm, TRIGGER now ends the run
     if (updateReplaced && !reverted && !busy && pending === null && (poll === null || poll.done) && Date.now() - t0 > TTL_S * 1000) { scheduleCleanup('ttl ' + TTL_S + ' s'); return; }
@@ -828,7 +924,7 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
   const s0 = singletons();
   let ver0 = -1;
   try { ver0 = nf.saveVersion(); } catch (e) { attachErrors.push('saveVersion: ' + e); }
-  const ready = { event: 'ready', version: version, pid: Process.id, base: String(exe.base), form: hex(FORM), mode: MODE, trigger: TRIGGER, flag: hex(FLAG), runs: RUNS, force: FORCE, suppress: SUPPRESS, park: PARK, updateReplaced: updateReplaced, hooks: hookBytes,
+  const ready = { event: 'ready', version: version, pid: Process.id, base: String(exe.base), form: hex(FORM), mode: MODE, trigger: TRIGGER, flag: hex(FLAG), runs: RUNS, force: FORCE, suppress: SUPPRESS, park: PARK, live: LIVE, liveWaiver: LIVE_WAIVE, updateReplaced: updateReplaced, hooks: hookBytes,
     game: String(s0.game), manager: String(s0.manager), main: String(s0.main), handler: String(s0.handler), player: String(s0.player),
     managerFlags: s0.game.isNull() ? -1 : hex(u32(s0.game, MANAGER_FLAGS)), pending: s0.game.isNull() ? -1 : u32(s0.game, PENDING_COUNT), dryRun: s0.manager.isNull() ? -1 : u8(s0.manager, DRY_RUN),
     mainThread: s0.main.isNull() ? -1 : u32(s0.main, MAIN_THREAD), saveVersion: ver0, remap: { rows: REMAP_ROWS.length, error: REMAP_ERROR, mode: MODE }, attachErrors: attachErrors };

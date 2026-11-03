@@ -7402,3 +7402,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (what exists, the gaps, the smallest real fix) is being read now. numidium's F9 read of playtest 43's scene (c2's own scene line
   spoken before c1 arrived, the host's scene producing no lines after the fix's stop, the watcher's say refused on its own quest state)
   is scripting's, the next arm's, as Eli said.
+- 14:35 PST 2026-11-03 (22:35Z 11-03) (thuum-cf): apply-on-demand.js v2.4 committed (sha1 2af35782, 93,753 bytes) after its fresh review, FIX FIRST applied as
+  written: the second death dispatcher Actor::KillImmediate (37735, 0x68e640, the dead=1 TESDeathEvent and SetLifeState(2); KillImpl 37896
+  dispatches dead=0 and sets kDying) is hooked beside KillImpl, so "no kill event" means both silent and a row with inWindow true is the
+  apply's own synchronous kill through 35568 or 35567; the dead-premise row's value is v2.3's again with the sitSleepState witness as its
+  own row (rule 5 parity under LIVE false); the handle lookup is labelled 12331 at 0x1795f0 with CommonLib's LookupReferenceByHandle its
+  twin 12332 at 0x179710 (the same math, both decompiled); the seated verdict's furniture reads null for no process or a null handle.
+  Ready for numidium's LIVE run on the idle lab (MODE apply, TRIGGER now, LIVE true; read 2 and F8 share the run). The slice's CI: the
+  fork's wire-test was red on clippy 1.99's chunks_exact_to_as_chunks (the CI image's toolchain is newer than the local stable 1.96);
+  decode_record_hex now walks as_chunks::<2>() with the pair destructured (adr065-sys1-wire e1eaf8ca, clean under cargo +1.99.0 clippy
+  across the workspace), re-merged as m3-adr065-system1 436ce96b, pipeline 5123 (server and Windows client builds).
