@@ -7245,3 +7245,31 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the dead record applied at the 3D load through LoadGame, which 164416 and 193005 showed lays the body with no kill and no fall), gated
   on the cross-seat run, now the critical path; no per-case patch. F5 is system 2 (logged, frozen); F7 is a profile's perk pick refused
   every 5 s (setup noise). Also seen: Hod's dialogue failed on his own host seat (the claim released at no Dialogue Menu within 10 s).
+- 12:51 PST 2026-11-03 (20:51Z 11-03) (numidium): playtest 42 STOPPED at Eli's word ("stop the test now."), about 20:43Z, after an hour on the staged r3 df9e1009.
+  The world is saved as playtest-42-end-evidence-20261103T204328Z (14,713 records); the recorder's cycles and end logs are in
+  results/playtest-42/; the console tees and probe dumps are kept in lab/.cache/runs/playtest-42/. My setup faults first: survival was
+  on (profile 42 lacked the 828 SetGlobal; fixed live at 20:16Z on both records), item 1's "19:00" was wrong (Hod's inn package
+  HodSleepingGiant19x3 0x35696 runs 19:00 for 180 minutes, PSDT in Skyrim.esm, no Update.esm override, so he leaves at 22:00), the
+  clock fix restarted the server mid-session (the likely trigger of F1 and F2), and the Overdraw40 perk in the profile ran against the
+  perks R0 switch (F7). Findings, all system 1 unless named:
+  - F1 a frozen, solid duplicate Embry 0x3550C on c2's street porch: after the restart c2's gate pulled its copy into 3c at 20:15:39
+    ("moved 3550c into 3c (the engine had it in 133c6)"), the record then went into 133c6 under c1 and c2's view got no update until c2
+    itself walked in at 20:21:06; the server's once-a-minute Disable snippet did not hold it; it blocked Hod's path into the inn.
+  - F2 a duplicate Hod on c2 inside the inn: Hod crossed the inn door on c2 (20:21:06 "a linked activation of 13424"), c1 (the inn's
+    host) dropped the sighting, his record froze outside unhosted, c2's copy froze inside and E on it went unanswered (20:26:36): Eli's
+    playtest-41 pattern. A second Hod mesh beside the frozen actor is not an actor (eight exhaustive samples), read later.
+  - F3 a replayed death on Prisoner's arrival outside Bleak Falls Temple: c2's engine loaded 29600, 29602 and 29613 alive at its own
+    spots; the client moved and killed each at the record ("dead record ... loaded alive on a watcher's seat", 20:33:11).
+  - F4 a missing corpse on c2: 29613 absent from c2's actor set while the server and c1 have it dead; and 29602's body 1,700 units down
+    the slope on c2 after the watcher's kill.
+  - F5 (system 2) the first loot opened after eleven activates and 2.2 s, then closed and reopened.
+  - F6 the second loot never opened: E_ACTIVATE_REACH from 1661 units, the reach measured from the record while Prisoner stood at c2's
+    slid copy.
+  - F7 (setup) E_PERK_POINTS every 5 s on profile 1, a state resend each time.
+  - Item 4 held on c2's re-entry into the temple: no replayed death, the bodies at the record within units.
+  Eli's calls in the session, verbatim: "we should be implementing the real fix every time. i bet everythings so fucked because we're
+  leaaving patches on patches around", then "all of this is going way too fucking slowly", then ADR-067's five (b9f39d23: no live
+  container view; replayed deaths allowed when every death is accounted for; every corpse where it lands; corpses are physics objects;
+  the stray copy moved, turbo3-sys1-f1). Next: F1's move staged with its probe after its review; thuum-cf's corpse-as-physics slice
+  (three to four days); the cross-seat apply read for ADR-065 (v2 in review); the scripts-and-quests arm after (ADR-062's flip, the
+  alias-created-item rule for the Golden Claw, D-F1 C's relayed quest start for Aventus, the rumor line's relay read).
