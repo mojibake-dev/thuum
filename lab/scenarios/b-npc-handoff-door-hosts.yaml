@@ -1,6 +1,8 @@
 # b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v19 2026-11-03: READY FOR THE GREENS and the parent's
-# red run by ADR-064's re-check of v18 (639f65ec; every claim holds on m3-system1-r2 4ccb4259 and the set goes red on the parent
-# b926a7d4 for the right reason, the bedside copy's second report into 133c7), with its two optional nits taken: the read after the
+# red run by ADR-064's re-check of v18 (639f65ec; every claim holds on m3-system1-r2 4ccb4259 and the set goes red on a build without
+# the promote fix for the right reason, the bedside copy's second report into 133c7; the red run plays first on playtest 41's
+# break-3 server b926a7d4, union-srv-3, which the lab has staged, and on parity 188a8dea, the merge's formal parent, if the thaw
+# condition wants it: numidium's correction, b926a7d4 is not m3-system1-r2's ancestor), with its two optional nits taken: the read after the
 # record's move waits 10 s, not 8, so a "not placed" line (the hold's worst case on round five: five asks 1.5 s apart and 2 s more) is
 # part of the read, and the hold's "asked the move" and "re-asked the move" lines are recorded again (they exist on round five, not
 # on round two), a count of how many asks the placement took. Noted for the reader, not claimed: the gate's line says "moved to the
