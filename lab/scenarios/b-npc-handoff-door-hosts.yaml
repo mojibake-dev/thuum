@@ -1,4 +1,12 @@
-# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v18 2026-11-03 after ADR-064's fresh review of v17
+# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v19 2026-11-03: READY FOR THE GREENS and the parent's
+# red run by ADR-064's re-check of v18 (639f65ec; every claim holds on m3-system1-r2 4ccb4259 and the set goes red on the parent
+# b926a7d4 for the right reason, the bedside copy's second report into 133c7), with its two optional nits taken: the read after the
+# record's move waits 10 s, not 8, so a "not placed" line (the hold's worst case on round five: five asks 1.5 s apart and 2 s more) is
+# part of the read, and the hold's "asked the move" and "re-asked the move" lines are recorded again (they exist on round five, not
+# on round two), a count of how many asks the placement took. Noted for the reader, not claimed: the gate's line says "moved to the
+# record below" though on round five the hold is the mover; the MoveTo lands the record exactly on c1, so the placed copy stands in
+# the player's capsule, and a "not placed" with the engine within a couple of hundred units of the record would point at the capsule's
+# push (a SetPos a few units off c1 the remedy). No claim changed from v18. v18 2026-11-03 after ADR-064's fresh review of v17
 # (FIX FIRST: the shape sound and deterministic on every head, three claims that could never hold): the hold's "placed at the
 # record" line never names the engine's pre-move cell (it prints only once the engine's cell IS the record's, so both read 3c), so
 # the stale case's witness is the view's gate line at the create-word promotion ("promote gate 1348a: the engine at (...) in
@@ -175,9 +183,11 @@ steps:
   - server: snapshot {name: door_a0, of: 'server.log_count("door 13423: 1348a.s host .* walks it through to 133c7")'}
   # the move: the record to c1's feet; c1 is promoted (the word) with its copy at the bed
   - c1: server-console {name: MoveTo, args: [0x1348a, 0x14]}
-  - wait: 8
+  - wait: 10
   - c1: npc-state {formId: 0x1348a}
   - c1: log-count {pattern: "hold 1348a: placed at the record"}
+  - c1: log-count {pattern: "hold 1348a: asked the move"}
+  - c1: log-count {pattern: "hold 1348a: re-asked the move"}
   - c1: log-count {pattern: "hold 1348a: placed at the record after [0-9]+ ms .asked [1-9]"}
   - c1: log-count {pattern: "hold 1348a: not placed"}
   - c1: log-count {pattern: "promote gate 1348a"}
