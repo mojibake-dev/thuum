@@ -452,6 +452,21 @@ test("labState ref serves a plain reference's position with the actor fields nul
     [true, 19237.1, -47480.26, -132.67, "3c:Skyrim.esm", null, undefined, null]);
 });
 
+test("labState ref carries a container's items, null where the record holds none", () => {
+  // the root-cause plan's W4: a two-seat container claim reads the chest's record (lab-api's server.inventory(<ref>))
+  global.mp = fakeMp();
+  mp.set(0x371e9, "locationalData", { cellOrWorldDesc: "371de:Skyrim.esm", pos: [1, 2, 3], rot: [0, 0, 0] });
+  mp.set(0x371e9, "type", "MpObjectReference");
+  mp.set(0x371e9, "inventory", { entries: [{ baseId: 0x12eb7, count: 1 }, { baseId: 0xf, count: 25 }] });
+  mp.set(0x3975b, "locationalData", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [0, 0, 0], rot: [0, 0, 0] });
+  mp.set(0x3975b, "type", "MpObjectReference");
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0x371e9 }).inventory,
+    [{ baseId: 0x12eb7, count: 1 }, { baseId: 0xf, count: 25 }]);
+  assert.strictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0x3975b }).inventory, null);
+});
+
 test("labState ref reads a plain reference's record without asking the actor's fields", () => {
   global.mp = fakeMp();
   mp.set(0xff000b01, "locationalData", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [5, 6, 7], rot: [0, 0, 0] });

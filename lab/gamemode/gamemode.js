@@ -261,6 +261,16 @@ const state = {
         worn = null;
       }
     }
+    // the reference's items as the server records them, a chest's or a body's as an actor's
+    // (lab-api's server.inventory(<ref>), the two-seat container claims of the root-cause plan's W4);
+    // null where the record holds none or the API refuses the read
+    let inventory = null;
+    try {
+      const inv = mp.get(actorId, "inventory");
+      if (inv && Array.isArray(inv.entries)) inventory = inv.entries;
+    } catch (e) {
+      inventory = null;
+    }
     return {
       found: true,
       actorId,
@@ -274,6 +284,7 @@ const state = {
       magickaPercentage: pct.magicka,
       staminaPercentage: pct.stamina,
       worn,
+      inventory,
     };
   },
 

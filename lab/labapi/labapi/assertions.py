@@ -1242,7 +1242,18 @@ class _ServerRef:
         except (KeyError, TypeError, ValueError) as e:
             raise AssertionData(f"spell {form_id:#x}'s record lacks {e}") from e
 
-    def inventory(self, client: str) -> InventoryView:
+    def inventory(self, client) -> InventoryView:
+        # a reference's id (an int or "File.esm:EditorID") reads that record's items, a chest's or a body's
+        # (labState ref's inventory; the root-cause plan's W4); a client name reads that player's
+        if not (isinstance(client, str) and client in self._clients):
+            ref_id = self._f.base_id(client) if isinstance(client, str) else int(client)
+            fn = getattr(self._f, "ref", None)
+            d = fn(ref_id) if fn else None
+            if not d or not d.get("found"):
+                raise AssertionData(f"server holds no record for {ref_id:#x}")
+            if not isinstance(d.get("inventory"), list):
+                raise AssertionData(f"server reports no inventory for {ref_id:#x} (a gamemode without the field)")
+            return InventoryView(tuple(e for e in d["inventory"] if isinstance(e, dict)), self._f.base_id)
         entries = self._f.inventory(client)
         if entries is None:
             raise AssertionData(f"server has no inventory for {client}")
@@ -1975,7 +1986,7 @@ _ID_METHODS = {
 _FORM_SPEC_METHODS = {
     WatchView: {"launched"},
     SelfWatchView: {"launched"},
-    _ServerRef: {"spell", "host", "ref", "follow", "fate"},
+    _ServerRef: {"spell", "host", "ref", "follow", "fate", "inventory"},  # inventory: a client name or a ref
 }
 # Methods that take a client's own watch and a string: c2.watched(c1).flights_match(c1.watched_self(), "angle")
 _PAIR_METHODS = {

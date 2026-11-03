@@ -275,6 +275,26 @@ class M0VocabularyTests(unittest.TestCase):
         from labapi.assertions import Evaluator
         self.ev = Evaluator(RichServer(), NearViews(), ["c1", "c2"])
 
+    def test_a_references_inventory_reads_its_record(self):
+        """the root-cause plan's W4: server.inventory(<ref>) reads a chest's or a body's items from its record,
+        and server.inventory(c1) still reads the player's"""
+        from labapi.assertions import AssertionData, Evaluator
+        srv = RichServer()
+        refs = {0x371E9: {"found": True, "actorId": 0x371E9, "x": 1.0, "y": 2.0, "z": 3.0, "cell": "371de:Skyrim.esm",
+                          "inventory": [{"baseId": 0x12EB7, "count": 1}, {"baseId": 0xF, "count": 25}]},
+                0x3975B: {"found": True, "actorId": 0x3975B, "x": 0.0, "y": 0.0, "z": 0.0, "cell": "3c:Skyrim.esm",
+                          "inventory": None}}
+        srv.ref = lambda actor_id: refs.get(actor_id, {"found": False})
+        ev = Evaluator(srv, NearViews(), ["c1", "c2"])
+        for expr in ('server.inventory(0x371e9).count("0x12eb7") == 1', 'server.inventory(0x371e9).count("0xf") == 25',
+                     'server.inventory(0x371e9).count("0x13790") == 0', 'server.inventory(c1).count("Skyrim.esm:IronSword") == 1'):
+            with self.subTest(expr=expr):
+                self.assertTrue(ev.evaluate(expr))
+        with self.assertRaises(AssertionData):
+            ev.evaluate('server.inventory(0x3975b).count("0xf") == 0')  # a record without the field
+        with self.assertRaises(AssertionData):
+            ev.evaluate('server.inventory(0x99999).count("0xf") == 0')  # no record
+
     def test_the_cell_host_table_and_a_ref_and_a_snapshot(self):
         from labapi.assertions import AssertionData, AssertionSyntax, Evaluator
         srv = RichServer()
