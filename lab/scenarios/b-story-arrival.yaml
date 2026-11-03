@@ -53,9 +53,8 @@ steps:
       # the client's arrival event at the login, once (the TS line and the native's line)
       - 'c1.log_count("arrival event raised at login for location 13163") >= 1'
       - 'c1.log_count("story change-location event queued for 14: old 0 new 13163") >= 1'
-      # the quest runs on the relaunched seat (it ran before the relaunch; the record keeps it; the Story Manager's second start, if
-      # any, is recorded by the questStart count, not claimed)
+      # the quest runs on the relaunched seat (it ran before the relaunch; the record keeps it); the Story Manager's second
+      # start, if any, is no claim of this scenario and its literal >= 0 read is gone (the gate audit, 2026-11-02)
       - c1.quest(0x74a83).running() == true
-      - 'c1.log_count("questStart quest 74a83") >= 0'
   - c1: dump-state
 artifacts: [server.log, c1.log, c2.log, screenshots]
