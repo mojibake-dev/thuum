@@ -5500,3 +5500,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   read: the promoted copy stands at the last relayed pre-door sample and its first report is judged a pass back; the fix,
   server-only, on m3-handoff-settle (the passing movement reliable before the hoster word, a 1 s settle, UNMEASURED) with its
   two-seat scenario. The gate never put two hosts on a door's two sides (the audit's case 3).
+- 18:30 PST 2026-11-02 playtest 41 (turbo 2 arm two) CLOSED at Eli's word ("jfc. yeah fuck it. close."). The last finding, Eli: "item physics sync
+  is more broken than it was when we STARTED testing": BROKEN, worse than at arm one; the server since break 3's swap granted 13 of
+  13 claims (the newest touch from any copy wins, a contact against a prop the other seat moves included) and refused a blasted
+  prop's owner while it still flew (E_PROP_NOT_OWNER at 02:19:26Z and 02:19:49Z, no claim between: the at-rest return). Three prop
+  changes went to the seats mid-arm (the 4096 range, the first-sample budget and the blast's claim, the blast's read and the two
+  owner checks retired), none with a two-seat claim; ADR-063 retired the checks without writing the arbitration. Agreed with
+  thuum-cf: no live prop change again; the rule written first in prop-physics.md under ADR-063 decision 4 (a grab beats a touch;
+  a non-owner's contact never takes a moving prop; ownership returns to the host only at rest, by the owner's own final sample),
+  then props.rs with T0, the two-seat probe and its scenario, after m3-handoff-settle. Evidence: the world
+  playtest-turbo-2-arm2-end-evidence-20261103T022433Z (not a base); logs at results/playtest-41/ (after break 3), -break3/ (01:10Z
+  to 02:11Z, with server-pre-swap.log) and -break2/ (to 01:10Z). The hold released; the lab server back on parity-6d7fcc84 (the
+  match of clean-m1's 64dbacfe client) for the nightly, the seats' schema-32 games offline until its first rollback.
