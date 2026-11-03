@@ -606,6 +606,17 @@ answered with IdleForceDefaultState on the next update (d0d53bf5); the path
 has not fired since x-npc-legs 202106 and is unread, and the furniture state
 itself rides the relay (npc-stream: exits stay on the relay by design).
 
+Kill moves (2026-11-03, m3-system1-r3 db0e19a5; docs/verbs/npc-fate.md, the guest's half-up body): a puppet's death is the server's
+word (ADR-050 decision 2), so the host's kill move is NOT replayed on a puppet's graph. The replayed victim animation killed the copy
+at its KillActor tag 3 s before the word (x-npc-death-freeze 140538 and 152912), the dead check stood it up, the word killed it again
+and the puppet's release clock, counting from the first death, froze the second ragdoll mid-fall. formView.replayActions drops a
+KillMove* event for a puppet (said once per puppet, "<id>: the host's <event> not replayed on the puppet, a puppet's death is the
+server's word"), the puppets' analogue of deathService's hook that blanks the figures' kill moves; onResurrected clears the settle
+clock. On the viewing seat the victim stands through the host's kill move until the word, then drops with the engine's full death.
+The graph's other mouth, the event relay (a creature's events, a humanoid event outside the PerformAction entry, the guest's own kill
+move on a puppet it hits), still carries a kill move (HYPOTHESIS, no run yet); the figures' hook widened to puppets is the next
+train's, with its read in x-npc-death-guest's frame.
+
 ## Message contract
 
 - No new message and no widened field (rule 4 met by no change). A puppet
