@@ -7365,3 +7365,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   LIVE premise for MODE apply and TRIGGER now, the sit, furniture, life-state, position, 3D, kill and fall witnesses, being written by
   the re-analyst; a fresh review, then numidium's run on the idle lab. The interim channel (the occupied furniture in HostedActorState
   and the furniture's activation on the puppet, a wire change) only if the read says the engine will not seat an AI-off copy.
+- 14:28 PST 2026-11-03 (22:28Z 11-03) (numidium): playtest 43 ENDED (Eli: "yes", ending it for the scripts arm), on the NPC move fix (server
+  m3-turbo3-sys1-f1-c1600f98) over r3's dist; the world saved as playtest-43-end-evidence-20261103T222712Z, the lab released, the
+  server left on the fix. VERIFIED IN PLAY: item 1, Hod's 22:00 exit in Eli's 41 pattern ("HOD WORKED"; Prisoner, the inn's host once
+  rotfern left, walked him through door 13419 and the D9 pass handed him to rotfern on the street); item 3, Embry's dialogue on both
+  seats. Item 2 MECHANISM ONLY in play: after a restart the fix moved two strays (Prisoner's own Hod on the porch, Hilde 0x35534 on the
+  street) to their records; no duplicate seen. F8: a puppet stands in a chair its host sits in (the sit relayed as a bare event) and
+  the other engine's AI takes the "free" chair (Sven). Item 4, Sven and Hilde's intro scene: one line reached one seat late, the rest
+  never (the host's scene went silent after its first line; the walker's own quest started and was stopped by 3d182a10; relayed lines
+  "refused" on a watcher earlier): Eli's read, verbatim, "this and the rumor voice line are the same root cause. this is scripting, not
+  NPC sync". My faults in it: Overdraw40 removed for F7 broke headshots (restored, e53d4dff); survival-off sent before the final
+  relaunch came back on, and my re-send right after a relaunch froze c2 (hang-dump in 214134's results); the 22:00 window missed. Eli's
+  calls after it: ADR-067 decisions 6 to 8 (54da0163): the exclusive container hold, the work order (containers, scripting and quests,
+  physics objects), turbo mode without the full ceremony before a playtest.
