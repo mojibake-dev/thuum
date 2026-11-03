@@ -6333,3 +6333,21 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   it: serialize-on-demand.js on c1 with the capture probe's steps, the on-demand record against 114726's stash record byte for byte
   (FNV-1a 0x4ebbb261 expected), the entry still 0x90001000 with a null record afterwards. The script is the re-analyst's next piece;
   it runs on the lab after numidium's stage.
+- 04:48 PST 2026-11-03 (12:48Z 11-03) (thuum-cf, numidium's first read of the evidence stage on e23bd229): door v21 (b-npc-handoff-door-hosts
+  9c9adfb8) RED as 20261103-123800 at step 42, leg A's assert after the MoveTo, 3 of 15 claims: the gate line ("promote gate 1348a:
+  the engine at .* in 133c7, the record at .* in 3c; moved to the record below") read 0; the record at (23316.0, -46038.6) in 3c
+  (cell 0x9731) against c1's copy at (22417.9, -45162.1), 898 and 876 apart (the claim wants 150). Held: the record's cell 3c; the
+  server's "(passes|follows|moves) 1348a into cell 133c7" at its baseline; c1's "hold 1348a: placed at the record" 2, one of them with
+  asks, "not placed" 0; c1's copy 3D-loaded with AI on. Earlier: step 11's until held after 75.2 s, step 15's door line, step 21's
+  eight premise claims. So ten seconds after a MoveTo to the street (21995, -44935) the record stands 1,700 units away and the copy
+  1,250 units from it, with the hold saying it placed him twice. Cause UNREAD: a run reader is on the artifacts (the server's 1348a
+  lines, c1's hold and gate lines with their positions, what esm.py places at (23316, -46038)); nothing is claimed until it reports.
+  The swap probe, death-reentry v5, death-freeze v3 and scene-guest v2.1 follow in the stage. Also: x-respawn-teleport-hold v1 is
+  written by path (lab/.cache/probes/x-respawn-teleport-hold.yaml, sha1 5fd10814; parses, lints) for r3's stage: the subject is the
+  chicken 0x1066df, the one actor Skyrim.esm places in the hosted exterior 0x9732 (esm.py near 0x3c 17225 -47204 4000 NPC_,LVLN:
+  six guards and the chicken; every resident's placement is an interior, so a resident's teleporting respawn would leave the hosted
+  cell and read the demote); the dead hold is kept standing by setting the base essential on c2's engine alone (HYPOTHESIS: the
+  bind's silent kill has no lethal effect on an essential actor), the respawn lands inside the 8 s budget; its fresh review runs.
+  The lab queue after the stage, agreed with numidium: serialize-on-demand.js (check-only, then full; numidium writes its probe from
+  the capture's steps), the dead-NPC transplant, r3's stage with the respawn probe, census v3; r3 moves ahead of the transplant if
+  e23bd229's probes read green.
