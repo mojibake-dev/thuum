@@ -773,8 +773,8 @@ word and the promote reading it rather than the last sample: ADR-064 system 1's 
 promote and demote), whose promote rows numidium writes from 052100, 055217 and playtest 41 before more settle code; the settle's
 merge waits on that order. The scenario claims it since v9 (thuum 02420ca6): no pass, follow or move of him into an exterior cell
 across EACH grant (the street seat's visit's and the interior seat's), a baseline right before the teleport in and equal after the
-grant, so the case goes red where it happens and a fix is tested at the grant too. T3: b-npc-handoff-door-hosts v9 (thuum 02420ca6,
-2026-11-03; v8 d474f718, v7 1c8f3455). v6's two red runs on the fix's parent 35509f7a settled the
+grant, so the case goes red where it happens and a fix is tested at the grant too. T3: b-npc-handoff-door-hosts v11 (thuum fe2d0eff,
+2026-11-03; v10 6cfc1c4c, v9 02420ca6, v8 d474f718, v7 1c8f3455). v6's two red runs on the fix's parent 35509f7a settled the
 shape (numidium's reads): leg A 20261103-051454 was red at its premise with fresh seats and NO pass logged at Hod's house door, while
 the swap probe 20261103-052100 REPRODUCED playtest 41's bounce at the house door ("ff000000 passes 1348a into cell 9731 (D9)" at
 05:22:17.325, "ff000001 passes 1348a into cell 133c7 (D9)" 56 ms later, the pair every 14 s as he retried his door), the street
@@ -784,22 +784,32 @@ sits inside the 1 s settle as well as being the placement's case. v7 and v8 keep
 premise (its copy of him indoors with no 3D at the exit is playtest 41's shape and the bounce's mechanism, not a proven cause) and
 claim the door each leg tests; v8 (d474f718) parks leg A's street seat at lab-spawn through the restart so leg B's street seat lands
 alone (a restart keeps the seats' places), bounds the hour above at each premise's end (a late clock would put the exit before the
-baselines), starts the clock at 6.0 and names the mutation's proof: the counts block at 5 s going red. Leg A, the house door at 08:00 (the sawmill package ends his night at home; the clock
-starts at 6.5 so the visit finds him home and the exit comes about two real minutes after the house's seat hosts him; c2 the
-street's seat, c1 the house's, 052100's orientation): his record in 0x133c7; the street's seat teleports to the house door's
-landing (-506, -177, 0), is granted the house, sees him with 3D (following false), teleports to the street, the house unhosts
-behind it, and its copy of him is claimed indoors with no 3D beside its hosting of 0x9712 and 0x9731; the house's seat enters by the
-same landing, is granted the house, his 3D and AI there and the street seat's copy still indoors claimed; the baselines (the door
-line first); the exit waited on the pass line itself; at 5 s the counts with the hour past 7.9 (the door 13407 line beyond its
-baseline, one more "now simulates 1348a in cell 97xx", no "passes 1348a into cell 133c7" and no pass, follow or move of him into the
-house beyond the baseline), then the seats read back to back and the engine claims (the record in 3c, the street's seat running him
-loaded within 150 units both ways, the house's seat with no 3D and its copy out of the house); at 65 s the counts again and nobody's
-copy in the house. Leg B, the inn door at 22:00, playtest 41's own, the roles swapped (c1 the street's, c2 the inn's): a restart at
-20.0 keeps the world (his record claimed not in the inn), the street's seat lands first, hosts his cell and his inn package walks him
-into the unhosted inn under its follow (claimed), then the same visit shape on the inn (the grant ends the follow, claimed), the inn's
-seat enters, and at 22:00 the fallback sandbox near his editor location walks him out by 0x13419 (the door 13419 line, "passes 1348a
-into cell 133c6" as the bounce line, the hour past 21.9). The exterior cell claim of v5 and v6 is dropped (the record outdoors and
-the 150-unit bound carry it). The by-path probe x-handoff-door-hosts-swap v7 plays leg A with the roles swapped on the parent (a run
+baselines), starts the clock at 6.0 and names the mutation's proof: the counts block at 5 s going red. Leg A, the house door at 19:00 by his unconditioned inn package (v10, after 055217 showed no door walk for 400 s to about 9.3 h
+and non-owning-seat.md P7 read his sawmill packages as CONDITIONED on the mill script's variable, with P4's no-package-after-a-
+double-promote the other reading, both HYPOTHESIS; the clock starts at 17.0: the seats come online at 17.19 after a 35 s relaunch
+or 17.69 after a 124 s rollback, the interior seat's premise ends 17.56 to 18.06, the exit comes 169 to 259 s after the baselines
+and the 400 s until ends 141 to 231 s past 19:00, numidium's fit of four runs; c2 the street's seat, c1 the house's, 052100's
+orientation): his record in 0x133c7; the street's seat teleports to the house door's landing (-506, -177, 0), is granted the house
+with no pass, follow or move of him into an exterior cell across the grant (v9's claim, 055217's and 060106's grant promotions),
+sees him with 3D on neither sawmill package (v11: 17:00 to 19:00 lies inside the sawmill window, and a seat meeting the mill's
+condition would walk him out early, a red with a working fix that would read as the grant bounce), teleports to the street, the
+house unhosts behind it, and its copy of him is claimed indoors with no 3D beside its hosting of 0x9712 and 0x9731 and the hour
+past 17; the house's seat enters by the same landing, is granted the house with the same no-exit claim across its grant, his 3D
+and AI there on neither sawmill package, the street seat's copy still indoors, the hour between 17 and 18.9; the baselines (the
+door line first); the exit waited on the pass line itself; at 5 s the counts with the hour past 18.9 (the door 13407 line beyond
+its baseline, one more "now simulates 1348a in cell 97xx", no "passes 1348a into cell 133c7" and no pass, follow or move of him
+into the house beyond the baseline: on the parent the "now simulates" claim holds, since he retries the door every 14.6 s, and
+the pass back into the house is the bounce's red), then the seats read back to back and the engine claims (the record in 3c, the
+street's seat running him loaded within 150 units both ways, the house's seat with no 3D and its copy out of the house); at 65 s
+the counts again and nobody's copy in the house. Leg B, the inn door at 22:00, playtest 41's own, the roles swapped (c1 the
+street's, c2 the inn's): leg A's street seat parks at lab-spawn (27 cells from Riverwood's squares) before the restart, since a
+restart keeps the seats' places and the cells rule hands a cell to a strictly nearer ring alone; a restart at 20.0 keeps the
+world, c1 lands on the street alone, hosts 9712 and 9731 (claimed) and the until waits for his record in 133c6 within 200 s
+(leg A's exit walked him there, or the inn package finishes the walk under c1's follow), then the same visit shape on the inn
+(the grant ends the follow, claimed), c2 enters from lab-spawn, and at 22:00 the fallback sandbox near his editor location walks
+him out by 0x13419 (the door 13419 line, "passes 1348a into cell 133c6" as the bounce line, the hour between 20 and 21.8 at the
+premise's end and past 21.9 at the exit). The exterior cell claim of v5 and v6 is dropped (the record outdoors and
+the 150-unit bound carry it). The by-path probe x-handoff-door-hosts-swap v9 plays leg A with the roles swapped on the parent (a run
 stops at its first red, so the scenario's second leg never reaches the parent); a third run at handoffPassSettleMs 0 reads the
 reliable placement alone. HYPOTHESIS until those runs:
 the mechanism above (every stamp fits it), and that the street seat's copy stands indoors at the promote (the precondition,

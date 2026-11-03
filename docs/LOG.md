@@ -5732,3 +5732,17 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   build alone; numidium stages it with the parent's server for door v10's leg A and the swap probe, the engine rows go CONFIRMED
   from that run, then the imposition commits (the record sent reliably before every UpdateHoster, the view's placement
   unconditional at a promote) follow on the branch.
+- 22:46 PST 2026-11-02 (06:46Z 11-03) (thuum-cf): door v10 cleared its quick review (READY FOR THE RED RUN; the instrumented chain
+  is numidium's: m3-promote-record d66de5fd's client on the parent's server, then v10's leg A and the swap probe); v11 fe2d0eff
+  takes its three fixes (each premise block claims his package is neither conditioned sawmill package on the seat running him, the
+  clock's numbers from four runs, the cause as P7 or P4). Props: round six's review (F2: Away's only exit could go missing with a
+  missed load report; the transform's gate stranded a live owner streaming into such a cell) answered by round seven
+  (Props::reached from RefreshReach ends the state for the cells in the seat's reach, the gate on grants and wakes alone);
+  8546111d went out with a red Rust test (the chain read `cargo test | grep`), 41300469 the fixed head; defb7097 GREEN on 4851;
+  probe v10 with leg 5 on a second placed ingot and leg 6 the re-entry. Slice 1b: x-script-natives v3 (20261103-062800) held every
+  claim but the guest's "(platform)" stage row, cut off by the console log's 100-character line (numidium's read; c2.log had the
+  fragment's skip and the latent apply, H-1b1's evidence); m4-scripts-work 15e01a0e writes the census one row per line and
+  5d840fa1 names a quest's, global's or alias's self in its row; probe v4. Two census numbers kept as hypotheses in
+  papyrus-events.md: H-1b4 SetOpen about 48 a second on every seat (modelApplyUtils's frame-rate apply; Eli's flicker?), H-1b5
+  Quest.Start about 1.3 a second on every seat (D-S1's data point). npc-handoff.md's T3 text at v11. Lesson repeated and written
+  to memory: read every check's exit status directly before a push, never through a pipe.
