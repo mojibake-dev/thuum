@@ -6036,3 +6036,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   chain on it is v18, the swap v16 and the settle-0 read re-derived from v18. Lesson: a cherry-pick keeps its source's author, so a
   public fork needs --reset-author at pick time when the source carried a work address; and a filter-repo scrub changes every
   descendant's sha, so every citation outside git (probes, memory) needs the map.
+- 02:12 PST 2026-11-03 (10:12Z 11-03) (thuum-cf): the re-check of door v18 (639f65ec): READY FOR THE GREENS and the parent's red run. Every claim holds on
+  m3-system1-r2 4ccb4259 (the gate's line at the create-word promotion names the bed and the street; the hold's placed line reads
+  "(asked 1 time(s), ...)" because the gate defers to the hold and the hold asks from its second check; the record's claims are
+  absolute against the street spot) and the set goes red on the parent b926a7d4 for the right reason (no gate or hold lines; the
+  bedside copy's second report, 130 ms after the swallowed first, judged a follow into 133c7 and yanking the record home;
+  HYPOTHESIS until the parent run). The reviewer retracted its "14x8" typo report (its own script's phantom). v19 (main 8d11a67f,
+  106 steps; no claim changed) takes its two optional nits: the read after the record's move waits 10 s so the hold's worst-case
+  "not placed" line is part of it, and the "asked the move" / "re-asked the move" lines are recorded again (present on round
+  five). Reader notes: the gate's "moved to the record below" is a misnomer on round five (the hold moves); the MoveTo lands the
+  record on c1, so a "not placed" with the engine near the record would point at the capsule's push (a SetPos a few units off c1
+  the remedy). The swap probe v17 (e9bf42aa, 36 steps). The m3-system1-r2 stage's chain: door v19, swap v17, the settle-0 read
+  re-derived from v19; the parent's red run of v19 is the mutation proof.
