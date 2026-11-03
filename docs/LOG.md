@@ -6235,3 +6235,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the superseded 817f78d0's 4952 was red on the three cases round nine fixed, as numidium's review read. The merge candidate's
   stage follows numidium's fresh review of f1c954d7 and the Formatting check, with door v21, swap v19, death-reentry v5,
   death-freeze v3 and scene-guest v2.1.
+- 04:03 PST 2026-11-03 (12:03Z 11-03) (thuum-cf, numidium's report): the change-forms transplant's first half CONFIRMED (change-forms.md D1, run
+  20261103-114726, c1 solo): FarmhouseAnimDoor01 0xe3a7a in the Sleeping Giant (0x133c6), `lock 50` typed after the attach; at
+  the attach its changes entry held 0x90000000 (kGameOnlyExtra, kAnimation) and no record since the cell was live; at `pcb` the
+  engine's own stash (AL 35570, caller 0x2bfbf8) wrote it through 35509 with flags 0x90001000 (kLockExtra added); the record a
+  REFR change form, version 0x4e, 36 bytes raw and 40 in all, the door's id inside as a type-1 direct id (portable), the
+  animation state "Close" readable. The second half (x-transplant-inject v1 on c2, solo, a fresh game: the 40 bytes written into
+  c2's changes map with the engine's own allocator before c2 loads the inn, after the record's FNV-1a matched; a fatal Frida
+  'bool' argument bug caught by its fresh review first) runs now; a green is ADR-065 decision 4's premise, one seat's engine
+  materializing another's record as its own. Corrections: death-reentry v5 is 20a6c65d (e771aeec plus the reviewer's claim on the
+  hold's release line and the recorded "stands nothing" line); lab-api's loader silently dropped a top-level `asserts:` block, so
+  census v2's and capture v1's claims were never evaluated (their greens say the steps ran; the census readings stand on their trace
+  rows), fixed on main 24b864ab (an unknown top-level key is refused; every committed scenario uses known keys only). The stage of
+  f1c954d7 starts on round nine's review GO.
