@@ -7092,3 +7092,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   and no second death; the mechanism (the silent kill's ragdoll from a standing pose at the resting point) HYPOTHESIS. R4 updated
   with the r3 read (D4's fix held). The probe's leg B bound of 256 is a premise cut from fresh deaths: 512 at the relaunch goes to
   Eli as D-P14 (a looser bar, W4), with the v6 draft ready by path; leg A keeps 256.
+- 09:56 PST 2026-11-03 (17:56Z 11-03) (thuum-cf): docs/research/adr065-serialize-on-demand: the run section for 20261103-174905 (numidium's run of apply-on-demand.js v2.1, PARK false,
+  c1 solo on the r3 image), read from its 70 rows: the leveled release inside 35568 stores the pose as an ExtraSavedHavokData (0x8c7368f2),
+  the finish pass parks the record's block over it (the sub-buffer pointer 0x1e9b884efd0 moves from the kind-2 map into the extra: identity,
+  not only the hash 0xe662d9bf), and the rebuilt 3D's init consumes it (19535 on 36014's path, +36 ms, the task thread), the body re-lying
+  within 11 units after 5 s: poseSource the record's block; PARK not needed for a leveled actor (C4, numidium 1d527cec). Corrected: the
+  setter pair ran once, not 18 times; 11977 and the hooked flush entry never fired (other paths). Open: the cross-seat apply (the record
+  and the live pose are the same bytes in a one-seat run), the release's block differing from 36016's 2 ms earlier, the non-leveled actor.

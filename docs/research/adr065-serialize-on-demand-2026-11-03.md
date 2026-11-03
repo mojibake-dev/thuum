@@ -1054,3 +1054,58 @@ pending count across the reload's second finish pass; (7) headZ and the root z a
   counts decide); the thread of 19742 (4560 by the run); the safety of 36014 on the main thread.
 - Open: who queues the model reload after the release (the actor's update or the base swap), whether 19742's apply precedes or follows the
   process re-attach for the ragdoll's motion type, and the content of 36016's block for a settled corpse against the record's.
+
+## Run 20261103-174905: the pose after the apply's 3D reload (17:49Z 11-03, numidium's run, thuum-cf's read of the rows)
+
+x-apply-roundtrip v2, c1 solo on the r3 image (m3-system1-r3 df9e1009's server), apply-on-demand.js v2.1 (fb244ad7), PARK false, the
+dead promoted bandit 0x39fe4 again; 1.6.1170 at base 0x7ff6834a0000, pid 2656, the main thread 6604; every hook resolved with its first
+bytes as the static read gave them. The rows (frida/c1-apply-on-demand-...-7.js.jsonl, 70 rows), times relative to the finish pass at
+17:50:31.613Z:
+
+- The first kLifeState mark (17:50:29.469Z, thread 4932) was refused on one premise, "actor dead (lifeState 2)": the first 0x400 mark is
+  the dying step; the second mark 2.0 s later (thread 11824, a task thread) found kDead, deferred 16 ms to PlayerCharacter::Update's return
+  on 6604 and passed every premise (the entry present with a null record, D7; flags 0x9a040427). B1's two marks 2 s apart, as recorded.
+- before: lifeState 2, level 0, the root 0x1ea50b99d90 at (-3742.66, 817.29, 591.21), angle z 5.377, 19 live bodies (18 active, 1 asleep;
+  flags 0x14), no ExtraSavedHavokData, the kind-2 map empty (capacity 0), the live pose by 36016: version 78, 993 bytes, 19 bodies, FNV-1a
+  0xe662d9bf.
+- The record built on demand: ACHR (type 1), version 78, 4,452 plain bytes (FNV 0xd34298dd; the framed record 0x33e582c5), its Havok block
+  the same 993 bytes with the same hash 0xe662d9bf: the record is this body's own serialization at the mark, so the record's block and the
+  live pose are the same bytes by construction. 35568 took it with flags 0x8a040427 (kInitingForms 0x10000000 dropped) and returned 1.
+- after apply (the same millisecond): the root null (the leveled release inside 35568), pending 1, an ExtraSavedHavokData PRESENT with
+  sub-buffer 0x1e9b920c020: version 78, 993 bytes, 19 bodies, hash 0x8c7368f2, the release's own store of the pose, different in content
+  from the 36016 block of 2 ms earlier (the same length; the moment or the encoding, HYPOTHESIS below); the kind-2 map now holds the form
+  (capacity 8, occupancy 1, keyed by the form POINTER, not the id) with sub-buffer 0x1e9b884efd0, the record's block as 35568 queued it.
+- finish 35567 (the same millisecond): pending back to 0, the kind-2 map empty, and the extra's sub-buffer is now 0x1e9b884efd0, the very
+  pointer the kind-2 map held, hash 0xe662d9bf. The finish pass moved the record's block out of the queue into the extra and replaced the
+  release's store: identity by pointer, not only by hash.
+- +35 ms (17:50:31.648Z): data3D set to 0x1ea50b986b8 on thread 11824 (the mark's own task thread; caller RVA 0x1a0a6b). +36 ms: 19535 on
+  the same thread (caller 0x62586f, 36014's path, outside any window) read the saved block 0xe662d9bf (19 bodies, 993 bytes) against 19 live
+  bodies (flags 0x15); the extra was present at its entry with its sub already detached (sub 0x0: the reader takes the buffer before the
+  call); 19 havokBody calls; SetPosition 1 and SetRotation 1.
+- rebuilt, 49 ms after the root appeared (172 ms after the finish): the root at the same position and angle as before the apply, the extra
+  gone (consumed), the kind-2 map empty, 19 bodies (18 active, 1 asleep), the live pose by 36016 now 0xc05e84c (993 bytes).
+- settled, 5 s later: (-3733.19, 811.43, 589.79), 11.2 units of drift, angle z 0.885, all 19 bodies asleep, the live block 561 bytes
+  (0x682255e1): a sleeping ragdoll serializes shorter than an awake one.
+- result: poseSource "the record's block", judged by the block 19535 read; liveHash equal to the record's by construction; parkHash null;
+  lastStored null. Liveness at the end: havokRead 1, havokBody 19, havokPrePass 1, rigidSetPosition 1, rigidSetRotation 1, setData3D 3,
+  savedHavokSet (11977) 0, flushEntry (the hooked 0x6264e0) 0, formsLog 0 (none of 35519's logs carried the form or the known strings: no
+  "already saved havok data", no mismatch).
+
+### What this run settles
+
+- CONFIRMED by run: on a loaded LEVELED actor the mid-game apply releases the 3D inside 35568 and stores the pose in an ExtraSavedHavokData;
+  the finish pass parks the RECORD's block over that store (the sub-buffer pointer moves from the kind-2 map into the extra); the rebuilt
+  3D's init consumes it (19535 on 36014's path, 36 ms after the finish, on the task thread); the body re-lies within 11 units after 5 s.
+  PARK is not needed for a leveled actor: the engine's own path carries the record's pose to the rebuilt body. change-forms.md C4 (numidium,
+  1d527cec) says the same.
+- Corrected expectations from the static read: Q4's (5), one setter pair per non-root body (18 for 19), was wrong: SetPosition and
+  SetRotation ran once each inside the read, so the per-body application goes another way (the 19 havokBody calls; a motion-state write or
+  a setter the script did not hook), HYPOTHESIS. The release's store did not go through 11977 (savedHavokSet 0) and the park did not go
+  through the hooked flush entry (flushEntry 0): both use paths the script did not hook; the extra's bytes and its sub-buffer pointer are
+  the witnesses that decided, and they suffice.
+- Open, for the cross-seat run: a one-seat round trip cannot separate the record's block from the live pose at the mark (the same bytes), so
+  the owner's record applied to a GUEST copy whose pose differs is the run that shows a guest body taking the owner's pose; by this run's
+  mechanism it will (the release's store is replaced either way on the leveled path). Also open: why the release's store (0x8c7368f2)
+  differs from the 36016 block of 2 ms earlier at the same length (the bodies detached from the world before the store, or a changing field
+  in the block); a dump of both blocks in the next version decides. And the non-leveled actor (no release, no rebuild): there the flush
+  feeds 19535 directly on the standing 3D, unread.
