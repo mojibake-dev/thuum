@@ -1612,32 +1612,37 @@ function run(step: Step, player: Actor): unknown {
       // {to}, or from the reference {from} into the player. The menu's own
       // store and take are the engine's RemoveItem with a move-to reference
       // too, so skymp5-client's containersService hears this one as it hears
-      // those (UNCONFIRMED until a lab run). A source holding fewer than
-      // {count} is refused before the call; the answer counts the item on
-      // both sides before and after (getItemCount), so a step that moved
-      // nothing shows, and lab-api reds a transfer answering {error}.
-      if ((a.to === undefined) === (a.from === undefined)) return { error: "transfer takes one of {to} and {from}" };
+      // those (UNCONFIRMED until a lab run). The answer counts the item on
+      // both sides before and after (getItemCount). A missing item or ref, a
+      // source holding fewer than {count} and counts that did not move by
+      // exactly {count} each way all throw, a failed step (an {error} answer
+      // would pass); that RemoveItem has moved the item when it returns is
+      // UNCONFIRMED, and a deferred move would fail every transfer here.
+      if ((a.to === undefined) === (a.from === undefined)) throw new Error("transfer takes one of {to} and {from}");
       const store = a.to !== undefined;
       const item = Game.getFormEx(num(a.item));
-      if (!item) return { error: `no such item ${num(a.item).toString(16)}` };
+      if (!item) throw new Error(`no such item ${num(a.item).toString(16)}`);
       const ref = form(store ? a.to : a.from);
-      if (!ref) return { error: `no such ref ${num(store ? a.to : a.from).toString(16)}` };
+      if (!ref) throw new Error(`no such ref ${num(store ? a.to : a.from).toString(16)}`);
       const id = ref.getFormID();
+      const what = item.getFormID().toString(16);
       const count = Math.max(1, num(a.count, 1));
       const before = { player: player.getItemCount(item), container: ref.getItemCount(item) };
       const has = store ? before.player : before.container;
-      if (has < count) {
-        const source = store ? "the player" : id.toString(16);
-        return { error: `${source} holds ${has} of ${item.getFormID().toString(16)}, fewer than ${count}` };
-      }
+      if (has < count) throw new Error(`${store ? "the player" : id.toString(16)} holds ${has} of ${what}, fewer than ${count}`);
       if (store) player.removeItem(item, count, true, ref);
       else ref.removeItem(item, count, true, player);
+      const after = { player: player.getItemCount(item), container: ref.getItemCount(item) };
+      const gain = store ? -count : count;
+      if (after.player - before.player !== gain || after.container - before.container !== -gain) {
+        throw new Error(`${store ? "a store" : "a take"} of ${count} of ${what} left the player at ${after.player} (from ${before.player}) and ${id.toString(16)} at ${after.container} (from ${before.container})`);
+      }
       return {
         item: item.getFormID(),
         ...(store ? { to: id } : { from: id }),
         count,
-        player: { before: before.player, after: player.getItemCount(item) },
-        container: { before: before.container, after: ref.getItemCount(item) },
+        player: { before: before.player, after: after.player },
+        container: { before: before.container, after: after.container },
       };
     }
     case "look": {

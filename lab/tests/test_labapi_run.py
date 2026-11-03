@@ -81,6 +81,7 @@ class Doubles:
         self.npcs: dict[str, dict[int, dict]] = {}  # the NPCs a client's npc-state reports, by form id
         self.chests: dict[str, dict[int, dict[int, int]]] = {}  # the containers a client's inventory reads: ref -> base id -> count
         self.carried: dict[str, dict[int, int]] = {}  # the items a client's player carries for transfer: base id -> count
+        self.stuck: set[str] = set()  # the clients whose engine moves nothing on a transfer (the driver's after-count throw)
 
     def turn(self):
         for name in self.names:
@@ -129,8 +130,9 @@ class Doubles:
                 data = {"ref": ref, "items": {str(b): n for b, n in chest.items()}} if chest is not None else {"error": "no such ref"}
             elif step["action"] == "transfer":
                 # the driver's contract: form ids, never names, and one of to and from (lab-api resolves and checks them
-                # first); the count moves between the player and the chest as removeItem moves it, and a missing ref or a
-                # source holding fewer than count answers {error}, as the driver does
+                # first); the count moves between the player and the chest as removeItem moves it, and a missing ref, a
+                # source holding fewer than count or an engine that moved nothing (self.stuck) throws in the driver,
+                # whose catch posts ok: false with the error's text
                 a = step["args"]
                 assert ("to" in a) != ("from" in a), a
                 item, ref, count = a.get("item"), a.get("to", a.get("from")), a.get("count", 1)
@@ -138,18 +140,26 @@ class Doubles:
                 chest = (self.chests.get(name) or {}).get(ref)
                 pack = self.carried.setdefault(name, {})
                 source, target = (pack, chest) if "to" in a else (chest, pack)
+                why = ""
                 if chest is None:
-                    data = {"error": f"no such ref {ref:x}"}
+                    why = f"no such ref {ref:x}"
                 elif source.get(item, 0) < count:
                     who = "the player" if "to" in a else f"{ref:x}"
-                    data = {"error": f"{who} holds {source.get(item, 0)} of {item:x}, fewer than {count}"}
-                else:
-                    before = {"player": pack.get(item, 0), "container": chest.get(item, 0)}
-                    source[item] -= count
-                    target[item] = target.get(item, 0) + count
-                    data = {"item": item, ("to" if "to" in a else "from"): ref, "count": count,
-                            "player": {"before": before["player"], "after": pack[item]},
-                            "container": {"before": before["container"], "after": chest[item]}}
+                    why = f"{who} holds {source.get(item, 0)} of {item:x}, fewer than {count}"
+                elif name in self.stuck:
+                    p, n = pack.get(item, 0), chest.get(item, 0)
+                    why = (f"{'a store' if 'to' in a else 'a take'} of {count} of {item:x} left the player at {p} (from {p}) "
+                           f"and {ref:x} at {n} (from {n})")
+                if why:
+                    r = self.client.post(f"{self.prefix}/step/{step['id']}/result", json={"ok": False, "error": f"Error: {why}"})
+                    assert r.status_code == 200, r.text
+                    continue
+                before = {"player": pack.get(item, 0), "container": chest.get(item, 0)}
+                source[item] -= count
+                target[item] = target.get(item, 0) + count
+                data = {"item": item, ("to" if "to" in a else "from"): ref, "count": count,
+                        "player": {"before": before["player"], "after": pack[item]},
+                        "container": {"before": before["container"], "after": chest[item]}}
             elif step["action"] == "av-table":
                 data = {"ids": list(range(1000, 1164))}
             elif step["action"] == "add-perks":
@@ -1680,12 +1690,16 @@ class TransferSteps(RunTests):
         self.assertEqual((self.doubles.carried["c1"], self.doubles.chests["c1"][0x371E9]), ({0x12EB7: 2}, {0x12EB7: 0}))
 
     def test_a_refused_transfer_is_a_red_step(self):
-        """The driver answers a source holding fewer than count, or a reference its game lacks, as {error}; the run takes
-        that as a red step, as it takes an ok: false, and plays nothing after it (a pass would leave the claims after it
-        to measure a store that never happened)."""
-        for chests, why in (({0x371E9: {}}, "371e9 holds 0 of 12eb7, fewer than 1"), ({}, "no such ref 371e9")):
+        """The driver throws on a reference its game lacks, a source holding fewer than count, and counts that did not
+        move by exactly count (an engine that moved nothing), and its catch posts ok: false; the run takes that as a red
+        step and plays nothing after it. An {error} answer posted as ok: true in its place would pass, and this fails."""
+        cases = (({0x371E9: {}}, False, "Error: 371e9 holds 0 of 12eb7, fewer than 1"),
+                 ({}, False, "Error: no such ref 371e9"),
+                 ({0x371E9: {0x12EB7: 1}}, True, "Error: a take of 1 of 12eb7 left the player at 0 (from 0) and 371e9 at 1 (from 1)"))
+        for chests, stuck, why in cases:
             with self.subTest(why=why):
                 self.doubles.chests["c1"] = chests
+                self.doubles.stuck = {"c1"} if stuck else set()
                 run_id, body = self._run(CHEST_SHORT)
                 self.assertEqual(body["verdict"], "red", body)
                 self.assertEqual([(f["kind"], f["client"], f["error"]) for f in body["failures"]], [("step-error", "c1", why)])

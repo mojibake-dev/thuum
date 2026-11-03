@@ -307,9 +307,10 @@ def _transfer_args(args: dict[str, Any]) -> dict[str, Any]:
     """transfer {item, to | from, count?}: a store into a container or a take from it in the seat's own game without the
     menu's keys (the driver's Papyrus ObjectReference.RemoveItem with the other container: x-shared-chest-phantom,
     docs/engine/containers.md section 4), `count` (1 to 100, 1 when absent) of the form `item` from the player into the
-    reference `to`, or from the reference `from` into the player. Each is a form id, a FormDesc or a table name, which
-    lab-api resolves before the driver sees it. The driver refuses a source holding fewer than count, and the run takes
-    that answer as a red step (runner.py), never as a pass."""
+    reference `to`, or from the reference `from` into the player. The item is a form id, a FormDesc or a table name; a
+    reference is a form id or a FormDesc (a table name resolves to a base form, guests.py's base_id, which the driver
+    refuses as no such ref); lab-api resolves each before the driver sees it. The driver fails the step (ok: false) on a
+    missing item or reference, a source holding fewer than count, and counts that did not move by exactly count."""
     unknown = sorted(set(args) - {"item", "to", "from", "count"})
     if unknown:
         raise ValueError(f"transfer takes item, to or from, and count, not {unknown}")
@@ -318,10 +319,12 @@ def _transfer_args(args: dict[str, Any]) -> dict[str, Any]:
     if ("to" in args) == ("from" in args):
         raise ValueError("transfer takes one of to (a store from the player) and from (a take into the player), "
                          f"got {sorted(args)}")
-    for key, what in (("item", "an item's"), ("to", "a container reference's"), ("from", "a container reference's")):
+    for key, what in (("item", "an item's form id (0x13790), a FormDesc or a table name"),
+                      ("to", "a container reference's form id (0x371e9) or a FormDesc"),
+                      ("from", "a container reference's form id (0x371e9) or a FormDesc")):
         v = args.get(key)
         if key in args and (isinstance(v, bool) or not ((isinstance(v, int) and v > 0) or (isinstance(v, str) and v.strip()))):
-            raise ValueError(f"transfer's {key} is {what} form id, a FormDesc or a table name, got {v!r}")
+            raise ValueError(f"transfer's {key} is {what}, got {v!r}")
     count = args.get("count", 1)
     if isinstance(count, bool) or not isinstance(count, int) or not 1 <= count <= 100:
         raise ValueError(f"transfer's count is a whole number from 1 to 100, got {count!r}")

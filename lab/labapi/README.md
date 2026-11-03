@@ -109,11 +109,13 @@ what each player's game shows beside the record (the root-cause plan's W4).
 `transfer {item, from}` takes them from `from` into the player, exactly one of
 the two: Papyrus ObjectReference.RemoveItem with the other container, silent,
 the menu's store and take without its keys (x-shared-chest-phantom;
-docs/engine/containers.md section 4). Each id is a form id, a FormDesc or a
-table name, resolved first. The answer counts the item on the player and in
-the container before and after, so a move that moved nothing shows in the
-step's note; a missing item or reference, or a source holding fewer than
-`count`, is refused by the driver and that step is red. `- server: netem {loss_pct:
+docs/engine/containers.md section 4). The item is a form id, a FormDesc or a
+table name; a reference is a form id or a FormDesc (a table name resolves to a
+base form, which the driver refuses as no such ref); each is resolved first.
+The answer counts the item on the player and in the container before and
+after; a missing item or reference, a source holding fewer than `count`, and
+counts that did not move by exactly `count` each way fail the step (the driver
+throws, an `"ok": false` answer). `- server: netem {loss_pct:
 25}` impairs the server's interface from that step on (delay_ms, jitter_ms and
 loss_pct as `server: {netem}` takes them; all zero clears it, and the run's end
 does too).
@@ -224,6 +226,5 @@ the client answers `POST /lab/step/s12/result` with `{"ok": true, "data":
 <form id>, "items": {"<decimal form id>": <count>}}`, or `{"error": "no such
 ref"}` from a game without that reference; for `transfer` it is `{"item": <form
 id>, "to": <form id>, "count": <n>, "player": {"before": <n>, "after": <n>},
-"container": {"before": <n>, "after": <n>}}` (`"from"` for a take), or
-`{"error": ...}`, which the run takes as a failed step, as it takes `"ok":
-false` (most other steps' `{"error"}` answers still pass).
+"container": {"before": <n>, "after": <n>}}` (`"from"` for a take), and a
+refusal is `{"ok": false, "error": "Error: ..."}`, a failed step.

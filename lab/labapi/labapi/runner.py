@@ -127,11 +127,6 @@ Write-Output ('{"games": [' + ($games -join ', ') + '], "dumps": [' + $list + ']
 # a FormDesc in braces inside a console step's text (guests.PLUGIN_RELATIVE's shape), typed as the run's id
 _CONSOLE_FORM = re.compile(r"\{([0-9a-f]{1,6}:[^{}]+?\.(?:esp|esm|esl))\}", re.I)
 
-# the client steps whose {error} answer fails the step as an ok: false answer does: the driver answers most refusals
-# as data, which the run takes as a pass (its own repeat already fails a repetition answering one), and a transfer it
-# refused would pass and leave the claims after it measuring a store or a take that never happened
-_RED_ON_ERROR = {"transfer"}
-
 
 class RunnerError(Exception):
     """E_RUN: the lab itself failed; the verdict is error, not red."""
@@ -1070,11 +1065,9 @@ class Runner:
             rec.verdict = "red"
             return False, str(e)
         qs = await self.board.run_step(step.client, step.action, args, self.s.step_timeout_s)
-        data = qs.result.get("data")
-        refused = qs.ok and step.action in _RED_ON_ERROR and isinstance(data, dict) and "error" in data
-        if qs.ok and not refused:
-            return True, self._answer(rec, index, step, data)
-        error = str(data["error"]) if refused else str(qs.result.get("error", "step failed"))
+        if qs.ok:
+            return True, self._answer(rec, index, step, qs.result.get("data"))
+        error = str(qs.result.get("error", "step failed"))
         rec.failures.append({"step": index, "kind": "timeout" if error == "timeout" else "step-error", "client": step.client, "error": error})
         rec.verdict = "red"
         return False, error
