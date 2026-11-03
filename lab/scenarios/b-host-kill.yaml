@@ -6,7 +6,7 @@
 # once, so the pass lands about 9 s after the host's last report, where the
 # timeout alone took about 24 s. Two seats under npcEnabled at Riverwood's
 # landing, c1 hosting 0x9732 and c2 beside it; c1's game is stopped hard
-# (relaunch {until: stopped}, lab-api 0d3dd4d3: the guest agent's kill, no
+# (relaunch {until: stopped}, lab-api 052ca39f: the guest agent's kill, no
 # quit menu, the step back as soon as the stop-and-start command returns,
 # nothing having told the server), then the claim: 0x9732 is c2's within 12
 # s of the kill (the pass's 9 s plus the command's own second or two; the
@@ -16,7 +16,7 @@
 # Falls Temple 0x371de and back): a seat that never stopped must never read
 # stale (the server log's line, read at the run). Measured as x-host-kill:
 # 205837 (3 s threshold, 8.7 s), 214420 (4 s, 9.4 s), 221644 on train-40
-# 92529f31 (9.0 s, no stale at either login). Its own commit (rule 13).
+# 661bc67a (9.0 s, no stale at either login). Its own commit (rule 13).
 id: b-host-kill
 milestone: M3
 clients: [c1, c2]

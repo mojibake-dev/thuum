@@ -10,7 +10,7 @@
 # its engine-rolled weapon is refused against a record that never held it and its swings are dropped, which
 # is playtest 34's D19 gap (the hosted server-made copy's dress: train-47's once-dress, or ADR-050 decision
 # 3's one NPC path), not this verb's. GREEN as x-npc-stream-p6 v2 20261026-173133 on the v3 stage of fork
-# m3-npc-stream 66f04f2a (27 steps); v1 on the stage before read red on the bandit's refusal alone, the
+# m3-npc-stream 03895571 (27 steps); v1 on the stage before read red on the bandit's refusal alone, the
 # residents' claims held. Promoted unchanged (rule 13): the id and this header differ from the probe, the
 # steps and asserts are byte for byte.
 id: b-npc-stream-equipment

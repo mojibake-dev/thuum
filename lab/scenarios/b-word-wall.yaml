@@ -1,4 +1,4 @@
-# b-word-wall (thuum-magnus, drafted 02:1x PST 2026-11-01, promoted 07:50 PST 2026-11-01 from x-word-wall 20261101-153103 green by path on m4-traps 346249e8; docs/verbs/word-wall.md, M4, D77 B; fork m4-word-wall):
+# b-word-wall (thuum-magnus, drafted 02:1x PST 2026-11-01, promoted 07:50 PST 2026-11-01 from x-word-wall 20261101-153103 green by path on m4-traps 19e8d981; docs/verbs/word-wall.md, M4, D77 B; fork m4-word-wall):
 # a word wall teaches its word into the server's shout record. Bleak Falls Sanctum 0x371dd (lab/esm.py cellrefs, 2026-10-31): the
 # wall NorWordWallWordFus 0x709d1 at (-7802, 100, 521), its trigger 0x709d2 at (-7601, -154, 674), the word WordFus 0x13e22 (the
 # trigger script's myWord01). The seat's engine sends OnTrigger to the trigger twice a half second while the player stands in its

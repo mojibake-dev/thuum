@@ -1,6 +1,6 @@
 # b-npc-archer (thuum-magnus, 2026-10-27; train 53, docs/verbs/npc-stream.md slice 6, the bow relay): a hosted
 # archer's shot on the other screen is the host's shot. Promoted unchanged from x-npc-archer (GREEN
-# 20261028-032303 on 53's stage of fork m3-npc-cast bf133744; the id and this header changed, steps and claims byte
+# 20261028-032303 on 53's stage of fork m3-npc-cast 5fb85e2c; the id and this header changed, steps and claims byte
 # for byte). c1 hosts Riverwood from the landing, c2 stands beside it; the server console places
 # EncBandit01MissileKhajiitM 0x9a549 at c1's own actor (a server-made ff actor c1 hosts) and it opens combat on its
 # own. In 032303 the host's client reported four hosted shots (the placed archer's 1397d from 3b562 at power 1.00,
@@ -8,7 +8,7 @@
 # ff000002 shot ... by its host ff000000"), zero E_SHOT_EQUIPMENT and E_SHOT_ORIGIN, its eight bow hits landed
 # through the record, and on c2 no "no figure, bow or arrow here", no arrow of the puppet's own and one relayed
 # arrow in flight after the volley. The first stage's 023756 was the code red this scenario guards against: natives
-# inside the launch handler threw on every launch and no shot reached the server (fixed in bf133744). Claims: c1
+# inside the launch handler threw on every launch and no shot reached the server (fixed in 5fb85e2c). Claims: c1
 # hosts 0x9732, no "a figure's own arrow dropped" on c1, the hosted shot line on c1, the server's OnPlayerBowShot by
 # its host, no E_SHOT_EQUIPMENT or E_SHOT_ORIGIN, no "no figure, bow or arrow here" on c2. Recorded: the projectiles
 # in flight on both seats, the puppet's release taken, E_SHOT_QUIVER, screenshots. Its own commit (rule 13).

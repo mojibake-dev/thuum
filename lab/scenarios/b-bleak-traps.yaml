@@ -1,4 +1,4 @@
-# b-bleak-traps (thuum-magnus, 07:50 PST 2026-11-01, from x-bleak-traps v4 20261101-153828 green on m4-traps 346249e8 under the layer
+# b-bleak-traps (thuum-magnus, 07:50 PST 2026-11-01, from x-bleak-traps v4 20261101-153828 green on m4-traps 19e8d981 under the layer
 # layer-world-scripts; docs/verbs/traps.md, docs/DECISIONS.md ADR-059, M4; the exit d-bleak-falls comes after the puzzle's slices).
 # Bleak Falls Temple 0x371de's traps and levers run as Papyrus scripts on the cell's host and reach the guest as relayed activations:
 # the plate TrapStonePressurePlate02 0x567f2 (PressurePlate) fires the spike wall 0x54b15 through its activation parent, the lever

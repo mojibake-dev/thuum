@@ -19,7 +19,7 @@
 # teleports the host's engine actor, which then falls), two reads of the fall, the until on
 # the record's death, dead on both seats, the host's report line counted. Refusals are the
 # server log's "[verb:npc-fate] death report E_DEATH_*" lines. Measured as x-npc-fall-report
-# v4 GREEN 20261025-195607 on parity 6cdc2b35 (the until at its first poll, dead on the
+# v4 GREEN 20261025-195607 on parity 8efabb10 (the until at its first poll, dead on the
 # server and both seats, the client's line counted); the leveled subject's run before it
 # was v3 GREEN 20261025-012351 on train-44. The trap's evidence (a trigger's own
 # activation) is the verb's open HYPOTHESIS and no claim here. Its own commit (rule 13).

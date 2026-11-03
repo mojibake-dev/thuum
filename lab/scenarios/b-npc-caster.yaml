@@ -1,6 +1,6 @@
 # b-npc-caster (thuum-magnus, 2026-10-27; train 53, docs/verbs/npc-stream.md slice 6, spells on hosted NPCs): a
 # hosted mage's cast on the other screen is the host's cast. Promoted unchanged from x-npc-caster (GREEN
-# 20261028-032625 on 53's stage of fork m3-npc-cast bf133744, and GREEN 024159 on ecec018e before it; the id and
+# 20261028-032625 on 53's stage of fork m3-npc-cast 5fb85e2c, and GREEN 024159 on 5bc6e8e9 before it; the id and
 # this header changed, steps and claims byte for byte). The mage EncBandit01MagicNordM 0x39d37 (the playtest's
 # "mage") is placed at c1's own actor by the server console and opens combat on its own. In 032625 the puppet on c2
 # cast the relayed spell five times and took three cast ends (H-53b confirmed), the server recorded zero

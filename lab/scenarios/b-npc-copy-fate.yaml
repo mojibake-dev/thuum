@@ -1,6 +1,6 @@
 # b-npc-copy-fate (thuum-magnus, 2026-10-26; train 51, ADR-050 decision 3, D29-C; docs/verbs/npc-fate.md): a
 # server-made NPC goes through the same roll and pin as a game-file actor. Promoted unchanged from
-# x-npc-copy-fate v2 20261027-051619 (GREEN on 51's stage of fork m3-npc-path 39cf3f4d; the id and this
+# x-npc-copy-fate v2 20261027-051619 (GREEN on 51's stage of fork m3-npc-path a8d10c99; the id and this
 # header changed, steps and claims byte for byte). The server rolls the placed bandit's fate before its create
 # word and sends it ahead of CreateActor; each seat's view arms the fate by the base before its placeAtMe and
 # the detours bind it to the copy's own id, so the host's copy wears the record's roll from its first frame;

@@ -1,6 +1,6 @@
 # b-npc-talk (thuum-magnus, 2026-10-27; train 55, ADR-052, docs/verbs/npc-talk.md): a guest opens dialogue with
 # an NPC the host's game simulates. Promoted unchanged from x-npc-talk-claim v6 (GREEN 20261027-233908 on 55's
-# stage of fork m3-npc-talk c1be67d1; the id and this header changed, steps and claims byte for byte). c1 hosts
+# stage of fork m3-npc-talk dee28c05; the id and this header changed, steps and claims byte for byte). c1 hosts
 # Riverwood from P4's landing; the host's game holds Sven (0x13491) with npc-hold (Actor.SetDontMove, eight
 # seconds for his leg to end, the record read still), c2 approaches to 70 units in his record's frame, a short
 # crosshair check, and E: talkService sends ActorClaim, the server grants it (the same world, the record's reach,
@@ -49,7 +49,7 @@ steps:
   # v4 (55's stage: v2 210601's E hit nothing, Sven walking his package out of the crosshair's line between
   # the approach's judge and the press; v3 230022 failed its own stillness assert, the host's npc-ai lever
   # off and Sven still walking a loop over the border at 9.0, package 0, 77 units a second). So the host's
-  # game holds him with the engine's own scene hold (npc-hold, Actor.SetDontMove, thuum main 9a657c65), his
+  # game holds him with the engine's own scene hold (npc-hold, Actor.SetDontMove, thuum main 79b8a9e2), his
   # AI and dialogue running as the claim's design wants; the record is read still, two snapshots three seconds
   # apart within five units, before c2 approaches to 70 units in his record's frame and presses E at once (the
   # approach's heading is the crosshair's aim; look and look-at aim nothing); the hold comes off at the end

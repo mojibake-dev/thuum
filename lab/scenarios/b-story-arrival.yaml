@@ -1,5 +1,5 @@
 # b-story-arrival (thuum-magnus, 2026-10-30; docs/verbs/quest-stage.md H-56a's fix, fork m3-story-arrival inside the union
-# m3-pass-train-3-win 820a565c; promoted from x-story-arrival-login v2, GREEN at the union's stage on 2026-10-30 with
+# m3-pass-train-3-win ef984db2; promoted from x-story-arrival-login v2, GREEN at the union's stage on 2026-10-30 with
 # lab/frida/story-location.js reading the engine's path): at login, when a seat stands inside a location, the client raises the
 # engine's own Change Location event through BGSStoryEventManager::AddEvent (the CLOC index, old none, new the current location), so
 # the Story Manager starts what an arrival starts. Playtest 38's finding: the seats log in INSIDE Riverwood (the camp is the landing)

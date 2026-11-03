@@ -9,7 +9,7 @@
 # fall's or a trap's shape, no server number) the record takes the fall within a poll and c2's puppet
 # follows the record within 0.05; the observer's puppets report nothing (no state line names c2's id); after
 # 30 s the host's regeneration has moved the record up with its engine. GREEN as x-npc-stream-p5
-# 20261026-163259 on the v2 stage of fork m3-npc-stream a0ff0e72 (28 steps, every claim held at the first
+# 20261026-163259 on the v2 stage of fork m3-npc-stream 7215b34e (28 steps, every claim held at the first
 # run of the slice). Promoted unchanged (rule 13): the id and this header differ from the probe, the steps
 # and asserts are byte for byte.
 id: b-npc-stream-state

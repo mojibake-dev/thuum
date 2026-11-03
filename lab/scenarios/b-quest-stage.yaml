@@ -1,5 +1,5 @@
 # b-quest-stage (thuum-magnus, 2026-10-30; docs/verbs/quest-stage.md, ADR-056, D58 B and D62; fork m3-quest-mode inside the union
-# m3-pass-train-3-win 92a3f276; promoted from x-quest-mode v6, whose v5 ran GREEN through the relay at the union's stage on 2026-10-30
+# m3-pass-train-3-win e8a89384; promoted from x-quest-mode v6, whose v5 ran GREEN through the relay at the union's stage on 2026-10-30
 # with lab/frida/quest-stage-chain.js reading the engine's chain): sharedQuestsMode {mode: all, denied: [...]} makes every
 # quest's stage a seat reports the world's unless denied; the login message carries the mode and the denied list; the client
 # reports every stage event but the denied; a start-game-enabled quest stays each seat's own (D62) unless the allowed list names

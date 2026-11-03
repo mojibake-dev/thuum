@@ -96,7 +96,7 @@ steps:
       - server.host(0x9732).client == "c2"
       - c2.npc_state(0x13483).aiEnabled == true
       # no loaded live copy on the seat that left: an unloaded copy keeps its AI bit since
-      # train-40 a146ee0c (the engine's own low-process schedule moves it, nobody simulates it
+      # train-40 fc7b2718 (the engine's own low-process schedule moves it, nobody simulates it
       # with 3D; npc-handoff D11), so the claim is loaded-ness and AI together, not the bit alone
       - not (c1.npc_state(0x13483).is3DLoaded and c1.npc_state(0x13483).aiEnabled)
   # a restart: the games reconnect on their own within the wait (skymp5-client's

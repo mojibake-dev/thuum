@@ -1,11 +1,11 @@
-# b-weather (thuum-magnus, 2026-10-31, from x-weather v2 9f7c2cfd's read, run 20261031-171309 GREEN on m4-weather 6c9de3df; docs/verbs/weather.md, M4; fork m4-weather): one sky
+# b-weather (thuum-magnus, 2026-10-31, from x-weather v2 9f7c2cfd's read, run 20261031-171309 GREEN on m4-weather a1c203df; docs/verbs/weather.md, M4; fork m4-weather): one sky
 # per worldspace, the server's. The server pools the game files' weather regions per worldspace (REGN's RDWT lists; the lab's deploy
 # settings pin a pool of two over Tamriel, SkyrimClear 0x81a and SkyrimCloudy 0x12f89, with a slot of ten game minutes: 30 s real at
 # the clock's scale of 20) and draws each slot's weather from a chain seeded by the worldspace and the slot (splitmix64 over the seed,
 # never repeating the previous when the pool has two), so the pick is the clock's and a restart keeps it. Each seat hears SetWeather
 # 66 (a cut at its login, a transition at a slot's turn, a release in an interior) and forces it (weatherService: Weather.setActive);
 # the lab reads the engine's sky with the `weather {read: true}` step as c.weather(): current, outgoing, transition (lab-api's weather
-# fact, thuum main 9b8cecf0). The server's lines: "[verb:weather] user U hears W for P slot S (cut|transition|release)"; the client's:
+# fact, thuum main 8be1fbdd). The server's lines: "[verb:weather] user U hears W for P slot S (cut|transition|release)"; the client's:
 # "weather applied W to P (cut|transition, ...)", "weather released in P".
 # Claims (the verb doc's Tests), each with what it proves:
 # 1. Both seats at lab-spawn read the same current weather within 8 s of the login's word, one of the pool's two: the login cut

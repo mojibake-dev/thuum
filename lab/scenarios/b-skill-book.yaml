@@ -1,5 +1,5 @@
 # b-skill-book (thuum-magnus, promoted 13:35 PST 2026-11-02 from x-skill-book f4d156ff, GREEN on its first run 20261102-212928 on
-# m5-skill-books 38659a3e's stage: the baseline, the one-level read, the "again" with nothing moved, the base after the relaunch and
+# m5-skill-books 4cce81f2's stage: the baseline, the one-level read, the "again" with nothing moved, the base after the relaunch and
 # the restart, "again" counted 2 after the restart; docs/verbs/leveling.md, the Skill books section; fork m5-skill-books): a skill
 # book read is the server's one-level increment, once per book per character. The seat reads SkillOneHanded1 (Skyrim.esm BOOK
 # 0x1afe3, DATA flags 0x01 TeachesSkill, teaches ActorValue 6; lab/esm.py 2026-11-02) from its inventory through the lab's equip

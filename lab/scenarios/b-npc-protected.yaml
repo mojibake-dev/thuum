@@ -7,7 +7,7 @@
 # Skyrim.esm 1.6.1170: ACBS kProtected set, kEssential clear, CommonLibSSE-NG
 # include/RE/T/TESActorBaseData.h:32). PREMISE: the engine on c1 reads her protected (held in every
 # run: the plugin's bit survives the load order). GREEN as x-npc-protected v3 20261026-012622 on
-# train-46's stage (aaafffe5); v2 000257 had held the floor (six bear hits, each logged "health 0.01 ->
+# train-46's stage (c40a36a3); v2 000257 had held the floor (six bear hits, each logged "health 0.01 ->
 # 0", the computed number before MayDie's floor puts her back at 0.01, her record alive) and read red
 # on a death claim too broad by the bear's own death; v1 234704's ice wolf bit the god-mode player
 # instead (god mode is not invisibility). Promoted unchanged (rule 13): the id and this header differ

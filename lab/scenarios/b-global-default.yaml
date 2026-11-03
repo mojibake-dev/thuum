@@ -1,5 +1,5 @@
 # b-global-default (thuum-magnus, promoted 14:07 PST 2026-11-02 from x-global-default d8f5cd9b, GREEN on its first run
-# 20261102-220306 on the deployed c9177cbc settings: both seats 1 at login, c1 0 after the MCM-style set with c2 still 1, c1 0 after
+# 20261102-220306 on the deployed 2d659fc6 settings: both seats 1 at login, c1 0 after the MCM-style set with c2 still 1, c1 0 after
 # the relaunch, c1 0 and c2 1 after the restart; docs/verbs/player-globals.md, "A default for everyone"). Eli via numidium
 # 2026-11-02: "a default setting id like turned for everyone and new players in MCM is the legacy resurrection FX for the
 # reanimation fx mod", the plugin raw. A listed player global may carry a default (wire-rules player_globals, an object entry

@@ -1,6 +1,6 @@
 # b-npc-death-guest (thuum-magnus, 2026-10-27; train 52, ADR-050 decision 2, docs/verbs/npc-fate.md): a guest kills
 # the host's NPC through the cause path. Promoted unchanged from x-npc-death-guest v6 (GREEN 20261027-103226 on
-# 52's stage of fork m3-npc-death cc1d9025; the id and this header changed, steps and claims byte for byte). The
+# 52's stage of fork m3-npc-death 8561473a; the id and this header changed, steps and claims byte for byte). The
 # host holds Sven in combat beside itself, the guest swings a Daedric warhammer from the record's frame: the hits
 # reach the server as the guest's, the record moves, the cause reaches the host, the death by either order,
 # dead on the record and both seats, no refusal of the guest's hits.

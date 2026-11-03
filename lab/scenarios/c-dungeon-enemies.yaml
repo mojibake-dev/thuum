@@ -43,7 +43,7 @@
 #     each seat's admission as the server's OpenContainer at its handler line ("waiting for 'ContainerMenu open'
 #     (a corpse)") with the menu open in the dump, c2's release as its closing activation's line, and the release's
 #     effect as no "players in the container now" at c1's join (c2 stands inside the occupation reach); no
-#     "occupant is another object", no E_ACTIVATE_REACH, the record dead throughout. On the union 0e23c820 the
+#     "occupant is another object", no E_ACTIVATE_REACH, the record dead throughout. On the union b8a9d4c6 the
 #     non-host's open itself is red (210543, 210957, 211413: the server admits, c2's engine never opens the body
 #     released from the puppet state with its AI left off); pending until its fix, x-body-open-guest reads the cause.
 #     v5 of the guest-loot fix (22:40 PDT 2026-10-30) runs a released body's open on the timers service with its own lines, so the

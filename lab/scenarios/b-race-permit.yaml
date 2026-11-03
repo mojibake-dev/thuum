@@ -2,7 +2,7 @@
 # 2026-11-01). The server restricts rotfern.esp's two races to profile 1 (server-settings.json restrictedRaces: aa00 rotfern,
 # 19d08 rotfernRaceVampire); c1 is profile 1, c2 profile 2. On each seat's own CreateActor the server names the restricted
 # races and the ones that profile may wear, and skymp5-client's RacePermitService reads them: its "restricted races" line on
-# both seats, no E_RACE_PERMIT (a restricted id that is no race), and the hide (apocrypha 26ebe040, on parity e6c5d01a:
+# both seats, no E_RACE_PERMIT (a restricted id that is no race), and the hide (apocrypha 71d37979, on parity fcbced40:
 # race.clearRaceFlag(1) through Skyrim Platform's typed Race, after MakeUnplayable proved SKSE's script wrapper in 20261101-232833):
 # two "taken off the menu" lines on c2 at login, none on c1 (x-race-permit-hide 20261102-023428 and 025940 green). The rule is the
 # server's:

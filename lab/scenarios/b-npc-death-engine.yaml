@@ -1,6 +1,6 @@
 # b-npc-death-engine (thuum-magnus, 2026-10-27; train 52, ADR-050 decision 2, docs/verbs/npc-fate.md): the host
 # kills its own hosted NPC and the death is the engine's, from the server's number. Promoted unchanged from
-# x-npc-death-host v5 (GREEN 20261027-095847 on 52's stage of fork m3-npc-death cc1d9025; the id and this header
+# x-npc-death-host v5 (GREEN 20261027-095847 on 52's stage of fork m3-npc-death 8561473a; the id and this header
 # changed, steps and claims byte for byte). The host approaches Sven in his record's frame, starts his combat
 # there (the hold read by an inCombat assert) and swings an iron sword six times at 1.5 s for the one-number
 # read (52's gate 20261027-140805 missed its one swing on a moving combatant; a still hold by npc-ai off did not

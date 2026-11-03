@@ -118,7 +118,7 @@ steps:
   # the gate audit (2026-11-02, docs/research/gate-audit-2026-11-02.md): the premise of the walker's switch goes in
   # the setup, not the claim: the host's engine holds Gerdur where she stands (npc-hold, Actor.SetDontMove) before the
   # handoff, so her schedule cannot walk her through a door into her house (0x133c7) during the window, and the live
-  # switch is claimed outright below (the 20e78923 restatement, aiEnabled == is3DLoaded, passed the red case; undone)
+  # switch is claimed outright below (the 0e6215f2 restatement, aiEnabled == is3DLoaded, passed the red case; undone)
   - c1: npc-hold {formId: 0x13489, held: true}
   - wait: 2
   - c1: npc-state {formId: 0x13482}

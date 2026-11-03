@@ -19,7 +19,7 @@
 # respawn is the engine's own Resurrect run with the AI on in one
 # game-thread task, a puppet demoted again after it). The late-fate line is
 # a read (a re-roll picking the same base changes no fate). Proved as
-# x-npc-respawn v3 GREEN 081548 on train-43 d2210492 (v2 070508 found the
+# x-npc-respawn v3 GREEN 081548 on train-43 47637942 (v2 070508 found the
 # resurrect under AI off, fixed; 075756 found the god mode). Its own commit
 # (rule 13).
 id: b-npc-respawn

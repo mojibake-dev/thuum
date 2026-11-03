@@ -11,10 +11,10 @@
 # report. Asserts: the follow names c1 while nobody hosts the house and both
 # engines have him in the same interior (npc_state .cell, the parent CELL);
 # c2 approaches in the record's cell (approach {cell: record}, lab-api
-# b1a009ce): the follow ends, c2 runs him (aiEnabled true), c1's puppet
+# 2477cc20): the follow ends, c2 runs him (aiEnabled true), c1's puppet
 # stands; then c1 walks in: its puppet, unsubscribed outside, binds at the
 # attach and stands within 150 units of c2's live Alvor. Proved as
-# x-handoff-door: v5 GREEN 041126 (train-40 a5e431e2), v6 GREEN 054447 (all
+# x-handoff-door: v5 GREEN 041126 (train-40 d698fe38), v6 GREEN 054447 (all
 # four legs); D6 held in 025527 and 032354 too. Its own commit (rule 13).
 id: b-npc-handoff-door
 milestone: M3
@@ -56,7 +56,7 @@ steps:
       - server.follow(0x13482).client == "c1"
       - c1.npc_state(0x13482).cell == c2.npc_state(0x13482).cell
   # informational (v4): the client's own "moved 13482 into" line appears only when formView moved
-  # the reference itself; when the server's Teleport to the viewer (train-40 8dc3b974) moved it
+  # the reference itself; when the server's Teleport to the viewer (train-40 a1c7b41e) moved it
   # first, the line is the server's "told to 1 viewing game(s)" in server.log instead
   #   c2.log_count("moved 13482 into") >= 1
   # the visitor walks in, wherever he went (the inn in 001915 and 013234, home in 025527): approach
@@ -73,7 +73,7 @@ steps:
       - server.follow(0x13482).following == false
       - c2.npc_state(0x13482).aiEnabled == true
       # c1 stands outside while Alvor is in the house: its copy has no 3D and, since train-40
-      # a146ee0c (an unloaded actor keeps its AI, npc-handoff D11), the claim is no LOADED live
+      # fc7b2718 (an unloaded actor keeps its AI, npc-handoff D11), the claim is no LOADED live
       # copy on c1, loaded-ness and AI together (b-npc-puppet's form; gate 114157 read the bit)
       - not (c1.npc_state(0x13482).is3DLoaded and c1.npc_state(0x13482).aiEnabled)
   # leg 4 (v6, after 041126's read): while c1 stood outside, in another cell than the record's,

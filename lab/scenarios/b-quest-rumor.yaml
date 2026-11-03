@@ -2,7 +2,7 @@
 # later stages are the world's and its own start stays each seat's. Playtest 38's finding 76 ("prisoner picked up the aventus rumor
 # misc quest and it didn't propagate"): under D62 every start-game-enabled quest's stage was each seat's own; D69 B refuses only the
 # engine's own start (stage 0 and the record's start-up stages, QUST INDX) and relays the rest. Promoted unchanged from x-quest-rumor
-# v2 (GREEN 20261031-051455 on m3-quest-sge-stages dc3ec679's stage; the id and this header changed, steps and claims byte for byte).
+# v2 (GREEN 20261031-051455 on m3-quest-sge-stages 6dbabc7a's stage; the id and this header changed, steps and claims byte for byte).
 # Shape: the chain trace armed on both seats at a relaunch, both connect in mode all; c1's console sets stage 10 of DB01Misc 0x1ea4f
 # (the rumor's quest, start-game-enabled, in no list): recorded, relayed, c2's game applies it; c1 sets MQ102's stage 10 (denied):
 # kept per seat, no server line; FreeformHeartwoodMill 0xe3ea5's start-up stage 10 reads done on both seats by the quest's own start

@@ -16,7 +16,7 @@
 #    engine's own start of a start-game-enabled quest is each seat's own; v2's first run 20261031-125456 read exactly those two):
 #    the journal came back from its change form (rule 6's restart shape).
 # 4. c2 relaunched (a fresh game) reads the stage done after its login: the record alone put it there.
-# v2 (2026-10-31, after the first run 125456 on parity e713862c: every claim held but "no E_QUEST_ line", which counted the two
+# v2 (2026-10-31, after the first run 125456 on parity 2fda2a19: every claim held but "no E_QUEST_ line", which counted the two
 # designed E_QUEST_OWN_START login lines): the refusal claims leave that code out.
 # Assertions are evaluated by lab-api only (ADR-009). Its own commit (rule 13).
 id: b-quest-stage-restart

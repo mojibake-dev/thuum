@@ -1,6 +1,6 @@
 # b-npc-stream-face (thuum-magnus, 2026-10-27; train 54, slice 5 of docs/verbs/npc-stream.md, D30-C): the gaze
 # and the face reach a puppet. Promoted unchanged from x-npc-stream-face v2 (GREEN 20261027-181024 on 54's stage
-# of fork m3-npc-face 240a31de; the id and this header changed, steps and claims byte for byte). The host's state
+# of fork m3-npc-face a9e47e0e; the id and this header changed, steps and claims byte for byte). The host's state
 # poll reads each hosted actor's highest set head-track slot and its emotion (pollHostedGaze, hostedGaze) and sends
 # them in HostedActorState on a change; the server records them and relays the state to the actor's other
 # listeners; the puppet seat aims its puppet at the same target (setLookAt) and wears the emotion

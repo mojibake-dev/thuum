@@ -1,5 +1,5 @@
 # b-formdesc-world (thuum docs/DECISIONS.md ADR-043, hard rule 6: the
-# schema change of slice one, fork m2-formdesc-world d0693ef4, ships with a
+# schema change of slice one, fork m2-formdesc-world 1d8a2b18, ships with a
 # migration AND this restart-persistence scenario). A world saved in the raw
 # shape under one load order is read by a server running another: every
 # stored form keeps the meaning it had when it was written, and a server

@@ -1,5 +1,5 @@
 # b-object-anim (thuum docs/verbs/traps.md, ADR-059 decisions 1 and 3; promoted 05:08 PST 2026-11-02 from probe x-object-anim v4, green
-# 20261102-063627 on fork m4-object-animation 64dbacfe over the host-scoped layer, MERGED to parity 64dbacfe and main 8139d579
+# 20261102-063627 on fork m4-object-animation ad1aa50a over the host-scoped layer, MERGED to parity ad1aa50a and main 482f157b
 # the same night). Under the hosted-cell gate the cell's host runs Bleak Falls Temple's scripts and the guest's engine runs none;
 # what the guest sees is what the host's engine shows, relayed as ObjectAnimation. A) the host c1 on the plate 0x567f2: its
 # engine's PressurePlate fires ("567f2 activates 54b15"), the wall 0x54b15's events (180For, 180Back, Rearm) and the plate's Down

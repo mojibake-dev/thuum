@@ -6,7 +6,7 @@
 # at an adjacent crossing: the record moves into the destination, the destination's host hears "not
 # hosted by other" and goes live, the sender's game hears "hosted by other" and demotes, and the
 # sender's further reports are dropped. GREEN as x-handoff-cross v2 20261025-235039 on train-46's
-# stage (aaafffe5): the split held (9712 to c1, 9731 to c2), no refusal of her moves, one pass, c1
+# stage (c40a36a3): the split held (9712 to c1, 9731 to c2), no refusal of her moves, one pass, c1
 # live and c2 a puppet at the end. Promoted unchanged (rule 13): the id and this header differ from
 # the probe, the steps and asserts are byte for byte.
 # Restated under D22's brake (D36 C, train 55, 2026-10-27; x-handoff-cross v3 211054 on 55's stage): a

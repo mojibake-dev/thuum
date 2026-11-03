@@ -2,7 +2,7 @@
 # places a listed spell's world objects from spellPlacedObjects at the accepted cast, the caster's game skips the
 # copies that name it): Apocalypse's Raise Wall (SPEL 00cc14) is one wall on every seat. Playtest 37's finding (the
 # verb doc, "The finding"): c1's cast put the wall into c1's game alone, c2 had neither base within 4000. The
-# server half (fork m3-spell-placed 5b951a9c: wire-rules placements.rs, PartOne's placement, removal and sweep, the
+# server half (fork m3-spell-placed 2470b577: wire-rules placements.rs, PartOne's placement, removal and sweep, the
 # CreateActor placed_by prop) places the MSTT 098529 at the caster's record plus 192 along its yaw and 48 down and
 # the ACTI 0735e8 at the same XY at the caster's height, 250 ms into an accepted cast while the stream holds
 # (Impose), and deletes both 5 s after the cast's end (Inventory's OnEffectFinish row); the client half's skip
@@ -26,7 +26,7 @@
 # nearest other actor's parent cell with the distances from that actor (lab-driver's refs-near), so claim 3's
 # distances are claim 2's pose formula instead of the caster's own 198 and 192. The one absolute claim moved with
 # the line again, north of the centre line: y > -166 at -174, the same 8 units. No tolerance changed.)
-# (v3, 04:45 PDT 2026-10-31, thuum-magnus; ADR-057 shape A, D70 and D74, fork m3-wall-pose 0e4b34e5 (gate head e713862c), after
+# (v3, 04:45 PDT 2026-10-31, thuum-magnus; ADR-057 shape A, D70 and D74, fork m3-wall-pose 45388e25 (gate head 2fda2a19), after
 # x-raise-wall v5 88877000's green read at the train's stage, run 20261031-113932: shape C's pose model fell at T3 three times on the union, the engine stands the wall
 # about 206 ahead along a heading the record's yaw does not carry, x-raise-wall-pitch v1. The server now asks the caster's game
 # where its engine stands the two bases (PlacedRequest at the accepted cast, a 6 s window) and places its copies where the

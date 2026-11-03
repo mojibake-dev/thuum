@@ -1,6 +1,6 @@
 # b-npc-death-blow (thuum-magnus, 2026-10-27; train 54, npc-fate.md H-52b, ADR-050 decision 2): a hosted NPC's
 # death whose report names no killer is credited to the hit the server numbered. Promoted unchanged from
-# x-npc-death-blow v2 (GREEN 20261027-181507 on 54's stage of fork m3-npc-face 240a31de; the id and this header
+# x-npc-death-blow v2 (GREEN 20261027-181507 on 54's stage of fork m3-npc-face a9e47e0e; the id and this header
 # changed, steps and claims byte for byte). Shape: b-npc-death-engine's measured leg (the combat hold, six
 # iron-sword swings, the one-number read), then the server path's death forced without a lethal blow: two more
 # sword swings for a numbered hit within the server's 3 s window, then the host's own engine takes his health
@@ -102,7 +102,7 @@ steps:
   # hit, never lethal (at most six hits of seven on his fifty: four measured, two after), then the host's own engine takes his
   # health with no attacker (npc-damage, Actor.DamageActorValue, as the cause does when it brings the engine
   # to zero): deathStart names no killer, the report says cause 0, and the server credits the hit it
-  # numbered within its 3 s window (H-52b, m3-npc-face 240a31de)
+  # numbered within its 3 s window (H-52b, m3-npc-face a9e47e0e)
   - c1: repeat {times: 2, gapMs: 700, step: {hold-key: {code: 199, ms: 120}}}
   - wait: 0.5
   - c1: npc-damage {formId: 0x13491, amount: 60}

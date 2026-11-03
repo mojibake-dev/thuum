@@ -8,7 +8,7 @@
 # the ContainerMenu on the record's items, Take All (R, scancode 19) and
 # the menu's close send the take and the releasing second activation.
 # Asserts: the body stays dead and server.inventory(c1) holds at least the
-# three gold. Proved as x-npc-loot GREEN 064648 on train-42 61ffa74e. Its own
+# three gold. Proved as x-npc-loot GREEN 064648 on train-42 5ffd078a. Its own
 # commit (rule 13).
 id: b-npc-loot
 milestone: M3

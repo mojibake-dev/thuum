@@ -4,7 +4,7 @@
 # inside the temple were two server-made bandits whose every swing OnHit's weapon check dropped
 # (E_HIT_WEAPON since train-46); the path itself was then seen live (39fe2 hits ff000000 at
 # 22:38:08Z, applied) and under the lab's eyes as x-host-own-hit 20261025-234109 on train-46's
-# stage (aaafffe5): 12 hits of the campfire pair on c1 in the window, no E_HIT_WEAPON, no
+# stage (c40a36a3): 12 hits of the campfire pair on c1 in the window, no E_HIT_WEAPON, no
 # permission refusal, the pair alive with its AI on. Promoted unchanged (rule 13): the id and
 # this header differ from the probe, the steps and asserts are byte for byte.
 # Shape: c1 alone in Bleak Falls Temple 0x371de (c2 connected and parked at the spawn, so c1

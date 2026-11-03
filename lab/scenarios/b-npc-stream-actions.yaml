@@ -14,10 +14,10 @@
 # before it: the client's print names no actor, and a creature's own attack near c2's connect point
 # counted once in 52's gate, 20261027-120242), no "No permission" refusal for the residents
 # or the bandit, Sigrid's track ending within 256 units on both seats. GREEN as x-npc-stream-p4 v2
-# 20261026-172720 on the v3 stage of fork m3-npc-stream 66f04f2a (42 steps; the bandit's six attacks all
+# 20261026-172720 on the v3 stage of fork m3-npc-stream 03895571 (42 steps; the bandit's six attacks all
 # taken on the puppet, none refused; ten puppets' first events); v1 on the same build's first stage read red
 # on a claim stale since slice 1 v2 (a resident's idle performs no longer through the entry), and the stage
-# before that (2673d1ab) crashed the puppet seat three times on the cause v2 removed (the master behaviour's
+# before that (e2ea071a) crashed the puppet seat three times on the cause v2 removed (the master behaviour's
 # fixed variable indexes written into creature graphs). Promoted unchanged (rule 13): the id and this header
 # differ from the probe, the steps and asserts are byte for byte.
 id: b-npc-stream-actions

@@ -13,7 +13,7 @@
 # leave, the 5 s grace, c2's load and the tick; the stale rule's pass lands at 9 to 10 s
 # after the quit itself), Alvor live on c2, and the relaunched c1 back where it stood
 # without taking the village from a live host. Measured as x-host-quit v4 20261025-012653
-# and x-host-quit-plain 20261025-013410 on train-44 6cdc2b35: the leave line 1.2 s after
+# and x-host-quit-plain 20261025-013410 on train-44 8efabb10: the leave line 1.2 s after
 # the quit step, the grant 5.0 s after that, c1 online 27.1 s after its relaunch, both
 # runs the same numbers (the first under the quit-path trace, the second without Frida).
 # Known beside the claims: on 44 the game crashes inside its own teardown after the

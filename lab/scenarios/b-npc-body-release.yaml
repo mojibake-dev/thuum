@@ -4,11 +4,11 @@
 # couldn't take armor, test 2 could". The server's lines then: a body is a container with ONE occupant within
 # 512 units (D16-A), and ProcessActivateSecond released a CONT and a FURN alone, so the looter's closing
 # activation fell through, the body stayed the looter's, and the other seat was refused five times ("occupant
-# is another object and is nearby") until the looter stood out of range. Train-46's aaafffe5 let the corpse
-# join the release. GREEN as x-body-release v3 20261026-012319 on train-46's stage (aaafffe5); promoted
-# unchanged (main f87ca564); the premise fixed d85701d (the judged approach, 51's gate).
+# is another object and is nearby") until the looter stood out of range. Train-46's c40a36a3 let the corpse
+# join the release. GREEN as x-body-release v3 20261026-012319 on train-46's stage (c40a36a3); promoted
+# unchanged (main a43d655e); the premise fixed d85701d (the judged approach, 51's gate).
 # D52 (playtest 37, Eli: "i WOULD like two people to be able to be in one container at once"; fork
-# dbfc8e82 and 10988419, in the pass union 0e23c820): a container or a corpse holds every player who opens
+# e3fa27a6 and c1de7167, in the pass union b8a9d4c6): a container or a corpse holds every player who opens
 # it (containerOccupants), so a corpse's open and close no longer pass the single-occupant check whose
 # "ProcessActivate 39fe4 - no occupant" lines this scenario counted; that check is furniture's alone now, and
 # the scenario went red three times in the union's sweep (20261030-164127: 184852, 185123, 185329) with the

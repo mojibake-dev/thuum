@@ -1,6 +1,6 @@
 # b-npc-headshot-host (thuum-magnus, 2026-10-27; train 52, ADR-050 decision 2 with ADR-038, docs/verbs/npc-fate.md):
 # a guest's headshot on a hosted NPC kills it on both screens without the deferral's wait. Promoted unchanged from
-# x-npc-headshot-host v9 (GREEN 20261027-104716 on 52's stage of fork m3-npc-death cc1d9025; the id and this header
+# x-npc-headshot-host v9 (GREEN 20261027-104716 on 52's stage of fork m3-npc-death 8561473a; the id and this header
 # changed, steps and claims byte for byte). The host holds Sven still (npc-ai off), the guest aims head to head
 # (look-at before the draw) from 150 units and looses: the lethal cause with the kill move on the host, the death
 # by either order, dead on both seats.

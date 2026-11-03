@@ -1,5 +1,5 @@
 # b-puzzle-relay, promoted from the probe x-puzzle-relay v3 (green 20261102-030924 on the bondblock train's stage; thuum-magnus; v1 07:58 PST 2026-11-01, v2 names the refusal codes after 023719, v3 stands the host in the third pillar's reach after 030232; docs/verbs/traps.md, ADR-059 decision 2's last piece; fork m4-puzzle-relay off m4-traps
-# 346249e8, under the layer's rows and the client's activationUnblockedBases as b-bleak-traps lays them). A guest's activation of a
+# 19e8d981, under the layer's rows and the client's activationUnblockedBases as b-bleak-traps lays them). A guest's activation of a
 # scripted world object in a cell it does not host is relayed by the server to the host's engine with the guest's actor as the
 # activator ("[verb:traps] ff000001 activates aa8cb in cell 371de (its host ff000000): relayed to 1 other game(s)"; the host
 # plays it: "relayed activation aa8cb by ff000001"), so the host's defaultPuzzlePillarScript turns and its lever counts the turn;

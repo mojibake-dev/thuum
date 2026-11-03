@@ -5,7 +5,7 @@
 # `lock` and `unlock` on the server under the console table's rank (the lab server runs enableConsoleCommandsForAll, so a typed `unlock`
 # on c1 is an owner's; the non-owner's refusal is T0's, locks.rs and ConsoleCommandTest). The subject: Bleak Falls Temple 0x371de's
 # bandit chest TreasBanditChest 0x371e9 (a Novice lock, level byte 0, no key); the key lock is the console's `Lock [ref, 255, key]`
-# (m4-locks 2d79199f) with RiverwoodAlvorHouseKey 0x36a3d (a vanilla KEYM; lab/esm.py), handed by AddItem. The minigame itself is
+# (m4-locks b1efca15) with RiverwoodAlvorHouseKey 0x36a3d (a vanilla KEYM; lab/esm.py), handed by AddItem. The minigame itself is
 # Eli's at the sitting: the lab's injected mouse and keys never reach the Lockpicking Menu (x-lockpick v6's trace, the pick and lock
 # angles flat through 27 attempts), so the pick's report ("picked", "broken N") is the verb's declared T4 (locks.md).
 # The server's lines: "E_ACTIVATE_LOCKED: <player> activates 371e9", "371e9 unlocked (level L, key K, N broken)", "<player> opens
