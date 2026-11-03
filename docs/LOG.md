@@ -7113,3 +7113,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   expectations, the wire options: type 0 re-encoded per seat plugin-relative as ADR-043 stores forms, type 2 through the server's
   created-form map or a rewrite of the one base field) and the reviewer's citation corrections (BGSNumericIDIndex.h:25-30 and its Flags at
   :10-14; TESForm.h:210-220; 14617 unnamed in Ghidra, its lock body the evidence; the six other 35928 callers).
+- 10:52 PST 2026-11-03 (18:52Z 11-03) (numidium): the D6 id census, both subjects, VOID: serialize-on-demand-actor.js v2.1 (main 224498b0) on c1 solo, r3's
+  build. 20261103-183149 (x-serialize-on-demand-actor-serialize, the promoted bandit 0x39fe4 in Bleak Falls Temple, RUNS 2): records of
+  4,780 and 4,466 bytes at kDying and kDead (flags 0x8a040426 and 0x8a040427, kind 6), idCensus total 0 at both marks. 20261103-183432
+  (x-actor-census-resident, Sven 0x13491 at 8 in Riverwood): 4,278 and 3,600 bytes (flags 0xaa000426 and 0xaa000427, raw, FNV-1a
+  0xfceb5c0e and 0x550b2d43 over the whole record), idCensus total 0 with droppedOtherThreads 0, Sven's body after the kill at pos
+  (21009.8, -45765.5, -131.6), head (20962.7, -45738.7, -115.8). Both green by their claims (the kill held). The zeros are frida-gum's
+  listener guard, not the engine (thuum-cf's read of gum/guminterceptor.c: the recipe ran inside PlayerCharacter::Update's onLeave, so
+  every hook its callees entered was bypassed), and 183432 carries the in-run control: the refrSave (19528) and stash hooks counted 2
+  each between the two liveness rows, the engine's own unloads of other references outside our listener, while the recipe's own
+  SaveGame calls counted none. The record bytes are kept (lab/.cache/runs/census-bandit.jsonl and census-resident-183432.jsonl); by eye,
+  the ref ids near both records' ends are type 1 (the actor's own, the player's 400014), and every '80 0x xx' created-id candidate was a
+  float, so the bytes settle nothing. Next: v2.2 (the recipe in a replacement of Update) on both subjects, then, if Sven reads kind 1
+  only, the cross-seat apply (drafted unreviewed: c1's kDead record onto c2's own dead Sven, moved first so the claims can fail).
