@@ -3957,3 +3957,78 @@ player's effects already, and the hooks bound what they can move. H3: a native's
 the enable and disable row touches every reference's load (ADR-043's running order and the loader's skips): its migration and its
 restart scenario come with it. H5: a script's PlaceAtMe of an actor meets npc-fate's roll at the placement (train 51's "fated
 before PlaceAtMe returns" is the shape).
+
+## ADR-063: Ownership, not permission: one engine owns each piece of the world, the others render, the server records, relays and arbitrates the hand-offs
+
+Status: ACCEPTED about 17:36 PST 2026-11-02 by Eli, verbatim: "commit to that ownership ADR". PROPOSED about 17:30 PST the same
+evening by numidium, in answer to Eli's question during playtest 41, verbatim: "back to the holistic question. if we're moving to a
+more trusting model, and we just discovered for adr-062 for example that we had the model inverted. is there maybe a way of
+thinking about what we're building in that way?" A restatement of the design law's reading, not a new law: ADR-058 (the toucher
+simulates), ADR-060 (the commander's game) and ADR-062 (the host runs every world script; a consequence is R2) are its instances.
+Eli's words it rests on, the same evening: "skyrim is not a competative game. trust should LARGELY be the default" and "so
+validation is only necessary in so much as we dont want something to become desynced or break."
+
+Context. The law says "Server owns STATE. A host client owns SIMULATION for its cell. The wire carries DELTAS." We have been reading
+"the server owns state" as "the server must permit every change". That reading made the same failure in every verb playtest 41
+touched, in five shapes:
+- two owners at once: a shared container's two open menus (F15; ADR-061);
+- a non-owner simulating: the guest's frozen bodies (F3, F14), the thrall walking its old package (ADR-060);
+- the server validating the owner: Raise Wall's anchor band (F1), the cabbage blast's refusals, and the props rotfern carried
+  after break 2, refused by the record's cell (E_PROP_CELL on both of 19074's touches, 01:38:05Z) and by a reach from the record's
+  position (E_PROP_REACH on 12dfc's drop, 01:37:04Z; ActionListener::OnPropClaim): Eli, "a bucket carried doesnt show";
+- a missing channel: Alvor's door locked by the host's AI alone (the night lock, ADR-062's Lock row), the Golden Claw that the
+  quest's alias created and the record never got;
+- permission written as content: papyrus-admitted.tsv's names and activationUnblockedBases (laid by scenarios at their relaunch,
+  never for play: F23's spike wall), each fix one more name.
+Prior art has the right reading. Accessible: Glenn Fiedler, "Networked Physics in Virtual Reality" (Gaffer On Games, 2018,
+https://gafferongames.com/post/networked_physics_in_virtual_reality/): authority over each object passes to whichever player
+interacts with it, is held while the object is grabbed, and the host resolves competing claims. Foundational: the High Level
+Architecture's ownership management, where each attribute of an object instance is owned by exactly one federate, which alone may
+update it, and ownership moves by explicit divestiture and acquisition (Dahmann, Fujimoto and Weatherly, "The Department of Defense
+High Level Architecture", Proceedings of the 1997 Winter Simulation Conference; standardised as IEEE 1516.1, the Federate Interface
+Specification).
+
+Decision.
+1. One owner. Every piece of the world has exactly one owning engine at a time, and that engine runs real single-player Skyrim
+   for it. Ownership follows context:
+   - the cell's host owns its world: its NPCs, its world scripts, its resting props (ADR-059, ADR-062);
+   - a player's own game owns its character;
+   - whoever touches a prop owns it while it moves (ADR-058);
+   - a commander's game owns its thrall for the effect's life (ADR-060);
+   - an opener owns a container while it is open (ADR-061's exclusive access).
+   The hand-off (who owns next, and when) is the one protocol a feature designs.
+2. Channels, not features. The owner's changes travel through a small fixed set of channels: the streams and relays that exist
+   (movement, animation, the hosted state, the object-animation relay) and the engine natives of ADR-062's census
+   (docs/research/adr062/papyrus-native-entries.md). Once a channel exists, every script, quest and AI routine that goes through
+   it works with no new code.
+3. Non-owners render; they never simulate. A copy on a non-owner plays back the owner's results. A non-owner's engine running
+   its own AI, Havok, death or script for an owned thing is a bug.
+4. The server records, relays and arbitrates the hand-offs. It validates consistency only: two owners colliding, item
+   conservation, bounds that would break the world for the others (the wire's shapes and caps). It does not check the owner's
+   engine against the record's idea of where the owner stands or what it may touch. R2 is the default rung for new state; R0
+   and R1 are the listed exceptions (damage between players, inventory transfers between parties, the server's own numbers such
+   as leveling and the economy).
+5. Content-specific code is the warning sign. An allow-list, a named script, a per-base lift, a special-cased quest item: each is
+   a missing channel or a missing ownership rule, and the fix is the channel or the rule, never one more name.
+6. The lens. Every verb doc answers four questions in VERB.md's Ownership section: who owns its state and how ownership passes;
+   which channel carries the owner's changes; whether it holds content-specific code; and which committed scenario plays the
+   content on two seats and reads the non-owner's screen.
+
+Consequences. CLAUDE.md's design law gains the rule's one line; VERB.md gains the Ownership section, and its Authority line and
+reviewer checklist read R2 as the default. No code moves by this ADR alone; ADR-062's slices are its first build. Two audits run
+through the lens:
+- the gate audit (docs/research/gate-audit-2026-11-02.md, read-only, at cf99ffec) answers the fourth question for the 73 items
+  PLAN marks DONE, BUILT or MERGED: 20 MISSING, 51 PARTIAL, 2 COVERED;
+- the validator audit answers decision 4 for every existing R1 check: kept where it guards consistency, retired where it checks
+  the owner, each retirement a fork change through the normal gate. Its first rows are E_PROP_CELL and E_PROP_REACH in
+  ActionListener::OnPropClaim, Raise Wall's anchor band (spell-placed-object) and the cabbage blast's refusals.
+Containers: decision 1's opener rule is ADR-061's exclusive access. The containerSharing switch stays "shared" by default while
+nobody is live (Eli, 2026-11-02: "dont worry about setting the container exclusivity. we're not even live"), as PLAN.md says;
+ADR-061's Status ("exclusive" the DEFAULT) and containers.md:126 are stale on that point. Live multi-party sync stays backlog.
+
+Risks. H1: a modified client can lie. Accepted: the deploy is a friends' server (ADR-055), Skyrim is not competitive (Eli), and
+the checks that remain keep a bad report from breaking the world for the others. H2: the hand-offs are the hard part (two players
+on one prop in the same frame, a host leaving mid-fight, a commander quitting), so each ownership rule names its tie-break and a
+two-seat scenario of the collision itself (the gate audit's case 2, both players on one object at once, is asserted in 4 of 56
+rows today). H3: an engine path no channel covers (the AI's night lock reached no native) shows up as a desync in play; the fix
+is a channel, a row in ADR-062's table, never a name.

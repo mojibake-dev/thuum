@@ -52,10 +52,17 @@ over hands, actors or seats lists every combination here before it merges.
 | <both seats at each other> | | |
 | <after a login or a cell change> | | |
 
+## Ownership (ADR-063: ownership, not permission)
+
+Owner: <the engine that owns this state at a time: the cell's host, the player's own game, the toucher, the commander, the opener>, and how ownership passes
+Channel: <the stream, relay or hooked native that carries the owner's changes; a new one is a row in ADR-062's table>
+Content-specific code: <none, or each name, base or special case with the missing channel or rule it stands for>
+Two seats: <the committed scenario that plays the content on two seats and reads the non-owner's screen>
+
 ## Authority
 
 Rung: <R0|R1|R2|R3>
-Why this rung and not the one above it:
+Why this rung (R2 is the default, ADR-063; R0 or R1 names the consistency it guards):
 What the server validates (R1) or records (R2):
 Rate limit / bounds:
 
@@ -143,7 +150,8 @@ A box ticked ahead of its evidence is unticked with the date and the reason.
 
 ## Reviewer checklist
 
-1. Is the rung right, and is the reason for not going one rung higher real?
+1. Is the rung right? R2 unless a consistency reason (two owners, conservation,
+   a bound that breaks the world) puts it at R0 or R1 (ADR-063).
 2. Does every address come from CommonLib, addrlib, or a Ghidra reference?
 3. Is there any state this verb creates that is not on a rung?
 4. Does the validator reject the obvious forgery (wrong owner, out of range,
@@ -163,3 +171,6 @@ A box ticked ahead of its evidence is unticked with the date and the reason.
     head's GitHub Formatting check green? Parity was red there from 10-15 to
     10-17 on two faults every branch inherited: Hooks.cpp formatted by a newer
     clang-format, and skyrimPlatform.ts edited without Definitions.txt.
+12. Does the Ownership section name the owner and its hand-off, the channel, no
+    content-specific code (or the missing rule each case stands for), and a
+    two-seat scenario that reads the non-owner's screen (ADR-063)?

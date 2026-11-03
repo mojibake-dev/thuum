@@ -15,6 +15,13 @@ toolchain per layer, every feature the same shape.
 
 - Server owns STATE. A host client owns SIMULATION for its cell. The wire
   carries DELTAS. Everything else is a HOOK.
+- Ownership, not permission (ADR-063): one engine owns each piece of the world
+  at a time (the cell's host, a player's own game, a prop's toucher, a thrall's
+  commander, a container's opener); non-owners render and never simulate; the
+  server records, relays and arbitrates hand-offs and validates consistency
+  only (two owners, conservation, bounds that break the world). R2 is the
+  default rung; R0 and R1 are the listed exceptions. An allow-list or a
+  content-specific case is a missing channel or ownership rule.
 - Every piece of state sits on one authority rung, declared in its verb doc:
   - R0: server computes (inventory transfer, damage numbers, leveling, economy)
   - R1: host computes, server validates (movement, hit registration, casts)

@@ -5463,3 +5463,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   TaskQueueInterface task, the link to KillImpl unread; Quest.SetStage is a Papyrus wrapper on SetCurrentStageID (56684); the fork's
   Hooks.cpp BindNativeMethod recorder already captures every native's callback at bind time, so slice 1b resolves each hook by class and
   name at runtime and asserts it against the id.
+- 17:43 PST 2026-11-02 ADR-063 ACCEPTED by Eli ("commit to that ownership ADR"): ownership, not permission, the design law's reading restated (one
+  owning engine per piece of the world; non-owners render, never simulate; the server records, relays and arbitrates the hand-offs
+  and validates consistency only; R2 the default rung, R0 and R1 the listed exceptions), proposed by numidium during playtest 41.
+  With it: CLAUDE.md's design law line, VERB.md's Ownership section (owner and hand-off, channel, content-specific code, the
+  two-seat scenario) and its Authority line and checklist. The gate audit committed as docs/research/gate-audit-2026-11-02.md (73
+  rows at cf99ffec: 20 MISSING, 51 PARTIAL, 2 COVERED; c1.view(c2) claimed in 1 of 122 scenarios; 14 literal `>= 0` claims; 28
+  scenarios set TGM; c-riverwood.yaml:142 restated after red run 20261101-084608 into a form that case passes, approved by
+  numidium; the containerSharing default contradicted on paper). Playtest 41 since break 2, Eli: the dead stay dead across the
+  restart, "but on a cell reentry i hear their deaths again"; rotfern "now can get a perk from leveling but still no
+  stam/health/mag possibility" (leveling.md:33's "later" row, never built); weather "SEEMS ok but no promises"; "a bucket carried
+  doesnt show" (the server refused the carrier: E_PROP_REACH on 12dfc's drop at 01:37:04Z, E_PROP_CELL on both of 19074's
+  touches at 01:38:05Z), and the cabbages launched out of sight ("i didnt see where the went enough to test").
