@@ -6738,3 +6738,21 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
     guest's body partly up, with the release line printed in all four. Playtest 41's item 5 is still open.
   - So r3 does not merge on this evidence, and playtest 42 moves to the evening slot at the earliest.
   - The actor class's on-demand reruns are on c1.
+- 07:38 PST 2026-11-03 (15:38Z 11-03) (thuum-cf; numidium's stage report, STAGE EXIT 0 at 07:35 PST): r3's second stage on m3-system1-r3 b8d82f05
+  done, four GREEN and two RED. GREEN: x-warm-exit v2 (151537): the warm-exit fix's flip and its line held (0x9731 c1's again within
+  10 s of the exit); swap v20 (151949); death-reentry v5 (152420), its third green; scene-guest v3 (153254), its second. RED: door v23
+  (150814) at step 83 on the 3D claim ALONE: server.host(0x9712) and (0x9731) both read c1, so the warm-exit fix held inside the door
+  scenario, and c1.npc_state(0x1348a).is3DLoaded read true with the record in 133c6 (P13: c1's copy keeps its 3D in the inn after the
+  exit); x-warm-exit v2's recorded reads after the exit are the Dynamic read for H1 against H2, a run reader is on them with 150814's
+  step 81 and puppetService's demote natives; the claim's fate (a stale premise about the engine, or a client fault to fix) follows
+  that read; a rewritten claim is a fresh-review item named to Eli under W4. death-freeze v4 (152912) at step 110 again: c2's headZ
+  -58.1 with c1 and c2 at the same spot (20594.06, -46142.26), the death report present, dead on all three; with 140538's -93.9 and
+  141811's -133.4 the guest's body goes fully down about half the time on r3 (playtest 41's item 5, "the body stands half-up on the
+  guest's screen", still open; 140538 was not a settle flake). numidium's read: c2's "body 13491: released from the puppet state
+  after the ragdoll" printed exactly once in all four runs, so the client releases the puppet every time and the failure is AFTER the
+  release (the ragdoll on c2 not taking, settling into a sitting or kneeling pose, the copy's position driven after the release, or
+  the release before the ragdoll has started; HYPOTHESIS, all of it). A run reader is on the three runs' c2 lines with deathService's
+  and puppetService's native order in hand; then the re-analyst scopes the Frida read numidium proposed (on c2, from the death word to
+  12 s after, every 100 ms: the copy's ragdoll state, motion type, the 3D root's world z, headZ, the AI process level, and any
+  SetPosition or puppet move landing after the release line). r3 cannot merge on this evidence (door v23 is in the gate; the freeze
+  is item 3 of playtest 42); playtest 42 moves to ADR-053's evening slot, numidium tells Eli.
