@@ -5706,3 +5706,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   promotion; the settle's greens are held and the parent stage stays up. Door v9's header and npc-handoff.md carry 060106. I am
   reading the promote path's code (the client's placement at the hoster word, the server's grant and return sends against the
   pass's reliable placement) for the doc's static column, as a research note beside numidium's rows.
+- 22:13 PST 2026-11-02 the door bounce at a CELL GRANT, two runs on the unfixed parent (union-srv-3 35509f7a): door v7's leg A (20261103-055217,
+  red at its exit until) and the swap probe v5 (20261103-060106): the house's new host, granted 0x133c7 (05:53:42.417; 06:02:29.120),
+  sent a first report placing Hod outdoors 180 ms and 38 ms later, judged a D9 pass to the street's host, whose own copy indoors
+  passed him back 36 ms and 47 ms after: the stale-placement bounce with no door walk. The fix on m3-handoff-settle covers the
+  D9 pass alone (half (a)), and its settle (half (b)) would keep such a false exit; so nothing in that branch merges before the
+  record is imposed at every promotion (grant, pass, return). W1 system 1's engine doc, docs/engine/non-owning-seat.md (c544f0e7):
+  the promote rows P1 to P7 from 052100, 055217, 060106 and playtest 41, the dead-state rows D1 and D2, the open reads R1 to R5,
+  the thaw condition; P7 records that Hod's sawmill packages are conditioned on kGetVMScriptVariable (630, TESCondition.h:763) on
+  the mill's 0x71dfc "::ResourceState_var" (Skyrim.esm), so the 08:00 exit is no premise, the unconditioned inn package (19:00)
+  is. Correction to the 21:38 line: 052100's games were freshly relaunched and the street seat went straight to the street, so a
+  stale indoor copy on the street's seat is a claimed premise of the later scenarios, not 052100's proven cause; the difference
+  between 051454 and 052100 is unexplained (the orientation or the hour). Reviews tonight: props round five (3fa107c6) and door
+  v8/v9 FIX FIRST; the seat-fact snapshot grammar on main (5219f093).
