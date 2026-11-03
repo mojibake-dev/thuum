@@ -201,6 +201,16 @@ screen where either alone takes one in all (x-quit-scan v3 021707; 081617,
 082111); the third holder is unnamed, the pair's numbers go upstream with
 D24-D, and the fast exit makes the count moot on a seat.
 
+Known limit found and closed on m3-system1-r3 (2026-11-03): a WARM exit from an interior fires no cellFullyLoaded for the exterior
+cells the engine re-attaches from its buffer (docs/engine/non-owning-seat.md P12; b-npc-handoff-door-hosts v22's leg B, 134832: c1's
+exit from the inn re-reported only its own cell by the fallback above, and 9731, lapsed by the visit's grace, stayed unhosted for the
+run, while the cold exits of 055217 and 084006 fired 27 events and re-hosted in 220 ms). In play: after any interior visit the NPCs of
+the neighbouring exterior cells froze until the player crossed a cell border. The fix (31167a9b, hostService.ts): the poll keeps a
+detached map (cell id to the time it left the loaded set, persisted with the reload survivor) and for ten minutes reads each such
+cell once a second; a cell standing attached again is added back and reported, with the line "cell <id> re-attached without its load
+event, reported N ms after its detach". No wire change. Its read is x-warm-exit v1 (the host within 10 s of the exit and that line),
+and b-npc-handoff-door-hosts v23 waits for 0x9731's host after the exit before its post-exit assert.
+
 ## Message contract
 
 - HostGrant and HostRelease, server to one client, reliable: thuum messages
