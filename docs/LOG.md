@@ -6274,3 +6274,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   demand on the owner (CheckSaveGame and SaveGame into our own BGSSaveFormBuffer while the reference is loaded; the unload's stash
   refuses an entry that already has a buffer), the re-analyst's read spawned (docs/research/adr065-serialize-on-demand-2026-11-03.md,
   in progress); (c) LoadGame on a 3D-loaded copy, risk 1, numidium's analyst.
+- 04:15 PST 2026-11-03 (12:15Z 11-03) (numidium): the container transplant, GREEN. c1's engine stored BarrelFood01 0x1f229's record
+  after `additem 0000000f 100`: flags 0x88000020 (kInventory added), 37 bytes raw, gold 0x40000f and count 0x64 inside
+  (20261103-120817). Written into a fresh c2's map before Riverwood loaded, it was applied at the cell's init (applied 1, one decode).
+  c2 read 100 gold in the barrel it never touched and 0 in the untouched neighbour, both claims held (20261103-121150). The
+  engine-native materialize path now covers a lock and an inventory (change-forms.md D3). Not yet covered: a moved, cell-changed or
+  promoted reference (the inject refuses those bits until the re-analyst reads the initial data's cell registration), which the
+  dead NPC needs. Round nine's review was FIX FIRST on a green pipeline, so its evidence stage runs, with no gate and no merge.
