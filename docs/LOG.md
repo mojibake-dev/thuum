@@ -5519,3 +5519,17 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   lands in 0x133c8 at (-513, -206, 240)). ADR-062 slice 1b f7ce5b37 (the first head c9596809 red at T0 on the old cause-3 refusal
   case; dropped), pipeline 4769, full client build. ADR-063 gains its decision-4 outcomes (the settle row; the props rule to write
   before any prop code). union-srv-3 35509f7a was green (4764) and laid at break 3 (02:15Z) before the close.
+- 18:56 PST 2026-11-02 the root-cause plan after playtest 41 APPROVED by Eli (plan mode; docs/research/root-cause-plan-2026-11-02.md), from
+  Eli's ask: "how we can end up building a feature without knowing how it works underneath in the engine or how we're over
+  validating, or how we had the allow list conceptualization of scripting inverted". Eli's two calls in it: the five
+  break-prone systems FROZEN until each has its engine model (docs/engine/<system>.md) and a two-player test (a reference's
+  life on a non-owning seat, containers and menus, Havok props, the progression UI, state no native reaches); one short
+  playtest per fixed system, eight items at most. Five workstreams: W1 engine model first, the burden of proof flipped (a
+  claim is HYPOTHESIS until a run or trace id backs it; CONFIRMED-STATIC retires); W2 validate consistency only (the
+  validator audit, docs/research/validator-audit-2026-11-03.md: 159 codes, 26 OWNER-CHECK, each retired with its
+  replacing rule and a two-seat collision scenario); W3 ownership for scripts and content (ADR-062's slices; the content
+  census, docs/research/content-census-2026-11-03.md: 43 places, 3 with a planned retirement); W4 gates that play the game
+  (the two-seat contract as a scenario lint, a mutation run per claim set, an independent reviewer; a relaxed claim goes
+  to Eli); W5 status and playtest discipline (the T3 box check in docs-lint, verb-merge refusing unrun probes, three
+  state words, one live change per system per arm). The engine census: docs/research/engine-unknowns-2026-11-03.md (about
+  256 open tags across 59 shipped docs, 27 boxes ticked over them, several of playtest 41's breakages never tagged).
