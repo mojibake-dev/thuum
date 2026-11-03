@@ -5597,3 +5597,23 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   live GlobalVariable.SetValue event (the direct mark holds); the per-row census and its "(platform)" keys reached no collected
   artifact, so H-1b1 stays unread until v2. (3) lab-api: server.handoffPassSettleMs as a run's overlay key (b723b802), the
   settle off at 0 to test the reliable placement alone; server.inventory(<ref>) (7a06787c).
+- 20:55 PST 2026-11-02 (04:55Z 11-03) (thuum-cf): the second review rounds. Settle m3-handoff-settle dd611afc (server-only
+  pipeline pending): pipeline 4803's red on 9713d92a was CellHostTest's wolf cross case (:765), the margin follow's deepening pass
+  recording the cell itself as the came-from cell, so the new host's report back across was judged a pass, numidium's finding 2
+  exactly; Follow rows now carry `from` and the deepening Pass reads it, handoffPassSettleMs is read as int64 and clamped 0 to 60
+  s with a warn, the prune test asserts the prune with a longer window, the texts and the Stale line name both rules (4's doc
+  side: npc-handoff.md's tenure mentions and ADR-047 D9's PROPOSED retirement note for Eli, 43f795a9). Props m4-prop-arbitration
+  14ad24e3 (full build pending): 4799's T0 reds (the fourth seat's block ran before the third's epoch check; the rest's words
+  counted the answer; AnswerPropWord's static map is an Impl member), a word at every owner change (TransformVerdict::TakenOver,
+  code 7: the host's sample of a row whose owner stopped streaming for PROP_MOVING_MS; the cap by Props::tick from PartOne::Tick
+  once a second; gone() words every row the seat owned, a capped grab included; the late subscriber's word names the host's own
+  live row as player 0 through PropCellHost), equal epochs replace on the client (the answer heals a seat that applied the
+  standing word wrongly), the contract and the version notes (31, 32 unrecorded; 33); item 4 (a refused claimant's copy running
+  its own Havok, the held loser, the menu-mode hold gap) is engine behaviour and waits for the reads under W1. Slice 1b d3d28dd8
+  GREEN on 4805 (client and server). b-npc-handoff-door-hosts v6 3c15a559 from numidium's two reviews (its schedule read: Hod's
+  inn package 19:00 to 22:00, the exit at 22:00 to his fallback sandbox): the clock at 19.0, the premise claimed in order with the
+  street host's follow and its end, the hour read at the premise and the exit, the street seat's copy in 0x9712 or 0x9731 (a
+  RELAXATION, Eli's word under W4), the door baseline first, the move line narrowed to the inn's promotion, the untils sized under
+  timeout_s, leg B's premise only "not the inn"; one leg template writes both legs. Probes by path: x-prop-arbitration v3 (every
+  snapshot of a count behind its log-count step, the stream counters for the no-refusal and hold claims, the blast's either-or
+  against snapshots), x-handoff-door-hosts-swap v4 (v6's leg B on a clean world).
