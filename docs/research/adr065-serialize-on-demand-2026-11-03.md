@@ -1336,3 +1336,22 @@ unrelaunched seat would read "already replaced this function" (every lab run rel
 Expected on the next runs: the census
 rows (the header's kind-1 row from 36037 first), the writer marks, and in the apply the release row with its caller inside 35568 and the
 park's savedHavokSet row with `ours: false` inside 35567.
+
+## The save's global data tables (re-analyst's read of the save path, 19:5xZ 11-03; the rows live in docs/STATE.md)
+
+BGSSaveLoadManager::Save (0x60fd40) builds the save data (35724) and calls BGSSaveLoadGame::SaveGame (35599, 0x605880) with kSaving set,
+which writes the form version byte (35740, 0x4E), a length-prefixed plugin list, 100 reserved bytes rewritten at the end as the file
+location table (ten u32: the formIDArray, history, table 1, table 2, change forms and table 3 offsets, then the three table counts and the
+change form count), then SaveGlobalData 35638 (0x608de0) over [0, 9), [100, 115) and [1000, 1006), the change forms between the second and
+third range (the changes map +0x330 sorted by form type, references after base forms, each entry its stored record through 36077 or
+serialized live: 36037, slot 0x0D, 35715, slot 0x0E, 36036), then the Form ID Array (35558 on formIDMap +0x298), the Visited Worldspace Array
+(35558 on worldspaceFormIDMap +0x30) and the history block (35686 on saveLoadHistory +0x300). 35638 is the iterator: for each type in the
+range, 35639 (0x608fa0) is the per-type switch whose first callee is the writer, the block goes out as a u32 type then the length-prefixed
+scratch; type 1001 (Papyrus) is special-cased through SkyrimVM's 54017 with the length patched by seeking back; an unknown type logs
+"Unknown global data type %i in SaveGlobalData()". The engine's own names are a 31-entry char* array at RVA 0x2011ef0 indexed by 35941 with
+no slot for the never-written type 104, so its names run one early from 105 on (35941's lookup must not be trusted for 105 to 114). So a
+regeneration tool takes type-to-writer from 35639's switch and the names from the array shifted by one from 105. The 32 rows (29 typed
+blocks that carry bytes, type 104 excluded, Main empty, plus the three untyped tables) are lab/state-tables.yaml with each writer's id and
+RVA, HYPOTHESIS by rule 2; the four to argue for ownership are Created Objects (4), Combat (101), Location MetaData (106) and Quest Static
+Data (107). The calendar is not a block of its own: GameHour, GameDaysPassed and kin are non-constant TESGlobals inside Global Variables
+(3), which the clock verbs already own at R0.

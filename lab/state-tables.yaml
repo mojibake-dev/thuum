@@ -1,24 +1,168 @@
-# The global data tables the save writes, one block per table: name, type_id (the save's global-data type), holds, scope
-# (world: a candidate for the server's record; player: R3 by nature; bookkeeping: engine-internal), source. Hand-maintained; the
-# authoritative list is the engine's own save path (BGSSaveLoadManager's global-data writers), read by the re-analyst (pending, 2026-11-03);
-# until that read lands only the tables ADR-065 names are listed, each marked so.
-- name: GlobalVariables
-  type_id: pending the engine read
-  holds: every TESGlobal's value (ADR-065 amendment B streams them by a per-frame diff over TESDataHandler's array)
+# The global data tables the save writes, one block per table: name, type_id (the save's global-data type), holds, scope (world: a
+# candidate for the server's record; player: R3 by nature; bookkeeping: engine-internal; host simulation: recomputed by each host),
+# source. Hand-maintained from the re-analyst's read of the engine's save path (2026-11-03): BGSSaveLoadGame::SaveGame (35599 at
+# 0x605880) calls SaveGlobalData 35638 (0x608de0) over the type ranges [0, 9), [100, 115) and [1000, 1006), with the change forms between
+# the second and third range; 35639 (0x608fa0) is the per-type switch whose first callee is each writer, so a tool regenerates this list
+# from it; type 104 is never written and the engine's own name table (31 char* at RVA 0x2011ef0, indexed by 35941) has no slot for it, so
+# its names run one early from 105 on; the three untyped tables follow the change forms. Every writer fact is HYPOTHESIS (decompile) by
+# rule 2; the CommonLib member names are CONFIRMED-STATIC.
+- name: Misc Stats
+  type_id: 0
+  holds: every misc stat (name, category, value) through MiscStatManager's SaveStatVisitor
+  scope: player
+  source: 36834 at 0x652aa0 (the per-type switch 35639 at 0x608fa0; HYPOTHESIS, decompile)
+- name: Player Location
+  type_id: 1
+  holds: TESDataHandler::nextID (the next created-form id, seat bookkeeping), the current worldspace, the grid cell, the player's parent cell and position
+  scope: mixed: bookkeeping and player
+  source: inline in 35639 after 40562 (HYPOTHESIS, decompile)
+- name: TES
+  type_id: 2
+  holds: the dead-count list per NPC base, the grid's created exterior cell ids, the attached cells' ids
   scope: world
-  source: ADR-065 decision 1 and amendment B; the type id from the engine's writer table (pending)
+  source: 13379 at 0x1a1ff0 (HYPOTHESIS, decompile)
+- name: Global Variables
+  type_id: 3
+  holds: every non-constant TESGlobal's id and value (the calendar's GameHour, GameDaysPassed and kin are such globals)
+  scope: world
+  source: inline in 35639 over TESDataHandler::formArrays[GLOB] (HYPOTHESIS, decompile)
+- name: Created Objects
+  type_id: 4
+  holds: BGSCreatedObjectManager's runtime-created enchantments, potions and poisons with refcounts and effects
+  scope: world (ownership of created-object ids undecided)
+  source: 36162 at 0x62be10 (HYPOTHESIS, decompile)
+- name: Effects
+  type_id: 5
+  holds: TES::activeImageSpaceModifiers (screen effects) and two global floats
+  scope: player
+  source: inline in 35639 (HYPOTHESIS, decompile)
 - name: Weather
-  type_id: pending the engine read
-  holds: the Sky's current and target weather and the transition
+  type_id: 6
+  holds: Sky's climate, current, last, default and override weather, region, the transition percent, timers and the two reference effects
   scope: world
-  source: ADR-065 decision 1 (the weather verb carries it today, docs/verbs/weather.md); the type id pending
-- name: Calendar
-  type_id: pending the engine read
-  holds: the game's time (ADR-021's clock globals carry it today)
+  source: 26271 at 0x4107f0 on Sky (HYPOTHESIS, decompile)
+- name: Audio
+  type_id: 7
+  holds: the current music type, the tracks in play, a timestamp
+  scope: player
+  source: 35141 at 0x5db110 (HYPOTHESIS, decompile)
+- name: SkyCells
+  type_id: 8
+  holds: each worldspace's sky cell id (derived from the load order)
+  scope: bookkeeping
+  source: 20545 at 0x30b220 (HYPOTHESIS, decompile)
+- name: Process Lists
+  type_id: 100
+  holds: ProcessLists' comment timers and the seven global crime lists (the crime ledger behind bounties)
   scope: world
-  source: ADR-065 decision 1 and amendment B ("the clock's globals stay ADR-021's"); the type id pending
+  source: 41414 at 0x773c10 (HYPOTHESIS, decompile)
+- name: Combat
+  type_id: 101
+  holds: CombatManager's groups, threat map, actors in combat and music timers
+  scope: host simulation
+  source: 46894 at 0x83ea70 (HYPOTHESIS, decompile)
+- name: Interface
+  type_id: 102
+  holds: four UI sub-writers (the last used forms among them)
+  scope: player
+  source: 52929 at 0x97a4c0 (HYPOTHESIS, decompile)
+- name: Actor Causes
+  type_id: 103
+  holds: the next actorCauseID and the ActorCause list (projectile and explosion attribution)
+  scope: bookkeeping
+  source: 27173 at 0x43af90 (HYPOTHESIS, decompile)
+- name: Detection Manager
+  type_id: 105
+  holds: a global map of FormID keys to 8 bytes (AI detection memory)
+  scope: bookkeeping (host-side AI)
+  source: 18381 at 0x295d70 (HYPOTHESIS, decompile)
+- name: Location MetaData
+  type_id: 106
+  holds: a global map of BGSLocation ids to a u32 (cleared and visited state)
+  scope: world
+  source: 25033 at 0x3cbac0 (HYPOTHESIS, decompile)
+- name: Quest Static Data
+  type_id: 107
+  holds: BGSStoryTeller's queued and running story events, queued stop, info-clear and hello-topic quests, a per-quest map, startUpQuestsInitialized
+  scope: world
+  source: 32488 at 0x533750 (HYPOTHESIS, decompile)
+- name: StoryTeller
+  type_id: 108
+  holds: one byte
+  scope: bookkeeping
+  source: 43616 at 0x7c5150 (HYPOTHESIS, decompile)
+- name: Magic Favorites
+  type_id: 109
+  holds: MagicFavorites' spells and hotkeys
+  scope: player
+  source: 52012 at 0x93ab90 (HYPOTHESIS, decompile)
+- name: PlayerControls
+  type_id: 110
+  holds: the enabled bytes of the sprint, attack-block, run and activate handlers
+  scope: player
+  source: 42362 at 0x79c850 (HYPOTHESIS, decompile)
+- name: Story Event Manager
+  type_id: 111
+  holds: BGSStoryEventManager's events array (the triggers of radiant quests)
+  scope: world
+  source: 32356 at 0x52bab0 (HYPOTHESIS, decompile)
+- name: Ingredient Shared
+  type_id: 112
+  holds: a global map of ingredient id to the learned-effects mask
+  scope: player (knowledge)
+  source: 11236 at 0x149c00 (HYPOTHESIS, decompile)
+- name: MenuControls
+  type_id: 113
+  holds: the menu-open handler's enabled byte and beastForm
+  scope: player
+  source: 52213 at 0x948510 (HYPOTHESIS, decompile)
+- name: MenuTopicManager
+  type_id: 114
+  holds: lastTopicInfo and lastSpeaker
+  scope: player
+  source: 35299 at 0x5e26b0 (HYPOTHESIS, decompile)
+- name: Temp Effects
+  type_id: 1000
+  holds: ProcessLists' global, magic and interface temp effects that handle their own save (decals, shaders, model effects)
+  scope: bookkeeping (a host's visuals)
+  source: 41418 at 0x774060 (HYPOTHESIS, decompile)
 - name: Papyrus
-  type_id: pending the engine read
-  holds: the VM's objects, states and variables (ADR-065 decision 5: not portable per object; a per-object encoder at the hand-off)
+  type_id: 1001
+  holds: the whole Papyrus VM state (strings, types, objects, arrays, stacks, queued messages), special-cased in 35638
+  scope: world for the host's cell scripts, player for player-bound scripts
+  source: 54017 at 0x9c9ef0 on SkyrimVM (HYPOTHESIS, decompile)
+- name: Anim Objects
+  type_id: 1002
+  holds: AnimationObjects' entries (actor, TESObjectANIO, state)
+  scope: bookkeeping (host animation)
+  source: 43579 at 0x7c4130 (HYPOTHESIS, decompile)
+- name: Timer
+  type_id: 1003
+  holds: VATS' magicTimeSlowdown and playerMagicTimeSlowdown
+  scope: player
+  source: 44313 at 0x7f43a0 (HYPOTHESIS, decompile)
+- name: Synchronized Animations
+  type_id: 1004
+  holds: the paired-animation manager's hk objects with their participants (killmoves)
+  scope: bookkeeping (host animation)
+  source: 32813 at 0x548d90 (HYPOTHESIS, decompile)
+- name: Main
+  type_id: 1005
+  holds: nothing in 1.6.1170 (the writer returns; the block is present with zero bytes)
+  scope: none
+  source: 36619 at 0x64a030 (CONFIRMED-STATIC: the body is a return)
+- name: Form ID Array
+  type_id: untyped (after the change forms)
+  holds: the type-0 index to FormID table of this seat and session
+  scope: bookkeeping
+  source: 35558 on formIDMap at +0x298 (BGSSaveLoadGame.h:91; HYPOTHESIS, decompile)
+- name: Visited Worldspace Array
+  type_id: untyped (after the change forms)
+  holds: which worldspaces were entered
   scope: world
-  source: ADR-065 decision 5; docs/research/adr065-papyrus-state-2026-11-03.md; the type id pending
+  source: 35558 on worldspaceFormIDMap at +0x30 (BGSSaveLoadGame.h:85; HYPOTHESIS, decompile)
+- name: History
+  type_id: untyped (the last block)
+  holds: the save log strings
+  scope: bookkeeping
+  source: 35686 on saveLoadHistory at +0x300 (BGSSaveLoadGame.h:92; HYPOTHESIS, decompile)
