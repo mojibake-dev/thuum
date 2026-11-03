@@ -274,6 +274,25 @@ stopped 39 s before the flush). x-script-natives v2 (by path) gives every seat c
 the platform's flush and the service's summary apart, and adds the guest leg (a second seat in the host's cell: "(not hosted)"
 tallies and no live row for cell 9732); the relayed quest stage read for H-1b1 is its v3.
 
+The second lab read (two seats, probe x-script-natives v3 as run 20261103-062800 on d3d28dd8's stage, numidium's read): every
+claim held but one. Both seats' 24 hooks attached and none stood down; the platform's flush ran 7 times on c1 and the service's
+summary 6 in the census window; "GlobalVariable.SetValue (platform)" 3 with no live SetValue line; the host's console stage set
+relayed ("set 10d3bb:Skyrim.esm stage 10: recorded, relayed to 1"), the stage done on both seats, no live
+"native Quest.SetCurrentStageID on" line on the guest, and c2.log carried the fragment's skip ("fragment of 10d3bb stage 10 entry 0
+skipped: the stage is the world's, applied from the relay; 0 mark(s) left for the pair") and the latent apply's onResult: H-1b1's
+positive evidence. The one red was the lab's: the console log cuts a line near 100 characters and the guest's
+"Quest.SetCurrentStageID (platform)" row sat past the cut of the summary line. m4-scripts-work 15e01a0e writes the census one row
+per line ("census <Class.Name> N in 30 s") and names the self of a quest's, global's or alias's call in its row ("Quest.Start on
+<id> N"), so the census says which script calls; the probe v4 reads the rows. Two numbers the census showed on BOTH seats, kept as
+hypotheses: H-1b4, "ObjectReference.SetOpen (platform)" about 1450 per 30 s, about 48 a second, the client's own apply of the open
+state at frame rate through a Papyrus native (modelApplyUtils.ts applyModelIsOpen, called by formView's update for every reference
+with an isOpen model about every 133 ms; whether the engine's SetOpen is idempotent or re-sends the state each tick is the read, and
+a HYPOTHESIS for Eli's inventory flicker: an open state re-applied under an open menu); a fix applies the state on change alone,
+behind ADR-064's containers freeze until its doc exists. H-1b5, "Quest.Start" about 40 per 30 s unmarked on the host AND the guest:
+a script calls Quest.Start about 1.3 times a second on every seat, D-S1's data point (a quest has no cell, so the hosted filter
+cannot stand it down); the self-naming census row tells which quest, and whether any such start reaches the server as a report
+is the next read (the census counts attempts, not effects).
+
 ## Status
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared

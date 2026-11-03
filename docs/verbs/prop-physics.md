@@ -93,9 +93,12 @@ The rule (R0: the server decides, the word is the decision; R2 for the transform
   client's order, until a run), so the server returns that player's rows in the cell (live or past the cap) to the host by default
   with the word, beside the cells rule's unload (Props::unloaded; round five, the review of 2026-11-03: the old host leaving
   through a door mid-flight left a live row nobody streamed). The unload is a state, not a moment (round six): until that
-  player's game reports the cell loaded again, its claims and samples there are refused E_PROP_AWAY (Away), since an unloading
-  host still hosts through its 5 s grace and its late sample would wake the prop by id again, and the same seat's claim would be
-  granted again; a gate on the seat's own report, not on a position (ADR-063). A seat reports a cell unloaded through its 1 s
+  player's game reports the cell loaded again, or the cell is in its reach again (RefreshReach, the way a follow vouches by
+  loaded or reach; round seven: a load report a seat never sends, playtest 41's 9731 missing from c1's set for 57 s, must not
+  refuse it for good), its GRANTS and WAKES there are refused E_PROP_AWAY (Away), since an unloading host still hosts through
+  its 5 s grace and its late sample would wake the prop by id again, and the same seat's claim would be granted again; a live
+  owner's own stream passes wherever its sample lands, so no row is stranded; a gate on the seat's own report, not on a
+  position (ADR-063). A seat reports a cell unloaded through its 1 s
   isAttached poll only for cells in its loaded set: a cell whose cellFullyLoaded never fired (the landing cell's patch covers
   the landing alone) or any cell on a seat with cellHost off is never reported, and a silent stale host keeps its rows until
   netcode's timeout; a disconnect is the departure's word. Whether the engine ends a grab at a door is an engine claim
@@ -114,12 +117,14 @@ and the asleep send unchanged. Tests: props.rs (the moving refusal, the grab ove
 words, the stalled claim, the host's wake by id across a host change, the tick's cap), PropTest.cpp (the word at rest to both seats
 with player 0, the moving refusal, NotOwner answered, the wake's word and the live row across the props table's grant),
 wire-validate's PropOwner case (0 admitted).
-Two seats: x-prop-arbitration v9 by path (lab-spawn, a server-placed iron ingot at the mining floor marker; leg 1 c2's contact at
+Two seats: x-prop-arbitration v10 by path (lab-spawn, a server-placed iron ingot at the mining floor marker; leg 1 c2's contact at
 rest: granted, streams, rests, the word returns it; leg 2 c1 kicks it into c2: the contact takes nothing (the guest's own skip or
 E_PROP_MOVING), the touch-0 grants unchanged through the flight, the host's wake and its rest and both seats' owner lines naming
 the host risen against snapshots (lab-api 5219f093 takes a seat's fact in a snapshot after its log-count step), and the record moved;
-leg 5 the guest's cell unload mid-stream: the contact granted, the unload's return line and the host's player-0 word risen, the
-record's height against the host's copy read for E32; leg 3 c2's grab at rest over a pitch sweep: granted, the hold's samples read through the
+leg 5 the guest's cell unload mid-stream on a second placed ingot: the contact granted, the unload's return line and the host's
+player-0 word risen against snapshots, the rest line read beside them (a timing red told from a build red), the record
+snapshotted after for E32's height; leg 6 the re-entry: the load report ends the unload's state, the contact granted again and
+E_PROP_AWAY flat; leg 3 c2's grab at rest over a pitch sweep: granted, the hold's samples read through the
 server's stream counters, the release's rest and word; leg 4 c2's blast at rest: the impulse grant or the host's own stream, one
 of the two; every count read against a snapshot behind its own log-count step; lab/frida/prop-grab.js armed on both seats at the
 relaunch for E13, E14 and E15, prop-sleep.js on c1 and prop-contact.js on c2 as each seat's second watcher (E10, E2, E26, E27;
