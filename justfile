@@ -142,6 +142,15 @@ relid:
 ledger:
     @python3 lab/ledger.py "{{skymp}}" docs/NATIVES.md
 
+# ADR-065 decision 1: docs/STATE.md, one row per change flag CommonLibSSE-NG declares (the `struct ChangeFlags` blocks) and per
+# global data table the save writes (lab/state-tables.yaml); the Rung, Channel, Notes and Verb columns are hand-kept and preserved.
+# `just state-check` fails on a stale file, a flag without a row, or an empty Rung; docs-lint runs the file-only lint without CommonLib.
+state:
+    @python3 lab/state.py --commonlib CommonLibSSE-NG --out docs/STATE.md
+
+state-check:
+    @python3 lab/state.py --commonlib CommonLibSSE-NG --out docs/STATE.md --check
+
 # Every verb's live state from its doc's Status boxes (ticked of nine, open HYPOTHESIS tags, scenario, what it
 # waits on), one table; PLAN.md keeps the order and one line per item, this is the check against it.
 status:

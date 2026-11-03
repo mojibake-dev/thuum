@@ -1,0 +1,24 @@
+# The global data tables the save writes, one block per table: name, type_id (the save's global-data type), holds, scope
+# (world: a candidate for the server's record; player: R3 by nature; bookkeeping: engine-internal), source. Hand-maintained; the
+# authoritative list is the engine's own save path (BGSSaveLoadManager's global-data writers), read by the re-analyst (pending, 2026-11-03);
+# until that read lands only the tables ADR-065 names are listed, each marked so.
+- name: GlobalVariables
+  type_id: pending the engine read
+  holds: every TESGlobal's value (ADR-065 amendment B streams them by a per-frame diff over TESDataHandler's array)
+  scope: world
+  source: ADR-065 decision 1 and amendment B; the type id from the engine's writer table (pending)
+- name: Weather
+  type_id: pending the engine read
+  holds: the Sky's current and target weather and the transition
+  scope: world
+  source: ADR-065 decision 1 (the weather verb carries it today, docs/verbs/weather.md); the type id pending
+- name: Calendar
+  type_id: pending the engine read
+  holds: the game's time (ADR-021's clock globals carry it today)
+  scope: world
+  source: ADR-065 decision 1 and amendment B ("the clock's globals stay ADR-021's"); the type id pending
+- name: Papyrus
+  type_id: pending the engine read
+  holds: the VM's objects, states and variables (ADR-065 decision 5: not portable per object; a per-object encoder at the hand-off)
+  scope: world
+  source: ADR-065 decision 5; docs/research/adr065-papyrus-state-2026-11-03.md; the type id pending
