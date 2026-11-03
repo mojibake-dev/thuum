@@ -120,7 +120,9 @@ steps:
       - 'abs(c2.refs_near().pos(0x5ace4).x - 133857) + abs(c2.refs_near().pos(0x5ace4).y - (-61266)) < 200'
       - 'server.log_count("E_PROP_STEP") == 0'
       - 'server.log_count("E_PROP_REACH") == 0'
-      - 'server.log_count("E_PROP_KIND") >= 0'
+      # a kind refusal names a claim on a reference that is no item: none in this run (the gate audit, 2026-11-02:
+      # the literal >= 0 made a claim)
+      - 'server.log_count("E_PROP_KIND") == 0'
   # the rest survives a restart: the created reference is back on both screens, at one place (its record), away from
   # the placement point (the kick's rest)
   - server: restart
