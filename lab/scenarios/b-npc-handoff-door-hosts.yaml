@@ -1,4 +1,19 @@
-# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v17 2026-11-03 after ADR-064's fresh review of v16
+# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v18 2026-11-03 after ADR-064's fresh review of v17
+# (FIX FIRST: the shape sound and deterministic on every head, three claims that could never hold): the hold's "placed at the
+# record" line never names the engine's pre-move cell (it prints only once the engine's cell IS the record's, so both read 3c), so
+# the stale case's witness is the view's gate line at the create-word promotion ("promote gate 1348a: the engine at (...) in
+# 133c7, the record at (...) in 3c; moved to the record below"), claimed, with the hold's "placed" line as the cure's witness and its
+# parenthetical "(asked K time(s) ...)" with K >= 1 as the second (the copy stood away); server.actor(c1) is normalized to lab-spawn
+# offsets while server.ref is absolute, so the record is claimed against the street spot in absolute units with bounds that admit
+# his first steps home (x within 2000 of 21995, y within 2500 of -44935). Read from the code by the review and named here: the
+# promotion is the CREATE WORD (the record's square change subscribes c1 as a listener and as the host, its CreateActor carries
+# isHostedByOther false, remoteServer's create handler holds with the CreateActor's movement; no UpdateHoster covers a server-side
+# move and no keyframe or Teleport relay reaches c1), the parent's first report after the server's MoveTo is swallowed by the
+# teleport flag (ActionListener.cpp's kInfinityPos rule: one MovementValidation warn line on every head, not claimed), so the
+# parent's bounce is the SECOND report's, 130 ms later, a race against the gate's move landing in about a second (P8), HYPOTHESIS
+# until the parent run; the hold's move from an unloaded interior to a loaded exterior is unread until this run ("not placed" its
+# witness, claimed absent). The head the gate plays is the system-1 merge candidate (m3-system1-r2, round five's hold lines).
+# v17 2026-11-03 after ADR-064's fresh review of v16
 # said BLOCKER on leg A's shape, three ways: a hosted cell never passes to a nearer seat in steady state (wire-rules cells.rs's
 # consider: only inside the 5 s cold start; a host loses a cell by becoming ineligible, then the grace passes it), so v16's swap
 # never happened; `approach {cell: record}` goes to the seat's own engine copy (runner.py reads the seat's npc-state), which by the
@@ -158,29 +173,30 @@ steps:
   - server: log-count {pattern: "report of 1348a into cell 133c7 within the settle window"}
   - server: snapshot {name: back_a1, of: 'server.log_count("(passes|follows|moves) 1348a into cell 133c7")'}
   - server: snapshot {name: door_a0, of: 'server.log_count("door 13423: 1348a.s host .* walks it through to 133c7")'}
-  - server: snapshot {name: c1pos, of: "server.actor(c1)"}
   # the move: the record to c1's feet; c1 is promoted (the word) with its copy at the bed
   - c1: server-console {name: MoveTo, args: [0x1348a, 0x14]}
   - wait: 8
   - c1: npc-state {formId: 0x1348a}
   - c1: log-count {pattern: "hold 1348a: placed at the record"}
-  - c1: log-count {pattern: "hold 1348a: placed at the record after [0-9]+ ms .*the engine at .* in 133c7, the record at .* in 3c"}
+  - c1: log-count {pattern: "hold 1348a: placed at the record after [0-9]+ ms .asked [1-9]"}
   - c1: log-count {pattern: "hold 1348a: not placed"}
-  - c1: log-count {pattern: "hold 1348a: asked the move"}
-  - c1: log-count {pattern: "hold 1348a: re-asked the move"}
   - c1: log-count {pattern: "promote gate 1348a"}
+  - c1: log-count {pattern: "promote gate 1348a: the engine at .* in 133c7, the record at .* in 3c; moved to the record below"}
   - c1: log-count {pattern: "moved 1348a into"}
   - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 97"}
   - server: log-count {pattern: "report of 1348a into cell 133c7 within the settle window"}
   - c1: screenshot
   - assert:
-      # the record outdoors at c1's feet and no report yanked it home
+      # the record outdoors near the street spot (absolute units; his first steps home admitted) and no report yanked it home
       - server.ref(0x1348a).cell == "3c:Skyrim.esm"
-      - 'abs(server.ref(0x1348a).x - snapshot("c1pos").x) < 300'
-      - 'abs(server.ref(0x1348a).y - snapshot("c1pos").y) < 300'
+      - 'abs(server.ref(0x1348a).x - 21995) < 2000'
+      - 'abs(server.ref(0x1348a).y + 44935) < 2500'
       - 'server.log_count("(passes|follows|moves) 1348a into cell 133c7") == snapshot("back_a1")'
-      # the stale case met and cured: the hold's line names the bed and the street; nothing timed out
-      - 'c1.log_count("hold 1348a: placed at the record after [0-9]+ ms .*the engine at .* in 133c7, the record at .* in 3c") >= 1'
+      # the stale case met: the gate's line at the create-word promotion names the bed and the street; cured: the hold placed
+      # the copy, having asked at least once (the copy stood away), and nothing timed out
+      - 'c1.log_count("promote gate 1348a: the engine at .* in 133c7, the record at .* in 3c; moved to the record below") >= 1'
+      - 'c1.log_count("hold 1348a: placed at the record") >= 1'
+      - 'c1.log_count("hold 1348a: placed at the record after [0-9]+ ms .asked [1-9]") >= 1'
       - 'c1.log_count("hold 1348a: not placed") == 0'
       # c1 runs him outdoors, its copy within 150 of the record both ways
       - c1.npc_state(0x1348a).is3DLoaded == true
