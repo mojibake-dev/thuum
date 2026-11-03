@@ -6482,3 +6482,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   untouched entry and the byte equality to CONFIRMED; clearingData's +0xDA5 and the dry-run byte's meaning stay HYPOTHESIS (zero at a
   wrong offset reads the same); the actor class (the stash's slot 0xF2 pre-call, no signature yet) and the inverse (c) stay open; the
   re-analyst takes the 0xF2 read now (static, the RE box, no lab).
+- 05:21 PST 2026-11-03 (13:21Z 11-03) (thuum-cf): the respawnFated lever's fresh review (b64d1bad): NOTES ONLY, applied as written. On the fork,
+  m3-system1-r3 is now 5e0e975b: the lever refuses a player's actor (IsFateRespawned is every non-player actor; a dead player's write
+  would have run RebuildAndRespawn's inventory reset, which the sweep never reaches) and a false write (a thrown error the gamemode
+  reports), and its header no longer says "write-only" (a Get exists) and names what the lever skips (the sweep's eligibility: a unique
+  base's body, a disabled body, placedDead). On thuum (b5e02c05): the gamemode's fallback catches only the missing-property error
+  ("Property 'respawnFated' doesn't exist", CustomPropertyBinding), so a throw inside the lever surfaces as the command's error instead
+  of masquerading as the old shape; the T2 fake's respawn-ref reply carries the shape; npc-fate.md's two respawn-ref references name
+  the fated shape. The review's reads: the binding is IsDeadBinding's shape; GetFormAt's throws reach the gamemode as catchable JS
+  errors; RespawnFated needs only IsDead and a parent, re-rolls only with a fateLevel, and sends the death-state container with
+  tIsDead false, tTeleport and tChangeValues to the host (or the actor itself) then the isDead false word; round eleven's pending
+  clear is on the branch and Respawn repeats it, so the lever leaves no stale due-set entry. r3's pipeline waiter follows 5e0e975b;
+  numidium's reviewer reads the new head; the stage's inputs are unchanged.
