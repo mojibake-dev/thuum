@@ -6146,3 +6146,27 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   superseded f048ebcb's 4943 was red on the host-change case at the grace (ActorDeathTest.cpp:259), the review's item 1, as
   expected. The merge candidate's stage follows numidium's fresh review of c605a8e0 and the Formatting check, with door v21 and
   swap v19, x-npc-death-reentry v5 (numidium's), x-npc-death-freeze v3 and x-scene-guest v2.1.
+- 03:27 PST 2026-11-03 (11:27Z 11-03) (thuum-cf): numidium's fresh review of round seven (c605a8e0): FIX FIRST, eight points: (1) the clean-quit T0
+  passed without the fix (the reconnect came before the grace, so the Release's flip reached the body through the re-subscription
+  and cleared the stamp); (2) the stamp followed HosterNoted, so a host that walked off (its Release reaching none of the cell's
+  actors), quit and came back first kept its stamp (the probe's own first half); (3) Respawn cleared nothing (RespawnFated alone);
+  (4a) a zero that belongs to no death (a bleedout, a refused report) stamped and never expired, undoing a later death; (4b) the
+  zero is sent once, unreliable, so one lost packet refused a later Resurrect; (5) a live word never reached the hold; (6) the
+  dropped-actions line named the bind; (7) verified; (8) probe v5's leg B red only if both halves fail (its fix: claim c1's
+  "the body is dead here" line, record the server's "stands nothing"). numidium's suggested shape, taken: the stamp names its
+  WITNESS. Round eight (a4a7805c; b0e3ebda before it a half-applied push from a chain whose guards sat behind a semicolon, fixed
+  forward, its own pipeline red by construction): the stamp carries the host's form id, its login generation (bumped at every
+  SetUserActor) and its time; HostSampledDeadBy compares all three and counts a stamp only as the death's (within kPendingDeathMs
+  before the recorded death, or any time for a body dead since before this process); the hosted state's zero stamps with the
+  witness, the host's reliable death report stamps too; Respawn clears beside fateDiedAt; NoteHoster, HosterNoted and the
+  disconnect loop gone; the client's live word releases a dead hold; seven T0 cases (the cast's rule; a new host; the clean quit
+  with the grace passed while away; the walk-off before the quit; the engine's death first; the bleedout's old zero; the reliable
+  report). The lab: Eli stopped the nightly ("i dont feel like we're gaining anything from it. run the census"); x-change-census
+  (change-census.js, AddChange and RemoveChange on 59 vtables through a scripted sequence) ran as 20261103-111425 and a v2 after;
+  then the evidence stage of c605a8e0 (no gate, no merge) with door v21, swap v19, death-reentry v5 e771aeec, death-freeze v3
+  0ab95c48, scene-guest v2.1 1259be6f, its reads feeding round eight's review. ADR-065 ("the save is the state"): decision 3 is the
+  save's serializers as the wire (0E at the owner's frame end, 0F on the receiver, per-flag appliers only where 0F fails mid-game),
+  my four risks its HYPOTHESIS rows, the save version byte (BGSLoadFormBuffer::GetVersion, slot 01; ADR-025's two exe versions)
+  added to the precondition; the re-analysts split: numidium's on the change forms' SaveGame/LoadGame mid-game and the cell-load
+  apply path, mine on the Papyrus per-object state and the event gate (docs/research/adr065-papyrus-state-2026-11-03.md, in
+  progress).
