@@ -476,3 +476,30 @@ here), and change-forms.md C4's risk stands: no engine path does it to a loaded 
 - 35907's and 35902's idempotence (the copy-out route's double registration), moot if the scratch route is taken.
 - The Actor block's field names (37649's fixed fields at +0x278, +0xEC, +0x110 and the four modifier blocks) against Actor.h's
   runtime data, for the actor record's size and for ADR-065's per-field validation.
+
+## Run 20261103-131511: what the lab confirmed (13:19Z 11-03, numidium's run, thuum-cf's read)
+
+serialize-on-demand.js in serialize mode on c1 alone (x-serialize-on-demand-serialize, by path; the check run 20261103-130xxx before it
+held every premise with the stash's record byte-identical to 114726's). At 35576's leave for 0xe3a7a's kLockExtra mark, on
+Main.threadID (thread 3584), the entry 0x90001000 with a null record: CheckSaveGame returned 1 with headerFlags 0x90001000 (nothing
+dropped), 35715's kind 0, the header 4e3a7a00 10009000 4e (id 0xe3a7a in BGSNumericIDIndex order, flags 0x90001000, type 0x4e REFR,
+version 0x4e), the record type 0, size code 0, version 78, length1 36, length2 0, 40 bytes, FNV-1a 0x4ebbb261; recordFreed and
+bufferDestroyed true; the entry re-read 0x90001000 with a null record (entryUntouched true). At the purge the engine's own stash wrote
+the same 40 bytes and the compare row read equal. So, by this run:
+
+- CONFIRMED: BGSSaveFormBuffer's layout as used (the header at +0x18 in file order, the flags at +0x1b, the form at +0x28) and the five
+  call signatures (36035, 36037, 35715, 36081, 36044), since the bytes came out right and nothing faulted;
+- CONFIRMED: a console lock's mark runs on Main.threadID (the stash row and the trigger agreed);
+- CONFIRMED: slot 0x0D then 0x0E on a loaded REFR outside a save leave the changes-map entry untouched (flags unchanged, record null);
+- CONFIRMED: the on-demand record equals the unload's stash record byte for byte for the same state, and the stash's record is
+  deterministic across sessions (the check run's purge against 114726; ADR-065 decision 7's premise);
+- CONFIRMED-STATIC stays as it was for the slot ids and the singletons;
+- HYPOTHESIS still: that +0xDA5 is TESDataHandler::clearingData and that +0x120's byte is the dry-run flag (both read zero, which a
+  wrong offset would also show; a read under a save or a clearing would settle them);
+- HYPOTHESIS still, untouched by this run: an actor's bytes (the stash's slot 0xF2 pre-call for an actor with a currentProcess, no
+  signature read yet), the extras' per-type mask table beyond the two extras this record carries, and the inverse (c): LoadGame on a
+  3D-loaded copy (risk 1).
+
+What it means for ADR-065: the sending half (b) is proven on the engine's own code, and with the transplants (change-forms.md D1 to D3,
+C5) the whole pipeline runs on the engine at both ends: observe at AddChange, serialize on demand through a scratch buffer, apply
+before the reference's first frame. The next reads: the actor class (0xF2), then (c).

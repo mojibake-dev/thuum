@@ -6472,3 +6472,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
     run), and apply before the first frame on another seat (the transplants of a lock and an inventory). Open: the apply to a
     reference already loaded on the receiver (risk 1); actors' created-form ids (D6); globals and condition-read variables (ADR-065
     amendment B and C).
+- 05:19 PST 2026-11-03 (13:19Z 11-03) (thuum-cf; numidium's run 20261103-131511): serialize-on-demand GREEN in serialize mode (c1 solo, the lock
+  asserts held): premises ok on Main.threadID (3584), the entry 0x90001000 with a null record; CheckSaveGame 1, headerFlags
+  0x90001000, kind 0, header 4e3a7a00100090004e; the record type 0, size code 0, version 78, length1 36, length2 0, 40 bytes, FNV-1a
+  0x4ebbb261; recordFreed and bufferDestroyed true; the entry re-read untouched. At the purge the engine's stash wrote the same 40
+  bytes: the compare row equal. change-forms.md C5 CONFIRMED (numidium, on main). ADR-065's sending half (b) is PROVEN on the engine's
+  own code; with the transplants the whole pipeline runs on the engine at both ends (observe at AddChange, serialize on demand, apply
+  before the first frame). The note's run section flips the buffer layout, the five call signatures, the main-thread mark, the
+  untouched entry and the byte equality to CONFIRMED; clearingData's +0xDA5 and the dry-run byte's meaning stay HYPOTHESIS (zero at a
+  wrong offset reads the same); the actor class (the stash's slot 0xF2 pre-call, no signature yet) and the inverse (c) stay open; the
+  re-analyst takes the 0xF2 read now (static, the RE box, no lab).

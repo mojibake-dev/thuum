@@ -1,4 +1,6 @@
 // serialize-on-demand.js (thuum, the re-analyst 2026-11-03; docs/research/adr065-serialize-on-demand-2026-11-03.md Q4): on the
+// Run 20261103-131511 (serialize mode, c1 solo): GREEN, the on-demand record equal to the stash's 40 bytes, FNV-1a 0x4ebbb261,
+// the entry untouched; the layout, the five signatures, the main-thread mark and the equality CONFIRMED (the note's run section).
 // owner, for a LOADED reference FORM, run the engine's own change-form serializer on a scratch BGSSaveFormBuffer when AddChange
 // (AL 35576) marks it with FLAG, and compare the bytes with the record the engine stores itself at the cell's unload (the stash,
 // AL 35570, read as transplant-capture.js reads it). MODE "check" (default): at the trigger each premise is read and printed as
