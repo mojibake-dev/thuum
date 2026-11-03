@@ -261,6 +261,23 @@ const state = {
         worn = null;
       }
     }
+    // the corpse's rest as the server records it (mp.get's bodyRest, thuum docs/verbs/npc-fate.md
+    // "The body's rest", ADR-067): bodyAtRest, and bodyRestAt the server's monotonic ms clock when it was
+    // set (0 while not at rest); null from a server without the property and for a plain reference
+    let bodyAtRest = null;
+    let bodyRestAt = null;
+    if (type !== "MpObjectReference") {
+      try {
+        const rest = mp.get(actorId, "bodyRest");
+        if (rest && typeof rest === "object") {
+          bodyAtRest = Boolean(rest.atRest);
+          bodyRestAt = Number(rest.restAt) || 0;
+        }
+      } catch (e) {
+        bodyAtRest = null;
+        bodyRestAt = null;
+      }
+    }
     // the reference's items as the server records them, a chest's or a body's as an actor's
     // (lab-api's server.inventory(<ref>), the two-seat container claims of the root-cause plan's W4);
     // null where the record holds none or the API refuses the read
@@ -285,6 +302,8 @@ const state = {
       staminaPercentage: pct.stamina,
       worn,
       inventory,
+      bodyAtRest,
+      bodyRestAt,
     };
   },
 

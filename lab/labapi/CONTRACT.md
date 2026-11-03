@@ -142,10 +142,18 @@ client whose player's actorId (the `actor` kind's) is the holder, "" when none.
 
 Request: `{"payload": {"kind": "ref", "actorId": <int>}}`. Answer: `{"found":
 true, "actorId", "x", "y", "z", "rot", "cell", "isDead", "healthPercentage",
-"magickaPercentage", "staminaPercentage", "worn", "inventory"}`, an actor's
+"magickaPercentage", "staminaPercentage", "worn", "inventory", "bodyAtRest",
+"bodyRestAt"}`, an actor's
 record by form id (a hosted NPC), the `actor` kind's fields without the
 appearance verdicts, or `{"found": false, "actorId"}` for a form the server
 holds no position for.
+`bodyAtRest` and `bodyRestAt` are the corpse's rest as the server records it
+(`mp.get(id, "bodyRest")`, docs/verbs/npc-fate.md "The body's rest", ADR-067):
+whether the body's owner put it at rest or its settle window ended, and the
+server's monotonic ms clock when that was set (0 while not); `null` from a
+server without the property and for a plain reference. Scenarios read
+`server.ref(<id>).bodyAtRest == true` after a kill and compare `server.ref(<id>).x`
+with both seats' `npc_state(<id>).x` once it is.
 `worn` is the record's equipment (`mp.get(id, "equipment")`, read inside a try)
 as a seat's npc-state counts it: the ARMO and WEAP form ids marked worn in a
 slot or either hand, one per form, sorted, typed through the server's espm, so

@@ -533,3 +533,35 @@ test("labState ref reads a plain reference's record without asking the actor's f
   assert.strictEqual(r.isDead, null);
   assert.strictEqual(actorReads, 0);
 });
+
+test("labState ref carries the corpse's rest (bodyAtRest, bodyRestAt), null without the property", () => {
+  // npc-fate "The body's rest" (ADR-067): the server's bodyRest property, read for an actor alone
+  global.mp = fakeMp();
+  mp.set(0xff000a03, "locationalData", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [9050, 550, 0], rot: [90, 0, 45] });
+  mp.set(0xff000a03, "percentages", { health: 0, magicka: 1, stamina: 1 });
+  mp.set(0xff000a03, "isDead", true);
+  mp.set(0xff000a03, "bodyRest", { atRest: true, restAt: 1234, owner: 0xff000001, samples: 3 });
+  mp.set(0x3975b, "locationalData", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [1, 2, 3], rot: [0, 0, 0] });
+  mp.set(0x3975b, "type", "MpObjectReference");
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  const body = mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0xff000a03 });
+  assert.deepStrictEqual([body.found, body.isDead, body.bodyAtRest, body.bodyRestAt], [true, true, true, 1234]);
+  // not at rest yet: false and 0
+  mp.set(0xff000a03, "bodyRest", { atRest: false, restAt: 0, owner: 0xff000001, samples: 1 });
+  const settling = mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0xff000a03 });
+  assert.deepStrictEqual([settling.bodyAtRest, settling.bodyRestAt], [false, 0]);
+  // a plain reference is never asked
+  const tankard = mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0x3975b });
+  assert.deepStrictEqual([tankard.bodyAtRest, tankard.bodyRestAt], [null, null]);
+  // a server without the property
+  const bare = fakeMp();
+  const get = bare.get;
+  bare.get = (id, k) => { if (k === "bodyRest") throw new Error("Property 'bodyRest' doesn't exist"); return get(id, k); };
+  bare.set(0xff000a03, "locationalData", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [9050, 550, 0], rot: [0, 0, 0] });
+  global.mp = bare;
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  const legacy = mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0xff000a03 });
+  assert.deepStrictEqual([legacy.found, legacy.bodyAtRest, legacy.bodyRestAt], [true, null, null]);
+});

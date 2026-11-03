@@ -35,6 +35,9 @@ the lab can grep (E_ASSERT_*).
                                                      an actor's record by form id (a hosted NPC); worn
                                                      is its equipment's armor and weapon form ids, sorted,
                                                      as c.npc_state(<id>).worn counts them (npc-stream)
+  server.ref(<id>).bodyAtRest | .bodyRestAt          the corpse's rest (npc-fate, ADR-067): whether the
+                                                     body is at rest, and the server's ms clock when it
+                                                     was set (0 while not)
   snapshot("<name>").<field>                         a server fact a `server: snapshot {name, of}` step
                                                      kept earlier in the run (the freeze's evidence)
   <client>.state.gameHour | .gameDay | .gameMonth | .gameYear | .gameDaysPassed | .timeScale
@@ -826,6 +829,10 @@ class RefView:
     magickaPercentage: float | None = None
     staminaPercentage: float | None = None
     worn: tuple[int, ...] | None = None
+    # the corpse's rest (docs/verbs/npc-fate.md "The body's rest", ADR-067): at rest, and the server's
+    # monotonic ms clock when it was set (0 while not); None from a server without the property
+    bodyAtRest: bool | None = None
+    bodyRestAt: int | None = None
 
 
 @dataclass(frozen=True)
@@ -1247,7 +1254,9 @@ class _ServerRef:
                            healthPercentage=_opt_float(d.get("healthPercentage")),
                            magickaPercentage=_opt_float(d.get("magickaPercentage")),
                            staminaPercentage=_opt_float(d.get("staminaPercentage")),
-                           worn=tuple(sorted(int(w) for w in d["worn"])) if isinstance(d.get("worn"), list) else None)
+                           worn=tuple(sorted(int(w) for w in d["worn"])) if isinstance(d.get("worn"), list) else None,
+                           bodyAtRest=_opt_bool(d.get("bodyAtRest")),
+                           bodyRestAt=_opt_int(d.get("bodyRestAt")))
         except (KeyError, TypeError, ValueError) as e:
             raise AssertionData(f"{actor_id:#x}'s record lacks {e}") from e
 
@@ -2003,7 +2012,8 @@ _ATTRS = {
     TimeView: {"year", "month", "day", "hour", "daysPassed", "timeScale"},
     SpellView: {"magnitude", "overTime", "conditional", "effects"},
     HostView: {"hosted", "client", "epoch", "actorId"},
-    RefView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "worn"},
+    RefView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "worn",
+              "bodyAtRest", "bodyRestAt"},
     FigureSpellsView: {"count", "extra", "base"},
     FollowView: {"following", "client", "cell", "actorId"},
     FateView: {"fated", "baseId", "level", "raceId", "worn"},

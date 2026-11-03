@@ -193,6 +193,98 @@ Rung: R0 for the fate (the roll, the death, the body's point, the respawn, the l
   deadline in game days from the death, never under the GMST's hours; a
   body's point within cell-host's movement bounds.
 
+The body's rest (ADR-067). A corpse is a physics object under the prop rule
+(ADR-063 decision 2, ADR-067 decision 4): one mover simulates the ragdoll,
+the engine that simulated the actor at its death (PartOne::SimulatorOf at
+the kill; none at the death, and the first simulator to report inside the
+window claims it), the at-rest pose is that mover's own final sample, every
+other seat places its corpse at it, and the server's record, the loot reach
+(E_ACTIVATE_REACH measures from the record, playtest 42's F6) and every
+later check use it. Rung R2: the owner computes the ragdoll, the server
+records the rest. For bodySettleMs after the recorded death (server
+setting, default 15000, WorldState::bodySettleMs) the owner's movement
+reports for the dead actor are accepted inside the movement bounds, applied
+to the record (SetPos, SetAngle) and relayed to the listeners as a live
+hosted actor's are; a report from any other seat is refused with
+E_BODY_NOT_OWNER, said once a minute per sender and body. The body is at
+rest when two accepted samples in a row agree within 2 units and 2 degrees
+(MpActor::kBodyRestUnits, kBodyRestDegrees) or when the window ends
+(PartOne::TickBodies, every second, and the movement path's own check);
+the resting sample goes to the other games reliably (the prop rule's final
+sample, ADR-058) and the record saves at once; from then every movement
+report for the body is refused with E_BODY_AT_REST (once a minute per
+sender and body) until a later claim (a drag or a push: the prop claim, a
+later slice; TODO). A resurrection (MpActor::Respawn: the fate's respawn,
+the host's engine's stand-up, a reanimate's, the lab's respawn-ref) clears
+the rest. A dead actor's movement report is a body sample and never a
+stand-up: the stand-up reads the health the host samples
+(OnHostedActorState), and the movement path reads neither healthPercentage
+nor isDead from the message. A body dead since before this process or
+placed dead has no window on this server and keeps the host's samples as
+before (TODO: its rest at load, with the prop claim; the rest state is not
+persisted, no schema change). Lab reads: labState kind ref carries
+bodyAtRest and bodyRestAt (the TickDeaths clock in ms, 0 while not at
+rest); the lines "[verb:npc-fate] body <id> settling under <owner>: (x, y,
+z)" at the first accepted sample, "[verb:npc-fate] body <id> at rest at (x,
+y, z) after N ms, M samples" once, and the two refusals by code. T0:
+ActorDeathTest's six BodyRest cases (fork branch adr067-corpses-srv).
+HYPOTHESIS, the lab's to prove with the client half: that the owner's
+engine reports the dead reference's position following its ragdoll until
+it rests (today's client stops a dead actor's movement reports, so the
+record kept the death point in F4 and F6); that the ragdoll rests within
+the 15 s window on Bleak Falls' slope; that two agreeing samples at the
+host's cadence are the rest and not a pause in the air; that a watcher
+placing its corpse at the relayed rest shows the body where the owner's
+lies.
+
+The watcher's corpse (ADR-067 by ADR-065's path; fork branch
+adr067-corpses-client, the client half, 2026-11-03). Rung R2: a render of
+the owner's rest, nothing simulated on the watcher. The at-rest moment
+above is the trigger of docs/verbs/change-form.md's pipeline: the owner's
+sender (sendInputsService.sendMovement) keeps sampling its dead hosted
+actor at the 130 ms cadence until two consecutive samples agree within 2
+units and 2 degrees or 15 s pass, sends the rest sample reliably and stops
+for that body; at that moment ChangeFormService.onBodyAtRest calls the
+native TESModPlatform.serializeChangeForm(refr) (the on-demand recipe: the
+engine's own SaveGame into a buffer plus the id census; answers formType,
+flags, version, bodyHex, fnv1a and the remap rows) and sends ONE reliable
+ChangeForm (MsgType 72: epoch from HostService.epochForActor, the cell's
+host epoch; formId the shared load order's id; formType; flags; version;
+body as hex; fnv1a; remap) when its fnv differs from the last ChangeFormAck
+(73) for the form. A watcher receiving ChangeFormApply (74, served with the
+actor's word, at a cell's load and after an owner's record is acked) holds
+the record until its own kill of the copy has run (the death word's kill
+or the bind's silent kill, both kept; deathService's kill is the hook) and
+then calls TESModPlatform.applyChangeForm(refr, bodyHex, flags, version,
+remapRows) once per received record, keyed by the body's FNV-1a computed
+on the client (the apply message carries no hash): the engine's own load
+lays the body in the owner's pose at the owner's place (read 1's GREEN
+20261103-210713: 1,150 units in one call, within 5 units). Nothing else
+moves a dead copy: movementApply's one-shot setPosition to the host's
+sample is gone, formView's bind no longer moves a body by coordinates when
+a record stands for it, and the bind's zero-force push is skipped after a
+laid body; no SetMotionType, no second kill. The natives are declared
+ahead of adr065-sys1-native in the client's module augmentation
+(clientListener.ts: a namespace merged into TESModPlatform with
+ChangeFormRemapRow, ChangeFormRecord and ChangeFormApplyResult) and in the
+codegen typings (skyrim-platform/src/platform_se/codegen/convert-files/
+skyrimPlatform.ts, two statics beside moveRefrToPosition at :3454); a
+platform without them logs one line and the sender's tick goes on. Lab
+lines, [verb:npc-fate]: on the owner "body <id> at rest on this engine
+after N ms: (x, y, z); M units from the first dead sample, two samples
+agree|the settle window ended" and "changeform <id> sent: <bytes> bytes,
+fnv <hex>, <n> remap rows, at rest (x, y, z); epoch E"; on the watcher
+"corpse <id> record held until the kill", "corpse <id> applied from the
+record: fnv <hex>, <n> rows remapped; patched fnv <hex>, <when>, N ms
+after the record came", "corpse <id> not applied: <reason>" and "body
+<id>: no push, the change-form record laid it". HYPOTHESIS, the lab's to
+prove: that the owner's engine reports the dead reference's position
+following its ragdoll until it rests (the rest line's distance reads 0 if
+not, the record then the death point's, and the fallback is the pelvis
+node's position through NetImmerse); that the record applied right after
+the silent kill lays the body with no fall (change-form.md's read 2); that
+a record whose cell is not the copy's moves it (read 3).
+
 ## Engine surface
 
 RE read 2026-10-23 (the re-analyst, docs/research/m3/re-npc-roll.md, every
