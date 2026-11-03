@@ -5989,3 +5989,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   numidium's review); its pipeline building. All five engine model docs exist (containers.md filed e1559ea0; its R3 needs a fresh
   run, the kept playtest-41 logs lack the window). Lesson: a hand-off premise must come from the cells rule as written (a host
   leaves or becomes ineligible), never from "nearer"; and a probe's approach step aims at the seat's own copy.
+- 01:33 PST 2026-11-03 (09:33Z 11-03) (thuum-cf): R4, x-npc-death-reentry v2 on playtest 41's break-3 build (091943, numidium's read): RED at the
+  return's exact position pairs alone (the re-hosting engine's corpse settled 1.2 units); 12 of 14 held; R5's guard line "its 3D
+  is not loaded, the redress waits for the load" x13 after the departure and no crash, CONFIRMED on 12f199e6's code; the same
+  session's re-entry replays nothing (no bind line, no anim event, no resurrect, no report), so Eli's replay is leg B's (a restart
+  and relaunch), unreached; numidium's v3 (05ee6dea) relaxes the return's and leg B's pairs to abs < 16 and reruns after its
+  reviewer. numidium's fresh review of m3-system1 (at 88b07f57): OK FOR ITS FIRST LAB RUN, five items before parity: the scene
+  stop's cherry-pick had dragged 7aac21d4's hide code into puppetService (inert, its caller dropped); deaths2's resurrect half
+  declared fields nothing read on parity (920cf981 is not there); the load block not covered (asks at 0, 1, 2 s against a block
+  of 4 to 5 s); deaths2's 4 s puppet state on a body that died flagged against npc-fate's "never activation-blocked"; five
+  smaller ones; plus a flag to Eli under the org's data rules: three picked commits carried a work e-mail address inherited from
+  their sources onto the public fork. Round five on the RE-CUT m3-system1-r2 (ce677c16, the same picks on parity in order, the
+  vouch never picked, 12f199e6 re-picked with the author reset to the repository's address; nothing pushed rewritten): the hide
+  code out, the inert fields out, five asks every 1.5 s to about 6 s with the release two seconds after the last, a dead word
+  ending a live hold unmoved, noteMovedLocal gone, the deferred death re-reading the word, the gate's dead read lazy; the body
+  rule's exception named in npc-fate.md (cfd33a35). m3-system1 (34a92ed6) stays as it is, superseded.
