@@ -1,3 +1,20 @@
+# b-npc-handoff-door-hosts v24 (07:53 PST 2026-11-03, thuum-cf): TWO CLAIMS REWRITTEN in leg B, the post-exit assert's and the post-grant assert's, a fresh-review item under
+# ADR-064 rule A and, under W4, Eli's word before it lands. v23's `c1.npc_state(0x1348a).is3DLoaded == false` fifteen seconds after
+# the street seat's warm exit from the inn encoded the COLD route (055217 and 084006 left for lab-spawn, another worldspace, and the
+# copy's 3D went in about 3.5 s); on the warm route it is false two of two (150814 step 82 and x-warm-exit 151537's eight reads over
+# 25 s): the engine's cell buffer keeps the detached interior's copies with their 3D intact, the pose frozen, the puppet flags on
+# (docs/engine/non-owning-seat.md P13; neither the demote's natives nor an attached interior, both refuted by the read). Not a client
+# fault: no client code holds or drops a 3D, the retained puppet stays AI-off until a promote, the record is frozen at the same spot.
+# What the claim wanted, "the street seat's copy of him reads indoors, not simulating", is now witnessed by his cell (133c6, kept)
+# and a stream witness: c1's count of its hosted-state lines for him ("HostedStateService: state 1348a:", the host's own reports),
+# snapshotted right after the exit's until and claimed EQUAL fifteen seconds later and again after the interior seat's grant (in
+# 151537 the host's last state line came 6 s before the exit and none after; a copy c1 HOSTED, by the server's word, would report: a
+# "(keyframe)" line at the grant, a line at each change), with a positive control (the count at least 1: the visit's own keyframe).
+# For the reader: a red by a line carrying "(keyframe)" is a re-grant to c1; a red by one line without it, stamped within a second
+# of the exit, is the last sample's race. The post-grant claim `c1.npc_state(0x1348a).is3DLoaded == false` was the same cold-route
+# premise read 25 to 120 s later on the same buffered interior (the eviction time HYPOTHESIS), and takes the same witness. The 3D
+# stays a recorded read in both blocks. Every other step and claim as v23. Fresh review (ADR-064 rule A) FIX FIRST on the control and
+# the second claim, applied as written; Eli's word under W4 covers both rewrites.
 # b-npc-handoff-door-hosts v23 (06:36 PST 2026-11-03, thuum-cf): one premise step added in leg B, no claim changed (ADR-064 rule A: a premise
 # change leaving every claim, no new review due). After the street seat's exit from the inn, an until waits (10 s) for 0x9731's host
 # to be c1 again before the wait and the assert. The cause, read from 134832 (v22's leg B red at step 82): the exit is a WARM re-attach
@@ -369,17 +386,25 @@ steps:
   # 0x9731 unhosted for the run while the fix's parent re-reported the own cell alone); the fix on m3-system1-r3 31167a9b re-reports
   # a re-attached cell within a second, so the host is waited for here and a late poll reads as its own red
   - until: {within: 10, expect: [server.host(0x9731).client == "c1"]}
+  # v24: the stream witness of "indoors, not simulating": c1's hosted-state lines for him, counted right after the exit and again
+  # 15 s later, must not grow (a copy c1 simulated would report); his 3D is recorded by the npc-state read, not claimed, because the
+  # warm exit's buffered interior keeps the copy's 3D (non-owning-seat.md P13, 151537 and 150814) where a cold exit loses it
+  - c1: log-count {pattern: "HostedStateService: state 1348a:"}
+  - server: snapshot {name: state_exit_b, of: 'c1.log_count("HostedStateService: state 1348a:")'}
   - wait: 15
+  - c1: log-count {pattern: "HostedStateService: state 1348a:"}
   - c1: npc-state {formId: 0x1348a}
   - assert:
       - server.host(0x9712).client == "c1"
       - server.host(0x9731).client == "c1"
       - server.ref(0x1348a).cell == "133c6:Skyrim.esm"
-      - c1.npc_state(0x1348a).is3DLoaded == false
+      # the witness, with its positive control: the pattern counted something (the visit's keyframe at least), and nothing new
+      - 'c1.log_count("HostedStateService: state 1348a:") == snapshot("state_exit_b")'
+      - 'c1.log_count("HostedStateService: state 1348a:") >= 1'
       - c1.npc_state(0x1348a).cell == 0x133c6
       - server.time().hour >= 20
   # the interior's seat enters by the same landing, is granted the interior and runs him: his 3D and AI there on neither
-  # sawmill package (the conditioned ones would walk him out early), the street seat's copy still indoors with no 3D; across
+  # sawmill package (the conditioned ones would walk him out early), the street seat's copy still indoors, its 3D recorded, its stream silent against the exit's baseline (v24); across
   # its grant no pass, follow or move of him into an exterior cell and none back into the interior (055217: the new host's first
   # report put him outdoors 180 ms after the grant and the other side's copy passed him back 36 ms later, the bounce's mechanism
   # at a grant; on the fix head the settle drops that report back and the hold would place the next copy at the stale record, so
@@ -401,6 +426,9 @@ steps:
   - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 97"}
   - server: log-count {pattern: "door 13419: 1348a.s host .* walks it through to 3c"}
   - server: log-count {pattern: "report of 1348a into cell 133c6 within the settle window"}
+  # v24: the street seat's copy is still indoors with its 3D recorded, its stream silent against the exit's baseline (the same
+  # cold-route premise as the post-exit claim; no grant to c1 can come between without c1's engine attaching the inn)
+  - c1: log-count {pattern: "HostedStateService: state 1348a:"}
   - assert:
       - 'server.log_count("(passes|follows|moves) 1348a into cell 97") == snapshot("out_grant_b")'
       - 'server.log_count("(passes|follows|moves) 1348a into cell 133c6") == snapshot("back_grant_b")'
@@ -409,7 +437,7 @@ steps:
       - c2.npc_state(0x1348a).aiEnabled == true
       - c2.npc_state(0x1348a).package != 0x1e604
       - c2.npc_state(0x1348a).package != 0x734ce
-      - c1.npc_state(0x1348a).is3DLoaded == false
+      - 'c1.log_count("HostedStateService: state 1348a:") == snapshot("state_exit_b")'
       - c1.npc_state(0x1348a).cell == 0x133c6
       - server.time().hour >= 20
       - server.time().hour < 21.8
