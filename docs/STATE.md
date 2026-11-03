@@ -10,21 +10,24 @@ ChangeForm once slice 3 lands); a channel-less R0 to R2 row is a missing channel
 
 | Rung | Rows |
 | --- | --- |
-| undeclared | 89 |
+| R0 | 37 |
+| R1 | 1 |
+| R2 | 4 |
+| undeclared | 47 |
 | total | 89 |
 
 | Key | Kind | Source | Rung | Channel | Notes | Verb |
 | --- | --- | --- | --- | --- | --- | --- |
-| `Actor.kLifeState` | flag bit 10 | include/RE/A/Actor.h:234 | undeclared |  |  |  |
-| `Actor.kPackageExtraData` | flag bit 11 | include/RE/A/Actor.h:235 | undeclared |  |  |  |
+| `Actor.kLifeState` | flag bit 10 | include/RE/A/Actor.h:234 | R0 | the death word (DeathStateContainer, isDead) | npc-fate.md:139 R0 for the death | npc-fate |
+| `Actor.kPackageExtraData` | flag bit 11 | include/RE/A/Actor.h:235 | undeclared |  | npc-stream relays the host's package choice at R2; the saved package extra itself has no row yet |  |
 | `Actor.kMerchantContainer` | flag bit 12 | include/RE/A/Actor.h:236 | undeclared |  |  |  |
 | `Actor.kDismemberedLimbs` | flag bit 17 | include/RE/A/Actor.h:237 | undeclared |  |  |  |
-| `Actor.kLeveledActor` | flag bit 18 | include/RE/A/Actor.h:238 | undeclared |  |  |  |
-| `Actor.kDispModifiers` | flag bit 19 | include/RE/A/Actor.h:239 | undeclared |  |  |  |
-| `Actor.kTempModifiers` | flag bit 20 | include/RE/A/Actor.h:240 | undeclared |  |  |  |
-| `Actor.kDamageModifiers` | flag bit 21 | include/RE/A/Actor.h:241 | undeclared |  |  |  |
-| `Actor.kOverrideModifiers` | flag bit 22 | include/RE/A/Actor.h:242 | undeclared |  |  |  |
-| `Actor.kPermanentModifiers` | flag bit 23 | include/RE/A/Actor.h:243 | undeclared |  |  |  |
+| `Actor.kLeveledActor` | flag bit 18 | include/RE/A/Actor.h:238 | R0 | the fate message (ADR-049) | npc-fate.md:139 R0 for the roll | npc-fate |
+| `Actor.kDispModifiers` | flag bit 19 | include/RE/A/Actor.h:239 | undeclared |  | disposition modifiers: hostility-sync carries hostility, not the modifiers |  |
+| `Actor.kTempModifiers` | flag bit 20 | include/RE/A/Actor.h:240 | R0 | actor values (ChangeValues) | actor-values.md:20 R0 for values the server sets, R2 for progress made in play; attributes.md:19 R0 for the record | actor-values, attributes |
+| `Actor.kDamageModifiers` | flag bit 21 | include/RE/A/Actor.h:241 | R0 | actor values (ChangeValues) | actor-values.md:20 R0 for values the server sets, R2 for progress made in play; attributes.md:19 R0 for the record | actor-values, attributes |
+| `Actor.kOverrideModifiers` | flag bit 22 | include/RE/A/Actor.h:242 | R0 | actor values (ChangeValues) | actor-values.md:20 R0 for values the server sets, R2 for progress made in play; attributes.md:19 R0 for the record | actor-values, attributes |
+| `Actor.kPermanentModifiers` | flag bit 23 | include/RE/A/Actor.h:243 | R0 | actor values (ChangeValues) | actor-values.md:20 R0 for values the server sets, R2 for progress made in play; attributes.md:19 R0 for the record | actor-values, attributes |
 | `BGSEncounterZone.kZoneFlags` | flag bit 1 | include/RE/B/BGSEncounterZone.h:53 | undeclared |  |  |  |
 | `BGSEncounterZone.kGameData` | flag bit 31 | include/RE/B/BGSEncounterZone.h:54 | undeclared |  |  |  |
 | `BGSListForm.kAddedForm` | flag bit 31 | include/RE/B/BGSListForm.h:21 | undeclared |  |  |  |
@@ -44,19 +47,19 @@ ChangeForm once slice 3 lands); a channel-less R0 to R2 row is a missing channel
 | `TESLevCharacter.kAddedObject` | flag bit 31 | include/RE/T/TESLevCharacter.h:24 | undeclared |  |  |  |
 | `TESLevItem.kAddedObject` | flag bit 31 | include/RE/T/TESLevItem.h:22 | undeclared |  |  |  |
 | `TESLevSpell.kAddedObject` | flag bit 31 | include/RE/T/TESLevSpell.h:22 | undeclared |  |  |  |
-| `TESNPC.kBaseData` | flag bit 1 | include/RE/T/TESNPC.h:48 | undeclared |  |  |  |
-| `TESNPC.kAttributes` | flag bit 2 | include/RE/T/TESNPC.h:49 | undeclared |  |  |  |
-| `TESNPC.kAIData` | flag bit 3 | include/RE/T/TESNPC.h:50 | undeclared |  |  |  |
-| `TESNPC.kSpellList` | flag bit 4 | include/RE/T/TESNPC.h:51 | undeclared |  |  |  |
-| `TESNPC.kFullName` | flag bit 5 | include/RE/T/TESNPC.h:52 | undeclared |  |  |  |
-| `TESNPC.kFactions` | flag bit 6 | include/RE/T/TESNPC.h:53 | undeclared |  |  |  |
-| `TESNPC.kNPCSkills` | flag bit 9 | include/RE/T/TESNPC.h:54 | undeclared |  |  |  |
-| `TESNPC.kClass` | flag bit 10 | include/RE/T/TESNPC.h:55 | undeclared |  |  |  |
-| `TESNPC.kFace` | flag bit 11 | include/RE/T/TESNPC.h:56 | undeclared |  |  |  |
-| `TESNPC.kDefaultOutfit` | flag bit 12 | include/RE/T/TESNPC.h:57 | undeclared |  |  |  |
-| `TESNPC.kSleepOutfit` | flag bit 13 | include/RE/T/TESNPC.h:58 | undeclared |  |  |  |
-| `TESNPC.kGender` | flag bit 24 | include/RE/T/TESNPC.h:59 | undeclared |  |  |  |
-| `TESNPC.kRace` | flag bit 25 | include/RE/T/TESNPC.h:60 | undeclared |  |  |  |
+| `TESNPC.kBaseData` | flag bit 1 | include/RE/T/TESNPC.h:48 | R0 | the appearance record and RaceMenu sync; leveling and learned spells for skills and spells | appearance.md:18 R0; the look R2 bounded (racemenu-sync.md:30); creation R1 (character-creation.md:20) | appearance, racemenu-sync, leveling, learned-spells |
+| `TESNPC.kAttributes` | flag bit 2 | include/RE/T/TESNPC.h:49 | R0 | the appearance record and RaceMenu sync; leveling and learned spells for skills and spells | appearance.md:18 R0; the look R2 bounded (racemenu-sync.md:30); creation R1 (character-creation.md:20) | appearance, racemenu-sync, leveling, learned-spells |
+| `TESNPC.kAIData` | flag bit 3 | include/RE/T/TESNPC.h:50 | R0 | the appearance record and RaceMenu sync; leveling and learned spells for skills and spells | appearance.md:18 R0; the look R2 bounded (racemenu-sync.md:30); creation R1 (character-creation.md:20) | appearance, racemenu-sync, leveling, learned-spells |
+| `TESNPC.kSpellList` | flag bit 4 | include/RE/T/TESNPC.h:51 | R0 | the appearance record and RaceMenu sync; leveling and learned spells for skills and spells | learned-spells.md:46 R0 for the list | appearance, racemenu-sync, leveling, learned-spells |
+| `TESNPC.kFullName` | flag bit 5 | include/RE/T/TESNPC.h:52 | R0 | the appearance record and RaceMenu sync; leveling and learned spells for skills and spells | appearance.md:18 R0; the look R2 bounded (racemenu-sync.md:30); creation R1 (character-creation.md:20) | appearance, racemenu-sync, leveling, learned-spells |
+| `TESNPC.kFactions` | flag bit 6 | include/RE/T/TESNPC.h:53 | R0 | the appearance record and RaceMenu sync; leveling and learned spells for skills and spells | appearance.md:18 R0; the look R2 bounded (racemenu-sync.md:30); creation R1 (character-creation.md:20) | appearance, racemenu-sync, leveling, learned-spells |
+| `TESNPC.kNPCSkills` | flag bit 9 | include/RE/T/TESNPC.h:54 | R0 | the appearance record and RaceMenu sync; leveling and learned spells for skills and spells | leveling.md:51 R0 for the record (R1 for a skill use) | appearance, racemenu-sync, leveling, learned-spells |
+| `TESNPC.kClass` | flag bit 10 | include/RE/T/TESNPC.h:55 | R0 | the appearance record and RaceMenu sync; leveling and learned spells for skills and spells | appearance.md:18 R0; the look R2 bounded (racemenu-sync.md:30); creation R1 (character-creation.md:20) | appearance, racemenu-sync, leveling, learned-spells |
+| `TESNPC.kFace` | flag bit 11 | include/RE/T/TESNPC.h:56 | R0 | the appearance record and RaceMenu sync; leveling and learned spells for skills and spells | appearance.md:18 R0; the look R2 bounded (racemenu-sync.md:30); creation R1 (character-creation.md:20) | appearance, racemenu-sync, leveling, learned-spells |
+| `TESNPC.kDefaultOutfit` | flag bit 12 | include/RE/T/TESNPC.h:57 | R0 | the appearance record and RaceMenu sync; leveling and learned spells for skills and spells | appearance.md:18 R0; the look R2 bounded (racemenu-sync.md:30); creation R1 (character-creation.md:20) | appearance, racemenu-sync, leveling, learned-spells |
+| `TESNPC.kSleepOutfit` | flag bit 13 | include/RE/T/TESNPC.h:58 | R0 | the appearance record and RaceMenu sync; leveling and learned spells for skills and spells | appearance.md:18 R0; the look R2 bounded (racemenu-sync.md:30); creation R1 (character-creation.md:20) | appearance, racemenu-sync, leveling, learned-spells |
+| `TESNPC.kGender` | flag bit 24 | include/RE/T/TESNPC.h:59 | R0 | the appearance record and RaceMenu sync; leveling and learned spells for skills and spells | appearance.md:18 R0; the look R2 bounded (racemenu-sync.md:30); creation R1 (character-creation.md:20) | appearance, racemenu-sync, leveling, learned-spells |
+| `TESNPC.kRace` | flag bit 25 | include/RE/T/TESNPC.h:60 | R0 | the appearance record and RaceMenu sync; leveling and learned spells for skills and spells | appearance.md:18 R0; the look R2 bounded (racemenu-sync.md:30); creation R1 (character-creation.md:20) | appearance, racemenu-sync, leveling, learned-spells |
 | `TESObject.kObjectValue` | flag bit 1 | include/RE/T/TESObject.h:19 | undeclared |  |  |  |
 | `TESObject.kObjectFullName` | flag bit 2 | include/RE/T/TESObject.h:20 | undeclared |  |  |  |
 | `TESObjectBOOK.kTeachesSkill` | flag bit 5 | include/RE/T/TESObjectBOOK.h:76 | undeclared |  |  |  |
@@ -69,38 +72,38 @@ ChangeForm once slice 3 lands); a channel-less R0 to R2 row is a missing channel
 | `TESObjectCELL.kDetachTime` | flag bit 30 | include/RE/T/TESObjectCELL.h:151 | undeclared |  |  |  |
 | `TESObjectCELL.kSeendData` | flag bit 31 | include/RE/T/TESObjectCELL.h:152 | undeclared |  |  |  |
 | `TESObjectDOOR.kTeleportExtra` | flag bit 17 | include/RE/T/TESObjectDOOR.h:39 | undeclared |  |  |  |
-| `TESObjectREFR.kMoved` | flag bit 1 | include/RE/T/TESObjectREFR.h:141 | undeclared |  |  |  |
-| `TESObjectREFR.kHavokMoved` | flag bit 2 | include/RE/T/TESObjectREFR.h:142 | undeclared |  |  |  |
-| `TESObjectREFR.kCellChanged` | flag bit 3 | include/RE/T/TESObjectREFR.h:143 | undeclared |  |  |  |
+| `TESObjectREFR.kMoved` | flag bit 1 | include/RE/T/TESObjectREFR.h:141 | R2 | the prop stream (prop-physics) and the movement relay | prop-physics.md:153 R2 for the transform (the simulating seat's Havok, the server records); a player's own movement is R1 (movement-relay.md:19); ADR-065's consequences (DECISIONS.md: a prop at rest is kMoved and kHavokMoved from its owner) | prop-physics, movement-relay |
+| `TESObjectREFR.kHavokMoved` | flag bit 2 | include/RE/T/TESObjectREFR.h:142 | R2 | the prop stream (the transform and the asleep flag) | prop-physics.md:153; ADR-065's consequences | prop-physics |
+| `TESObjectREFR.kCellChanged` | flag bit 3 | include/RE/T/TESObjectREFR.h:143 | R1 | npc-handoff's cell-change report | npc-handoff.md:72 R1 for the host's cell-change report (the server validates the destination) | npc-handoff |
 | `TESObjectREFR.kScale` | flag bit 4 | include/RE/T/TESObjectREFR.h:144 | undeclared |  |  |  |
-| `TESObjectREFR.kInventory` | flag bit 5 | include/RE/T/TESObjectREFR.h:145 | undeclared |  |  |  |
+| `TESObjectREFR.kInventory` | flag bit 5 | include/RE/T/TESObjectREFR.h:145 | R0 | the inventory messages (containers; npc-fate's body inventory) | containers.md:51 R0 for the container's inventory; npc-fate.md:139-141 R0 for the body's inventory; the design law's R0 for inventory transfer | containers, npc-fate |
 | `TESObjectREFR.kOwnershipExtra` | flag bit 6 | include/RE/T/TESObjectREFR.h:146 | undeclared |  |  |  |
-| `TESObjectREFR.kBaseObject` | flag bit 7 | include/RE/T/TESObjectREFR.h:147 | undeclared |  |  |  |
-| `TESObjectREFR.kItemExtraData` | flag bit 10 | include/RE/T/TESObjectREFR.h:148 | undeclared |  |  |  |
-| `TESObjectREFR.kAmmoExtra` | flag bit 11 | include/RE/T/TESObjectREFR.h:149 | undeclared |  |  |  |
-| `TESObjectREFR.kLockExtra` | flag bit 12 | include/RE/T/TESObjectREFR.h:150 | undeclared |  |  |  |
-| `TESObjectREFR.kEmpty` | flag bit 21 | include/RE/T/TESObjectREFR.h:151 | undeclared |  |  |  |
+| `TESObjectREFR.kBaseObject` | flag bit 7 | include/RE/T/TESObjectREFR.h:147 | undeclared |  | no verb swaps a base; the censuses read bit 7 clear on a leveled actor (192013, the clone rebuilt from its templates) |  |
+| `TESObjectREFR.kItemExtraData` | flag bit 10 | include/RE/T/TESObjectREFR.h:148 | R0 | with the inventory | containers.md:51 (the items' extra data travels with the inventory; today the roadmap's known gap for charges and poisons) | containers |
+| `TESObjectREFR.kAmmoExtra` | flag bit 11 | include/RE/T/TESObjectREFR.h:149 | R0 | with the inventory | containers.md:51 | containers |
+| `TESObjectREFR.kLockExtra` | flag bit 12 | include/RE/T/TESObjectREFR.h:150 | R0 | locks' lock state | locks.md:52 R0 for the lock state (locked, level, key), R1 for a pick's result | locks |
+| `TESObjectREFR.kEmpty` | flag bit 21 | include/RE/T/TESObjectREFR.h:151 | R0 | the inventory (an emptied container) | containers.md:51 | containers |
 | `TESObjectREFR.kOpenDefaultState` | flag bit 22 | include/RE/T/TESObjectREFR.h:152 | undeclared |  |  |  |
-| `TESObjectREFR.kOpenState` | flag bit 23 | include/RE/T/TESObjectREFR.h:153 | undeclared |  |  |  |
-| `TESObjectREFR.kPromoted` | flag bit 25 | include/RE/T/TESObjectREFR.h:154 | undeclared |  |  |  |
+| `TESObjectREFR.kOpenState` | flag bit 23 | include/RE/T/TESObjectREFR.h:153 | R0 | containers' open state; a door's through activation | containers.md:51 R0 for the open state; activation-reach.md:20 R1 for the activation itself | containers, activation-reach |
+| `TESObjectREFR.kPromoted` | flag bit 25 | include/RE/T/TESObjectREFR.h:154 | undeclared |  | a promoted actor never stashes (change-forms.md D7); the server's own creation word is R0 by construction, not yet a row |  |
 | `TESObjectREFR.kActivatingChildren` | flag bit 26 | include/RE/T/TESObjectREFR.h:155 | undeclared |  |  |  |
-| `TESObjectREFR.kLeveledInventory` | flag bit 27 | include/RE/T/TESObjectREFR.h:156 | undeclared |  |  |  |
-| `TESObjectREFR.kAnimation` | flag bit 28 | include/RE/T/TESObjectREFR.h:157 | undeclared |  |  |  |
+| `TESObjectREFR.kLeveledInventory` | flag bit 27 | include/RE/T/TESObjectREFR.h:156 | R0 | the fate's roll (ADR-049) with the inventory | npc-fate.md:109 (the LVLI roll at the reference's load, the server's at level 1), :139 R0 for the roll | npc-fate |
+| `TESObjectREFR.kAnimation` | flag bit 28 | include/RE/T/TESObjectREFR.h:157 | R2 | the animation event relay (npc-stream's actions) | the design law's R2 for animation; the saved animation sub-buffer itself is engine-local (the serialize note's Q3: the on-demand path drops bit 28) | npc-stream |
 | `TESObjectREFR.kEncZoneExtra` | flag bit 29 | include/RE/T/TESObjectREFR.h:158 | undeclared |  |  |  |
 | `TESObjectREFR.kCreatedOnlyExtra` | flag bit 30 | include/RE/T/TESObjectREFR.h:159 | undeclared |  |  |  |
 | `TESObjectREFR.kGameOnlyExtra` | flag bit 31 | include/RE/T/TESObjectREFR.h:160 | undeclared |  |  |  |
 | `TESPackage.kWaitingFlag` | flag bit 26 | include/RE/T/TESPackage.h:265 | undeclared |  |  |  |
 | `TESPackage.kNeverRunFlag` | flag bit 31 | include/RE/T/TESPackage.h:266 | undeclared |  |  |  |
-| `TESQuest.kQuestFlags` | flag bit 1 | include/RE/T/TESQuest.h:201 | undeclared |  |  |  |
-| `TESQuest.kQuestScriptDelay` | flag bit 2 | include/RE/T/TESQuest.h:202 | undeclared |  |  |  |
-| `TESQuest.kQuestAlreadyRun` | flag bit 26 | include/RE/T/TESQuest.h:203 | undeclared |  |  |  |
-| `TESQuest.kQuestInstanceData` | flag bit 27 | include/RE/T/TESQuest.h:204 | undeclared |  |  |  |
-| `TESQuest.kQuestRuntimeData` | flag bit 28 | include/RE/T/TESQuest.h:205 | undeclared |  |  |  |
-| `TESQuest.kQuestObjectives` | flag bit 29 | include/RE/T/TESQuest.h:206 | undeclared |  |  |  |
-| `TESQuest.kQuestScript` | flag bit 30 | include/RE/T/TESQuest.h:207 | undeclared |  |  |  |
-| `TESQuest.kQuestStages` | flag bit 31 | include/RE/T/TESQuest.h:208 | undeclared |  |  |  |
+| `TESQuest.kQuestFlags` | flag bit 1 | include/RE/T/TESQuest.h:201 | R0 | the stage request relay (D-F1 C, not built); quest-stage's feed today | DECISIONS.md 93699f36 (ADR-063 amended by D-F1 C: quest state R0 on the server, a stage write a request relayed to every seat); quest-stage.md:47 R1 for the feed today | quest-stage |
+| `TESQuest.kQuestScriptDelay` | flag bit 2 | include/RE/T/TESQuest.h:202 | R0 | the stage request relay (D-F1 C, not built); quest-stage's feed today | DECISIONS.md 93699f36 (ADR-063 amended by D-F1 C: quest state R0 on the server, a stage write a request relayed to every seat); quest-stage.md:47 R1 for the feed today | quest-stage |
+| `TESQuest.kQuestAlreadyRun` | flag bit 26 | include/RE/T/TESQuest.h:203 | R0 | the stage request relay (D-F1 C, not built); quest-stage's feed today | DECISIONS.md 93699f36 (ADR-063 amended by D-F1 C: quest state R0 on the server, a stage write a request relayed to every seat); quest-stage.md:47 R1 for the feed today | quest-stage |
+| `TESQuest.kQuestInstanceData` | flag bit 27 | include/RE/T/TESQuest.h:204 | R0 | the stage request relay (D-F1 C, not built); quest-stage's feed today | DECISIONS.md 93699f36 (ADR-063 amended by D-F1 C: quest state R0 on the server, a stage write a request relayed to every seat); quest-stage.md:47 R1 for the feed today | quest-stage |
+| `TESQuest.kQuestRuntimeData` | flag bit 28 | include/RE/T/TESQuest.h:205 | R0 | the stage request relay (D-F1 C, not built); quest-stage's feed today | DECISIONS.md 93699f36 (ADR-063 amended by D-F1 C: quest state R0 on the server, a stage write a request relayed to every seat); quest-stage.md:47 R1 for the feed today | quest-stage |
+| `TESQuest.kQuestObjectives` | flag bit 29 | include/RE/T/TESQuest.h:206 | R0 | the stage request relay (D-F1 C, not built); quest-stage's feed today | DECISIONS.md 93699f36 (ADR-063 amended by D-F1 C: quest state R0 on the server, a stage write a request relayed to every seat); quest-stage.md:47 R1 for the feed today | quest-stage |
+| `TESQuest.kQuestScript` | flag bit 30 | include/RE/T/TESQuest.h:207 | R0 | the stage request relay (D-F1 C, not built); quest-stage's feed today | DECISIONS.md 93699f36 (ADR-063 amended by D-F1 C: quest state R0 on the server, a stage write a request relayed to every seat); quest-stage.md:47 R1 for the feed today | quest-stage |
+| `TESQuest.kQuestStages` | flag bit 31 | include/RE/T/TESQuest.h:208 | R0 | the stage request relay (D-F1 C, not built); quest-stage's feed today | DECISIONS.md 93699f36 (ADR-063 amended by D-F1 C: quest state R0 on the server, a stage write a request relayed to every seat); quest-stage.md:47 R1 for the feed today | quest-stage |
 | `TESTopicInfo.kSaidOnce` | flag bit 31 | include/RE/T/TESTopicInfo.h:60 | undeclared |  |  |  |
-| `table:GlobalVariables` | table pending the engine read, world: every TESGlobal's value (ADR-065 amendment B streams them by a per-frame diff over TESDataHandler's array) | ADR-065 decision 1 and amendment B; the type id from the engine's writer table (pending) | undeclared |  |  |  |
-| `table:Weather` | table pending the engine read, world: the Sky's current and target weather and the transition | ADR-065 decision 1 (the weather verb carries it today, docs/verbs/weather.md); the type id pending | undeclared |  |  |  |
-| `table:Calendar` | table pending the engine read, world: the game's time (ADR-021's clock globals carry it today) | ADR-065 decision 1 and amendment B ("the clock's globals stay ADR-021's"); the type id pending | undeclared |  |  |  |
-| `table:Papyrus` | table pending the engine read, world: the VM's objects, states and variables (ADR-065 decision 5: not portable per object; a per-object encoder at the hand-off) | ADR-065 decision 5; docs/research/adr065-papyrus-state-2026-11-03.md; the type id pending | undeclared |  |  |  |
+| `table:GlobalVariables` | table pending the engine read, world: every TESGlobal's value (ADR-065 amendment B streams them by a per-frame diff over TESDataHandler's array) | ADR-065 decision 1 and amendment B; the type id from the engine's writer table (pending) | R2 | player-globals (ADR-029); ADR-065 amendment B's per-frame diff | player-globals.md:36 R2, host computes, server records; the clock's globals stay ADR-021's (R0, time.md:71) | player-globals |
+| `table:Weather` | table pending the engine read, world: the Sky's current and target weather and the transition | ADR-065 decision 1 (the weather verb carries it today, docs/verbs/weather.md); the type id pending | R0 | the weather verb | weather.md:50 R0 (the server picks and keeps; the clients render) | weather |
+| `table:Calendar` | table pending the engine read, world: the game's time (ADR-021's clock globals carry it today) | ADR-065 decision 1 and amendment B ("the clock's globals stay ADR-021's"); the type id pending | R0 | time (ADR-021) | time.md:71 R0 | time |
+| `table:Papyrus` | table pending the engine read, world: the VM's objects, states and variables (ADR-065 decision 5: not portable per object; a per-object encoder at the hand-off) | ADR-065 decision 5; docs/research/adr065-papyrus-state-2026-11-03.md; the type id pending | R0 | the server VM's scripts (script-variables); ADR-065 decision 5's hand-off encoder | script-variables.md:23 R0 (the server's VM computes every write); papyrus-events.md:45 R3 for the admission itself; ADR-065 decision 5 (the owning seat's VM runs an object's scripts) | script-variables, papyrus-events |
