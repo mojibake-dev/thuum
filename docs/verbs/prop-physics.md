@@ -95,10 +95,14 @@ ownerOf by the word; onOwner stores any epoch not below the known one, player 0 
 skipped while another seat's awake stream is live here (STREAM_LIVE_MS; the server refuses it anyway); grab, release and drop claims
 and the asleep send unchanged. Tests: props.rs (the moving refusal, the grab over a touch, the rest's return and word, the departure's
 words, the stalled claim, the host's own rest sends no word, the host's takeover and the tick's cap), PropTest.cpp (the word at rest
-to both seats with player 0, the moving refusal, NotOwner answered, the takeover's word), wire-validate's PropOwner case (0 admitted). Two seats: x-prop-arbitration by path (lab-spawn, c1 hosts
-and drops the ingot as b-prop-push does; c2 walks into it at rest: granted, streams, rests, the word returns it; c1 kicks it and c2
-steps into the flight: E_PROP_MOVING, no grant during the flight; at rest c2 grabs: granted, c1's walk-in Held; the release rests
-and the word returns it), then b-prop-arbitration in its own commit; the blast leg from x-prop-blast after. Stale text fixed with
+to both seats with player 0, the moving refusal, NotOwner answered, the takeover's word), wire-validate's PropOwner case (0 admitted).
+Two seats: x-prop-arbitration v4 by path (lab-spawn, a server-placed iron ingot at the mining floor marker; leg 1 c2's contact at
+rest: granted, streams, rests, the word returns it; leg 2 c1 kicks it into c2: the contact takes nothing (the guest's own skip or
+E_PROP_MOVING) and the record moved; leg 3 c2's grab at rest over a pitch sweep: granted, the hold's samples read through the
+server's stream counters, the release's rest and word; leg 4 c2's blast at rest: the impulse grant or the host's own stream, one
+of the two; every count read against a snapshot behind its own log-count step; lab/frida/prop-grab.js armed on both seats at the
+relaunch for E13, E14 and E15; A2's Held and E31 wait for a concurrent step, a serial script cannot overlap two seats' acts), then
+b-prop-arbitration in its own commit. Stale text fixed with
 the build: skymp.rs:1816, PropClaimMessage.h:10, propClaimMessage.ts:8 and props.rs:201 (the cell refusal), skymp.rs:1833,
 PropOwnerMessage.h:8-10 and propOwnerMessage.ts:4-6 (the velocity), PropTest.cpp:371's title, the reach row below (:268).
 

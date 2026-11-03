@@ -756,17 +756,25 @@ stays Refuse; the door's pre-check treats Stale as a refusal; a real return afte
 window. No wire change (no epoch travels; numidium's epoch shape is the alternative if the window proves too blunt). T0:
 cells.rs `a_passed_actors_report_back_within_the_settle_window_is_a_stale_copys_sample` and the cross test's teleport moved past
 the window; CellHostTest's door case reads the report's reliable send ahead of the word, the stale drop and the exit after the
-window. T3: b-npc-handoff-door-hosts v3 (thuum abb4d8bc, 19:51 PST 2026-11-02; v1 019b0cd3 played a walk INTO a hosted house, which
-worked before the fix, and v2 dd472cc6 had four claim groups a working fix could still fail, both caught by ADR-064's fresh
-reviews): Hod 0x1348a OUT of the Sleeping Giant by its inn-side door 0x13419 to the street 0x9712, the inn's seat at the
-street-side door 0x13424's landing (-250, -360, 0) hosting 0x133c6, the street's seat on Riverwood's road, the clock at 22.0 (his
-bedtime walk), both roles on a restarted clock. Per leg: the premise (the hosts, the hour, his record and 3D on the inn's seat, the
-street seat's own copy of him standing indoors with no 3D: the precondition the parent's bounce rests on), the counts read against
-baselines snapshotted at the premise (his walk into the inn is itself a pass into 133c6), the exit waited on the pass line
-itself, then at 5 s the door walk's line, one more "now simulates 1348a in cell 97xx" and no more for 133c6, the record outdoors,
-the street's seat running him loaded within 150 units of the record, the inn's seat with no 3D of him and its copy out of the inn;
-at 65 s the counts again and nobody's copy in the inn. The mutation run is the fix's parent 35509f7a (leg A), and the by-path
-probe x-handoff-door-hosts-swap plays leg B's roles on the parent (a run stops at its first red). HYPOTHESIS until those runs:
+window. T3: b-npc-handoff-door-hosts v6 (thuum 3c15a559, 2026-11-03; v1 019b0cd3 played a walk INTO a hosted house, which worked
+before the fix, v2 dd472cc6 had four claim groups a working fix could still fail, v3 abb4d8bc and v4 974a9484 took the reads'
+order and the baselines, v5 0f9f84b0 the premise miss of the parent run 20261103-041145 (Hod's clean-world record stands in his
+house 0x133c7, unhosted and frozen), and v6 numidium's schedule read, all caught by ADR-064's fresh reviews): Hod 0x1348a OUT of
+the Sleeping Giant by its inn-side door 0x13419 to the street 0x9712 at 22:00, when his inn package (HodSleepingGiant19x3
+0x35696, 19:00 to 22:00) ends and the fallback sandbox near his editor location takes him out; the clock at 19.0; the inn's seat
+begins INSIDE his house and hosts it so his AI walks him out (a pass to the street's host) and into the unhosted inn (the street
+host's follow, claimed), then teleports to the inn's door 0x13424's landing (-250, -360, 0), steps in and is granted the inn (the
+follow's end claimed); the street's seat on Riverwood's road hosts 0x9712 and 0x9731; both roles on a restarted clock. Per leg:
+the premise in order (his record claimed before the house's seat lands, the hosts, the hour, the two walks as two waits, his 3D
+and AI on the inn's seat, the street seat's own copy of him standing indoors with no 3D: the precondition the parent's bounce
+rests on), the counts read against baselines snapshotted at the premise with the door line first (his walk into the inn is
+itself a pass into 133c6), the exit waited on the pass line itself, then at 5 s the door walk's line, one more "now simulates
+1348a in cell 97xx" and no more for 133c6, the hour past 21.5, the record outdoors, the street's seat running him loaded in 0x9712
+or 0x9731 within 150 units of the record (his walk home crosses the square edge in 5 to 7 s; a RELAXATION of v5's claim, Eli's
+word under ADR-064's W4), the inn's seat with no 3D of him and its copy out of the inn; at 65 s the counts again and nobody's copy
+in the inn. The mutation run is the fix's parent 35509f7a (leg A), the by-path probe x-handoff-door-hosts-swap v4 plays leg B's
+roles on the parent (a run stops at its first red), and a third run at handoffPassSettleMs 0 reads the reliable placement alone.
+HYPOTHESIS until those runs:
 the mechanism above (every stamp fits it), and that the street seat's copy stands indoors at the promote (the precondition,
 claimed). What the two halves carry (20:13 PST 2026-11-02, the settle branch's fresh review): the playtest's first bounce came about 8 s after
 the promote, outside any 1 s window, so the reliable copy of the passing report ahead of the word carries the playtest's case
