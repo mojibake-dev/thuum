@@ -107,10 +107,10 @@ and the asleep send unchanged. Tests: props.rs (the moving refusal, the grab ove
 words, the stalled claim, the host's wake by id across a host change, the tick's cap), PropTest.cpp (the word at rest to both seats
 with player 0, the moving refusal, NotOwner answered, the wake's word and the live row across the props table's grant),
 wire-validate's PropOwner case (0 admitted).
-Two seats: x-prop-arbitration v7 by path (lab-spawn, a server-placed iron ingot at the mining floor marker; leg 1 c2's contact at
+Two seats: x-prop-arbitration v8 by path (lab-spawn, a server-placed iron ingot at the mining floor marker; leg 1 c2's contact at
 rest: granted, streams, rests, the word returns it; leg 2 c1 kicks it into c2: the contact takes nothing (the guest's own skip or
-E_PROP_MOVING), the touch-0 grants unchanged through the flight, the host's wake and its rest risen against snapshots, the seats'
-owner lines naming the host counted before and after (a snapshot reads a server fact alone), and the record moved; leg 3 c2's grab at rest over a pitch sweep: granted, the hold's samples read through the
+E_PROP_MOVING), the touch-0 grants unchanged through the flight, the host's wake and its rest and both seats' owner lines naming
+the host risen against snapshots (lab-api 5219f093 takes a seat's fact in a snapshot after its log-count step), and the record moved; leg 3 c2's grab at rest over a pitch sweep: granted, the hold's samples read through the
 server's stream counters, the release's rest and word; leg 4 c2's blast at rest: the impulse grant or the host's own stream, one
 of the two; every count read against a snapshot behind its own log-count step; lab/frida/prop-grab.js armed on both seats at the
 relaunch for E13, E14 and E15, prop-sleep.js on c1 and prop-contact.js on c2 as each seat's second watcher (E10, E2, E26, E27;
