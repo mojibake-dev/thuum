@@ -680,7 +680,7 @@ stands in an interior this game has not loaded (Cell.isAttached false) is HIDDEN
 reference, and reconcile never releases a hidden actor to its schedule; when its record is back in a loaded cell (it came out, or this
 game walked in) it is shown (Enable, moved to the record) and reconciled (the house granted makes it live, the word makes it a
 puppet). The host's own reference is never hidden. Unhosted cells freeze; a seat that does not load a cell sees none of its actors:
-the design law's reading of D6 for the viewer. HYPOTHESIS until x-handoff-hide (by path) runs: the hide fires on the viewer once the
+the design law's reading of D6 for the viewer. HYPOTHESIS, open until the hide's own probe x-handoff-hide (a draft in lab/.cache/probes, v2 6f7d2025) runs on the hide's branch m4-turbo2-settle 7aac21d4 when that branch stages (the hide is not in the system-1 merge m3-system1): the hide fires on the viewer once the
 record stands in a cell it has not loaded, the D11 release never runs on a hidden actor (its copy a puppet 25 s on, no "released ...
 no 3D here" line), and the show's enable-and-move lands within 15 s of the attach (its v2 claims these after ADR-064's fresh review of
 2026-11-03). "Disable holds a puppet-flagged actor" (the server's own snippet did not hold Hilde: that snippet ran while the
