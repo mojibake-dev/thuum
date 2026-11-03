@@ -6248,3 +6248,19 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   census v2's and capture v1's claims were never evaluated (their greens say the steps ran; the census readings stand on their trace
   rows), fixed on main 24b864ab (an unknown top-level key is refused; every committed scenario uses known keys only). The stage of
   f1c954d7 starts on round nine's review GO.
+- 04:06 PST 2026-11-03 (12:06Z 11-03) (numidium): THE TRANSPLANT, GREEN. One seat's engine materialized another seat's record as its
+  own, through the engine's own load path (docs/engine/change-forms.md D1 to D3 CONFIRMED for a REFR's lock; ADR-065 decision 4's
+  premise).
+  - Capture, c1 solo (x-transplant-capture v1, 20261103-114726). FarmhouseAnimDoor01 0xe3a7a in the Sleeping Giant was locked with
+    `lock 50`. At `pcb` the engine's own stash (AL 35570) stored its record in the changes map: flags 0x90001000, type REFR, version
+    0x4e, 40 bytes raw, the door's id inside as a type-1 direct id. The probe's top-level asserts block was never read, which is
+    why the loader now refuses unknown keys (main 24b864ab).
+  - Inject, c2 solo, a fresh game (x-transplant-inject v1, 20261103-120316). The script carried its fresh review's fixes (FIX FIRST;
+    Frida's bool arguments would have thrown before the write). The record, checked and FNV-1a'd, went into c2's map with the
+    engine's own allocator before the inn ever loaded. At c2's `coc` the cell's init ran the apply (AL 35569) for 0xe3a7a: applied 1,
+    the only decode among 499 applies. c2 read GetLocked 1 for the door it never locked, and 0 for the untouched door 0xe3a79. Both
+    were assert steps, read and held.
+  - What it means: the record is the wire, and the engine's own cell-load path materializes it before the reference's first frame.
+    There is no load-time fix, no Papyrus native and no per-feature code. Next: the same for a container's inventory and a dead
+    NPC (D1 and D4's class), serializing on demand on the owner (SaveGame into our own buffer, not the unload's stash), and
+    LoadGame on a 3D-loaded reference.

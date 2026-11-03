@@ -26,6 +26,8 @@ only with the run that saw it. The run ids are the lab's.
   - Its ready row's pid (10376) matches none of the run's skyrim-platform log names. The trace is still this run's process:
     its rows carry the run's own acts at their times, Sven's death at the kill step and the player's equip at the equip.
   - v1 (20261103-111425) went red on its premise before the attach: the teleport step needs a server.
+  - v2's one claim (Sven dead) sat in a top-level asserts block, which the loader dropped unread (fixed on main 24b864ab: an
+    unknown top-level key is now refused). So v2's green says every step ran, and the death is the trace's kLifeState rows.
 - The census script's fresh review (FIX FIRST on v1). Its findings bound what v2's trace can show, in section 2(e).
 
 ## 2. The claims
@@ -66,9 +68,9 @@ only with the run that saw it. The run ids are the lab's.
 
 | Row | Claim | State | Evidence |
 |---|---|---|---|
-| D1 | When a reference unloads, AL 35570 stores its record in the changes map in save-file format. It runs CheckSaveGame, writes the initial data (AL 35715), runs SaveGame, packs the result (AL 36081) and stores {flags, record} in the entry (AL 35509). The callers include the cell's unload (AL 19113). | HYPOTHESIS | The re-analyst; the string "FORMS: Form '%s' (%08X) is unloading, but it already has a buffer." |
-| D2 | At a cell's next init (slot 0x13, AL 18881 and 18882), AL 35572 re-creates the moved and created references and applies their records. Each reference then runs AL 35569: read the entry, check the type byte, decode, consume, read the initial data, and run LoadGame, all before its 3D loads. | HYPOTHESIS | The re-analyst; the string "(Load Error) Form ... was saved with form type %s". |
-| D3 | A record written into the changes map (AL 35509) before a cell loads would be applied by D2 as the engine's own. It needs the right type byte, a version byte equal to the current save version (AL 35740), its ref ids encoded as type 1 or 2 or present in the form id map, and the cell's registration at +0xC8 if the reference changed cell. | HYPOTHESIS | The re-analyst. This is the safe-by-construction route: the record before the first frame. It is read by section 3's transplant. |
+| D1 | When a reference unloads, AL 35570 stores its record in the changes map in save-file format. It runs CheckSaveGame, writes the initial data (AL 35715), runs SaveGame, packs the result (AL 36081) and stores {flags, record} in the entry (AL 35509). The callers include the cell's unload (AL 19113). | CONFIRMED | 20261103-114726 (x-transplant-capture v1, c1 solo): FarmhouseAnimDoor01 0xe3a7a in the Sleeping Giant, locked by `lock 50`. Its entry at the attach held flags 0x90000000 (kGameOnlyExtra, kAnimation) and no record, since the cell was live. At `pcb` the stash (its caller 0x2bfbf8) wrote it through 35509 (caller 0x603ca9, inside 35570) with flags 0x90001000, kLockExtra added. The record: type 0 (REFR), size code 0, version 0x4e (78) as AL 35740 returns, length1 36, length2 0 (raw), 40 bytes; the door's own id inside as 0x4e3a7a (type 1, direct) and its animation state "Close" readable. |
+| D2 | At a cell's next init (slot 0x13, AL 18881 and 18882), each of the cell's references runs AL 35569 after its InitItemImpl: read the entry, check the type byte against the live form's, decode (AL 36080), consume, read the initial data and run LoadGame, all before its 3D loads. AL 35572 does the same for moved and created references. | CONFIRMED | 20261103-120316 (x-transplant-inject v1, c2 solo): at c2's `coc` into the Sleeping Giant, 35569 ran 499 times (one per reference of the cell) and decoded once, our entry's, for 0xe3a7a with `applied: 1`. |
+| D3 | A record written into the changes map (AL 35509) before a cell loads is applied by D2 as the engine's own. It needs the right type byte, a version byte equal to AL 35740's (0x4e), its ref ids encoded as type 1 or 2 (or present in the session's form id map), and the cell's registration at +0xC8 if the reference changed cell. | CONFIRMED for a REFR's lock (kGameOnlyExtra, kAnimation, kLockExtra; no move, no cell change) | The transplant. c1's engine stored 0xe3a7a's record at its unload (114726, D1). Its 40 bytes, checked and FNV-1a'd (0x4ebbb261), went into c2's map with the engine's own allocator before c2 ever loaded the inn (120316: written, read back as ours). c2's engine applied it at the cell's init (D2), and c2 read GetLocked 1 for 0xe3a7a, which c2 never locked, and 0 for the untouched door 0xe3a79; both claims were assert steps, read and held. One seat's engine materialized another seat's record as its own. |
 | D4 | The queued sub buffers (BGSSaveLoadGame.h's queuedSubBuffersMap) only defer 3D-dependent data: animation, character controller and Havok (AL 36024, 36026, 36031, "queued havok data"). They are not the materialize path. | HYPOTHESIS | The re-analyst. |
 | D5 | The changes map can be walked under its read lock (BGSSaveLoadGame.h:94, entries of 0x20 bytes: form id, flags, unknown, record pointer), as the engine's SaveGame (AL 35599) does. | HYPOTHESIS | The re-analyst. |
 
@@ -98,7 +100,7 @@ only with the run that saw it. The run ids are the lab's.
   is reading those (docs/research/adr065-papyrus-state-2026-11-03.md). Also absent are a created NPC's template forms
   (AL 14408's path, A1).
 
-Next reads:
+Next reads (the transplant, read 2 below, ran GREEN as 20261103-120316: D2 and D3 CONFIRMED for a lock):
 1. Census v3 with its review's fixes: hook 35576 itself, behind 14607's tail jump, plus 14608; drop BGSMovableStatic [0];
    refuse non-executable targets; a depth guard for TESNPC; every key in the sum rows; a raw-count heartbeat. It adds a quest
    that does start, a lock and an unlock, and a prop pushed.
