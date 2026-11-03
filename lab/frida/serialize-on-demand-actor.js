@@ -11,7 +11,7 @@
 // hand-off, where 37649 would read the high process mid-transition, 35715's Havok block ragdolling bodies, and a lock re-taken by
 // 39429 would hang, not crash); DEFER false runs inline; the rows print deferredMs and deferredVia. Against the REFR script: NO slot
 // 0xF2 pre-call (37622 Actor::MovetoLow is the unload's AI demotion; hooked only as a witness: in run 144049 the engine ran it on the
-// promoted bandit at the player's exit, from 37501, whose IsPersistent gate then skipped the stash: D7 again); three more premises (not
+// promoted bandit at the player's exit, from 37501, whose IsPersistent gate (HYPOTHESIS, the decompile) then skipped the stash: D7 again); three more premises (not
 // the player; far skin absent, since a set farGeometry makes 0x0E strip it by RemoveItem and mark kInventory, which would make
 // entryUntouched false for the engine's own reason, HYPOTHESIS; the live state is read before and after 0x0E, the far-skin flag being
 // the only expected write); a save-shaped record (level 0 or 1, the process block present); the body sectioned by the engine's own
@@ -24,7 +24,7 @@
 // check with FLAG 0xffffffff and RUNS 8 first, the kill's mark census (each premises row prints the mark's flags and thread), then
 // serialize with FLAG 0x400 and RUNS 2 (kDying, then kDead). No map write, kSaving, TLS +0x670 or reference maps. The stash (35570) and
 // the map write are hooked for FORM: a record that comes gets a compare row; a promoted or persistent actor never stashes
-// (change-forms.md D7; the unload walk 19230 and 37501 skip IsPersistent), the serialize row says so, and no stash row is then no error.
+// (change-forms.md D7; the unload walk 19230 and 37501's IsPersistent gate (HYPOTHESIS) skip it), the serialize row says so, and no stash row is then no error.
 // The compare's limit for a non-promoted actor: the first differing offset is PREDICTED at the level u32 (levelBoolBits: 0 or 1 on
 // demand, 3 after the stash's MovetoLow) and every later offset shifts with the process block, so "not equal at levelBoolBits" is the
 // expected reading, not a fault; a section-aligned compare would need the stash's own marks. Every engine call is wrapped, but a fault
@@ -69,7 +69,7 @@ const OFFSETS = {
     actorSave: 0x686710, // 37649 Actor::SaveGame, VTABLE_Actor (207511) slot 0x0E (Actor.h:275)
     characterSave: 0x727d40, // 40266 Character::SaveGame, VTABLE_Character (207886) slot 0x0E (Character.h:31): an inlined copy of 37649's body; every NPC's 0x0E
     playerUpdate: 0x732660, // 40447 PlayerCharacter::Update, VTABLE_PlayerCharacter (208040) slot 0xAD (Actor.h:371): the per-frame main-thread trigger (hooked)
-    movetoLow: 0x6826d0, // 37622 Actor::MovetoLow, slot 0xF2 (Actor.h:440): hooked, NEVER called
+    movetoLow: 0x6826d0, // 37622 Actor::MovetoLow, slot 0xF2 (Actor.h:440): hooked as a witness; the recipe never calls it (the engine did at the exit in 144049)
     refrSave: 0x2da5c0, // 19528 TESObjectREFR::SaveGame inside 37649 (mark refr)
     processSave: 0x6e4710, // 39429 AIProcess::SaveGame (mark process)
     actorStateSave: 0x6cea60, // 38987 the ActorState block (mark actorState)
@@ -337,7 +337,8 @@ if (off === undefined || !(FORM > 0)) {
   const counts = { innerAdd: 0, innerAddForm: 0, triggers: 0, runs: 0, refused: 0, stash: 0, stashForm: 0, mapWrite: 0, mapWriteForm: 0, movetoLow: 0, movetoLowForm: 0,
     refrSave: 0, processSave: 0, actorStateSave: 0, modifiersSave: 0, avStorageSave: 0, playerUpdate: 0 };
   let busy = false; // 0x0E may re-enter AddChange (the far-skin RemoveItem)
-  let pending = null; // DEFER: the kill's mark, run at the next 35576 return on Main.threadID (any form)
+  let pending = null; // DEFER: the kill's mark, run at the next 35576 return on Main.threadID (any form) or PlayerCharacter::Update's return
+  let updateThread = -1; // PlayerCharacter::Update's thread, every frame; read against the ready row's mainThread
   const act = function (q) { // q: { form, flags, markThread, t, runThread, deferredMs, via }
     if (counts.runs >= RUNS || busy) return;
     busy = true;
@@ -358,16 +359,17 @@ if (off === undefined || !(FORM > 0)) {
   const hookBytes = {}; // every hook's resolved address and first bytes, read before the attach (the pitfalls rule)
   ['innerAdd', 'stash', 'mapWrite', 'movetoLow', 'refrSave', 'processSave', 'actorStateSave', 'modifiersSave', 'avStorageSave', 'playerUpdate'].forEach(function (n) { hookBytes[n] = firstBytes(n); });
   const mainTid = function () { const m = ptrAt(at('main'), 0); return m.isNull() ? -1 : u32(m, MAIN_THREAD); };
-  const runPending = function (threadId, via) { // the deferred run, on Main.threadID only, never inside the arming call
+  const runPending = function (threadId, via, id) { // the deferred run, on Main.threadID only, never inside the arming call
     if (pending === null || busy || threadId !== mainTid()) return;
-    const q = pending; pending = null; q.runThread = threadId; q.deferredMs = Date.now() - q.t; q.via = via; act(q);
+    if (via !== 'PlayerCharacter::Update' && Date.now() - pending.t < 250) return; // AddChange is the fallback: two frames are 33 ms, 250 covers a hitch, 144049 waited 13,115
+    const q = pending; pending = null; q.runThread = threadId; q.deferredMs = Date.now() - q.t; q.via = id === undefined ? via : via + ' ' + hex(id); act(q);
   };
   const attachErrors = [];
   const attach = function (name, cb) { try { Interceptor.attach(at(name), cb); } catch (e) { attachErrors.push(name + ': ' + e); } };
   attach('innerAdd', {
     onEnter(args) { counts.innerAdd += 1; this.form = args[1]; this.flags = args[2].toUInt32(); this.id = u32(args[1], FORM_ID); },
     onLeave(retval) {
-      runPending(this.threadId, 'AddChange ' + hex(this.id)); // precedes this call's own mark, so the arming call never runs its pending
+      runPending(this.threadId, 'AddChange', this.id); // precedes this call's own mark, so the arming call never runs its pending
       if (this.id !== FORM) return;
       counts.innerAddForm += 1;
       if ((retval.toUInt32() & 0xff) !== 1 || (this.flags & FLAG) === 0) return;
@@ -375,11 +377,12 @@ if (off === undefined || !(FORM > 0)) {
       const q = { form: this.form, flags: this.flags, markThread: this.threadId, t: Date.now(), runThread: this.threadId, deferredMs: 0, via: null };
       if (!DEFER || MODE === 'check') { act(q); return; } // check mode reads inline so the census sees every mark
       if (pending === null && counts.runs < RUNS && !busy) { pending = q; emit({ event: 'mark', form: hex(FORM), flags: hex(q.flags), thread: q.markThread, armed: true }); }
+      else emit({ event: 'mark', form: hex(FORM), flags: hex(q.flags), thread: q.markThread, armed: false, reason: pending !== null ? 'pending armed' : (busy ? 'busy' : 'runs spent') });
     },
   });
   attach('playerUpdate', { // PlayerCharacter::Update: once per frame on the main thread (HYPOTHESIS), the deferred run's per-frame chance
     onEnter() { counts.playerUpdate += 1; },
-    onLeave() { runPending(this.threadId, 'PlayerCharacter::Update'); },
+    onLeave() { updateThread = this.threadId; runPending(updateThread, 'PlayerCharacter::Update'); },
   });
   attach('movetoLow', {
     onEnter(args) {
@@ -427,7 +430,7 @@ if (off === undefined || !(FORM > 0)) {
       emit({ event: 'write', form: hex(FORM), flags: hex(u32(args[2], 0)), record: String(ptrAt(args[2], 8)), caller: rva(this.returnAddress) });
     },
   });
-  setInterval(function () { emit({ event: 'liveness', counts: counts }); }, 10000);
+  setInterval(function () { emit({ event: 'liveness', counts: counts, updateThread: updateThread }); }, 10000);
 
   const s0 = singletons();
   let ver0 = -1;
