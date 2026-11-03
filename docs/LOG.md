@@ -5418,3 +5418,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   them for numidium's layer-stage after the arm. The claw is MS13's GoldenClaw alias (ALCO 0x39647 created in the Arvel alias), not Arvel's
   record (one item, 0x12eb7): the server needs the alias-created-item rule (q-golden-claw's slice in PLAN). The draugr read is (a): the
   ambush script, not a figure the AI ignores.
+
+- 16:55 PST 2026-11-02 the cabbage fix's two halves (prop-physics.md, "Playtest 41's cabbages"): the rule's first-sample budget (fork m4-prop-blast
+  8d94232c, in the server train f9a0792e) and the client's touch IMPULSE within 1.5 s of its own shout or cast (m4-prop-blast-client
+  24a841ea, folded into the chest bundle 10ade7c4). lab/esm.py gains `scripts <plugin> <form id>...` (a record's VMAD script and property
+  names in full; `describe` cuts fields at 32 bytes), the read behind MS13's six names.

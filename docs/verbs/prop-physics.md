@@ -263,8 +263,9 @@ T2 runs again on 50a44336.
 | PROP_SILENCE_MS | 3000 | wire-rules props | an awake row with no sample lapses; a creeping body (under 2 units per 100 ms) sends every 2 units, so its gaps bound it |
 | PROP_GRAB_MAX_MS | 120000 | wire-rules props | a grab nobody released; the longest a player holds an object in play |
 | PROP_MAX_SPEED_UNITS_PER_S | 6000 | wire-rules props | the fastest a kicked or shouted body flies between accepted samples (E_PROP_STEP counts in the server log) |
-| PROP_STEP_FLOOR_UNITS | 128 | wire-rules props | the first sample after a grant and the host's first of a resting prop (the record's distance from the body) |
-| kPropTouchReach, kPropDropReach, kPropImpulseReach | 256, 512, 2048 | ActionListener | the claimant's distance to the record at a contact or grab, a drop, an impulse (E_PROP_REACH) |
+| PROP_STEP_FLOOR_UNITS | 128 | wire-rules props | the first sample after a grant (the record's distance from the body) |
+| PROP_FIRST_SAMPLE_UNITS | 3000 (PROP_MAX_SPEED x 0.5 s) | wire-rules props | a simulator's first sample of a prop with no live row (the host's of a resting prop, a lapsed row's): half a second of flight, since a blast moves the prop before the first sample (playtest 41's cabbages; fork m4-prop-blast 8d94232c) |
+| kPropTouchReach, kPropDropReach, kPropImpulseReach | 256, 512, 2048 | ActionListener | the claimant's distance to the record at a contact or grab, a drop, an impulse (E_PROP_REACH); the client sends touch IMPULSE for a prop that moves by itself within IMPULSE_WINDOW_MS 1500 of its own shout or cast release (propService, playtest 41; fork m4-prop-blast-client 24a841ea, in the chest bundle 10ade7c4) |
 | SEND_MIN_MS, SAMPLE_UNITS, SAMPLE_DEGREES | 100, 2, 2 | PropService | the stream's cadence and dead band; the follower's glide reads as motion a sample behind |
 | STIR_UNITS, SLEEP_AFTER_MS | 0.25, 500 | PropService | the sleep stand-in (the platform exposes no Havok state); too short and a slowing body sleeps early, too long and the lease starts late |
 | REST_READ_MS | 100 | PropService | a resting simulated body's read cadence; the cost of sixty-four host-default props at rest |
@@ -677,3 +678,19 @@ lays on clean-m1 with item 7 SKIPPED.
   (labState ref's actor fields on a prop, six server.ref reads in the probe), fixed in lab/gamemode (thuum main 6bffd168), not a client
   bug.
 
+### Playtest 41's cabbages (2026-11-02 evening PST; Eli: "just blast a bunch of cabbages. that should be a good prop test. only some stayed synced")
+
+Two refusals in the server log, two causes. (1) E_PROP_REACH: the blown cabbages moved in c1's game and the contact stand-in claimed
+them by touch 0 from 735 to 1400 units (the shout's reach), the contact's 256 refusing every one; the IMPULSE touch (3, reach 2048)
+was in the contract and on the server with no sender. Fix, client: ShoutService and MagicSyncService note this seat's own release
+(PropService.noteImpulse) and the two self-moved claim sites send touch 3 inside a 1.5 s window, touch 0 otherwise (fork
+m4-prop-blast-client 24a841ea, cherry-picked into m4-turbo2-chest 10ade7c4). (2) E_PROP_STEP on the host (ff000001, 1c0c2, 1c0c6,
+1c0c7): a prop with no live row had the floor (128 units) as its budget; a blasted cabbage's first sample moved farther, TooFast
+returned before the row was written, and every later sample was measured against the never-moving record, so the host lost the prop
+for good. Fix, rule: PROP_FIRST_SAMPLE_UNITS (3000, half a second at the top speed) is the budget of a sample with no live row, the
+row is written at the first accepted sample and the elapsed budget takes over (fork m4-prop-blast 8d94232c, in the server train
+m4-turbo2-union-srv f9a0792e; wire-rules test a_hosts_first_sample_of_a_blasted_prop_passes_and_writes_the_row). Rule 5 note: the
+touch kind is the client's word, bounded by the reach alone; a later tightening admits touch 3 only after a cast or shout the server
+accepted from the claimant within 2 s. Probe after the arm: x-prop-blast (c1 shouts Unrelenting Force at a cabbage cluster the host
+c2 simulates; claims: the touch-3 grants in the server log, no E_PROP_REACH or E_PROP_STEP, every cabbage's server position within the
+snap threshold of c1's and c2's reads 5 s after the blast).

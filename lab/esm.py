@@ -19,6 +19,7 @@ field's size is the uint32 that XXXX carried.
     esm.py near <plugin> <world form id> <x> <y> <radius> <TYPE,TYPE,...>
     esm.py ref <plugin> <form id>
     esm.py id <plugin> <form id>
+    esm.py scripts <plugin> <form id> [<form id> ...]   (the VMAD's script and property names)
     esm.py races <plugin>
     esm.py attacks <plugin> <race editor id substring>
     esm.py quests <plugin> [sge|all]
@@ -50,6 +51,7 @@ pressure plate and its trap in Bleak Falls Temple), where `near` cannot reach.
 
 from __future__ import annotations
 
+import re
 import struct
 import sys
 import zlib
@@ -340,6 +342,32 @@ def main(argv: list[str]) -> int:
                 print(describe(record_at(buf, off)[0]))
                 return 0
         return 1
+    if len(argv) >= 4 and argv[1] == "scripts":
+        # the Papyrus script and property names a record's VMAD carries (a base's
+        # or a placement's), the names ADR-059's admitted list takes; `describe`
+        # shows a field's first 32 bytes, which cuts most script names short
+        # (playtest 41's MS13 read, 2026-11-02: Arvel's web, the ambush, the Hall
+        # of Stories keyhole and rings)
+        with open(argv[2], "rb") as f:
+            buf = f.read()
+        want = {int(a, 0) for a in argv[3:]}
+        seen: set[int] = set()
+        for t, fid, off, _ in headers(buf, 0, len(buf), None):
+            if fid not in want or fid in seen:
+                continue
+            seen.add(fid)
+            rec = record_at(buf, off)[0]
+            vmad = rec.get("VMAD")
+            name = rec.get("NAME")
+            base = f" base {struct.unpack_from('<I', name)[0]:#x}" if name and len(name) >= 4 else ""
+            if not vmad:
+                print(f"{fid:#010x} {t} {rec.editor_id}{base}: no VMAD")
+                continue
+            names = sorted({m.decode() for m in re.findall(rb"[A-Za-z_][A-Za-z0-9_:]{3,}", vmad)})
+            print(f"{fid:#010x} {t} {rec.editor_id}{base}: VMAD {len(vmad)} B: {' '.join(names)}")
+        for fid in sorted(want - seen):
+            print(f"{fid:#010x}: not found")
+        return 0 if seen else 1
     if len(argv) == 3 and argv[1] == "races":
         with open(argv[2], "rb") as f:
             buf = f.read()
