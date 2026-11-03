@@ -6460,7 +6460,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   x-respawn-teleport-hold v2 after their review; then the gate (verb-merge's always set plus the touched verbs and watch) for the
   merge and playtest 42. Still reading: the binding commit's review, the two respawn probes' review, numidium's own r3 review; the
   serialize run is on c1.
-- 05:20 PST 2026-11-03 (13:20Z 11-03) (numidium): SERIALIZE-ON-DEMAND GREEN. The sending half of ADR-065 is proven for a REFR's lock
+- 05:18 PST 2026-11-03 (13:18Z 11-03) (numidium): SERIALIZE-ON-DEMAND GREEN. The sending half of ADR-065 is proven for a REFR's lock
   (change-forms.md C5).
   - Check run (x-serialize-on-demand-check, 20261103-131204): every premise of the recipe held at 0xe3a7a's kLockExtra mark, on the
     main thread. The engine's own stash at the purge wrote the same 40 bytes as 114726's in another session (FNV-1a 0x4ebbb261): the
