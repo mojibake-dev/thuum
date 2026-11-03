@@ -815,11 +815,13 @@ The menu choices, `lab/layer/ini-patches.tsv` over the mod's own ini (lab/tools/
 file stays the mod's, the manifest holds the deltas): every menu the mod covers stays unpaused as
 shipped (Inventory, Container, Barter, Gift, Favorites, Magic, Tween, Stats, LevelUp, Training,
 Journal, Map, Book, Lockpicking, SleepWait, Tutorial, MessageBox, Custom), with movement in menus on,
-no slow motion, the combat-alert overlay on, auto-close at 400 units; two deltas: `bConsole = false`,
-the console pauses as in vanilla because the lab's scenario steps type console commands against a
-paused world (numidium or magnus can flip it), and `bHideEngineFixesWarning = true`, the start-up
-message box the mod shows without Engine Fixes, which every seat would have to click away and the
-smoke would read as E_RUN_PAUSED. Two facts for the lab's rules: DialogueMenu is not a Souls menu
+no slow motion, the combat-alert overlay on, auto-close at 400 units; one delta,
+`bHideEngineFixesWarning = true`, the start-up message box the mod shows without Engine Fixes, which
+every seat would have to click away and the smoke would read as E_RUN_PAUSED. The console stays
+unpaused as shipped (Eli, 2026-11-02, mid Turbo 2: "nothing should pause"); the lab's scenario steps
+type console commands against a paused world, so a lab run sets `bConsole = false` for itself in the
+stopped game's ini through the relaunch step's ini lever (numidium's), not through the layer, which is
+the players' build (the layer carried `bConsole = false` from 2026-10-28 to 2026-11-02). Two facts for the lab's rules: DialogueMenu is not a Souls menu
 because vanilla Skyrim never pauses dialogue, so "dialogue unpaused" needs no setting (if a lab
 dialogue path pauses, that is SkyMP's own menu, a MessageBoxMenu or CustomMenu, both unpaused here);
 and with MessageBoxMenu unpaused, docs/LAB.md's rule "a seat whose dump-state shows MessageBoxMenu
