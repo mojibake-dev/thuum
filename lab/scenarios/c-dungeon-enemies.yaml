@@ -111,9 +111,8 @@ steps:
       - 'server.log_count("OnWeaponHit - 39fe[24] hits ff000000") >= 1'
       - 'server.log_count("E_HIT_WEAPON") == 0'
       - 'server.log_count("No permission to send OnHit") == 0'
-      # recorded, not claimed (>= 0 always holds and the count prints in the result): the pair's hits on
-      # the guest's player, the R0 path no scenario has claimed for a hosted actor
-      - 'server.log_count("OnWeaponHit - 39fe[24] hits ff000001") >= 0'
+      # the pair's hits on the guest's player (the R0 path) are no claim of a god-moded run: the literal >= 0 read
+      # is gone (the gate audit, 2026-11-02); the audit's redesign claims them outside TGM in their own scenario
   # claim 3: the host's engine damages 0x39fe4 (no server number: a fall's or a trap's shape); the stream
   # carries the fall to the record within a poll and the record to c2's puppet
   - c1: npc-damage {formId: 0x39fe4, amount: 25}
@@ -226,8 +225,8 @@ steps:
       # the death is the engine's, by the host's report (ADR-050 decision 2; b-npc-death-guest's claims)
       - 'server.log_count("death report: 39fe4 died") >= 1'
       - 'server.log_count("death by the server.s word on 39fe4") == 0'
-      # recorded, not claimed: the kill credited to the guest's actor
-      - 'server.log_count("death report: 39fe4 died .* killer ff000001") >= 0'
+      # the kill's credit to the guest's actor is the death report's own line above; the literal >= 0 read is gone
+      # (the gate audit, 2026-11-02)
   - c1: npc-hold {formId: 0x39fe4, held: false}
   # claim 5: one body, two looters. The judged approach puts each seat 150 units from the body as the
   # record has it (a fixed point stood past the reach in b-npc-body-release's 061048); the opener's
