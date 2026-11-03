@@ -2027,6 +2027,21 @@ and about 120 below the eye (about 13 counts a degree on this seat; the rune pro
   30 s c1.log names the redress or its refusal for 39fe4; the worn read against the roll when lab-api exposes it). The gate audit's
   class: npc-fate's scenarios read the roll, never the host's rendered actor.
 
+### Playtest 41's crash on c1 (17:56 PST 2026-11-02; 01:51:00Z, numidium's read of C:\lab\evidence\playtest41-c1-crash-20261103T015312Z)
+
+EXCEPTION_ACCESS_VIOLATION at SkyrimSE.exe+070DB20 (`mov rax, [rcx+0x08]`, rcx null); the objects on the stack: Sven 0x13491
+(Character), an Iron Dagger 0x1397E (USSEP), the player, BGSEquipSlot 0x13F42, BGSOutfit 0x9D5DF, Helvard 0x19824, a static
+NativeFunction of thirteen ints. The platform log's last second: setHosted false for all fifteen hosted actors (the host set
+15 to 0 at a release), two redresses with "3D loaded false" (13486, 13485), then "rerollActor(13491): not a leveled clone,
+redress instead" and the crash. Eli: "rotfern crashed after npcs were desynced for too long". HYPOTHESIS: the redress's
+AddWornOutfit (FateApi.cpp RedressOnGameThread, a_forceUpdate true) on an actor with no 3D reads the model it has not got. The
+guard on the bundle head m4-turbo2-chest 12f199e6 (TS): the late fate runs the platform's re-roll or redress on a loaded actor
+alone; an unloaded one waits in actorFateService's pending set ("late fate for <id>: its 3D is not loaded, the redress waits
+for the load") and is dressed at its load (the reference's cellAttach, a 1 s poll), forgotten after 120 s. Dynamic plan: the
+re-analyst names +070DB20 in 1.6.1170 and its null (the equip path's model read or the outfit's); a Frida trace of the redress on
+an unloaded actor on the lab confirms; the platform's own guard (RedressOnGameThread refusing an actor whose Is3DLoaded is
+false, logging "redressActor(<id>): no 3D, deferred") is the second half, a platform build.
+
 ## Status
 
 DRAFT 2026-10-22, the night of playtest 32, before any code and before the

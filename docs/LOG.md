@@ -5482,3 +5482,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   reads), one commit per scenario; the containers default corrected on paper; PLAN's three-state line. Break 3 heads: union-srv-2
   85b6c096 (the follow vouch + ADR-063 decision 4's retired prop checks), the bundle 59af5508 (the blast's read reaches the room, the
   silent bind kill's anim-event trace for the re-entry death sound; probe x-npc-death-reentry). Green: 4749 slice 1a, 4750, 4751.
+
+- 17:56 PST 2026-11-02 c1 crashed at 01:51:00Z in Sven's redress on an actor with no 3D right after the host set emptied (npc-fate.md, the crash section;
+  HYPOTHESIS the equip path's null); the bundle head m4-turbo2-chest 12f199e6 makes the late fate wait for the actor's load. Break 3's
+  refs: server union-srv-2 85b6c096, client 12f199e6, the traps stopgap, on Eli's go.
