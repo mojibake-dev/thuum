@@ -4134,3 +4134,24 @@ Risks. H1: some reads the lab cannot take (spell-cast.md:1328's aim-down pitch, 
 go to Eli's T4 by rule 8 and the verb waits, which can stall a system; the per-system order puts the cheap reads first.
 H2: two-seat traces cost lab hours; the nightly window and the stage slots carry them. H3: a grep counts a narrative line
 mentioning HYPOTHESIS; the author rewords the line, the rule stays mechanical.
+
+Amended 2026-11-03 02:36 PST (10:36Z), Eli ("saying yes to that ADR revision"), after the night's churn (the door
+scenario at v20, most probes through two to four review rounds) and Eli's "it should just be as simple as Find the
+thing, and Build the thing": three rules replace decision 4's "every scenario commit gets a fresh reviewer" and narrow
+the process to what catches defects.
+
+A. A fresh review is due for a NEW probe or scenario before its first lab run, for new or changed fork code before its
+first lab run, and for a claim relaxed or rewritten (the reviewer's call before the scenario's first green or gate
+entry, Eli's after, as decision 4's refinement says). It is NOT due for a reviewer's own fix applied as written, for a
+change to steps or premises that leaves every claim as reviewed (a wait, a position, an added count step, a dropped dead
+read), for header and comment edits, or for a sha remap; the change's author says which in the header and the next
+review reads it.
+
+B. A probe asks one question. A probe that needs a premise the engine has not shown is preceded by the small probe that
+reads that premise, so a failed premise costs one short run, not a long one; a multi-leg scenario is assembled as the
+committed gate scenario only from parts already green.
+
+C. The engine model first, by rule: a premise fact a lab run teaches (where the engine places an actor at load, a path
+that moves the record, an AI reaction to a visitor) goes into docs/engine/<system>.md as a row with its run id before
+the next scenario version relies on it, and the scenario cites the row. A scenario resting on an unread engine fact
+states it as HYPOTHESIS in its header and is not the first read of it.
