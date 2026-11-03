@@ -122,9 +122,10 @@ Rate limit / bounds: the inventory messages' own (PutItem, TakeItem budgets).
   every player who opens a container is in it, memo D52) or "exclusive" (one occupant at a time: MpObjectReference's
   CONT branch refuses every other player's activation while an occupant holds it, "[verb:containers] E_CONTAINER_BUSY:
   <player> activates <container> held by <occupant>", and the refused seat hears Debug.Notification "Someone is using
-  this"; the occupant's close, its leaving reach or its disconnect frees it). Fork m4-container-exclusive a393557c, the
-  default flipped to "exclusive" in its second commit by Eli's clause the same evening (the reopen failed, ADR-061's
-  outcome); "shared" is the backlog's live view.
+  this"; the occupant's close, its leaving reach or its disconnect frees it). Fork m4-container-exclusive, head 8e7d6e56:
+  the default is "shared" (Eli, the same evening, after a flip to exclusive and back: "dont worry about setting the
+  container exclusivity. we're not even live"); "exclusive" is the switch for a live server; the live multi-party view
+  is the backlog (ADR-061's outcome).
 
 ## Client
 

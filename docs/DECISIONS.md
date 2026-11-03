@@ -3841,8 +3841,10 @@ to the other seat, whose reopen re-sent it back: "2 players in the container now
 phantom take ("Source inventory doesn't have enough 0x12eb7" at :36.8). Eli, verbatim: "ok corpse fix works worse than before",
 then "the container works pretty ok but the inventory screen flicker is still there and we already said we dont want the
 whole menu to open and close out from under a guy". Eli's rule, standing: NO MENU IS EVER CLOSED AND REOPENED UNDER A PLAYER
-TO SYNC IT. Decision 3's fallback is taken by Eli's own clause: containerSharing "exclusive" is the DEFAULT (fork
-m4-container-exclusive, the second commit), a chest's and a corpse's alike, and the client bundle drops the reopen (the live
+TO SYNC IT. Decision 3's fallback is built by Eli's own clause: containerSharing "exclusive" exists as the switch (fork
+m4-container-exclusive, head 8e7d6e56), a chest's and a corpse's alike, and its default is "shared" while nobody is live
+(Eli, later the same evening: "dont worry about setting the container exclusivity. we're not even live"); the client bundle
+drops the reopen (the live
 apply keeps the record by base counts, so an occupant's own echo draws nothing; a foreign change, possible under "shared" alone,
 asks the engine's redraw once per burst). Live multi-party container sync goes to the backlog with its Frida plan (decision 4);
 decision 2's probe is the backlog's gate, not tonight's.
