@@ -1,0 +1,170 @@
+# sources: vanilla:Skyrim - Misc.bsa(14026 pex); vanilla:_ResourcePack.bsa(1 pex); vanilla:ccBGSSSE001-Fish.bsa(182 pex); vanilla:ccBGSSSE025-AdvDSGS.bsa(54 pex); vanilla:ccBGSSSE037-Curios.bsa(1 pex); vanilla:ccQDRSSE001-SurvivalMode.bsa(38 pex); mods:Apocalypse - Magic of Skyrim.bsa(206 pex); mods:Better Stealth AI for Followers.bsa(15 pex); mods:Dwemer Goggles & Scouter.bsa(21 pex); mods:GeneralDisplays.bsa(20 pex); mods:LRD.bsa(2 pex); mods:LostGrimoire.bsa(147 pex); mods:MCMHelper.bsa(3 pex); mods:MoreCraftableEquipment.bsa(2 pex); mods:MysticismMagic.bsa(18 pex); mods:Next-Gen Decapitations.bsa(1 pex); mods:Odin - Skyrim Magic Overhaul.bsa(77 pex); mods:RaceMenu.bsa(6 pex); mods:_001_SelfFillingBookshelves.bsa(1 pex); mods:SkyUI_SE.bsa(12 pex); mods:Supernatural Survival Tweaks - Cold Resist Werebeast and Vampire.bsa(3 pex); mods:Supernatural Survival Tweaks - Cold Resist Werebeast and Vampire_xbox.bsa(3 pex); mods:rmp_telvannihearthfires.bsa(3 pex); mods:Thaumaturgy.bsa(6 pex); mods:UndeadFX.bsa(28 pex); mods:unofficial skyrim special edition patch.bsa(1724 pex); mods:UnreadBooksGlow.bsa(11 pex); mods:vampireinverterdg.bsa(5 pex); mods:loose .pex(106 pex)
+# scripts read: vanilla 14302, mods 2420
+group	native	vanilla_scripts	mod_scripts	examples
+ai	EvaluatePackage	518	169	actor, byoh_qf_byohhousebanditattack_010008a8, byoh_sf_relationshipadoption__0101652d, byoh_sf_relationshipadoption__0101652e, CWFinaleScript, DLC2dunSeekerInvisScript, QF_CWAttackCity_0004F8BF
+ai	AddToFaction	292	156	actor, arenascript, arenatransitioncombatquest, byoh_qf_byohhousebanditattack_010008a8, PlayerWerewolfChangeScript, QF_CWAttackCity_0004F8BF, QF_CWSiege_000954E1
+ai	RemoveFromFaction	272	101	actor, arenascript, arenatransitioncombatquest, byoh_qf_byohhousebanditattack_010008a8, CWFieldCOScript, CWFinaleScript, PlayerVampireQuestScript
+ai	StartCombat	214	102	actor, arenascript, atronachforgescript, bfbdragonflyoverscript, QF_CWAttackCity_0004F8BF, _ts_DR_RideControlScript, ao_vampirequestscript
+ai	SetRelationshipRank	180	83	actor, byoh_qf_byohhousefalkreath_0100305e, byohrelationshipadoptableorphanagesc, byohrelationshipadoptablescript, QF_CWAttackCity_0004F8BF, _ts_DR_DragonFollowerRegisterScript, byoh_qf_byohhousefalkreath_0100305e
+ai	StopCombat	63	49	actor, arenacombatantscript, c00jorrvaskrfightscenescript, c00vilkastrainingscript, CWFinaleScript, _ts_DR_RideControlScript, c00vilkastrainingscript
+ai	SetPlayerTeammate	54	42	actor, c01questscript, c05questscript, ccbgssse001_mudcraballyscript, _ts_DR_DragonFollowerRegisterScript, c00vilkastrainingscript, ccbgssse001_mudcraballyscript
+ai	SetFactionRank	60	20	actor, arenascript, arenatransitioncombatquest, byoh_tif__01003d98, byohhousehorsescript, byohrelationshipadoptablescript, byohrelationshipadoptionscript
+ai	SetCrimeFaction	26	27	actor, byohrelationshipadoptableorphanagesc, byohrelationshipadoptionscript, cwmission06script, _ts_DR_DragonFollowerRegisterScript, byohrelationshipadoptionscript, cwscript
+ai	SetAlert	34	0	actor, c00jorrvaskrfightscenescript, dlc1_tif__01019830, dlc1_tif__01019831
+ai	SendAssaultAlarm	11	7	actor, da08ebonybladealerteffectscript, dgintimidatealiasscript, dlc1vampirefeedbystanderscript, ao_vampirequestscript, dgintimidatealiasscript, dlc1vampirefeedbystanderscript
+ai	PushActorAway	9	9	dlc2cycloneeffectscript, dlc2levitatescript, dlc2whirlwinddamagescript, dunkatariahscimitarscript, PCKP_PortalScript, springtrap, wb_accelerationrune_script
+ai	SetAttackActorOnSight	5	6	actor, c03rampagequest, dlc1playervampirechangescript, playervampirequestscript, PlayerVampireQuestScript, PlayerWerewolfChangeScript, c03rampagequest
+ai	SetLookAt	10	0	actor, c01questscript, pf_c00trainergetbacktotrainin_000ec1ac, pf_dgintimidatespectatorpacka_000aa053
+ai	ClearLookAt	8	2	actor, c01questscript, pf_c00trainergetbacktotrainin_000ec1ac, pf_dgintimidatespectatorpacka_000aa053, _ts_DR_DragonFollowerRegisterScript, _ts_DR_DragonRegisterScript
+ai	SetHeadTracking	3	3	actor, dunwhiteriverwatchdisableheadtracking, qf_mq101_0003372b, odn_flash_script, odn_follow_script, qf_mq101_0003372b
+ai	SetDontMove	2	3	actor, dlc2_sf_dlc2mq02miraakapocryp_0201cb66, grim_des_arcticfortress, odn_immobilize_script, wb_tharnsgibbet_script
+ai	StartSneaking	4	1	actor, dlc1_tif__0100cd57, dlc1harkoncombatmagiclevelingscript, dlc2foxblessingscript, mineorescript
+ai	SheatheWeapon	0	5	ao_vampirequestscript, grim_alt_polymorphbearab, grim_des_arcticfortress
+ai	KeepOffsetFromActor	1	3	actor, odn_flash_script, odn_follow_script, odn_immobilize_script
+ai	ClearKeepOffsetFromActor	1	3	actor, odn_flash_script, odn_follow_script, odn_immobilize_script
+ai	PathToReference	2	0	actor, movementtestrig
+ai	DrawWeapon	1	1	actor, utility_transformationmagiceff
+ai	SendTrespassAlarm	1	0	actor
+ai	Dismount	1	0	actor
+globals-game	SetValue	402	188	blackreachelevatorbuttonscript, bladesblessingeffectscript, byoh_qf_byohhousebanditattack_010008a8, byoh_qf_byohhousebanditattack_01005207, ActivationKeyScript, CWFortSiegeScript, CWReinforcementControllerScript
+globals-game	EnablePlayerControls	98	49	c00vilkastrainingscript, c03rampagequest, carriagesystemscript, ccbgssse001_fishingsystemscript, DbMiscFunctions, PlayerVampireQuestScript, PlayerWerewolfChangeScript
+globals-game	DisablePlayerControls	80	47	altarofmolagbalscript, c00vilkastrainingscript, c02ceremonytriggerscript, c03rampagequest, CWFinaleScript, DbMiscFunctions, PlayerVampireQuestScript
+globals-game	AddAchievement	56	38	achievementsscript, byoh_qf_byohhousefalkreath_0100305e, byoh_qf_byohhousehjaalmarch_0100be09, byoh_qf_byohhousepale_01010bee, PlayerWerewolfChangeScript, byoh_qf_byohhousefalkreath_0100305e, byohhousebuildingscript
+globals-game	ShakeCamera	59	33	ccbgssse001_dwarvencolumnscript, da10hauntingcontrollerscript, db05fallingstatueactivate, dbsanctuarydb10loadcheck, db05fallingstatueactivate, dlc1_bf_fallingdebristrigscript, dlc1_qf_dlc1ld_bthalft_0100cfff
+globals-game	SetValueInt	47	27	byohhousescript, c04questscript, ccbgssse001_crabmq4crabspawner, ccbgssse001_crabmq4reinforcements, JewelryLimitMCM, Survival_NeedCold, byohhousescript
+globals-game	IncrementStat	35	15	achievementsscript, byohhousehorsescript, critter, dlc1_prkf_dlc1vampiricgrip_0100599a, PlayerVampireQuestScript, PlayerWerewolfChangeScript, byohhousehorsescript
+globals-game	IncrementSkill	26	5	dlc2_qf_dlc2wb01_020209ae, game, qf_bardscollegedrum_000d944f, qf_bardscollegeflute_000d9431, qf_bardscollegedrum_000d944f, qf_bardscollegeflute_000d9431, qf_bardscollegelute_000d93fa
+globals-game	TeachWord	18	13	dbsanctuarywordwalltriggerscript, defaultlearnwordonact, dlc1_qf_dlc1vqdragon_0100c73a, dlc1vqdragonscript, DbMiscFunctions, dbsanctuarywordwalltriggerscript, defaultlearnwordonact
+globals-game	ForceFirstPerson	15	14	carriagesystemscript, ccbgssse001_fishingsystemscript, da09script, dlc1_qf_dlc1_bf_duntempleqst_01006bda, carriagesystemscript, da09script, dlc1vq06readingtriggerscript
+globals-game	AdvanceSkill	3	26	favordialoguescript, game, transmutemineralscript, favordialoguescript, grim_alt_bestowgift, grim_alt_extractorequest
+globals-game	ForceThirdPerson	12	16	c03rampagequest, ccbgssse001_fishingsystemscript, dlc1playervampirechangescript, dlc2bookdungeoncontrollerscript, PlayerWerewolfChangeScript, ao_vampirequestscript, c03rampagequest
+globals-game	SetInChargen	14	8	carriagesystemscript, dlc1playervampirechangescript, dlc1vq06questscript, dlc2_qf_dlc2mq02_02017f8f, PlayerWerewolfChangeScript, carriagesystemscript, dlc1playervampirechangescript
+globals-game	UnlockWord	11	8	c03rampagequest, dlc2mkmiraakmaskscript, dlc2qalearnshouts, game, DbMiscFunctions, PlayerWerewolfChangeScript, c03rampagequest
+globals-game	RequestAutoSave	7	3	defaultautosavescript, dlc2bookdungeoncontrollerscript, dlc2dialoguerrquestscript, dunfellglowautosavetrigger, dlc2bookdungeoncontrollerscript, dlc2dialoguerrquestscript, qf_mq101_0003372b
+globals-game	FastTravel	6	3	carriagesystemscript, dlc2dialoguerrquestscript, ferrysystemscript, game, carriagesystemscript, dlc2dialoguerrquestscript, ferrysystemscript
+globals-game	FadeOutGame	4	5	carriagesystemscript, ferrysystemscript, game, qf_mq101_0003372b, carriagesystemscript, ferrysystemscript, qf_mq101_0003372b
+globals-game	SetBeastForm	5	4	c03rampagequest, dlc1playervampirechangescript, game, playerwerewolfchangescript, PlayerWerewolfChangeScript, c03rampagequest, dlc1playervampirechangescript
+globals-game	SetPlayerAIDriven	5	4	game, qf_mq101_0003372b, qf_relationshipmarriageweddin_0007404e, sf_ciceroangryscene_000547f8, qf_mq101_0003372b, qf_relationshipmarriageweddin_0007404e, wb_mindcontrol_script
+globals-game	TriggerScreenBlood	2	4	dlc1vampiretransformvisual, game, dlc1vampiretransformvisual, odn_slayliving_script, wb_fingerofdeath_script
+globals-game	SendWereWolfTransformation	3	3	dlc1playervampirechangescript, game, playerwerewolfchangescript, PlayerWerewolfChangeScript, dlc1playervampirechangescript, playerwerewolfchangescript
+globals-game	ShowRaceMenu	3	1	game, qf_mq101_0003372b, triggerracemenuscript, qf_mq101_0003372b
+globals-game	SetCameraTarget	1	3	game, wb_farsight_script, wb_mindcontrol_script, wb_mirrorentity_script
+globals-game	SetSunGazeImageSpaceModifier	2	1	dlc1aurielsbowplayerscript, game, dlc1aurielsbowplayerscript
+globals-game	IncrementSkillBy	3	0	game, oghmainfiniumscript, qf_dunbardsleapsummitqst_000ae014
+globals-game	AddPerkPoints	2	1	dlc2miraakaltarscript, game, dlc2miraakaltarscript
+globals-game	SetHudCartMode	2	1	game, qf_mq101_0003372b, qf_mq101_0003372b
+globals-game	RequestSave	2	1	game, qf_mq101_0003372b, qf_mq101_0003372b
+globals-game	SetGameSettingFloat	0	3	utility_aliasonplayerloadgame, utility_changegamesettings, utility_changegamesettingsnew
+globals-game	SetGameSettingInt	0	3	utility_aliasonplayerloadgame, utility_changegamesettings, utility_changegamesettingsnew
+globals-game	SetGameSettingString	0	3	utility_aliasonplayerloadgame, utility_changegamesettings, utility_changegamesettingsnew
+globals-game	ServeTime	2	0	game, jailbedscript
+globals-game	StartTitleSequence	2	0	game, mq101questscript
+inventory	AddItem	788	285	abforswornbriarheartscript, arenascript, atrfrgsigilstonescript, boundboweffectscript, DbMiscFunctions, betterstealthaiscript, bqscript
+inventory	RemoveItem	520	255	abforswornbriarheartscript, animaltrainersystemscript, arenascript, atrfrgsigilstonescript, DbMiscFunctions, JewelryLimiterREfScript, PlayerWerewolfChangeScript
+inventory	AddSpell	131	106	actor, byohvampirecoffinscript, c03rampagequest, ccbgssse001_potspellhandler, PlayerVampireQuestScript, PlayerWerewolfChangeScript, SST_PlayerScriptAddRemoveAbilities
+inventory	RemoveSpell	82	76	actor, bladesblessingeffectscript, byohrestedadoptioneffectscript, byohvampirecoffinscript, PlayerVampireQuestScript, PlayerWerewolfChangeScript, SST_PlayerScriptAddRemoveAbilities
+inventory	EquipItem	71	52	abforswornbriarheartscript, actor, arenascript, boundboweffectscript, DbMiscFunctions, JewelryLimiterREfScript, PlayerWerewolfChangeScript
+inventory	SetOutfit	47	34	actor, actorbase, byohrelationshipadoptionchildscript, c01questscript, QF_CWAttackCity_0004F8BF, byohrelationshipadoptionchildscript, c03rampagequest
+inventory	UnequipItem	40	32	actor, arenascript, briarheartingredientscript, byohrelationshipadoptionchildscript, DbMiscFunctions, JewelryLimitMCM, JewelryLimiterREfScript
+inventory	AddPerk	48	22	actor, bladesalchpotionscript, da11ringofnamirascript, dlc1_qf_dlc1init_01002c09, ao_vampirequestscript, dlc1_qf_dlc1init_01002c09, dlc1_qf_dlc1vq03vampire_01004c3d
+inventory	RemoveAllItems	28	32	atronachforgescript, byohdivertitemscript, byohhousebuildingscript, byohhousecraftingtriggerscript, DbMiscFunctions, _001_scrpt_selffillingbookshelves, byoh_tif__01004d07
+inventory	EquipSpell	14	19	actor, dlc1dunharkonbossbattle, dlc1harkoncombatmagiclevelingscript, dlc1mistformmanagerscript, PlayerVampireQuestScript, dlc1dunharkonbossbattle, dlc1mistformmanagerscript
+inventory	RemovePerk	22	5	actor, da11ringofnamirascript, dlc1ld_aetherialcrownscript, dlc1ld_aetherialshieldscript, dlc1playervampirechangescript, dlc2miraakaltarscript, ms11questscript
+inventory	DropObject	7	6	c01questscript, carryactorscript, ccbgssse001_fishplaquescript, defaultdisplayiteminlistscript, DbMiscFunctions, carryactorscript, defaultdisplayiteminlistscript
+inventory	RemoveShout	6	6	actor, c03rampagequest, dlc1durnehviir, dlc1ld_forgemasterbossbattle, PlayerWerewolfChangeScript, c03rampagequest, dlc1ld_forgemasterbossbattle
+inventory	AddShout	6	5	actor, c03rampagequest, dlc1durnehviir, dlc1ld_forgemasterbossbattle, DbMiscFunctions, PlayerWerewolfChangeScript, c03rampagequest
+life	Kill	119	65	abforswornbriarheartscript, actor, astridendscript, briarheartingredientscript, CWReinforcementControllerScript, QF_CWSiege_000954E1, Survival_NeedCold
+life	SetGhost	100	47	actor, c01questscript, c03rampagequest, ccbgssse025_bosscontrollerscript, PlayerWerewolfChangeScript, ao_vampirequestscript, c03rampagequest
+life	SetEssential	70	41	actor, actorbase, cchorsearmorchangescript, cwfinaleenemyleaderscript, dlc1_qf_dlc1vq05_01002850, dlc1_qf_dlc1vq07_01002853, dlc1_qf_dlc1vq08_01007c25
+life	SetAlpha	68	41	actor, bwcnightingaleghostscript, da15wabbajackeffectscript, defaultghostscript, DLC2dunSeekerInvisScript, bwcnightingaleghostscript, dlc1_bf_falmerstatuescript
+life	SetRestrained	47	23	actor, byoh_qf_byohhousebanditattack_010008a8, carriagedriverscript, carriagesystemscript, _ts_DR_DragonFollowerRegisterScript, byoh_qf_byohhousebanditattack_010008a8, carriagesystemscript
+life	SetCriticalStage	23	21	actor, bwcnightingaleghostscript, da15wabbajackeffectscript, defaultghostscript, bwcnightingaleghostscript, dlc1dunharkonbossbattle, dlc1soulcairncreaturefx
+life	Resurrect	24	12	actor, da02script, da10reanimateeffectscript, dlc1_qf_dlc1vqdragon_0100c73a, da02script, dlc1_qf_dlc1vqdragon_0100c73a, dlc2_qf_dlc2dunhaknirtreasure_02024002
+life	SetProtected	20	10	actorbase, cwfinaleenemyleaderscript, dlc2_qf_dlc2dunfrostmoonqst_0201f9e6, dlc2_qf_dlc2dunkolbjornqst_0201810b, dlc2_qf_dlc2dunfrostmoonqst_0201f9e6, dlc2_qf_dlc2dunkolbjornqst_0201810b, dlc2_qf_dlc2mh02_0201a50c
+life	KillEssential	3	0	actor, dlc1vqdragonscript, dlc2dunildariscript
+life	KillSilent	2	0	actor, dlc2dunkillonplayerentertrig
+life	SetUnconscious	1	0	actor
+magic-weather	Stop	984	563	arenascript, atronachfrostactorscript, atronachfrostscript, bardsongsscript, CWAttackCityScript, CWCampaignScript, CWFinaleScript
+magic-weather	Play	388	284	atronachfrostactorscript, atronachfrostscript, audiorepeateractivator01script, barreddoor, CWSiegeScript, JewelryLimiterREfScript, PlayerVampireQuestScript
+magic-weather	Cast	150	130	atronachfrostactorscript, blacksmithforge01, byoh_tif__01002da0, byoh_tif__01002da2, DLC2dunSeekerInvisScript, PlayerWerewolfChangeScript, Portal_Script_FishPunch
+magic-weather	Dispel	14	82	activemagiceffect, boundboweffectscript, dlc1crystaldrainhealthcheckscript, dlc1magicdispelspellselfoneffectend, dlc1bloodsynthspellscript, dlc1fxdeathhoundscript, dlc1fxdwarvencenturionscript
+magic-weather	SetActive	53	28	ccbgssse001_crabmq4battlezonescript, ccbgssse001_fishingsystemscript, clearskieseffectscript, clearskiesquestscript, QF_CWSiege_000954E1, clearskiesquestscript, cwscript
+magic-weather	DispelSpell	16	37	actor, dlc1aurielsbowplayerscript, dlc1batseffectscript, dlc1dunharkonbossbattle, PlayerWerewolfChangeScript, dlc1aurielsbowplayerscript, dlc1dunharkonbossbattle
+magic-weather	DoCombatSpellApply	14	25	actor, applymagicdamageonenter, dlc1dunharkonbatteleport, dlc1dunharkonshieldeffectscript, dlc1dunredwaterdenbloodspringscript, dlc1trapinfectedbones, dlc2_qf_dlc2dunkolbjornqst_0201810b
+magic-weather	ReleaseOverride	24	8	ccbgssse001_crabmq4battlezonescript, ccbgssse001_fishingsystemscript, clearskieseffectscript, dlc1_qf_dlc1_bf_duntempleqst_01006bda, QF_CWSiege_000954E1, dlc1magiccastfromsunscript, dlcweatherswapzonescript
+magic-weather	RemoteCast	5	23	dlc1magiccastfromsunscript, magicprojectilestormscript, rpdefault_castspellonactivate, rpdefault_castspellonactivatealias, dlc1magiccastfromsunscript, grim_des_stormrift, grim_ill_phantomtreasureab
+magic-weather	DispelAllSpells	13	12	actor, defaultmoveactortriggerscript, dlc1dunharkonbatteleport, dlc1dunharkonbossbattle, dlc1dunharkonbossbattle, dlc1vq06readingtriggerscript, dlc2dunhaknirbossbattlescript
+magic-weather	ForceActive	12	8	dlc1_bf_fallingdebristrigscript, dlc1weatherchangetrigger, dunbloatedmantogglebloodmoon, qf_cwattackcity_0004f8bf, QF_CWAttackCity_0004F8BF, QF_CWSiege_000954E1, dlc1_bf_fallingdebristrigscript
+object-state	Activate	377	159	activateagainafterdelay, activatelinkedchestdummyscript, activateselfoncombatbegin, altarofazurascript, CWSiegeCityDoorScript, Fragments_Activate_Vampire, QF_CWSiege_000954E1
+object-state	PlayAnimation	264	100	altarofmolagbalscript, bfbpuzzle01pillar, blackreachlockscript, blacksmithforge01, blackreachlockscript, blacksmithforge01, byohplantercontainerscript
+object-state	BlockActivation	127	62	activateagainafterdelay, arenaexitdoorscript, arenainteriordoorscript, arenawagerdoorexteriorscript, CWSiegeCityDoorScript, CWSiegeScript, QF_CWSiege_000954E1
+object-state	Lock	121	62	arenainteriordoorscript, arenascript, cidhnaminedoorascript, cidhnaminedoorbscript, CWFinaleScript, QF_CWSiege_000954E1, RaceMenuMorphsCBBEUIListMenu
+object-state	PlayAnimationAndWait	138	44	activateagainafterdelay, batteringtrap, bfbpuzzle01control, bfbpuzzle01pillar, bfbpuzzle01control, blackreachdoorscript, critterbird
+object-state	SetOpen	77	33	arenascript, blackreachdoorscript, blackreachlockscript, cidhnaminedoorbscript, blackreachdoorscript, blackreachlockscript, da11opendoorondeath
+object-state	SetNoFavorAllowed	44	11	ccbgssse001_dynamotriggerscript, da01brokenstarscript, da04oghmainfiniumscript, da05questingbeastscript, dlc1gargoyleambushscript, dlc2defaultslotteditemactivatorscript, dlc2dunhaknirbossbattlescript
+object-state	SetAnimationVariableFloat	35	13	ccbgssse001_fishingsystemscript, critter, dlc1_bf_iceshieldtrigscript, dlc1_sf_dlc1hunterbaseintroen_01008a8c, crittermoth, dlc1_bf_iceshieldtrigscript, dlc1_sf_dlc1hunterbaseintroen_01008a8c
+object-state	DamageObject	32	15	cwfortsiegebarricadescript, cwmission02resourceobjectscript, cwresolution01barricadescript, cwresolution02barricadescript, QF_CWSiege_000954E1, dlc1_bf_falmerstatuescript, dlc1arkngthamzdestructionscript
+object-state	SetLockLevel	24	14	cwfinalescript, cwlockduringsiegescript, db09playerbridgeexittrigscript, db09towerenterdoorlocktrigscript, CWFinaleScript, QF_CWSiege_000954E1, cwfinalescript
+object-state	SetFactionOwner	24	11	cell, dlc1_qf_dlc1_wesc07_01003508, dlc1vampirecastlecontrollerscript, dlc2_qf_dlc2dunfrostmoonqst_0201f9e6, byohhousehorsescript, byohhousescript, byohrelationshipadoptionscript
+object-state	SetDestroyed	20	11	byohhousebuildingscript, ccbgssse001_dynamotriggerscript, dlc1gargoylestatuescript, dlc1trappoisonbloom, byohhousebuildingscript, dlc1trappoisonbloom, dlc1vcmoondialtilescript
+object-state	SetActorOwner	18	7	animaltrainersystemscript, cell, dlc1_qf_dlc1vq08post_0101a1c1, dlc2_qf_dlc2rr02_02018b14, dlc1_qf_dlc1vq08post_0101a1c1, grim_con_boundchestscript, qf_wedl01_000b8141
+object-state	PlayGamebryoAnimation	13	7	dlc1vcembertogglescript, dlc1vq03barrierpylonscript, dlc1vq07waterchannelsscript, dunvolunruuddoorscript, QF_CWSiege_000954E1, dlc1vq03barrierpylonscript, mq202esbernsdoorscript
+object-state	ClearDestruction	12	7	dlc1gargoylestatuescript, dlc2rieklingbarrelscript, lumbermillsawscript, mineorescript, dlc1trappoisonbloom, lumbermillsawscript, mineorescript
+object-state	SendAnimationEvent	5	2	debug, dlc2dunbook3hallmoveleft, dlc2dunbook3hallmovereturn02, dlc2dunbook3hallmoveright, ao_vampirequestscript, grim_alt_polymorphbearab
+object-state	PlayImpactEffect	3	4	dlc1magiceatenbybatsscript, dragonactorscript, objectreference, dragonactorscript, udgpdurnehviirdragonscript, wb_breathofarkay2_script
+object-state	AddDependentAnimatedObjectReference	4	1	headchopblock2manhookupscript, headchopblockhookupscript, objectreference, spiderwebanimationsscript, spiderwebanimationsscript
+object-state	SetAnimationVariableBool	3	2	dunfolgunthurbosstrigger, dungeirmundsbosstrigger, objectreference, dlc2miraakaltarscript, dungeirmundsbosstrigger
+object-state	SetAnimationVariableInt	2	1	dlc2bookdungeoncontrollerscript, objectreference, dlc2bookdungeoncontrollerscript
+object-state	PlaySyncedAnimationSS	1	0	objectreference
+object-state	PlaySyncedAnimationAndWaitSS	1	0	objectreference
+object-state	SetDisplayName	0	1	DbMiscFunctions
+placement	Disable	874	391	activateagainafterdelay, altarofmolagbalscript, atrfrgsigilstonescript, atronachforgescript, CWCampaignScript, CWFortSiegeScript, CWSiegeScript
+placement	Enable	760	367	activateagainafterdelay, atrfrgsigilstonescript, bfbdragonflyoverscript, blackreachelevatorbuttonscript, CWCampaignScript, CWFortSiegeScript, CWSiegeScript
+placement	MoveTo	426	252	arenacrowdquestscript, arenaexitdoorscript, arenainteriordoorscript, arenatransitioncombatquest, DbMiscFunctions, PCKP_PortalScript, PCKP_ScriptPortalMover
+placement	PlaceAtMe	258	213	atronachforgescript, atronachfrostactorscript, atronachfrostscript, byoh_qf_byohhousefalkreath_0100305e, DbBigActorArray, DbBigStringArray, DbMiscFunctions
+placement	Delete	153	175	arenascript, atronachforgescript, byoh_qf_byohhouseskeeverinfes_01010a44, byoh_qf_byohhousewolfattack_01000c39, CWFinaleScript, DbBigActorArray, DbBigStringArray
+placement	DeleteWhenAble	167	65	byoh_qf_byohhousebanditattack_010008a8, byoh_qf_byohhousebanditattack_01005207, byoh_qf_byohhousegiantattack_01000c3e, byoh_qf_byohhousewolfattack_01000c39, CWFortSiegeScript, QF_CWAttackCity_0004F8BF, byoh_qf_byohhousebanditattack_010008a8
+placement	Reset	99	62	batteringtrap, bladetrap, bladetraphit, bpwmatchcardscript, CWFortSiegeScript, CWReinforcementControllerScript, CWSiegeScript
+placement	DisableNoWait	82	69	byohhousebuildingscript, byohhousescript, ccbgs_arportcullisscript, ccbgssse001_addingredientanddisable, byohhousebuildingscript, byohhousescript, critter
+placement	EnableNoWait	77	44	byohhousebuildingscript, byohhousescript, ccbgs_arportcullisscript, ccbgssse001_catapultctrlscript, byohhousebuildingscript, byohhousescript, dbsanctuarywordwalltriggerscript
+placement	SetMotionType	47	25	beehivehavokonhit, carriagesystemscript, cartandhorsetether, cartdriverscript, carriagesystemscript, cr12totemslotscript, critter
+placement	SetAngle	13	39	critter, critterdragonfly, critterfish, dlc01wesc03script, critter, critterdragonfly, critterfish
+placement	PlaceActorAtMe	24	25	byohrelationshipadoptionscript, ccbgssse001_crabencmonitor, ccbgssse001_crabmq4crabspawner, ccbgssse001_crabmq4reinforcements, CWFinaleScript, CWFortSiegeScript, byohrelationshipadoptionscript
+placement	SetScale	21	22	byohrelationshipadoptioncritteractorsc, ccbgssse001_fishtankcontainerscript, critterbird, critterdragonfly, critterbird, critterdragonfly, critterfish
+placement	MoveToMyEditorLocation	26	15	arenascript, byohhousebardscript, byohkidsattendweddingmarker, c03rampagequest, QF_CWSiege_000954E1, byohhousebardscript, c03rampagequest
+placement	TranslateTo	24	13	ccbgssse001_dwarvencolumnscript, critter, cwarrowvolleyparentscript, cwartilleryaimingmenuscript, critter, dlc1testphilvortexscript, dlc1testphilvortextrigscript
+placement	ApplyHavokImpulse	22	13	da10ghosttrap, defaulforcetowardlinkrefonenable, defaultdisablehavokonload, defaultragdollattachpointscript, DbMiscFunctions, da10ghosttrap, defaultdisablehavokonload
+placement	SetPosition	14	21	critter, critterdragonfly, critterfish, cwmapscript, _ts_DR_DragonFollowerRegisterScript, critter, critterdragonfly
+placement	DisableLinkChain	15	9	default2stateactivator, dlc1_2stateactivatorwithglobal, dlc2apoextendinghallscript, dlc2dunfahlbtharzresonatorscript, default2stateactivator, dlc1_2stateactivatorwithglobal, dlc2apoextendinghallscript
+placement	TranslateToRef	12	11	ccbgssse001_fishingsystemscript, da09script, dlc01dundbchimemasterscript, dlc1batseffectscript, da09script, dlc1dunharkonbossbattle, dlc1vq08batsswapeffectscript
+placement	StopTranslation	9	9	ccbgssse001_fishtankcritterscript, critter, da09script, dlc1dunharkonbatteleport, critter, da09script, dlc2dunnchardakwaterplane
+placement	EnableLinkChain	10	8	default2stateactivator, dlc1_2stateactivatorwithglobal, dlc2apoextendinghallscript, dlc2dunfahlbtharzresonatorscript, default2stateactivator, dlc1_2stateactivatorwithglobal, dlc2apoextendinghallscript
+placement	SplineTranslateTo	9	5	critter, critterbird, critterdragonfly, critterfish, critter, critterbird, critterdragonfly
+placement	MoveToNode	7	6	ccbgssse001_fishingsystemscript, critter, cwmapactivatorscript, dlc2explodingspidereggscript, critter, cwmapactivatorscript, dlc2explodingspidereggscript
+placement	SplineTranslateToRef	3	0	ccbgssse001_fishtankcritterscript, dunkagrenzelanimationactivationscript, objectreference
+placement	MoveToInteractionLocation	1	0	objectreference
+quest	SetStage	6290	566	aliasadvancestage, arenascript, bfbdragonflyoverscript, blackreachdragononhitscript, CWFinaleScript, CWFortSiegeScript, CWReinforcementControllerScript
+quest	SetObjectiveDisplayed	631	256	byoh_qf_byohhousebanditattack_010008a8, byoh_qf_byohhousebuilding_0100305d, byoh_qf_byohhousefalkreath_0100305e, byoh_qf_byohhousehjaalmarch_0100be09, CWReinforcementControllerScript, QF_CWAttackCity_0004F8BF, QF_CWSiege_000954E1
+quest	SetObjectiveCompleted	597	250	bladeofwoescript, byoh_qf_byohhousebanditattack_010008a8, byoh_qf_byohhousebuilding_0100305d, byoh_qf_byohhousefalkreath_0100305e, CWReinforcementControllerScript, QF_CWAttackCity_0004F8BF, QF_CWSiege_000954E1
+quest	Start	614	220	arenascript, aventussacramenttriggerscript, banneredmarescenetriggerscript, bardsongsscript, CWFinaleScript, JewelryLimiterREfScript, JewelryLimiterStartScript
+quest	ForceRefTo	270	153	arenascript, bardsongsscript, byoh_qf_byohhousefalkreath_0100305e, byoh_qf_byohhousehjaalmarch_0100be09, CWCampaignScript, CWFinaleScript, CWFortSiegeScript
+quest	CompleteAllObjectives	185	88	byoh_qf_byohhousebanditattack_010008a8, ccbgssse001_radiantitemquest, dlc1_qf_dlc1hunterbaseintro_01004e24, dlc1_qf_dlc1hunterbasestage2_01013f1f, byoh_qf_byohhousebanditattack_010008a8, ccbgssse001_radiantitemquest, dlc1_qf_dlc1hunterbasestage2_01013f1f
+quest	Clear	131	104	arenascript, byoh_qf_byohhousebuilding_0100305d, byohhousebuildingscript, byohrelationshipadoptableurchinscript, DbBigActorArray, DbBigStringArray, DynamicActorArrays
+quest	SetObjectiveFailed	50	38	cwscript, dlc1_qf_dlc1rv01_01004c1b, dlc1_qf_dlc1rv03_010050bd, dlc1_qf_dlc1vq00_0100d90e, QF_CWAttackCity_0004F8BF, QF_CWSiege_000954E1, cwscript
+quest	UpdateCurrentInstanceGlobal	40	17	byoh_qf_byohhousefalkreath_0100305e, byoh_qf_byohhousehjaalmarch_0100be09, byoh_qf_byohhousepale_01010bee, byohhousebuildingscript, CWReinforcementControllerScript, byoh_qf_byohhousefalkreath_0100305e, byohhousebuildingscript
+quest	ForceLocationTo	11	14	byohhousebuildingscript, byohrelationshipadoptionscript, cwcampaignscript, dlc1_qf_dlc1vq00changelocatio_0100d90b, CWCampaignScript, QF_CWSiege_000954E1, byohhousebuildingscript
+quest	CompleteQuest	14	5	companionsstoryquest, dlc1_qf_dlc1ld_01005817, dlc2_qf_dlc2dunhaknirtreasure_02024002, dlc2_qf_dlc2dunkolbjornqst_0201810b, dlc2_qf_dlc2dunhaknirtreasure_02024002, dlc2_qf_dlc2dunkolbjornqst_0201810b, qf_dungauldursonqst_000e4d31
+quest	ForceRefIfEmpty	6	3	arenascript, referencealias, survival_needcold, survival_needexhaustion, Survival_NeedCold, survival_needcold, vendorstockpotionscript
+quest	ForceStart	3	3	mq302script, qf_mq302_00045923, scene, grim_qf_grim_qst_ill_alluring_0b337eff, mq302script, qf_mq302_00045923
+quest	SetCurrentStageID	1	0	quest
+values	SetAV	247	90	actor, byoh_pf_byohadoptionor_orders_01003f37, byoh_pf_byohadoptionor_orders_01003f38, byoh_pf_byohadoptionstd_child_01004005, QF_CWAttackCity_0004F8BF, betterstealthaiscript, byohrelationshipadoptablescript
+values	SetActorValue	145	61	actor, bfbdragonflyoverscript, byoh_qf_byohhousebanditattack_01005207, byoh_tif__01003e0b, DLC2dunSeekerInvisScript, DbMiscFunctions, _ts_DR_DragonFollowerRegisterScript
+values	DamageActorValue	11	31	actor, ccbgssse001_speedenchscript, da05huntertriggerscript, dlc2dbbooklevellighttrigscript, ao_vampirequestscript, odn_slayliving_script, odn_sneakexpose_script
+values	RestoreActorValue	13	27	actor, ccbgssse001_speedenchscript, dlc1playervampirechangescript, dlc1seranalevelingscript, ao_vampirequestscript, dlc1playervampirechangescript, dlc1seranalevelingscript
+values	DamageAV	23	14	actor, bwclightdamagescript, da15wabbajackeffectscript, da16mistfill, dlc1dunharkonbossbattle, dlc1testphilrunehammerabilityscript, dlc2_qf_dlc2dunkolbjornqst_0201810b
+values	RestoreAV	20	17	actor, da15wabbajackeffectscript, dlc01soulcairncratterscript, dlc1_qf_dlc1vq07_01002853, PlayerWerewolfChangeScript, QF_CWAttackCity_0004F8BF, dlc1_qf_dlc1vq07_01002853
+values	ModActorValue	15	22	actor, dlc1radiantscript, dlc2_qf_dlc2mq07_020179d7, dlc2ashrunescript, DbMiscFunctions, carriagesystemscript, dlc1radiantscript
+values	SetRace	19	14	actor, c01questscript, c03rampagequest, dlc1harkoncombatmagiclevelingscript, PlayerVampireQuestScript, PlayerWerewolfChangeScript, c03rampagequest
+values	ModAV	4	6	actor, perkdarkpotencyscript, qf_ms04_000209ca, qf_ms05duplicate000_00053511, uskpretroactive213script, utility_modactorvaluemageff, utility_modweaponspeed
+values	ForceAV	4	1	actor, c01questscript, dunbluepalacearenascript, dunhagsendhagravenbattlemanager, dunbluepalacearenascript
+values	ForceActorValue	1	2	actor, odn_deepstorage_script, wb_forcehpto1_script

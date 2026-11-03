@@ -3844,3 +3844,106 @@ m4-container-exclusive, the second commit), a chest's and a corpse's alike, and 
 apply keeps the record by base counts, so an occupant's own echo draws nothing; a foreign change, possible under "shared" alone,
 asks the engine's redraw once per burst). Live multi-party container sync goes to the backlog with its Frida plan (decision 4);
 decision 2's probe is the backlog's gate, not tonight's.
+
+
+## ADR-062: Scripts work: the host runs every world script of its hosted cells, and the safety moves to the natives that change server-owned state
+
+Status: PROPOSED 17:05 PST 2026-11-02 by thuum-magnus from numidium's shape, for Eli's sign-off (the next build after turbo 2's arm two). Amends
+ADR-059's IMPLEMENTATION; its principle stands: the cell's host runs the cell's world scripts, guests render the relays. Eli,
+verbatim, playtest 41: "i also feel like youre sort of fixing things one at a time, when really shouldn't 'scripts work' be a
+holistic fix? something structural is just not working." To this shape: "yes please." Earlier the same evening: "if something is
+built and running and we're saying we dont know how the engine works, then we did something wrong."
+
+Context. ADR-059 admitted world scripts by NAME (lab/layer/papyrus-admitted.tsv's host row, built from one dungeon's read) and
+lifted the activation block per listed base (activationUnblockedBases). Every dungeon since has failed on a name the list lacked:
+Bleak Falls tonight alone, read from the esm's VMADs (lab/esm.py scripts), wanted six more (MS13WebDestructibleSCRIPT on Arvel's
+web, MS13TriggerArvelRunSceneScript and defaultActivateSelf on his run trigger, masterAmbushScript on the spider and the alcove
+draugr, HallofStoriesKeyholeScript and HallofStoriesDiskScript on the claw door), and the list cannot know the next dungeon's.
+The census (docs/research/adr062/papyrus-census-2026-11-02.tsv, lab/tools/papyrus-census.py: the string table of every .pex in the
+load order's archives and loose scripts, 14,302 vanilla and 2,420 mod scripts) shows the shape of the problem: the scripts are
+many and their consequences few. Thousands of scripts call SetStage (6,290 vanilla, 566 mod), Enable and Disable (874 and 760),
+AddItem (788), Activate (377), PlayAnimation (264), PlaceAtMe (258), Kill (119), Lock (121); the server-owned state they move
+fits in one table. Prior art is the same lesson: TES3MP runs every script on every client and syncs the consequences as object
+packets; we run them on one client (the host) and sync the consequences through the server, which validates and records. The
+design law: a host client owns SIMULATION; we do not reimplement what an engine runs for us; the server owns STATE; every
+network byte is recognised once, in Rust.
+
+Decision.
+1. The default flips. On a host, every world script of its hosted cells runs: Skyrim Platform's SendEvent block and the
+   activation block are lifted wholesale for references in hosted cells (the hosted-cell set hostService already tells the
+   platform; the name walk goes). No allow-list: papyrus-admitted.tsv's host rows and activationUnblockedBases retire (ADR-044's
+   player-scoped rows for the player's own effects stay, they are a different question). Guests run none (the lifecycle events
+   aside, ADR-059 decision 1) and render the relays.
+2. The safety moves to the consequences. The engine natives through which any script changes server-owned state are hooked once
+   each in Skyrim Platform (the Papyrus native's entry, found by its registration name through the re-analyst, rule 1) and
+   routed to the server, which validates, records and relays; a host-run script's change is the host's report (R2 where the
+   server records, R1 where it judges, R0 where the server's own rule answers instead). The table below is the census's: each
+   native with its scripts, the state it moves, our verb today and what this ADR adds. Most have a verb already; the gaps are
+   enable and disable, scripted placements and deletes, alias fills and their created items (the claw), scripted kills as
+   evidence, destruction stages, world globals and the player's standing.
+3. Proof by whole dungeons, not scripts. The scenarios are q-golden-claw (Bleak Falls Barrow end to end on two seats: the campfire
+   bandits, the plate and the spike wall, the pillars and the lever, the spider's drop, Arvel's web and run, the claw in his
+   body, the rings and the keyhole, the word wall, with a restart in the middle) and q-embershard (the mine's bridge and its
+   bandits), each green twice before the ADR closes; the per-script probes (x-bleak-traps, x-object-anim, x-word-wall-read) stay
+   as the reads behind them. The spike wall's regression of playtest 41 (the plate's own Down reported, no line for 54b15) is
+   the baseline's first row: read on the union's dist against the morning's green before the flip.
+
+The census (scripts naming the native, vanilla / mods; the full table with examples is the research file):
+
+| Native (Papyrus) | vanilla / mod scripts naming it | Server-owned state it moves | Our verb today | ADR-062 |
+| --- | --- | --- | --- | --- |
+| Quest.SetStage | 6290 / 566 | the shared quest's stage | quest-stage (ADR-056: the server's stage, the client parks and reports) | hook: the host's stage call becomes the quest-stage report; guests never run it |
+| Quest.Start / Stop | 614 / 220 / 0 / 0 | a quest's running state | quest-stage (the start word) | hook: start and stop as stage 0 and the stop word |
+| ReferenceAlias.ForceRefTo / Alias.Clear | 270 / 153 / 131 / 104 | an alias's reference and its created items (MS13's GoldenClaw ALCO) | none | NEW: alias fills recorded; alias-created items into the actor's record (q-golden-claw) |
+| SetObjectiveDisplayed / Completed / Failed | 631 / 256 / 597 / 250 / 50 / 38 | nothing (the journal's rows) | R3 | no hook |
+| ObjectReference.Enable / Disable (and NoWait) | 760 / 367 / 874 / 391 | a reference's enabled state | npc-handoff's hide snippet only | NEW: the enabled state as a server property (recorded from the host, relayed, restored at load) |
+| ObjectReference.Delete / DeleteWhenAble | 153 / 175 / 167 / 65 | a reference's existence | the server's Delete for its own copies | NEW: a host's delete of a game-file or server reference, recorded |
+| ObjectReference.PlaceAtMe / Actor.PlaceActorAtMe | 258 / 213 / 24 / 25 | a new reference or actor | spell-placed objects (ADR-057, spells alone); npc-fate's roll for actors | NEW: a script's placement becomes the server's (ADR-057's table generalised to any placer), the actor rolled by npc-fate |
+| ObjectReference.MoveTo / SetPosition / SetAngle / TranslateTo | 426 / 252 / 14 / 21 / 13 / 39 / 24 / 13 | a reference's place | movement (actors, R2 through the host's stream); prop-physics (props) | hook for non-actor, non-prop references: the place recorded as a placement; actors and props already stream |
+| ObjectReference.Reset | 99 / 62 | a reference's state | none | NEW (small): recorded as a reset of the server's record |
+| ObjectReference.AddItem / RemoveItem / RemoveAllItems | 788 / 285 / 520 / 255 / 28 / 32 | an inventory | inventory and containers (ADR-031 whole actions; the server's record) | hook: a host-run script's change to an NPC or container is the host's report (R2, recorded); to the player, a judged report (R1) with the quest's stage as the cause |
+| Actor.EquipItem / UnequipItem / SetOutfit | 71 / 52 / 40 / 32 / 47 / 34 | an actor's worn set | equipment (UpdateEquipment), npc-fate's dress | covered by the host's equipment report |
+| Actor.AddSpell / RemoveSpell / AddPerk / RemovePerk / AddShout | 131 / 106 / 82 / 76 / 48 / 22 / 22 / 5 / 6 / 5 | the known set, perks, shouts | spell-cast's known set, perks, shouts | hook on the player alone: the server's natives (R0) answer the script's grant |
+| ObjectReference.Activate | 377 / 159 | the activation chain | ADR-059 decision 2's relay and the linked-activation report | covered: the host's engine activates, the report stands |
+| PlayAnimation / PlayAnimationAndWait / SendAnimationEvent / SetAnimationVariable* | 264 / 100 / 138 / 44 / 5 / 2 / 35 / 13 | a world object's animation | ADR-059 decision 3's ObjectAnimation relay | covered (the sendAnimationEvent hook); the variables ride the same relay |
+| Lock / SetLockLevel | 121 / 62 / 24 / 14 | a lock | locks | hook: the host's lock change is the locks verb's report |
+| SetOpen | 77 / 33 | a door's or container's open state | containers (isOpen), doors | hook: recorded and relayed as isOpen |
+| SetDestroyed / DamageObject / ClearDestruction | 20 / 11 / 32 / 15 / 12 / 7 | a destructible's stage | none (the cobwebs are the engine's own destruction) | NEW (small): the destruction stage recorded and relayed |
+| BlockActivation | 127 / 62 | nothing shared (the engine's own gate) | ADR-059's lift | no hook (host-local) |
+| Actor.Kill / KillSilent / Resurrect | 119 / 65 / 2 / 0 / 24 / 12 | a life | npc-fate (the host's death report with evidence; a script's kill carries none, E_DEATH_UNCHECKED) | hook: a host-run script's Kill is a new evidence kind (recorded), its Resurrect the stand-up word |
+| SetEssential / SetProtected / SetGhost / SetAlpha / SetCriticalStage / SetRestrained | 70 / 41 / 20 / 10 / 100 / 47 / 68 / 41 / 23 / 21 / 47 / 23 | an actor's flags | npc-fate's essential and protected rule (from the base) | hook: the flags recorded from the host (R2) |
+| SetAV / ModAV / DamageAV / RestoreAV / ForceAV | 247 / 90 / 4 / 6 / 23 / 14 / 20 / 17 / 4 / 1 (plus the long names 145 / 61 / 15 / 22 / 11 / 31 / 13 / 27) | an actor's values | actor-values (the player's R1 report, the server's R0 hold), hosted state (NPCs, R2) | covered for NPCs; the player's script-sourced change is a judged report with the script as the cause (the shrine blessing, the quest's bonus) |
+| GlobalVariable.SetValue / SetValueInt | 402 / 188 / 47 / 27 | a global | player-globals (ADR-029 A2, per player) | NEW: world globals as the server's (one rule, the per-player list stays) |
+| AdvanceSkill / IncrementSkill / AddPerkPoints / SetPlayerLevel / TeachWord / UnlockWord | 3 / 26 / 26 / 5 / 2 / 1 / 0 / 0 / 18 / 13 / 11 / 8 | the character's progression | leveling (40489 hooked), perks, shouts and word-wall | covered by the engine-entry hooks and the server's natives |
+| AddToFaction / RemoveFromFaction / SetRelationshipRank / SetFactionRank / SetCrimeFaction | 292 / 156 / 272 / 101 / 180 / 83 / 60 / 20 / 26 / 27 | an actor's factions and standing | hostility-sync (players), the host's AI (NPCs, R2) | R2 for NPCs (the host's AI acts on them); the player's standing is NEW (small): recorded from the host |
+| StartCombat / StopCombat / EvaluatePackage / SetDontMove / SetAlert / SetPlayerTeammate | 214 / 102 / 63 / 49 / 518 / 169 / 2 / 3 / 34 / 0 / 54 / 42 | the host's AI | hosted state (R2) | no hook: the host simulates, the stream carries the result |
+| Spell.Cast / RemoteCast / Dispel / DoCombatSpellApply | 150 / 130 / 5 / 23 / 14 / 82 / 14 / 25 | a cast and its effects | spell-cast and magic-effects (the host's casts are reports) | covered: the host's engine casts, the cast hooks report |
+| Weather.ForceActive / SetActive / ReleaseOverride | 12 / 8 / 53 / 28 / 24 / 8 | the weather | weather | hook: the host's forced weather is a weather report |
+| Sound.Play / Stop, Scene.Start / Stop | 388 / 284 / 984 / 563 | nothing shared (sounds), a scene's run | R3; npc-puppet's scene rule | no hook for sounds; scenes stay the host's (the stop rule stands) |
+| EnablePlayerControls / DisablePlayerControls / ShakeCamera / FadeOutGame / AddAchievement / IncrementStat | 98 / 49 / 80 / 47 / 59 / 33 / 4 / 5 / 56 / 38 / 35 / 15 | the player's own screen | R3 | no hook |
+
+Consequences. Platform (a Windows build): the hosted-cell lift replaces the name walk in OnSendEventEnter and dealWithRef's per-base
+lift; one hook per native in the table's "hook" and "NEW" rows, each an entry hook with a filter (the reference's cell hosted
+here, the caller a script) before the bridge (rule 9), each named in docs/NATIVES.md with its rung (rule 10). Server (Rust rules,
+C++ handlers where legacy): the existing verbs take the host's reports through their own validators (quest-stage, inventory,
+locks, containers, npc-fate's death evidence, weather, actor-values, hosted state); new messages for the gaps (RefState for
+enabled and deleted, ScriptPlacement generalising ADR-057's table, AliasFill with its created items, DestructionStage, WorldGlobal)
+each with validator, fixtures and contract line in one commit (rule 4), their records in the change form with a migration and a
+restart scenario (rule 6). Client: the gate and the relays' handlers already exist; the new state rows get their apply. Lab: the two
+dungeon scenarios, the gate set widened to them. Estimate: the flip and the hooks for the covered verbs (SetStage, AddItem and
+RemoveItem, Activate, PlayAnimation, Lock, SetOpen, Kill, Cast, the weather) two days plus the re-analyst's day for the entries;
+the new rules (enabled state and deletes one day, scripted placements one and a half, alias fills and created items half, scripted
+kill evidence half, destruction stages half, world globals and standing half) four and a half days; the two scenarios and their
+runs two days; about nine working days, built in three slices, each staged and walked by Eli: slice 1 the flip with the covered
+hooks (Bleak Falls walked by hand), slice 2 the new rules (the claw), slice 3 the scenarios green. What this rejects: one more name
+on the list (parked tonight, no more); running the vanilla scripts on the server's VM (ADR-059's reason stands); a per-dungeon
+allow-list of any shape.
+
+Risks. H1: a host-run script does what the server already does for the same event (a quest reward the server also grants, a kill
+the server also numbers), so each hook dedupes against the server's own mark (the quest-stage's "parked" shape). H2: a mod's
+world script (USSEP's 1,724, Apocalypse's 206) runs on the host for the whole cell now; ADR-044 admitted these plugins for the
+player's effects already, and the hooks bound what they can move. H3: a native's Papyrus entry is not one function per name
+(overloads, the Actor and ObjectReference pairs), so the re-analyst's read per native is the first day, not an afterthought. H4:
+the enable and disable row touches every reference's load (ADR-043's running order and the loader's skips): its migration and its
+restart scenario come with it. H5: a script's PlaceAtMe of an actor meets npc-fate's roll at the placement (train 51's "fated
+before PlaceAtMe returns" is the shape).

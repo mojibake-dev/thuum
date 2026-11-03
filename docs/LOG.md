@@ -5423,3 +5423,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   8d94232c, in the server train f9a0792e) and the client's touch IMPULSE within 1.5 s of its own shout or cast (m4-prop-blast-client
   24a841ea, folded into the chest bundle 10ade7c4). lab/esm.py gains `scripts <plugin> <form id>...` (a record's VMAD script and property
   names in full; `describe` cuts fields at 32 bytes), the read behind MS13's six names.
+
+- 17:05 PST 2026-11-02 ADR-062 PROPOSED (numidium's shape, Eli: "shouldn't 'scripts work' be a holistic fix? something structural is just not working" and
+  "yes please"): the host runs every world script of its hosted cells (the allow-list and activationUnblockedBases retire), the safety
+  moves to the natives that change server-owned state, hooked once each and routed to the server; proof by q-golden-claw and
+  q-embershard. The census behind it: lab/tools/papyrus-census.py over the load order's archives and loose scripts on sky-srv (14,302
+  vanilla and 2,420 mod .pex), docs/research/adr062/papyrus-census-2026-11-02.tsv; SetStage in 6,290 vanilla scripts, Enable 874,
+  Disable 760, AddItem 788, Activate 377, PlayAnimation 264, PlaceAtMe 258, Kill 119, Lock 121. Nine working days in three slices.
