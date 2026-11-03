@@ -6022,3 +6022,17 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   tonight: T2 green on m3-system1 34a92ed6's image (round five is client-only); R4 v2 red only on exact position claims (R5's
   guard 13 lines, no crash; no same-session replay); upstream skyrim-multiplayer/skymp has 3 commits past our main mirror (10-05
   fixes) and dependency bumps, nothing in our areas.
+- 02:02 PST 2026-11-03 (10:02Z 11-03) (thuum-cf): after numidium's history rewrite (Eli's order; git filter-repo on the author and committer e-mail
+  alone, both repos, trees identical; thuum main 4176fc37 then the two citation remaps, 67a996a5 and dace1998), my side: the
+  shared checkout pulled; 29 fork worktrees under my scratchpad fetched and reset (clean, --hard) to their rewritten heads from
+  numidium's list (m3-system1-r2 4ccb4259 the merge candidate, its pipeline 4923 numidium's; m3-promote-record-r3 466afafa;
+  m4-prop-arbitration 147a6cfe; m4-scripts-work 06cbc2d8; parity 188a8dea), three list entries found to be dead directories with
+  no .git (October's cast-wt, train3c-wt, voice-wt) and the fork's four prunable worktree registrations pruned; 200 commit
+  citations in 112 by-path probes under lab/.cache/probes remapped through the sha map (frozen/ and the backups untouched), 577 in
+  my memory files. Door v18 (main 639f65ec, 104 steps; the review of v17 applied: the gate's line at the create-word promotion as
+  the stale case's witness, the hold's "placed" line and its asks as the cure's, the record claimed in absolute units against the
+  street spot, the header naming the create word as the promotion and the teleport flag swallowing the parent's first report) and
+  the swap probe v16 (d15e2dcc, 34 steps) landed after the freeze; the m3-system1-r2 stage follows its green 4923, and the door
+  chain on it is v18, the swap v16 and the settle-0 read re-derived from v18. Lesson: a cherry-pick keeps its source's author, so a
+  public fork needs --reset-author at pick time when the source carried a work address; and a filter-repo scrub changes every
+  descendant's sha, so every citation outside git (probes, memory) needs the map.
