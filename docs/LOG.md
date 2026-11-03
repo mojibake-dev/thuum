@@ -6315,3 +6315,21 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   residual, a placing hold's record at a teleporting respawn, recorded in npc-handoff.md and left to ADR-066. Nothing tests the
   tTeleport revive yet and no stage probe respawns onto a dead hold: a probe for r3's stage. The decision memo for Eli is
   docs/private/decisions-after-fnv-read.md (D-F1 the quest's owner, A/B/C with C recommended; D-F2 ADR-066, A recommended).
+- 04:38 PST 2026-11-03 (12:38Z 11-03) (thuum-cf): the re-analyst's note on ADR-065's sending half (b) is in,
+  docs/research/adr065-serialize-on-demand-2026-11-03.md (478 lines; every id by lab/addr.py, every body by pyghidra-mcp, REA down;
+  13 HYPOTHESIS, 7 CONFIRMED-STATIC, nothing renamed in Ghidra). Q1: BGSSaveFormBuffer is 0x30 bytes (the growable buffer, then the
+  save file's nine-byte change-form header at +0x18 in file order, the form at +0x28; ctor 36035, header init 36037, destroy 36044);
+  TESObjectREFR::CheckSaveGame (19527, slot 0x0D) drops kAnimation unless a saved sub-buffer or the 3D says yes, drops the inventory
+  bits with no InventoryChanges, returns 0 for a permanently deleted ref; SaveGame (19528, slot 0x0E) writes the flags, base, scale,
+  the extra list under a mask, the inventory and the animation block, and the lab's 40-byte door record decodes field by field
+  against it. Q2: outside a save 0x0D and 0x0E need both singletons, kSaving clear and the dry-run byte at BGSSaveLoadManager +0x120
+  zero; the "refid table" is BGSSaveLoadGame::formIDMap (+0x298): load-index-00 ids encode direct as type 1, created as type 2,
+  everything else through the map (type 0, seat-local indices; 000000 is null on every seat). Q3: the unload's stash (35570) would
+  run on a live form but freezes the entry (an entry holding a record skips AddChange's OR and the real unload, and the next save
+  writes the stale record), so a scratch buffer is the route, never the map. Q4: the recipe (premise checks, ctor, header from the
+  entry's flags, slot 0x0D, 35715's initial data, slot 0x0E, pack, report, free) and what it must never touch. Correction to ADR-065's
+  framing: the record carries no header flags, so the wire carries the triple {form id, flags, record} (the capture and inject already
+  do), and for plugin forms the sender's type-0 (index, form id) pairs with a receiver-side rewrite. The one Frida read that proves
+  it: serialize-on-demand.js on c1 with the capture probe's steps, the on-demand record against 114726's stash record byte for byte
+  (FNV-1a 0x4ebbb261 expected), the entry still 0x90001000 with a null record afterwards. The script is the re-analyst's next piece;
+  it runs on the lab after numidium's stage.
