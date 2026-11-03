@@ -7284,3 +7284,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   The move itself is npc-handoff's H5 (CONFIRMED at T3 through this native). HYPOTHESIS for numidium's F1 probe: a view-less puppet
   copy lands the same; after D11's release the copy's schedule may walk it off an unhosted record (Hod's porch), the minute's cadence
   showing as a pop. The fork's pipeline on 6cce828e runs.
+- 13:11 PST 2026-11-03 (21:11Z 11-03) (numidium): THE CROSS-SEAT APPLY, GREEN: x-apply-cross-seat-sven v2 as 20261103-210713 (c2 solo, apply-on-demand.js v2.3
+  ea535c14, 13 of 13 claims; reviewed fresh, GO, its notes applied as written; the first attempt 210358 a premise miss, the WallLeanMarker
+  0x8b822 landing Sven across the cell's north edge in 0x9712, so the move went to the barrel 0x4d7d2, no claim touched). c1's kDead
+  record of Sven from session 192345 (3,420 bytes, FNV-1a 0x7dd12708), its one session-local id (the active effect's spell 0x2B005373)
+  re-encoded at offset 2097 from c1's index 10586 to c2's 10584 by the engine's own 35928, applied by 35568 and 35567 to c2's own dead copy,
+  killed about 1,150 units away in the same cell: the copy moved to the record's spot inside 35568, its root kept, 19535 set 19 bodies from
+  the record's block (poseSource "the record's block"), no active-effect miss, and c2's body settled within 5 units of c1's, position and
+  head. ADR-065's receiver half is shown across two seats for a dead NPC (MECHANISM ONLY, one subject); change-forms.md C4 carries it.
+  For ADR-067's "every corpse where it lands" it is the engine's own path: the owner's record of the corpse at rest, applied by the watcher.
+  Reads 2 (a dead record onto a live copy) and 4 (the actor record injected before the cell loads) wait for thuum-cf's script changes.
