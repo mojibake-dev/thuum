@@ -756,7 +756,22 @@ stays Refuse; the door's pre-check treats Stale as a refusal; a real return afte
 window. No wire change (no epoch travels; numidium's epoch shape is the alternative if the window proves too blunt). T0:
 cells.rs `a_passed_actors_report_back_within_the_settle_window_is_a_stale_copys_sample` and the cross test's teleport moved past
 the window; CellHostTest's door case reads the report's reliable send ahead of the word, the stale drop and the exit after the
-window. T3: b-npc-handoff-door-hosts v8 (thuum d474f718, 2026-11-03; v7 1c8f3455). v6's two red runs on the fix's parent 35509f7a settled the
+window. The parent run of v7's leg A (20261103-055217, union-srv-3 35509f7a, numidium's read) widened the case: red at the exit until
+with NO door walk, and the bounce at the house seat's GRANT instead. 05:53:42.417 c1 granted 133c7 at epoch 2; 05:53:42.597 "ff000000
+passes 1348a into cell 9732, which another game hosts (D9)", c1's FIRST report as the new host putting Hod outdoors; 05:53:42.633
+"ff000001 passes 1348a into cell 133c7 (D9)", c2's indoor copy passing him back; then only his speech and state lines for 400 s.
+Reading (HYPOTHESIS): the promote at the grant placed c1's copy at the LAST RELAYED SAMPLE (c2's follow of 05:53:05.698 during its
+visit, when he stepped out and back in: "follows 1348a into cell 9713 (D6)", "may not move 1348a to cell 133c7", "moves 1348a into
+cell 133c7, which it hosts"), not at the record (indoors since 05:53:06.767): the stale placement's mechanism at a grant rather than
+a D9 pass. For the fix's scope: half (a) imposes the passing report at a D9 pass alone, not at a grant; half (b) would PROTECT this
+false exit (the report back came 36 ms after the pass out, inside the window), leaving him outdoors though he never walked. So the
+record must be imposed at EVERY promotion (a grant, a D9 pass, a host's return), its position sent reliably with or before the hoster
+word and the promote reading it rather than the last sample: ADR-064 system 1's model (a reference's life on a non-owning seat,
+promote and demote), whose promote rows numidium writes from 052100, 055217 and playtest 41 before more settle code; the settle's
+merge waits on that order. The scenario claims it since v9 (thuum 02420ca6): no pass, follow or move of him into an exterior cell
+across EACH grant (the street seat's visit's and the interior seat's), a baseline right before the teleport in and equal after the
+grant, so the case goes red where it happens and a fix is tested at the grant too. T3: b-npc-handoff-door-hosts v9 (thuum 02420ca6,
+2026-11-03; v8 d474f718, v7 1c8f3455). v6's two red runs on the fix's parent 35509f7a settled the
 shape (numidium's reads): leg A 20261103-051454 was red at its premise with fresh seats and NO pass logged at Hod's house door, while
 the swap probe 20261103-052100 REPRODUCED playtest 41's bounce at the house door ("ff000000 passes 1348a into cell 9731 (D9)" at
 05:22:17.325, "ff000001 passes 1348a into cell 133c7 (D9)" 56 ms later, the pair every 14 s as he retried his door), the street
@@ -781,7 +796,7 @@ copy in the house. Leg B, the inn door at 22:00, playtest 41's own, the roles sw
 into the unhosted inn under its follow (claimed), then the same visit shape on the inn (the grant ends the follow, claimed), the inn's
 seat enters, and at 22:00 the fallback sandbox near his editor location walks him out by 0x13419 (the door 13419 line, "passes 1348a
 into cell 133c6" as the bounce line, the hour past 21.9). The exterior cell claim of v5 and v6 is dropped (the record outdoors and
-the 150-unit bound carry it). The by-path probe x-handoff-door-hosts-swap v6 plays leg A with the roles swapped on the parent (a run
+the 150-unit bound carry it). The by-path probe x-handoff-door-hosts-swap v7 plays leg A with the roles swapped on the parent (a run
 stops at its first red, so the scenario's second leg never reaches the parent); a third run at handoffPassSettleMs 0 reads the
 reliable placement alone. HYPOTHESIS until those runs:
 the mechanism above (every stamp fits it), and that the street seat's copy stands indoors at the promote (the precondition,

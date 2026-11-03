@@ -5688,3 +5688,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   PropTest cases. Probe v7 (leg 2 claims the touch-0 grants unchanged and the host's wake and rest lines risen against snapshots;
   the seats' owner lines counted: scenario.py refuses a snapshot of a seat fact). Docs: prop-physics A7, havok-props's rule cites
   at the current lines (85ef28e0, f0282e1b), npc-handoff's T3 text at v8 with the correction.
+- 22:09 PST 2026-11-02 (06:09Z 11-03) (thuum-cf): props round five 3fa107c6 GREEN on 4832 (its review out); x-prop-arbitration v8
+  by path claims both seats' owner lines against snapshots under lab-api 5219f093 (a seat's fact in a snapshot after its log-count
+  step). Door v7's leg A on the parent (20261103-055217, numidium's read) widened the case: red at the exit until with NO door
+  walk, the bounce at the house seat's GRANT (05:53:42.417 c1 granted 133c7; .597 "ff000000 passes 1348a into cell 9732 (D9)",
+  c1's first report putting him outdoors; .633 "ff000001 passes 1348a into cell 133c7 (D9)"); reading (HYPOTHESIS): the promote
+  placed c1's copy at the last relayed sample (c2's follow of 05:53:05.698 during its visit), not at the record; the settle's half
+  (b) would protect that false exit (36 ms inside the window), so the record must be imposed at EVERY promotion with its position
+  sent reliably with or before the hoster word (ADR-064 system 1's model first; numidium writes its promote rows from 052100,
+  055217 and playtest 41; the settle's merge waits). v9 02420ca6 claims no pass, follow or move of him into an exterior cell
+  across each grant (the visit's and the interior seat's); swap probe v7 the same. npc-handoff.md carries the run and the reading.
