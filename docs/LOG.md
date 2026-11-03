@@ -6905,3 +6905,20 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   19533's layout, the head-node walk, no visible change after the round trip; for the apply half, that the owner's pose lands rather
   than being overridden by the copy's animation (the "Behavior ragdoll save/load state mismatch" log is the tell). Its fresh review
   runs before numidium's solo-c1 round trip (the lab is free; a crash inside 35568 shows risk 1 real behind a rollback).
+- 08:18 PST 2026-11-03 (16:18Z 11-03) (thuum-cf): numidium's fresh review of the freeze fix (b8d82f05..db0e19a5): FIX FIRST. (1) The settle clock's
+  clear in onResurrected was undone in the same tick: deathService's resurrect only QUEUES the fate's resurrect (FateApi's gameThrQ,
+  drained after the JS tick) before clearing, and formView.applyAll runs the dead check's emit and then reconcile in one call while
+  the body is still dead and flagged, so reconcile restamped; on the reds' times the release would still have come 1.0 and 1.85 s
+  into the second fall. (2) The replay drop missed kill moves by name (the host relays the victim's event as the idle's ENAM less
+  "pa_": pa_KillMoveD 0x5474a and pa_KillMove1HMStabUpFace seen; pa_KillingBlow on three bleed-out idles, pa_2HWKillMoveA and
+  pa_KillWerewolfPaired* in the tree, numidium's esm read) and by channel (a creature's graph is not admitted by the action hook, so
+  its victim event rides the event relay to applyAnimation, unfiltered below 0xff000000). (3) The guest loses the victim half (the
+  victim stands, then falls at the word). (4) v4 cannot show the mechanism (two greens in four unfixed), so numidium writes
+  death-freeze v5 (3ae8457a): c2's drop line >= 1 and "resurrected 13491" == 0 beside the head bar. Round two on m3-system1-r3
+  7d0d4d7e: the clear moves into reconcile's live path, where the body is SEEN alive (movementApply's deadSince idiom), onResurrected
+  clearing the deferred kill alone; hookDisableKillMoves widened to the game-file range with the puppet read inside the hook
+  (animation.ts's idiom; the range and the patterns filter in native, rule 9) for KillMove*, KillingBlow*, 2HWKillMove* and
+  KillWerewolf* (HYPOTHESIS beyond the two seen); the replay drop kept as the cheap first filter with its lab line. tsc clean, no
+  wire change; its pipeline and both fresh reviews run. numidium's round-trip probe is written by path (x-apply-roundtrip.yaml: the
+  actor capture's placement, the frida step with the defaults, wait 15, npc-kill, the dead assert, a 10 s wait, a dead-after assert),
+  waiting on apply-on-demand.js's review verdict (the script on main fef08b18, sha1 539bac69).
