@@ -117,7 +117,7 @@ and the asleep send unchanged. Tests: props.rs (the moving refusal, the grab ove
 words, the stalled claim, the host's wake by id across a host change, the tick's cap), PropTest.cpp (the word at rest to both seats
 with player 0, the moving refusal, NotOwner answered, the wake's word and the live row across the props table's grant),
 wire-validate's PropOwner case (0 admitted).
-Two seats: x-prop-arbitration v10 by path (lab-spawn, a server-placed iron ingot at the mining floor marker; leg 1 c2's contact at
+Two seats: x-prop-arbitration v12 by path (v11 ran as 20261103-075626 on badca627 and went red at leg 1's premise, not its rule: the 1.5 s walk stopped 20 units short of the ingot and prop-contact.js on c2 heard the ground alone, so nothing was claimed or streamed and legs 2 to 6 never ran; two Frida watchers a seat settled; v12 holds W 2.2 s and the contact watcher's motion-type field reads the non-owner's copy once the capsule reaches it; lab-spawn, a server-placed iron ingot at the mining floor marker; leg 1 c2's contact at
 rest: granted, streams, rests, the word returns it; leg 2 c1 kicks it into c2: the contact takes nothing (the guest's own skip or
 E_PROP_MOVING), the touch-0 grants unchanged through the flight, the host's wake and its rest and both seats' owner lines naming
 the host risen against snapshots (lab-api 5219f093 takes a seat's fact in a snapshot after its log-count step), and the record moved;
