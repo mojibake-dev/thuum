@@ -229,7 +229,10 @@ the player learns it now, false when it knew it already or the record is no
 spell.
 
 `kill-ref` kills a game-file actor by form id through the server's console Kill (the killer the scenario client
-named, sent as its profile), and `respawn-ref` puts it up again at once, at its spawn point or where it fell with
+named, sent as its profile), and `respawn-ref` puts it up again at once: without `inPlace` by the fate's own teleporting
+respawn (the server's `respawnFated` property, RespawnFated: at its placement, rolled anew, the death-state container with
+tTeleport, the sweep's wire; an older server without the property gets the old locationalData-then-isDead shape, named in
+the reply), or where it fell with
 `inPlace`. `console` runs a console command on the server as the profile's player would type it
 (`mp.executeConsoleCommand`; skymp5-server's ConsoleCommands.cpp is the table), never typed into a game: a scenario
 writes it `c1: server-console {name: PlaceAtMe, args: [0x14, 0x23abf]}` (an EncWolfIce placed at c1's player), and

@@ -274,7 +274,11 @@ def _log_count_args(args: dict[str, Any]) -> dict[str, Any]:
 def _ref_command_args(action: str, args: dict[str, Any], clients: list[str]) -> dict[str, Any]:
     """kill-ref {formId, killer?} and respawn-ref {formId, inPlace?}: a game-file actor killed by the server (the
     console verb's Kill, as the seat's console; `killer` a client of the scenario, whose actor is the killer) or put up
-    again at once (at its spawn point, or where it fell with inPlace), by form id (npc-fate's death reads)."""
+    again at once, by form id (npc-fate's death reads). Without inPlace the respawn is the fate's own (the server's
+    respawnFated property: RespawnFated, the teleporting respawn at its placement, rolled anew, the death-state container
+    with tTeleport, the sweep's wire); with inPlace it stands where it fell (isDead false, no teleport). On a server
+    without the property the gamemode falls back to the old shape (locationalData then isDead false, a bare teleport and
+    a container WITHOUT tTeleport) and says so in its reply (2026-11-03)."""
     allowed = {"formId", "killer"} if action == "kill-ref" else {"formId", "inPlace"}
     unknown = sorted(set(args) - allowed)
     if unknown:

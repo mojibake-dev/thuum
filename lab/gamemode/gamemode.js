@@ -599,16 +599,29 @@ command["kill-ref"] = (payload) => {
 };
 
 // A dead game-file actor up again at once by form id (npc-fate's respawn reads, without the reset's hours): at
-// its spawn point as respawn puts a player there (locationalData, then isDead false: MpActor::SetIsDead's
-// Respawn), or where it fell with inPlace (the console verb's Resurrect does the same).
+// its placement by the fate's OWN path (the server's respawnFated property: MpActor::RespawnFated, RebuildAndRespawn
+// with the teleport and the roll anew, the death-state container WITH tTeleport, the wire the sweep sends; thuum
+// x-respawn-teleport-hold v1's fresh review, 2026-11-03: the old shape, locationalData then isDead false, was
+// SetIsDead's Respawn(false), a bare teleport and a container without tTeleport, so a client path keyed on the
+// teleport was unreachable from the lab), or where it fell with inPlace (isDead false, the console verb's Resurrect's
+// shape). On a server without the property (an older image) the old shape runs and the reply names it.
 command["respawn-ref"] = (payload) => {
   const formId = payload.formId;
   if (!Number.isInteger(formId) || formId <= 0) return { ok: false, error: "respawn-ref needs formId, a form id" };
   if (!mp.get(formId, "isDead")) return { ok: false, formId, error: "not dead" };
-  const spawn = payload.inPlace ? null : mp.get(formId, "spawnPoint");
-  if (spawn) mp.set(formId, "locationalData", spawn);
+  if (!payload.inPlace) {
+    try {
+      mp.set(formId, "respawnFated", true);
+      return { ok: true, formId, shape: "respawnFated", isDead: Boolean(mp.get(formId, "isDead")) };
+    } catch (e) {
+      const spawn = mp.get(formId, "spawnPoint");
+      if (spawn) mp.set(formId, "locationalData", spawn);
+      mp.set(formId, "isDead", false);
+      return { ok: true, formId, shape: "locationalData+isDead (no respawnFated property: " + String(e) + ")", spawn: spawn || null, isDead: Boolean(mp.get(formId, "isDead")) };
+    }
+  }
   mp.set(formId, "isDead", false);
-  return { ok: true, formId, spawn: spawn || null, isDead: Boolean(mp.get(formId, "isDead")) };
+  return { ok: true, formId, shape: "inPlace", isDead: Boolean(mp.get(formId, "isDead")) };
 };
 
 function dispatch(table, payload) {
