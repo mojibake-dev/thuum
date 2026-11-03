@@ -5375,3 +5375,17 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   perkPicks beside perks, an older record read as the perks held capped at level - 1 so it keeps the points it showed. wire-rules
   perks.rs Record.picks with its test, wire-bridge pick(..., picks, ...) and perk_points(level, picks), PerkTest's two new cases.
   An R0 after the arm (T0 and T2); the level-up's attribute pick (also item 6) stays a later slice: it needs the menu's RE.
+
+- 16:12 PST 2026-11-02 containers, Eli's call (ADR-061, "take one more deep dive crack at REALLY getting live omnidirectional syncing of containers for all
+  interacting parties, and if that doesnt work, backlog that and revert to one person is allowed to interact with a chest at a time"):
+  41's chest fix c38e4bf6 never ran for the body (its record lands in formView's path, the chest's in remoteServer's) and on the chest
+  its by-counts mutation under the open menu with the in-place redraw left the rows stale (Eli's trace: an apple's take became an eat, a
+  stored sword showed as boots). Fork m4-turbo2-chest b0939b7e (TS only): view/liveContainer.ts serves both paths, the record by base
+  counts (the own echo draws nothing), then the menu closed and the container asked again through the server 400 ms later, so the
+  engine draws the list whole; the in-place redraw stays behind chestRedraw "inplace" for its trace. The exclusive fallback (the
+  server setting containerSharing) is built next; x-shared-chest-phantom v2 proves the attempt before Eli sees it.
+
+- 16:12 PST 2026-11-02 reanimation, Eli's call (ADR-060, "and yes go with A"): a commanded NPC is simulated by its commander's game for the effect's life.
+  Playtest 41: Sven's reanimate ran on his host's engine with rotfern's figure as the commander (the get-up on Prisoner's screen alone,
+  the thrall back on his own path); the fix is ADR-052's claim at the accepted hit (a Commanded follow kind, the lease from the effect's
+  duration, released at the thrall's death), the host snippet retired. Build next on the fork; probe x-reanimate-claim.

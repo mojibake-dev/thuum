@@ -3700,3 +3700,134 @@ hook is on IAnimationGraphManagerHolder, which every animated reference holds; U
 engine enters a plate's primitive as an actor (the copy's character controller is a real one; the voice slice saw figures trigger
 nothing because nothing ran); H4, the replay's spacing and the count's drift when a relayed activation is refused by the
 script's busy window (the server counts what the host's engine confirms through the animation report, not what it relayed).
+
+## ADR-060: A commanded NPC is simulated by its commander's game for the effect's life (reanimation first)
+
+Status: ACCEPTED 16:06 PST 2026-11-02 by Eli, verbatim via numidium: "and yes go with A". PROPOSED the same evening by numidium's read of
+playtest 41's reanimate; written by thuum-magnus. Forced by playtest 41 (2026-11-02), the deaths2 client on the seats.
+
+Context. Playtest 41, verbatim: "when i killed sven and reanimated him, the animation only played for prisoner even though rotfern
+cast the spell" and "weird reanimating sven just puts him back on his normal path". The server's lines: 13491 (Sven) killed by
+ff000000 (rotfern, test client 1) at 23:42:51.561Z with ff000001 (Prisoner, test client 2) hosting Riverwood; "reanimate 65bd7 by
+ff000000 on 13491: cast on its host ff000001 for the engine's own effect" at 23:43:05.128Z (ActionListener::CastReanimateOnHost,
+npc-fate's "Reanimation is any player's, on any body": the hit accepted on the caster's seat, a Spell.Cast snippet on the body's
+host with the caster's figure as the source); "resurrection by its host's engine: 13491 stands again ... on ff000001's sample, 20 s
+after its death" at 23:43:12.203Z (the hosted-state stand-up rule, finding 48). So the Reanimate effect ran in the HOST's engine
+with a figure as its commander: the get-up and the shader played on the host's screen alone, and a commanded actor whose
+commander is a figure (an actor nobody's intent drives: no combat targets, no travel) fell back to its own packages. Arm one's
+contrast: Hod, hosted by the caster's own seat, fought for rotfern as in single-player, because the caster's engine ran the
+effect. The engine's CommandedActor archetype binds the thrall to the actor that cast it; that actor's game is the one that
+knows what the commander wants. The server already has a per-actor row beside the cell's host: ADR-052's claim (wire-rules
+cells.rs claim, FollowKind::Claim with CLAIM_LEASE_MS 120 s; PartOne::ClaimActor sends UpdateHoster to every game; simulator_of
+answers every gate, HostOf included), built for a dialogue and proven by b-npc-talk. The design law: a host client owns
+SIMULATION; we do not reimplement what an engine runs for us; the server owns STATE.
+
+Decision.
+1. A commanded NPC is simulated by its commander's game for the effect's life. At a reanimate hit the server accepts on a dead
+   NPC (OnHit's ReanimateEffectOf branch), the server claims the body for the commander's seat (the caster when a user plays it,
+   else the caster's own host: a hosted necromancer's thrall is its host's) as a new follow kind, Commanded, beside Claim; the
+   word is UpdateHoster to every listening game (the claimant's puppet becomes its live actor, the former host's live actor
+   becomes a puppet). The snippet CastReanimateOnHost retires: the commander's own engine cast the spell and runs the effect,
+   the resurrect, the get-up, the shader and the commanded packages on its screen, and its samples reach the server as any
+   hosted actor's (R2), so the record stands the body up through the existing stand-up rule, now on the commander's sample.
+2. The lease is the effect's. The spell's Reanimate effect item's duration (libespm Effects::Effect::duration, seconds) plus a
+   margin of 10 s; a duration of 0 (Dead Thrall) is permanent: no lease. The row ends at the thrall's death (the commander's
+   engine kills it at the effect's end, vanilla's ash pile, and reports it; PartOne::OnDeathState releases any Commanded row on
+   the actor), at the lease, or at the commander's departure (cells.rs gone() already drops a departed player's follows); the
+   release's word is UpdateHoster to the cell's simulator, as ReleaseClaim does. A second reanimate on the same body by another
+   player is a new claim: the newest commander wins (vanilla: a reanimated thrall cannot be reanimated again until it dies; the
+   rule refuses a Commanded claim on a body the record holds alive).
+3. The relay. RelayCast keeps carrying the caster's cast to every other game as its look, the body's former host included; the
+   skip of the body's host (built for the snippet) retires with the snippet. HYPOTHESIS H1: the former host's engine, whose copy of
+   the body is a puppet (AI off) from the grant on, does not stand its copy by its own effect; the copy stands by the server's
+   live word and follows the stream. If the trace shows it standing on its own, the double is cosmetic: a puppet takes the
+   stream regardless.
+4. Rungs. R0 the claim, its lease and its end (the server decides who simulates, as ADR-052); R1 the reanimate hit (today's
+   accepted cast on a dead body); R2 the thrall's movement, state and actions from its commander's game (HostedActorState, the
+   action relay, as any hosted actor); R3 the shader and the get-up on each screen (the puppets' Resurrect at the live word).
+5. The shape is every CommandedActor effect (Reanimate Corpse, Revenant, Dread Zombie, Dead Thrall, the staff and scroll
+   variants); the first build is the reanimate's, keyed on espm::MGEF::EffectType::Reanimate as today. A summon is the caster's
+   already (its own copy); Illusion's Frenzy and Calm command nothing.
+
+Consequences. Server: cells.rs FollowKind::Commanded (a claim with an optional lease, claim_commanded(actor, player, cell,
+lease_ms, now) and release_any_claim(actor); the bridge's rows); PartOne::ClaimCommanded (the lease from the spell's effect
+item through MpActor::EffectsOf) and the release at OnDeathState; ActionListener's reanimate branch calls it where
+CastReanimateOnHost stood; RelayCast's host skip removed; T0: CellHostTest's claim cases extended (a commanded claim at the hit,
+the lease from the duration, permanent for 0, the release at the death and at the departure, the refusal on a live body),
+NpcFateTest's reanimate case turned from the snippet to the claim; T2: difftest's reanimate session declares the UpdateHoster
+pair instead of the snippet. Client: nothing new in principle; the reconcile already promotes a puppet to a live actor at
+UpdateHoster (AI on) and demotes the former host's. HYPOTHESIS H2, the one the probe reads first: the commander's engine applied
+the Reanimate effect at its own hit on a dead puppet (AI off) before the grant arrived; whether the effect took (the actor
+resurrected in that game, then re-killed by the server's dead word, or kept) decides whether the client re-casts the spell on
+the body at the grant (castSpellImmediate by the commander on its now-live actor, the engine entry remoteServer already uses).
+Probe x-reanimate-claim (two seats, Riverwood): c1 kills a c2-hosted resident, c1 casts Reanimate Corpse at the body; the
+server's claim line and the UpdateHoster pair; c1's console shows the actor mine and alive within 3 s, c2's shows the puppet's
+Resurrect; npc-state isDead false on both; c1 walks 20 m away and the thrall's distance to c1 on the server shrinks (it follows
+its commander); at the effect's end (60 s plus the margin) the body is dead on both seats and the row is gone, hosting back to
+c2. Scenario b-reanimate-claim after the probe, in its own commit. docs/verbs/npc-fate.md gets the row and the HYPOTHESIS tags.
+
+Risks. H1 and H2 above. H3: the commander's engine stands the thrall while the server's record still holds it dead for one
+round trip, and the deaths2 client's released-body branch (AI off 4 s through the ragdoll) races the grant: the reconcile must
+read the server's word (isHostedByOther false plus the live word) over its own dead branch. H4: a hosted necromancer's thrall
+(the caster an NPC) claims for the caster's host, which is the body's host already in the common case; no change there.
+
+## ADR-061: A shared container's live view is the menu drawn again whole; exclusive access is the fallback behind a setting
+
+Status: ACCEPTED 16:11 PST 2026-11-02 by Eli, verbatim via numidium: "i say take one more deep dive crack at REALLY getting live
+omnidirectional syncing of containers for all interacting parties, and if that doesnt work, backlog that and revert to one person
+is allowed to interact with a chest at a time." Written by thuum-magnus; forced by playtest 41's item 7 and its chest fix's
+trace (below), after 40's F8 and 37's findings 29 and 30.
+
+Context. Memo D52 B (playtest 37) chose TES3MP's live view: a chest two players have open shows each one's takes and stores as
+they happen. Three builds tried to redraw the engine's ContainerMenu in place while the record landed under it: the item list's
+re-read (37: "showed nothing and took the store button"), the engine's inventory-update message through refreshContainerMenu
+(40's F8: the selection ended on the player's pane and a press on a book ran EquipItem), and the record by base counts with the
+same redraw (41, c38e4bf6; Eli's trace, verbatim: "no changes / rotfern tries to remove apple, / eats it instead / this doesnt
+show on prisoners screen / rotfern cannt place items / prisoner can remove and place / prisoner places sword / boots appear /
+rotfern takes sword, no sword appears"). The common factor is the mutation of a container under its open menu: the platform's
+addItemEx and removeItem change InventoryChanges without the engine's own container-changed path, and whatever the redraw
+message rebuilds, the Scaleform rows end up pointing at the wrong entries (a take becomes an eat, a sword shows as boots). The
+engine draws a ContainerMenu whole at its open and nowhere else that we have found; the lab's close-menu step (the platform's
+CloseMenu, the engine's kHide) closes it cleanly. Two paths applied the record under an open menu (remoteServer's for a viewless
+game-file CONT, formView's for a body, an actor with a view), and 41's by-counts fix sat on one of them while the body's trace
+came from the other. Eli's word closes the question: one attempt, then exclusive access.
+
+Decision.
+1. The live view's mechanism is the reopen. One function (skymp5-client view/liveContainer.ts, applyLiveContainer) serves both
+   paths: the record lands by base counts (the engine's count per base against the record's; the shortfall added with the
+   record's extras, the surplus removed), so this seat's own transfer, echoed by the server, changes nothing and draws nothing;
+   another occupant's change is applied and the menu is then drawn again whole: CloseMenu("ContainerMenu"), then the container
+   activated again through the server's own flow 400 ms later (the closing activation leaves as the open flow sees the menu
+   shut, the new one brings the record and the OpenContainer, the engine lays the list). The in-place redraw stays behind the
+   client setting chestRedraw "inplace" for its trace alone and is not the default. The cost is a flicker and the selection's
+   reset on each foreign change; TES3MP's live view at that cost.
+2. The attempt is proven before Eli sees it. x-shared-chest-phantom v2, after lab-api's grammar (a client transfer step, item
+   and direction; a reference's server.inventory(<refr>)): c1 opens, c2 joins; c2 stores a weapon and a food while c1's menu is
+   open; c1 takes the weapon; c2 takes the food; the reverse order with the roles swapped; a body as well as a CONT; after every
+   change each seat's engine inventory of the container equals the record and no refusal ("Source inventory doesn't have
+   enough", an unauthorized equip) appears in the server log; the opener's menu is open again within 1.5 s of each foreign
+   change. Green twice by path, then b-shared-chest in its own commit, then Eli.
+3. The fallback is built now, behind a server setting, so the flip is one settings line: containerSharing "shared" (today's
+   default) or "exclusive". Exclusive: MpObjectReference::ProcessActivate's container branch refuses a second occupant while
+   one has the container open (the furniture occupant rule's shape), logs E_CONTAINER_BUSY with both ids, and tells the second
+   seat through the existing notification snippet ("Someone is using this"); the first occupant's close frees it, and a
+   disconnect frees it as the occupant set already handles. T0 in PartOne_ActivateTest (the second activation refused and the
+   message sent; the close frees; shared unchanged); a scenario b-container-exclusive after the switch is on in the lab.
+4. If the attempt's probe is not green after one lab day of reads (the reopen's own failure modes: the second activation's
+   distance or facing check refusing the re-ask, the closing activation racing the re-ask on the server's occupant count, a
+   body's AI switch at the re-ask), the setting flips to exclusive on the lab and the live view goes to the backlog with its
+   Frida plan (ContainerMenu::ProcessMessage and ItemList::Update under a Frida trace while the record lands, the rows' entry
+   pointers before and after the redraw).
+
+Consequences. Client (TypeScript, the turbo bundle): liveContainer.ts, remoteServer's and formView's calls, the by-counts
+method and the redraw timers moved. Server (C++, an R0 merge on T0 and T2): the setting, the refusal and its line, the
+notification, the test. Lab: the probe's grammar (numidium), the probe and the scenarios in their own commits. Estimate: the
+client's unification an hour (built with this ADR); the switch two hours server-only; the probe one lab run per direction after
+the grammar; the in-place RE, if ever, one lab day. What this rejects: a third in-place redraw without a trace; mutating a
+container under an open menu and trusting any redraw; one path per container kind.
+
+Risks. H1: CloseMenu by kHide sends the closing activation through the open flow's watcher on every dist in use (the lab's
+close-menu step relies on it; the probe counts the server's occupants). H2: the re-ask's activation is refused when the player
+has turned away or stepped back during the 400 ms (the activation's distance check): the menu stays closed and the record is
+applied already; the probe's 1.5 s claim catches it. H3: a burst of foreign changes closes and asks the menu once per change;
+a batch (one reopen per 300 ms burst) is the first tuning if the flicker annoys.
