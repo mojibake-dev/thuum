@@ -5878,3 +5878,22 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   MECHANISM ONLY in Eli's own hedge). Eli asked whether we are obtaining the engine models: two of five docs, non-owning-seat.md
   (2 of 12 rows CONFIRMED, 7 in part, R2 to R5 unrun) and havok-props.md (17 of 38); thuum-cf's re-analyst drafts of containers,
   the progression UI and the night lock begun at 08:20Z (REA down this session, CommonLib then pyghidra).
+- 00:30 PST 2026-11-03 (08:30Z 11-03) (thuum-cf): numidium's fresh review of m3-promote-record 0b61fc80: OK FOR ITS FIRST LAB RUN, eight items
+  before the merge (1 the timeout runs from the word and the move is asked once, so a no-op move after a load or a slow landing
+  lets the stale reports out after both settle windows; 2 the hold moves bodies, against D78 C; 3 two moves per cross-cell
+  promotion; 4 deaths, shots and casts during a hold dropped without a line; 5 the create word's test admits non-actors; 6 a
+  demote does not end a hold; 7 the Release's flip sends keyframes for forms the new host lacks; 8 no try/catch per hold) and
+  the branch lacking 12f199e6 (the redress waits for the 3D; D2's crash reachable). Round three written and pushed to the
+  SIBLING branch m3-promote-record-r3 (9e613cb9 the eight items, 5e7330d9 = 12f199e6 cherry-picked with -x), because the door
+  chain's stage pulled 0b61fc80's bare server tag and a push to the branch would re-point it mid-chain (numidium's hold). The
+  door chain is staged on 0b61fc80 with door v14 (58f2c3a6 by sha) and the settle-0 read (162e943b), swap v12 and x-handoff-hide
+  by lab-run as their reviews clear; x-npc-death-reentry goes on playtest 41's break-3 build (the hold moves bodies on this
+  head). Probe reviews split so nobody reviews their own: mine (agents) on x-npc-death-reentry and x-handoff-hide, numidium's on
+  swap v12, props v12 and x-prop-static; propStatics is already deployed as ["1c0c3:Skyrim.esm"]. Slice 1b: x-script-natives v7
+  GREEN on 19bdfc3c (081915, every claim held); the host's census read from c1-console.log into papyrus-events.md (the cell gate
+  filters on the host too); 788f18a4 (the census key comment) pushed. Eli asked whether the engine models are being obtained:
+  two of five docs exist (non-owning-seat.md 12 rows, 2 confirmed; havok-props.md 17 of 38); the static halves of the three
+  missing systems (containers and the open menu, the progression UI, state no native reaches) started as three re-analyst
+  agents writing docs/engine/containers.md, progression-ui.md and ai-world-state.md (REA down, pyghidra up), uncommitted until
+  read. numidium wrote the Play lines (ADR-064 decision 5, main 71f14350): 12 BROKEN, perks VERIFIED IN PLAY, weather MECHANISM
+  ONLY.

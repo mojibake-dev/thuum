@@ -320,6 +320,20 @@ windows, fe01481e to fe01482e one-offs) and "others" 56 in one window beside the
 second, H-1b4's family), PlaceAtMe 2, Enable 2, Activate 2, Resurrect 2, Lock 4, Disable 1, Delete 1. The host's census numbers are
 the claims' line counts alone (c1-console.log was not in v6's artifacts; v7 lists it).
 
+The fourth lab read (two seats, probe x-script-natives v7 as run 20261103-081915 on 19bdfc3c's stage, numidium's read): GREEN,
+every claim held, the guest's "Quest.SetCurrentStageID on others" == 0 included, so the named row's absence now rules the stage set
+at load out on the guest (H-1b1's positive evidence stands with the cap no longer in the way). The host's census from the run's
+c1-console.log (ten windows, 111 rows; my count): "ObjectReference.SetOpen (platform)" 13368 (about 45 a second, H-1b4's family on
+the host too); "Quest.Stop on 30002859" 401 and "Quest.Start on 30002859" 399 (H-1b5, every window), "Quest.Stop on others" 83 in
+one window; "ReferenceAlias.ForceRefTo on 2e00ce06" 56 in one window; "GlobalVariable.SetValue on fe000a0f" 48 over nine windows,
+"(platform)" 29 over six, "on others" 21 in one, and a tail of one-offs (2201d280 to 2201d283 at 4 each, fe01481e to fe014833 at
+2 each, 201a31b 2); filtered on the HOST as well, "ObjectReference.RemoveItem (not hosted)" 47 over three windows, "MoveTo (not
+hosted)" 16, "PlaceAtMe (not hosted)" 2, "Disable (not hosted)" 2, so the cell gate filters other cells' lifecycle handlers on a host
+too, not only on a guest (the host of 0x9732 runs handlers for cells it does not host at its arrival, the same shape as the guest's
+83); the host's own live calls were few: PlaceAtMe 6, DisableNoWait 4, AddItem 3, RemoveItem 2, Activate 2, and "Quest.SetCurrentStageID
+on 2012f92" 2 beside the platform's 2 (the console setstage's own path on the host, as the probe expects). The open set's size on a
+host is at least these filtered 67 in the first windows; D-S1's measurement holds on both viewpoints.
+
 ## Status
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared
