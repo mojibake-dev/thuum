@@ -7316,3 +7316,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   numidium's F1 probe on r3 (211844, 212407) showed a MoveTo construction cannot make F1 (the server's MoveTo informs the watcher); the
   deterministic reproduction is the sighting path (the record parked outside with the inn empty, c2 hosting the street, c1 entering the
   inn so its engine's own Embry stands inside and its roster moves the record in, P10), else the play proof tonight with the fix's line.
+- 13:46 PST 2026-11-03 (21:46Z 11-03) (numidium): F1's move (ADR-067 decision 5) on the lab: fork m3-turbo3-sys1-f1 c1600f98 (6cce828e's PartOne.cpp plus the
+  finding-38 unit test's expectation changed to the move; the first two pipelines built no server image, the fork's server-build runs
+  only for m<n>- branches; pipeline 5101 green), turbo-srv at 13:41 PST (the lab's SERVER_TAG; the world saved first). The old hide's
+  cause, from playtest 42's c2 tee: "SpSnippet ObjectReference Disable failed Error: Unable to find form with id 0" six times, 20:15:57
+  to 20:21:01Z: the snippet never reached the copy. The probe x-stray-copy-moved (fresh review FIX FIRST, applied as written) needed
+  three tries to make a stray: a server MoveTo informs the watcher, so r3's own gate fixed it (211844, 212407, premise red), until
+  thuum-cf's P10 construction (the record taken to the street by c2's MoveTo, c1 entering the inn only after, its own Embry inside,
+  its sighting against the record) made one: on r3 213118 printed "ff000000's own copy of 3550c hidden (its record stands in 9712,
+  which ff000001 hosts)"; on the fix 214134 GREEN, 9 of 9: "ff000000's own copy of 3550c told to move to the record at (23254, -44472,
+  -10) in 3c (the record's cell 9712 is another game's; the copy stood at (-211, 203, 0) in 133c6 here)", no snippet failure on
+  either seat, all copies agreeing at the end. MECHANISM ONLY: the lab never reproduced playtest 42's six-minute frozen copy (213538
+  with the restart made no stray; r3 also converged in 213118), so playtest 43 is the proof in play. The cross-seat apply earlier
+  (210713) is unrelated to this push.
