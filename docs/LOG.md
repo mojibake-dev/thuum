@@ -6602,3 +6602,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   82). The gate (verb-merge: the always set, npc-handoff's, npc-fate's, cell-host's and npc-puppet's scenarios, and watch) plays the
   door scenario from sky-srv's deployed tree, so it waits for v23 committed and numidium's deploy-srv; if v23 lands by about 15:00Z
   the gate runs 15:00 to 17:00Z, the merge follows, and playtest 42 fits Eli's morning. The leg-B run reader is still on 134832.
+- 06:29 PST 2026-11-03 (14:29Z 11-03) (thuum-cf): the actor-mode script's fresh review (serialize-on-demand-actor.js 67f1b645): FIX FIRST, one
+  blocking (the five writer hooks, 19528, 39429, 38987, 39009 and 39023, counted nothing before their filter and had no first-bytes
+  entry, and hookBytes listed actorSave, never attached: with no pulse an empty marks list cannot be told from "not hooked", the
+  pitfalls rule of 2026-11-02) and nine notes, applied as written by the author: stashExpected keys on kPersistent too (the unload's
+  walk skips every IsPersistent reference, formFlags bit 10); the compare's limit for a non-promoted actor stated (the first
+  difference predicted at the level u32, every later offset shifting with the process block); the DESIGN note taken as LAB_PARAMS
+  DEFER (default true): the recipe ran inside the kill's own engine frame (35576's return inside SetLifeState or KillImpl, the ragdoll
+  hand-off), where 37649 reads the high process mid-transition and a lock re-taken by 39429 would hang, not crash, so the kill's mark
+  now sets a pending form and the recipe runs at the NEXT AddChange return on Main.threadID, milliseconds later, with deferredMs on
+  the row; farGeometry 0 a premise (a set far skin makes 0x0E strip it and mark kInventory, which would read as entryUntouched false
+  for the engine's own reason); sectionAt's modifiers array fixed; the info row only for an ACHR and a faulted read printed as -1;
+  the header's census shape (check mode with FLAG 0xffffffff and RUNS 8 first, then serialize with FLAG 0x400 and RUNS 2); the pack
+  fault's leak closed (out.readPointer() in the cleanup); the ready-stamp clause and the kPromoted cite (TESObjectREFR.h:154); a
+  second actorInfo after 0x0E. Every one of its 26 ids resolved by addr.py to the RVA declared; the plus-8 Actor offsets and the
+  block layout checked against the headers. The leg-B run reader is still on 134832.
