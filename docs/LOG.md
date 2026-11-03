@@ -6494,3 +6494,22 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   tIsDead false, tTeleport and tChangeValues to the host (or the actor itself) then the isDead false word; round eleven's pending
   clear is on the branch and Respawn repeats it, so the lever leaves no stale due-set entry. r3's pipeline waiter follows 5e0e975b;
   numidium's reviewer reads the new head; the stage's inputs are unchanged.
+- 05:35 PST 2026-11-03 (13:35Z 11-03) (thuum-cf): the two respawn probes' fresh review, FIX FIRST (two blocking on x-essential-bind v1, one on
+  x-respawn-teleport-hold v2), applied as written (rule A). Premise probe, now v2 (sha1 f31696a9): the bind's own line claimed ("dead
+  record 1066df loaded alive on ... killed silently at the bind", formView.ts), since isDead false alone holds if the bind never fired;
+  the record no longer claimed dead at the end, because after the hold's release the essential copy's bleedout zero stamps the body
+  as host-sampled dead (ActionListener.cpp 971-979) and its recovery reads as "resurrection by its host's engine" (946-968), so the
+  server's two lines are recorded, not claimed (an essential lever on a hosted seat is not "nothing respawns here"); isEssential under
+  the premises; npc-state after the screenshot; wait 18 (the budget counts from loadedAt); the exact "dead at the word, a body is never
+  moved" line; the flag cleared on c2 as the last step. Question probe, now v3 (sha1 3bd6ba39): the fated path's witness claimed, the
+  server's "1066df stands again at its placement" line (MpActor::RespawnFated's info line), since the gamemode replies ok on the fated
+  path and on its fallback alike and a stale image's fallback would reproduce the parent's red exactly; the bind's line and the live
+  branch's dead release recorded; a second discriminator claimed (the copy more than 2048 from the landing, the parent's place); the
+  flag cleared at the end. The review's reads: the driver types `console {text}` whole (DIK letters, digits, space), the engine's own
+  handler runs (the client's intercept replaces only its schemas; as server-console it would be Decision::Unknown); the ACHR 0x1066df
+  is not persistent, so c2's engine creates it at the cell attach after the command (whether the base's essential bit reaches the
+  actor's runtime flag is HYPOTHESIS, read by isEssential); the dead hold starts at the FLIP, not the create word (an unhosted cell's
+  create word says hosted-by-other), so its budget runs from about the grant; the watcher's poll re-applies the kill every 2 s until
+  the flip; the respawn's container is built from GetSpawnPoint (the editor placement, unbent by the MoveTo), sent to the host alone
+  before the standalone word. r3's by-path set complete: swap v20 75bd28b9, scene-guest v3 4ffaf665, essential-bind v2, respawn v3;
+  door v22 main 8609b4f4; the gamemode and fake main b5e02c05; the fork head 5e0e975b.
