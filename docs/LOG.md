@@ -6934,3 +6934,20 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   Round two (7d0d4d7e) covers the paths these runs did not take (the clock's clear where the body is seen alive; the event relay's
   mouth and the other name families). The re-stage continues with x-warm-exit v2, swap v20, death-reentry v5 and scene-guest v3;
   then 7d0d4d7e's re-stage with v5 twice, once both reviews answer.
+- 08:30 PST 2026-11-03 (16:30Z 11-03) (thuum-cf): my fresh review of round two (db0e19a5..7d0d4d7e): NOTES ONLY, GO; two one-line notes applied as
+  m3-system1-r3 df9e1009 (the head for the next re-stage; its pipeline under a waiter): the four puppet handlers covered 0..0xfeffffff,
+  so a KillingBlow, 2HWKillMoveA or KillWerewolfPaired* relayed to a server-made NPC's copy (a 0xff000000-range form, a puppet on the
+  seats that do not host it, the lab's placed bandits included) was not blanked; they now cover the whole id range (the puppet read
+  keeps figures out; a KillMove* the figures' handler already blanked arrives as "" and matches nothing); the settle-clock comment
+  states the observed 0.75 to 1.0 s beside the counterfactual. The review's reads: the clear's line is reached by every loaded,
+  not-mine, non-figure, alive actor on every reconcile, before the has3D and flagged branches; after the resurrect lands the next
+  reconcile clears and the word's kill stamps anew and releases 4 s later; a failing resurrect never reads alive; the hook's
+  mechanism is the figures' (the hooked entry is the one Debug.sendAnimationEvent, the event relay and the engine's own paired start
+  all reach; one pattern per handler; case-sensitive prefix; the isPuppet read a mutex registry read per matching event); the exe's
+  KillMove strings are settings and handler names, KillingBlow's are GetKillingBlowLimb and the paired event itself, KillWerewolf and
+  2HWKill have no exe string (the esm and the hkx alone, HYPOTHESIS as tagged); 0x14 is never flagged, so the player's own kill moves
+  play; a puppet attacker's half is blanked too, the right call (its paired start would pull its victim into the animation whose tag
+  kills outside the word). Carried into the verb docs: a one-frame hole if the dead word's update handler ran in the very tick the
+  resurrect landed and before the view's update (improbable; the hole-free shape is clearing the stamp at the word's own kill); and
+  the guest's own kill move on a puppet it hits is already touched by the hook (the puppet victim's paired start blanked, no local
+  kill at the tag), its look unread.

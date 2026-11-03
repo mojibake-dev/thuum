@@ -2066,7 +2066,13 @@ and about 120 below the eye (about 13 counts a degree on this seat; the rune pro
   cheap first filter with its lab line. What the guest sees: a kill move only on the killer's screen; the victim stands through it
   until the word, then drops with the engine's full death (the figures' precedent; playtest 42's checklist line). The deeper shape,
   a later round with its own read: refusing a puppet's own KillActor kill while the victim animation plays, so the guest sees the
-  victim half. Pre-existing and not these rounds: the stand-up pass re-arms the deferred kill on a still-dead body. The read is
+  victim half. Since df9e1009 the puppet handlers cover the whole id range (a server-made NPC's copy is a puppet on the seats that do
+  not host it). Carried, not changed (the fresh review of 7d0d4d7e): a one-frame hole if the dead word's update handler ran in the
+  very tick the resurrect landed and before the view's update (improbable: the view's update listener is registered first and the
+  lab's gap was 3 s; the hole-free shape is clearing the stamp at the word's own kill); and the guest's own kill move on a puppet it
+  hits is already touched by the hook (the engine's paired start on the puppet victim is blanked, so no local kill at the tag, while
+  the guest's attacker half plays against a victim that never enters the paired state), its look unread, HYPOTHESIS, in
+  x-npc-death-guest's frame. Pre-existing and not these rounds: the stand-up pass re-arms the deferred kill on a still-dead body. The read is
   x-npc-death-freeze v4 on db0e19a5 (the re-stage) and v5 (c2's drop line and no resurrect, numidium's) on 7d0d4d7e. First proof on
   two seats (db0e19a5's re-stage): v4 GREEN twice, 20261103-161847 and 162349, both with the mechanism shown: c2's "the host's
   KillMoveShortB not replayed on the puppet" and "... KillMoveShortD ..." one each, "resurrected 13491" 0, the body down; so four
