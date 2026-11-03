@@ -245,52 +245,74 @@ start the window at BeginPendingDeath); the same line with the record still at t
 samples.
 
 The watcher's corpse (ADR-067 by ADR-065's path; fork branch
-adr067-corpses-client, the client half, 2026-11-03). Rung R2: a render of
-the owner's rest, nothing simulated on the watcher. The at-rest moment
-above is the trigger of docs/verbs/change-form.md's pipeline: the owner's
-sender (sendInputsService.sendMovement) keeps sampling its dead hosted
-actor at the 130 ms cadence until two consecutive samples agree within 2
-units and 2 degrees or 15 s pass, sends the rest sample reliably and stops
-for that body; at that moment ChangeFormService.onBodyAtRest calls the
-native TESModPlatform.serializeChangeForm(refr) (the on-demand recipe: the
-engine's own SaveGame into a buffer plus the id census; answers formType,
-flags, version, bodyHex, fnv1a and the remap rows) and sends ONE reliable
-ChangeForm (MsgType 72: epoch from HostService.epochForActor, the cell's
-host epoch; formId the shared load order's id; formType; flags; version;
-body as hex; fnv1a; remap) when its fnv differs from the last ChangeFormAck
-(73) for the form. A watcher receiving ChangeFormApply (74, served with the
-actor's word, at a cell's load and after an owner's record is acked) holds
-the record until its own kill of the copy has run (the death word's kill
-or the bind's silent kill, both kept; deathService's kill is the hook) and
-then calls TESModPlatform.applyChangeForm(refr, bodyHex, flags, version,
-remapRows) once per received record, keyed by the body's FNV-1a computed
-on the client (the apply message carries no hash): the engine's own load
-lays the body in the owner's pose at the owner's place (read 1's GREEN
-20261103-210713: 1,150 units in one call, within 5 units). Nothing else
-moves a dead copy: movementApply's one-shot setPosition to the host's
-sample is gone, formView's bind no longer moves a body by coordinates when
-a record stands for it, and the bind's zero-force push is skipped after a
-laid body; no SetMotionType, no second kill. The natives are declared
-ahead of adr065-sys1-native in the client's module augmentation
-(clientListener.ts: a namespace merged into TESModPlatform with
-ChangeFormRemapRow, ChangeFormRecord and ChangeFormApplyResult) and in the
-codegen typings (skyrim-platform/src/platform_se/codegen/convert-files/
-skyrimPlatform.ts, two statics beside moveRefrToPosition at :3454); a
+adr067-corpses-client, the client half, 2026-11-03; the natives
+adr065-sys1-native 2ea234cd). Rung R2: a render of the owner's rest,
+nothing simulated on the watcher. The at-rest moment above is the trigger
+of docs/verbs/change-form.md's pipeline: the owner's sender
+(sendInputsService.sendMovement) keeps sampling its dead hosted actor at
+the 130 ms cadence until two consecutive samples agree within 2 units and
+2 degrees or 15 s pass, sends the rest sample reliably and stops for that
+body; at that moment ChangeFormService.onBodyAtRest calls the native
+TESModPlatform.SerializeChangeForm(refr) through callNative (a Papyrus
+static answering a JSON string: "" on a refusal, the reason in the
+platform log as "[verb:change-form] SerializeChangeForm refused <id>:
+<reason>"; else the record's formType, flags, version, bodyHex (the whole
+record's bytes, lowercase hex), fnv1a over those bytes and the remap rows
+{offset, formId, index}, the u32s read back unsigned since Papyrus Int is
+signed) and sends ONE reliable ChangeForm (MsgType 72: epoch from
+HostService.epochForActor, the cell's host epoch; formId the shared load
+order's id; formType; flags; version; body as hex; fnv1a; remap) when its
+fnv differs from the last ChangeFormAck (73) for the form. No epoch (no
+hosted cell names the actor's): the message is held and sent at the next
+grant or the five-second pass; an unacked message is re-sent with a fresh
+epoch every five seconds up to three tries, then given up; the ack clears
+it. A watcher receiving ChangeFormApply (74, served with the actor's word,
+at a cell's load and after an owner's record is acked) holds the record
+until its copy is dead here. The kill is deferred (Actor.Kill and
+KillSilent queue a type-10 task and the actor is alive at the native's
+return, docs/research/adr062/papyrus-native-entries.md:73), so
+deathService's kill (the death word's or the bind's silent kill, both
+kept) marks the record and the service applies it as the kill lands,
+tried every update for 3 s, through TESModPlatform.ApplyChangeForm(refr,
+bodyHex, flags, version, "offset:formId:index,...") by callNative (a JSON
+string back: applied, reason "at <step>: ..." when not, fnvPatched, the
+diagnostics kept for the lab line), once per received record, keyed by
+the body's FNV-1a computed on the client (the apply message carries no
+hash); a record re-served for a body still laid and dead here is not
+re-applied; the bind's record applies on the owner's own seat too (a host
+relaunch must not re-record every corpse at its spawn); a kill by the word
+on the seat that simulates the actor drops a held record (its own engine's
+death stands). The engine's own load lays the body in the owner's pose at
+the owner's place (read 1's GREEN 20261103-210713: 1,150 units in one
+call, within 5 units). Nothing else moves a dead copy: movementApply's
+one-shot setPosition to the host's sample is gone; formView's bind keeps
+its coordinate move (the apply moves the body anyway, and the owner's
+early dead samples then come from the record's spot); the bind's
+zero-force push is skipped when a record is held for or laid on the body
+(a given-up apply stands for nothing and the push runs as before). No
+SetPosition of the service's own, no SetMotionType, no second kill. The
+client declares no typing of its own for the natives (callNative by name;
+the codegen's skyrimPlatform.ts is the native branch's regeneration); a
 platform without them logs one line and the sender's tick goes on. Lab
 lines, [verb:npc-fate]: on the owner "body <id> at rest on this engine
 after N ms: (x, y, z); M units from the first dead sample, two samples
-agree|the settle window ended" and "changeform <id> sent: <bytes> bytes,
-fnv <hex>, <n> remap rows, at rest (x, y, z); epoch E"; on the watcher
-"corpse <id> record held until the kill", "corpse <id> applied from the
-record: fnv <hex>, <n> rows remapped; patched fnv <hex>, <when>, N ms
-after the record came", "corpse <id> not applied: <reason>" and "body
-<id>: no push, the change-form record laid it". HYPOTHESIS, the lab's to
-prove: that the owner's engine reports the dead reference's position
-following its ragdoll until it rests (the rest line's distance reads 0 if
-not, the record then the death point's, and the fallback is the pelvis
-node's position through NetImmerse); that the record applied right after
-the silent kill lays the body with no fall (change-form.md's read 2); that
-a record whose cell is not the copy's moves it (read 3).
+agree|the settle window ended", "changeform <id> sent: <bytes> bytes, fnv
+<hex>, <n> remap rows, at rest (x, y, z); epoch E[, try N]", "changeform
+<id> held: no hosted cell names the actor's; sent at the next grant (...)",
+"changeform <id> unacked after 3 tries, given up" and "changeform <id> not
+serialized: ..."; on the watcher "corpse <id> record held until the kill"
+(a record ahead of any kill here), "corpse <id> applied from the record:
+fnv <hex>, <n> rows remapped; patched fnv <hex>, <when>, N ms after the
+record came; <the native's diagnostics>", "corpse <id> not applied:
+<reason> (attempt i of 5, <when>); <diagnostics>", "corpse <id> record
+dropped: held N ms, the copy never died here" and "body <id>: no push,
+the change-form record laid it". HYPOTHESIS, the lab's to prove: that the
+owner's engine reports the dead reference's position following its ragdoll
+until it rests (the rest line's distance reads 0 if not, the record then
+the death point's, and the fallback is the pelvis node's position through
+NetImmerse); that the record applied as the kill lands lays the body with
+no fall (change-form.md's read 2); that a record whose cell is not the
+copy's moves it (read 3).
 
 ## Engine surface
 
