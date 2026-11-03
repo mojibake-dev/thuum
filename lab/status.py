@@ -3,9 +3,11 @@
 docs' own Status checklists, as one table. PLAN.md keeps one line of state per
 item and the order; this is the check against it, generated, never edited.
 
-Columns: verb, milestone, class, rung, boxes ticked, lines that say HYPOTHESIS
+Columns: verb, milestone, class, rung, the verb's state in ADR-064's three words, boxes ticked, lines that say HYPOTHESIS
 without a CONFIRMED (a grep, not a verdict), the Inventory's rows marked later
-(ADR-031), the T3 scenario, and the first unticked box (what the verb waits on).
+(ADR-031), the T3 scenario, and the first unticked box (what the verb waits on). The state is the doc's "Play:" line:
+BROKEN when it names one, VERIFIED IN PLAY when it says so and cites the playtest or a two-seat run id, and MECHANISM
+ONLY otherwise, every box ticked or not (ADR-064 decision 5: nothing else is "done").
 Usage: status.py [docs/verbs] [--md]  (--md writes nothing; the table is
 Markdown either way, so it pastes into a report)."""
 import re
@@ -14,6 +16,22 @@ from pathlib import Path
 
 BOX = re.compile(r"^- \[([ xX])\] (.+)$")
 RUN_ID = re.compile(r"\b\d{8}-\d{6}\b")  # a lab run id, 20261102-131634
+PLAY = re.compile(r"^Play:\s*(.+)$", re.M)
+PLAYTEST = re.compile(r"\bplaytest \d+", re.I)
+WORDS = ("VERIFIED IN PLAY", "MECHANISM ONLY", "BROKEN")
+
+
+def play_state(text: str) -> str:
+    """ADR-064 decision 5's word for a verb, from its doc's first "Play:" line; the burden of proof is the doc's."""
+    m = PLAY.search(text)
+    v = m.group(1) if m else ""
+    if v.startswith("<"):  # VERB.md's placeholder, as /verb scaffolds it
+        v = ""
+    if re.search(r"\bBROKEN\b", v):
+        return "BROKEN"
+    if "VERIFIED IN PLAY" in v and (RUN_ID.search(v) or PLAYTEST.search(v)):
+        return "VERIFIED IN PLAY"
+    return "MECHANISM ONLY"
 
 
 def read_verb(path: Path) -> dict:
@@ -71,21 +89,21 @@ def read_verb(path: Path) -> dict:
             continue
         if in_inv and line.startswith("|") and re.search(r"\|\s*later\b", line):
             later += 1
-    return {"verb": name, "milestone": milestone, "class": klass, "rung": rung, "ticked": ticked,
+    return {"verb": name, "milestone": milestone, "class": klass, "rung": rung, "state": play_state(text), "ticked": ticked,
             "total": total, "hypotheses": hyp, "later": later, "scenario": scenario, "waits_on": first_open}
 
 
 def table(rows: list[dict]) -> str:
     order = {"M0": 0, "M1": 1, "M1.1": 2, "M2": 3, "M3": 4, "M4": 5, "M5": 6, "M6": 7, "M7": 8}
     rows = sorted(rows, key=lambda r: (order.get(r["milestone"], 99), r["verb"]))
-    out = ["| verb | M | class | rung | status | hyp. lines | later | scenario | waits on |",
-           "| --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
+    out = ["| verb | M | class | rung | state | boxes | hyp. lines | later | scenario | waits on |",
+           "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
     for r in rows:
-        state = "DONE" if r["total"] and r["ticked"] == r["total"] else f"{r['ticked']}/{r['total']}"
-        out.append(f"| {r['verb']} | {r['milestone']} | {r['class']} | {r['rung']} | {state} | {r['hypotheses']} | {r['later']} | {r['scenario']} | {r['waits_on'][:48]} |")
+        out.append(f"| {r['verb']} | {r['milestone']} | {r['class']} | {r['rung']} | {r['state']} | {r['ticked']}/{r['total']} | {r['hypotheses']} | {r['later']} | {r['scenario']} | {r['waits_on'][:48]} |")
     done = sum(1 for r in rows if r["total"] and r["ticked"] == r["total"])
+    words = "; ".join(f"{sum(1 for r in rows if r['state'] == w)} {w}" for w in WORDS)
     out.append("")
-    out.append(f"{len(rows)} verbs, {done} with every Status box ticked; {sum(r['hypotheses'] for r in rows)} lines still say HYPOTHESIS without a CONFIRMED (a grep: the docs decide); {sum(r['later'] for r in rows)} Inventory rows marked later (ADR-031).")
+    out.append(f"{len(rows)} verbs: {words}; {done} with every Status box ticked; {sum(r['hypotheses'] for r in rows)} lines still say HYPOTHESIS without a CONFIRMED (a grep: the docs decide); {sum(r['later'] for r in rows)} Inventory rows marked later (ADR-031).")
     return "\n".join(out)
 
 

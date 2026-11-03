@@ -144,9 +144,14 @@ Rate limit / bounds:
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
 
+Play: <VERIFIED IN PLAY, with the playtest Eli saw it in or the two-seat run whose claim read the player's view | BROKEN,
+with the finding and its playtest> (absent: MECHANISM ONLY)
+
 A box whose item the verb has none of (no new native, no wire change) is ticked with
-"(none: why)"; `just status` counts ticked boxes, and an item with nothing to do is done.
-A box ticked ahead of its evidence is unticked with the date and the reason.
+"(none: why)"; `just status` counts ticked boxes, and an item with nothing to do is ticked.
+A box ticked ahead of its evidence is unticked with the date and the reason. The verb's state
+is the Play line's word, never the boxes: MECHANISM ONLY until the line cites its evidence
+(ADR-064 decision 5; `just status` prints it).
 
 ## Reviewer checklist
 
