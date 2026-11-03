@@ -7353,3 +7353,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   old "own copy of 3550c hidden" (213118). MECHANISM ONLY: playtest 42's frozen copy never reproduced (213538's restart made no stray),
   so playtest 43 (up since 13:48 PST on that server and r3's dist; Hod's 22:00 exit, a restart on Eli's word, the dialogue, Sven and
   Hilde; the hold to 00:47Z) is the proof, its findings as F8 onward. ADR-067's cite fixed to ADR-063 decision 1 (8c5ba967).
+- 14:06 PST 2026-11-03 (22:06Z 11-03) (thuum-cf): Playtest 43's F8 (Eli: "embry is standing in his chair", then "sven just tried to sit [where] embry was sitting"), my read: on r3 a
+  puppet's non-hand, non-attack actions reach its graph as bare events (formView.replayActions' puppets' path, slice 1 v2 after a
+  grindstone idle performed through the entry crashed a puppet's graph, 151921); a furniture enter sent as an event cannot seat an actor
+  (the sit is the AI process's furniture use: occupiedFurniture, the actor state's sitSleepState, the marker), so the puppet stands at the
+  chair and the other seat's engine sees the chair free for Sven's AI; the server's "no occupant" is the player activation path's. The
+  server log has no per-action relay line for 3550c around 22:00Z, c2 never ran the event before 22:00:50 either way. Fix shape, the real
+  one: the engine's own seating state is in the change form (sitSleepState, occupiedFurniture, both in AIProcess::LoadGame's walk), so
+  the live-actor record of ADR-065 seats the puppet by the engine's path and every process-state goof with it, no per-case channel; its
+  gate is the deferred read of a LIVE record applied onto a live loaded copy (read 2 and F8 share the run): apply-on-demand.js v2.4 with a
+  LIVE premise for MODE apply and TRIGGER now, the sit, furniture, life-state, position, 3D, kill and fall witnesses, being written by
+  the re-analyst; a fresh review, then numidium's run on the idle lab. The interim channel (the occupied furniture in HostedActorState
+  and the furniture's activation on the puppet, a wire change) only if the read says the engine will not seat an AI-off copy.
