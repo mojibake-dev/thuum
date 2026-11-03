@@ -7160,3 +7160,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   path (sha1 33e98734, v5 kept beside as -v5.yaml). Next: deploy-srv and the r3 gate on df9e1009 (numidium, after the Sven round trip
   clears the lab); the ADR-065 build opens for thuum-cf: STATE.md and the fork's observe-and-serialize half, scoped after the process
   reader's read and apply-on-demand.js v2.3 (REMAP) land.
+- 11:35 PST 2026-11-03 (19:35Z 11-03) (thuum-cf): docs/research/adr065-serialize-on-demand: the non-leveled path READ by numidium's Sven round trip 20261103-193005 (apply v2.2 on c2
+  solo, his own kDead record): 35568 returned 1 with the root unchanged, 35567's flush ran kinds 1 and 2 on the main thread inside the
+  window (the first on-thread rows, by v2.2's replacement), 19535 read the block against the standing 3D (19 bodies, the live pose
+  0x23a94bd1), the position equal before and after, 2 units at settled, no crash: C4's two paths both run (the leveled release and park,
+  174905; the fixed base's direct feed, 193005). DECISIONS.md 93699f36 (numidium): ADR-065 ACCEPTED, ADR-066 ACCEPTED, ADR-063 amended by
+  D-F1 C. Playtest 42 readies on the staged r3 (Eli's ask), the gate after it; the lab held; v2.3's cross-seat run after.

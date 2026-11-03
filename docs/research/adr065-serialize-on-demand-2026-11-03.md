@@ -1109,8 +1109,15 @@ bytes as the static read gave them. The rows (frida/c1-apply-on-demand-...-7.js.
   the owner's record applied to a GUEST copy whose pose differs is the run that shows a guest body taking the owner's pose; by this run's
   mechanism it will (the release's store is replaced either way on the leveled path). Also open: why the release's store (0x8c7368f2)
   differs from the 36016 block of 2 ms earlier at the same length (the bodies detached from the world before the store, or a changing field
-  in the block); a dump of both blocks in the next version decides. And the non-leveled actor (no release, no rebuild): there the flush
-  feeds 19535 directly on the standing 3D, unread.
+  in the block); a dump of both blocks in the next version decides. The non-leveled actor (no release, no rebuild) is now READ:
+  20261103-193005 (numidium, Sven 0x13491 on c2 solo, apply-on-demand.js v2.2 d9ec58d2, his own kDead record of 3,435 bytes): the kDying
+  mark refused as expected, the kDead premises held on the main thread (5088, 32 ms after the mark), 35568 returned 1 with the ROOT
+  POINTER UNCHANGED (no release: a fixed base) and pending 1, then 35567's flush ran kinds 1 and 2 on the main thread inside the window
+  (visible for the first time, by v2.2's replacement) and 19535 read the block directly against the standing 3D: 19 bodies, 993 bytes,
+  hash 0x23a94bd1, the live pose (a one-seat round trip's record is the live pose by construction), SetPosition 1 and SetRotation 1; the
+  position equal before and after the apply and 2 units off at settled; no crash, no extra created. So C4's two paths are both run: a
+  leveled actor releases and rebuilds its 3D and the finish pass parks the record's block for the init (174905); a fixed-base actor keeps
+  its 3D and the flush feeds 19535 directly (193005). The reviewer's gate item for the cross-seat run (the engine fact first) is met.
 
 ## D6: the record's ids across seats (numidium's premise before any cross-seat actor apply; the census to run)
 
