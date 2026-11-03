@@ -2044,6 +2044,26 @@ and about 120 below the eye (about 13 counts a degree on this seat; the rune pro
   "placed at the record" 1 and "not placed" 0 where the parent would have asked the copy back to the corpse's place 3,200 units away;
   its premise x-essential-bind v2 20261103-141231 held the dead hold's 8 s budget with the copy alive under a typed essential flag). Named for its own round: the server still accepts a dead record's movement and actions. The lab
   read is numidium's evidence stage on e23bd229 (door v21, swap v19, death-reentry v5, death-freeze v3, scene-guest v2.1).
+  The guest's half-up body (playtest 41's item 5; x-npc-death-freeze 140538 and 152912 red, 141811 green, on m3-system1-r3),
+  read 2026-11-03: a SECOND ragdoll frozen mid-fall. The host's kill move (KillMove1HMStabUpFace, KillMoveD), relayed to the puppet's
+  graph as a plain animation event by formView's replayActions, ran the victim animation whose KillActor tag killed the copy about
+  2.7 s after the event (HYPOTHESIS on the tag; the timing is the runs'), 3 s before the server's word (the host's own kill move
+  killed at its tag only in the green run); formView's 2 s dead check found a dead body under a live record and stood it up; the
+  word killed it again; puppetService's release "after the ragdoll's 4.0 s" came 0.75 to 1.0 s into the second fall because
+  deadFlaggedSince was stamped at the first death and onResurrected never cleared it; setPuppet(false) with the AI off then left
+  nothing ticking the graph and the skeleton stopped where it was (c2's head 12.8 and 54.6 units above the root, identical across
+  three reads; the green's head 4.8 below the root after a full settle). The deferred kill was armed and did not hold against the
+  kill move's route (KillActorHandler to Actor::Kill to KillImpl), so the graph's door is the puppet's real guard. The rule, as
+  ADR-050 decision 2 already says: a puppet's death is the server's word. The fix (m3-system1-r3 db0e19a5, both fresh reviews NOTES
+  ONLY): replayActions drops a KillMove* event for a puppet ("<id>: the host's <event> not replayed on the puppet, a puppet's death
+  is the server's word", once per puppet per process), the puppets' analogue of deathService.hookDisableKillMoves for the figures;
+  and onResurrected clears deadFlaggedSince, so the settle clock restarts at the last death. What the guest sees: a kill move only on
+  the killer's screen; the victim stands through it until the word, then drops with the engine's full death (the figures'
+  precedent; playtest 42's checklist line). Left for the next train, with its own read in x-npc-death-guest's frame: the puppet
+  graph's second mouth, the event relay, still carries a kill move to a puppet by a creature's events, a humanoid event outside the
+  PerformAction entry, or the guest's own kill move on a puppet it hits (HYPOTHESIS, all three); the shape is the figures' hook
+  widened to puppets (isPuppet read inside a sendAnimationEvent hook on the game-file range); and two unread names before the match
+  widens, the exe's "pa_KillingBlow" and the IDLE records' ENAMs. The read is x-npc-death-freeze v4 twice on the re-stage.
   HYPOTHESIS (the fresh review of x-essential-bind v1 and x-respawn-teleport-hold v2, 2026-11-03, a static read of
   ActionListener.cpp's stamping and standing branches): an actor whose ENGINE refuses the death (an essential base, set by the game
   files or by a typed setessential on the host's seat) answers a server kill with bleedout, so the host's zero sample stamps the body
