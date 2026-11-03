@@ -101,8 +101,11 @@ steps:
   - c2: log-count {pattern: "relayed activation 3b9f1 by 3e728"}
   - c2: log-count {pattern: "relayed activation [0-9a-f]+ by aa8c3"}
   - assert:
-      - 'server.log_count("3e728 activates 3b9f1") >= 0'
-      - 'server.log_count("aa8c3 activates") >= 0'
-      - 'server.log_count("E_TRAP_NO_REF") >= 0'
+      # the relay's own lines are the claims (the gate audit, 2026-11-02: three literal >= 0 reads stood where
+      # traps.md credited this scenario with the solve): the guest's pillar turn relayed to the host's engine, the
+      # lever's pull, and no relay refused for a reference the server does not hold
+      - 'server.log_count("3e728 activates 3b9f1") >= 1'
+      - 'server.log_count("aa8c3 activates") >= 1'
+      - 'server.log_count("E_TRAP_NO_REF") == 0'
   - c1: dump-state
   - c2: dump-state
