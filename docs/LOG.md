@@ -6640,3 +6640,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   are committed (fd4e60fb). numidium's schedule: the fix, its review, the push and the client pipeline (about 40 min), r3's stage
   again (door v23, x-warm-exit v1, swap v20, death-reentry v5, death-freeze v4 96ae3e4c with a 6 s settle before the pose read, and
   scene-guest v3 if time), the gate, the merge; playtest 42 moves to ADR-053's evening slot if that runs past Eli's morning.
+- 06:44 PST 2026-11-03 (14:44Z 11-03) (thuum-cf; numidium's runs): the actor-mode serialize script's first lab runs on the promoted bandit 0x39fe4
+  (check 20261103-143818; serialize 20261103-144049 with RUNS 2 and DEFER true), both green on their kill asserts, the recipe NEVER
+  serialized: two premises refused. (1) The kill's kLifeState marks fire OFF the main thread (lifeState 0 then 1 on threads 1056,
+  1964, 3292; the main thread 2804), which the DEFER design anticipated: the serialize run armed the mark on thread 6872 and ran the
+  premises 13,115 ms later at the next AddChange on the main thread (via form 0x38ab1), a long deferral while the player stood still.
+  (2) The subject's vtable slot 0x0E is 0x727d40, AL 40266 by the reverse lookup, with no CommonLib name, not Actor::SaveGame 37649
+  (0x686710): the bandit is a Character, whose class overrides SaveGame (HYPOTHESIS Character::SaveGame wrapping Actor's); the exact
+  premise refused it, as a premise should. Entry 0x9a040427 with a null record; process level 0, farGeometry 0. Also: the engine's own
+  MovetoLow ran for 0x39fe4 at the player's exit (caller 0x675fb7, outside the recipe) and no stash formed (D7 confirmed again); the
+  writer hooks fired for other forms (stash 4,087, refrSave 339, processSave 66, actorStateSave 71, modifiersSave 284, avStorageSave
+  71), so the hooks are live. The re-analyst reads 40266 (whose vtable, does it call 37649, what it adds), admits it beside 37649 for a
+  Character, and looks for a per-frame main-thread trigger for the deferred run so the recipe runs within a frame or two of the
+  mark; the probe reruns unchanged after.
