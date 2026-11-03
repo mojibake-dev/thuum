@@ -194,7 +194,7 @@ Rung: R0 for the fate (the roll, the death, the body's point, the respawn, the l
   body's point within cell-host's movement bounds.
 
 The body's rest (ADR-067). A corpse is a physics object under the prop rule
-(ADR-063 decision 2, ADR-067 decision 4): one mover simulates the ragdoll,
+(ADR-063 decision 1, ADR-067 decision 4): one mover simulates the ragdoll,
 the engine that simulated the actor at its death (PartOne::SimulatorOf at
 the kill; none at the death, and the first simulator to report inside the
 window claims it), the at-rest pose is that mover's own final sample, every
@@ -236,6 +236,13 @@ the 15 s window on Bleak Falls' slope; that two agreeing samples at the
 host's cadence are the rest and not a pause in the air; that a watcher
 placing its corpse at the relayed rest shows the body where the owner's
 lies.
+Reading rules from the fresh review (2026-11-03): the rest decision is cadence-sensitive (two agreeing samples at the client's
+130 ms cadence would call a creep under about 15 units a second rest; if the lab shows the owner's final body position drifting from
+the record's rest, the fix is a dwell held across samples spanning about 500 ms, not a count); and the owner's samples that land
+during the 3 s pending-death phase move the record as LIVE hosted samples and are not body samples, so a rest line reading "0 samples;
+the settle window ended" with the record already at the ragdoll's place is that phase, not a missing client half (a follow-up may
+start the window at BeginPendingDeath); the same line with the record still at the death point means the owner's client sent no dead
+samples.
 
 The watcher's corpse (ADR-067 by ADR-065's path; fork branch
 adr067-corpses-client, the client half, 2026-11-03). Rung R2: a render of
