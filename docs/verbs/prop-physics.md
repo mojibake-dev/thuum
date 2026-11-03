@@ -85,7 +85,7 @@ the build: skymp.rs:1816, PropClaimMessage.h:10, propClaimMessage.ts:8 and props
 PropOwnerMessage.h:8-10 and propOwnerMessage.ts:4-6 (the velocity), PropTest.cpp:371's title, the reach row below (:268).
 
 BUILT 19:21 PST 2026-11-02 on fork m4-prop-arbitration aafb26ba (base: union-srv-3 35509f7a plus the chest bundle 12f199e6, the seats'
-break-3 state), pipeline 4780 with the client build: wire-rules props.rs (PROP_MOVING_MS 1000, ClaimVerdict::Moving,
+break-3 state), pipeline 4780 GREEN at 03:36Z 2026-11-03 (server, client, wire-test, wire-fuzz, difftest-build, rust-image): wire-rules props.rs (PROP_MOVING_MS 1000, ClaimVerdict::Moving,
 TransformVerdict::Returned(epoch), `gone` returning the rows for their words, PROP_LEASE_MS and PROP_SILENCE_MS gone, nine
 tests), the bridge (codes 3 and 4, PropReturn, prop_moving_ms), wire-validate (PropOwner.player 0 admitted; fixture
 60-PropOwner-2), the schema's and the message headers' text, PartOne::SendPropOwnerWord (the grant's, the rest's, the departure's

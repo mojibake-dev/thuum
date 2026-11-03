@@ -1470,7 +1470,7 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   verb-lint green); the stale tags being settled from their runs by an agent; b-npc-handoff-door-hosts v2 (dd472cc6) in the
   playtest's direction with both roles, awaiting the fresh review, its red run on 35509f7a and its green on the settle head
   (m3-handoff-settle 9606963e, its pipeline rerun after a SIGABRT in an unrelated reloot test); the props arbitration BUILT on
-  m4-prop-arbitration aafb26ba (pipeline 4780), the probe and the engine model next. ADR-062 slice 1b f7ce5b37 green, staged by
+  m4-prop-arbitration aafb26ba (pipeline 4780 GREEN), its probe x-prop-arbitration by path for numidium's stage, the engine model next. ADR-062 slice 1b f7ce5b37 green, staged by
   numidium after its rules review.
   The race permit (Eli, 2026-11-01: rotfern's race for test client 1 alone) MERGED to fork parity 7fe600e6 (18:18 PST 2026-11-01; the gate 12 of
   12, T2 38 of 38; the menu hide follows in the bondblock train), BUILT WHOLE on fork m5-race-permit b59ab993 (13:56 PST 2026-11-01:
