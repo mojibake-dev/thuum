@@ -6617,3 +6617,26 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   fault's leak closed (out.readPointer() in the cleanup); the ready-stamp clause and the kPromoted cite (TESObjectREFR.h:154); a
   second actorInfo after 0x0E. Every one of its 26 ids resolved by addr.py to the RVA declared; the plus-8 Actor offsets and the
   block layout checked against the headers. The leg-B run reader is still on 134832.
+- 06:38 PST 2026-11-03 (14:38Z 11-03) (thuum-cf): door v22's leg B red (134832, step 82) READ: a gap in cell-host's CLIENT half on a warm exit,
+  not the scenario's premise and not r3's change. The run reader's timeline: c1 hosted 9712 and 9731 from the street (13:54:00.69);
+  its inn visit lapsed both (26 unloads at 13:54:54.48, the grace ended 13:54:58.48, "cell 9731 is unhosted, frozen at its record");
+  the exit (13:55:09.1) re-attached the exterior from the engine's cell buffer and fired NO cellFullyLoaded for the neighbours, so
+  HostService re-reported only the player's own cell ("own cell 9712 reported without its load event", granted at epoch 2 at
+  13:55:10.85) and never 9731; the 30 s refresh re-sends only the loaded set, which the poll's isAttached had emptied at the detach,
+  so nothing would ever re-report it and an until would time out. The two earlier runs where this assert held (055217 step 15,
+  084006 step 23) were COLD exits from lab-spawn ("unloaded 1, loaded 27", 9731 re-granted in 220 ms); hostService.ts's reporting
+  code is unchanged between those builds and r3 (r3's lines there are all the hold's). In play: after any interior visit the NPCs of
+  the neighbouring exterior cells froze until the player crossed a cell border, which playtest 42's Hod-at-the-inn items would have
+  met. The second red (c1's copy of Hod still 3D-loaded 21 s after the exit, with puppet flags) is UNREAD: HYPOTHESIS H1 (the
+  exit-tick demote's puppet natives keep the copy in high process with its 3D) or H2 (the interior buffer keeps the inn's 3D); the
+  cold house exits read false; rule 8: a Dynamic read. Built, with numidium's agreement ("merging with the gap would put frozen
+  neighbours into playtest 42"): (1) the fix on m3-system1-r3 31167a9b: the poll keeps a detached map (cell id to the poll's time,
+  persisted with the reload survivor) and for ten minutes reads each such cell once a second, adding it back and reporting it when
+  attached again, with the line "cell <id> re-attached without its load event, reported N ms after its detach"; tsc clean; its fresh
+  review and pipeline waiter run; (2) door v23 committed alone (thuum 5976e426, file c9bed211): an until of 10 s on 0x9731's host
+  after the exit, every claim as in v22 (rule A, no review due), the 3D claim kept as written; (3) x-warm-exit v1 by path (sha1
+  97560cc3): the host flip within 10 s and the fix's line claimed, the premises claimed, Hod's npc-state every 3 s for 18 s after the
+  exit and the cell events around the visit recorded (the Dynamic read); its fresh review runs. The actor-mode script's review fixes
+  are committed (fd4e60fb). numidium's schedule: the fix, its review, the push and the client pipeline (about 40 min), r3's stage
+  again (door v23, x-warm-exit v1, swap v20, death-reentry v5, death-freeze v4 96ae3e4c with a 6 s settle before the pose read, and
+  scene-guest v3 if time), the gate, the merge; playtest 42 moves to ADR-053's evening slot if that runs past Eli's morning.
