@@ -5394,3 +5394,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   containerSharing "shared" (default) or "exclusive"; a container with an occupant refuses every other player's activation with
   E_CONTAINER_BUSY and Debug.Notification "Someone is using this" on the refused seat; the close or leaving reach frees it. T0 in
   PartOne_ActivateTest. An R0 after the arm; the flip is one settings line if x-shared-chest-phantom v2 stays red on b0939b7e.
+
+- 16:36 PST 2026-11-02 ADR-061's reopen failed Eli's test ("ok corpse fix works worse than before"; the mechanism rejected: "we already said we dont want
+  the whole menu to open and close out from under a guy"): b0939b7e's reopen ping-ponged between two occupants of a corpse (each
+  re-activation re-sent the record and drove the other seat's reopen, 00:28Z) and a phantom take followed. Eli's clause taken:
+  containerSharing "exclusive" is the server default (m4-container-exclusive's second commit; chests and corpses), the client bundle
+  drops the reopen (m4-turbo2-chest's commit after b0939b7e: by-counts, the own echo draws nothing), live multi-party container sync
+  goes to the backlog with its Frida plan. Standing rule recorded in ADR-061: no menu is ever closed and reopened under a player.

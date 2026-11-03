@@ -3831,3 +3831,16 @@ close-menu step relies on it; the probe counts the server's occupants). H2: the 
 has turned away or stepped back during the 400 ms (the activation's distance check): the menu stays closed and the record is
 applied already; the probe's 1.5 s claim catches it. H3: a burst of foreign changes closes and asks the menu once per change;
 a batch (one reopen per 300 ms burst) is the first tuning if the flicker annoys.
+
+Outcome, 16:36 PST 2026-11-02: decision 1's reopen FAILED Eli's test the same evening and is REJECTED as a mechanism. The seats ran it
+(m4-turbo2-chest b0939b7e) on a corpse: c1 "live body b6fe4: the record applied by base counts under the open ContainerMenu
+(2 added, 4 removed)" at 00:28:19Z, then a reopen ping-pong between the two occupants (every re-activation re-sent the record
+to the other seat, whose reopen re-sent it back: "2 players in the container now" at :25.8, :31.9, :37.2, :39.7, :51.5) and a
+phantom take ("Source inventory doesn't have enough 0x12eb7" at :36.8). Eli, verbatim: "ok corpse fix works worse than before",
+then "the container works pretty ok but the inventory screen flicker is still there and we already said we dont want the
+whole menu to open and close out from under a guy". Eli's rule, standing: NO MENU IS EVER CLOSED AND REOPENED UNDER A PLAYER
+TO SYNC IT. Decision 3's fallback is taken by Eli's own clause: containerSharing "exclusive" is the DEFAULT (fork
+m4-container-exclusive, the second commit), a chest's and a corpse's alike, and the client bundle drops the reopen (the live
+apply keeps the record by base counts, so an occupant's own echo draws nothing; a foreign change, possible under "shared" alone,
+asks the engine's redraw once per burst). Live multi-party container sync goes to the backlog with its Frida plan (decision 4);
+decision 2's probe is the backlog's gate, not tonight's.

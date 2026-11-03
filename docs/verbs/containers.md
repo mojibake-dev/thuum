@@ -122,8 +122,9 @@ Rate limit / bounds: the inventory messages' own (PutItem, TakeItem budgets).
   every player who opens a container is in it, memo D52) or "exclusive" (one occupant at a time: MpObjectReference's
   CONT branch refuses every other player's activation while an occupant holds it, "[verb:containers] E_CONTAINER_BUSY:
   <player> activates <container> held by <occupant>", and the refused seat hears Debug.Notification "Someone is using
-  this"; the occupant's close, its leaving reach or its disconnect frees it). Fork m4-container-exclusive a393557c.
-  The flip is one settings line; "exclusive" is the fallback if the live view's probe (below) stays red.
+  this"; the occupant's close, its leaving reach or its disconnect frees it). Fork m4-container-exclusive a393557c, the
+  default flipped to "exclusive" in its second commit by Eli's clause the same evening (the reopen failed, ADR-061's
+  outcome); "shared" is the backlog's live view.
 
 ## Client
 
@@ -133,11 +134,11 @@ Rate limit / bounds: the inventory messages' own (PutItem, TakeItem budgets).
   chest's record (remoteServer, a viewless game-file CONT) and a body's (formView, an actor's view) while this seat's
   ContainerMenu is open on the reference: the record by base counts (this seat's own transfer, echoed by the server,
   changes nothing and draws nothing, "the record matches the engine"), another occupant's change applied and then the
-  menu closed (TESModPlatform.CloseMenu) and the container activated again through the server 400 ms later, so the
-  engine draws the list whole ("live chest <id>: the record applied by base counts ... the menu closed and the container
-  asked again (reopen)"). The in-place redraw (refreshContainerMenu) left stale rows in playtests 37, 40 and 41 and
-  stays behind the client setting `chestRedraw: "inplace"` for its trace alone. Fork m4-turbo2-chest b0939b7e.
-- Kill switch config key: the server's `containerSharing` (above); the client's `chestRedraw` picks the redraw.
+  engine's inventory-update redraw asked once per burst (possible under "shared" alone). The reopen (CloseMenu and the
+  container asked again, b0939b7e) ping-ponged between two occupants and is REJECTED by Eli's rule: no menu is ever closed
+  and reopened under a player to sync it (ADR-061's outcome). The in-place redraw left stale rows in playtests 37, 40 and
+  41 and is the backlog's trace. Fork m4-turbo2-chest, the commit after b0939b7e.
+- Kill switch config key: the server's `containerSharing` (above).
 
 ## Tests
 
@@ -146,11 +147,14 @@ Rate limit / bounds: the inventory messages' own (PutItem, TakeItem budgets).
   load keeps it (not the 1 s window); a container saved open loads shut; a disconnect releases the occupant and the
   other user hears isOpen false; under containerSharing "exclusive" the second player is refused and notified while the
   first is in it, admitted once the first leaves, both in it again under "shared" (ADR-061).
-- T3 for the live view (ADR-061 decision 2): x-shared-chest-phantom v2 after lab-api's transfer step and
-  server.inventory(<refr>): c1 opens, c2 joins; c2 stores a weapon and a food while c1's menu is open; c1 takes the
-  weapon, c2 the food; the roles swapped; a body as well as a CONT; after every change each seat's engine inventory of
-  the container equals the record, no "Source inventory doesn't have enough" or unauthorized equip in the server log,
-  the other seat's menu open again within 1.5 s. Green twice by path, then b-shared-chest in its own commit.
+- T3 for the live view (ADR-061 decision 2, BACKLOG since the reopen's failure): x-shared-chest-phantom v2 after lab-api's
+  transfer step and server.inventory(<refr>): c1 opens, c2 joins; c2 stores a weapon and a food while c1's menu is open;
+  c1 takes the weapon, c2 the food; the roles swapped; a body as well as a CONT; after every change each seat's engine
+  inventory of the container equals the record, no "Source inventory doesn't have enough" or unauthorized equip in the
+  server log, each seat's menu redrawn in place (never closed). The backlog's gate, with the Frida plan on
+  ContainerMenu::ProcessMessage. Tonight's T3 is exclusive access: b-container-exclusive after a probe (c2's E on a chest
+  c1 has open: E_CONTAINER_BUSY in the server log, the notification snippet on c2, no OpenContainer; c1 closes, c2 opens;
+  the same on a corpse).
 - T1: none.
 - T2: the smoke session's container leg as today.
 - T3 scenario id: lab/scenarios/b-container-rest.yaml (after the probe): c1 opens the lab's chest, c2's screenshot
