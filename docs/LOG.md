@@ -6281,3 +6281,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   engine-native materialize path now covers a lock and an inventory (change-forms.md D3). Not yet covered: a moved, cell-changed or
   promoted reference (the inject refuses those bits until the re-analyst reads the initial data's cell registration), which the
   dead NPC needs. Round nine's review was FIX FIRST on a green pipeline, so its evidence stage runs, with no gate and no merge.
+- 04:18 PST 2026-11-03 (12:18Z 11-03) (thuum-cf): round ten on m3-system1-r2, e23bd229, numidium's review of round nine (FIX FIRST; items 1, 2
+  and 6). (1) A respawn that teleports: in the death-state container, before the teleport is applied and ahead of the standalone
+  live word, a dead hold on the actor turns back into a placing hold with the TELEPORT's place as its record (position, rotation,
+  cell), so the revived hold never asks the corpse's place over the spawn point; the later live word finds the hold placing and
+  changes nothing (reviveHold ignores a hold that is not dead). (2) The stamp's window is anchored at the earlier of the recorded
+  death and the pending death's start: the host's engine dies at the DamageCause sent beside BeginPendingDeath and its reliable
+  flip lands within half a second, while TickDeaths records the death 3 to 4 s later; without the anchor most such stamps fell past
+  the 3 s window and a later script's Resurrect was refused. T0: the pending start 7.4 s ago, the stamp 0.4 s after it, the death
+  recorded 3.4 s after the start, the live sample stands the body (RecordPendingDeathAt backdates the start for tests, as
+  RecordDeathAt does the death; 22 cases in ActorDeathTest). (6) wire-schema's doc comment on HostedActorState says what the client
+  sends, matching WIRE.md (main 44b4c51b): unreliable except three samples reliable (the keyframe after a grant, a stand-up, the
+  alive-to-dead flip); the two stale HostSampledDeadBy comments name DeadStampGap. tsc and fork-lint clean, the pipeline pending,
+  no wire shape changed. Named for its own round, not this one: the server accepts a dead record's movement and actions.
