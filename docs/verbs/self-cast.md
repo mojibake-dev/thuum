@@ -424,7 +424,7 @@ Health a second while held) applied nothing, so the caster's own game's rise
 was cropped away by the attribute model within a report (playtest
 twenty-eight, "test 2's heals are getting rejected", Azure Reconstruction's
 case aside; docs/research/train-31-reads.md section 2). Fork m2-train-31
-6f7b7a06: a Self concentration cast runs on the server as a stream, its
+88ea219b: a Self concentration cast runs on the server as a stream, its
 effects as running entries at the record's magnitude a second for the
 cast's span (MpActor::ApplyEffects' `streamSeconds`, the record's own
 duration set aside), ended by the cast's end message (EndSelfStream, the

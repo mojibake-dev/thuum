@@ -1,7 +1,7 @@
 # Verb: leveling
 
 Drafted 00:3x PDT 2026-10-31 from docs/VERB.md (pile item 12 of docs/private/turbo-2-prework.md; M5 Progression's
-first verb; actor-values.md records what M1 built). MERGED to fork parity b6748da0 at 16:20Z 2026-10-31 (numidium's verb-merge:
+first verb; actor-values.md records what M1 built). MERGED to fork parity 92271160 at 16:20Z 2026-10-31 (numidium's verb-merge:
 the gate 20261031-153419 green 10 of 10 in 11 runs with p-level-up 154211, a-actor-values and b-figure-values, c-riverwood green on
 its watch rerun; T2 beside); the Status boxes say what each tier read, the HYPOTHESIS tags what the playtest still owes.
 
@@ -33,7 +33,7 @@ ActorValueInfo.h:34-41) and the game settings fSkillUseCurve, fXPPerSkillRank, f
 | the level-up's choice of health, magicka or stamina (+10) and the perk point | engine (the Stats menu) | later: a transaction verb (pile item 13's perks; the attribute pick with it) |
 | the Legendary reset (a skill at 100 back to 15, the perks refunded) | engine | later: with the perk transactions |
 | skill-dependent conditions in the world (dialogue, perks' ranks) | engine | native: the engine reads the base the server wrote |
-| a skill book read: the skill one level up, the bar keeping its share, the character credited, the base form marked read | engine (IncrementSkill at the Book Menu's open, the re-analyst's static read 2026-11-02) | imposed (R0): the server's one-level increment once per book per character (the record's readBooks), the record sent so the seat's own rise is the server's number (the Skill books section; fork m5-skill-books 38659a3e, 2026-11-02) |
+| a skill book read: the skill one level up, the bar keeping its share, the character credited, the base form marked read | engine (IncrementSkill at the Book Menu's open, the re-analyst's static read 2026-11-02) | imposed (R0): the server's one-level increment once per book per character (the record's readBooks), the record sent so the seat's own rise is the server's number (the Skill books section; fork m5-skill-books 4cce81f2, 2026-11-02) |
 | the trainers | engine | later: an increment the server validates (a trainer's gold and five a level) |
 
 ### Sequences and combinations (ADR-033)
@@ -83,7 +83,7 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
   now).
 - The server today: OnActorValues records the snapshot within bounds (R2; actor-values.md); ActorValueRecord holds
   bases, skills' progress, xp, threshold, level (ActorValueRecord.h); ActorValuesTest.cpp.
-- libespm: AVIF read since fork m5-leveling bb0b37d8 (AVIF.h: the AVSK constants and the perk tree's nodes; EspmTest
+- libespm: AVIF read since fork m5-leveling e67bd208 (AVIF.h: the AVSK constants and the perk tree's nodes; EspmTest
   on One-handed 0x44c, Smithing 0x450 and AVDragonSouls 0x62c). The load order is the source: Skyrim.esm's Smithing
   AVSK reads 160, 0, 0.25, 300 but Update.esm overrides it to 1, 0, 0.25, 300, which the browser returns and UESP's
   table shows (the patched game); a read of one plugin alone is not the game's value (the two pipelines red on the
@@ -147,7 +147,7 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
 
 - Message name / numeric type: SkillUse, MsgType 63 (wire id 71), client to server, reliable: `{ uses: [{ skill: u8
   (6 to 23), amount: f32 }] }` (up to 18 entries, one per skill per second, the amounts summed). The server's answer is
-  ActorValues (MsgType 40) as today. SCHEMA_VERSION 23 (fork m5-leveling 553863f8, 2026-10-31; locks' LockReport takes 64).
+  ActorValues (MsgType 40) as today. SCHEMA_VERSION 23 (fork m5-leveling c60305f5, 2026-10-31; locks' LockReport takes 64).
 - Direction: C2S.
 - Fields: as above.
 - Validator rules: skill 6 to 23 and listed once (E_VAL_RANGE), amounts finite and within 0 to 1e6 (E_VAL_NONFINITE,
@@ -197,10 +197,10 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
   test.
 - T1: none (the hook is a Skyrim Platform export; its proof is T3).
 - T2: a difftest session with a SkillUse accepted and one refused.
-- Probe x-skill-use by path, GREEN at v4's rerun 20261031-151449 on m5-leveling b6748da0 (two seats, c2 the target 120 units south
+- Probe x-skill-use by path, GREEN at v4's rerun 20261031-151449 on m5-leveling 92271160 (two seats, c2 the target 120 units south
   under god mode, twenty swings: sixteen hits, the batches sent, One-handed 20 to 21 on the server and on the seat's base with the
   carry, kept across a relaunch); v5 f804a96c swings thirty-six times for the record.
-- T3 scenario id: lab/scenarios/p-level-up.yaml (M5's exit; on thuum main d9e02b7d since 2026-10-31, its first run owed before the
+- T3 scenario id: lab/scenarios/p-level-up.yaml (M5's exit; on thuum main 085ac33d since 2026-10-31, its first run owed before the
   leveling gate): a seat's One-handed from 20 to 21 by hits on the other player's figure (the console's SetActorValue wrote the base alone
   until m5-skill-set, so the draft could not start at 15; the seat's own 20 is the start), then to 25 with the character's level 2, rate-proof counts, no crosstalk on the target's
   record, a relaunch and a server restart keeping the level. As first drafted: a seat's One-handed from 15 to 16 by hits on a lab NPC
@@ -213,7 +213,7 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
-- x-skill-use v1 (549cec01) at ef618dee's stage, 05:25 PDT 2026-10-31: red twice before any swing at c2's teleport (the engine dropped
+- x-skill-use v1 (549cec01) at 6919bcca's stage, 05:25 PDT 2026-10-31: red twice before any swing at c2's teleport (the engine dropped
   the move: the client's dump unmoved 1,176 units under lab-spawn while the server's record held the target; c1 moved). The hypothesis, withdrawn below:
   a move asked 11 s after c2's 3D load falls inside Skyrim Platform's post-load block (the wall probe moved c2 at about 20 s); v3
   (4585b2a0) dumps and screenshots both seats before any move, waits 10 s more and moves c2 first.
@@ -230,7 +230,7 @@ Rate limit / bounds: as above; skills 15 to 100 (legendary resets later); the le
   remainder into the record, the seat applies it), kept across the relaunch. v5 (f804a96c, thirty-six swings) for the record.
 - v5 (151817) landed 13 of 36 at 120 units, all in the first 14 s: each hit pushes the target back and after a dozen it stands out of
   the sword's reach (numidium's read); v7 (df00436b) swings in batches of twelve with c2 teleported back to 80 units between them.
-  p-level-up v3 (e4647c46) GREEN standalone 152612 (08:35 PDT): 168 of 168 swings landed in fourteen batches, the skill 21 at hit 16,
+  p-level-up v3 (b644a40d) GREEN standalone 152612 (08:35 PDT): 168 of 168 swings landed in fourteen batches, the skill 21 at hit 16,
   22 at 33, 25 at 94 with the character's level 2 the same tick, 27 at 145 and never 28; the seat read base 27, level 2, xp 18.79 at
   the last level and 1,033.09 after the relaunch (the login applies the record's carry; between levels the server accumulates without
   a send), kept across the restart; c2's record at 20 throughout. The missing "applied the server's
@@ -280,7 +280,7 @@ them (its two lines of the night are Sneak's at 20:27): the engine's rise for a 
   end (the rise is at the menu's OPEN) and from the two inventory handlers; a non-player reader gets nothing, and TESObjectBOOK::
   Activate never reads. The rule's carry matches this read; the DATA's teaches field of a skill book is the skill's ActorValue, not
   a form (lab/esm.py: SkillOneHanded1 0x1afe3 carries 6, SkillSpeechcraft2 0x1b00e 17, SkillAlchemy1 0x1afc4 16).
-- Server (fork m5-skill-books 38659a3e): wire-rules leveling.rs `Progress::apply_book` (the character loop shared with apply_use;
+- Server (fork m5-skill-books 4cce81f2): wire-rules leveling.rs `Progress::apply_book` (the character loop shared with apply_use;
   `carry_after_step`), the bridge's `apply_book` beside `apply_use` (one `judge`), PartOne::ApplySkillBook (the record write shared
   with ApplySkillUse through WriteLevelingOutcome, the record sent always), WorldState::applySkillBook installed by PartOne,
   MpActor::IsBookRead/MarkBookRead over the change form's `readBooks`, and ReadBookEvent's skill branch: ActorValue 6 to 23 else
@@ -292,7 +292,7 @@ them (its two lines of the night are Sneak's at 20:27): the engine's rise for a 
   the server's numbers. CONFIRMED by x-skill-book 212928's av-read steps: base 21 and current 21 with the Book Menu open, after
   the record's arrival, after the second read and after the restart, so slot 5's ModActorValue on a skill moves the base, not a
   permanent modifier, and the seat needs no undo of its own rise.
-- T0 (38659a3e): LevelingTest's skill-book case (One-handed 15 with 378 toward 392.6, the book takes it to 16 with the carry
+- T0 (4cce81f2): LevelingTest's skill-book case (One-handed 15 with 378 toward 392.6, the book takes it to 16 with the carry
   378 / 392.6 of the step from 16, the base 16, the character's 16, one ActorValues sent, the book kept; the same book again moves
   nothing and sends the record once; readBooks on the change form; leveling off drops a second book's read unspent),
   FormDescWorldTest's readBooks in both JSON shapes and across orders A to B (rotfern's slot 02 to 03), leveling.rs's three cases
@@ -302,9 +302,9 @@ them (its two lines of the night are Sneak's at 20:27): the engine's rise for a 
   server's two lines once, the seat's base 21 with the experience 0 and the level 1 within 10 s, no E_SKILL_ or E_BOOK_; the same
   book again: the "again" line, the base still 21; c2's record at 20 throughout; a relaunch keeps 21; a server restart keeps 21 and
   a third read says "again" (readBooks persisted); the current value recorded beside the base for the ModActorValue question.
-- x-skill-book GREEN on its first run (20261102-212928 on m5-skill-books 38659a3e's stage, numidium): the baseline, the one-level
+- x-skill-book GREEN on its first run (20261102-212928 on m5-skill-books 4cce81f2's stage, numidium): the baseline, the one-level
   read, the "again" with nothing moved, the base 21 after the relaunch and after the restart, "again" counted 2 after the restart.
-  Promoted to b-skill-book (thuum main 2d42914c, its own commit). MERGED 22:42Z 2026-11-02 to fork parity 6d7fcc84 as the R0 train
+  Promoted to b-skill-book (thuum main 91872dc1, its own commit). MERGED 22:42Z 2026-11-02 to fork parity 188a8dea as the R0 train
   m4-turbo2-r0-train with restart-dead (numidium: T0 13 of 13, the per-sha T2 green; ADR-053's R0 shape). The Skill books section is
   done at T3; its HYPOTHESIS tags (the static read of TESObjectBOOK::Read) stand confirmed in effect by the probe's base reads.
 - Known limits: the seat's own base form carries the read flag only for its process (no save keeps it under SkyMP), so after a
@@ -317,11 +317,11 @@ them (its two lines of the night are Sneak's at 20:27): the engine's rise for a 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared (the reference trace owed)
 - [x] engine surface cited or delegated (headers and CommonLibSSE-NG's source; the Frida read planned)
 - [x] server logic + T0 (fork m5-leveling, 2026-10-31: wire-rules leveling.rs with its Table (nine cases), libespm's AVIF reader (EspmTest), the bridge's LevelingTable (its case), PartOne's LoadSkillTable at AttachEspm, ApplySkillUse and the `leveling` switch, ActionListener::OnSkillUse; unit/LevelingTest.cpp's three cases ride the pipeline)
-- [x] message + validator (same commit: SkillUse 63, check_skill_use, the budget, two fixtures, SkillUseMessage.h; m5-leveling 553863f8)
+- [x] message + validator (same commit: SkillUse 63, check_skill_use, the budget, two fixtures, SkillUseMessage.h; m5-leveling c60305f5)
 - [x] native hook + T1 (fork m5-leveling, 2026-10-31: Skyrim Platform's UseSkill replacement at 40488, game/Offsets.h and FridaHooks.cpp, the skillUse event; T1 is the client build)
 - [x] TS handler (skillUseService.ts: a second's uses summed per skill into SkillUse 63; the engine's own write stays, nothing under the zeroed mults)
 - [ ] T2 green
-- [ ] T3 scenario green (p-level-up v3, main e4647c46, GREEN standalone 20261031-152612 on m5-leveling b6748da0: 168 of 168 batched swings landed, One-handed 20 to 27, the character's level 2 at skill 25, the relaunch and the restart keeping both, c2's record untouched; 08:35 PDT 2026-10-31; the gate runs it again), HYPOTHESIS tags read as noted beside each (UNTICKED 19:02 PST 2026-11-02: 5 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
+- [ ] T3 scenario green (p-level-up v3, main b644a40d, GREEN standalone 20261031-152612 on m5-leveling 92271160: 168 of 168 batched swings landed, One-handed 20 to 27, the character's level 2 at skill 25, the relaunch and the restart keeping both, c2's record untouched; 08:35 PDT 2026-10-31; the gate runs it again), HYPOTHESIS tags read as noted beside each (UNTICKED 19:02 PST 2026-11-02: 5 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated

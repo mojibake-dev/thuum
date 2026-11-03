@@ -38,7 +38,7 @@ is the first slice's evidence.
 | two stages of one quest set within a second on the talker (the fragment's chain) | x-quest-stage | pending |
 | the same stage set on both seats at once (both talk to the same NPC) | x-quest-stage | pending (one record, two no-op reports) |
 | a stage set while the other seat is in another cell, then both meet | x-quest-stage | pending |
-| a stage set, the server restarted, a login | b-quest-stage-restart | GREEN standalone 20261031-135330 (v2, main 2d920040, on parity e713862c's quest code); in dedupe's gate |
+| a stage set, the server restarted, a login | b-quest-stage-restart | GREEN standalone 20261031-135330 (v2, main 8b201edd, on parity 2fda2a19's quest code); in dedupe's gate |
 | an unlisted quest's stage | x-quest-stage | pending (refused in the log, the seat keeps its own) |
 | a stage lower than the quest's current one (SetStage out of order) | x-quest-stage | pending (recorded as done, GetStage unchanged on the applying seat) |
 
@@ -97,7 +97,7 @@ Rate limit / bounds: 50 ms per quest per player; a report of a stage already don
 ## Message contract
 
 - Message name / numeric type: QuestStage, MsgType 57, wire id 65 (wire-schema skymp.rs, SCHEMA_VERSION 19 at first; 21 with
-  the mode byte, fork m3-quest-mode 11cbf4cb, 2026-10-29).
+  the mode byte, fork m3-quest-mode e950fb46, 2026-10-29).
 - Direction: both. C2S: the seat's report. S2C: the relay to the other seats and the login replay.
 - Fields: quest (u32, the QUST form id in the shared load order; a long form id where the server's convention needs
   one, as PlayerGlobals carries its ids), stage (u16, the engine's stage index).
@@ -129,7 +129,7 @@ Rate limit / bounds: 50 ms per quest per player; a report of a stage already don
 - Settings: `sharedQuests` in server-settings.json (lab/deploy/sky-srv, both load orders): FreeformRiverwood01
   (A Lovely Letter, 0x74a83), MS13, MS13Intro, MS13FIN (The Golden Claw, 0x39645, 0xb6031, 0x3dd29), read from
   Skyrim.esm with lab/esm.py on 2026-10-28.
-- Settings since D58 B (14:49 PDT 2026-10-29, fork m3-quest-mode fc17612d): `sharedQuests` stays the curated array above (mode
+- Settings since D58 B (14:49 PDT 2026-10-29, fork m3-quest-mode 0b9a14a4): `sharedQuests` stays the curated array above (mode
   list); the mode lives under its OWN key `sharedQuestsMode`: `{"mode": "all", "denied": [...]}` (every quest a seat starts is the
   world's unless denied; the Rust parser is strict: unknown fields, a duplicate, a non-list `denied` are named errors; the mode key
   wins when both are present). The key is its own so an older image, which reads only `sharedQuests`, ignores it and starts from the
@@ -209,7 +209,7 @@ two names), 54240 and 25234 (formID, stage), 53763 (the counter). (a) c1's conso
 effect. (b) c2's relayed apply under the detour: 56684, 53716, 25004, 25260, 53987 returning with 25234 inside its frame and no
 53429 or 54240, 53763 to zero in the same call; lab-api stageDone(10) true on c2, no world effect, the promise resolved.
 
-**Suppress (slice two, 14:29 PDT 2026-10-29, fork m3-quest-fragment d02103fd):** the relayed stage's Papyrus fragment, by a Gum replacement of the VM's quest stage sink (53987) keyed by the pairs the client marks (TESModPlatform.SuppressQuestStageFragment / ReleaseQuestStageFragment); the callback's slot 1 fires so the journal, the done bit and the latent return keep; setting questFragmentSuppress; HYPOTHESIS until the trace.
+**Suppress (slice two, 14:29 PDT 2026-10-29, fork m3-quest-fragment db0bb406):** the relayed stage's Papyrus fragment, by a Gum replacement of the VM's quest stage sink (53987) keyed by the pairs the client marks (TESModPlatform.SuppressQuestStageFragment / ReleaseQuestStageFragment); the callback's slot 1 fires so the journal, the done bit and the latent return keep; setting questFragmentSuppress; HYPOTHESIS until the trace.
 
 ### Finding 76 is D62 (2026-10-30; x-quest-mode v4 144813)
 
@@ -225,7 +225,7 @@ suppression keeps a relayed stage's script off the applying seat), a server rule
 the union; C) leave as today. The union merges the quest work as it stands (D68: whole if x-quest-mode goes green on a quest that
 is neither start-game-enabled nor denied, else the deploy's mode back to the list).
 
-D69 B built (2026-10-30, fork m3-quest-sge-stages dc3ec679, off the union 0e23c820, T0 green on pipeline 4017; a train after the union's merge): in mode all,
+D69 B built (2026-10-30, fork m3-quest-sge-stages 6dbabc7a, off the union b8a9d4c6, T0 green on pipeline 4017; a train after the union's merge): in mode all,
 OWN_START refuses only the engine's own start of a start-game-enabled quest, stage 0 and the record's start-up stages (QUST INDX,
 libespm's JournalIndex::StartUpStage; MQ101's 0 carries it), and its later stages are recorded, relayed and replayed like any
 other quest's; the login replay follows the same stage-aware test. The D62 unit test became D69's (FreeformHeartwoodMill's flagged start-up stage 10 refused, its 20 and MS13's 10 and 20
@@ -234,7 +234,7 @@ quest's own stage set (DB01Misc 10, x-quest-mode v4's frame) crossing to the oth
 train's stage. Eli may still veto for A or C.
 
 Ahead, the stage-0 report churn (12:11 PDT 2026-10-30, scoped from x-quest-mode v5's server log, run 20261030-151127, and the
-code at dc3ec679): DLC1VCController 0x0201a428 (Dawnguard.esm; QUST DNAM flags 0x0119, Start Game Enabled and Run Once, the
+code at 6dbabc7a): DLC1VCController 0x0201a428 (Dawnguard.esm; QUST DNAM flags 0x0119, Start Game Enabled and Run Once, the
 vampire-conversion controller) restarts itself in bursts on each seat, and each restart fires the engine's stage-0 event, so the
 seat reports stage 0 and the server refuses it OWN_START: 32 reports per seat in a burst about a minute apart in that run
 (15:12:39 one, 15:13:41 thirty-two held, on user 1; the same on user 2). The server already holds its line to one per seat per
@@ -256,7 +256,7 @@ the engine's own repeat (d42cd5e5); b-quest-report-dedupe follows its green. The
 ([3-9][0-9]|[1-9][0-9][0-9]) such report") == 0 (no window of thirty or more held); the mode-all relay unchanged (x-quest-mode v5's
 set and relay claims repeated in the same run). The premise's read first: whether the controller's bursts recur in the lab's
 frame without a vampire on either seat (they did in 151127's, both seats mortal).
-Built (12:58 PDT 2026-10-30): fork m3-quest-report-dedupe 7eb968bb off the union 0e23c820 (questStageService.ts: REPORT_REPEAT_MS 30000,
+Built (12:58 PDT 2026-10-30): fork m3-quest-report-dedupe 32c7bdca off the union b8a9d4c6 (questStageService.ts: REPORT_REPEAT_MS 30000,
 REPORT_MEMORY_MAX 256, REPEAT_FLUSH_MS 5000; `repeated`, `closeRepeatWindow`, `flushRepeats`; tsc clean), kept local until the union and the
 physics train have merged (its client build would load the seats' host mid-sweep); the probe x-quest-report-dedupe v1 by path (0a281115:
 both seats mortal at the spawn for 150 s, the drop line on each seat, the server's held count under thirty, x-quest-mode v6's relay unchanged).
@@ -269,7 +269,7 @@ both seats mortal at the spawn for 150 s, the drop line on each seat, the server
 - [x] message + validator (same commit)
 - [x] native hook + T1 (none needed)
 - [x] TS handler
-- [x] T2 green (ticked 17:02 PDT 2026-10-29 by the pass: T2 GREEN on m3-turbo-train-3n e14dc298, pipeline 3793, zero undeclared differences, the quest-stage session's declared relay matched once its ids were hex, LOG 2026-10-29 04:15 PDT; the sharing-mode slice's T2 is P2's, running)
+- [x] T2 green (ticked 17:02 PDT 2026-10-29 by the pass: T2 GREEN on m3-turbo-train-3n 38cea9bf, pipeline 3793, zero undeclared differences, the quest-stage session's declared relay matched once its ids were hex, LOG 2026-10-29 04:15 PDT; the sharing-mode slice's T2 is P2's, running)
 - [ ] T3 scenario green, no HYPOTHESIS tags (DEBT, 2026-10-30, D68: no scenario of this verb is committed; the mode-all relay, the denylist, the INDX check, the fragment suppression and the login's arrival ride the union with x-quest-mode v3 and b-story-arrival as their reads; b-quest-stage is owed from x-quest-mode's green and lands in its own commit)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
@@ -334,7 +334,7 @@ controllers 1219b6, 126ab9, 12bbbc, 284074, FactionAssaultEvent 284076, FactionK
 29847f) join the list the day that plugin is served; today it is client-only, so its quests are E_QUEST_UNKNOWN on the server. The
 `allowed` list is where a start-game-enabled world system that should cross gets named.
 
-**D62 built (15:10 PDT 2026-10-29, fork m3-quest-mode 4a759c5b):** in mode all a quest whose DNAM carries Start Game Enabled (libespm
+**D62 built (15:10 PDT 2026-10-29, fork m3-quest-mode 1018cc45):** in mode all a quest whose DNAM carries Start Game Enabled (libespm
 QUST.h, mainFlags 0x1) is each seat's own: its reports are refused E_QUEST_OWN_START and a recorded stage of it is not replayed at a
 login, unless the quest is on `sharedQuestsMode.allowed` (a quest both denied and allowed is a parse error); the client has no filter
 (Skyrim Platform's Quest exposes no start-enabled getter), so a seat still reports such stages and the server refuses them. The
@@ -345,25 +345,25 @@ the former curated four (A Lovely Letter, MS13, MS13Intro, MS13FIN), so the Gold
 Eli, D63: which start-game-enabled world quests join `allowed` (the MS side quests, the faction openers C00 and CW00, the dialogue
 hubs stay a seat's own by the recommended reading, since their stages track one player's conversations).
 
-## The review's fixes (18:05 PDT 2026-10-29, fork m3-pass-train-2 58208e9f; P2-win dca7fe09)
+## The review's fixes (18:05 PDT 2026-10-29, fork m3-pass-train-2 e6c0c684; P2-win 278d28c3)
 
-An agent's rules review of the train (ee44f7d1..0b49a28e) found eight things; six are fixed on the train, two are declared.
+An agent's rules review of the train (33240fd4..f1b71d38) found eight things; six are fixed on the train, two are declared.
 
-1. Slice two was INERT: d02103fd changed TESModPlatform.psc but not the compiled TESModPlatform.pex, and Skyrim Platform's
+1. Slice two was INERT: db0bb406 changed TESModPlatform.psc but not the compiled TESModPlatform.pex, and Skyrim Platform's
    callNative resolves a function through the loaded .pex (VmProvider.cpp), so Suppress and ReleaseQuestStageFragment threw
    "Native function not found", the client logged it and every relayed stage ran its fragment. Both natives are declared in the
-   .pex now (lab/pex.py add-native, the arrival native's precedent, e0e3af03); no playtest had reached the path.
+   .pex now (lab/pex.py add-native, the arrival native's precedent, 6e115396); no playtest had reached the path.
 2. Rule 12 and 5 in mode all: any u16 stage of any shareable quest was accepted with no check against the quest's own stages and
    no bound on the world's record, and the login replay was quadratic. Now a stage the quest's INDX list does not define is
    refused (E_QUEST_STAGE, libespm's QUST stages), the record is bounded (QUEST_RECORD_CAP 4096 pairs in wire-rules
-   quest_stages, E_QUEST_FULL once per 10 s past it, UNMEASURED as a bound), and at_login runs in one pass (c5749f0c; tests in
+   quest_stages, E_QUEST_FULL once per 10 s past it, UNMEASURED as a bound), and at_login runs in one pass (e3ce8785; tests in
    the crate and QuestStageTest, MS13's INDX list read from the browser: 10 in, 9999 out).
 3. The arrival event was armed by the login's quest mode message, which a server with an empty shared list never sends, so such
    a server never raised the Change Location event at login. The arrival now waits on this connection's own CreateActor and
-   the game's load, the flags reset at every connectionAccepted, the 3 s window kept (6653465c).
+   the game's load, the flags reset at every connectionAccepted, the 3 s window kept (22b4d673).
 4. The fragment mark was released at the SetStage promise's answer, which can come before a queued stage's event (a quest not
    yet running). The sink's replacement consumes one mark at the pair's first event, and the client's release is a 10 s safety
-   that logs a warn if it takes a mark back (58208e9f). HYPOTHESIS (the agent's caveat): the static read has the setter send one
+   that logs a warn if it takes a mark back (e6c0c684). HYPOTHESIS (the agent's caveat): the static read has the setter send one
    TESQuestStageEvent per log entry (25260), so a stage with several passing entries would run its later entries' fragments
    under a one-shot consume; lab/frida/quest-stage-chain.js counts the 53987 events per stage at P2's stage and decides whether
    the consume moves to the last entry (53716's count).
@@ -371,7 +371,7 @@ An agent's rules review of the train (ee44f7d1..0b49a28e) found eight things; si
    Skyrim.esm's 330 such quests arrive at the client's rate and each cost a token of the validator's budget and an info line.
    Skyrim Platform's Quest exposes no Start Game Enabled getter, so the client filter stands; the server logs E_QUEST_OWN_START
    once per seat per 10 s with the held count, and tests E_QUEST_DENIED first (a quest both denied and start-game-enabled logs
-   the setting's word; 5ced4995). The token cost is a declared limit until the mode message carries the flag.
+   the setting's word; 165d835b). The token cost is a declared limit until the mode message carries the flag.
 6. Declared, not fixed: PlayerScale reads the sex from the appearance alone, so a female NPC's reach uses the male height column
    (melee-reach.md's known limit; within the 256-unit slack for every playable race); libespm's NPC_ data reads no sex, and
    UESP's ACBS bit 0x1 Female is the lead to confirm against the record before a one-line read.
@@ -379,7 +379,7 @@ An agent's rules review of the train (ee44f7d1..0b49a28e) found eight things; si
 T0 green locally on the crate (246 cases) and the bridge; clippy, fork-lint and tsc green; the C++ compiles on CI (the push
 pipeline, whose difftest builds on the crate change); the Windows half on P2-win's pipeline.
 
-D69's T3, first reads (21:46 PDT 2026-10-30; x-quest-rumor v1 on the m3-quest-sge-stages dc3ec679 stage, 043546 cold and 044055
+D69's T3, first reads (21:46 PDT 2026-10-30; x-quest-rumor v1 on the m3-quest-sge-stages 6dbabc7a stage, 043546 cold and 044055
 relaunched, RED on two claims alike): the rumor half holds (DB01Misc's stage relayed in mode all, the denied MQ102 kept per seat) and
 FreeformHeartwoodMill's stage 20, unflagged, was recorded and relayed once with c2 done: D69 B's point. The red: no E_QUEST_OWN_START
 for stage 10 of e3ea5 and c2's stage 10 done. The chain trace (quest-stage-chain.js on both seats) says why: on c1 EnsureQuestStarted
@@ -390,11 +390,11 @@ flagged stage stands at T0). v2 by path (the sha1 in the LOG): the start-up stag
 relay kept, and the server's OWN_START refusal reached through the reports the engine makes by itself, the vampire controller's
 stage-0 reports at its restarts (DLC1VCController 1a428, within 150 s; the churn item's own evidence), never recorded.
 
-D69's T3 (22:20 PDT 2026-10-30): x-quest-rumor v2 GREEN, 20261031-051455 on m3-quest-sge-stages dc3ec679's restage (the union's dist by
+D69's T3 (22:20 PDT 2026-10-30): x-quest-rumor v2 GREEN, 20261031-051455 on m3-quest-sge-stages 6dbabc7a's restage (the union's dist by
 REUSE_DIST_FROM): the rumor quest's stage relayed in mode all and applied on c2, the denied MQ102 kept per seat, FreeformHeartwoodMill's
 start-up stage 10 done on both seats by the quest's own start and its unflagged stage 20 recorded and relayed once with c2 done, the
 server's OWN_START refusal of the vampire controller's own stage-0 reports within the window. Promoted unchanged as b-quest-rumor
-(main 1b4dde1c, its own commit) and held pending in lab/gate.yaml (ebfbe115) until the train merges, since parity under D62 refuses
+(main 001d602e, its own commit) and held pending in lab/gate.yaml (15133271) until the train merges, since parity under D62 refuses
 the HeartwoodMill relay; the merge's commit un-pends it. The merge: a union of m3-guest-loot and m3-quest-sge-stages under one gate
 (always, c-dungeon-enemies, b-npc-body-release, b-quest-rumor, the quest-stage scenarios, watch; T2 beside it) if the guest-loot rerun
 is green, D69 alone otherwise. The Status box "T3 scenario green" ticks at the merge, when b-quest-rumor plays green in the gate.
@@ -402,5 +402,5 @@ is green, D69 alone otherwise. The Status box "T3 scenario green" ticks at the m
 Debt noted (22:23 PDT 2026-10-30): b-quest-stage-restart is named above as the verb's restart scenario and is not in lab/scenarios; the
 quest records' persistence across a restart rides a-restart-persistence's world today and QuestStageTest's restart case at T0. It
 is written after D69's merge (rule 6's shape: the recorded stages read back after a server restart on both seats).
-Written 05:38 PDT 2026-10-31 (thuum main 7c9cc309): the stage set and relayed, the restart, both seats' reads after the reconnect with
+Written 05:38 PDT 2026-10-31 (thuum main ca3e80e8): the stage set and relayed, the restart, both seats' reads after the reconnect with
 the login replay lines, a relaunched c2 reading the stage at its login. Its first run is owed before any gate that lists it.

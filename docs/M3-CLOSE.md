@@ -2,7 +2,7 @@
 
 Written 22:26 PST 2026-11-01 on Eli's correction of the weekend summary ("you called M3 closed, im accepting it closed as far as
 building goes, but it still needs to be closed as of testing"). M3's building ended 2026-10-31 01:31 PDT when the exit's last
-item, a guest's loot of a released body, went green and m3-guest-loot merged (fork parity d10789f7); PLAN.md's M3 header now
+item, a guest's loot of a released body, went green and m3-guest-loot merged (fork parity 19e8c397); PLAN.md's M3 header now
 says BUILT. The rule, as M2 set it (docs/M2-CLOSE.md): the milestone is DONE when every T4 row below is ticked in a playtest
 report of Eli's, on the merged base or a stage with the same content. Anything a sitting finds is fixed on a train or
 carried to M4 by name, in this file, before the word DONE is used. A T4 row is a yes or a no, not a feel.

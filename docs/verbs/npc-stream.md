@@ -7,8 +7,8 @@ H7, the HostedActorState epoch; docs/verbs/cell-host.md:165-170, :185-188,
 :206-215), npc-puppet's roster and its "later: npc-stream" rows
 (docs/verbs/npc-puppet.md:102, :108, :556), the prior-art read
 (docs/research/m3/tes3mp.md Q2, te-npcs.md section 2, skymp-hosting.md 1.4
-and 2.4) and a code read of fork m3-npc-puppet at 757066f3, re-read 2026-10-22 at
-19e7ca9b (the worktree lab/.cache/wt/puppet's head at review; every fork
+and 2.4) and a code read of fork m3-npc-puppet at c6665aa7, re-read 2026-10-22 at
+6139dc60 (the worktree lab/.cache/wt/puppet's head at review; every fork
 path below is at that head unless another is named), before any code. The cut (rule 3): what the game hosting a cell
 reports about each of the cell's NPCs beyond its position, how often, on
 which channel, what the server checks and keeps, and what the other games'
@@ -48,7 +48,7 @@ Dynamic plan), the records (riverwood-ids.md) and the code read:
 | the engine's BGSActions (the attack, the power attack, the draw and sheathe: r-npc-fight's three IsAttacking windows and 22 moveStarts on one bandit, readings-18:67-71) | trace | native on the host, imposed on a puppet (R2): UpdateAction 44 extended from the player to the actors this game hosts (ADR-035 point 5: "actions ride cast-action's action replay (ADR-032), extended from players' figures to NPCs"; cast-action.md:229 left them "a later slice"): the native PerformAction hook's filter widened from the player to a hosted set (FridaHooks.cpp:455-470 reads `data->source.get() == player` at :460); a puppet performs them through performAction with the variables first, as a figure does (formView.ts:613, the method :824); H2 CONFIRMED (172720: every streamed attack performed through the entry on the AI-off puppet); the event an action carries is not re-sent as an animation event; H1 CONFIRMED (101422: an action's events ride the mark) |
 | health, magicka and stamina as the host's engine moves them (regeneration; a bandit's hit on a bandit; a fall; a script) | trace (r-npc-fight's bandit took none; the engine alone's NPC values are not in a trace yet), code | native on the host, imposed on a puppet from the server's record: R2 for the numbers, recorded from HostedActorState (new, MsgType 51) under R1 bounds (finite, 0 to 1 inclusive, and the attributes hold, wire-rules attributes.rs, the players' rule: a host's report cannot undo a value the server lowered itself); at most twice a second per actor; the server tells the other games as ChangeValues 16, the path a figure's values take (remoteServer.ts:882-904); a report of 0 does not kill: a death is the server's (R0, npc-fate), the record floors at one point and the floor logs (Server) |
 | the combat target and the combat state (a hit drafts the actor, combatTarget the player, inCombat true: readings-18:100-102; TESCombatEvent) | trace | native on the host; recorded in memory (R2) from HostedActorState (the target's identity; the look point stays in the movement sample, movementGet.ts:46-56, where the puppet's head tracking reads it, movementApply.ts:37-56); never imposed on a puppet (npc-puppet's H6: a puppet is never in combat); restored at a promote: later, npc-handoff |
-| the running package and its changes (the schedule switch at 8:00, Hod back to the mill, readings-17:39-43; packageStart, packageChange, packageEnd) | trace (the Papyrus getter read 0x3EAB9 at every read, AI on or off and mid-recoil, readings-17:67, readings-18:77-82 and :116-118), code | native on the host; recorded in memory (R2) from HostedActorState, an observation only: nothing imposes a package on a puppet (Skyrim Together's package sync, written, crashed and compiled out, te-npcs.md section 3); the proposed source is Skyrim Platform's package events, not the getter (ADR-034; H3, HYPOTHESIS until b-npc-stream-state's claim, drafted and not committed: a c1 log-count of the sender's package-event line for 0x13483 across 8:00, gameHour 7.9 for 60 s, `>= 1`, with c1.npc_state(0x13483).package recorded before and after, the line's text the fork's, 42af75b7; b-npc-stream-state.yaml, promoted from P5 163259, carries no package line, so the read waits on the claim's own commit, rule 13, and a gate, P3 222300 and P5 163259 having asserted nothing on the package); what the getter's one id means is the open question stated under Engine surface, the package |
+| the running package and its changes (the schedule switch at 8:00, Hod back to the mill, readings-17:39-43; packageStart, packageChange, packageEnd) | trace (the Papyrus getter read 0x3EAB9 at every read, AI on or off and mid-recoil, readings-17:67, readings-18:77-82 and :116-118), code | native on the host; recorded in memory (R2) from HostedActorState, an observation only: nothing imposes a package on a puppet (Skyrim Together's package sync, written, crashed and compiled out, te-npcs.md section 3); the proposed source is Skyrim Platform's package events, not the getter (ADR-034; H3, HYPOTHESIS until b-npc-stream-state's claim, drafted and not committed: a c1 log-count of the sender's package-event line for 0x13483 across 8:00, gameHour 7.9 for 60 s, `>= 1`, with c1.npc_state(0x13483).package recorded before and after, the line's text the fork's, 9b7be620; b-npc-stream-state.yaml, promoted from P5 163259, carries no package line, so the read waits on the claim's own commit, rule 13, and a gate, P3 222300 and P5 163259 having asserted nothing on the package); what the getter's one id means is the open question stated under Engine surface, the package |
 | what the actor wears and holds (the server's EquipBestWeapon on a hosted caster, MpActor.cpp:193, skymp-hosting.md:130; the engine's own equips under its packages; ActorEquipManager) | code | native on the host, imposed on a puppet (R1): UpdateEquipment 5 under the actor's own idx from the host's half-second poll (slice 3: a poll, not the equip events, which were the player's alone, sendInputsService.ts:55-103, :287-290), validated against that actor's own inventory and base spells, recorded on that actor (today the handler writes the sender's record whatever the idx, ActionListener.cpp:873-876 and :1024-1025: the latent corruption skymp-hosting.md:131 names), relayed reliably; a puppet applies it as every view does (formView.ts:655-675); the client's -1 inventory count that the wire's u32 refuses (docs/LOG.md:2245, 2026-10-22 03:19, c2's 1,835 refused UpdateEquipment sends) is this row's prerequisite |
 | the actor's inventory changing on the host (a pickup, loot taken, an arrow spent) | ADR-035 point 6; PLAN.md:1045-1047 | later: npc-fate, on ADR-035 point 6 (docs/DECISIONS.md:1302-1305: inventories are R0, the server's); open question for Eli: docs/PLAN.md:1045-1047 has inventory changes streaming from the host as R2 with cheap bounds, the ADR has them R0, and the two have not been reconciled; this doc follows the ADR and carries no inventory_delta either way (the M0 row's field, Message contract) until he says which |
 | the actor's death on the host (NPC against NPC, a fall, a trap) | ADR-035 point 6 | later: npc-fate (deaths that persist, R0); until then a puppet shows the relayed isDead as today (movementApply.ts:73, deathService), a corpse the server's record calls alive: carried by name, with H9's count |
@@ -124,7 +124,7 @@ combat music.
   carried with it (ADR-033 point 5; cell-host's CellLoaded budget is the
   precedent); the first stage runs UNMEASURED placeholders at four times
   the rate the references suggest, named so in the code.
-- MEASURED (P3, x-npc-stream-p3 20261026-222300 on parity 66f04f2a, the
+- MEASURED (P3, x-npc-stream-p3 20261026-222300 on parity 03895571, the
   pcap's read by an agent, 16:05 PDT): with c1 hosting 18 to 19 actors and
   c2 puppeting them, the relay to the puppet seat is about 9.6 KB/s of
   message-bearing payload in the quiet square (55 packets a second) and
@@ -145,7 +145,7 @@ combat music.
   loop): an idle client costs about 815 packets a second, near 45 KB/s with
   headers, because the server loop ticks and sleeps 1 ms (skymp5-server
   index.ts:222-227) and the wire sends at every update, a budget row of its
-  own before the per-actor budgets are tightened. D64 (18:44 PDT 2026-10-29): the transport flushes on a 60 Hz clock (fork m3-send-rate b6f4deb4), 59.98 a second measured on
+  own before the per-actor budgets are tightened. D64 (18:44 PDT 2026-10-29): the transport flushes on a 60 Hz clock (fork m3-send-rate 11a3e466), 59.98 a second measured on
   the idle client, T2 green; the gate when the lab is back. Two server-wide stalls (164 ms at the
   Riverwood keyframe, 60 ms at c2's teleport), no gap over 0.3 s while
   hosting, no retransmission-looking repeats. The per-message counts and
@@ -740,7 +740,7 @@ whatever the arrow's path.
   NPC's equipment (the latent corruption back); the old host's states
   accepted after the handoff (epoch not advancing).
 
-### Slice 6's creature half (playtest 37, finding 47; fork m3-npc-caster 05a285f6, 2026-10-28)
+### Slice 6's creature half (playtest 37, finding 47; fork m3-npc-caster fc493be9, 2026-10-28)
 
 A flame atronach hosted by Prisoner cast Firebolts he alone saw: the host's client reports a cast from Skyrim
 Platform's spellCast event, which the platform raises only when the spell sits in one of the actor's four selected
@@ -758,7 +758,7 @@ returning, H-53g); the server stands a known constant-effect ability as the cast
 (PartOne::AbilityReaching over KnownBaseSpells' reached spells), so the atronach's cloak damage lands at the reach
 rule's cadence, and a spell no ability reaches stays refused (rule 5; T0 NpcCastTest). Known: a server-made
 creature's death still ends by the server's word (the client never reports a 0xff id and the wire refuses the range,
-a contract change for its own commit, fork m3-death-range 2069d4d2). READ (2026-10-28; the train's first T0, pipeline
+a contract change for its own commit, fork m3-death-range a46fa688). READ (2026-10-28; the train's first T0, pipeline
 3650, showed it): the cloak's hit is claimed, and its damage effect, MGEF crFireDamageConcAimed 0x10fdd1 (SPEL
 crAtronachCloakFlameDmg 0x6445b: concentration, aimed, magnitude 10, duration 1), carries one CTDA, function 719,
 EqualTo 1.0, params 0, run on Subject (lab/esm.py). H-53h CONFIRMED-by-read for the identity: 719 is IsHostileToActor
@@ -775,7 +775,7 @@ carry aggressor_is_hosted and target_is_hosted (worldState.HostOf non-null for a
 NPC on the other, the StartCombat notice stays between two players (a hosted NPC's victim is its host engine's to fight, a player's
 copy of a hosted creature is AI-off), TickFights keeps a pair whose member has a host, and the rest rule's in_fight refuses a player a rest
 mid-fight with a hosted NPC as with a player (hostility-sync.md's T0 line amends ADR-023's "between players"). The T0
-claim restored (NpcCastTest's cloak case, relaxed at df445168): the cloak's first hit on a never-fought pair, the
+claim restored (NpcCastTest's cloak case, relaxed at e3e5b5d4): the cloak's first hit on a never-fought pair, the
 atronach's own host standing in the cloak (playtest 37's seat), is refused "its conditions fail; not applied" with its
 health unchanged, the engine's rule between strangers; a claimed Firebolt of the atronach's begins the fight with the
 other player (health 0.9, GetFights().between, no StartCombat notice, the pair kept through a TickFights); then
@@ -799,7 +799,7 @@ engine's one sender of the TESTopicInfoEvent, DialogueItem::SendTopicInfoEvent
 (Address Library 35225), tests nothing per seat: the BEGIN leaves 39643
 inside our sayTopicInfo, the END leaves UpdateSoundCallBack inside our voice
 pair, both to 25616 and SkyrimVM's sink 53997, which calls the info's begin
-or end fragment. Built on fork m3-face-twelve 4e643c1c as a Gum replacement
+or end fragment. Built on fork m3-face-twelve 91c9499a as a Gum replacement
 of 35225: a puppet speaker (Puppets::Is) whose high process is not
 talkingToPC (HighProcessData.h:341) sends no event, logged once a minute per
 speaker ("fragment gate: info X type Y on puppet Z not sent to the VM"); the
@@ -809,7 +809,7 @@ fragment's effect is the host's seat's (R2 recorded through its own
 consequences: a barter, a stage); the watcher suppresses. H-57a (the gate
 stops the menu on the watcher) and H-57b (the host's own menu and fragments
 are untouched) CONFIRMED at T4, 2026-10-28 18:02 PDT, Eli's shop test on
-ed606faf's predecessor dist (2ce8b523): the inn's host opened Orgnar's shop,
+63376de3's predecessor dist (9ccc8176): the inn's host opened Orgnar's shop,
 the watcher's screen got no barter menu (playtest 37, finding 40; the formal
 read stays the Frida plan). The same test found the claimant's promoted
 vendor offering no vendor topic at all (finding 40 b; the read in
@@ -929,7 +929,7 @@ call under the law, Eli's letter changing any:
 - Q8, the voice line: the fourth slice of this verb, after the actions, the
   state and the equipment. Call: later slice.
 
-Slices, inside-out, one fork branch m3-npc-stream off parity aaafffe5:
+Slices, inside-out, one fork branch m3-npc-stream off parity c40a36a3:
 1. ACTIONS (the root the review named): the hosted set in Skyrim Platform
    (setHosted and isHosted beside setPuppet) read at the PerformAction
    entry, the actionPerformed event for a hosted actor, UpdateAction under
@@ -949,7 +949,7 @@ Slices, inside-out, one fork branch m3-npc-stream off parity aaafffe5:
 4. The voice line, the budgets from P3, b-npc-stream whole, the parity
    scenario and the reference trace (ADR-050 decision 5).
 
-### Slice 1 as built (2026-10-26 03:08 PDT, fork m3-npc-stream c2129b4a off parity aaafffe5)
+### Slice 1 as built (2026-10-26 03:08 PDT, fork m3-npc-stream b3e12090 off parity c40a36a3)
 
 The hook on the engine's one action entry (FridaHooks.cpp,
 ActorMediator::PerformAction 38949) admits, beside the player, every actor
@@ -1067,7 +1067,7 @@ attack-family row exists; P4's fight is a placed bandit (0x1bcd8 at Sven
 through the server), the host's own server-made actor, whose attacks go
 through its host's entry.
 
-### Slice 2 as built (2026-10-26 03:49 PDT, fork m3-npc-stream 42af75b7 on c2129b4a)
+### Slice 2 as built (2026-10-26 03:49 PDT, fork m3-npc-stream 9b7be620 on b3e12090)
 
 HostedActorState, MsgType 53, wire id 61, C2S, 64 bytes, in the same commit
 as its validator and its two fixtures (wire-schema skymp.rs; wire-validate
@@ -1143,7 +1143,7 @@ host's regeneration), the puppet's health follows the record within 0.05,
 the first state line in the server log at the grant, no E_STATE_OWN, the
 non-host's puppets report nothing (no "state ... by c2's id" line).
 
-### Slice 3 as built (2026-10-26 04:13 PDT, fork m3-npc-stream 2673d1ab on 42af75b7)
+### Slice 3 as built (2026-10-26 04:13 PDT, fork m3-npc-stream e2ea071a on 9b7be620)
 
 The record's hands are what the hit path judges a hosted actor's swing
 against (E_HIT_WEAPON: playtest 34's two bandits, every swing dropped, the
@@ -1362,7 +1362,7 @@ update's exactly. 25616 marks the info said-once on both BEGIN and END
 done bits' initial value on a fresh actor (if clear, the first say refuses
 and the native must set 0x180 first), the dialogue state's type field.
 
-### The voice slice as built (2026-10-26 05:33 PDT, fork branch m3-npc-voice 82ffd53a off 2673d1ab, its own worktree; CI next)
+### The voice slice as built (2026-10-26 05:33 PDT, fork branch m3-npc-voice 614eadbe off e2ea071a, its own worktree; CI next)
 
 On the host, a Skyrim Platform sink on TESTopicInfoEvent (the struct in
 game/Events.h with the read's layout and a static_assert on its 0x18
@@ -1417,9 +1417,9 @@ commit (rule 13), the parity scenario p-npc-stream and the reference trace
 (ADR-050 decision 5), the labState `stream` counters with their lab-api
 row, the sequence table's result column (ADR-033).
 
-### The first stage's read and slice 1 v2 (2026-10-26 09:09 PDT, fork a0ff0e72)
+### The first stage's read and slice 1 v2 (2026-10-26 09:09 PDT, fork 7215b34e)
 
-The stage of 2673d1ab (verb-stage 08:09 to 08:31 PDT, T2 GREEN at 15:58Z)
+The stage of e2ea071a (verb-stage 08:09 to 08:31 PDT, T2 GREEN at 15:58Z)
 ran P4, P5 and P6 and all three ended E_RUN_GAME_LOST for c2, the puppet
 seat, within seconds of the host's stream reaching its puppets
 (20261026-151921, -152304, -152837): access violations in the graph update
@@ -1454,7 +1454,7 @@ maps (states[-1], rcx 0x1_00000000). Split into dwords, every corrupted
 pointer is two adjacent 4-byte words holding a small int and a plausible
 float (453 and 1.288; 599 and -1.259; 1 and 0): the footprint of a
 4-byte-strided out-of-bounds write of variable values (CONFIRMED by its
-fix: v2 a0ff0e72 bounded the write; the v2 and v3 stages ran with no crash
+fix: v2 7215b34e bounded the write; the v2 and v3 stages ran with no crash
 log, 172720, 163259, 173133). The descriptor wrote 301 fixed
 master indices (14 ints, 19 floats, 268 booleans, the highest 300) into
 `variableValueSet->varSet[index]` with no check of the set's size, where
@@ -1480,7 +1480,7 @@ into a graph that is not the master behaviour's. Unread statically: the
 creature projects' word counts (below 301 by the signature), the humanoid
 project names (data, not strings in the image: v2's log line reads them).
 
-v2 (a0ff0e72): the descriptor admits a graph only when its project is
+v2 (7215b34e): the descriptor admits a graph only when its project is
 DefaultMale or DefaultFemale (the two names CONFIRMED by the gate's log line
 and the residents' stream on the v2 and v3 stages: 163259 and 162926
 'ChickenProject (variable set of 47) is not the master behaviour', 172720
@@ -1499,12 +1499,12 @@ read above found no entry-side cause). Two bisect switches
 for the next stage, read from c2's settings file, on by default:
 npcStreamActions (false drops an NPC puppet's queue unplayed) and
 npcStreamHands (false skips the hands' apply). The voice branch takes v2 by
-merge (fba05393). The re-analyst's read of the three crashes' frames
+merge (d4f80ad8). The re-analyst's read of the three crashes' frames
 (59263+0x10, 59380+0xFB, the graph update chain) is running and lands in
 the Dynamic plan when it comes; the lab's next read is P4 to P6 on v2's
 stage (started 09:1x PDT).
 
-### The second stage's read (v2 a0ff0e72, 09:10 to 09:39 PDT; the verdicts and the next claims, 10:09 PDT)
+### The second stage's read (v2 7215b34e, 09:10 to 09:39 PDT; the verdicts and the next claims, 10:09 PDT)
 
 NO CRASHES: c2 survived P4, P5 and P6 with no crash log, and T2 is GREEN
 at 17:05Z. The descriptor's gate did its work and said so: c2's log has
@@ -1526,7 +1526,7 @@ check: the two names read CONFIRMED by the residents' stream.
   and the attacks alone (no resident fought); the host's side held (40
   action lines), the earlier claims held. The puppet's event path now says
   its first action per actor once ("npc-stream: first action <event> on
-  <id> played as its event", 66f04f2a), and P4 v2 claims that line; the
+  <id> played as its event", 03895571), and P4 v2 claims that line; the
   entry's proof stays the bandit's attack (its claims stand, unreached in
   v1 since the run stopped at the stale claim).
 - P6 (163621) RED on the bandit, not on slice 3: the residents' equipment
@@ -1541,13 +1541,13 @@ check: the two names read CONFIRMED by the residents' stream.
   the probe after D19 or decision 3 lands. The "0 worn, right 0 left 0"
   equipment lines numidium read were the lab spawn's creatures (107cf8 to
   107d07, 1066df the chicken, 1b747), not clothed residents.
-The next stage (66f04f2a, the first-event line alone over v2) reruns P4
+The next stage (03895571, the first-event line alone over v2) reruns P4
 and P6 with the v2 claims; then the voice branch's stage, the voice branch
 having taken the stream's commits by merge.
 
 ### The third stage's read: the three slices GREEN at T3 on probes (11:03 PDT)
 
-The v3 stage of 66f04f2a (10:09 to 10:34 PDT, lab-api d0fef6d3): P4 v2
+The v3 stage of 03895571 (10:09 to 10:34 PDT, lab-api c0f15b01): P4 v2
 20261026-172720 GREEN (42 steps), P6 v2 20261026-173133 GREEN (27 steps),
 T2 GREEN at 18:01Z, no crash log on either seat; with P5 20261026-163259
 GREEN on the stage before, every slice has its green run. The numbers from
@@ -1580,7 +1580,7 @@ the runs' logs:
   the lab-api row server.ref(id).worn (numidium's, live) let P6 v3 compare
   the record with both seats' npc-state worn lists: CONFIRMED on Step R
   (x-npc-stream-p6 20261026-222815, GREEN, all 34 steps, on the merged
-  parity 66f04f2a: c1's and c2's worn lists equal server.ref(0x13491).worn).
+  parity 03895571: c1's and c2's worn lists equal server.ref(0x13491).worn).
 - The budgets' first numbers (UNMEASURED placeholders) were never hit:
   no E_VAL_RATE in the server logs across the stage.
 
@@ -1593,7 +1593,7 @@ committed scenarios (promoted from these green runs: b-npc-stream-actions,
 b-npc-stream-state, b-npc-stream-equipment, each its own commit, rule 13),
 the parity scenario and the reference trace (ADR-050 decision 5).
 
-### The voice stage's read (a7cba312, 11:01 to 11:15 PDT; P7 v1 20261026-181119, 11:26 PDT)
+### The voice stage's read (21d7e7c5, 11:01 to 11:15 PDT; P7 v1 20261026-181119, 11:26 PDT)
 
 No crash on either seat; T2 on the voice branch running at the read. The
 pipeline works end to end for the message: the host's sink raised 26 lines
@@ -1619,7 +1619,7 @@ of mine: the state byte passes 1 and back to idle inside one pair call
 printed never; the creatures' twenty-five lines may well have ended. V4
 unread.
 
-Voice build v2 (the commit after a7cba312 on m3-npc-voice): the native
+Voice build v2 (the commit after 21d7e7c5 on m3-npc-voice): the native
 logs the say's return value, the process's presence, the sound handle's
 validity and the timer after the call, and answers "played" when the
 handle is live without the state byte (the sound-descriptor path); the
@@ -1631,7 +1631,7 @@ off the playtest's build until P7 is green.
 
 Voice v4 and P7 v5, READ (2026-10-27 01:53 PDT, an agent over run
 20261027-083204-x-npc-stream-p7, GREEN on 52's stage, build m3-npc-death
-f9859083, voice code 8da16ef6): v3's "deferred" was the audibility gate
+dd51e45e, voice code ed71ee67): v3's "deferred" was the audibility gate
 (SpeakSoundFunction, before the lip load: a speaker outside the dialogue
 output model's range of the seat's listener on an axis), named "inaudible"
 since v4 and cleared (result 5, the item cleared, ClearGreetTopic); v5
@@ -1738,7 +1738,7 @@ entry (set by 37542 and the sound-descriptor path, cleared at the line's
 end, at a pause and at Say), not a dialogue state: the first-read name was
 wrong and the doc above is corrected by this paragraph.
 
-Voice v3 (the commit after ad1d103d on m3-npc-voice): the native passes
+Voice v3 (the commit after 5c51b385 on m3-npc-voice): the native passes
 the seventh flag false, the SYNCHRONOUS lip load (16256), so the line
 plays in the same call with its lip sync and no replay is needed; the
 diagnostics add the lip entry's state bits before and after the call.
@@ -1749,7 +1749,7 @@ line 6aea9 carries a LIP and the chickens' bark 10aa5d does not.
 
 ### P7 v2's read and voice v3's stage (12:00 PDT)
 
-P7 v2 (20261026-185231, the v2 stage of ad1d103d) GREEN, all 33 steps:
+P7 v2 (20261026-185231, the v2 stage of 5c51b385) GREEN, all 33 steps:
 V1 (the sink and the relay) held again, a started say and an ENDED line on
 the puppets held ("line on 1066df ended (timer 0.00 -> -1.00)", the hare's
 the same: the detour's pair ends a puppet's line, V3 CONFIRMED on the
@@ -1758,14 +1758,14 @@ deferral read before v3 ran: Sven's neighbour 13489 (info 6aea8) and 1348b
 (info 6aea9) answered "refused (returned true, state idle, handle none,
 dialogue state set after)": the say ACCEPTED the line, played nothing, and
 left the lip entry set, the replay queued for an AI frame a puppet never
-gets. Voice v3 (6efe3271, pushed 12:00 PDT on numidium's word; its stage
+gets. Voice v3 (711a847b, pushed 12:00 PDT on numidium's word; its stage
 chained after the v2 T2) passes the flag that selects the synchronous lip
 load, and P7 v3 reads whether the residents' lines play with their lip
 sync (V2 for humanoids) and end (V3 for humanoids).
 
 ### P7 v3's read and voice v4 (13:49 PDT)
 
-P7 v3 (6efe3271): the first run 193428 measured nothing (c1 paused under a
+P7 v3 (711a847b): the first run 193428 measured nothing (c1 paused under a
 MessageBoxMenu, E_RUN_PAUSED); numidium's rerun x-npc-stream-p7-shot 200538
 GREEN on its letter, no box, no crash, T2 green: the creatures start and end
 their lines, and the resident 13482 (info 6aeaa) read "deferred (bits
@@ -1794,7 +1794,7 @@ nobody until a line ends through 37544 or 37741. So D27-B's letter: the voice
 stays off the build until a resident speaks on a puppet; the STREAM merges
 alone under D25-C.
 
-Voice v4 (m3-npc-voice 8da16ef6): the say logs the 3D and the per-axis
+Voice v4 (m3-npc-voice ed71ee67): the say logs the 3D and the per-axis
 distance to the player before the call, passes keepExtra false (44673's and
 37541's shape; only Papyrus Say passes true), and a start that left the item
 in progress with nothing playing and no lip entry is reported as INAUDIBLE
@@ -1811,11 +1811,11 @@ inaudible count recorded. V5, the resident's line plays with its lip on a
 puppet whose seat stands within range, CONFIRMED in two parts: the line
 started on a puppet within range (083204: 13483's 453f3 and 6aea8, 13484's
 6aea9 and 45473 to 45478, among 45 starts); its lip drawn on the watcher
-only since the face node's force bit (m3-face-twelve 0ab36af3; Eli 'LIPS
+only since the face node's force bit (m3-face-twelve 3c6a91b2; Eli 'LIPS
 WORK', playtest 37 finding 25, 16:58 PDT 2026-10-28), the mouth's data read
 x-puppet-head-face v2's sets 8 and 9.
 
-### Slice 5 as built (14:36 PDT, fork m3-npc-face ac435de8 off m3-npc-death 55a95002)
+### Slice 5 as built (14:36 PDT, fork m3-npc-face 58152d96 off m3-npc-death ec3ea013)
 
 The plan above, in code: the four fields on HostedActorState (validator bounds
 and fixtures in the commit, the row Both); the server records them
@@ -1854,13 +1854,13 @@ puppet, and it is not cleared by a promote, so the talker's live Orgnar read
 exprOverride true (numidium's 522 samples). So H-54b is withdrawn: the
 puppet wears what its say gives it, PuppetFaceService records the host's
 emotion and clears any override once per puppet, PuppetService clears it at
-every promote (fork m3-face-twelve 4e643c1c). The lip sync itself is not
+every promote (fork m3-face-twelve 91c9499a). The lip sync itself is not
 gated by the override: it writes the unnamed set at +0x120 from the lip
 file (16266, sixteen phonemes at 30 fps) and copies it to +0x140, which the
 face node's morph pass (26988) applies under two camera-distance INI
 floats; phenomeKeyFrame (+0x80) is the script layer and stays zero under
 engine lip sync, which is why the first face read saw nothing. faceKeyframes
-answers all twelve sets since ceb54180 (sets 8 and 9 are the mouth).
+answers all twelve sets since 7b6da53d (sets 8 and 9 are the mouth).
 
 23:25Z, the lip draw (the re-analyst's read C): numidium's twelve-set
 samples showed sets 8 and 9 moving on the watcher's PUPPET as on the live
@@ -1875,20 +1875,20 @@ passes because its AI runs there; a puppet in dialogue with the local
 player passes through IsTalkingToPC. Settings read from the image:
 fTalkingDistance:LOD 2000 and fLodDistance:LOD 500 (plus ten, from the
 world root camera), uiNumActorsAllowedToMorph:FaceGen 10, none the gate at
-one to three meters. Fix (fork m3-face-twelve 0ab36af3): while a puppet
+one to three meters. Fix (fork m3-face-twelve 3c6a91b2): while a puppet
 speaks, DriveVoice sets the face node's runtime flag bit 8 each frame
 (BSFaceGenNiNode.h:27; the engine's own one-shot force, set by
 AIProcess::Update3DModel), so the pass queues the node past the budget and
 the distances, applies every layer and clears the bit. H-54h (the mouth
 moves on the watcher during a relayed line; the number H-54d is the gaze
 read's below, x-npc-stream-face carrying no mouth claim) CONFIRMED at T4:
-Eli 'LIPS WORK' on f231f2ea's dist (playtest 37 finding 25, 16:58 PDT
+Eli 'LIPS WORK' on 6c7ab1ac's dist (playtest 37 finding 25, 16:58 PDT
 2026-10-28, LOG 2711); the data read is x-puppet-head-face v2's setsMax[8]
 and [9] during a line, unrun; the idle face between lines stays static (the
 engine-shaped insert 41450 is one new id, later).
 
 54's stage, first read (10:43 PDT, x-npc-stream-face 20261027-173514 on
-m3-npc-face 240a31de): the gaze path is alive end to end for actors near the
+m3-npc-face a9e47e0e): the gaze path is alive end to end for actors near the
 player. The host's state lines carried head-track targets for the creatures
 at the landing ("state 107cf9 ... gaze 107d07 slot 1", another at slot 5),
 the server accepted and relayed them (15 resident state lines, E_STATE_OWN
@@ -1925,7 +1925,7 @@ fact; a playtest 39 checklist line for it is owed (playtest-m3-39.md has
 none). Promoted as b-npc-stream-face
 (main, its own commit) for 54's gate set.
 
-Step R (2026-10-26, on the merged parity 66f04f2a; numidium's chain, 22:15
+Step R (2026-10-26, on the merged parity 03895571; numidium's chain, 22:15
 to 22:32Z): P3 (x-npc-stream-p3 20261026-222300) GREEN, all 32 steps, its
 pcap the rates' read (the MEASURED bullet under Rate limit above); P6 v3
 (222815) GREEN, H6 CONFIRMED; x-npc-bow (221512) and x-npc-spell (221906)
@@ -1955,12 +1955,12 @@ nine of nine hand actions and cast nothing (no relay reached it). Both are
 train 53's: the launch rule by what the actor is (the player's or a
 simulated actor's arrow flies and is reported, a figure's or a puppet's is
 dropped), the hands poll keeping a hand's spell out of the worn list
-(m3-npc-cast cd3f6121), the server half above. Train
+(m3-npc-cast 5f2ded88), the server half above. Train
 53's call: the bow relay is built whatever v2 reads, one shape for arrows
 (every arrow on the wire is a relayed shot, a puppet's like a figure's; the
 puppet's own launch, if its engine makes one, dropped by the launch rule
 extended to puppet shooters); v2's read decides only whether that drop has
-work to do (H-53c). The voice's P7 v4 (20261026-224627, on 8da16ef6's
+work to do (H-53c). The voice's P7 v4 (20261026-224627, on ed71ee67's
 stage) read RED on its own premise: every resident's say on c2 was
 "inaudible" with the diagnostics putting the speaker 3.7k to 6.6k units
 from c2's listener (the residents who spoke during the tour were not the
@@ -1971,8 +1971,8 @@ resident through the judged approach (c1 at 150 units, c2 at 300) for
 three visits of 45 s (numidium runs it in a gap).
 
 Slice 6 (SPELLS AND BOWS on hosted NPCs, train 53; ADR-050's "attacking the
-same"), the server half built 2026-10-26 on fork m3-npc-cast 30e72b86 (off
-the talk head 87557458): a hosted actor's hands, casts and hits under its
+same"), the server half built 2026-10-26 on fork m3-npc-cast a08fc5cd (off
+the talk head 36d3da4b): a hosted actor's hands, casts and hits under its
 own id, with these dispositions (rule 5). The NPC's spell LIST is the host's
 engine's (templates and leveled spell lists the server does not walk):
 recorded, R2. A spell or a shout in a hosted equipment report outside the
@@ -2010,10 +2010,10 @@ puppet's own arrow or bolt on the replayed release, the drop's work) read
 counted) a known limit: a hosted shooter's arrow claims no headshot, the
 headshot rule being the player's bow path (ADR-038, ClaimHeadshot) and a
 hosted shot's hit landing as the arrow's number, unread in the lab and
-accepted. Built the same afternoon on the branch (78cec009): the
-hands poll keeps a hand's spell out of the worn list (cd3f6121); a hosted
+accepted. Built the same afternoon on the branch (6702399f): the
+hands poll keeps a hand's spell out of the worn list (5f2ded88); a hosted
 caster's cast END goes out from its action stream's hand-equipped event
-(463a029a; H-53b's mechanism: the player's end hook was its own graph's);
+(24e69486; H-53b's mechanism: the player's end hook was its own graph's);
 and the BOW RELAY, one shape for arrows (every arrow on the wire is a
 relayed shot, a puppet's like a figure's): PlayerBowShot names its shooter
 (idx; SCHEMA_VERSION 18; the validator refuses u32::MAX; fixtures, the size
@@ -2042,9 +2042,9 @@ relayed arrow flew on c2 per shot and none of the puppet's own (x-npc-archer
 032303), Eli read 'bows work' in playtest 35's Bleak Falls note, and the hit
 is the server's number whatever the arrow's path.
 
-### 53's stage read (20:31 PDT 2026-10-27; fork m3-npc-cast ecec018e, then bf133744)
+### 53's stage read (20:31 PDT 2026-10-27; fork m3-npc-cast 5bc6e8e9, then 5fb85e2c)
 
-The first stage (ecec018e, probes 20261028-023756 and 024159) read the
+The first stage (5bc6e8e9, probes 20261028-023756 and 024159) read the
 caster GREEN and the archer RED, a code red: the archer EncBandit01Missile-
 KhajiitM 0x9a549 fired seven arrows on its host (PROJ 50 in flight on c1's
 polls; the puppet's attackRelease taken 1 on c2) and every launch threw in
@@ -2056,11 +2056,11 @@ server. The cause: playerBowShotService's onHostedLaunch read the engine
 handler, and Skyrim Platform refuses a native there (CallNativeApi.cpp:
 requirements.vm is unset in the launch event's context); the player's own
 shot keeps its launch and does its natives on the update tick, the crossbow
-hook defers with controller.once("update"). The fix (bf133744, one hunk):
+hook defers with controller.once("update"). The fix (5fb85e2c, one hunk):
 the hosted branch keeps the launch's fields and reports on the next update,
 the file's own idiom; tsc clean; no wire change. Memo D44.
 
-The restage (bf133744, 20:12 PDT) read both GREEN:
+The restage (5fb85e2c, 20:12 PDT) read both GREEN:
 
 - x-npc-archer 20261028-032303: the host's client reported four hosted
   shots (ff000002 the placed archer, 1397d from 3b562 at power 1.00, and
@@ -2089,8 +2089,8 @@ The restage (bf133744, 20:12 PDT) read both GREEN:
   E_SPELL_NO_CAST and zero E_EQUIP_REFUSED naming the mage; 68 OnSpellHit
   lines by caster ff000002 on c1's player through the record.
 
-T2 on ecec018e GREEN (numidium, 20:12 PDT); the fix is client-only, so it
-predicts bf133744's, which runs now. Playtest 35 runs on this stage under
+T2 on 5bc6e8e9 GREEN (numidium, 20:12 PDT); the fix is client-only, so it
+predicts 5fb85e2c's, which runs now. Playtest 35 runs on this stage under
 ADR-040 (memo D41 and D44); 53's gate after Eli's report, the merge after
 the gate; the Status boxes tick at that merge. b-npc-archer and b-npc-caster
 are promoted from the two probes then (rule 13, their own commits).
@@ -2100,7 +2100,7 @@ are promoted from the two probes then (rule 13, their own commits).
 Playtest 35 (pt35-read-1 E): Hilde's IdleTanningEnter was captured on the
 host two minutes before the second seat reached Riverwood, and her
 CreateActor carried the last animation EVENT, not the action, so the puppet
-stood idle until the host's engine restarted the chore. Built (6bc6657c):
+stood idle until the host's engine restarted the chore. Built (5ec2cbef):
 MpActor keeps a hosted actor's last UpdateAction (memory, R2; set in
 OnUpdateAction for an actor the sender hosts) and VisitProperties writes it to
 the CreateActor as the custom property "lastAction" (UpdateAction's fields as
@@ -2180,7 +2180,7 @@ entered for an AI-off puppet; 37541 with a response for a non-partner
 speaker; the continuation returning 1 with nothing started while the mark is
 set and 37266 says free (39372 on a stale lip entry is the unread gate).
 
-### Train 53 merged (00:08 PDT 2026-10-28): fork parity bf133744
+### Train 53 merged (00:08 PDT 2026-10-28): fork parity 5fb85e2c
 
 The chain 20261028-044241 (the gate, 30 scenarios, four not-greens, every one
 a premise or a tooling read: the mage's timing, Sven's walk, a lab-api
@@ -2202,7 +2202,7 @@ cast, so no cast could end; the mage's record is hardened after its first
 cast, main 34cbc19), green on the rerun 065950 with neither lever yet
 deployed. Closes when the scenario plays green with both levers in a gate.
 
-### Train 57's candidate (00:16 PDT 2026-10-28; fork m3-voice-lines 3eef89d3 off 56's head)
+### Train 57's candidate (00:16 PDT 2026-10-28; fork m3-voice-lines a37b1725 off 56's head)
 
 Built ahead of the trace so its build is ready, staged only after
 lab/frida/voice-lines.js has read the chain on a host seat (rule 8, ADR-054
@@ -2220,46 +2220,46 @@ c2's puppet: the first line started, at least one continuation, at least two
 ends). Falsified by the trace (a multi-line bark with one BEGIN, or the
 AI update entered for an AI-off puppet) the candidate is dropped unmerged.
 
-### Playtest 36, the turbo day (11:36 PDT 2026-10-28; 56's stage defaa7e2 with the hot bundle, then 40e3ab41 relaunched)
+### Playtest 36, the turbo day (11:36 PDT 2026-10-28; 56's stage aae7191b with the hot bundle, then 40e3ab41 relaunched)
 Eli's item 3 ticked ("when prisoner showed up hilde WAS tanning": the late joiner's lastAction, 56). Item 4 unticked: "didn't
 work. only first plays. LOTS of voice lines are synced. their barks (things said as you pass them) are synced. however, the
 'DRAGON! I SAW A DRAGON' exchange that hilde and sven have is weird. sometimes anims play for one (pointing) sometimes
 neither. voicelines only play for one at a time. i think something about it being a scripted event makes it weird." Three
-threads in that: the continuation (train 57, built and green on m3-voice-lines 5de4ced5, was NOT in the build; merged into
-the turbo train at 26e3d0cf for tonight's gate; its read is the voice paragraph's under train 56 above, x-npc-voice-lines
+threads in that: the continuation (train 57, built and green on m3-voice-lines b803d3e7, was NOT in the build; merged into
+the turbo train at 29207fe2 for tonight's gate; its read is the voice paragraph's under train 56 above, x-npc-voice-lines
 unrun); one speaker of a two-NPC scene refused on the observer (c2's VoiceService: five "-> refused", PuppetApi result 2, all
 b6fdb's while b6fe4's lines started; the sayTopicInfo pre-state in c2's skyrim-platform.log is numidium's read); and the
 dialogue idles (IdleDialogueStart, MotionDrivenDialogueGeneric, NextClip) stream to the observer (c2's ActionSync traces
 carry them) but Eli sees them play for one or neither: the replay's result per idle on a puppet is the platform log's too
 (both reads before any code). Item 6 unticked: "so ferns head looks right, NPC heads dont track. im wondering if that's ok
 for tracking players so each player is addressed on their screen, but it needs to work for NPCS talking to eachother on both.
-additionally no talking animations propagate still." The local gaze (8acf15f9) looks at the local player alone; a
+additionally no talking animations propagate still." The local gaze (a84839fd) looks at the local player alone; a
 conversation's partner is the missing target (memo D53). Item 7 unticked: "still a little glide back about a foot" (the
 movement knobs, a measured tune in tomorrow's slot, not a blind one). Item 5 ticked: arrow deaths by the engine (npc-fate).
 
 ## Status
 
 Doc drafted 2026-10-22, before any code; reviewed the same day (rules 1,
-2 and 11 checked, the fork lines re-read at 19e7ca9b). BUILDING since
+2 and 11 checked, the fork lines re-read at 6139dc60). BUILDING since
 2026-10-26 02:24 PDT on fork m3-npc-stream (ADR-050), the eight questions answered
 above as the build's calls. Slice 1 (ACTIONS) built 2026-10-26 03:08 PDT,
-fork c2129b4a (tsc, codegen and fork-lint clean; CI building), its probes
+fork b3e12090 (tsc, codegen and fork-lint clean; CI building), its probes
 by path; P1 read the same morning (H1 confirmed in the lab's sense). Slice
-2 (STATE) built 2026-10-26 03:49 PDT, fork 42af75b7 (the wire message,
+2 (STATE) built 2026-10-26 03:49 PDT, fork 9b7be620 (the wire message,
 its validator and fixtures, the Rust rule and its bridge, the core's
 handler, the client's sender; wire tests and clippy clean, tsc, codegen and
 fork-lint clean; CI green, pipeline 3133). Slice 3 (EQUIPMENT) built the
 same morning (the hosted idx resolved in OnUpdateEquipment, the hands
 streamed from the host's poll, the puppet's hands following; tsc, lint and
-the JSON crate's tests clean; fork 2673d1ab, CI green, pipeline 3136; the
-first stage RED on the puppet seat's crash, slice 1 v2 a0ff0e72 pushed
+the JSON crate's tests clean; fork e2ea071a, CI green, pipeline 3136; the
+first stage RED on the puppet seat's crash, slice 1 v2 7215b34e pushed
 09:09 PDT; the v2 and v3 stages GREEN, no crashes, T2 green twice; the three
 slices at T3 on probes 11:03 PDT: the build's slice-1 numbering H1, H2, H2a,
 H3 and H7 confirmed, slice 3's H6, the hands, confirmed on Step R, P6 v3
 222815; the Inventory's H3, the package events, and the Suppress section's
 H6, the hosted set, still open). Slice
 4's voice line read twice by the re-analyst and BUILT 2026-10-26 05:33 PDT
-on fork branch m3-npc-voice 82ffd53a (the sink, the native, the detour's pair, the
+on fork branch m3-npc-voice 614eadbe (the sink, the native, the detour's pair, the
 message with its validator and fixtures, the server relay, the client
 service; HYPOTHESIS V1 to V4 for P7); the rest of slice 4 waits on the
 stage's reads (P4 to P6 queued behind the nightly, numidium's chain). Open questions for Eli before the build as
@@ -2281,7 +2281,7 @@ Inventory's voice row).
 - [x] doc complete, inventory listed with a disposition per row, rung declared (ticked 17:02 PDT 2026-10-29 by the pass: the Inventory's 27 rows each carry a disposition and a rung; the Rung paragraph at the top declares R1 for the transform and R2 for the hosted state)
 - [x] engine surface cited or delegated (ticked 17:02 PDT 2026-10-29 by the pass: the combat and speech surfaces cited to CommonLibSSE-NG by file:line in the Engine surface section, the voice slice's ids by `just addr` from the re-analyst's reads)
 - [x] server logic + T0 (slices 1 to 3; CellHostTest's four cases)
-- [x] message + validator (same commit: HostedActorState 53/61 42af75b7; ActorSpeech 54/62 82ffd53a on the voice branch)
+- [x] message + validator (same commit: HostedActorState 53/61 9b7be620; ActorSpeech 54/62 614eadbe on the voice branch)
 - [x] native hook + T1 (no new Address Library id in slices 1 to 3; the voice slice's ids are the re-analyst's reads, their T1 the stage's log lines)
 - [x] TS handler
 - [x] T2 green (the v2 and v3 stages, 17:05Z and 18:01Z)
@@ -2324,14 +2324,14 @@ Inventory's voice row).
     10-17 on two faults every branch inherited: Hooks.cpp formatted by a newer
     clang-format, and skyrimPlatform.ts edited without Definitions.txt.
 
-Trains 52 and 54 merged (13:43 PDT): fork parity 240a31de (m3-npc-face, with
-m3-npc-death 7cd47e24 inside), cited by the chain 20261027-181833-gate-m3-
+Trains 52 and 54 merged (13:43 PDT): fork parity a9e47e0e (m3-npc-face, with
+m3-npc-death 774bc940 inside), cited by the chain 20261027-181833-gate-m3-
 npc-face plus its rest 202429, verdict watch: 28 green and 3 red in the gate
 (b-npc-death's corpse drift, H-54e; b-npc-headshot-host, the lab's aim,
 pending; b-npc-stream-voice's listener placed off an obstacle), the rest
 three of three green. On this build: the voice slice (V1 to V4 read), the
 gaze and the face (H-54a and H-54b read at T3, H-54d confirmed, H-54c for
-T4), slice 4's counters (867c4210); slice 4's parity scenario
+T4), slice 4's counters (2b96ea56); slice 4's parity scenario
 (p-npc-stream against lab/references/npc-packages-a.json) is not built,
 since its per-id grammar row in lab-api is numidium's and later, so the
 parity Status box stays open. The killer credit (H-52b) and the life
@@ -2339,7 +2339,7 @@ check's stand-up are in the same build (npc-fate.md).
 
 ## Watch item (2026-10-27, 54's gate, ADR-027): b-npc-stream-voice
 
-b-npc-stream-voice red once at 20261027-200545 (54's gate on 240a31de): the
+b-npc-stream-voice red once at 20261027-200545 (54's gate on a9e47e0e): the
 listener's third approach (300 units from 0x13484) was judged unsettled for
 60 s because the computed landing point fell in a Riverwood obstacle and the
 engine placed c2 74 units off it, the same spot to the decimal nineteen

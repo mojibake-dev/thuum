@@ -5,8 +5,8 @@ from ADR-035 point 6 (docs/DECISIONS.md:1302-1308), ADR-045 (:2297-2377),
 the rows npc-puppet carried here (npc-puppet.md:101, :103, :106, :135),
 npc-stream (:49, :53-54, :87) and npc-handoff (:14-15), the prior art
 (docs/research/m3/tes3mp.md Q6, :214-247; docs/TE-MAP.md:72, leads only) and
-a code read of the fork at the puppet worktree's head 8eafa85d (train-34,
-off parity fb6f3f09; every fork path below is at that head), the night of
+a code read of the fork at the puppet worktree's head 67256b72 (train-34,
+off parity a76125cb; every fork path below is at that head), the night of
 playtest 32 and before any code. The cut (rule 3): the server owns an NPC's
 fate: which actor a leveled placement becomes, whether it is dead and where
 its body lies, when it comes back, what its body holds. Not here: hits on
@@ -30,7 +30,7 @@ Roadmap reference: skymp/ROADMAP.md "NPC" (render NPC templates from the
 server; death and respawn), skymp-hosting.md:38-39, :213-216.
 Milestone: M3   Class: B
 
-## Why now: playtest 32's three readings (2026-10-22, fork parity fb6f3f09)
+## Why now: playtest 32's three readings (2026-10-22, fork parity a76125cb)
 
 1. Two games, two rolls, two brains. Bleak Falls Barrow's entrance bandits
    and its first chamber's draugr (the checklist's place 3) are placements
@@ -109,7 +109,7 @@ reviewed like a scenario.
 | the actor's inventory and outfit, their LVLI entries rolled by each engine at the reference's load (kLeveledInventory, TESObjectREFR.h:156) and by the server at level 1 (MpObjectReference.cpp:1982-1999, :44) | record, code | imposed: the server's inventory is the body's container (R0, the CONT shape, Server); the engine's own roll on the body never reaches a player: the menu lists the server's list (H4); and the WORN roll matters alive too (playtest 33, 2026-10-23): the headshot's helmet check reads the server's worn list, which each engine's own roll contradicts on screen (seven refusals for a hood nobody saw, docs/verbs/headshot.md), so the roll decision below covers outfits and server-placed 0xff actors, not placements alone |
 | the death item (INAM, TESActorBaseData.h:126) rolled at death | record, code | native on the server already (EvaluateDeathItem, MpActor.cpp:1796-1857; AddDeathItem from Kill :1932); nothing new |
 | the death on the server's own number: a hit the server computed takes health to zero (SetPercentages, MpActor.cpp:889-897, Kill(aggressor) :896; SetPercentage :855-866), a headshot (PartOne.cpp:2060-2063), a scripted kill (ClaimScriptedKill :1905-1912), the console (ConsoleCommands.cpp:255-268) | code | native: R0 as today; Kill (MpActor.cpp:1911-1933) records isDead, tells the listeners (DeathStateContainer 18) and fires onDeath; this verb changes what onDeath arms (Server) |
-| a death the server has no number for: a fall, a trap, an NPC killed by an NPC on the host, a script (the host's engine shows it dead; the host's health report of 0 floors at one point and logs, npc-stream.md:49) | code | suppressed this slice: the record stays alive at the floor and the host's deathStart or TESDeathEvent is counted (Observe, H5); the decision between TES3MP's authority word (R2, tes3mp.md:228-229) and a server-checkable cause is Eli's (Authority); measured 2026-10-22 (x-npc-death 20261023-051540 on parity 7e59c32c): Actor.Kill with the seat's player as killer did nothing to Sigrid 0x13483 on her host (isEssential and isProtected false on both seats), and the cause is the client's by design: formView.ts:323-327 starts a deferred kill on every actor it views with no isMine gate, the host's own live residents included, so no kill by this client's engine lands on a hosted NPC and the floor holds (health 0, alive) until the server's number; the npc-damage read (x-npc-death 20261023-054215): the host held her alive at a health of -128.87% (the engine's deferred kill, StartDeferredKill is the engine's own Papyrus native, FunctionsDump.txt:3863) while her puppet on the other seat, under the same deferred kill, took the relayed number through movementApply.ts:233-247's damageActorValue step and DIED (isDead true, the body in the garden): dead on one screen, standing on the other, playtest 32's "definitely some desynced NPCs" in one measurement; which engine path kills a deferred-kill actor whose AI is off is the Dynamic question below, the fix shape is train-35's (npc-puppet.md: the host's report clamped to [0, 1], the validator refusing outside it, the puppet apply never below a sliver), and the floored host actor itself, alive and acting at -128%, is the decision this row asks of Eli |
+| a death the server has no number for: a fall, a trap, an NPC killed by an NPC on the host, a script (the host's engine shows it dead; the host's health report of 0 floors at one point and logs, npc-stream.md:49) | code | suppressed this slice: the record stays alive at the floor and the host's deathStart or TESDeathEvent is counted (Observe, H5); the decision between TES3MP's authority word (R2, tes3mp.md:228-229) and a server-checkable cause is Eli's (Authority); measured 2026-10-22 (x-npc-death 20261023-051540 on parity 03e7d163): Actor.Kill with the seat's player as killer did nothing to Sigrid 0x13483 on her host (isEssential and isProtected false on both seats), and the cause is the client's by design: formView.ts:323-327 starts a deferred kill on every actor it views with no isMine gate, the host's own live residents included, so no kill by this client's engine lands on a hosted NPC and the floor holds (health 0, alive) until the server's number; the npc-damage read (x-npc-death 20261023-054215): the host held her alive at a health of -128.87% (the engine's deferred kill, StartDeferredKill is the engine's own Papyrus native, FunctionsDump.txt:3863) while her puppet on the other seat, under the same deferred kill, took the relayed number through movementApply.ts:233-247's damageActorValue step and DIED (isDead true, the body in the garden): dead on one screen, standing on the other, playtest 32's "definitely some desynced NPCs" in one measurement; which engine path kills a deferred-kill actor whose AI is off is the Dynamic question below, the fix shape is train-35's (npc-puppet.md: the host's report clamped to [0, 1], the validator refusing outside it, the puppet apply never below a sliver), and the floored host actor itself, alive and acting at -128%, is the decision this row asks of Eli |
 | the death played: the death animation or ragdoll (KillImpl's ragdollInstant, Actor.h:468; deathStart, deathEnd events), the kill move, the dying line | trace (owed), code | native on every game, from the server's word: deathService.killActor (deathService.ts:141-153: endDeferredKill then kill) on the engine reference; a puppet's graph ticks (npc-puppet), so the death plays on it (H10); the host's own live actor takes the kill too, Rule A's one declared exception (Authority, H11) |
 | the body's resting place: the fall from the standing point by each game's physics; the engine keeps a dead actor where it lies in the save | code | R0 for the standing point at the kill (the record's position, the host's last accepted sample under cell-host's bounds); R2, declared, for where it rolled: each game's fall from that point (H6); a reload places the body at the record's point and kills it at once (Impose), TES3MP's instant death (tes3mp.md:238-240) |
 | looting the body: the engine opens a dead actor's ContainerMenu on activation; the take enters the player's engine inventory and is reported (containersService.ts:19-73) | code | imposed: a dead actor's activation runs the CONT branch on the server (occupancy, the "inventory" property, OpenContainer; MpObjectReference.cpp:1544-1569) so TakeItem and PutItem (:642-668) hold and the item moves on the server's record (R0); the body's list applied before the menu opens (H4, H7) |
@@ -117,7 +117,7 @@ reviewed like a scenario.
 | the engine's cell reset: after the detach time plus iHoursToRespawnCell (or iHoursToRespawnCellCleared; the zone's kNeverResets, BGSEncounterZone.h:14; gameData detachTime, attachTime, resetTime :34-36; ExtraDetachTime.h; TESObjectCELL's kDetachTime change, TESObjectCELL.h:151) the engine deletes the body, re-rolls the placement and resets inventories (ResetInventory(a_leveledOnly), TESObjectREFR.h:338) | record (the GMSTs), code | suppressed on every game (Suppress, H8): the server resets, the engine never does |
 | the respawn: the actor back at its placement after the reset time, a fresh pick from the list (the engine's reset re-rolls a leveled placement: H9a), full attributes, the base inventory | record, code | imposed: the server's schedule on the shared clock (R0, Server), applied in the game as disable, base, enable (Impose, H9) |
 | SkyMP's respawn after spawnDelay 25 s at GetSpawnPoint with the base inventory re-added (MpActor.cpp:1935-2007; DeathEvent.cpp:65-70; MpChangeForms.h:117) and the respawn of a dead record at load (MpActor.cpp:820-824; PartOne.cpp:375-378 for players) | code | suppressed for game-file actors: the fate's schedule replaces the timer and the load-time respawn; players keep theirs (m0-death) |
-| the loader's skips: dead-at-start placements (kStartsDead, TESObjectREFR.h:177; WorldState.cpp:471-480, "TODO: Load dead references") and initially disabled ones (:492-507) | code | BUILT 2026-10-29 (fork m3-dead-placed 2f886731, playtest 38's finding 65: a Bleak Falls floor body with different loot per screen): a dead-at-start placement loads as the server's corpse, dead on the record with no death event, no death item and no respawn (MpActor::MarkPlacedDead; RespawnWithDelay yields), its loot the corpse path's one roll, lootable by every seat; T0 NpcExists's floor-body case (0x3b9ea). x-dead-placed-loot (v1 by path 2026-10-29 13:57 for the pass train's stage) RAN twice on 2026-10-30: v1 20261030-130152 red on its own premise (both E_ACTIVATE_REACH lines were the probe's activations of 0xc3b1d from 10,423 units, each engine opening its own corpse menu and rolling its own gold; the loader's claims all held) and v2 20261030-133512 GREEN with each seat approached to the body (0xc3b1d dead on the record and in both engines, each seat's ContainerMenu open on it, no E_ACTIVATE_REACH, no "doesn't exist", no "no actor record loads for it"). Of the two open points (settled 19:26 PST 2026-11-02): no death event and no death item on a starts-dead actor CONFIRMED from 133512's logs, read after the run since no claim carried it (the server's only lines for c3b1d are the dropped health-0 sample, "the record is dead, the report dropped", and ProcessActivate with two players, no "died at day" and no EvaluateDeathItem line; c1, its host, wrote no "death report" and no "cause on" line); whether the watcher's bind leaves the engine's own corpse pose stays HYPOTHESIS, 133512's 031-c2.png showing the open Skeleton menu (1 gold) with the body out of frame behind the menu's blur, so a body-framed screenshot before the open and the `== 0` log-count are v3's to add; v2 kept the skeleton (no dressed body yet). Initially disabled placements stay skipped.; the review of m3-pass-train-1 (18:19 PDT): a host's live sample of a placed corpse stands nothing (DiedAgo is nothing for it, so the old no-grace branch had stood it on the first sample above a point) unless the server accepted a reanimate hit on it within MpActor::kReanimateWindowMs 10 s (b0cda83a; NpcFateTest's case), the gate that keeps a cast the only stand-up |
+| the loader's skips: dead-at-start placements (kStartsDead, TESObjectREFR.h:177; WorldState.cpp:471-480, "TODO: Load dead references") and initially disabled ones (:492-507) | code | BUILT 2026-10-29 (fork m3-dead-placed 965790df, playtest 38's finding 65: a Bleak Falls floor body with different loot per screen): a dead-at-start placement loads as the server's corpse, dead on the record with no death event, no death item and no respawn (MpActor::MarkPlacedDead; RespawnWithDelay yields), its loot the corpse path's one roll, lootable by every seat; T0 NpcExists's floor-body case (0x3b9ea). x-dead-placed-loot (v1 by path 2026-10-29 13:57 for the pass train's stage) RAN twice on 2026-10-30: v1 20261030-130152 red on its own premise (both E_ACTIVATE_REACH lines were the probe's activations of 0xc3b1d from 10,423 units, each engine opening its own corpse menu and rolling its own gold; the loader's claims all held) and v2 20261030-133512 GREEN with each seat approached to the body (0xc3b1d dead on the record and in both engines, each seat's ContainerMenu open on it, no E_ACTIVATE_REACH, no "doesn't exist", no "no actor record loads for it"). Of the two open points (settled 19:26 PST 2026-11-02): no death event and no death item on a starts-dead actor CONFIRMED from 133512's logs, read after the run since no claim carried it (the server's only lines for c3b1d are the dropped health-0 sample, "the record is dead, the report dropped", and ProcessActivate with two players, no "died at day" and no EvaluateDeathItem line; c1, its host, wrote no "death report" and no "cause on" line); whether the watcher's bind leaves the engine's own corpse pose stays HYPOTHESIS, 133512's 031-c2.png showing the open Skeleton menu (1 gold) with the body out of frame behind the menu's blur, so a body-framed screenshot before the open and the `== 0` log-count are v3's to add; v2 kept the skeleton (no dressed body yet). Initially disabled placements stay skipped.; the review of m3-pass-train-1 (18:19 PDT): a host's live sample of a placed corpse stands nothing (DiedAgo is nothing for it, so the old no-grace branch had stood it on the first sample above a point) unless the server accepted a reanimate hit on it within MpActor::kReanimateWindowMs 10 s (9ced8083; NpcFateTest's case), the gate that keeps a cast the only stand-up |
 | the puppet's deferred kill and million health (formView.ts:313-319) and a puppet's death shown from the relay (movementApply.ts:75) | code | imposed as today: a puppet's isDead is the server's word; the view's "don't spawn dead actors" (formView.ts:75-79) changes for an engine reference, which binds and takes the death (Client) |
 | the killer: the engine's myKiller (Actor.h:654, GetKiller :550) set by KillImpl's attacker; the server's kill names none (GetDeathStateMsg :1608-1636 carries isDead alone; deathService.killActor(actor, null)) | code | later: the crime verb (a townsperson's death with a killer is a bounty); this slice's kills stay killer-less in the engine, named |
 | headshot's predicted death on a figure (deathService.ts:107-118, ADR-038) | code | native as is; an NPC target's kill is the server's through ClaimHeadshot (PartOne.cpp:2060-2063), no prediction |
@@ -402,7 +402,7 @@ outfit-array resolver (16155, re-npc-roll.md section 8; first 16072, which
 the lab showed to be the late path alone) adds the server's worn list
 tagged as the outfit's items under every inventory init and rolls nothing;
 the sleep outfit stays the engine's (a declared gap). Both pass every call
-through while the npcFate switch is off (since 3aabd51e, 22:46 PDT, only
+through while the npcFate switch is off (since cc21ae6f, 22:46 PDT, only
 when the settings file says false: the pin held at T3, x-npc-fate-pin v3
 GREEN 053914) or the reference is unfated. No Papyrus native is added (the exports are
 Skyrim Platform's, as setPuppet is); docs/NATIVES.md unchanged. The lab
@@ -413,11 +413,11 @@ Registry, train-42 (20:54 PDT), the deaths: on the server, the player path's
 schedules the fated respawn instead), and the server's number floors at one
 point for an essential base, or a protected one not under a player's hand
 (MayDie). On every seat, a dead body is never activation-blocked past the ragdoll's settle (the one named exception: deaths2, fork
-ce7ddd65, on the system-1 merge branch, keeps a body that died while flagged a puppet in the puppet state for ragdollSettleMs 4 s, so
+f6405a77, on the system-1 merge branch, keeps a body that died while flagged a puppet in the puppet state for ragdollSettleMs 4 s, so
 on a non-host seat a fresh body cannot be looted for about 4 s, until "body <id>: released from the puppet state after the ragdoll";
 numidium's review of m3-system1 on 2026-11-03, item 4), and from that release the rule holds in full (the rule
 since 2026-10-28, playtest 37's findings 58 and 62; train-42 blocked a
-game-file body at the death and puppetService 32dffbda kept the block
+game-file body at the death and puppetService f8c32c2d kept the block
 through a dead promote, on the assumption that the server's OpenContainer
 activation with default processing opens a blocked body: it never did, every
 corpse that opened was the engine's own activation of an unblocked one, and
@@ -433,7 +433,7 @@ flag cleared) and the fate's resurrect turns the AI on for the call whatever
 the flag; the
 engine's own cell-reset resurrection of a corpse on a re-entry
 (re-npc-roll.md section 9, the 19286 path) is undone by the view's
-two-second re-apply of the record's death. Registry, train-43 (23:56 PDT, fork m3-train-43 962fc913, stacked on 42,
+two-second re-apply of the record's death. Registry, train-43 (23:56 PDT, fork m3-train-43 02c001ca, stacked on 42,
 built ahead of Eli's D17): the hands. A third detour, on the container-path
 adder 16128 (re-npc-roll.md section 11: InitLeveledItems' per-entry roll
 14751 carries no owner; this adder does, the outfit argument null on the
@@ -443,7 +443,7 @@ once per init pass, then lets the original tag them as the engine would;
 the dresser 418622 equips the server's weapon as its own best pick, so no
 forced equip and nothing to re-evaluate. Gold and loot rows stay the
 engine's (the corpse's menu is the server's inventory). CONFIRMED at T3
-(00:31 PDT): x-npc-fate-outfit v3 GREEN on 43's stage 962fc913 (run
+(00:31 PDT): x-npc-fate-outfit v3 GREEN on 43's stage 02c001ca (run
 20261024-072041), the worn equality whole on both Embershard bandits at 20 s
 and again at 60 s (0xB6FE4: IronWarAxe 0x13790, hide boots 0x13910, studded
 cuirass 0x1B3A2, bandit gauntlets 0x6F39B, the WIC cloak 0xE00DB79; 0xB6FDB:
@@ -502,7 +502,7 @@ layer adding such lines reopens the read (layer-stage's check).
 
 ## Message contract
 
-Built, the server half (train-41, fork m3-train-41 818287c3, 2026-10-23 15:05
+Built, the server half (train-41, fork m3-train-41 2d1a71f6, 2026-10-23 15:05
 PDT, stacked on m3-train-40; ADR-049 PROPOSED, D2 to D5 at option A): the
 ActorFate message (MsgType 51, wire id 59, server to client, reliable:
 fates of {refrId, baseId, level, worn}, at most 64 entries and 32 worn each,
@@ -525,7 +525,7 @@ before any of it is loaded or subscribed; an actor this process rolled
 without a fate (loaded by the grid before any pass, a login's own square)
 rolls anew at the pass's level (MpActor::RollFateIfUnrolled: chain and
 outfit, not from a save, not dead), while a record from a save keeps its
-roll (ADR-049 decision 1). The client half followed the same day (below). CI: pipeline 2783 GREEN on 510f190c (16:47 PDT), the server with its unit tests (NpcFateTest included) and the Windows client with the detours. A chain rolling
+roll (ADR-049 decision 1). The client half followed the same day (below). CI: pipeline 2783 GREEN on fa9874f4 (16:47 PDT), the server with its unit tests (NpcFateTest included) and the Windows client with the detours. A chain rolling
 chance-none pins its head where vanilla would show nothing that visit; the
 resident is always present, the engine's own answer unread.
 
@@ -551,7 +551,7 @@ resident is always present, the engine's own answer unread.
   check_actor_death (the id in range, the cause at most 4, a finite point in
   the world) and a per-host budget of six at once, one a second
   (E_VAL_RATE); two fixtures; the C++ struct and the client type in the same
-  train (597bb9dc the wire, dd285ad9 the server, 6e827918 the client). The
+  train (54798208 the wire, e7950b98 the server, faeb232a the client). The
   server's checks are the Server section's (OnActorDeath); WIRE.md carries
   the contract. The roster's engine base rides ActorSightings (below).
 - Fields (name: type, units, bounds), in the family's JSON form (`"t": 53`):
@@ -617,7 +617,7 @@ resident is always present, the engine's own answer unread.
 
 ## Server
 
-Built, the deaths (train-42, fork m3-train-42 645f9344 the server, 95abf0dc
+Built, the deaths (train-42, fork m3-train-42 4a345953 the server, 3cb843a8
 the client, 2026-10-23 20:39 PDT), independent of ADR-048's D1 and held from
 the merge until Eli's answer: the death stamps the record with the server's
 game day (MpChangeFormREFR::fateDiedAt, optional, formVersion kept; the
@@ -642,14 +642,14 @@ occupancy within 512, the record's inventory, OpenContainer, TakeItem and
 PutItem on the server). T0 (NpcFateTest): the body lies inside the window
 and stands at its placement past it, rolled anew, its fate sent; the corpse
 opens as a container and the take is the server's; the broadcast case
-leaves the shared world alive. Then (d908abca, 20:46 PDT): the hours are
+leaves the shared world alive. Then (69a8a972, 20:46 PDT): the hours are
 the master's GMST iHoursToRespawnCell, 240 (record 0xD3646; the cleared
 0xD3647 is 720, for the quests verb; numidium's esm.py read on sky-srv),
 through libespm when the world has the master, the setting first, the
 compiled 72 last (D13, T0 pins 240); MpActor::Respawn is the one funnel that
 clears the body's stamp and its due entry (the console's Resurrect and the
 lab's respawn-ref pass there), so the next death counts from its own day.
-008c8883 fixes the Catch2 chained comparison both builds of 645f9344
+e6da24ec fixes the Catch2 chained comparison both builds of 4a345953
 refused. A contract change (21:35 PDT): the gamemode's per-actor spawnDelay
 times players alone now; a game-file actor's body keeps to the reset clock
 whatever spawnDelay says, so upstream's two integration tests that killed
@@ -659,7 +659,7 @@ in their settings and a wait spanning one sweep; a gamemode wanting an
 instant respawn calls the console's Resurrect or the lab's respawn-ref. Owed: the JSON round-trip T0 and MayDie against a master flag, the
 restart scenario as b-npc-fate (rule 13, after x-npc-death holds), the
 cleared hours (the quests verb), kNeverResets zones (libespm reads no ECZN:
-every cell resets). The lab's grammar (numidium, lab main eb4592aa):
+every cell resets). The lab's grammar (numidium, lab main 80c350dd):
 `c1: kill-ref {formId, killer?}` (the console verb's Kill as the seat's
 console) and `c1: respawn-ref {formId, inPlace?}`; asked: npcRespawnHours
 in the scenario's server block, for the sweep's own read.
@@ -739,7 +739,7 @@ in the scenario's server block, for the sweep's own read.
   (ADR-035 point 9, the run's own setting); off is today's behaviour, every
   path above untouched.
 
-Built, the death report's judge (train-44, fork m3-train-44 dd285ad9,
+Built, the death report's judge (train-44, fork m3-train-44 e7950b98,
 2026-10-24 16:10 PDT; ADR-048's B, Eli's D1 "jump right to B", 15:49 PDT):
 ActionListener::OnActorDeath takes a host's ActorDeath for a game-file actor
 when the reporter simulates it (PartOne::SimulatorOf: the cell's host or
@@ -775,7 +775,7 @@ Parents: "this reference will be activated by the reference which acted as
 the activate parent, not the originally activating NPC"), and the client
 reported only activations whose action reference was the player or a hosted
 actor, so no trap ever reached OnActivate. Since the restage's head (the
-commit after 53b9fd65): the game hosting the trigger's cell forwards a
+commit after 576c3cde): the game hosting the trigger's cell forwards a
 reference's activation of itself as an Activate with caster and target the
 same (activationService), and the server notes it where and when
 (OnActivate's first branch: the reporter must host the cell, nothing is
@@ -796,7 +796,7 @@ PLATE_X/Y/Z and the victim's id unfilled, so it cannot run as written until
 numidium's esm.py fills them); and the fall bound (200 units within 4 s is a
 plausibility floor, not the engine's damage rule, which ran on the host;
 x-npc-fall-report reads a drop the engine kills at). MEASURED
-(x-npc-fall-report v3 20261025-012351 on 44 6cdc2b35, 18:26 PDT, numidium's
+(x-npc-fall-report v3 20261025-012351 on 44 8efabb10, 18:26 PDT, numidium's
 read): the host's engine killed the lifted wolf by a 4000-unit fall
 (mid-fall at z 12741, dead at hp -675 under the deferred kill), the floor
 report went out, and the server took it by "a drop of 3813 units in the
@@ -818,12 +818,12 @@ esm.py), since a one-in-five premise red is no gate scenario.
 Done (13:03 PDT): the subject is the fixed EncWolf 0x82717 (base EncWolf
 itself, numidium's esm.py read; its pair 0x82716 and the leveled predator
 0x82718 culled from a park at square (22, -20)), x-npc-fall-report v4 GREEN
-20261025-195607 on parity 6cdc2b35 promoted unchanged into
+20261025-195607 on parity 8efabb10 promoted unchanged into
 b-npc-death-report (main c5eb498); the premises are the engine's (c1 runs
 the wolf, c2 puppets it, raceId 78346). The nightly's four reds all read
 and their scenarios green again (fix-m3-nightly 193214, 4 of 4).
 
-Built, the roll's level rule (train-44 e3b39ac8, 16:30 PDT; the memo's D2,
+Built, the roll's level rule (train-44 1d8efca5, 16:30 PDT; the memo's D2,
 Eli: "some way to calculate a middle ground?"): PartOne::FateRollLevel gives
 the fate pass its level by the npcRollLevel setting: "loader" (the first
 loader's own level, ADR-049's A), "party-mean" (the default: the mean,
@@ -842,7 +842,7 @@ bandits in Bleak Falls Temple, carried in the world since a lab placement
 profileId -1), died to rotfern's headshots and stood again 25 s later by
 the players' RespawnWithDelay, while the game-file bandit 0x39fe4 beside
 them lay for the reset hours as designed: IsFateRespawned required an id
-under 0xff000000. Train-46 (fork m3-train-46 fe1ee08f) keys it on the base
+under 0xff000000. Train-46 (fork m3-train-46 53bd5959) keys it on the base
 instead (every actor that is not a player's; IsCreatedAsPlayer is a 0xff id
 with base 0x7 or below), so a server-made NPC's death schedules the reset
 clock and its respawn stands it at its spawn point (SendAndSetDeathState's
@@ -946,7 +946,7 @@ that IsCorpse shares with the CONT branch's OPEN but not its CLOSE), so a
 body's occupancy is never released by its looter's closing activation and
 clears only by distance, disable or destroy. The fix is one condition
 (the corpse joins the CONT release) with a T0 case: BUILT as train-46's
-fourth commit (aaafffe5, 16:09 PDT, numidium's call: one CI cycle against a
+fourth commit (c40a36a3, 16:09 PDT, numidium's call: one CI cycle against a
 second server train's T2 and gate), ActorDeathTest's case opening, closing
 and admitting the next player with its OpenContainer. The strip and the
 cape left no server line: client-side, as read above. The ice wolf's 0
@@ -984,10 +984,10 @@ logs at the end (numidium's agent).
 GREEN AT T3, both (18:42 PDT): the corpse's release (x-body-release v3
 20261026-012319 on 46's stage: c1's loot and close, then c2 admitted at
 once, two "no occupant" lines and never "another object"; committed as
-b-npc-body-release, main f87ca564) and the protected floor (x-npc-protected
+b-npc-body-release, main a43d655e) and the protected floor (x-npc-protected
 v3 20261026-012622: six bear hits on Jenassa logged "health 0.01 -> 0",
 the number before MayDie's floor, her record and c1's engine alive, no
-death line of hers; committed as b-npc-protected, main a7a25d13). The
+death line of hers; committed as b-npc-protected, main 6f9a7957). The
 earlier runs' reds were the probes' (a bare close-menu, a mod's start-up
 box, a claim too broad by the bear's own death, a hostile taking the
 god-mode player). Train-46 MERGE-READY by citation and MERGING on Eli's
@@ -996,7 +996,7 @@ god-mode player). Train-46 MERGE-READY by citation and MERGING on Eli's
 AMENDED FOR D52 (12:06 PDT 2026-10-30, main 330124b, the scenario alone):
 b-npc-body-release's claims counted the single-occupant check's lines
 ("ProcessActivate 39fe4 - no occupant", twice), and memo D52's shared
-containers (dbfc8e82, 10988419; the pass union 0e23c820) moved a corpse's
+containers (e3fa27a6, c1de7167; the pass union b8a9d4c6) moved a corpse's
 open and close onto containerOccupants, which write nothing but "N players
 in the container now" at a second concurrent occupant; the check is
 furniture's alone now (MpObjectReference.cpp:1965). The scenario went red
@@ -1015,7 +1015,7 @@ another object", no E_ACTIVATE_REACH, the body dead on the record. Two
 seats in one body at once is x-shared-chest's read (D52's probe), not this
 scenario's.
 
-BUILT AHEAD, train-47 (fork m3-train-47 fdd0b123, client TS, stacked on
+BUILT AHEAD, train-47 (fork m3-train-47 ea2d6431, client TS, stacked on
 train-46; built ahead does not merge): (1) applyInventory takes
 resetBaseFirst, and the view's dead-body apply passes false, so a game-file
 body's inventory lands as a diff alone, its worn set in place; (2) a
@@ -1030,7 +1030,7 @@ how playtest 34's two were made is numidium's to say).
 
 ## Client
 
-Built, the deaths' client half (95abf0dc, 20:39 PDT): formView binds a dead
+Built, the deaths' client half (3cb843a8, 20:39 PDT): formView binds a dead
 record's engine reference (the copies' "never spawn dead" kept for copies)
 and emits applyDeathStateEvent at the bind and every two seconds while the
 record is dead and the engine's actor is not (the engine's own cell reset
@@ -1050,10 +1050,10 @@ lists the server's items), H6 (the body at the record's point on a reload),
 H9 (Resurrect, then the late re-roll), H10 and H11 (the kill on a puppet
 and on the host's actor).
 
-Built, the client half (train-41, fork m3-train-41 8535e336, 2026-10-23 15:23 PDT),
+Built, the client half (train-41, fork m3-train-41 035fc671, 2026-10-23 15:23 PDT),
 behind the npcFate switch, off by default: Skyrim Platform's fate table and
 two Frida Gum detours (the leveled roll wrapper 14752 answering the server's
-NPC_ as the one CALCED_OBJECT; since 17:24 PDT, 1a3a91c4, the outfit-array
+NPC_ as the one CALCED_OBJECT; since 17:24 PDT, 5351478f, the outfit-array
 resolver 16155 under every inventory init, adding the server's worn list
 tagged through the engine's own ExtraOutfitItem setter and entry adder and
 skipping the roll, in place of InventoryChanges::InitOutfitItems 16072,
@@ -1066,7 +1066,7 @@ id from re-npc-roll.md's table by `just addr`, every structure offset a
 CommonLibSSE-NG header line; ActorFateService keeps every fate and re-rolls
 a reference the engine already holds when its fate is new (a login's
 neighbours, a cell attached ahead, a respawn): one pop, its engine lookups
-inside the update tick (0a10f977, 20:18 PDT: the handler itself writes only
+inside the update tick (3d224c08, 20:18 PDT: the handler itself writes only
 the table, which has to hold the fate before a loading screen's attach, and
 a Papyrus native in a message handler is the fault that broke every teleport
 on train-40; the two exports queue game-thread tasks of their own); formView skips the
@@ -1075,7 +1075,7 @@ them; figures and 0xff copies keep the apply). The detours and the re-roll
 CONFIRMED by x-npc-fate-roll's five observations: 1 and 2 held three times
 (232048, 234133, 235610), 4 for the site (x-npc-fate-outfit v2 002544), 3
 read as the attach re-roll 37323 (000244), 5 NOT HELD (every load re-rolls,
-so the pin applies at every load); the switch on by default since 3aabd51e,
+so the pin applies at every load); the switch on by default since cc21ae6f,
 and the parity read (both seats' species and worn items equal to the
 server's record) ticked ADR-046 decision 1 at T3 (x-npc-fate-pin v3 053914,
 060646, 072444; x-npc-fate-outfit v3 072041). Known cost of the first slice:
@@ -1103,9 +1103,9 @@ at a login every fated neighbour the engine already rolled is re-rolled once
   cellAttach re-applies the table (the fallback suppression). The GMST and
   kNeverResets switches at login (SpApi, once).
 - Kill switch config key: the server's `npcFate`; the client follows the
-  server (no fate arrives, nothing pins, the view behaves as on fb6f3f09).
+  server (no fate arrives, nothing pins, the view behaves as on a76125cb).
 
-Built, the death report's sender (train-44 6e827918, 16:18 PDT):
+Built, the death report's sender (train-44 faeb232a, 16:18 PDT):
 DeathReportService sends ActorDeath at deathStart (the kill itself; deathEnd
 waits for the ragdoll to settle and the server's windows run from the kill)
 for a game-file actor this game simulates (HostService.isMineLocal) whose
@@ -1115,7 +1115,7 @@ remote id when the engine names an actor, else 0 (the server picks any
 evidence it has); the body's position; one logLab line per report. Not
 reported: the player's own death, a figure's or a copy's (0xff ids), a
 puppet's (another game simulates it). The floor (17:51 PDT, fork
-m3-train-44 6cdc2b35, after x-npc-fall-report 20261025-004503 fell 4000
+m3-train-44 8efabb10, after x-npc-fall-report 20261025-004503 fell 4000
 units and fired nothing): every viewed actor carries the engine's deferred
 kill (formView startDeferredKill, "the server's death is the only death"),
 so the deaths B exists for, a fall, a trap, a blow whose engine damage
@@ -1179,20 +1179,20 @@ the deferred kill did not hold.
   fixtures and a new session npc-fate.yaml later (a fated placement's
   CreateActor then ActorFate, both stacks byte-equal). The legacy server
   without npcFate must produce today's output for every existing session.
-- T3 scenario ids, committed (01:16 PDT, main 7135b4be, one commit each,
+- T3 scenario ids, committed (01:16 PDT, main ed9a9d7a, one commit each,
   rule 13): lab/scenarios/b-npc-death.yaml (the death's travel on both
   seats through the viewer's return, the restart and the host's relaunch:
   x-npc-death v3 GREEN 080218) and lab/scenarios/b-npc-loot.yaml (the corpse
   as the server's container: x-npc-loot GREEN 064648); lab/scenarios/b-npc-respawn.yaml (the body
   standing again at its placement after the reset hours across a restart,
-  rolled anew, on both seats: x-npc-respawn v3 GREEN 081548; main 26db4afd,
+  rolled anew, on both seats: x-npc-respawn v3 GREEN 081548; main 40faee46,
   01:21 PDT). The sketch below (b-npc-fate.yaml,
   the Barrow's bandits with a bow and the restart) stays the fuller scenario
   for the verb's close.
   lab/scenarios/b-npc-death-report.yaml (main 3c6c54e, 2026-10-24 18:28 PDT,
   its own commit): the host's floor report of a fall taken by the server's
   own samples' drop and the death on both seats, from x-npc-fall-report v3
-  GREEN 20261025-012351 on 44 6cdc2b35 (the host's engine drops a hosted
+  GREEN 20261025-012351 on 44 8efabb10 (the host's engine drops a hosted
   predator 4000 units through its console; "a drop of 3813 units in the
   host's samples; the server records the death"). The NPC fight's reports
   read inside b-npc-death's and b-cell-host's runs (the log's "accepted" or
@@ -1507,7 +1507,7 @@ re-analyst needs the sites).
   puppet apply floors the relayed health (train-35), so the question changes
   nothing a player sees.
 
-x-npc-fate-pin v2 (20:18 PDT, for train-41's stage on 0a10f977): two legs,
+x-npc-fate-pin v2 (20:18 PDT, for train-41's stage on 3d224c08): two legs,
 one path each. Late (c1): the teleport from the lab spawn (square 32,-15,
 five squares out, beyond the fate ring of 3 and the engine's grid of 2)
 straight into the forest; the engine rolls at the load and the fate arrives
@@ -1522,7 +1522,7 @@ equal. Worn lists read, not asserted (the predators wear no outfit; the
 outfit claim is x-npc-fate-outfit's). The switch flips to true on 41 when
 both legs hold.
 
-x-npc-fate-pin v2 on 41's stage (0a10f977; run 20261024-052150, 22:33 PDT):
+x-npc-fate-pin v2 on 41's stage (3d224c08; run 20261024-052150, 22:33 PDT):
 the species pin HELD on leg 1: server.fate's raceId 78346 for both predators
 (level 1, worn empty: creatures), c1's engine races 78346 for both, "pinned
 85547 to" once in the plugin's log. The run went red on its own premise:
@@ -1537,7 +1537,7 @@ outfit 1e608", d1fa9 (4 of 4, outfit c0197), d1f56 (5 of 5, c0197), and
 "the base has no default outfit, nothing to redress" for 107d05, 85540 and
 107d06: the outfit imposition's late path works on bases with a default
 outfit. x-npc-fate-outfit green on the same stage (052632, npcFate off, the
-detours inert; its trace on the results site). Then v3 GREEN (22:46 PDT, run 20261024-053914, 10 of 10): leg 1 as before (three runs now); leg 2, c2 parked over square 31,-17 at z 25000 landed in one attempt and stood at about 12,946 absolute after the wait (above the forest's 10,700: no fall-through), no late line while parked or after stepping in, both species 78346 on c2's engine, "pinned 85547 to" once. The species half of ADR-046 decision 1 holds at T3 on both seats and both paths; npcFate flipped on by default (3aabd51e); the worn half is x-npc-fate-outfit v3's read on the Embershard bandits. A finding outside the fate:
+detours inert; its trace on the results site). Then v3 GREEN (22:46 PDT, run 20261024-053914, 10 of 10): leg 1 as before (three runs now); leg 2, c2 parked over square 31,-17 at z 25000 landed in one attempt and stood at about 12,946 absolute after the wait (above the forest's 10,700: no fall-through), no late line while parked or after stepping in, both species 78346 on c2's engine, "pinned 85547 to" once. The species half of ADR-046 decision 1 holds at T3 on both seats and both paths; npcFate flipped on by default (cc21ae6f); the worn half is x-npc-fate-outfit v3's read on the Embershard bandits. A finding outside the fate:
 c2's console logged 108 "settle 86111" lines over 19 s with the puppet
 2,077 units from its record and the gap never closing. Read (22:50 PDT, an
 agent over the run's logs): 86111 died at 05:24:42 UTC to another NPC's hit
@@ -1552,8 +1552,8 @@ for an engine actor. So c2's copy stayed a corpse, movementApply's
 included) while the settle print fired on each of c1's samples, until the
 cell grant to c2 promoted the corpse live without placing it. The cause is
 the deaths' respawn travel, not npc-puppet's settle. 42's client half
-applies the property (the seam, 55e64a94; Resurrect on an engine
-reference, 95abf0dc), and 61ffa74e adds the mirror of the dead bind: a
+applies the property (the seam, 7b311df0; Resurrect on an engine
+reference, 3cb843a8), and 5ffd078a adds the mirror of the dead bind: a
 dead engine reference whose record the server explicitly says is alive is
 resurrected on the two-second read (a seat that reconnects after the
 sweep binds a corpse), the server saying a game-file actor's life
@@ -1561,7 +1561,7 @@ explicitly in CreateActor (props.isDead false, within the contract); a
 record never dead says nothing, so ADR-038's predicted deaths stand. The
 confirming read is x-npc-respawn's (both seats alive after the restart).
 
-41's restage on 3aabd51e, npcFate on by default (23:17 PDT): x-npc-fate-pin v3
+41's restage on cc21ae6f, npcFate on by default (23:17 PDT): x-npc-fate-pin v3
 GREEN again (060646). x-npc-fate-outfit v3 (061219): the race held for both
 Embershard bandits (0xB6FE4 79684, 0xB6FDB 79688, the engine equal to the
 fate) and the armor matched the server's roll exactly (0xB6FE4: hide boots
@@ -1578,7 +1578,7 @@ stronger claim; rerun before 42's stage. The outfit half of ADR-046
 decision 1 stands on the armor already; the weapon's equality is the rerun's.
 
 x-npc-fate-outfit v3 with the hands in the engine's worn read (41 restaged
-with lab driver 9aecd2aa; run 20261024-062856, 23:34 PDT): the ARMOR is
+with lab driver 4e5d273a; run 20261024-062856, 23:34 PDT): the ARMOR is
 pinned on both bandits, exactly, and the race with it; 0xB6FDB matched the
 server whole (SteelSword 0x13989, ArmorBanditCuirass2 0x10594D, the WIC
 cloak 0xE00233D); 0xB6FE4's armor matched (hide shield 0x13914, studded
@@ -1594,10 +1594,10 @@ chance). So the outfit half of ADR-046 decision 1 holds for what the outfit
 governs, the armor and the race (the headshot claim: the helmet you see is
 the server's), and the WEAPON is a declared gap of this slice: a bandit's
 weapon may differ per screen, the damage the server's either way. The pin
-of the inventory's leveled roll is train-43 (962fc913, 23:56 PDT: the 16128
+of the inventory's leveled roll is train-43 (02c001ca, 23:56 PDT: the 16128
 detour, Suppress); D17 asks Eli whether it comes before playtest 34.
 
-42's stage on 61ffa74e (00:00 PDT): x-npc-loot GREEN (064648): kill-ref,
+42's stage on 5ffd078a (00:00 PDT): x-npc-loot GREEN (064648): kill-ref,
 the corpse's three gold by the console, approach, activate (the hook
 reported, the engine's menu blocked), the ContainerMenu on the server's
 list, Take All, close: server.inventory(c1) rose by the gold and the body
@@ -1626,7 +1626,7 @@ the host at the death (an AI-on death), reconnected as a viewer: its view
 demoted the corpse (AI off, activation blocked) and the two-second read's
 Resurrect ran on that corpse and did not stand it up; in 064950 c1 won the
 grant and both seats came back alive. No message was missed and no error
-logged. Fix (m3-train-42 5ee047df, merged forward into 43 d2210492):
+logged. Fix (m3-train-42 62a4ae6b, merged forward into 43 47637942):
 resurrectActor, a Skyrim Platform export running the engine's own Resurrect
 (A/Actor.h:369) with the AI on in one game-thread task (a puppet demoted
 again after it, a live actor unblocked), in place of the Papyrus call whose
@@ -1641,13 +1641,13 @@ reason is H-54f's read (Finding 54 below). x-npc-death v2 (070022) held the
 death on both seats through the viewer's return and the restart (the body
 bound widened to 32 units each way for the ragdoll's settle, v3).
 
-43's stage on 962fc913 (00:31 PDT): x-npc-fate-outfit v3 GREEN (072041): the
+43's stage on 02c001ca (00:31 PDT): x-npc-fate-outfit v3 GREEN (072041): the
 worn equality whole, the weapons included (above, Suppress); x-npc-fate-pin
 v3 GREEN (072444), both legs. ADR-046 decision 1 holds at T3 for everything
 the outfit and the inventory roll govern: species, armor, cloak and weapon,
 on both seats and both paths.
 
-43's restage on d2210492 (01:15 PDT): x-npc-death v3 GREEN (080218): the
+43's restage on 47637942 (01:15 PDT): x-npc-death v3 GREEN (080218): the
 kill is the server's word on both seats, the body stays through the viewer's
 leaving and return, the server's restart keeps it dead at its point (within
 32 units, the ragdoll's settle) and the host's relaunch passes the cell with
@@ -1662,10 +1662,10 @@ god mode does not survive the server restart any more than a relaunch, so
 the revived predators killed c2's player, whose respawn at the spawn lost
 the cell before the read; v3 re-arms tgm after the reconnects (numidium).
 
-x-npc-respawn v3 GREEN (01:21 PDT, run 20261024-081548 on 43 d2210492, god
+x-npc-respawn v3 GREEN (01:21 PDT, run 20261024-081548 on 43 47637942, god
 mode re-armed after the reconnects): alive on the record and both seats
 after the restart, the species equal to the fate on both, c2 running the
-revived predator with c1's puppet 50 units behind. On d2210492 every fate
+revived predator with c1's puppet 50 units behind. On 47637942 every fate
 and death probe is green: pin v3, outfit v3 (weapons too), death v3,
 respawn v3, loot, with b-host-kill and door v6 beside them.
 
@@ -1679,7 +1679,7 @@ clone answers ExtraLeveledCreature's originalBase (the placed NPC_, an esm
 id), never the clone (Ghidra: the native's callback reads the extra's
 +0x10, else data.objectReference); the "rerolled" line had never appeared
 in any run, and the two greens had re-rolled the same base. Fixed on
-m3-train-41 7ec13787 (forward 42 28c4861c, 43 de9d048e): rerollActor
+m3-train-41 93ca1ec1 (forward 42 b62c638a, 43 417cb746): rerollActor
 decides on the game thread by the engine's own mark (ExtraDataList::HasType
 kLeveledCreature): a clone takes the engine's 37323 re-roll through the
 detours, any other actor the redress (the body shared on the game thread);
@@ -1709,7 +1709,7 @@ itself; the deferred kill stays on puppets alone; the host's death report
 keeps ADR-048 B's checks and a refusal is corrected through the respawn
 path; the 500 ms floor poll retires; the host's health reaches the server
 through HostedActorState. A read-only code map (2026-10-26, fork
-m3-npc-stream 2673d1ab) found the pieces; nothing is built yet, and the
+m3-npc-stream e2ea071a) found the pieces; nothing is built yet, and the
 build waits for npc-stream's stage reads and Eli's word on the train.
 
 What stands today (FACT, the map's reads):
@@ -1813,9 +1813,9 @@ number and the engine's death; 38586 (the event and the reactions for a
 remote cause) is the richer path and stays a later read, since the host's
 engine already plays blood and reactions for the swing it saw.
 
-## ADR-050 decision 3, one NPC path: train 51 as built (13:49 PDT, fork m3-npc-path 4be36aed)
+## ADR-050 decision 3, one NPC path: train 51 as built (13:49 PDT, fork m3-npc-path f552ccc3)
 
-Server (c387979c): MpActor::RollFateIfUnrolled refuses only a player's base
+Server (634c2874): MpActor::RollFateIfUnrolled refuses only a player's base
 (baseId <= 0x7), so a server-made NPC rolls as a game-file actor does;
 PapyrusObjectReference::PlaceAtMe rolls the placed actor before its create
 word, at the level WorldState::fateRollLevelAt gives (PartOne::FateRollLevel
@@ -1830,7 +1830,7 @@ swing or cast schedules no player respawn (the fate's clock stands). T0:
 NpcFateTest "A server-made NPC is fated at its placement, its fate goes ahead
 of its create word, and its death is the server's word to every listener".
 
-Client and Skyrim Platform (4be36aed): PuppetService is the reconciler, one
+Client and Skyrim Platform (f552ccc3): PuppetService is the reconciler, one
 function reconcile(localId, mine?, last?) computing the state from (the
 server's word, loaded here, dead, kind) and applying it idempotently: live
 (the word names this game: markHosted true, the promote once with the
@@ -1858,7 +1858,7 @@ state) is R0 through the existing activate path.
 Read by x-npc-copy-fate (38 steps): H-51a CONFIRMED (041406), H-51b
 CONFIRMED whole (v2 051619, promoted b-npc-copy-fate 916af5a), H-51c and
 H-51d at the gate (20261027-054632 plus 074932, the regression set green;
-parity 39cf3f4d). The four: H-51a the armed fate binds inside placeAtMe on
+parity a8d10c99). The four: H-51a the armed fate binds inside placeAtMe on
 both seats (the outfit detour meets the new copy before the engine's own
 outfit roll); H-51b the host's worn report then matches the record (no
 E_EQUIP_REFUSED naming a 0xff actor) and the bandit's swings land
@@ -1868,7 +1868,7 @@ stays green; H-51d the release grace of 4 s leaves no live window on a
 non-host after the late fate's 3D drop (b-npc-handoff-night's claims).
 
 Lab read (2026-10-26 night, 51's stage at numidium's): the first run,
-x-npc-copy-fate 20261027-041406 on m3-npc-path 28aa2e43, read H-51a
+x-npc-copy-fate 20261027-041406 on m3-npc-path 75794bd1, read H-51a
 CONFIRMED (both seats "copy ... of 1bcd8: fate armed true", three dress lines
 each "from the server's roll inside the outfit roll: 6 of 6 tagged for outfit
 c0197", the PlaceAtMe fated line on the server) and H-51b FALSE for a reason
@@ -1879,19 +1879,19 @@ the worn set (the fate's worn list the clients dress from) and once into
 the inventory, so a leveled helmet could be worn by the record and absent
 from its inventory. Every leveled outfit could do it: P6 v2's placed-bandit
 refusal (npc-stream.md) reads as this, not D19. Fixed on m3-npc-path
-39cf3f4d (one roll, its picks added to the inventory; NpcFateTest's placed
+a8d10c99 (one roll, its picks added to the inventory; NpcFateTest's placed
 case asserts every worn entry is in the inventory). The rerun, v2
-20261027-051619 on 39cf3f4d, GREEN: no E_EQUIP_REFUSED for the copy, the
+20261027-051619 on a8d10c99, GREEN: no E_EQUIP_REFUSED for the copy, the
 dress claims matched, and the bandit's swings landed on the host's player
 (OnWeaponHit on ff000000, no E_HIT_WEAPON): H-51b CONFIRMED whole. Promoted
 unchanged as b-npc-copy-fate (thuum main 916af5a, its own commit), and
 b-npc-stream-equipment's placed-bandit lines turned from recorded to
 claimed (e42dbca). H-51c and H-51d read on the gate: MERGED to fork parity
-39cf3f4d at 08:19Z 2026-10-27, the gate cut at 18 of 25 by sky-c2's RTX
+a8d10c99 at 08:19Z 2026-10-27, the gate cut at 18 of 25 by sky-c2's RTX
 wedge and finished by its rest under D38 B, cited as one
 (20261027-054632-gate-m3-npc-path+20261027-074932-gate-m3-npc-path-rest, 29
 runs, verdict watch: b-npc-body-release's old point, below); T2 green on
-39cf3f4d; both clones promoted; the regression set (b-npc-puppet,
+a8d10c99; both clones promoted; the regression set (b-npc-puppet,
 b-cell-host, the four b-npc-handoff) green in the gate, so H-51c and H-51d
 hold at T3.
 
@@ -1904,7 +1904,7 @@ server numbered 54 ms before, the killer ..." (the engine's deathStart named no 
 pending aggressor, H-52b's path): the credit held, the cause word did not. Bodies: lootable from the killer's seat; the other
 seat's E on the same body met "occupant is another object and is nearby" (one looter at a time, the engine's rule).
 
-## Playtest 37's hands and outfit (findings 43 and 46, 2026-10-28; fork m3-fate-dress 5b89bf35)
+## Playtest 37's hands and outfit (findings 43 and 46, 2026-10-28; fork m3-fate-dress 9f577d2e)
 
 The host's engine copy of a game-file bandit wielded a weapon its record lacked ("E_HIT_WEAPON: hosted 39fe4 hits
 ff000001 with 13983, which its record's hands lack; dropped", 39fe2 with 13985) and a bandit outside stood naked.
@@ -1927,7 +1927,7 @@ missing item still drops; the record's worn non-weapon entries a report lacks ar
 report never shrinks the fate's worn list; the host's hands poll skips an actor whose 3D is not loaded (HYPOTHESIS that
 the dressing precedes the flag, read by b-npc-stream-equipment's claim, drafted and not committed, the file claiming
 E_EQUIP_REFUSED and E_HIT_WEAPON zero and nothing on the skip line or E_EQUIP_UNKNOWN_WEAPON while m3-fate-dress
-5b89bf35 rides the turbo trains unread: a host log-count of the poll's skip line, text on 5b89bf35, with the claim that
+9f577d2e rides the turbo trains unread: a host log-count of the poll's skip line, text on 9f577d2e, with the claim that
 every skipped resident reports worn within one poll, 0.5 s, of its first sample and no E_EQUIP_UNKNOWN_WEAPON). T0:
 NpcFateTest [NpcFate][HostedEquipment]. Rung note: the wielded weapon's identity
 on a hosted game-file actor is R2 where the fate arrived late; the damage number stays the server's. The one-roll
@@ -1936,7 +1936,7 @@ already naked in the playtest world heal only by a restore or a respawn. Probe: 
 server.ref(id).worn holding the weapon both seats' npc_state show, no E_EQUIP_REFUSED naming it, its swings logged as
 OnWeaponHit, the worn lists equal on both seats.
 
-## A resurrection by the host's engine (playtest 37, finding 48; fork m3-npc-caster 05a285f6, 2026-10-28)
+## A resurrection by the host's engine (playtest 37, finding 48; fork m3-npc-caster fc493be9, 2026-10-28)
 
 Eli: "the necromancer resurrected a skeever, only visible on prisoner ... yea deff add resurrections to thuum's
 stack." The host's sampler streams every hosted actor its engine has alive, so a reanimated actor's health went out
@@ -1950,15 +1950,15 @@ puppet, formView.ts's dead-word gate under 0xff000000, a known limit). T0: Actor
 from a non-host nothing; from the host the death cleared and the live word relayed). Reanimate's thrall, Dead Thrall
 and a scripted resurrect all ride it. The 0xff death report (a server-made creature's death "by the server's word"
 after 3 s because the client never reported a 0xff id and the wire refused the range) is its own commit, fork
-m3-death-range 2069d4d2 (19:3x PDT): ActorDeath's refr_id bound leaves the validator (the id nonzero, the cause 0 to
+m3-death-range a46fa688 (19:3x PDT): ActorDeath's refr_id bound leaves the validator (the id nonzero, the cause 0 to
 4; who may report whom stays OnActorDeath's rule: the simulator, a fated actor, alive), the client's gate keeps only the
 player's own actor out (the host gate isMineLocal keeps other players' figures out), no schema change; docs/WIRE.md's
 row says so. HYPOTHESIS until a placed creature dies on its host under the lab's eyes: x-npc-creature-caster v3 carries
-no death leg (its atronach is never killed) and no probe has read a 0xff death report since m3-death-range 2069d4d2; the
+no death leg (its atronach is never killed) and no probe has read a 0xff death report since m3-death-range a46fa688; the
 leg to add is c1 killing the placed caster by swings, with the claims server.log_count("death report: ff000002 died") >=
 1 and "death by the server's word on ff000002" == 0.
 
-### The non-host's reanimate at T3 (2026-10-30; x-reanimate-host v6 152542 on the union 8f9c11bd)
+### The non-host's reanimate at T3 (2026-10-30; x-reanimate-host v6 152542 on the union a4541cd0)
 
 GREEN, seven of seven: c2's Reanimate Corpse on Hilde's body (killed by kill-ref, the record dead) reached the server as a player's
 cast ("OnSpellCast ff000001 cast 65bd7 ... relayed"), the server sent the cast to the body's host for the engine's own effect
@@ -1979,14 +1979,14 @@ the evaluator. Follow-up for the next server train touching MpActor's effects (o
 no row; append the failing row ("HasPerk(0x581de) == 1 on Target") and add the dead-target case to that test. And the aim: on c2 the mouse step's pitch found the body at 700 to 800 counts for a target 80 units off
 and about 120 below the eye (about 13 counts a degree on this seat; the rune probes' 20.2 was another seat's or another frame's).
 
-## Playtest 40's death findings (12:25 PST 2026-11-02; turbo 2 on parity 64dbacfe; numidium's logs at results/playtest-40)
+## Playtest 40's death findings (12:25 PST 2026-11-02; turbo 2 on parity ad1aa50a; numidium's logs at results/playtest-40)
 
 - F3, Eli: "dead things fall on one screen, on the other they freeze and are embedded in the ground." Hod 0x1348a and Faendal
   0x1348c, hosted by c1, killed by rotfern's bow headshots at 20:11:37 and :41; 0x1066df, hosted by c2, killed by rotfern's melee at
   20:10:13. On the guest's seat each puppet died 1.5 to 1.7 s AHEAD of the server's word (the relayed arrow's or the attacker's own
   engine's kill; "body ... released from the puppet state" at 20:11:35.9 against the server's death at :37.68), so the pre-kill
   placement never ran, and two seconds later train 52's restBody moved the dead ragdoll to the host's spot ("rested at the host's
-  spot, 118 units away"): the move took, and the body froze into the ground. Fix (fork m4-turbo2-deaths-client 920cf981, the client):
+  spot, 118 units away"): the move took, and the body froze into the ground. Fix (fork m4-turbo2-deaths-client 4227a63d, the client):
   a dead body is never moved; the host's distance is logged once ("lies where it fell, N units from the host's (D78 C)"). D78's C
   stands as the rule; the same spot is M4's pose replication.
 - F4, Eli: the reanimated Hod "runs and fights correctly" on the host and on the guest "is laying on the ground kind of sliding
@@ -1999,7 +1999,7 @@ and about 120 below the eye (about 13 counts a degree on this seat; the rune pro
   up" has company).
 - F5: the thrall's end. Reanimate Corpse's spell ended at 20:13:21 and the engine killed Hod again on his host; the host's report named
   no cause (cause 0, killer 0) and the server refused it ("E_DEATH_UNCHECKED: no hit, drop or activation the server saw"), holding Hod
-  alive at one point while c1 had him dead. Fix (fork m4-turbo2-wall-range f6c25cec, the server): MpActor::NoteHostStoodUp at the
+  alive at one point while c1 had him dead. Fix (fork m4-turbo2-wall-range 9de119b2, the server): MpActor::NoteHostStoodUp at the
   resurrection branch; a host's cause-0 report within kReanimatedEndMs (90 s: Reanimate Corpse and its kin last 60 s) of that stand-up,
   on a body with an accepted reanimate, is the reanimation's end (ActorDeathTest's case: refused without the stand-up, taken within
   the span, refused past it). Dead Thrall has no end but a hit's.
@@ -2011,12 +2011,12 @@ and about 120 below the eye (about 13 counts a degree on this seat; the rune pro
   ("1066df stands again ... its death before this process; the record's death cleared", Faendal 1348c at 20:20:35Z), against M3's
   "bodies lie where they died after a relaunch". A body dead since before this server process has no death stamp, and the host's engine
   loads such a corpse alive for a frame before the kill word lands, so its first live sample read as a resurrection. Fix (fork
-  m4-turbo2-restart-dead aef99109, the server): MpActor::NoteHostSampledDead at a dead sample from the simulator, cleared at the
+  m4-turbo2-restart-dead 98f785ce, the server): MpActor::NoteHostSampledDead at a dead sample from the simulator, cleared at the
   stand-up; a live sample stands a body dead before this process only after its host has sampled it dead once, or within a
   reanimate's window (ActorDeathTest's case rewritten: the first live sample stands nothing, a dead then a live one stands it).
-- Where the fixes stand (14:44 PST 2026-11-02): F5 MERGED with wall-range (fork parity 4b6f5fa3, 21:12Z); F9 MERGED as the R0 train
-  m4-turbo2-r0-train (parity 6d7fcc84, 22:42Z, with skill books; T0 13 of 13, T2 green); F3 and F4 ride the client train
-  m4-turbo2-train 1a1f304b (with prop-statics and the settle head), arm two's build, its gate after the arm (Eli's turbo order). The
+- Where the fixes stand (14:44 PST 2026-11-02): F5 MERGED with wall-range (fork parity 4fdb2d31, 21:12Z); F9 MERGED as the R0 train
+  m4-turbo2-r0-train (parity 188a8dea, 22:42Z, with skill books; T0 13 of 13, T2 green); F3 and F4 ride the client train
+  m4-turbo2-train 11e6b00e (with prop-statics and the settle head), arm two's build, its gate after the arm (Eli's turbo order). The
   reanimate's grace and the never-moved body are read by Eli's eyes in arm two (docs/private/playtest-turbo-2.md, items 1 and 2).
 
 ### Playtest 41's deaths, late (17:33 PST 2026-11-02)
@@ -2024,7 +2024,7 @@ and about 120 below the eye (about 13 counts a degree on this seat; the rune pro
 - The guest's frozen spider (Eli: "on prisoners screen instead of ragdolling it froze"): the host killed MS13FrostbiteSpiderREF
   0x3a1e1 at 00:46:16Z while it hung in its ambush furniture (its masterAmbushScript never ran on the host, the name parked;
   ADR-062 runs it); on the guest the puppet died by the server's word inside the furniture's idle, no fall, the deaths2 flag keep
-  ticking a graph that never left the idle. Fix on the bundle head m4-turbo2-chest 77b7e485 (TS): a killed puppet that has not
+  ticking a graph that never left the idle. Fix on the bundle head m4-turbo2-chest 84ef8669 (TS): a killed puppet that has not
   dropped 16 units within 300 ms gets the engine's zero-force push (finding 71's cure), "body <id>: no fall N units after the
   kill, pushed to ragdoll". HYPOTHESIS until x-npc-death-ambush (by path: c1 hosts the Temple and kill-refs the spider in its
   perch, c2's npc-state z under the perch within 4 s).
@@ -2044,7 +2044,7 @@ NativeFunction of thirteen ints. The platform log's last second: setHosted false
 15 to 0 at a release), two redresses with "3D loaded false" (13486, 13485), then "rerollActor(13491): not a leveled clone,
 redress instead" and the crash. Eli: "rotfern crashed after npcs were desynced for too long". HYPOTHESIS: the redress's
 AddWornOutfit (FateApi.cpp RedressOnGameThread, a_forceUpdate true) on an actor with no 3D reads the model it has not got. The
-guard on the bundle head m4-turbo2-chest 12f199e6 (TS): the late fate runs the platform's re-roll or redress on a loaded actor
+guard on the bundle head m4-turbo2-chest e742d086 (TS): the late fate runs the platform's re-roll or redress on a loaded actor
 alone; an unloaded one waits in actorFateService's pending set ("late fate for <id>: its 3D is not loaded, the redress waits
 for the load") and is dressed at its load (the reference's cellAttach, a 1 s poll), forgotten after 120 s. Dynamic plan: the
 re-analyst names +070DB20 in 1.6.1170 and its null (the equip path's model read or the outfit's); a Frida trace of the redress on
@@ -2069,7 +2069,7 @@ ground (built as npcRollLevel, party-mean by default), D3 to D10 A, D11 A,
 D12 B (built, cell-host's quitting-host row), D13 to D17 A; the merge of 39
 to 44 held until 44 is staged and gated ("Hold until built").
 MERGED 2026-10-24 22:23 PDT on Eli's "Merge now": trains 39 to 44 on fork
-parity 6cdc2b35 (gate set 20261025-015916-gate-m3-train-44, eighteen green;
+parity 8efabb10 (gate set 20261025-015916-gate-m3-train-44, eighteen green;
 T2 green), the clones promoted; D2 settled as A2 party-mean, the default.
 Open after the merge: the hazard evidence's lab read (a trap death), the
 encounter zone clamp (docs/research/m3/encounter-zones.md), the fuller
@@ -2077,12 +2077,12 @@ b-npc-fate scenario; the quit crash is cell-host's row.
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (ticked 17:02 PDT 2026-10-29 by the pass: the Inventory's 29 rows each carry a disposition; the Rung paragraph declares R0 for the roll and the death word, R1 for the host's report, R2 for the host's state, R3 for the looks)
 - [x] engine surface cited or delegated (the roll sites 14374, 14752, 16129 and 16155 by `just addr` with the lab's Frida counts, re-npc-roll.md sections 1 to 8; the attach re-roll's caller 19231 and its gate, section 9, REA; the death path, death-path.md; the CommonLib lines named per field; 22:47 PDT)
-- [x] server logic + T0 (the first slice: the one roll at the first loader's level, fateLevel on the record, the fate pass ahead of the engine's ring at the square change, the pin, the respawn re-roll; fork m3-train-41, CI green 2783 on 510f190c and 2793 on 740ab970 with NpcFateTest, 17:19 PDT); the death half on fork m3-train-42 1d09fa04 (the body's stamp, the sweep on the game clock, the master's 240 h, the respawn funnel, the engine's essential and protected rule, the corpse as a container; five T0 cases; CI GREEN on 5352af64 and again on 61ffa74e (23:11 PDT, the mirror rule and the explicit life flag), 21:44 PDT: the unit binary, upstream's integration tests under the reset clock, the Windows client)
-- [x] message + validator (same commit) (ActorFate 51, wire id 59, its validator, fixtures, C++ struct and client type in one commit, fork m3-train-41 a891e6a6; ActorDeath 52, wire id 60, its validator and per-host budget, two fixtures, fork m3-train-44 597bb9dc, the C++ struct dd285ad9 and the client type 6e827918, 2026-10-24)
+- [x] server logic + T0 (the first slice: the one roll at the first loader's level, fateLevel on the record, the fate pass ahead of the engine's ring at the square change, the pin, the respawn re-roll; fork m3-train-41, CI green 2783 on fa9874f4 and 2793 on 40cf4d70 with NpcFateTest, 17:19 PDT); the death half on fork m3-train-42 59f54e92 (the body's stamp, the sweep on the game clock, the master's 240 h, the respawn funnel, the engine's essential and protected rule, the corpse as a container; five T0 cases; CI GREEN on a7a2374d and again on 5ffd078a (23:11 PDT, the mirror rule and the explicit life flag), 21:44 PDT: the unit binary, upstream's integration tests under the reset clock, the Windows client)
+- [x] message + validator (same commit) (ActorFate 51, wire id 59, its validator, fixtures, C++ struct and client type in one commit, fork m3-train-41 2f0e5a84; ActorDeath 52, wire id 60, its validator and per-host budget, two fixtures, fork m3-train-44 54798208, the C++ struct e7950b98 and the client type faeb232a, 2026-10-24)
 - [x] native hook + T1 (ticked 17:36 PDT 2026-10-29 by the pass: the roll detours in skyrim-platform FateHooks.cpp on 14374, 14752, 16129 and 16155 by `just addr`, their counts confirmed by lab/frida/npc-roll.js on x-npc-fate-outfit v2 20261024-002544 and x-npc-fate-pin v3 072444; T1 none, Windows-only, the trace is its proof)
-- [x] TS handler (ActorFateService keeps every fate and re-rolls a reference the engine already holds when its fate is new; formView's engine-dressed rule; behind npcFate, off by default until x-npc-fate-pin; 0a10f977: the late path's lookups in the update tick, not the message handler; 3aabd51e: npcFate on unless the settings file says false, both readers, after the pin's green; the deaths' client half 95abf0dc: the dead bind with its two-second re-check, the corpse's inventory and activation block, the engine's Resurrect at the respawn, the corpse branch of the container flow; DeathReportService 6e827918, train-44: the host's death report at deathStart; 6cdc2b35: read from the health floor under the deferred kill, the ear that hears a fall)
-- [x] T2 green (33 sessions identical with the declared divergences at de9d048e, the index compared as identity, the declarations naming forms; 09:55 PDT)
-- [ ] T3 scenario green, no HYPOTHESIS tags (the template's wording restored and the box unticked 15:52 PDT 2026-10-29 by the pass's inventory, docs/private/hypothesis-inventory-2026-10-29.md: 16 tags with a named read and 18 without stand in this doc; the earlier tick read: T3 scenario green (20:13 PDT, 2026-10-24: the gate set 20261025-015916-gate-m3-train-44 on 6cdc2b35, all eighteen green on their last runs, b-npc-death-report 024748 among them, the death report's fall at T3; before it 09:55 PDT: the gate set 20261024-155001-gate-m3-train-43 on de9d048e, all sixteen green on their last runs, b-npc-death 162453, b-npc-loot 163014, b-npc-respawn 163304 with the re-roll; T2 green at de9d048e; gate-cite's five checks pass; HYPOTHESIS tags remaining: the over-time damage path's aggressor, the engine's reason for refusing Resurrect under AI off, named in Suppress) (x-npc-fate-pin v3 GREEN 053914, 060646, 072444: the species on both seats and both paths; x-npc-fate-outfit v3 GREEN 072041 on 43's stage 962fc913: armor, cloak and weapon whole on both Embershard bandits; ADR-046 decision 1 at T3; committed: b-npc-death, b-npc-loot and b-npc-respawn (main 26db4afd); every fate and death probe green on 43 d2210492; 43's T2 and a gate set with the nine plus the seven committed scenarios run tonight for the merge's citation; by path, awaiting the stages: x-npc-death, x-npc-loot and x-npc-respawn on 42; b-npc-fate written after x-npc-death holds, rule 13))
+- [x] TS handler (ActorFateService keeps every fate and re-rolls a reference the engine already holds when its fate is new; formView's engine-dressed rule; behind npcFate, off by default until x-npc-fate-pin; 3d224c08: the late path's lookups in the update tick, not the message handler; cc21ae6f: npcFate on unless the settings file says false, both readers, after the pin's green; the deaths' client half 3cb843a8: the dead bind with its two-second re-check, the corpse's inventory and activation block, the engine's Resurrect at the respawn, the corpse branch of the container flow; DeathReportService faeb232a, train-44: the host's death report at deathStart; 8efabb10: read from the health floor under the deferred kill, the ear that hears a fall)
+- [x] T2 green (33 sessions identical with the declared divergences at 417cb746, the index compared as identity, the declarations naming forms; 09:55 PDT)
+- [ ] T3 scenario green, no HYPOTHESIS tags (the template's wording restored and the box unticked 15:52 PDT 2026-10-29 by the pass's inventory, docs/private/hypothesis-inventory-2026-10-29.md: 16 tags with a named read and 18 without stand in this doc; the earlier tick read: T3 scenario green (20:13 PDT, 2026-10-24: the gate set 20261025-015916-gate-m3-train-44 on 8efabb10, all eighteen green on their last runs, b-npc-death-report 024748 among them, the death report's fall at T3; before it 09:55 PDT: the gate set 20261024-155001-gate-m3-train-43 on 417cb746, all sixteen green on their last runs, b-npc-death 162453, b-npc-loot 163014, b-npc-respawn 163304 with the re-roll; T2 green at 417cb746; gate-cite's five checks pass; HYPOTHESIS tags remaining: the over-time damage path's aggressor, the engine's reason for refusing Resurrect under AI off, named in Suppress) (x-npc-fate-pin v3 GREEN 053914, 060646, 072444: the species on both seats and both paths; x-npc-fate-outfit v3 GREEN 072041 on 43's stage 02c001ca: armor, cloak and weapon whole on both Embershard bandits; ADR-046 decision 1 at T3; committed: b-npc-death, b-npc-loot and b-npc-respawn (main 40faee46); every fate and death probe green on 43 47637942; 43's T2 and a gate set with the nine plus the seven committed scenarios run tonight for the merge's citation; by path, awaiting the stages: x-npc-death, x-npc-loot and x-npc-respawn on 42; b-npc-fate written after x-npc-death holds, rule 13))
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
@@ -2131,9 +2131,9 @@ their deaths again" (break 2); c1 crashed in Sven's redress on an actor with no 
     10-17 on two faults every branch inherited: Hooks.cpp formatted by a newer
     clang-format, and skyrimPlatform.ts edited without Definitions.txt.
 
-MERGED (18:44 PDT, 2026-10-25): train-46 on fork parity aaafffe5 (Eli: "Merge
+MERGED (18:44 PDT, 2026-10-25): train-46 on fork parity c40a36a3 (Eli: "Merge
 now"; gate 20261026-001639 eighteen of eighteen, T2 green; thuum main
-bfc41e0b): the server-made actor's death by the NPC rule, E_HIT_WEAPON at
+b5a50371): the server-made actor's death by the NPC rule, E_HIT_WEAPON at
 info, the corpse's occupancy released. The body's diff-only inventory and
 the hosted copy's dress ride train-47, built ahead on the memo's letters.
 
@@ -2151,7 +2151,7 @@ the report (ADR-050 decision 2's pending death), or the engine first and
 the report checked (ADR-048 B); the probes' claim assumed the first and now
 accepts either. (2) The bodies lay 326 units apart: c2's rest fired
 ("rested at the host's spot, 329 units away") and a dead ragdoll takes no
-setPosition. Fixed on fork m3-npc-death cc1d9025: the puppet is placed at
+setPosition. Fixed on fork m3-npc-death 8561473a: the puppet is placed at
 the host's last sample BEFORE the kill word is applied, while it still
 moves (deathService); the rest after death stays as a read. Also read: the
 guest-hit path works (x-npc-death-guest v3 091346: ff000001's hits on
@@ -2161,7 +2161,7 @@ and twenty-four times now), and the combat hold (start-combat on the host)
 keeps a walking resident in place for the swings, where a judged approach
 alone lands three seconds behind him. H-52a (the pre-kill placement puts the
 bodies within 200 units) CONFIRMED: x-npc-death-host v5 20261027-095847 on
-the restaged cc1d9025 GREEN, nine of nine claims, the one-number read after
+the restaged 8561473a GREEN, nine of nine claims, the one-number read after
 the first swing, the death by either order, the bodies within 200 units on
 both axes. The guest's probe reached 0.16 with six landed hits before Sven
 fled into his house (v5 095425); v6 arms the guest with a Daedric warhammer
@@ -2174,7 +2174,7 @@ ff000001 kills 1348c with fe01e801 on a claimed bow hit", 103638); v8
 holds Sven still with the host's npc-ai lever instead of combat (a shot
 needs a still target, a swing an engaged one).
 
-52's gate (gate-m3-npc-death on cc1d9025, 10:51Z; 04:46 PDT): b-npc-death
+52's gate (gate-m3-npc-death on 8561473a, 10:51Z; 04:46 PDT): b-npc-death
 20261027-112539 red on the restart leg, read as a premise, not 52's code.
 The record after the restart lay 360 units (y) from the body snapshot. What
 moved it: after a restart both games log in again within the same tenth of
@@ -2205,12 +2205,12 @@ any host held the cell; c1 logged in as host at 12:01:26 and bound a
 corpse; c2's two-second check resurrected its puppet ("resurrect 85547
 (puppet true) queued"), c1's never ran: 52 had put the check's
 `!simulatedHere` guard on both directions ("the life check is a puppet's",
-b82a82e5). The kill direction is the design's (ADR-050 decision 2: the
+354b13c2). The kill direction is the design's (ADR-050 decision 2: the
 simulating seat's engine dies from the cause and its report, the check
 never kills it); the stand-up is the server's word on every seat, since the
 respawn's container reaches the host of the moment and a host that logs in
 after the sweep binds a corpse, as the check's own comment already said.
-Fixed on m3-npc-death 7cd47e24 (the check resurrects any copy whose record
+Fixed on m3-npc-death 774bc940 (the check resurrects any copy whose record
 says alive and still never kills a simulated one; one condition, tsc clean,
 no server, wire or scenario change), pushed when the gate's branch is
 clear, then CI, the restage, the probes with b-npc-respawn, and the gate
@@ -2229,7 +2229,7 @@ warhammer's 27-a-hit blow ended Sven, and the host's report said "13491 died
 of unknown ..., host ff000000, killer 0: a hit the server numbered 82 ms
 before; the server records the death", with his AI on and his combat started
 in 160510; the stage's 123746 killed him with the iron sword's small blows
-and the report named ff000000. deathReportService on 7cd47e24 sends
+and the report named ff000000. deathReportService on 774bc940 sends
 deathStart's killer when the engine names an actor and 0 otherwise, so
 H-52b: after a lethal single blow (a kill move, or the one cause that takes
 the engine's health to zero) the engine's deathStart names no killer, H1's
@@ -2237,7 +2237,7 @@ edge; CONFIRMED at T3 (x-npc-death-blow v2 20261027-181507, ten of ten: the
 report named no killer and the server credited the sword hit it numbered
 54 ms before; b-npc-death-blow). The server has the better evidence, its own
 number's aggressor on the pending line (R0), so the credit is train 54's
-code: on m3-npc-face 240a31de a report naming no killer after a hit the
+code: on m3-npc-face a9e47e0e a report naming no killer after a hit the
 server numbered within the window takes that hit's aggressor as the killer
 (ActionListener::OnActorDeath case 0, "the killer {:x} credited from the
 server's own number"; MpActor::LastHitBy picks the latest hitter in the
@@ -2255,13 +2255,13 @@ line as cause 4 with the killer: the engine's own kill move had ended him.
 So H1 is REFUTED for the killer: the cause applied through damageActor kills
 the engine's actor without recording an attacker, and deathStart names a
 killer only when the engine's own kill move kills. The credit from the
-server's own number (54, 240a31de) is the fix, not an edge. A loosening of
+server's own number (54, a9e47e0e) is the fix, not an edge. A loosening of
 b-npc-death-engine's killer line to the pending line's aggressor (main
 895f135) was reverted the same hour (3055859): numidium read it against
 rule 13, never turn a scenario green by weakening its assertions, and was
 right; the line stays strict. So train 52 ships inside train 54 as one merge
-train (ADR-030): m3-npc-face carries m3-npc-death 7cd47e24 and the credit
-240a31de on parity 39cf3f4d, 54's gate plays every M3 scenario including
+train (ADR-030): m3-npc-face carries m3-npc-death 774bc940 and the credit
+a9e47e0e on parity a8d10c99, 54's gate plays every M3 scenario including
 b-npc-death-engine's strict line on the build that names the killer from
 the server's own number, and parity goes from 51 to 54 with 52's commits
 inside. The intermediate parity at 52 is the only thing that goes.
@@ -2279,7 +2279,7 @@ when it brings the engine to zero), so deathStart names no killer and the
 report says cause 0; the credit then names the hit's aggressor. Its rerun on
 54's stage reads H-52b at T3.
 H-52b CONFIRMED at T3 (11:19 PDT): x-npc-death-blow v2 20261027-181507 GREEN,
-ten of ten, on m3-npc-face 240a31de: "[2026-10-27 18:17:52.188] [info] [verb:npc-fate] death report: 13491 died of unknown at (20025, -46299, -147), host ff000000, killer ff000000: a hit the server numbered 54 ms before, the killer ff0000". The report named no
+ten of ten, on m3-npc-face a9e47e0e: "[2026-10-27 18:17:52.188] [info] [verb:npc-fate] death report: 13491 died of unknown at (20025, -46299, -147), host ff000000, killer ff000000: a hit the server numbered 54 ms before, the killer ff0000". The report named no
 killer (cause 0) and the server credited the sword hit it had numbered
 within its window; every other claim of b-npc-death-engine held with it.
 Promoted as b-npc-death-blow (main, its own commit). H1 stands refuted for
@@ -2304,7 +2304,7 @@ off no corpse moves (x-npc-corpse-drift 20261027-211727: one point through
 24 reads over four minutes on both seats, across a restart and the
 reconnect; b-npc-death green in 55's gate 003911); the mechanism the
 promote's EnableAI and EvaluatePackage on a corpse at the flip, the code
-read of 12:18 PDT, the fix on parity 1b866786.
+read of 12:18 PDT, the fix on parity c85dab3d.
 Candidates: the reconciler's puppet flip at
 the reconnect feeding the locomotion detour a speed the dead actor's graph
 keeps; the engine's own movement controller running on a corpse killed by
@@ -2322,7 +2322,7 @@ c6899e0, after 0977292 had re-measured the fall-point bounds against that
 snapshot and numidium read it against rule 13: a re-measurement that hides
 the anomaly weakens the claim). Until H-54e's read the scenario reds on a
 drifting corpse, by design. H-54e's read at T3 (14:26 PDT, x-npc-corpse-drift
-20261027-211727 GREEN on 55's stage, m3-npc-talk c1be67d1 with the promote
+20261027-211727 GREEN on 55's stage, m3-npc-talk dee28c05 with the promote
 fix): the corpse stayed at one point through 24 reads over four minutes on
 both seats, c1's at (125306, -81256) and c2's 22 units from it, across the
 kill word, a server restart and the host's reconnect (the flip that walked
@@ -2341,42 +2341,42 @@ resurrect turns the AI on when the record stands again), a local commit on
 m3-npc-face behind 54's gate, pushed to whichever branch the gate's verdict
 sends it to (a restage of 54 on a red rerun, 55's branch on a green).
 
-Train 52 merged inside train 54 (13:43 PDT): fork parity 240a31de, the chain
+Train 52 merged inside train 54 (13:43 PDT): fork parity a9e47e0e, the chain
 20261027-181833-gate-m3-npc-face plus its rest 202429 (verdict watch), 52's
 commits in it: the engine's own deaths from the server's cause (H-52a
-confirmed), the life check's stand-up (7cd47e24), the killer credited from
+confirmed), the life check's stand-up (774bc940), the killer credited from
 the server's own number (H-52b confirmed at T3, b-npc-death-blow), the
 voice slice, the body placement before the kill. Open on this build: H-54e
 (a corpse moving on its host's engine; the promote fix is on 55's branch,
-c1be67d1, with x-npc-corpse-drift as its read) and the engine's refusal of
+dee28c05, with x-npc-corpse-drift as its read) and the engine's refusal of
 Resurrect under AI off (Suppress). b-npc-headshot-host sits pending until
 the lab can aim.
 
 H-54e's fix merged (19:26 PDT): the promote that leaves a dead actor's AI
-off rode train 55 to parity 1b866786 (c1be67d1), read green at T3 by
+off rode train 55 to parity c85dab3d (dee28c05), read green at T3 by
 x-npc-corpse-drift 211727; b-npc-death played green in 55's gate (003911).
 
 ## Watch item (2026-10-27, 52's cut gate and restage, ADR-027): b-npc-death
 
 b-npc-death red twice on its restart leg's premise, never on a claim. (1)
-20261027-112539 (52's gate on cc1d9025): the record after the restart lay
+20261027-112539 (52's gate on 8561473a): the record after the restart lay
 360 units from the body snapshot because the restart's cell grant is a race
 between the games' own logins; c2 won it with a corpse its cell reload had
 re-settled down the forest slope, and the record followed its host's body
 under R2. Fixed on main 86d340b: c2 waits five squares out through the
 restart, c1 alone reloads the cell and the step holds for its grant. (2)
-20261027-125354 (52's restage on 7cd47e24): the pinned host held and c2's
+20261027-125354 (52's restage on 774bc940): the pinned host held and c2's
 teleport back, issued within a second of its login, never settled (the
 record written, the game unmoved for 60 s under the server's corrections).
 Fixed on main c1f44fb: fifteen seconds between c2's reconnect and the move.
-GREEN at 20261027-132954 on 7cd47e24 with every claim as written. (3)
+GREEN at 20261027-132954 on 774bc940 with every claim as written. (3)
 20261027-141823 (52's gate): the server's god mode is a session flag the
 restart forgot, and the pinned-host shape left c1 alone with the forest's
 predators for 40 s; 86117 killed it in ten hits and D18's grace passed its
 cells to c2 before leg 4 (every death and body claim before it held). Fixed
 on main b8c494f: server-console TGM after c1's reconnect, after c2's and
 after c1's relaunch. GREEN in the gate's rest at 154008, which played b8c494f
-from main at ec7107d. (4) 20261027-190413 (54's gate on 240a31de): with
+from main at ec7107d. (4) 20261027-190413 (54's gate on a9e47e0e): with
 the host pinned and holding, the record after the restart lay 1316 x and
 687 y from the body snapshot because c1's own engine had moved the corpse
 between the kill and the restart at the same height and the record followed
@@ -2388,7 +2388,7 @@ this time. The four reds stay the watch item, H-54e open, until the
 scenario is green once more in a gate or the nightly and H-54e has its
 read; then this section and gate.yaml's entry come out together.
 
-## Train 56: the cause tops the engine up to the server's number (22:11 PDT 2026-10-27; fork m3-pt35-fixes 627bc45f)
+## Train 56: the cause tops the engine up to the server's number (22:11 PDT 2026-10-27; fork m3-pt35-fixes 136ee235)
 
 Playtest 35, Bleak Falls: rotfern's three arrow hits took 39fe2's record 1 to
 0.564 to 0.1285 to 0, "death pending ... its host reports within 3000 ms",
@@ -2430,7 +2430,7 @@ so such a body could never be stood up; and a 0xff NPC copy's live word took the
 path on the watcher. The logs put the reanimation on c2's engine at 03:54:15Z two seconds after a handoff while c1 was
 stale then disconnected, so the screen Eli saw it on is undetermined; the mechanism is the same on either host.
 
-Fix, fork m3-reanimate 9ef0d567 (train m3-turbo-train-3g d1f3e393): the platform hooks Character's Resurrect
+Fix, fork m3-reanimate 1a3dc981 (train m3-turbo-train-3g d384de20): the platform hooks Character's Resurrect
 (CommonLibSSE-NG Actor.h:369, vfunc 0AB, written on VTABLE_Character[0] with PlayerHealthDamage's write_vfunc shape;
 the player's own vtable is untouched) and, for an actor this seat hosts and not a puppet, enables the AI before the
 engine's call and turns it off again only if the body stays dead; the host's sampler sends the dead-to-alive flip
@@ -2439,7 +2439,7 @@ reliable and never swallows it as unchanged; the server counts a death with no s
 H-54f, x-reanimate-host's read (by path 2026-10-29 13:55 for the pass train's stage, RUN five times on 2026-10-30: v2
 20261030-125920 red on its premise, the Papyrus kill refused E_DEATH_UNCHECKED and the record stood Hilde back up; v3
 133744, the driver's Spell.Cast never crossed the client's cast hooks; v4 135637, the bolt hit Sven; v5 145135, the bolt
-hit nothing; v6 20261030-152542 GREEN seven of seven on the union 8f9c11bd, the host's engine standing her up 7 s after the
+hit nothing; v6 20261030-152542 GREEN seven of seven on the union a4541cd0, the host's engine standing her up 7 s after the
 relayed cast, the record's death cleared, alive on both seats; its claims the server's host-cast line and the record alive
 within 15 s, the c1 log-count recorded since v2; settled 19:26 PST 2026-11-02): CONFIRMED in its outcome (x-reanimate-host v6
 20261030-152542), the kProcessMe bit (what EnableAI writes) is what blocks Resurrect on an AI-off actor: c2's line
@@ -2468,8 +2468,8 @@ cast by any player on any body stands it on every screen whichever seat hosts th
 bodies in Prisoner's hosted cell (finding 63) are the required case, not the design's gap. The mechanism is the
 engine's own path, which the pieces already outline: the server accepts the caster's hit (it did), the relayed cast on
 the HOST's seat makes the caster's figure launch the same spell at the body on the host's engine (castSpellImmediate,
-with the launch geometry since fork m3-npc-launch-geometry 435b4c64), the Reanimate effect runs there, the Resurrect
-hook of 9ef0d567 stands the hosted body, the host's sampler reports it alive, the server flips the record and every
+with the launch geometry since fork m3-npc-launch-geometry e5bae766), the Reanimate effect runs there, the Resurrect
+hook of 1a3dc981 stands the hosted body, the host's sampler reports it alive, the server flips the record and every
 puppet stands. Tonight's zero platform lines on c2 say one of three links failed: the relayed projectile never hit the
 body on c2, the effect did not apply on the host's engine (the magic model keeps effects the server's),
 or the hook never fired (H-54g); Prisoner's
@@ -2485,7 +2485,7 @@ Playtest 41, Eli, verbatim: "when i killed sven and reanimated him, the animatio
 cast the spell" and "weird reanimating sven just puts him back on his normal path"; the decision "and yes go with A". The
 snippet above (the server's own Spell.Cast on the body's host, CastReanimateOnHost) ran the Reanimate effect in the HOST's
 engine with the caster's figure as the commander: the get-up and the shader played there alone, and a commanded actor whose
-commander is a figure (no intent behind it) fell back to its packages. Built on fork m4-reanimate-claim 9cc3c94c (server
+commander is a figure (no intent behind it) fell back to its packages. Built on fork m4-reanimate-claim 2dc75ab6 (server
 only): the accepted reanimate hit claims the body for the caster's seat (the caster when a user plays it, else the caster's
 host) through the cells rule's new commanded claim (wire-rules cells.rs FollowKind::Commanded beside ADR-052's Claim;
 claim_commanded with the lease the effect's EFIT duration plus 10 s, 0 for good; release_any_claim at the thrall's death in
@@ -2511,7 +2511,7 @@ kills a c2-hosted resident, c1 casts Reanimate Corpse at the body: the claim lin
 and alive within 3 s, c2's puppet Resurrect, npc-state isDead false on both, the thrall's server distance to c1 shrinking as
 c1 walks away, hosting back to c2 at 60 s plus the margin), then b-reanimate-claim in its own commit.
 
-## The non-host's loot at M3's exit (D71, 14:29 PDT 2026-10-30; c-dungeon-enemies on the union 0e23c820)
+## The non-host's loot at M3's exit (D71, 14:29 PDT 2026-10-30; c-dungeon-enemies on the union b8a9d4c6)
 
 RED three times (210543, 210957 relaunched, 211413 cold) at claim 5's first menuOpen: c2, the puppet seat and the killer, activates
 the body and the server admits it (OpenContainer, "onOpenContainerMesage - waiting for 'ContainerMenu open' (a corpse) to be
@@ -2542,7 +2542,7 @@ the closing activation at the close), their reruns the train's gate. Before D52 
 for 15 s after the looter closed it: playtest 34's "the non-host can't interact with the body" had this second cause beside the
 corpse's missing release.
 
-The guest-loot train begun (15:04 PDT 2026-10-30): fork m3-guest-loot off parity 0e23c820, first commit 39e5c2f5 (tsc clean, local
+The guest-loot train begun (15:04 PDT 2026-10-30): fork m3-guest-loot off parity b8a9d4c6, first commit 647674ec (tsc clean, local
 until the physics train has staged): remoteServer.ts's open-container handler takes its first wait as `Utility.waitMenuMode(0.1)`, so
 on the host the checker sees the engine's open menu at once and the close sends the closing activation instead of the 15 s give-up;
 the two scenarios' host claims (the admission line within the step, the closing activation at the close) read this behavior as
@@ -2553,29 +2553,29 @@ console kill, the engine's death and the host's report): the guest's Activate fa
 (npc-ai on the body of leg 2): Activate true, the menu open, the body 45 units off within 5 s (H-54e's walk). Leg 4 (the AI on leg 1's
 body): the driver's Activate false yet the menu open, the server's path (the handler's activate with default processing) opening it.
 So a released body takes an activation only with its AI on, the player's E and the handler's alike. The fix (fork m3-guest-loot
-05ac32a9, tsc clean, unpushed until the physics stage): onOpenContainerMessage switches a dead NPC's AI on before its activate, polls
+f3e484b9, tsc clean, unpushed until the physics stage): onOpenContainerMessage switches a dead NPC's AI on before its activate, polls
 the menu in menu mode (the open seen while the game pauses), and switches the AI off at the first open or after 2 s, one trace line
 each way ("body X: AI on for the server's open (D71)", "body X: AI off again, the menu is open (D71, H-54e)"); the game pauses in the
 menu, so nothing walks while it is open, and the bracket bounds the walk to the open's own frames. The promote's dead branch keeps
 the AI off (H-54e's no-drift rule). Its probe x-body-open-guest-fix v1 by path (cb798c4c, 73 steps): both kills, the guest's menu
 within 4 s with the two lines once per body and the AI off after, then the host's open after the guest's close with its handler line
-inside the step (39e5c2f5) and no second occupant counted. The train's gate: c-dungeon-enemies, b-npc-body-release and this probe
+inside the step (647674ec) and no second occupant counted. The train's gate: c-dungeon-enemies, b-npc-body-release and this probe
 (b-body-open-guest promoted on green); M3's exit closes with it.
 
-x-body-open-guest-fix v1 (041249, 21:18 PDT read; the guest-loot stage, m3-guest-loot 05ac32a9, dist 14946) RED 1 of 5 at step 28: the
+x-body-open-guest-fix v1 (041249, 21:18 PDT read; the guest-loot stage, m3-guest-loot f3e484b9, dist 14946) RED 1 of 5 at step 28: the
 fix fired ("body 39fe4: AI on for the server's open (D71)" at 04:15:38.085, the handler's "waiting for 'ContainerMenu open' (a corpse)"
 in the same millisecond), the menu never opened, no later handler line came within the run (the 2 s off line should have), and the
 dump read the body's AI off. Two candidates: the enable and the activate in one frame, the engine taking the AI state a frame later
 (v2's green read had the lab's npc-ai seconds before a separate activate); or the enable never took (the dump's off with no off line
-of ours). The fix's v2 (fork m3-guest-loot, the head after 05ac32a9): the AI state logged at the switch, the activate deferred to the
+of ours). The fix's v2 (fork m3-guest-loot, the head after f3e484b9): the AI state logged at the switch, the activate deferred to the
 next update callback with the state logged right before it, and the state logged at the off; a read either way. D69's stage takes
 the lab while it builds.
 
-The fix's v2 (e1235544) RED twice (22:03 PDT read; x-body-open-guest-fix 045522 cold, 045859 relaunched, step 28 alone): the AI read
+The fix's v2 (ca5b93d2) RED twice (22:03 PDT read; x-body-open-guest-fix 045522 cold, 045859 relaunched, step 28 alone): the AI read
 TRUE at the switch, the "one update later" line printed in the switch's own millisecond (a once('update') registered inside an update
 callback runs in the same pass), so the activate still landed in the enable's frame and the menu never opened; at the dump the AI read
 off again (whether by our deadline's off or another hand is the next run's question: the off line's presence in 045522's console).
-The server sent OpenContainer each time and logged nothing about the body. v3 (0547e5d4, pushed): a real latent beat between the
+The server sent OpenContainer each time and logged nothing about the body. v3 (3dc03d98, pushed): a real latent beat between the
 switch and the activate (await Utility.waitMenuMode(0.2), which runs while paused), the AI state logged right before the activate,
 the off deadline 3 s. In x-body-open-guest v2's green leg the lab's npc-ai had switched the AI on seconds before a separate activate,
 so the beat the engine needs is somewhere under five seconds and above a frame. D69's restage takes the lab while v3 builds.
@@ -2586,18 +2586,18 @@ frame it: the handler's first wait, Utility.waitMenuMode(0.1), resolved on the g
 the activation), and in x-prop-push v9's console Skyrim Platform logged "onResult called: Utility.waitMenuMode (call 1)" at the give-up
 while the 150 iterations of the loop's Utility.wait(0.1) logged nothing: Utility.wait is Skyrim Platform's own frame wait, waitMenuMode a
 VM latent. HYPOTHESIS (the next run's onResult lines decide): a second VM latent from the same handler never resolves on the guest, or
-waitMenuMode advances only in menu mode past its first call. v3 (0547e5d4) put the beat on waitMenuMode too and would have hung before
-the activate; superseded before any run by v4 (ce1df68b, pushed, the restage's head): the beat Utility.wait(0.15), the open-poll back on
+waitMenuMode advances only in menu mode past its first call. v3 (3dc03d98) put the beat on waitMenuMode too and would have hung before
+the activate; superseded before any run by v4 (75d6e631, pushed, the restage's head): the beat Utility.wait(0.15), the open-poll back on
 Utility.wait(0.1) as the original loop (its 15 s give-up printed on schedule in earlier runs), the first wait alone in menu mode for the
 host's open menu. Under the game-time poll a guest's menu, once open, pauses the game and the poll resumes at the close, so the AI's
 off for a guest's open lands at the close (nothing walks under the pause). The probe stays cb798c4c.
 
-The fix's v4 (ce1df68b) RED twice (22:40 PDT read; 053012 cold, 053335 relaunched, step 28 alone): the activation went out, the AI
+The fix's v4 (75d6e631) RED twice (22:40 PDT read; 053012 cold, 053335 relaunched, step 28 alone): the activation went out, the AI
 switched on ("reads true at the switch"), and the handler never logged again: no "after the wait" line, no error; c2.log's only latent
 completion the handler's first waitMenuMode, 58 ms before the switch. With v2's stall two awaits after the switch and v4's at the first
 (a game-time Utility.wait), the kind of wait is not the fault: after enableAI(true) on the released body this handler's next await
 never resumes, whatever it awaits, while cast-action and npc-stream keep logging. A second pattern, kept: "Trying to get server mods,
-attempt 2" after a "Request/parse error ... Could not establish connection" 13 to 15 s after the switch in every run. v5 (80188d13,
+attempt 2" after a "Request/parse error ... Could not establish connection" 13 to 15 s after the switch in every run. v5 (d1fefeef,
 tsc clean, local until D69's merge): a released body's open runs on the TimersService with no await after the switch (its callbacks
 run inside the game's update when the player exists): the switch and its read; a 150 ms timer that activates and logs the activate's
 return; a 100 ms poll for the ContainerMenu; at the open the AI off ("AI off again, the menu is open") and a poll for the close that
@@ -2605,23 +2605,23 @@ sends the closing activation ("closing activation sent, the menu closed"); with 
 activation as the give-up. The other paths keep the async loop, which now has a catch that logs a throw. The probe (x-body-open-
 guest-fix v2 by path) and the two pending scenarios (c-dungeon-enemies, b-npc-body-release, their own commits) read the guest's
 admission and release through these lines; the host's open, its body never a puppet and its AI on, keeps the generic handler's lines.
-D69 merges alone meanwhile (numidium: a restage of dc3ec679, its gate always plus b-quest-rumor, b-quest-stage, b-story-arrival plus
+D69 merges alone meanwhile (numidium: a restage of 6dbabc7a, its gate always plus b-quest-rumor, b-quest-stage, b-story-arrival plus
 watch, T2 beside); the union m3-pass-train-4 is re-cut on v5 after.
 
-The fix's v5 (b878b2a6, parity dc3ec679 merged in) RED twice (00:1x PDT 2026-10-31; x-body-open-guest-fix v2 aba01c6f, 065444 cold,
+The fix's v5 (60f6c296, parity 6dbabc7a merged in) RED twice (00:1x PDT 2026-10-31; x-body-open-guest-fix v2 aba01c6f, 065444 cold,
 065821 relaunched, step 28 alone; numidium's read): the timers path ran whole, "AI on for the server's open (D71); reads true at the
 switch" at 07:00:20.015, "AI reads true after 150 ms; activating" at .150, "activate returned false" at .151, the 3 s give-up and the
 closing activation after; no menu. The one green read of H5 (x-body-open-guest v2 215922, leg 4) had the lab's npc-ai switch the AI on
 five seconds and more before the server's open took the body's activate; v1, v2 and v5 all activated within a frame to 150 ms of the
 switch. HYPOTHESIS (v6's run decides): the dead actor's process wants more than 150 ms after EnableAI before it takes an activation (the
-engine's own promotion of the actor's process, not a flag our switch sets). v6 (m3-guest-loot d10789f7, pushed 00:09 PDT): the activate
+engine's own promotion of the actor's process, not a flag our switch sets). v6 (m3-guest-loot 19e8c397, pushed 00:09 PDT): the activate
 retried every 200 ms for up to 5 s after the switch, each return logged with the body's state ("activate returned <bool> at +N ms
 (attempt K; AI, dead, 3D, health)"); the first true, or an open ContainerMenu regardless of the return, starts the menu poll as v5; the
 refusals to the deadline switch the AI off ("the activate refused K times over N ms") and release the occupant. The time of the first
 true is the measurement; a run of refusals falsifies the hypothesis and sends the read to Actor::ActivateRef (rule 8; the re-analyst
 on sky-re, CommonLibSSE-NG TESObjectREFR.h:367 names it). The probe stays aba01c6f.
 
-v6 GREEN (00:5x PDT 2026-10-31; x-body-open-guest-fix v2 aba01c6f, 20261031-074043 on d10789f7's stage, a cold run; numidium's read):
+v6 GREEN (00:5x PDT 2026-10-31; x-body-open-guest-fix v2 aba01c6f, 20261031-074043 on 19e8c397's stage, a cold run; numidium's read):
 the engine takes a released body's activation about 2.1 s after its AI is switched on. c2's lines: the switch at 07:43:36.379 ("reads
 true at the switch"), nine "activate returned false" at +164, +384, +608, +818, +1027, +1271, +1475, +1690 and +1904 ms, each with
 AI true, dead true, 3D true, health 0, then "activate returned true at +2127 ms (attempt 10)", "the ContainerMenu is open" 54 ms later,

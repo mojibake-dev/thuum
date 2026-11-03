@@ -61,7 +61,7 @@ echo "== 1. the Windows build of $sha8"
 # runs nothing; the client compiles against npm's 2.8.0 typing (skymp5-client/tsconfig.json:15); and the codegen tools
 # run only as the Formatting check's CodegenCheck (linter-config.json:80-117), step 1b's gate, so a const enum edit
 # without its regenerated skyrim_platform/ConstEnumApi.cpp stops there, and one with it keeps the wait (2026-11-01,
-# m4-traps 346249e8: 2dece251's leave declaration cost a 35 min build for that file alone)
+# m4-traps 19e8d981: 2d73ebcb's leave declaration cost a 35 min build for that file alone)
 dist_sha=$sha; overlay=; dist_branch=$branch
 if [ "${REUSE_DIST:-}" = 1 ]; then
   # libespm/ is server-only too: its static espm library is linked by server_guest_lib and unit alone
@@ -93,7 +93,7 @@ if [ "${REUSE_DIST:-}" = 1 ]; then
   }
   # REUSE_DIST_FROM=<branch>: a server-only branch with no client build of its own (its pushes carry
   # CLIENT_BUILD_WINDOWS=0) takes an ancestor's dist from the branch that built it, under the same checks
-  # (m3-quest-sge-stages off the union, whose 0e23c820 dist m3-pass-train-3-win built, 2026-10-31)
+  # (m3-quest-sge-stages off the union, whose b8a9d4c6 dist m3-pass-train-3-win built, 2026-10-31)
   reuse_walk "$branch" || { [ -n "${REUSE_DIST_FROM:-}" ] && reuse_walk "$REUSE_DIST_FROM"; } || true
   [ "$dist_sha" != "$sha" ] || echo "   REUSE_DIST: no earlier build has this head's client${REUSE_DIST_FROM:+ (on $branch or $REUSE_DIST_FROM)}; waiting for its own"
 fi
@@ -126,7 +126,7 @@ for i in $(seq 1 120); do
     completed:cancelled)
       # a newer push to the branch cancels the mirror's run (cancel-in-progress) while the fork's own client-build of this
       # head goes on building it on sky-build, which the loop's top takes once it succeeds (m5-train-permit-onceload
-      # 64ec9666, 2026-11-01: the 25c00758 push cancelled run 41362790349 and stopped the stage, then job 16373 succeeded)
+      # f646bd01, 2026-11-01: the 60704df0 push cancelled run 41362790349 and stopped the stage, then job 16373 succeeded)
       live=$(python3 - "$sha" <<'PY' || true
 import sys
 sys.path.insert(0, "lab/tools")

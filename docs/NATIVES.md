@@ -73,7 +73,7 @@ Status meanings:
 | `ActiveMagicEffect.UnregisterForUpdate` (method) | missing |  |  |  |
 | `ActiveMagicEffect.UnregisterForUpdateGameTime` (method) | missing |  |  |  |
 | `Actor.AddPerk` (method) | implemented | R0 | writes the perk into the server's record and sends the player its perk state (docs/verbs/perks.md; fork m5-perks, 2026-10-31); no rule: a script's or the console's word | perks |
-| `Actor.AddShout` (method) | implemented | R0 | Since fork m4-word-wall (f32fcebc, the word wall's server half): writes the shout into the actor's record (RecordShoutEntry) and tells its game by SpSnippet Actor.AddShout, as the console does; true when the record grew. The login replays the record (docs/verbs/shouts.md). | word-wall |
+| `Actor.AddShout` (method) | implemented | R0 | Since fork m4-word-wall (55d96b97, the word wall's server half): writes the shout into the actor's record (RecordShoutEntry) and tells its game by SpSnippet Actor.AddShout, as the console does; true when the record grew. The login replays the record (docs/verbs/shouts.md). | word-wall |
 | `Actor.AddSpell` (method) | delegated |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:782]; the server also sends it after a sleep to grant Rested (ActionListener::GrantRested) [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1020]; the console's AddSpell (an admin's) sends it to the target's game after recording the spell (docs/verbs/cast-teleport.md) [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1020] | sleep |
 | `Actor.AddToFaction` (method, not in SP dump) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusActor.cpp:1016] |  |
 | `Actor.AllowBleedoutDialogue` (method) | missing |  |  |  |

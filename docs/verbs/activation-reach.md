@@ -119,7 +119,7 @@ Rate limit / bounds: the reach above; rate unchanged.
   (the scenario approved by Eli, 2026-10-05)
 - [x] on fork parity (b095fca6, 2026-10-03)
 
-## The OpenContainer wait after a swap (train-29, 2026-10-20; fork m2-train-29 18c0e603, merged to parity 4720d0d3 at 13:40)
+## The OpenContainer wait after a swap (train-29, 2026-10-20; fork m2-train-29 c3751c1d, merged to parity 7293c944 at 13:40)
 
 Playtest twenty-five's c1.log counted 2000 latent Utility.wait calls from
 Shadowbond's break onward, five a second (lab read, pt25/log-read.md
@@ -129,7 +129,7 @@ instant, so the client's OpenContainer handler (remoteServer.ts
 onOpenContainerMessage) activated the reference, waited for ContainerMenu to
 open, and waited forever; the server kept test 1 as the object's occupant
 (MpObjectReference::occupant) until a destroy or disable, and HYPOTHESIS
-refused the next player by the occupant distance check. Fix (18c0e603): the
+refused the next player by the occupant distance check. Fix (c3751c1d): the
 first wait has a 15 s deadline; on giving up the handler skips the menu wait
 and still sends the second Activate, which the server takes without the
 reach check (ActionListener OnActivate's second-activation path) and which

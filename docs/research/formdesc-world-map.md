@@ -1,7 +1,7 @@
 # ADR-043 implementation map: every stored form a FormDesc
 
 Read-only code map, 2026-10-19 evening. Every file:line is against the fork
-commit e3806870b93b994e9a09175e36a84f4e92973558 (origin/parity as pushed
+commit 0a20755af48d67e8826cbc5465df753dc20270b3 (origin/parity as pushed
 19:00:04 PDT; it moved from 88c43e77 during this read, so earlier numbers were
 re-derived against the pin). Paths are relative to skymp5-server/cpp/ unless
 they start with unit/, libespm/, skymp-wire/, skymp5-server/ts/ or lab/.

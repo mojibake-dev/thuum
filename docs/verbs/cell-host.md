@@ -84,13 +84,13 @@ Why not R1 for the host: a game cannot see who else has the cell, nor
 anyone's round trip; TES3MP and Skyrim Together both keep the stamp on the
 server (tes3mp.md:45-47; te-npcs.md:56-58).
 Rate limit / bounds: CellLoaded 128 at once, 32 a second after (MEASURED
-on b-cell-host 20261021-184501, fork c0e4a029: the save's load fired 30
+on b-cell-host 20261021-184501, fork e8f1f9a3: the save's load fired 30
 loaded reports within 14 ms, a teleport five cells away 25 unloaded and 25
 loaded within 60 ms, loads and unloads sharing the bucket; the first bucket
 of 32 then 8 refused the landing cell's own report, E_VAL_RATE, which no
 client retries, so the server never learned the host had it; the bucket is
 sized to the engine's bursts and carried with those numbers, ADR-033 point
-5, fork a591bdeb); GRACE_MS 5000; the host's stream keeps its own budgets.
+5, fork 3ea950eb); GRACE_MS 5000; the host's stream keeps its own budgets.
 
 ## Engine surface
 
@@ -123,7 +123,7 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   high process list, ProcessLists::GetSingleton and highActorHandles
   (ProcessLists.h:36, :69; te-npcs.md:277-281). Not used here: the host's
   stream covers the server's NPCs by their views.
-- MEASURED (x-cell-attach 20261021-185728, solo, fork c0e4a029, the
+- MEASURED (x-cell-attach 20261021-185728, solo, fork e8f1f9a3, the
   driver's cell-events steps): cellFullyLoaded fires once per cell, 25
   exterior cells within 2 ms at the coc into Riverwood (plus one
   runtime-created exterior cell with an 0xff id, which carries no map
@@ -156,7 +156,7 @@ sized to the engine's bursts and carried with those numbers, ADR-033 point
   epoch } to the old host. The client's HostService keeps { cell: epoch }; a
   view's NPC is "hosted here" when its copy's parent cell is in that set,
   which is what storage['hosted'] answered per actor (remoteServer.ts:
-  153-179 on ef44a1d8; formView.ts:450-464, 515-532 on t31 9ad635cd). The
+  153-179 on ef44a1d8; formView.ts:450-464, 515-532 on t31 e87267c4). The
   hosted actors' stream is SkyMP's own: movement every 130 ms, animation,
   hits and casts (sendInputsService.ts:111-153, 216-252; hitService.ts:
   17-41; magicSyncService.ts:62-64).
@@ -195,7 +195,7 @@ second quit crash (SkyrimSE.exe+0x1949d3, 13129+0x23 under 36551+0xd9d, an
 actor's skeleton going down) is the load order's, not ours
 (x-quit-second-nopuppet 082607, x-quit-second-solo 083649); the instruction's
 reading stays the re-analyst's, and the fast exit (D24-B, train-49 in 50b,
-fork parity 951ea43d) skips the engine's shutdown, so no seat meets it. With
+fork parity cad9ce48) skips the engine's shutdown, so no seat meets it. With
 both plugins loaded the Loading Menu's IMenu gains one reference per loading
 screen where either alone takes one in all (x-quit-scan v3 021707; 081617,
 082111); the third holder is unnamed, the pair's numbers go upstream with
@@ -231,7 +231,7 @@ D24-D, and the fast exit makes the count moot on a seat.
   load then an unload keep their order), cap 16 bytes, fields { cell: u32,
   loaded: bool } (built 2026-10-21). Validator: the budget above as
   wire-validate's cell_loaded_budget (128 at once, 32 a second since
-  a591bdeb; E_VAL_RATE), a
+  3ea950eb; E_VAL_RATE), a
   cell of 0 refused (E_VAL_RANGE), nothing more about the cell, since the
   election checks the server's own grid; idempotent (it sets a bit). The C++
   side: CellLoadedMessage, HostGrantMessage, HostReleaseMessage
@@ -256,13 +256,13 @@ D24-D, and the fast exit makes the count moot on a seat.
   (None unless connected; try_from_secs_f64, no `as`), mirrored in
   wire-bridge beside client_ip, read in C++ as IServer::GetRttMs(userId)
   through WireServer's clientsByUser table (WireServer.cpp:191-229). Built
-  2026-10-21 (fork m3-cell-host f2b59a33): wire-bridge Server::client_rtt_ms
+  2026-10-21 (fork m3-cell-host e2dc7d46): wire-bridge Server::client_rtt_ms
   (-1 while unknown), IServer::GetRttMs with that default, WireServer's and
   the combined server's, PartOne::SetRoundTripSource installed by
   ScampServer and read every cell-host tick; CellHostTest's third case ranks
   two visitors by it. CONFIRMED and fixed on the way (docs/research/
-  transport-clock.md, fork wire-renet-clock cb6bedee, merged into this
-  branch 1c21308a): wire-transport's polls called transport.update(dt,
+  transport-clock.md, fork wire-renet-clock b70880ed, merged into this
+  branch c40fcc1e): wire-transport's polls called transport.update(dt,
   renet) and never renet.update(dt) (lib.rs:330, :582), so renet's
   connection clock stood at zero, every rtt read 0 and no lost reliable
   packet was ever resent (reliable.rs:112-113); a loopback T0 fails without
@@ -271,7 +271,7 @@ D24-D, and the fast exit makes the count moot on a seat.
   with no host goes to the first player with it loaded and in reach (either
   fact may come second: the game loads a 5x5 while the grid is a 3x3, so a
   cell is often loaded before it is reached, and Reach is a fact with
-  decisions too, built 2026-10-21 07:00, fork 8f17d7a4), epoch plus one;
+  decisions too, built 2026-10-21 07:00, fork fb898f17), epoch plus one;
   the host's Unloaded, its Reach dropping the cell, or Gone arms GRACE_MS;
   loaded and in reach again before the deadline disarms it (a Loaded while
   out of reach disarms nothing); at the deadline the visitors with the cell
@@ -301,7 +301,7 @@ D24-D, and the fast exit makes the count moot on a seat.
   square; libespm's index assigned by file order and the map's cell came
   later, which a plugin overriding the persistent cell would have undone
   (CombineBrowser asks the last file first), so the index now takes only a
-  cell inside an exterior sub-block (fork 29a7b56e), pinned by EspmTest
+  cell inside an exterior sub-block (fork c236dc01), pinned by EspmTest
   (the origin 0x99a2, the T2 spawn's (32, -15) 0xbbb1, an empty square).
   The cell-change
   rule: a hosted NPC's report naming another cell is accepted when the sender
@@ -336,7 +336,7 @@ D24-D, and the fast exit makes the count moot on a seat.
   game activated the bench with her own player and she sat ("rotfern sat
   down on a bench all on her own"; her own activation then followed each of
   the resident's at 01:21:23Z and 01:24:44Z, answered "occupant is another
-  object and is nearby"). Since train-34 1db977ed (fork parity 7e59c32c, 2026-10-22 21:40 PDT) the
+  object and is nearby"). Since train-34 1a8585dd (fork parity 03e7d163, 2026-10-22 21:40 PDT) the
   reply goes only to an actor with a user; CellHostTest's case covers a hosted sitter
   at a bed. Teleport and ChangeValues keep the host route (the host's game
   must apply them to its actor).
@@ -345,7 +345,7 @@ D24-D, and the fast exit makes the count moot on a seat.
   user at about 02:31:54Z (the connection timeout) and the cell passed at
   the grace, 02:32:00Z. For about 24 s the cell belonged to a game that was
   gone: its residents froze on the other screen, nobody's to move. Since
-  train-39 (fork m3-train-39 206190dc, 2026-10-23 13:26 PDT) the server reads
+  train-39 (fork m3-train-39 efefb899, 2026-10-23 13:26 PDT) the server reads
   each connection's silence itself (R0): the wire transport stamps every
   received message per client (Server::client_silence_ms, IServer::GetSilenceMs
   through the combined server), and TickCellHosts marks a user silent for
@@ -379,15 +379,15 @@ D24-D, and the fast exit makes the count moot on a seat.
   at a game's first loads after a login (the first teleport after connect,
   a relaunched game's login), none at the four mid-session loading screens
   (Bleak Falls Temple and back on each seat), no grant changed hands on
-  them. kStaleHostMs is 4 s from train-39's next commit (2b14f213, local
+  them. kStaleHostMs is 4 s from train-39's next commit (c213a2ca, local
   until the stage is free), which clears all three; a login-time blip costs
   a second of candidacy at most, since revived disarms the grace.
-  Second read, x-host-kill 20261023-214420 on 2b14f213 (4 s): the pass 9.4 s
+  Second read, x-host-kill 20261023-214420 on c213a2ca (4 s): the pass 9.4 s
   after the last report (stale at 4.4 s, the grace), the disconnect 4.4 s
   later; and 4 s still tripped at each seat's first load after its login
   (4.5 and 4.8 s, n=5 across the two runs: 3.1 to 4.8), never mid-session,
-  never moving a grant. Two changes (fork m3-train-39 f88cd50d, carried by
-  m3-train-40 92529f31): the silence is the smaller of netcode's time since
+  never moving a grant. Two changes (fork m3-train-39 d4792a20, carried by
+  m3-train-40 661bc67a): the silence is the smaller of netcode's time since
   any packet (renet_netcode's time_since_last_received_packet: a keepalive
   counts, so a game whose network tick runs while its world loads is heard;
   the client's tick rides Skyrim Platform's tick event, so during a load it
@@ -398,26 +398,26 @@ D24-D, and the fast exit makes the count moot on a seat.
   only a host is marked stale, since a login's first loads come before any
   grant and a silent visitor hosts nothing
   to pass on. The threshold stays 4 s.
-  Third read, x-host-kill 20261023-221644 on train-40's stage 92529f31 (the
+  Third read, x-host-kill 20261023-221644 on train-40's stage 661bc67a (the
   two changes carried): no stale line at either login; the kill's alone,
   "silent 4032 ms, stale" and the pass at epoch 2 about 9.0 s after c1's
   last report, the disconnect 4.6 s later. The row's number is MEASURED and
-  its login blips closed. Carried in train-40 a5e431e2: T2 green (33 sessions), the gate set
+  its login blips closed. Carried in train-40 d698fe38: T2 green (33 sessions), the gate set
   GREEN 9 of 9 (run set 20261024-044200-gate-m3-train-40, 22:13 PDT) and
-  x-host-kill green on 92529f31 with the rule unchanged since; the merge
+  x-host-kill green on 661bc67a with the rule unchanged since; the merge
   waits on Eli's D12 alone (a restage first if 41's stage has replaced the
   gate's, as agreed with numidium). The row's committed T3 (23:04 PDT, main
-  1cb745d1, its own commit): lab/scenarios/b-host-kill.yaml, x-host-kill's
+  8faa1e5d, its own commit): lab/scenarios/b-host-kill.yaml, x-host-kill's
   shape with the timing claimed: the kill through `relaunch {until:
-  stopped}` (lab-api 0d3dd4d3, the step back at the kill with nothing told
+  stopped}` (lab-api 052ca39f, the step back at the kill with nothing told
   to the server) and `until: {within: 12, expect: [server.host(0x9732).client
   == "c2"]}`, which the timeout's 24 s would miss; first run GREEN
-  (20261024-065333 on 42's stage, lab-api 0d3dd4d3, 00:00 PDT): the pass 7.0 s
+  (20261024-065333 on 42's stage, lab-api 052ca39f, 00:00 PDT): the pass 7.0 s
   after the kill (8 polls), c2 hosting and running 0x13482 and 0x35534, still
   the host after c1's return and both seats' loading screens. D12's number
   stands at T3; green again in the citable set (162052, gate-m3-train-43 155001
-  on de9d048e, 09:55 PDT).
-  D12's B built (train-44, fork m3-train-44 cf8b6007, 2026-10-24 16:25 PDT;
+  on 417cb746, 09:55 PDT).
+  D12's B built (train-44, fork m3-train-44 c6a27e31, 2026-10-24 16:25 PDT;
   Eli, 15:49 PDT: "leaning towards B, that's the best practice way right? but
   also A as a background"): the client disconnects at the game's own quit.
   The re-analyst's read of the quit path (REA on sky-re, 16:00 PDT,
@@ -459,7 +459,7 @@ D24-D, and the fast exit makes the count moot on a seat.
   (x-host-quit 004815, v4 012653 GREEN at T3; b-host-quit 030427, 030801);
   none of the falsifiers fired. The stale rule stays the backstop for a crash
   or a kill (A as the background, Eli's words).
-  MEASURED by x-host-quit 20261025-004815 on 44's stage 154ca7d4 (numidium's
+  MEASURED by x-host-quit 20261025-004815 on 44's stage 8ce658e8 (numidium's
   read, 17:50 to 18:00 PDT): the trace holds the premise, the quit flag's
   frame and the shutdown's entry on one thread (3928, the main thread),
   DestroyClient entered at the flag and left 5 ms later from the thunk
@@ -502,17 +502,17 @@ D24-D, and the fast exit makes the count moot on a seat.
   variable the next stage can hold fixed: both seats fail "Trying to get
   server mods" (status 0, no connection) about every 42 s all run long, and a
   fetch was in flight at both crashing quits.
-  Cited: gate set 20261025-015916-gate-m3-train-44 on 6cdc2b35 (20:13 PDT),
+  Cited: gate set 20261025-015916-gate-m3-train-44 on 8efabb10 (20:13 PDT),
   b-host-quit green on its last runs (030427, 030801 after the 025053
   settle red at c2's first teleport, the set's watch item), b-host-kill
   green with it; train-44 merge-ready by citation, Eli's word next.
-  MERGED 22:23 PDT on Eli's "Merge now": fork parity 6cdc2b35, the clones
+  MERGED 22:23 PDT on Eli's "Merge now": fork parity 8efabb10, the clones
   promoted; the quitting host's two halves (the stale rule and the quit's
   disconnect) are parity's. Open: the quit crash's three discriminators on
   the next stage (the Papyrus quit, the no-client quit, the console quit on
   parity), then the heaps mode if they point at a movie.
   THE CRASH PREDATES 44 (x-quit-console-43 20261025-185002 on m3-train-43
-  de9d048e, the build without the thunk, numidium's read, 11:5x PDT): c1
+  417cb746, the build without the thunk, numidium's read, 11:5x PDT): c1
   wrote c1-crash-2026-10-25-11-52-22.log at that quit, the same exception
   at SkyrimSE.exe+0x10EA550 and the same stack frame by frame through
   36551+0x3f4 and WinMain+0x1b3 (the Skyrim Platform frame at a different
@@ -741,7 +741,7 @@ D24-D, and the fast exit makes the count moot on a seat.
   the leaked movie's name. One lab fact worth the read: the lab's quit is the
   console's qqq with the Console menu open, a
   movie a player's menu quit never has open.
-  GREEN at T3: x-host-quit v4 20261025-012653 on 44 6cdc2b35 (numidium's
+  GREEN at T3: x-host-quit v4 20261025-012653 on 44 8efabb10 (numidium's
   read, 18:30 PDT): the server's "user N left" line held 1.2 s after the
   quit step returned (two polls of lab-api's server.log_count, the console
   typing inside it), the grant of 0x9732 to c2 held 5.0 s after that (the
@@ -777,7 +777,7 @@ D24-D, and the fast exit makes the count moot on a seat.
   second and third. All three need a stage change, so they wait for Eli's
   look at 39 to 44.
 
-### The follow's vouch (17:22 PST 2026-11-02; playtest 41's break, Eli: "also npcs were desynced when it came back"; fork m3-follow-vouch 19c68d2d)
+### The follow's vouch (17:22 PST 2026-11-02; playtest 41's break, Eli: "also npcs were desynced when it came back"; fork m3-follow-vouch 720f914d)
 
 After the break's server restart with both games running (01:07:59Z), c1 re-reported its loaded set as 9772, 9771, 9770, 976f,
 976e and 9732, without Riverwood's other half 9731, and for 57 s every walk of its hosted NPCs into 9731 was refused ("ff000000 may
@@ -801,7 +801,7 @@ recorded). An R0 (T0 and T2) into the next server train after the arm.
   hosted cells with epochs; isHostedHere(refr) for formView, hitService,
   magicSyncService and sendInputsService in place of storage['hosted']; the
   HostGrant and HostRelease handlers; tryHost and hostAttempts.ts removed.
-  As built (5f10768c): isMine(form, refr) is what the four sites ask, the
+  As built (6ee9cba7): isMine(form, refr) is what the four sites ask, the
   grant and the server's own word on the actor (isHostedByOther, false
   only on the host's screen for the cell's actors no user plays, flipped
   at the grant for a 0xff actor; for an ESM actor the flip never landed,
@@ -811,7 +811,7 @@ recorded). An R0 (T0 and T2) into the next server train after the arm.
   monotonic rule is the grant's); the loaded set is re-sent when the
   player's own CreateActor arrives (the moment the server has the actor,
   after Welcome), and cells the engine detaches leave it by a once-a-second
-  Cell.isAttached read. Since 6ac33367 the loaded set is reported again
+  Cell.isAttached read. Since 79966b98 the loaded set is reported again
   every 30 s: a report is a bit the server sets, so the repeat costs nothing
   there, and it heals a report the server never took (b-cell-host
   20261021-184501's refused landing cell); the budget is the first line,
@@ -821,7 +821,7 @@ recorded). An R0 (T0 and T2) into the next server train after the arm.
   way).
 
 - The player's own parent cell joins the loaded set at every poll without
-  waiting for its load event (fork m3-train-33 2ce4fd36, 14:23 PDT): at a
+  waiting for its load event (fork m3-train-33 1f281dff, 14:23 PDT): at a
   teleport the engine's cellFullyLoaded for the destination cell itself can
   go missing while its four neighbours' arrive (x-npc-legs 20261022-211702:
   c1 at the Riverwood landing reported 9752, 9733, 9712 and 9731, never 9732,
@@ -920,7 +920,7 @@ A hot-reloaded skymp5-client (lab client-hot, ADR-054) keeps its connection and 
 grants and epochs, loaded set, native hosted mirror and attached actors, all class fields, died with the reload: a reloaded
 host's roster stopped (hosted.size 0 gates reportSightings), isHostedHere said no, a release for a held cell was ignored
 and the setHosted mirror could not be cleared; the per-actor word in the world model survived, so the streams went on,
-which hid it. Fixed e9953d0c: the five persisted in sp.storage at every grant, release and reset and once a second from the
+which hid it. Fixed 846a1f84: the five persisted in sp.storage at every grant, release and reset and once a second from the
 poll, restored at construction ("resumed after a reload: N hosted cell(s), ..."). The fix takes hold from a fresh launch;
 numidium laid the bundle with a relaunch per seat at 11:22 and 11:23 PDT.
 
@@ -930,13 +930,13 @@ Doc drafted 2026-10-21, before any code.
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (2026-10-21; the dispositions stand on the 2026-10-18 references, to be re-read on the merged base)
 - [x] engine surface cited or delegated (the cell events and getters through Skyrim Platform; cell_of through libespm's index; the AI switches npc-puppet's)
-- [x] server logic + T0 (the cell host table: wire-rules cells with seven T0 and reach as a fact with decisions, fork m3-cell-host afc792c1 and 8f17d7a4; the bridge's Cells; the core, 9aadeaea 2026-10-21 07:10: WorldState::CellOf and HostOf, PartOne's facts and senders, the hosted flag frozen by default, the cell-change rule, Host 14 ignored, hosters retired; unit/CellHostTest's two ESM-backed cases; wire-validate's tests for the three messages; Linux CI green through 29a7b56e: 2481, 2483, 2487 and 2488, 2026-10-21 08:05; the Windows build's ctest failed two CellHostTest cases at 29a7b56e on the test's 1 ms clock margins against the server's own grace stamp, fixed c0e4a029 11:19 with 2.5 s inside and 2 s past, the election untouched)
-- [x] message + validator (same commit): CellLoaded 47, HostGrant 48, HostRelease 49 with their validators, JSON forms, fixtures and C++ structs, fork m3-cell-host ea0e24d3
+- [x] server logic + T0 (the cell host table: wire-rules cells with seven T0 and reach as a fact with decisions, fork m3-cell-host deadea18 and fb898f17; the bridge's Cells; the core, f908eb4b 2026-10-21 07:10: WorldState::CellOf and HostOf, PartOne's facts and senders, the hosted flag frozen by default, the cell-change rule, Host 14 ignored, hosters retired; unit/CellHostTest's two ESM-backed cases; wire-validate's tests for the three messages; Linux CI green through c236dc01: 2481, 2483, 2487 and 2488, 2026-10-21 08:05; the Windows build's ctest failed two CellHostTest cases at c236dc01 on the test's 1 ms clock margins against the server's own grace stamp, fixed e8f1f9a3 11:19 with 2.5 s inside and 2 s past, the election untouched)
+- [x] message + validator (same commit): CellLoaded 47, HostGrant 48, HostRelease 49 with their validators, JSON forms, fixtures and C++ structs, fork m3-cell-host 92068887
 - [x] native hook + T1 (none: events through Skyrim Platform; ticked 17:02 PDT 2026-10-29 by the pass under VERB.md's rule that a box whose item the verb has none of is ticked with its reason)
-- [x] TS handler (HostService, fork m3-cell-host 5f10768c 2026-10-21 07:22: the loaded set as CellLoaded from cellFullyLoaded plus Cell.isAttached once a second, reported anew when the player's own actor is created; grants and releases per cell with the monotonic epoch; isHostedHere and isMine for formView, hitService, magicSyncService and sendInputsService; tryHost, hostAttempts.ts and the HostStart/HostStop handlers retired; the cellHost settings key; tsc clean)
-- [x] T2 green (difftest session cell-host.yaml, fork 5fef550a: c1's grant at epoch 1, c2's nothing, c1's unload and departure, c2's grant at epoch 2 at the deadline; "T2 green" at skymp-server:m3-cell-host 535544db, 33 sessions identical, run beside the merge gate 2026-10-21 and confirmed before parity moved)
-- [x] on fork parity 535544db (2026-10-21 13:47, `just verb-merge m3-cell-host b-cell-host`: the gate 20261021-202319-merge-m3-cell-host 8 of 8 green with no rerun (the smoke, a-restart-persistence, b-duel, b-cell-host 203119, a-melee-reach, a-racemenu, b-spell, b-invis-recast), no game lost or replaced; both clones promoted; main 6b593f6 pins it; the lab's settings carry the Survival flags from the next server start)
-- [ ] T3 scenario green, no HYPOTHESIS tags (unticked 15:52 PDT 2026-10-29 by the pass's inventory: sixteen tags written after the tick of run 20261021-201430, ten resolved later in this doc, six resolved nowhere, at lines near the quit path's tail call, the own-cell miss, the watchpoint's read, the lock check and the CIF holder; the earlier tick read: T3 scenario green, no HYPOTHESIS tags (b-cell-host GREEN 20261021-201430 on the 535544db stage, all twelve asserts, no crash, the old shape 201045 clean through the handoff too; approved by Eli 11:03; the road there: 184501 red on the CellLoaded budget (fixed a591bdeb), 192314 red on the scenario's own away-and-back timing (the wait 0.5 s, main e6e9474), 192835 lost c1's game to a copy deleted while the host's engine still ran its movement job (fix 535544db, disable then delete; the cleaner's guard a896acf3), 193557 and 194846 held further each time, the freeze block reshaped around relaunch {until: gone} (main 7ef5522); x-cell-attach 185728 green and read; the tags that remained are npc-stream's and npc-handoff's by name, and H5 waits for a third seat))
+- [x] TS handler (HostService, fork m3-cell-host 6ee9cba7 2026-10-21 07:22: the loaded set as CellLoaded from cellFullyLoaded plus Cell.isAttached once a second, reported anew when the player's own actor is created; grants and releases per cell with the monotonic epoch; isHostedHere and isMine for formView, hitService, magicSyncService and sendInputsService; tryHost, hostAttempts.ts and the HostStart/HostStop handlers retired; the cellHost settings key; tsc clean)
+- [x] T2 green (difftest session cell-host.yaml, fork 31199f9c: c1's grant at epoch 1, c2's nothing, c1's unload and departure, c2's grant at epoch 2 at the deadline; "T2 green" at skymp-server:m3-cell-host 259bf390, 33 sessions identical, run beside the merge gate 2026-10-21 and confirmed before parity moved)
+- [x] on fork parity 259bf390 (2026-10-21 13:47, `just verb-merge m3-cell-host b-cell-host`: the gate 20261021-202319-merge-m3-cell-host 8 of 8 green with no rerun (the smoke, a-restart-persistence, b-duel, b-cell-host 203119, a-melee-reach, a-racemenu, b-spell, b-invis-recast), no game lost or replaced; both clones promoted; main 6b593f6 pins it; the lab's settings carry the Survival flags from the next server start)
+- [ ] T3 scenario green, no HYPOTHESIS tags (unticked 15:52 PDT 2026-10-29 by the pass's inventory: sixteen tags written after the tick of run 20261021-201430, ten resolved later in this doc, six resolved nowhere, at lines near the quit path's tail call, the own-cell miss, the watchpoint's read, the lock check and the CIF holder; the earlier tick read: T3 scenario green, no HYPOTHESIS tags (b-cell-host GREEN 20261021-201430 on the 259bf390 stage, all twelve asserts, no crash, the old shape 201045 clean through the handoff too; approved by Eli 11:03; the road there: 184501 red on the CellLoaded budget (fixed 3ea950eb), 192314 red on the scenario's own away-and-back timing (the wait 0.5 s, main e6e9474), 192835 lost c1's game to a copy deleted while the host's engine still ran its movement job (fix 259bf390, disable then delete; the cleaner's guard 0b4b8ed1), 193557 and 194846 held further each time, the freeze block reshaped around relaunch {until: gone} (main 7ef5522); x-cell-attach 185728 green and read; the tags that remained are npc-stream's and npc-handoff's by name, and H5 waits for a third seat))
 - [x] parity scenario green, or its later list reviewed with it (ADR-031): no parity scenario of this verb's own (the election adds no engine action; the host's NPCs run as the engine alone runs them, the references r-npc-packages, r-npc-fight and r-cell-leave of 2026-10-18 standing); the parity diff of a hosted cell against the engine alone is npc-stream's row, listed there
 - [x] sequences and combinations green, every checklist item with its scenario (ADR-033): the table above, each row with its run; the two rows that name later verbs carry by name
 - [x] ledger and suppression registry updated: no native touched (docs/NATIVES.md unchanged); the Suppress section above is the registry entry (the per-actor ask and grant retired from the senders, the ids kept)
@@ -944,12 +944,12 @@ Doc drafted 2026-10-21, before any code.
 Play: BROKEN, playtest 41 (2026-11-02, LOG 17:22): "also npcs were desynced when it came back" after the server restart (every
 walk refused: the follow vouch read an incomplete loaded set); the vouch fix (m3-follow-vouch) laid at break 3, unread in play.
 
-MERGED (18:44 PDT, 2026-10-25): train-46 on fork parity aaafffe5 carries the
+MERGED (18:44 PDT, 2026-10-25): train-46 on fork parity c40a36a3 carries the
 pass between live hosts (npc-handoff D9) and the corpse's release; the dead
 host (D18-B) rides train-48, built ahead on Eli's letter.
 
 THE HOLDERS READ (18:49 PDT, 2026-10-25; x-quit-holders 20261026-014250 on
-parity aaafffe5, numidium's run of quit-path.js's holders mode; the quit
+parity c40a36a3, numidium's run of quit-path.js's holders mode; the quit
 crashed as every quit does, c1-crash-2026-10-25-18-45-37.log): at the UI
 destructor's entry the Loading Menu's IMenu read refCount 5, onStack false,
 delegateCallbacks 2, 207 ms after the quit flag. The UI's own references
@@ -972,7 +972,7 @@ screen, kept (3 at the start, 6 after three loads, x-quit-scan v3 021707),
 held in two plugins' statics; none taken with them aside (022931).
 
 THE HOLDERS NAMED (19:27 PDT, 2026-10-25; x-quit-scan v3 20261026-021707,
-numidium's run of quit-path.js's scan mode on parity aaafffe5): the
+numidium's run of quit-path.js's scan mode on parity c40a36a3): the
 Loading Menu's IMenu (0x1bac400dd10) read refCount 3 at the script's
 start and 6 at the scan 110 s later, after three loading screens (the
 login's, the landing's, the temple's): one reference per load, kept; 6
@@ -999,8 +999,8 @@ fast-exit the process in our quit thunk after the disconnect (the way the
 x-quit-bisect-ngd-ddo (by path) reads the count
 and the quit with the two DLLs renamed aside.
 
-BUILT AHEAD, D24-B (19:33 PDT, 2026-10-25; fork m3-train-49 1c25b0e6 off
-parity aaafffe5, a client dist; built ahead does not merge): the quit
+BUILT AHEAD, D24-B (19:33 PDT, 2026-10-25; fork m3-train-49 5f643929 off
+parity c40a36a3, a client dist; built ahead does not merge): the quit
 thunk OnQuitShutdown, after the client's teardown and a log flush, ends the
 process (TerminateProcess) instead of running the engine's shutdown, when
 skymp5-client's quitFastExit setting (default on) has said so through the
@@ -1029,7 +1029,7 @@ crash) and WinMain's shutdown call. The second quit crash
 (SkyrimSE.exe+0x1949d3, 13129+0x23 under 36551+0xd9d, an actor's skeleton
 going down) is the load order's, not ours (x-quit-second-nopuppet 082607,
 x-quit-second-solo 083649); the instruction's reading stays the re-analyst's,
-and the fast exit (D24-B, train-49 in 50b, fork parity 951ea43d) skips the
+and the fast exit (D24-B, train-49 in 50b, fork parity cad9ce48) skips the
 engine's shutdown, so no seat meets it. So the engine's shutdown under this
 load order dies in its world teardown once the UI's part gets through:
 a second crash that every quit so far hid behind the first. Dropping the
@@ -1075,7 +1075,7 @@ the plugins' leak goes upstream (D24-D).
 c-riverwood, M3's exit scenario, went red once in the union's sweep (211911) on its restart leg alone: Alvor's record, read right
 after the restart against its pre-restart snapshot, lay (27.8, 72.4) off, past the claim's 64 in y; Gerdur's two and Alvor's x held,
 and before it the hand-off held whole (c2 hosting, the residents' AI on c2). The relaunched rerun (212353) was green throughout, so
-the item is a watch (lab/gate.yaml). HYPOTHESIS, from the code (WorldState.cpp TickSaveStorage, union 0e23c820): the records reach
+the item is a watch (lab/gate.yaml). HYPOTHESIS, from the code (WorldState.cpp TickSaveStorage, union b8a9d4c6): the records reach
 the storage as a write-behind batch of every changed form, one batch in flight at a time (saveStorageBusy), the next taken when the
 storage answers, no interval of its own; a restart that stops the process takes whatever the last answered batch held, so a walking
 resident's record can sit a batch or two behind its host's last accepted sample, 77 units here (about a second of a resident's
@@ -1090,7 +1090,7 @@ while. Not a loosening candidate: the bound stays, the watch closes on a green g
   5): a resident walking at the server's restart came back 800 to 1,200 units behind her pre-restart snapshot while standing Alvor's
   record matched to the hundredth. Cause: the Node process had no SIGTERM handler (Docker's restart sends one, then SIGKILL after 10 s),
   so the save storage's batch in flight and every edit the movement policy left to the record alone (MpObjectReference::
-  IsLocationSavingNeeded requests a position save every 30 s at most) were lost. Fix on fork m3-save-flush-on-stop 34a40459 (R0:
+  IsLocationSavingNeeded requests a position save every 30 s at most) were lost. Fix on fork m3-save-flush-on-stop 6f39d9a7 (R0:
   ChangeFormGuard marks a skipped edit, MpObjectReference::FlushUnsavedEdit, WorldState::FlushSaveStorage drains the storage within a
   budget, PartOne::FlushSaves, the addon's flushSaves, index.ts's SIGTERM and SIGINT handlers with a 5 s flush; SaveStorageTest's case).
   c-riverwood is pended in lab/gate.yaml until the fix is on parity and a gate plays it.

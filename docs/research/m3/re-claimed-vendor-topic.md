@@ -8,7 +8,7 @@ of the RVA in addrlib/versionlib-1-6-1170-0.bin through lab/addr.py's loader, ev
 header in this tree, the game file read on sky-srv with lab/esm.py (a CTDA decoder appended for the run, scratch only;
 no Strings files are under /srv/persist/esm, so no prompt text is quoted from the file). Engine names beyond
 CommonLib's and every inferred side effect are HYPOTHESIS until a Frida trace confirms them. Fork code read:
-m3-face-twelve 9936706e (PuppetApi.cpp, PuppetHooks.cpp, talkService.ts, puppetService.ts).
+m3-face-twelve 9135dcd2 (PuppetApi.cpp, PuppetHooks.cpp, talkService.ts, puppetService.ts).
 
 ## The short answer
 

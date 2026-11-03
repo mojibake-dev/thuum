@@ -24,7 +24,7 @@ the attacker's engine; the server cannot simulate the swing, only bound it.
 What the server validates: on OnHit (MsgType 17) from a player against
 another player's actor, with a weapon or bare hands and not a bow or
 crossbow shot, the distance between the two actors' recorded positions
-against the bound below. Since fork m3-npc-reach 7a80172c (the weekend pass,
+against the bound below. Since fork m3-npc-reach ffb525c6 (the weekend pass,
 14:17 PDT 2026-10-29, M3's "NPC melee reach and hit cone"): a humanoid NPC, its
 race playable (RACE DATA flag 0x1), is gated as a player is, as a target of a
 player's swing and as an aggressor whose host reports the hit (R1: the host

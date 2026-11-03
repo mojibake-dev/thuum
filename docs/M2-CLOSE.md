@@ -37,12 +37,12 @@ scenarios now in `pending` leaving it as the train carries their fixes:
 
 | scenario | proves | carried by |
 | --- | --- | --- |
-| b-spells-reconnect | a server-taught spell survives a reconnect with the game up (playtest 27's loss) | fork m2-train30-spells 096d2cd8 |
-| b-figure-values (the hit steps) | a figure's bar never dents below the server's number on the hitter's screen | fork m2-train30-dent e6a8270a |
-| b-formdesc-world | a world saved under one load order reads right under another, and after a restart (ADR-043 slice one, rule 6) | fork m2-formdesc-world 80cf1e35 |
-| b-hailstone (new, from probe x-hailstone; approved by Eli 2026-10-20, main a6991674) | the server evaluates an effect's own conditions (GetActorValue with the race's abilities, HasMagicEffect) and resists a hostile effect as the engine does: 0.85 on both seats by different paths | fork m2-train30-resist on m2-train30-conditions |
+| b-spells-reconnect | a server-taught spell survives a reconnect with the game up (playtest 27's loss) | fork m2-train30-spells 2b6bc288 |
+| b-figure-values (the hit steps) | a figure's bar never dents below the server's number on the hitter's screen | fork m2-train30-dent ddb01d41 |
+| b-formdesc-world | a world saved under one load order reads right under another, and after a restart (ADR-043 slice one, rule 6) | fork m2-formdesc-world 80c9e9b4 |
+| b-hailstone (new, from probe x-hailstone; approved by Eli 2026-10-20, main cb92d641) | the server evaluates an effect's own conditions (GetActorValue with the race's abilities, HasMagicEffect) and resists a hostile effect as the engine does: 0.85 on both seats by different paths | fork m2-train30-resist on m2-train30-conditions |
 
-Plus every scenario already green on parity 4720d0d3 and on the layer gate
+Plus every scenario already green on parity 7293c944 and on the layer gate
 of 2026-10-20 (the full sweep; b-spell on the served band). A red in a
 scenario that was green before the train is the train's, not a carry.
 
@@ -57,14 +57,14 @@ common file carries the login clock and the login globals; a train that
 widens the wire declares its divergence in the same commit). The fork's
 ctest green at the train's head (the condition functions, the race
 abilities, the resistance rule, formdesc's 401 cases, the dent's client
-build). Both were DONE for 1d88a6b7 on 2026-10-20 (pipeline 2309 green in
+build). Both were DONE for f008e6c8 on 2026-10-20 (pipeline 2309 green in
 every job; T2 at 16:05 PDT identical across 32 sessions); the head then
-moved once, to 44372078 at 16:51, for clang-format alone (the fork's
+moved once, to 67679548 at 16:51, for clang-format alone (the fork's
 Formatting check, three files, no code change), so its pipeline and a T2
-at 44372078 are the ones the merge cites (ADR-042 check 4); pipeline 2349
+at 67679548 are the ones the merge cites (ADR-042 check 4); pipeline 2349
 green in every job at 17:13, the Windows client included, and T2 at
-44372078 identical across 32 sessions at 17:19 (the same difftest binary
-and sessions as 1d88a6b7's, since the format commit left skymp-wire alone).
+67679548 identical across 32 sessions at 17:19 (the same difftest binary
+and sessions as f008e6c8's, since the format commit left skymp-wire alone).
 Both DONE.
 
 ## 3. Playtest twenty-eight (T4, Eli, both seats, on the train's stage)
@@ -125,7 +125,7 @@ class list Eli asked for:
    the entries), teleports, quiver, no freeze, globals, the staggered cast.
 
 Report (Eli, 2026-10-20 22:33 PDT, docs/private/playtest-m2-29.md; the
-night's stage of m2-train-31, 3b579f41 then 9ad635cd at his word after the
+night's stage of m2-train-31, a40559fd then e87267c4 at his word after the
 stage's probes found the caster dying with its target and the bolt's origin
 offset, both fixed and probed green before he resumed): items 1 to 3 and 5
 to 8 ticked; item 4 marked unsure ("unsure what this is testing"), proven by
@@ -193,13 +193,13 @@ Survival race (lifted by the 8df default's smoke).
    patch's own side effect, the player-base override found on the way and
    banned by rule (numidium's 2b check), b-duel's late first contact as a
    likely one-off, b-god under read. The fixed layer, apocrypha's
-   c38a3b04 (the 0x7 drop-record, the head parts on their masters' gender
+   1289987b (the 0x7 drop-record, the head parts on their masters' gender
    bits, RaceMenu's menu laid loose; no slot moves), re-stages with
    a-rotfern, a-racemenu and b-duel as its deciders on the parity image
    alone; it merges by its own gate after twenty-eight. Done 17:15: the
    three deciders green (a-rotfern 20261021-000439, a-racemenu 000831,
    b-duel 001214), RaceMenu's chargen initialising on both seats.
-2. m2-train-30 44372078 (assembled as 1d88a6b7, then formatted; CI and T2
+2. m2-train-30 67679548 (assembled as f008e6c8, then formatted; CI and T2
    at the head) staged
    once on the staged layer (numidium, verb-stage from the layer's
    worktree); the probes in order, b-formdesc-world first, green on the
@@ -249,8 +249,8 @@ Survival race (lifted by the 8df default's smoke).
    over the stage or `just sweep m2-close`), `just verb-merge
    m2-train-31`, and M2 DONE in PLAN and LOG, the carries moved to M3's
    chart. Where it stands at 2026-10-20 22:40: twenty-nine REPORTED (section
-   3b, the T4 half met); the train's head 9ad635cd is CI-green and T2-green
-   (at 3b579f41; 9ad635cd left skymp-wire alone), its five probes green on
+   3b, the T4 half met); the train's head e87267c4 is CI-green and T2-green
+   (at a40559fd; e87267c4 left skymp-wire alone), its five probes green on
    the night's stage; the morning's order (the train-30 and layer merges
    under ADR-042a after the 03:30 sweep of the re-laid train-30 stage, then
    m2-train-31 staged on main's merged layer and swept, then its merge) is
@@ -279,16 +279,16 @@ Survival race (lifted by the 8df default's smoke).
    claimed two): 0.98 (main 673db44, scenario alone). b-spell: aa2dd21.
    b-push: the known refused second Ragdoll, Eli's word; its probe
    x-push-knock-frida has never run. So step 3 stages m2-train-31 at
-   9ad635cd as it stands.
+   e87267c4 as it stands.
    2026-10-21 11:13: M2 DONE. The sweep 20261021-144529-m2-close read 69
    of 70 green, b-push red twice (the known refused second Ragdoll in the
    victim's own game under the layer); Eli at 11:03 and again in
    numidium's session at 11:07: "carry b-push to m3", so ADR-042b
    (ACCEPTED, main ffd5347) moved it from watch to pending at the merge and
-   the set stands. verb-merge m2-train-31 at 11:10 (fork parity 9ad635cd,
+   the set stands. verb-merge m2-train-31 at 11:10 (fork parity e87267c4,
    T2's log cited), layer-merge stage-layer-train31 at 11:12 (thuum main
-   b0252470, all eight checks), both clones promoted clean-m1-next to
-   clean-m1, deploy-srv from main, lab-api 2294723b (cell-host's lab
+   90beeb82, all eight checks), both clones promoted clean-m1-next to
+   clean-m1, deploy-srv from main, lab-api a1630efe (cell-host's lab
    pieces, the perks mechanism, the netem step). The carries are section
    4's plus b-push and the rows after twenty-nine (PLAN's M2 section).
    M3's first look is playtest thirty (PLAN's M3 section).

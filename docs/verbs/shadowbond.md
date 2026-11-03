@@ -4,7 +4,7 @@ Drafted 2026-10-18 evening from playtest twenty-three and apocrypha's read of
 the mod's records and script (docs/research/apocalypse/train-27-spells.md,
 branch apocrypha/train-27-spells). Built in two trains: train-27 (the bond
 and the server's swap) and train-28 (the concealment, third shape), merged
-to fork parity e3806870 (2026-10-20T02:00Z); b-shadowbond green twice on
+to fork parity 0a20755a (2026-10-20T02:00Z); b-shadowbond green twice on
 that tree (20261020-015430, 20261020-015709) after one red on its own aim
 (20261020-014021 step 44; the scenario's placement fixed on main 8a2cb11).
 
@@ -128,7 +128,7 @@ MoveTo instant, the report cadence 130 ms).
   server's swap can carry them later. Before this the script's own MoveTo in
   the caster's game was overwritten by the relay, as every figure move is.
 - What the caster's game gained back (18:37 PST 2026-11-01, fork m2-shadowbond-script-block
-  9aeaeace): the two concealment procs. The script's OnEffectStart cast them
+  1b3eb138): the two concealment procs. The script's OnEffectStart cast them
   in the caster's game, so PartOne::CastBondProc relayed them to every game
   but the caster's; with the script blocked, the first run on the bondblock
   train (b-shadowbond 20261102-023146) landed the swap and never showed the
@@ -204,7 +204,7 @@ MoveTo instant, the report cadence 130 ms).
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
-- The own-player half of the relay: CONFIRMED on e3806870's stage.
+- The own-player half of the relay: CONFIRMED on 0a20755a's stage.
   b-shadowbond 20261020-014021 (step 33), 20261020-015430 and
   20261020-015709 all read c2.watched_self().ever("av:Invisibility") == 1
   and c1.watched_self().ever(...) == 1 with the server casting the proc only
@@ -238,13 +238,13 @@ MoveTo instant, the report cadence 130 ms).
       BreakBondsOf; EndConcealment breaking the acting actor's bond; OnHit
       recording it at the claim; unit/BondTest, three cases; the lab's
       server-settings name Shadowbond on thuum lab-bonds-setting. Train-28,
-      fork train28-bond b28517ed: the server swaps both itself and holds
+      fork train28-bond c357d4b4: the server swaps both itself and holds
       them (ab14087f), and owns the concealment: the entry's `proc`,
       ConcealBond and UnconcealBond, TickBonds, EndRunningEffectsOfSource;
       six Rust and eight server tests; the lab's entry names the proc on
-      thuum lab-bonds-proc 35a2b66. Then train28-bond2 62f95f5e: the casts
+      thuum lab-bonds-proc 35a2b66. Then train28-bond2 63a9cd31: the casts
       500 ms after the claim on a timer with an epoch guard; and
-      train28-bond3 e3a5b367: the proc as a SpellCast relay in place of the
+      train28-bond3 635a3c10: the proc as a SpellCast relay in place of the
       Papyrus snippet, BondTest reading the relays, after b-shadowbond
       20261019-215816 read the snippet applying nothing)
 - [x] message + validator (same commit): no new message
@@ -254,11 +254,11 @@ MoveTo instant, the report cadence 130 ms).
       (the server's imposition), and a relay carrying no animation
       variables takes the actor's own current set
 - [x] T2 green (session shadowbond.yaml, 19 declarations, on train28-bond3;
-      e3806870's T2 green beside the gate, 32 sessions identical, difftest
-      job 9056; b81ce2a9's first T2 red on a declaration slip, two relay
-      messages matching one declaration, fixed sessions-only in e3806870)
+      0a20755a's T2 green beside the gate, 32 sessions identical, difftest
+      job 9056; 82c37535's first T2 red on a declaration slip, two relay
+      messages matching one declaration, fixed sessions-only in 0a20755a)
 - [ ] T3 scenario green, no HYPOTHESIS tags: the scenario IS green
-      (b-shadowbond 20261020-015430 and 20261020-015709 on e3806870's
+      (b-shadowbond 20261020-015430 and 20261020-015709 on 0a20755a's
       stage, after 20261020-014021 red at step 44 on its own aim; placement
       fixed by thuum 1131d57, main 8a2cb11); T4 ticked whole in playtest
       twenty-seven (both screens, the break by either seat, the 20 s run
@@ -279,12 +279,12 @@ effect"): the server no longer sends the bonded player's game a StartCombat
 at the bond's hit, as the engine's own neighbours only remark on a
 non-hostile spell. Before the train every held effect began one, and the
 difftest session shadowbond declared that StartCombat; T2 at fork
-m2-train-31 3642bc32 showed it no longer occurring and the declaration went
+m2-train-31 3563361f showed it no longer occurring and the declaration went
 (the session's one edit). The bond, its concealment and the break are
 unchanged.
 - [x] the script's suppression at T3: b-shadowbond green by path on the
   re-cut train (025608) and inside its gate (032144), both halves (the
   server's swap at a break, the caster's procs through the relay, no swap at
-  a run-out); out of pending (main 3f547169); MERGED to fork parity e6c5d01a
+  a run-out); out of pending (main 1eae0786); MERGED to fork parity fcbced40
   (20:09 PST 2026-11-01, the train m4-train-bondblock-puzzle with the puzzle relay and
   the race menu hide; gate 12 of 12, T2 38 of 38)

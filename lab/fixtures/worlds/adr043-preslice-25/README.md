@@ -1,7 +1,7 @@
 # adr043-preslice-25: a pre-slice world for ADR-043's rule 6 scenario
 
 The world a server running thuum ADR-043 slice one (fork m2-formdesc-world,
-head d0693ef4) must migrate: eight change forms written in the raw shape
+head 1d8a2b18) must migrate: eight change forms written in the raw shape
 (every form a runtime id of the load order they were saved under, no
 `formVersion`), beside a hand-written `load-order.json` in the slice's own
 format naming that order. `lab/scenarios/b-formdesc-world.yaml` restores it

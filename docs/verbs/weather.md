@@ -86,12 +86,12 @@ to 64 weathers; one word per player per place entered and per change stood throu
   (word)", Bleak Falls Temple's own torchlit sky in the screenshot, no error after); Weather.getCurrentWeatherTransition
   reads below 1 through a blend: CONFIRMED (0.65 and 0.58 mid-blend on both seats within 0.01 of each other, 1 with
   outgoing 0 once settled). CONFIRMED by b-weather's legs 3b and 3c (b-weather 20261101-102038 and 20261101-105309, both
-  GREEN on m5-perks 395cdc49, the gate 20261101-104201-merge-m5-perks that put weather on parity 2026-11-01; settled
+  GREEN on m5-perks 487e1262, the gate 20261101-104201-merge-m5-perks that put weather on parity 2026-11-01; settled
   19:26 PST 2026-11-02): the override survives a cell change within the worldspace (x-weather's seats never left lab-spawn's cell; the
   scenario moves c1 to Riverwood, where its "weather released" count stayed at the interior's 1 and it read c2's sky,
   0x12f89 in 105309 and 0x81a in 102038), and the client leaves a blend alone and re-forces any drift, blending or settled
   (the first rule re-forced a settled one alone and never fired while a blend ran, b-weather 20261101-091049 red at step 52,
-  the guard gone at 395cdc49; the scenario forces SkyrimOvercastRain 0xc821f on c1 through the driver's weather step and
+  the guard gone at 487e1262; the scenario forces SkyrimOvercastRain 0xc821f on c1 through the driver's weather step and
   read the one re-apply, "re-applied 1" once and c1 back on c2's sky within 10 s in both runs).
 
 ## Suppress
@@ -141,7 +141,7 @@ to 64 weathers; one word per player per place entered and per change stood throu
 - Kill switch config key: `weatherSync` (server). The client needs none: no word, no override.
 - The late apply (the update tick, every 2 s) waits one tick from a word's arrival, so the word's own deferred apply runs
   first (a transition blends); a word kept for a place this game is not in yet applies late at the exit as before
-  (m4-weather 79a74960, from x-weather 171309's double login apply).
+  (m4-weather f73de11a, from x-weather 171309's double login apply).
 
 ## Tests
 
@@ -167,7 +167,7 @@ to 64 weathers; one word per player per place entered and per change stood throu
   change within 45 s as a blend on both; C an interior (Bleak Falls Temple) releases and the way out cuts; D a
   relaunched seat hears the sky at its login; E a restart (recorded: the hears lines name the same weather). The
   three HYPOTHESIS tags above are read from its console lines and screenshots.
-- x-weather v2 (9f7c2cfd) GREEN at 20261031-171309 on m4-weather 6c9de3df's own build (an agent's read, 10:42 PDT): the
+- x-weather v2 (9f7c2cfd) GREEN at 20261031-171309 on m4-weather a1c203df's own build (an agent's read, 10:42 PDT): the
   login cut on both (81a at slot 193 to c1, 12f89 at 194 to c2), a transition word to both every 30 s (slots 195 to 201)
   applied on both consoles within the same second, eighteen transition applies all by the word (a blend) and none forced;
   the reads gave both seats the same current and outgoing sky with the blend's progress within 0.01 (0.65/0.66, then
@@ -177,10 +177,10 @@ to 64 weathers; one word per player per place entered and per change stood throu
   server.gameHour 7.9), so the slot rewound from 201 to 192 and both seats read 12f89 (slot 192's pick, as at the run's
   start). One finding: every fresh game applied its login word twice, "(cut, late)" then "(cut, word)" 18 ms apart (the
   update tick's late apply ran before the message handler's deferred apply, so a transition word landing on a due tick
-  would be forced instead of blended): fixed at m4-weather 79a74960 (the late apply waits one tick from the word's
+  would be forced instead of blended): fixed at m4-weather f73de11a (the late apply waits one tick from the word's
   arrival; a word kept for another place still applies late at the exit).
 
-- The drift watcher's rule (01:43 PST 2026-11-01, fork m5-perks 395cdc49, b-weather 20261101-091049's read): every 2 s, a word applied for
+- The drift watcher's rule (01:43 PST 2026-11-01, fork m5-perks 487e1262, b-weather 20261101-091049's read): every 2 s, a word applied for
   the place the player stands in is compared with the engine's current weather, which is a blend's target from the blend's
   first frame; equal, nothing (our own transition); anything else, settled or blending, is a drift and the word goes back on
   as a cut ("weather applied ... (cut, re-applied N)"). The earlier guard on the blend's progress silenced the watcher through
@@ -205,7 +205,7 @@ to 64 weathers; one word per player per place entered and per change stood throu
 - [x] native hook + T1 (none)
 - [x] TS handler (weatherService.ts)
 - [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags (the probe x-weather v2 GREEN 20261031-171309; b-weather on thuum main ca1a5f1d with the two
+- [ ] T3 scenario green, no HYPOTHESIS tags (the probe x-weather v2 GREEN 20261031-171309; b-weather on thuum main dbdbed5b with the two
       hypotheses' legs 3b and 3c, its first run at the train's gate)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)

@@ -1156,7 +1156,7 @@ health message. A second red within two sweeps makes it a bug.
   margin four points and up. Still uncounted, a known limit: the tail between
   the last report and the stream's end (one cadence at most) and the first
   contact's way. The one T2 declaration that followed the old cap moved in the
-  same commit (spell-cast's second tick, 0.96 to about 0.948: the counted gap is the server's clock's, 400 ms nominal with a millisecond or two of replay jitter, so the T2 declaration carries a 0.001 tolerance since 92a3f276); casts.rs's new case
+  same commit (spell-cast's second tick, 0.96 to about 0.948: the counted gap is the server's clock's, 400 ms nominal with a millisecond or two of replay jitter, so the T2 declaration carries a 0.001 tolerance since e8a89384); casts.rs's new case
   covers the way, a hole, the cadence, a re-contact and exactly a second. This
   claim had read red on 10-18 twice, 10-20, 10-22 twice and 10-30; each red cost
   a cold rerun, and a real one or two point regression of the stream's number
@@ -1202,7 +1202,7 @@ health message. A second red within two sweeps makes it a bug.
   dedupFrames = 2 of the last one sent, and every second same-key hit inside
   one frame, both measured in JS frames (this.frame, one per update); a
   stalled tick puts two real stream ticks, 183 ms apart, inside that window,
-  where they read as the engine's double. Fix on fork m3-train-33 ab1740bf:
+  where they read as the engine's double. Fix on fork m3-train-33 369751e8:
   both rules in time (the engine's double within 8 ms; a hit and its apply
   within 34 ms), which a slow tick cannot fold: a latent bug fixed, not
   this cause. The stall hypothesis is FALSIFIED ({now} PDT, numidium): c1's
@@ -1222,9 +1222,9 @@ health message. A second red within two sweeps makes it a bug.
   standing figure's 8-unit deadband against a fresh sample's jitter, and the
   2 s re-apply of an unchanged record ran the same gate, so with c2 standing
   still nothing ever brought the figure back. Fix on fork m3-train-33
-  8a581ede: the periodic re-apply of an unchanged record settles a standing
+  078b5e39: the periodic re-apply of an unchanged record settles a standing
   figure or puppet from one unit (movementApply.ts, formView.ts); a fresh
-  sample keeps its deadband. 8a581ede did NOT settle ({now} PDT): b-duel
+  sample keeps its deadband. 078b5e39 did NOT settle ({now} PDT): b-duel
   three times on it went red (11 ticks, the figure 6.8 off at the end of
   phase 2, peak 8.9), red (10, 5.8 off, peak 10.6) and green (16 ticks, 0.3
   off), and x-duel-stream 233951 read the figure a constant 6.9 units off
@@ -1236,11 +1236,11 @@ health message. A second red within two sweeps makes it a bug.
   is not the whole story either: the translation that fires on a fresh
   sample past eight units did not leave the figure on the record (the
   stagger's push outlasting a 0.2 s translation, HYPOTHESIS). Fix on fork
-  m3-train-33 3bd8d8ae: the record's own stillness decides, the deadband is
+  m3-train-33 b8c3226b: the record's own stillness decides, the deadband is
   one unit whenever the target equals the last target this code sent
   (within half a unit), whatever the sample count, and a settle prints
   `settle <id>: <units> units from (x, y) to (x, y)` to the console (c1.log)
-  for the lab's read. 3bd8d8ae on the stage ({now} PDT): b-duel green three
+  for the lab's read. b8c3226b on the stage ({now} PDT): b-duel green three
   times on its assert (19, 17 and 15 ticks) but the figure still 4.4 and 4.9
   off after phase 2 in two of three, and no settle anywhere: the stillness
   test compared the target with the last translation this code had sent,
@@ -1248,23 +1248,23 @@ health message. A second red within two sweeps makes it a bug.
   so the test never armed; and the console line never reaches c1.log at all
   (printConsole is the in-game console; the [verb:npc-puppet] lines are the
   native logger's), so the watch's phase-2 end error is the read. Fix on
-  fork m3-train-33 fb6f3f09: the stillness is read from consecutive records
+  fork m3-train-33 a76125cb: the stillness is read from consecutive records
   (the target within half a unit of the previous apply's), which a standing
   player's reports satisfy every tick. Read: b-duel three times on the
   stage, 19 or 20 ticks each, the phase-2 error back under one unit by the
   end of the watch; if a run still ends off with the record still, the
   settle moves from translateTo to setPosition for the standing case
   (HYPOTHESIS that a 0.2 s translation under the self keep-offset does not
-  finish). SETTLED ({now} PDT): fb6f3f09 on the stage, b-duel three times
+  finish). SETTLED ({now} PDT): a76125cb on the stage, b-duel three times
   green with the figure back on the record (19 ticks, the phase-2 error 0.0
   at the end from a peak of 4.7; 19 ticks, 0.4 from 5.6; 18 ticks and
   3.22 s of stream, 0.2 from 1.7), against the short streams' 2.0 to 2.6 s;
   x-duel-stream 001417 on the head before it still read 5.3 for ten seconds.
-  The watch item closes with the gate on fb6f3f09; the figure's height
+  The watch item closes with the gate on a76125cb; the figure's height
   (dz minus 7.4 to minus 7.7 throughout) stays the figures' row. Whether
   train-33 shifted the push's size is not asked
   (HYPOTHESIS either way; the deadband is the defect). Row for the figures, from the
-  same watches: on every run, green and red, 16b8854a's included, c2's
+  same watches: on every run, green and red, 9f3ced84's included, c2's
   figure on c1's screen stands about 8 units below c2's own z on the lab
   spawn's flat ground (14665 to 14666 against 14673.7), playtest 31's
   "clipping through the floor" by the look of it; the figure's spawn height
@@ -1424,7 +1424,7 @@ half (setActorAimPitch) stays HYPOTHESIS until the driver can aim down.
 - Status: built and pushed (fork m2-train-27, first commit); Rust T0 green
   (176 + 17 tests); server T0 and T2 at the stage; T3 unwritten.
 
-## Target location after playtest twenty-four (2026-10-19; fork m2-train28-castfix abe87806; the research memo of the day, re-read with the records on sky-srv and the re-analyst's REA read)
+## Target location after playtest twenty-four (2026-10-19; fork m2-train28-castfix a0e1f892; the research memo of the day, re-read with the records on sky-srv and the re-analyst's REA read)
 
 Eli, test 2's seat: "the effect works, but there is no visible placed rune
 on player 2's screen. i can see the cast and the initial rune, but not
@@ -1531,7 +1531,7 @@ propagating. The records say otherwise, and split the finding in four.
   the hook point, static) and Eli's seat (the Frida read).
 
 
-## Train-29 (2026-10-20 night; fork m2-train-29 18c0e603 on parity 602a2dd2; the rows of docs/research/train-29-rows.md; MERGED to parity 4720d0d3 at 13:40, gate 10 of 10)
+## Train-29 (2026-10-20 night; fork m2-train-29 c3751c1d on parity 9ef0a394; the rows of docs/research/train-29-rows.md; MERGED to parity 7293c944 at 13:40, gate 10 of 10)
 
 Built overnight on Eli's word ("go ahead and run tonight to do the biggest
 lump"), each row from the reads of 2026-10-19, for the morning's stage
@@ -1542,7 +1542,7 @@ gate and the merges after).
   takes the AV effect's projectile (src/RE/P/Projectile.cpp:213-222) and
   Lightning Strike's AV effect has none, so the observer's launch recorded
   projectile 0 and nothing flew (x-lightning-strike 20261019-220431, the
-  launch row `[13929, 0, 0, ...]`). MagicApi.cpp (07b33046) takes the first
+  launch row `[13929, 0, 0, ...]`). MagicApi.cpp (a62f9e4c) takes the first
   effect whose base effect carries a projectile (include/RE/E/Effect.h:39,
   include/RE/E/EffectSetting.h:90) when the constructor left it null; area
   stays as set, the explosion comes from the PROJ. CONFIRMED on the launch
@@ -1569,7 +1569,7 @@ gate and the merges after).
   candidates stand (a null parentCell on the figure's launch, a model that
   never arrives, a dive below ground).
 - Finger of Death, the condition half (row 2b): IsEssential (354) is a
-  server condition function now (eea3a5d5; a player is never essential, an
+  server condition function now (bc468a0e; a player is never essential, an
   NPC by its base record's flag, libespm NPC_.h isEssential; HYPOTHESIS: a
   runtime essential flag is not seen), so the spell's one effect is no
   longer refused as unknown and its hit holds (a fight begins). The kill
@@ -1605,7 +1605,7 @@ gate and the merges after).
   Hailstone's own two effects are gated on GetActorValue (14) and
   HasMagicEffect (214), which the server lacks, so it applies nothing on
   the server today. BUILT 2026-10-20 on fork m2-train30-conditions
-  f2c0ba33 (server only, T0 in unit/EffectConditionsTest.cpp): the base
+  a9469ef4 (server only, T0 in unit/EffectConditionsTest.cpp): the base
   effect WB_Des_Frost1_Effect_Hailstone (030B2C7F, 15 Health and Stamina,
   duration 0) gates on Subject.GetActorValue(ResistFrost) > 0 and its
   Shatter (030B374E, 15 with area 10, duration 0) on
@@ -1628,12 +1628,12 @@ gate and the merges after).
   master byte Apocalypse's own), so HasMagicEffect's parameter is mapped to
   the global id through the record that owns the condition before the
   compare (ConditionFunction::IsFormParameter, MpActor::EffectConditionsHold;
-  fork 39affd73); the older functions compare their parameters raw, which
+  fork 6a6839fb); the older functions compare their parameters raw, which
   holds for Skyrim.esm's forms only. HYPOTHESIS, the gap: a Nord's 50 ResistFrost is
   a racial ability's constant effect, not a base, so the client's report
   carries 0 and the server never applied it; the engine answers 50 and
   applies the base effect, the server refuses it. The row's second half
-  BUILT 2026-10-20 on fork m2-train30-conditions 52ea63f8: the race's
+  BUILT 2026-10-20 on fork m2-train30-conditions c7d149f5: the race's
   constant abilities (RACE SPLO, each an Ability spell of constant cast
   type; libespm already parsed the list) are read once per race from the
   records into the rule's facts (MpActor.cpp RaceAbilityFactsOf) and summed
@@ -1645,14 +1645,14 @@ gate and the merges after).
   server had run short by (every figure's bar and every magicka check of an
   Altmer, a quieter gap the same source closes). T0: the record chain for
   a Nord and an Altmer appearance (unit/EffectConditionsTest.cpp), green
-  in ctest on the train's head (fork m2-train-30 1d88a6b7, pipeline 2309):
+  in ctest on the train's head (fork m2-train-30 f008e6c8, pipeline 2309):
   the Nord reads 50 on ResistFrost from Skyrim.esm's own records and the
   Altmer's maximum Magicka carries Highborn's 50 (UESP's Skyrim:High Elf
   confirmed by the record). The gap it exposed next, the server applying Hailstone's
   effects at their magnitudes with no resistance multiplier where the
   engine halves frost damage on a Nord (the engine's resistance never runs
   on a player's imposed damage), is the resistance rule, BUILT the same
-  day on fork m2-train30-resist 8219604e, stacked on this branch
+  day on fork m2-train30-resist f6eff0ea, stacked on this branch
   (docs/verbs/magic-effects.md, Resistance). The record read on sky-srv
   (2026-10-20, esm.py, Apocalypse's esp, DATA 152 B each): the base effect
   030B2C7F has flags 0x200805 (Hostile, Detrimental) and NO resist value
@@ -1660,10 +1660,10 @@ gate and the merges after).
   Detrimental, HideInUI) and resist 43, ResistFrost. So on a Nord the engine
   halves the Shatter and lets the base effect through whole, 15 + 7.5. The
   scenario b-hailstone, first run on the train stage (20261021-004204 on
-  fork m2-train-30 44372078 over the fixed layer): the Orc row 0.85 (the
+  fork m2-train-30 67679548 over the fixed layer): the Orc row 0.85 (the
   Shatter alone, whole), the Nord row 0.7892 with the wait's regeneration,
   the record's number; its band had said 0.85 and was corrected to the
-  record (main 053dd276). CONFIRMED there: the conditions (the base effect
+  record (main 7c02e965). CONFIRMED there: the conditions (the base effect
   refused on the Orc, applied on the Nord by the race's ResistFrost) and
   the resistance rule on the Shatter.
 - Scattershock (row 6), measured, no code: x-scattershock-6s
@@ -1673,7 +1673,7 @@ gate and the merges after).
   was a 2.5 s hold equal to the charge. The missile angle on the observer
   stays unmeasured: the lab's flights record covered arrows only. Train-30
   BUILT 2026-10-20: the projectileFlight hook admits a spell's projectiles
-  (fork m2-train30-flights 951b5bbc: the spell source in place of the ammo,
+  (fork m2-train30-flights 773babb1: the spell source in place of the ammo,
   the spell's id in the event; the bow service already ignores a flight
   without ammo) and the driver's flights rows carry projectile and spell as
   columns nine and ten (thuum main; lab-api pairs on the first eight, so an
@@ -1712,7 +1712,7 @@ gate and the merges after).
   Projectile.cpp:220-221), and the arrival then takes a different branch of
   44217 for each (+0x247 against +0x1c3). Built the same night on
   m2-train-29 as a relayed launch with delivery kTargetLocation taking the
-  engine's pair (99c39e3e), measured on its stage and REVERTED (d34053e0):
+  engine's pair (2a94524d), measured on its stage and REVERTED (a6898e8f):
   no glyph, and the static read says why the flags could not matter. The
   static read then came in (the re-analyst on
   REA the same night, docs/research/re-37335-and-rune-landing.md, question
@@ -1724,9 +1724,9 @@ gate and the merges after).
   because the candidate was the shooter (iProjectileMineShooterCanTrigger
   0). The flag flip was a no-op, as predicted: Launch sets kAutoAim only for
   a player shooter, and kUseOrigin's one reader is the position snap for
-  non-grenades; on 99c39e3e's own stage x-rune-visible-frida2
+  non-grenades; on 2a94524d's own stage x-rune-visible-frida2
   20261020-101636 showed no glyph in the observer's view at any of four
-  marks, and the commit is reverted (m2-train-29 d34053e0; the projectile
+  marks, and the commit is reverted (m2-train-29 a6898e8f; the projectile
   pick stays). 43919 is the grenade's Havok
   deactivation callback and 44213 is fed by the collision landing; a
   target-location rune is born at rest (speed 0) in both games, so neither
@@ -1737,13 +1737,13 @@ gate and the merges after).
   gated on the projectile's slot 0xAE; 44186's only callers are 34452 and
   44213, and the relay's bare Launch (MagicApi.cpp) never passes through
   34452. CONFIRMED by rule 8's read the same night (x-rune-decal-frida
-  20261020-102818, rune-decal-trace.js on both seats, on 99c39e3e's stage):
+  20261020-102818, rune-decal-trace.js on both seats, on 2a94524d's stage):
   the caster's game entered 34452 from the player's cast, launched inside
   it (autoAim 1, useOrigin 0), looked the material up (44190: materialID
   0xe4d39ca3, form 0x12f37) and placed ONE decal (44186: the rune PGRE, the
   pick's position, the normal (5.83, -69.75, 0) of length 69.99, return
   0x10000); the observer's game had one launch row from the relay (the
-  figure as shooter, 99c39e3e's flags in effect, contact normal (0, 0, 1))
+  figure as shooter, 2a94524d's flags in effect, contact normal (0, 0, 1))
   and no 34452, material or decal row. Two side facts for the row: the
   caster's normal was nearly horizontal, so that probe's aim put the rune
   on the tent's south face, not the ground (the screenshots' weak control),
@@ -1758,7 +1758,7 @@ gate and the merges after).
   dynamic-form shooter (rule 9). Still wanted: a per-figure rune cap in the
   observer's game, since the registration gate (43934) admits the player's
   runes alone and a figure's four casts would leave four armed runes.
-  BUILT 14:02 PST 2026-11-02, fork m2-rune-glyph 1d21c9ba (1d21c9ba plus its client build's two fixes) off parity 4b6f5fa3, pushed with its client build (queued by Eli the
+  BUILT 14:02 PST 2026-11-02, fork m2-rune-glyph dd5aa100 (dd5aa100 plus its client build's two fixes) off parity 4fdb2d31, pushed with its client build (queued by Eli the
   same day: "yes please queue it on virtue that it should have been done already tbh"): the wire half (SpellCastData.decal {normal, materialId}, SCHEMA_VERSION 32, check_decal, the legacy
   table, the fixture; the C++ struct, the server's strip with the launch, unit/SpellDecalTest.cpp), the platform's reads (the
   projectileLaunched event gains LaunchData's contactNormal; a hook on 44186's entry for the player's own projectile raises
@@ -1782,7 +1782,7 @@ gate and the merges after).
   observer once then twice, the cap's line once, no E_VAL_; the glyph on both screens is Eli's T4. Its stage follows the arm's
   train (gated with b-spell and the rune probes, as Eli's queue said).
 - The event filter (row 1) is its own verb, docs/verbs/papyrus-events.md
-  (b2db6354 on this branch), with its rate read: a dozen Papyrus events a
+  (bfbed728 on this branch), with its rate read: a dozen Papyrus events a
   second at idle on the old filter (numidium, lab/frida/sendevent-rate.js:
   OnTrigger about 30 and OnUpdate 13 to 22 per 5 s), so the parent walk is
   noise.
@@ -1801,12 +1801,12 @@ delivery (MagicApi.cpp): an aimed bolt left the figure's own third-person
 magic node along the relayed aim. b-hailstone 20261021-005051's launches on
 both seats put that node about 65 units from the caster's own (behind the
 aim, to the right, lower) at identical angles, so the two bolts flew
-parallel 65 units apart at any range. Fork m2-train-31 c3dae632, no wire
+parallel 65 units apart at any range. Fork m2-train-31 7e886795, no wire
 change: the caster's own cast of a fire-and-forget projectile aimed or at a
 target actor (Firebolt, Electrosphere, Hailstone) waits for its launch and
 the projectile's flight as a target-location cast waits for its launch, and
 goes with the launch's origin and the flight's angles (the bow service's
-rule; m2-train30-flights 951b5bbc merged for the spell flights); the figure's
+rule; m2-train30-flights 773babb1 merged for the spell flights); the figure's
 cast takes the launch for any projectile. HYPOTHESIS: whether a player's
 spell bolt re-aims on its first update as an arrow does (the flight's angles
 cover it either way). T3: b-spell-aim (for review; b-arrow-path's claim,
@@ -1828,8 +1828,8 @@ LOS variants) cast them from script or an entry point. The probe's target is
 c2's player at full health 150 units off; 3249 ms is the bolt's landing. The
 lab is ruled out: the recorder's effects are Skyrim Platform's
 magicEffectApply events, unfiltered (lab/driver/src/index.ts:913-919), and no
-effects line changed between the 10-21 driver (ceded7d6) and the night's
-(8d3b3139). The reference (lab/references/spell-bolt-a.json, retaken 10-15)
+effects line changed between the 10-21 driver (38def879) and the night's
+(48352af3). The reference (lab/references/spell-bolt-a.json, retaken 10-15)
 predates the essentials layer that brought the mod (10-19), but the probe was
 green on 10-21 on trains 30 and 31 with the mod in the load order, so the
 mod's presence alone is not it: the cloak runs at the hit now where it did
@@ -1846,10 +1846,10 @@ parity run 142552 (trace-c1.json): the lab spawn's fox 0x107cf9 and rabbit
 one of them, onto c1's own actor and the figure from 3416 ms every 500 ms;
 the 10-21 green's watch listed the figure alone, the cleaner having removed
 the wildlife then, and since npc-puppet (the cleaner's floor at 0xff000000,
-19e7ca9b) the engine's own references stand in every game. So the bolt's
+6139dc60) the engine's own references stand in every game. So the bolt's
 landing made the animals detect or target c1 and their cloaks pulsed. Not a
 spell-path regression; the declaration is on the probe's later list (main
-626108f6, its own commit, docs/private/reviews-pending.md), the reference
+280eae4e, its own commit, docs/private/reviews-pending.md), the reference
 stays. The figure is therefore an NPC to every
 distributor in the layer and a Player to every GetIsID(0x7) condition: a
 design row for the figure model, decided 2026-10-23 (ADR-046, decision 2,
@@ -1860,7 +1860,7 @@ kept; a client train of its own.
 What changed since 10-21 is the wildlife standing in the lab's games, npc-puppet's
 doing by design; the figure's double nature stands as the row (the dummy landed
 on the figure, so GetIsID(0x7) passed for it). Reads: p-spell-bolt on parity
-7b3a17c6 (20261023-142552, the stage m3-train-36) was RED with the same diff
+e7aa226d (20261023-142552, the stage m3-train-36) was RED with the same diff
 (both dummies at 3416 ms), clearing train-37; the recorder then named the
 casters (above), which ends the bisect. The reference stays
 until the cause is named (no retake under ADR-042b without it); the row
@@ -1886,22 +1886,22 @@ both times (MRh_SpellAimedConcentrationStart to MRh_Equipped_Event). Two mechani
    sets the slot to None), so a hit report that reaches the server after the end is refused as E_SPELL_NO_CAST and its
    gap, up to a cadence, is lost; the green run's last counted report came 40 ms before the end would have. The fix is
    the rule's: an ended stream stays claimable for one report within HOLE_MS (counting its gap as a later report's), then
-   closes (fork m2-stream-end-grace ea15e8bb (a1bd3908 with its C++ stream test taught the grace), built 17:30 PST 2026-11-01 on the bondblock train's head 84f87370, R0 after that train merges; T0 in casts.rs; a difftest session declares nothing new since the
+   closes (fork m2-stream-end-grace f3e2c995 (e6504633 with its C++ stream test taught the grace), built 17:30 PST 2026-11-01 on the bondblock train's head 02b8f315, R0 after that train merges; T0 in casts.rs; a difftest session declares nothing new since the
    fake clients hold no stream). Not a weakening: the claim stands, the server counts the stream the engine dealt.
 
 Rule 13 kept: b-duel's bound is unchanged; the reruns under ADR-036 carried the two gates meanwhile.
 
-T2 (20:51 PST 2026-11-01, on 8eddb2c4, the grace with parity e6c5d01a merged in): the grace shows in difftest's spell-cast session as
+T2 (20:51 PST 2026-11-01, on 99a19b61, the grace with parity fcbced40 merged in): the grace shows in difftest's spell-cast session as
 one more c2 ChangeValues, health 0.908 after c1's 4.3 s report (300 ms after the end; its gap since the last counted report,
-500 ms, is 4 of Flames' 8), declared in the session on m2-stream-end-grace 235aad49 (legacy 0, wire 1, within 0.001 as the
+500 ms, is 4 of Flames' 8), declared in the session on m2-stream-end-grace c8c21cd1 (legacy 0, wire 1, within 0.001 as the
 second tick's, since the gap is the server's clock; the header and the 0.68 reason follow it). The same run's shadowbond red
 (c1 without the caster's two relayed procs) was the image's, not the code's: verb-merge's T2 step ran on the bare tag four
-minutes before the head's server-build finished, so it tested ea15e8bb's image, the grace without 9aeaeace (numidium's read
-from the CastBondProc count, "to 2 game(s)" against the fixed "to 4"); thuum main d4c528f7 makes verb-merge wait for the head's
+minutes before the head's server-build finished, so it tested f3e2c995's image, the grace without 1b3eb138 (numidium's read
+from the CastBondProc count, "to 2 game(s)" against the fixed "to 4"); thuum main ae2a734e makes verb-merge wait for the head's
 server-build and run on its per-sha tag. The grace's push waits for the object-animation pair's layer-merge (that parity merged
 in, server-only), then numidium's per-sha T2 and the R0=1 verb-merge.
 
-MERGED (22:09 PST 2026-11-01): fork parity 235aad49 (numidium's R0 verb-merge under ADR-053: T0 13 of 13, T2 green on the per-sha tag; no lab
+MERGED (22:09 PST 2026-11-01): fork parity c8c21cd1 (numidium's R0 verb-merge under ADR-053: T0 13 of 13, T2 green on the per-sha tag; no lab
 gate, no client change). The end grace is live for every stream: a report within HOLE_MS of an ended stream that counted counts
 its gap once; b-duel's Flames leg keeps its bound, and its look-before-the-hold premise commit stands beside it.
 

@@ -1,6 +1,6 @@
 # Verb: locks
 
-Drafted 00:2x PDT 2026-10-31 from docs/VERB.md and a code map of the fork at parity dc3ec679 (pile item 8 of
+Drafted 00:2x PDT 2026-10-31 from docs/VERB.md and a code map of the fork at parity 6dbabc7a (pile item 8 of
 docs/private/turbo-2-prework.md; M4's "doors, locks, containers" row); built 04:xx to 06:xx PDT the same day as fork
 m4-locks (stacked on m5-leveling and m3-wall-pose for the message ids), the Status boxes below. One design fact
 changed the Observe half while building: every door and container is activation-blocked in this game
@@ -136,7 +136,7 @@ reference is E_LOCK_* and the lock is re-imposed.
 - Message name / numeric type: LockReport, MsgType 64 (wire id 72), client to server, reliable; LockPrompt, MsgType
   65 (wire id 73), server to client, reliable, the activating player alone; the lock state on CreateActorProps
   (`lock: Option<LockProp { level: u8, key: u32, locked: bool }>`) and UpdateProperty "lock" (the existing property
-  path, the same three fields as JSON), server to client. SCHEMA_VERSION 24 (fork m4-locks c324c015, 2026-10-31).
+  path, the same three fields as JSON), server to client. SCHEMA_VERSION 24 (fork m4-locks 3578539c, 2026-10-31).
 - Direction: LockReport C2S; the state S2C.
 - Fields: LockReport { refr: u32 (the reference's form id, never 0), outcome: u8 (0 the lock turned, 1 picks broke
   and the lock stands, 2 the menu left), broken: u8 (picks broken in this attempt, 0 to 8) }. LockPrompt { refr: u32 }.
@@ -160,7 +160,7 @@ reference is E_LOCK_* and the lock is re-imposed.
   path), the report's judgment (locked, reach, level, picks held, rate), the broken pick's consumption; PartOne and
   MpObjectReference: the lock gate in ProcessActivateNormal before the DOOR and container branches, the record's
   `lock` field, the UpdateProperty "lock" send, the console Lock and Unlock (the server's own, console.rs's rank
-  table; `lock <ref> [level] [key]` since m4-locks 2d79199f, 2026-10-31: the key's base as a form id, 0 for none, a
+  table; `lock <ref> [level] [key]` since m4-locks b1efca15, 2026-10-31: the key's base as a form id, 0 for none, a
   level alone keeping the key, so the lab stands a key lock on any reference with 255 and a vanilla KEYM the console
   then hands the player, RiverwoodAlvorHouseKey 0x36a3d; LockTest's console case), the Papyrus natives Lock, IsLocked, GetLockLevel, SetLockLevel, GetKey (ledger lines, R0) and
   OnLockStateChanged (the server's VM, when a script needs it; a stub first with its ledger line).
@@ -178,7 +178,7 @@ reference is E_LOCK_* and the lock is re-imposed.
 
 - SP binding: none new (the natives above exist).
 - TS handler: dealWithRef applies the server's lock instead of stripping it and logs it ("lock <id> set at creation: locked, level L,
-  key K", m4-locks 0fee1628, the lab's read before any change; a change logs "lock <id> applied: ..." from applyModelLock); a LockService watches
+  key K", m4-locks 642ac537, the lab's read before any change; a change logs "lock <id> applied: ..." from applyModelLock); a LockService watches
   `lockChanged`, the Lockpicking Menu's open and close, and `containerChanged` for the Lockpick, and sends LockReport;
   ActivationService holds an Activate on a reference that reads locked (the engine's menu runs) and sends it once
   the lock is gone.
@@ -190,7 +190,7 @@ Run 20261101-212155 (b-locks by path on the pair's stage) read no "lock 371e9 se
 landing took 9.6 s and its CreateActor for the chest came before the engine had loaded the cell, so remoteServer's onceLoad
 gave up after 120 frames ("Failed to load object reference 371e9") and the lock, with every other prop of that CreateActor
 (inventory, open state, node scales, isDisabled, the last animation), was never applied; the cold rerun 212943 landed fast and
-held every claim. The fix (fork m4-onceload-pending f3f27ce0, 13:59 PST 2026-11-01): the props wait in RemoteServer.pendingLoads once the
+held every claim. The fix (fork m4-onceload-pending 76bd10a3, 13:59 PST 2026-11-01): the props wait in RemoteServer.pendingLoads once the
 frames run out, swept every 2 s on the update thread and at once after cellFullyLoaded or cellAttach, applied when the engine
 has the reference (a trace line with the wait), dropped with the old error line after 120 s; a newer CreateActor for the same
 reference replaces the wait and its DestroyActor ends it. Nothing on the wire or the server changes. Evidence: a slow landing
@@ -240,7 +240,7 @@ the console log when a landing is slow.
   esm. HYPOTHESIS: the sweet spot's half-width is the tier's angle times (1 + skill * 0.006); HYPOTHESIS: a broken pick resets
   to the top (the absolute sweep holds either way); the pick-to-mouse ratio in the menu is unread (no export reads the runtime
   data's pickAngle :94 or sweetSpotAngle :B4), so the steps are sized for 5 to 14 counts a degree.
-- v4 (b5e2cc64, run 20261031-175103 on 9ece63c2's build) RED after all fourteen attempts with nothing logged; the menu's
+- v4 (b5e2cc64, run 20261031-175103 on 83e95d82's build) RED after all fourteen attempts with nothing logged; the menu's
   screenshot shows "Lockpicking 100", "Lock Level: Novice", "Lockpicks Left: 15" and the hints "Mouse Rotate Pick", "A D Rotate
   Lock", so the record's set reached the engine and the menu is the real one. Two readings remain: the lab's mouse and held key
   never drive the minigame, or every angle missed. v5 (cc50b014) reads the instrument with screenshots (the pick after a
@@ -258,7 +258,7 @@ the console log when a landing is slow.
   pick leg if the ratio or the mouse path fails: a held A then opens the lock by the engine's own minigame, and the report, the
   server's unlock and the watcher's applied line are the claims as before. The trace is a run's artifact (frida/*.jsonl), not a
   fact, so the first run reads it by hand.
-- v6 (7b767004, run 20261031-183903 on 9ece63c2, the trace's first run; numidium's read): the offsets are RIGHT (CONFIRMED: the
+- v6 (7b767004, run 20261031-183903 on 83e95d82, the trace's first run; numidium's read): the offsets are RIGHT (CONFIRMED: the
   ready row's vtable 0x18faf20, the menu's rows on one thread with sweetSpotAngle 42.6, damagePickAngle 90, pickBreakSeconds 3,
   partialPickAngle 50.05, numBrokenPicks 0; a first few rows on another thread read garbage, another object), and pickAngle and
   lockAngle read 0 in every one of 22,316 rows through all 27 attempts (the fine A sweep and the coarse D sweep): CONFIRMED that the
@@ -297,14 +297,14 @@ dungeon's XLOC, the lab's commanded chest).
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared (the reference trace owed)
 - [x] engine surface cited or delegated (the code map of 2026-10-31; no address needed)
-- [x] server logic + T0 (fork m4-locks aec38c1a, 2026-10-31: wire-rules locks.rs (five cases, the tiers from the game files), libespm's XLOC and KEYM (a key an item on both ends), the change form's lock, GetLock/SetLock/SendLockPrompt, the gate in ProcessActivateNormal, OnLockReport, the console's Lock and Unlock, the `locks` switch; unit/LockTest.cpp's three cases on Bleak Falls Temple's chests 0x371e9 and 0x3fa69 ride the pipeline)
-- [x] message + validator (same commit: LockReport 64, LockPrompt 65, CreateActorProps.lock, their checks and budget, four fixtures, the C++ structs; m4-locks c324c015)
+- [x] server logic + T0 (fork m4-locks 669c5b25, 2026-10-31: wire-rules locks.rs (five cases, the tiers from the game files), libespm's XLOC and KEYM (a key an item on both ends), the change form's lock, GetLock/SetLock/SendLockPrompt, the gate in ProcessActivateNormal, OnLockReport, the console's Lock and Unlock, the `locks` switch; unit/LockTest.cpp's three cases on Bleak Falls Temple's chests 0x371e9 and 0x3fa69 ride the pipeline)
+- [x] message + validator (same commit: LockReport 64, LockPrompt 65, CreateActorProps.lock, their checks and budget, four fixtures, the C++ structs; m4-locks 3578539c)
 - [x] native hook + T1 (none: events and natives)
 - [x] TS handler (m4-locks: dealWithRef applies the server's lock prop, applyModelLock on the property, LockService's prompt and report, the console's lock and unlock sent to the server; tsc green)
 - [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags (b-locks on thuum main c8dbc382, 23:03 PDT 2026-10-31: the legs the lab can drive, the
+- [ ] T3 scenario green, no HYPOTHESIS tags (b-locks on thuum main 8ddac4a3, 23:03 PDT 2026-10-31: the legs the lab can drive, the
       creation lines, the prompt and the minigame opened, the console's unlock, the key lock refused and opened by the key, the relock, a
-      relaunch and a restart keeping the lock; its first run at the perks gate, which carries locks and weather too (m5-perks 2e0c03c6
+      relaunch and a restart keeping the lock; its first run at the perks gate, which carries locks and weather too (m5-perks 13a8c21c
       stacks on both); the pick's report is the verb's declared T4: x-lockpick v6's trace showed the lab's input never reaches the menu)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)

@@ -166,7 +166,7 @@ first build counts the rate with a Frida tracer, ADR-044 decision 3).
 - Breakpoint plan for a human session: none needed.
 - Owner: agent (lab probes).
 
-## ADR-062, slice 1: the hosted cell's scripts run (17:12 PST 2026-11-02; slice 1a BUILT on fork m4-scripts-work d8fc5fa2, the gate and the lift; the hooks of decision 2 follow the re-analyst's table)
+## ADR-062, slice 1: the hosted cell's scripts run (17:12 PST 2026-11-02; slice 1a BUILT on fork m4-scripts-work f08abd57, the gate and the lift; the hooks of decision 2 follow the re-analyst's table)
 
 Eli (playtest 41): "shouldn't 'scripts work' be a holistic fix? something structural is just not working"; at the sign-off:
 "shouldn't every script incident be transmitted and accepted? skyrim is not a competative game. trust should LARGELY be the
@@ -202,7 +202,7 @@ Actor.Kill (a new death-report evidence kind, "a host-run script killed it", rec
 ForceActive (the weather report). Each hook filters in native before the bridge (rule 9: the self reference's cell hosted here,
 the caller a script frame, not the engine's own call) and gets its docs/NATIVES.md line with its rung (rule 10).
 
-Built in slice 1a (d8fc5fa2): FridaHooks.cpp OnSendEventEnter reads the self's cell for actors as for references, passes a world
+Built in slice 1a (f08abd57): FridaHooks.cpp OnSendEventEnter reads the self's cell for actors as for references, passes a world
 object's event in a hosted cell (its lifecycle events anywhere) and a simulated actor's (Hosted and not a puppet) wherever it
 stands, consults the layer's host names no more (their lifecycle rule stays for an older papyrus-scripts.txt); objectReferenceEx
 lifts the engine's activation on activators and movable statics in a hosted cell (doors, containers, furniture and items keep the
@@ -212,7 +212,7 @@ readable until slice 3's scenarios drop their relaunch writes. HYPOTHESIS H1a: C
 cell's activators on a loaded cell (Papyrus's own, UESP "Cell Script"); H1b: a blocked activator's own press reaches its script
 (playtest 41's pillars say yes) and a lifted one's default processing fires its activation parents once per press (the spike wall).
 
-Built in slice 1b (fork m4-scripts-work, 19:34 PST 2026-11-02; the first head f7ce5b37 went through numidium's fresh rules review, FIX
+Built in slice 1b (fork m4-scripts-work, 19:34 PST 2026-11-02; the first head ddfbd605 went through numidium's fresh rules review, FIX
 FIRST, and this is the round after it): the platform's ScriptNatives (24 natives of the table hooked at their own entries,
 resolved by class and name from the VM's bindings at kDataLoaded, the hook's callbacks registered at plugin load so the attach
 never inserts into the map the live hooks read; each attach counted by Gum's answer), the event scriptNative (native, self, arg,
@@ -255,12 +255,12 @@ is blocked like the other scripted kinds when not hosted (objectReferenceEx), so
 
 Tests: T0 for each verb's new report path where one is new (the scripted kill's evidence in ActorDeathTest; an NPC's scripted
 AddItem recorded in PartOne_ActivateTest's shape); T1 none; T2 difftest's sessions unchanged (the reports are the same messages);
-T3 the baseline first (b-object-anim on the union's dist against the morning's 64dbacfe green, the spike wall's regression), then
+T3 the baseline first (b-object-anim on the union's dist against the morning's ad1aa50a green, the spike wall's regression), then
 the Bleak Falls walk by hand on slice 1's stage (the plate and the wall, the pillars and the lever, the spider's drop, Arvel's web
 and run, the alcove draugr waking), then q-golden-claw and q-embershard as slice 3's scenarios. Status boxes below stay as they
 are until the slice is built; the build opens its fork branch as m4-scripts-work off parity.
 
-The first lab read (one seat, m4-scripts-work d3d28dd8's stage of 20:49Z 2026-11-03, probe x-script-natives v1 as run
+The first lab read (one seat, m4-scripts-work 425a9cd6's stage of 20:49Z 2026-11-03, probe x-script-natives v1 as run
 20261103-045048, numidium's read of c1.log after the probe went red on its own grammar at the hook block): "24 of 24 native entries
 hooked (ADR-062 slice 1b)" at 20:52:31.812Z and no row stood down at its self probe; every one of the 24 runtime offsets equals the
 research table's RVA (docs/research/adr062/papyrus-native-entries.md: 16 by row name, 8 in the combined rows: Enable 0xa2cc50,
@@ -276,7 +276,7 @@ stopped 39 s before the flush). x-script-natives v2 (by path) gives every seat c
 the platform's flush and the service's summary apart, and adds the guest leg (a second seat in the host's cell: "(not hosted)"
 tallies and no live row for cell 9732); the relayed quest stage read for H-1b1 is its v3.
 
-The second lab read (two seats, probe x-script-natives v3 as run 20261103-062800 on d3d28dd8's stage, numidium's read): every
+The second lab read (two seats, probe x-script-natives v3 as run 20261103-062800 on 425a9cd6's stage, numidium's read): every
 claim held but one. Both seats' 24 hooks attached and none stood down; the platform's flush ran 7 times on c1 and the service's
 summary 6 in the census window; "GlobalVariable.SetValue (platform)" 3 with no live SetValue line; the host's console stage set
 relayed ("set 10d3bb:Skyrim.esm stage 10: recorded, relayed to 1"), the stage done on both seats, and c2.log carried the fragment's
@@ -284,7 +284,7 @@ skip ("fragment of 10d3bb stage 10 entry 0 skipped: the stage is the world's, ap
 pair") and the latent apply's onResult: H-1b1's positive evidence (the guest's zero live "native Quest.SetCurrentStageID on" lines
 is none: a quest's call never raises a per-call event, so a leak would show as an unmarked census row "Quest.SetCurrentStageID on
 10d3bb", which the probe claims absent since v5). The one red was the lab's: the console log cuts a line near 100 characters and the guest's
-"Quest.SetCurrentStageID (platform)" row sat past the cut of the summary line. m4-scripts-work 15e01a0e writes the census one row
+"Quest.SetCurrentStageID (platform)" row sat past the cut of the summary line. m4-scripts-work d26d057e writes the census one row
 per line ("census <Class.Name> N in 30 s") and names the self of a quest's, global's or alias's call in its row ("Quest.Start on
 <id> N"), so the census says which script calls; the probe v4 reads the rows. Two numbers the census showed on BOTH seats, kept as
 hypotheses: H-1b4, "ObjectReference.SetOpen (platform)" about 1450 per 30 s, about 48 a second, the client's own apply of the open
@@ -295,18 +295,18 @@ behind ADR-064's containers freeze until its doc exists. H-1b5, "Quest.Start" ab
 a script calls Quest.Start about 1.3 times a second on every seat, D-S1's data point (a quest has no cell, so the hosted filter
 cannot stand it down); the run's driver logs name it already ("questStart quest 30002859 (and 13 more in the last 10 s)" on both
 seats), a quest of load-order index 0x30, finding 77's shape (Reading List's RL_DetectionQuest starting every half second,
-LOG.md's 10-29 entry); the self-naming census row ("Quest.Start on 30002859 N", the platform's commit after 15e01a0e, at most
-eight selves a row a window, 32 since 19bdfc3c) confirms it from the native's side, and whether any such start reaches the server as a report is the
+LOG.md's 10-29 entry); the self-naming census row ("Quest.Start on 30002859 N", the platform's commit after d26d057e, at most
+eight selves a row a window, 32 since c9a92e25) confirms it from the native's side, and whether any such start reaches the server as a report is the
 next read (the census counts attempts, not effects).
 
-The third lab read (two seats, probe x-script-natives v6 as run 20261103-073235 on 0ea79994's stage, numidium's read): 9 of 10
+The third lab read (two seats, probe x-script-natives v6 as run 20261103-073235 on dc8fb541's stage, numidium's read): 9 of 10
 claims held (both seats read stage 10 of 0x10d3bb done; c2's "Quest.SetCurrentStageID (platform)" 2 lines and no "on 10d3bb" row;
 SetOpen (platform) on both seats; Quest.Start on a real self on both; no server refusal but E_QUEST_OWN_START). The one red was the
 census's cap, not a leak: c2's "Quest.SetCurrentStageID on others" 1 line (2 calls) in the guest's first window after its load,
 eight named selves (2002b6e, 25185, 25231, 25251, 2830f690, 4b2d9, 703ecf2, c18e1) filling the row three minutes before the relay,
 so 10d3bb at load could be ruled neither in nor out; the claim did its job. At the relay c2.log holds "fragment of 10d3bb stage 10
 entry 0 skipped: the stage is the world's, applied from the relay; 0 mark(s) left for the pair" and then the platform's apply, and
-no guest row for 10d3bb in any window after it: H-1b1's positive evidence again. The fix: m4-scripts-work 19bdfc3c names up to 32
+no guest row for 10d3bb in any window after it: H-1b1's positive evidence again. The fix: m4-scripts-work c9a92e25 names up to 32
 selves a row a window (a rare row names every self, since selves never exceed calls; a hot row's tail stays under "on others"), and
 probe v7 keeps the "on others" == 0 claim beside the named row's absence, so the bound biting reads as a red and never as a pass,
 and lists c1-console.log in its artifacts for the host's numbers. D-S1's measurement from the same run (ADR-063 decision 3's
@@ -320,7 +320,7 @@ windows, fe01481e to fe01482e one-offs) and "others" 56 in one window beside the
 second, H-1b4's family), PlaceAtMe 2, Enable 2, Activate 2, Resurrect 2, Lock 4, Disable 1, Delete 1. The host's census numbers are
 the claims' line counts alone (c1-console.log was not in v6's artifacts; v7 lists it).
 
-The fourth lab read (two seats, probe x-script-natives v7 as run 20261103-081915 on 19bdfc3c's stage, numidium's read): GREEN,
+The fourth lab read (two seats, probe x-script-natives v7 as run 20261103-081915 on c9a92e25's stage, numidium's read): GREEN,
 every claim held, the guest's "Quest.SetCurrentStageID on others" == 0 included, so the named row's absence now rules the stage set
 at load out on the guest (H-1b1's positive evidence stands with the cap no longer in the way). The host's census from the run's
 c1-console.log (ten windows, 111 rows; my count): "ObjectReference.SetOpen (platform)" 13368 (about 45 a second, H-1b4's family on
@@ -340,7 +340,7 @@ host is at least these filtered 67 in the first windows; D-S1's measurement hold
 - [x] engine surface cited or delegated (CommonLibSSE-NG ObjectTypeInfo.h, VirtualMachine.h; the fork's Offsets.h)
 - [x] server logic + T0: none, no server half (ADR-044)
 - [x] message + validator (same commit): no new message
-- [x] native hook + T1 (fork m2-train-29 b2db6354, merged to parity 4720d0d3 on 2026-10-20 13:40; T1 is the Windows build's, green)
+- [x] native hook + T1 (fork m2-train-29 bfbed728, merged to parity 7293c944 on 2026-10-20 13:40; T1 is the Windows build's, green)
 - [x] TS handler: none
 - [x] T2 green: no wire change
 - [ ] T3 scenario green, no HYPOTHESIS tags (b-papyrus-events approved by Eli 2026-10-20 and on main, d1d8370, asserting the Creation's check ran connected with the prompt flag from the per-player default; its first run is the layer-merge sweep; x-mcm-register's HUD count still to read)

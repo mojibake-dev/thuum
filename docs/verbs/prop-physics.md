@@ -1,10 +1,10 @@
 # prop-physics
 
-Status: MERGED to fork parity 6414dcd2 (04:03Z 2026-11-01, numidium: the gate 20261101-031523-merge-m3-prop-physics 11 of 11,
+Status: MERGED to fork parity 4f746162 (04:03Z 2026-11-01, numidium: the gate 20261101-031523-merge-m3-prop-physics 11 of 11,
 b-prop-push green at its first run 032302, T2 green with the prop-physics session identical at 18 declared divergences, both clones
 promoted; slice one whole: the drop at the drop point, D73's rest, D75's persistence, the walk's nudge on both seats and across a
 restart). Earlier: DRAFT (the weekend pass, thuum-magnus; ADR-058). Slice one's server half BUILT 14:54 PDT 2026-10-29 on fork m3-prop-physics
-(b752b262 the wire rows with validators, fixtures, C++ structs and client interfaces, SCHEMA_VERSION 21; 8575e59b the owner rule
+(879f9e88 the wire rows with validators, fixtures, C++ structs and client interfaces, SCHEMA_VERSION 21; 8699e3c8 the owner rule
 props.rs with its bridge, the handlers, PartOne's plumbing, unit/PropTest.cpp, the difftest session; cargo tests and clippy green,
 fork-lint green, the C++ compiles on CI only); the client service in build; nothing at T3 yet.
 
@@ -33,7 +33,7 @@ prop the other seat streams.
 Eli at the close: "item physics sync is more broken than it was when we STARTED testing". The server since break 3 granted 13 of 13
 claims and refused a blasted prop's owner while it still flew (E_PROP_NOT_OWNER at 02:19:26Z and 02:19:49Z with no claim between).
 ADR-063 retired the owner checks (E_PROP_CELL, E_PROP_REACH) and never wrote the arbitration they stood in for. A read agent mapped
-every ownership transition on 35509f7a (the break-3 server; the client bundle 12f199e6 beside it); the two failure families:
+every ownership transition on b926a7d4 (the break-3 server; the client bundle e742d086 beside it); the two failure families:
 
 1. Newest touch wins over a moving prop. wire-rules props.rs:204-236: any live, ungrabbed row is overwritten by any other player's
    claim, whatever the touch kind and whether the prop moves (pinned by props.rs:353-365 and PropTest.cpp:257-265); the client claims
@@ -117,10 +117,10 @@ and the asleep send unchanged. Tests: props.rs (the moving refusal, the grab ove
 words, the stalled claim, the host's wake by id across a host change, the tick's cap), PropTest.cpp (the word at rest to both seats
 with player 0, the moving refusal, NotOwner answered, the wake's word and the live row across the props table's grant),
 wire-validate's PropOwner case (0 admitted).
-Two seats: x-prop-arbitration v12 by path (v11 ran as 20261103-075626 on badca627 and went red at leg 1's premise, not its rule: the 1.5 s walk stopped 20 units short of the ingot and prop-contact.js on c2 heard the ground alone, so nothing was claimed or streamed and legs 2 to 6 never ran; two Frida watchers a seat settled; v12 holds W 2.2 s and the contact watcher's motion-type field reads the non-owner's copy once the capsule reaches it; lab-spawn, a server-placed iron ingot at the mining floor marker; leg 1 c2's contact at
+Two seats: x-prop-arbitration v12 by path (v11 ran as 20261103-075626 on 147a6cfe and went red at leg 1's premise, not its rule: the 1.5 s walk stopped 20 units short of the ingot and prop-contact.js on c2 heard the ground alone, so nothing was claimed or streamed and legs 2 to 6 never ran; two Frida watchers a seat settled; v12 holds W 2.2 s and the contact watcher's motion-type field reads the non-owner's copy once the capsule reaches it; lab-spawn, a server-placed iron ingot at the mining floor marker; leg 1 c2's contact at
 rest: granted, streams, rests, the word returns it; leg 2 c1 kicks it into c2: the contact takes nothing (the guest's own skip or
 E_PROP_MOVING), the touch-0 grants unchanged through the flight, the host's wake and its rest and both seats' owner lines naming
-the host risen against snapshots (lab-api 5219f093 takes a seat's fact in a snapshot after its log-count step), and the record moved;
+the host risen against snapshots (lab-api 3b8273a5 takes a seat's fact in a snapshot after its log-count step), and the record moved;
 leg 5 the guest's cell unload mid-stream on a second placed ingot: the contact granted, the unload's return line and the host's
 player-0 word risen against snapshots, the rest line read beside them (a timing red told from a build red), the record
 snapshotted after for E32's height; leg 6 the re-entry: the load report ends the unload's state, the contact granted again and
@@ -133,7 +133,7 @@ two seats' acts), then b-prop-arbitration in its own commit. Stale text fixed wi
 the build: skymp.rs:1816, PropClaimMessage.h:10, propClaimMessage.ts:8 and props.rs:201 (the cell refusal), skymp.rs:1833,
 PropOwnerMessage.h:8-10 and propOwnerMessage.ts:4-6 (the velocity), PropTest.cpp:371's title, the reach row below (:268).
 
-BUILT 19:21 PST 2026-11-02 on fork m4-prop-arbitration aafb26ba (base: union-srv-3 35509f7a plus the chest bundle 12f199e6, the seats'
+BUILT 19:21 PST 2026-11-02 on fork m4-prop-arbitration 8deb7809 (base: union-srv-3 b926a7d4 plus the chest bundle e742d086, the seats'
 break-3 state), pipeline 4780 GREEN at 03:36Z 2026-11-03 (server, client, wire-test, wire-fuzz, difftest-build, rust-image): wire-rules props.rs (PROP_MOVING_MS 1000, ClaimVerdict::Moving,
 TransformVerdict::Returned(epoch), `gone` returning the rows for their words, PROP_LEASE_MS and PROP_SILENCE_MS gone, nine
 tests), the bridge (codes 3 and 4, PropReturn, prop_moving_ms), wire-validate (PropOwner.player 0 admitted; fixture
@@ -141,7 +141,7 @@ tests), the bridge (codes 3 and 4, PropReturn, prop_moving_ms), wire-validate (P
 and the NotOwner answer's one sender), ActionListener's E_PROP_MOVING and the Returned branch ("prop X rests on Y's screen at (x, y, z): the
 host's again at epoch N"), PropTest's five cases rewritten to the rule, propService.ts (Owner without a lease; ownerOf by the
 word; the two mirror writes and the presence set removed; the contact claim held while another seat's awake stream is live
-here). The review round (20:10 PST 2026-11-02, numidium's fresh review of aafb26ba, FIX FIRST; fork 9fc30e95, pipeline 4799): the rows above as
+here). The review round (20:10 PST 2026-11-02, numidium's fresh review of 8deb7809, FIX FIRST; fork 4b471676, pipeline 4799): the rows above as
 amended (every rest a word, the cap and the refused rest as words, every refusal answered, the late subscriber's word, the held
 stream and the lost hold, the grab's clock), SCHEMA_VERSION 33 for the player-0 word, the difftest session's two return words
 declared, the probe's v2 (the return line's real pattern, server baselines, movement claimed on the grab and the blast, the blast's
@@ -234,15 +234,15 @@ hook's event send hops to the JS thread.
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (ticked 17:36 PDT 2026-10-29 by the pass: the Engine surface table and the Observe, Impose, Suppress split carry a disposition per row; Rung R2 for the transform, R0 for the claim, declared at the top; the reference trace is the stage's, lab/references/prop-push.json when x-prop-push runs under the recorder)
 - [x] engine surface cited or delegated (ticked 17:36 PDT 2026-10-29 by the pass: every row cites CommonLibSSE-NG by file:line; the touch was delegated to the re-analyst and read, docs/research/m3/re-havok-contact.md, its ids 79131, 78304 and 26003 by `just addr`, HYPOTHESIS until lab/frida/prop-contact.js)
-- [x] message contract in wire-schema with validators and fixtures (same commit; b752b262)
-- [x] server rule in Rust with T0 (8575e59b; the C++ T0 PropTest runs on CI)
-- [ ] native hook + T1 (the contact hook BUILT, fork m3-prop-physics d4a75d02: a Gum on-enter detour on 79131 filtered to the player's proxy controller and the clutter and props layers, one propContact event per prop per 250 ms through the tick queue; T1 none, the trace at the stage; the transform read and the Keyframed set are the platform's own natives)
-- [x] SP binding and TS service (the TS PropService, 8f887477; no new SP binding in slice one: setMotionType, translateTo, setPosition from the platform's own surface)
-- [x] T2 green (ticked 20:09 PDT 2026-10-29: P3 6901781c's T2 GREEN at 03:08Z, numidium, its own difftest job 14395; the prop-physics
+- [x] message contract in wire-schema with validators and fixtures (same commit; 879f9e88)
+- [x] server rule in Rust with T0 (8699e3c8; the C++ T0 PropTest runs on CI)
+- [ ] native hook + T1 (the contact hook BUILT, fork m3-prop-physics be76cf80: a Gum on-enter detour on 79131 filtered to the player's proxy controller and the clutter and props layers, one propContact event per prop per 250 ms through the tick queue; T1 none, the trace at the stage; the transform read and the Keyframed set are the platform's own natives)
+- [x] SP binding and TS service (the TS PropService, bb4e9f9f; no new SP binding in slice one: setMotionType, translateTo, setPosition from the platform's own surface)
+- [x] T2 green (ticked 20:09 PDT 2026-10-29: P3 f61a2b39's T2 GREEN at 03:08Z, numidium, its own difftest job 14395; the prop-physics
       session identical to legacy with its 14 declared divergences, the kept server log without an E_PROP line; the union P3-win
-      e65a345b's T2 is the last before the stage)
-- [ ] T3 scenario green (b-prop-push GREEN at the gate 20261101-032302 on 6414dcd2; x-prop-push v16 GREEN 20261101-014442 on 71092a64 with the restart leg; pass v13 and (UNTICKED 19:02 PST 2026-11-02: 30 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
-      grab v9 green on 37e960eb, rerun on 71092a64 at the stage; b-prop-push on thuum main d140ff89, its first run at the train's gate)
+      72c44f04's T2 is the last before the stage)
+- [ ] T3 scenario green (b-prop-push GREEN at the gate 20261101-032302 on 4f746162; x-prop-push v16 GREEN 20261101-014442 on b763e3ac with the restart leg; pass v13 and (UNTICKED 19:02 PST 2026-11-02: 30 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
+      grab v9 green on 222a7471, rerun on b763e3ac at the stage; b-prop-push on thuum main 703eabcf, its first run at the train's gate)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green (ADR-033)
 - [ ] ledger and suppression registry updated
@@ -265,7 +265,7 @@ broken than it was when we STARTED testing" (LOG 15:33 item 2, break 2, 18:30); 
 - Unverified: the C++ on CI (listener population after ForceSubscriptionsUpdate, the LocationalData init, the first CellLoaded's grant);
   the lease's end tested in Rust alone; the difftest session drops an iron dagger and assumes the drop lands at 0xff000004.
 
-## The client half (15:18 PDT 2026-10-29, fork m3-prop-physics 8f887477, slice one)
+## The client half (15:18 PDT 2026-10-29, fork m3-prop-physics bb4e9f9f, slice one)
 
 PropService (skymp5-client/src/services/services/propService.ts, 880 lines; registered in index.ts; HostService gained hostsCell): every
 500 ms the view's bound item references within 1024 units (the nearest 64; FormTypeEx.isItem's ten types) are tracked; the owner is
@@ -291,7 +291,7 @@ character controller, the re-analyst's read in flight) is slice one's missing pi
 contact is HYPOTHESIS and the probe uses the host as the walker. Everything engine-facing (motion-type flips at runtime, translateTo on
 keyframed clutter, the 500 ms sleep stand-in, the drop match against DropItemService's delete) is untested until x-prop-push.
 
-## The touch built (15:51 PDT 2026-10-29, fork m3-prop-physics d4a75d02)
+## The touch built (15:51 PDT 2026-10-29, fork m3-prop-physics be76cf80)
 
 Offsets::Hooks::CharProxyContactPointAdded{{ REL::ID(79131) }} (Address Library 1.6.1170, just addr; AE only, as Reanimate), the on-enter
 detour OnPropContactEnter: the point's rootCollidableB on layer kClutter or kProps (GetCollisionLayer), `this` (the listener subobject at
@@ -313,7 +313,7 @@ read: the Riverwood cart Eli kicked (its reference and base record type by esm.p
 there, so a STAT or a MISC with a Havok body is the likely answer), then the prop row kind widened to that type with the same
 PropTransform, PropClaim and PropOwner shape; the persistence path as written below.
 
-**BUILT 13:22 PST 2026-11-02, fork m4-prop-statics a290aba0 (off parity 4b6f5fa3):** the cart Eli kicked is Riverwood's cart wheel, the one
+**BUILT 13:22 PST 2026-11-02, fork m4-prop-statics f07ba07e (off parity 4fdb2d31):** the cart Eli kicked is Riverwood's cart wheel, the one
 MSTT named Cart in Skyrim.esm (HandCart01Wheel 0x1c0c3, placed twice: 0x1c0c2 by the smithy at (20758, -45548, -104) and 0x14201 at
 (21377, -46104, -99); lab/esm.py). The admission is a list, not a type: server-settings.json's `propStatics` (["<shortid>:<plugin>",
 ...], the restrictedRaces key's shape; the lab's files list the wheel) names the movable static bases that are props, because every
@@ -342,9 +342,9 @@ x-prop-restart is not needed; b-prop-push inherits the step. PropTest's third ca
 ChangeForm the save writes). HYPOTHESIS until the run: that the client's arrival forcing (formView's item movement, skipped for a
 tracked prop) leaves the restarted record's place standing on a fresh seat.
 
-## The review's fixes (17:19 PDT 2026-10-29, fork m3-prop-physics eb04cdd5; P3 54e021e0, P3-win 48e35c46)
+## The review's fixes (17:19 PDT 2026-10-29, fork m3-prop-physics 720a6608; P3 1b9e97f7, P3-win 1f53626c)
 
-An agent's rules review of slice one (ee44f7d1..2b2f23c0) found six holes and two low notes; every one is fixed on the branch before
+An agent's rules review of slice one (33240fd4..ff59516e) found six holes and two low notes; every one is fixed on the branch before
 the trace, so the lab proves the rule as it ships.
 
 1. The authority was the sample's cell: the position a seat sent named the cell whose host was asked, and no step bound existed, so
@@ -387,8 +387,8 @@ identical. The session had assumed the drop's id (0xff000004, the generator's ne
 sessions had allocated forms on the same server, so the claim named a reference that was not the dagger (E_PROP_UNKNOWN by the
 header's own caveat; the refusal line itself was lost with the container). The fix is the harness's, not the rule's: a session
 names a created form by its base, `"{{created:<baseId>}}"`, resolved by the fakeclient from the CreateActor it received and by the
-harness per stack (docs/WIRE.md, Differential harness; fork m3-prop-physics f559b0d9, P3 50a44336 with train 2's fixes merged). The
-T2 runs again on 50a44336.
+harness per stack (docs/WIRE.md, Differential harness; fork m3-prop-physics 05184f99, P3 88e72156 with train 2's fixes merged). The
+T2 runs again on 88e72156.
 
 ## The numbers the stage sizes (18:45 PDT 2026-10-29; every one UNMEASURED until x-prop-push and x-prop-pass)
 
@@ -399,8 +399,8 @@ T2 runs again on 50a44336.
 | PROP_GRAB_MAX_MS | 120000 | wire-rules props | a grab nobody released; the longest a player holds an object in play |
 | PROP_MAX_SPEED_UNITS_PER_S | 6000 | wire-rules props | the fastest a kicked or shouted body flies between accepted samples (E_PROP_STEP counts in the server log) |
 | PROP_STEP_FLOOR_UNITS | 128 | wire-rules props | the first sample after a grant (the record's distance from the body) |
-| PROP_FIRST_SAMPLE_UNITS | 3000 (PROP_MAX_SPEED x 0.5 s) | wire-rules props | a simulator's first sample of a prop with no live row (the host's of a resting prop, a lapsed row's): half a second of flight, since a blast moves the prop before the first sample (playtest 41's cabbages; fork m4-prop-blast 8d94232c) |
-| kPropTouchReach, kPropDropReach, kPropImpulseReach | 256, 512, 2048 | ActionListener | the claimant's distance to the record at a contact or grab, a drop, an impulse (E_PROP_REACH); the client sends touch IMPULSE for a prop that moves by itself within IMPULSE_WINDOW_MS 1500 of its own shout or cast release (propService, playtest 41; fork m4-prop-blast-client 24a841ea, in the chest bundle 10ade7c4) |
+| PROP_FIRST_SAMPLE_UNITS | 3000 (PROP_MAX_SPEED x 0.5 s) | wire-rules props | a simulator's first sample of a prop with no live row (the host's of a resting prop, a lapsed row's): half a second of flight, since a blast moves the prop before the first sample (playtest 41's cabbages; fork m4-prop-blast 020de9ab) |
+| kPropTouchReach, kPropDropReach, kPropImpulseReach | 256, 512, 2048 | ActionListener | the claimant's distance to the record at a contact or grab, a drop, an impulse (E_PROP_REACH); the client sends touch IMPULSE for a prop that moves by itself within IMPULSE_WINDOW_MS 1500 of its own shout or cast release (propService, playtest 41; fork m4-prop-blast-client 81c8cb0f, in the chest bundle 8415e637) |
 | SEND_MIN_MS, SAMPLE_UNITS, SAMPLE_DEGREES | 100, 2, 2 | PropService | the stream's cadence and dead band; the follower's glide reads as motion a sample behind |
 | STIR_UNITS, SLEEP_AFTER_MS | 0.25, 500 | PropService | the sleep stand-in (the platform exposes no Havok state); too short and a slowing body sleeps early, too long and the lease starts late |
 | REST_READ_MS | 100 | PropService | a resting simulated body's read cadence; the cost of sixty-four host-default props at rest |
@@ -415,7 +415,7 @@ every reference below 0xff000000 that is no DOOR and no NPC_ (skipFormViewCreati
 FormModel and no FormView), while PropService.rescan built its candidates from the view's forms alone, so the set was empty by
 construction; the model "the view's bound item references" (The client half) was wrong, and the server half streams them
 correctly (LoadChunkIfNeeded admits items, Subscribe sends the CreateActor with the record's transform). The fix (fork
-m3-prop-physics af65e4b4, in the union at 8f9c11bd): PropService remembers every game-file item's CreateActor (refr, base, the
+m3-prop-physics 6c1ba6a8, in the union at a4541cd0): PropService remembers every game-file item's CreateActor (refr, base, the
 record's pose; a bounded map, no view, no model), the rescan adds those references when loaded and near, their record's pose is
 imposed from the message where the model's movement would have been, and isItem caches nothing for a reference not loaded yet.
 Two smaller holes stay noted: the record's pose for such a reference is the message's until a sample comes (recordSample keeps it
@@ -429,7 +429,7 @@ the lane), the drop through the InventoryMenu (DropItemService acts only while i
 reaches it), and lab-api's server.ref, which is actor-typed, so a tankard's record is read through the seats' listings (pos) and
 not server.ref until the gamemode's ref kind serves any reference.
 
-### The drop at T3 (07:45 PDT 2026-10-30; x-prop-drop v3 143937 on the restage, 8f9c11bd)
+### The drop at T3 (07:45 PDT 2026-10-30; x-prop-drop v3 143937 on the restage, a4541cd0)
 
 Thirteen of fourteen claims held on the fixed client: the engine's own dropped reference deleted by DropItemService, the server's
 copy placed and "simulated here: Dynamic" on the dropper's seat, its stream started and asleep twice as the sword settled, the
@@ -439,11 +439,11 @@ tracked on both seats, the sword at the dropper's feet on both screens, no claim
 sending a drop claim at all: PropService.onContainerChanged required the event's reference, which Skyrim Platform leaves
 undefined when the engine's container event carries an empty handle, as a drop's does (EventHandler.cpp's conversion;
 DropItemService's gate accepts the same event), so the drops list stayed empty and claimDrop never matched the copy. Fixed on
-m3-prop-physics (2026-10-30; the union at 0e23c820): the guard without the reference, a trace per recorded drop and per new track (a
+m3-prop-physics (2026-10-30; the union at b8a9d4c6): the guard without the reference, a trace per recorded drop and per new track (a
 follower's new prop had no line: placed within two units, Keyframed from the start). The engine reuses the deleted drop's form
 id for the copy's placeAtMe (HYPOTHESIS, harmless). x-prop-drop v4 reruns unchanged on the new client.
 
-### The drop's stream at T3 (09:52 PDT 2026-10-30; x-prop-drop v4 162049 on 0e23c820, read by an agent)
+### The drop's stream at T3 (09:52 PDT 2026-10-30; x-prop-drop v4 162049 on b8a9d4c6, read by an agent)
 
 With the record gate gone the non-host's drop claimed and was granted ("ff000001 claims prop ff000002 by touch 2: granted, epoch
 1"), both seats took the word, and 3.6 s later the dropper's first sample met "E_PROP_NOT_OWNER: ... another seat simulates it".
@@ -462,12 +462,12 @@ hear it simulates again at a lapse (today c1 kept the copy Keyframed, believing 
 lab-spawn with a server-placed Basket01 (PlaceAtMe at the host's feet; the strip is flat, the cell 0xbbb1); Riverwood's exterior
 has four MISC references in all (the camp's two tankards and pot in a rock pocket, the street bucket disabled in this world).
 
-Built (09:54 PDT 2026-10-30, fork m3-prop-physics 5f7b87dc and after, the physics train off the union): (1) a prop whose word named this
+Built (09:54 PDT 2026-10-30, fork m3-prop-physics 604407b4 and after, the physics train off the union): (1) a prop whose word named this
 seat (a granted touch, flip's wake) sends its first read at once and opens its stream ("stream <id> started at the grant"), so the
 asleep sample and the server's lease follow SLEEP_AFTER_MS later when nothing stirs; the host-default simulation keeps the lazy
 baseline (nothing out until a move), so a cell's clutter still makes no records. (2) MpActor::DropItem places the copy 64 units
 ahead of the actor along its heading at its feet, never inside the capsule (DropItemTest's position follows). (3) The drop record
-takes DropItemService's gate, the inventory menu open (02e93cc3). (4) propPhysics is on by default again in the train, which merges
+takes DropItemService's gate, the inventory menu open (940afd22). (4) propPhysics is on by default again in the train, which merges
 only with b-prop-push green. The train's T3: the lab-spawn basket probes (push v9, pass v9, grab v7), then b-prop-push promoted.
 
 ## Slice three on paper (18:45 PDT 2026-10-29; ADR-058 decision 4 names it M4's build)
@@ -501,7 +501,7 @@ Two props the engine owns differently from clutter, written so the row kind "pro
   much of a bugbear. M3's bodies row closes at "within a stride".
 - Not slice three's: traps' bodies (M4's dungeon work, with the MSTT admission ADR-058's note defers there), horses (mount.md).
 
-## The physics stage's first reads (19:30 PDT 2026-10-30; m3-prop-physics dde874b5 on the merged base, LABAPI 4021)
+## The physics stage's first reads (19:30 PDT 2026-10-30; m3-prop-physics 3586f2db on the merged base, LABAPI 4021)
 
 x-prop-push v9 (021439) RED, 6 of 10, read against c1's console: "Create actor" and "PlaceAtMe done" at 02:17:33.8 (the basket at the
 host's feet), a contact 200 ms later ("contact ff000947 layer 4 motion 2: not a tracked prop"): the host's own capsule ejecting the
@@ -510,7 +510,7 @@ back to the record ("placed at its record") into the capsule and the Dynamic set
 then nothing: no contact while the host stood in it, none from the run through its spot at 02:17:48 (the walk was clean, 243 units
 south). HYPOTHESIS H-P1: a Dynamic body denied activation (setMotionType's allowActivate false) is inert to the character controller,
 so a host's clutter could never be kicked; the comment's "rests until a contact wakes it" was the guess. Fix on the branch, local
-until the read: 46f1a2dc, allowActivate true whenever this seat simulates (the stream's lazy baseline keeps a resting cell silent).
+until the read: 7a647687, allowActivate true whenever this seat simulates (the stream's lazy baseline keeps a resting cell silent).
 x-prop-pass v9 (021831) a LAB FAULT (c2's relaunch lost its guest-agent pid), rerun queued. x-prop-grab v7 (022116) RED on 2 of 9: the
 guest's grab worked end to end (the pitch sweep's hit at 800 counts, the claim, the grant 0.4 s into the 1.5 s hold, Dynamic, the
 stream at the grant, asleep 0.5 s later), the host never applied and untracked the basket "out of reach" 1.6 s into the stream, and
@@ -542,7 +542,7 @@ stream's jump put it, and the Dynamic set may resolve a penetration (ground, cap
 hand the grab's stretched spring its force. The drop (v4) took the same flip at its grant without flight, on a copy the server
 had just created at the drop point, never a follower. The read before the fix: x-prop-pass v10 by path (372f3a71), v9's frame with
 the basket's position on both seats at 1, 2 and 4 s after the key (radius 1200, x, y, z recorded); grab v8's release read tells the
-hand's case. The two local fixes (46f1a2dc, a2256945) wait on these reads; one head move after them.
+hand's case. The two local fixes (7a647687, a2256945) wait on these reads; one head move after them.
 
 x-prop-grab v8 (024409, 19:52 PDT read) RED on 4 of 12: the grab held on the marker site (the sweep's third pitch, the claim by touch 1
 granted, Dynamic, the stream at the grant at 02:47:36.113, asleep at 36.962; the host "theirs", Keyframed, applied at 36.011), then the
@@ -567,7 +567,7 @@ until the grant) and push v9 (a Dynamic body denied activation takes no contact)
 first touch of anything no local physics. D73 (DECISIONS.md, under ADR-058): a body is Dynamic with leave to wake unless another
 seat streams it awake right now; Keyframed from a stream's first awake sample to 150 ms after its asleep sample (or a second after
 the last awake one); the grant's flip sets no motion on a body already Dynamic; the loss of the simulation sets none. Built on fork
-m3-prop-physics 0bb02f74 over 46f1a2dc (the wake); the held-hand guess a2256945 reverted. HYPOTHESIS until the restage's probes
+m3-prop-physics c47a339f over 7a647687 (the wake); the held-hand guess a2256945 reverted. HYPOTHESIS until the restage's probes
 (push v11 1e8203e4, pass v10b a0a6e14b, grab v8 7689e959, drop v5 426cf923): the resting copies settle alike, the glide holds, a grab
 closes on the Dynamic body and its E consumes no pickup. The pickup of a real short press stays the engine's and the server's
 (ProcessActivate's item branch).
@@ -576,20 +576,20 @@ pass v10b (025124, 20:00 PDT read): at 1 s after the kick the server's record of
 host still listed the basket there, and the claimant (c2) listed nothing: the claimant's own engine loses its copy at the grant's
 Dynamic set, the server and the stream innocent. Every flown copy had been placed by setPosition (the first track's "placed at its
 record", the asleep sample's jump); the drop's copy, never placed, settled under the same Dynamic set. HYPOTHESIS H-P4: setPosition
-leaves a Keyframed body's collision where it was and the Dynamic set resolves the mismatch violently. Fix fa225f01: the asleep sample,
+leaves a Keyframed body's collision where it was and the Dynamic set resolves the mismatch violently. Fix 670ead48: the asleep sample,
 a jump past JUMP_UNITS and the first placement all translateTo at a speed landing within 100 ms when the 3D is loaded (setPosition
-only before), the rest-Dynamic set 300 ms after. The branch for the restage: 46f1a2dc (the wake), 0bb02f74 (D73), fa225f01 (H-P4);
+only before), the rest-Dynamic set 300 ms after. The branch for the restage: 7a647687 (the wake), c47a339f (D73), 670ead48 (H-P4);
 its probes push v11, pass v10c (02af9dc2: the record by `server: snapshot` steps, no pos claims, since the evaluator evaluates every
 operand and a missing listing raises), grab v8, drop v5.
 
-push v11 (025647, 20:01 PDT read; the old build dde874b5, no wake fix) RED 5 of 10 at the stream claims, as expected, and it reads
+push v11 (025647, 20:01 PDT read; the old build 3586f2db, no wake fix) RED 5 of 10 at the stream claims, as expected, and it reads
 H-P4 again from the host's side: the premise held on the marker site (both seats one copy at (133433.6, -61386.5), c1 "tracked, 80
 units off", "placed at its record" (the setPosition snap) and "simulated here: Dynamic"); at the walk c1 logged "contact ff000002
 layer 4 motion 2: owned, no claim" (02:59:54.610), so the Dynamic body set WITHOUT the wake flag did take the running walker's
 contact (H-P1's inertness is therefore unconfirmed; push v9's silence was the body inside the standing host's capsule), and right
 after the contact the host's own listing lost the basket while c2's kept it at the spot: the host's copy flew, no stream, no
 E_PROP line. The same signature as v10b's claimant: a copy placed by setPosition and set Dynamic flies at its first contact. H-P4
-reinforced; fa225f01 is the fix under test on the restage. The wake fix 46f1a2dc stays as the engine's own default for clutter
+reinforced; 670ead48 is the fix under test on the restage. The wake fix 7a647687 stays as the engine's own default for clutter
 (allowActivate true), its H-P1 justification downgraded to a note.
 
 drop v5's rerun (030029, 20:07 PDT read) RED on the distance claim alone, 157 against 150, and the number is not a roll: the sword's z on
@@ -600,9 +600,9 @@ falls through to the cell's floor on both seats alike, the stream faithful to th
 dropped item vanishes into the floor. The fix is the server's spawn lift (the copy at the feet plus a lift, falling onto the ground as
 the engine's own drop does from the hand), a server commit on the physics branch after 4076's client build (server-only, the knob), with
 DropItemTest's position following; drop v6 by path adds the floor claim (the sword's z above 14600 on both seats). The branch's three
-client commits are pushed (fa225f01, pipeline 4076 running).
+client commits are pushed (670ead48, pipeline 4076 running).
 
-## The fixed build's first read (20:33 PDT 2026-10-30; b421d1b2's server, fa225f01's client dist 14923, LABAPI 4021)
+## The fixed build's first read (20:33 PDT 2026-10-30; c080bbdb's server, 670ead48's client dist 14923, LABAPI 4021)
 
 x-prop-push v11 (032724) RED 3 of 10 at the rest reads, and three fixes read true on it: "prop ff000002 placed at its record
 (translated)" (H-P4's keyframed translate in place of the setPosition snap), "simulated here: Dynamic" with the settle stream started
@@ -620,7 +620,7 @@ host's own capsule contact ("contact ff000002 layer 4 motion 2: claimed", the gr
 record (translated)" put it back into the capsule, and the Dynamic set threw it past 400 on both seats (the follower applied the stream
 and untracked it out of reach 6 s later). With the wake the ejection from inside a capsule is a throw, and the slope question is moot:
 push v11's travel on the marker had the same shape. Consequences. For the lab: a prop never spawns at a player's feet by the console
-again; the probes make it appear by the verb's own path, the server's drop (64 ahead, 48 up, b421d1b2), which is also how a player
+again; the probes make it appear by the verb's own path, the server's drop (64 ahead, 48 up, c080bbdb), which is also how a player
 makes a prop appear: push v13 (e98f89ba) and pass v11 (by path) have the host drop a Basket01 from the inventory menu, its touch-2
 claim, fall and sleep as the premise, then the kick. For the code, a follow-up, not tonight: the first track's placement translate
 re-creates an overlap whenever the record sits inside a capsule (a login into a cell whose clutter rests where a player stands);
@@ -639,7 +639,7 @@ last second and a half, since a long press is a grab in the engine's own grammar
 (touch 1) is a declared limit: a held E on a prop does not lift it on this build, and its release picks the item up; the kick,
 the pass and the drop are the train's claims (b-prop-push promoted from push v13 on green).
 
-drop v6 (033901, 20:45 PDT read; the lift build b421d1b2) RED 3 of 15, the floor claims alone: the sword rests at 14521.6 (c1) and
+drop v6 (033901, 20:45 PDT read; the lift build c080bbdb) RED 3 of 15, the floor claims alone: the sword rests at 14521.6 (c1) and
 14514.1 (c2) against the strip's 14662, as v5's 14520.7 and 14518.6 did WITHOUT the lift. The lift moved nothing, so the copy is not
 spawned inside the ground: it falls through the strip's collision on the dropper's seat (and through the camp's landscape in v4, the
 same 150), the stream faithful, the sync green (the grant, two streams started and one asleep, the host's apply, one copy per seat
@@ -650,7 +650,7 @@ and up, falls onto the strip and rests on both seats; settled 19:38 PST 2026-11-
 earlier reading was that a WEAP reference the view creates by PlaceAtMe and sets Keyframed (dealWithRef), then
 Dynamic by this service, carries no working collision against the ground (the engine's own drop, DropObject, builds the weapon's
 world physics; a weapon's L_WEAPON layer and shape may need it), where a MISC's clutter shape works under the same sequence; the
-sinking was the spawn height (the drop fix of b421d1b2), not the collision. Reads
+sinking was the spawn height (the drop fix of c080bbdb), not the collision. Reads
 owed, not tonight: a Frida or console read of the placed sword's collision layer and motion on the dropper's seat after the Dynamic
 set; and the design item, the server's copy ADOPTING the engine's own dropped reference (the record bound to the reference the
 engine made, its physics the engine's) instead of a second reference the engine's is deleted for. Until then a dropped weapon is
@@ -666,7 +666,7 @@ capsule's contact launched a resting body past 1200 units in two seconds, where 
 travel on the marker was this launch, not the slope. The view's creation path, read for the stale-collision theory: SpawnProcess
 places the copy with placeAtMe at the player initially DISABLED, setPosition's it to the record while disabled, then enables it, so the
 3D and the Havok body are built at the final place (the theory does not cover the copy; it covered the first track's snap and the
-asleep jump, which fa225f01 now translates). What remains unexplained is the launch itself: HYPOTHESES, (a) the character proxy's
+asleep jump, which 670ead48 now translates). What remains unexplained is the launch itself: HYPOTHESES, (a) the character proxy's
 penetration recovery on a light body made Dynamic by setMotionType(1, true) where the file's body is SphereInertia (the contact
 reports motion 2, so the type is native; the mass or the inertia after the set is the question); (b) the wake flag's activation of a
 body the proxy overlaps every frame; (c) something of ours moving the body at the contact (the host's own stream echoed back through
@@ -696,7 +696,7 @@ lays on clean-m1 with item 7 SKIPPED.
 - Owner: agent (Frida), on the physics branch's restage after the guest-loot and D69 trains; Eli (x64dbg) only if the trace
   contradicts itself.
 
-### x-prop-launch v2's read (11:37 PDT 2026-10-31; run 20261031-181848 on m3-prop-physics f923e0a7's build, red at step 18; an agent's read)
+### x-prop-launch v2's read (11:37 PDT 2026-10-31; run 20261031-181848 on m3-prop-physics 2c2e3437's build, red at step 18; an agent's read)
 
 - The driver's place-ref worked: Basket01 0x12fe7 placed as 0xff0009c3 (the answer's 4278192579) at the host's feet, (133856.1,
   -61330.0, 14674.7). The trace's one row for it, 0.3 s later: `ContactPointAdded ... playerProxy:true, layer 4, motion 2, ref
@@ -740,7 +740,7 @@ lays on clean-m1 with item 7 SKIPPED.
   (the factor path), or as a sane result with the body's velocity leaping anyway (then the push is not this path: the stream's echo,
   the view's apply, or our Dynamic set's mass). v3's RAW rows carry the raw pointers for anything the shape above gets wrong.
 
-### x-prop-launch v3's read: the launch is the engine's push plus the summit; the drop's copy spawned in the capsule (12:34 PDT 2026-10-31; run 20261031-190643, an agent's read of the fixed tracer; the fix m3-prop-physics 967ba8c8)
+### x-prop-launch v3's read: the launch is the engine's push plus the summit; the drop's copy spawned in the capsule (12:34 PDT 2026-10-31; run 20261031-190643, an agent's read of the fixed tracer; the fix m3-prop-physics b770e745)
 
 - CONFIRMED by the trace (one row each, every field sane): the native Basket01 (0xff000884, placed 60 south of the host) took ONE push at
   the host's run-through: `event {objectImpulse -17.748, dt 0.02217, projectedVelocity 4.290, massInv 0.2175}; result |17.7| before,
@@ -751,22 +751,22 @@ lays on clean-m1 with item 7 SKIPPED.
   item is the engine's own kick (7 m/s for a 5 kg body from a run) and the summit's slope; nothing of ours moves the body. A run-through
   kick needs a few hundred units to stop even on the flat; lab-spawn's strip is 110 units from the cell's edge and 450 long.
 - CONFIRMED, the defect: the server's dropped copy (0xff000002) spawned at the dropper's own position (c1's "prop ff000002 tracked, 0
-  units off", c2's "170 units off" = c2's distance to c1), although MpActor::DropItem set it 64 ahead and 48 up (b421d1b2): PlaceAtMe
+  units off", c2's "170 units off" = c2's distance to c1), although MpActor::DropItem set it 64 ahead and 48 up (c080bbdb): PlaceAtMe
   created it at the actor and the create word carried that position; the move after never reached the dropper's copy (no message, the
   DropItemTest's two messages). Its body stood inside the capsule through the paused InventoryMenu; at the first Havok step after the
   close it took one push (`objectImpulse -23.361 at projectedVelocity 0.094`, |46.7| after the factor; the body to |8.5| m/s = 595
-  units a second: a penetration term, HYPOTHESIS, computed upstream of 78304) and left for 991 units. Fixed at 967ba8c8: PlaceAtMe's
+  units a second: a penetration term, HYPOTHESIS, computed upstream of 78304) and left for 991 units. Fixed at b770e745: PlaceAtMe's
   core is PapyrusObjectReference::PlaceAt(anchor, form, where), the one creation path for a server-placed form, and DropItem creates the
   copy through it at the drop point; DropItemTest reads the create word's position.
 - CONFIRMED, the second defect: the copy read "stream ff000002 asleep" 500 ms into the dropper's open InventoryMenu (a paused world stirs
-  nothing), so the server leased a body that had never settled. Fixed at 967ba8c8: the client holds a streaming prop's stir clock while
+  nothing), so the server leased a body that had never settled. Fixed at b770e745: the client holds a streaming prop's stir clock while
   Utility.isInMenuMode().
 - The probes' premise changes from here: the basket appears by the drop (the copy at the drop point, falling onto the strip), the
   toucher WALKS into it (the walk toggle, Caps Lock, DIK 58; a walk's push is a fraction of a run's and the basket stops within the
   strip), the kick is read as a nudge of tens of units with the copies within 32, and no claim expects a kicked basket to stop within
   400 of a run's contact. x-prop-launch's purpose is served; it stays by path as the record (v3 3c0da75f).
 
-### The fixed build's first probes (13:48 PDT 2026-10-31; bdad3572 on 967ba8c8's dist, numidium's reads of 2014xx to 2040xx, each red twice)
+### The fixed build's first probes (13:48 PDT 2026-10-31; b552b416 on b770e745's dist, numidium's reads of 2014xx to 2040xx, each red twice)
 
 - x-prop-drop v6 GREEN (202154): the SteelSword's copy spawns ahead and up, falls onto the strip, the dropper streams the fall and
   sleeps, the watcher applies, one runtime sword per seat within 32 of each other on the strip. The drop fix holds.
@@ -781,7 +781,7 @@ lays on clean-m1 with item 7 SKIPPED.
   seats' copies rested within 32 of each other; settled 19:38 PST 2026-11-02 from the engine model docs/engine/havok-props.md E9): the capsule's
   contact reaches a small box on the floor as it does a basket.
 
-### The basket runs read in full, and the grab's real cause (13:56 PDT 2026-10-31; numidium's read agent on 201426, 201809, 202618; the fix m3-prop-physics 37e960eb)
+### The basket runs read in full, and the grab's real cause (13:56 PDT 2026-10-31; numidium's read agent on 201426, 201809, 202618; the fix m3-prop-physics 222a7471)
 
 - Push and pass: the roll CONFIRMED (c1's "stream started at the grant", then "untracked: out of reach" 8.1 s later with no asleep line;
   the settle 1,050 units west and 200 south of the drop, 22 units past the cell's edge; the strip itself slopes west, the drop's sword
@@ -792,30 +792,30 @@ lays on clean-m1 with item 7 SKIPPED.
   copy at 42.1, and c1's follow read the deletion as "out of reach" (the label covers a deleted record). The body was still
   KEYFRAMED when E was pressed: tick() returned before D73's resting-to-Dynamic branch whenever no sample was pending and the touch
   fallback was off (wantsRef), so no seat logged "at rest: Dynamic" in any of the four runs; a Keyframed body cannot be grabbed and the
-  E's release picks it up (the Havok prop facts of 2026-10-30). Fixed at 37e960eb: the tick wants the reference when the rest or the quiet
+  E's release picks it up (the Havok prop facts of 2026-10-30). Fixed at 222a7471: the tick wants the reference when the rest or the quiet
   is due, and the existing branch runs. HYPOTHESIS until grab v9: the resting ingot reads Dynamic on c2 ("at rest: Dynamic (the stream
   ended)") within a second of the asleep sample, and E then grabs.
 
-### The restart leg's cause and D75 (16:43 PDT 2026-10-31; x-prop-push v15 220439 and 221908 on 37e960eb; the fix m3-prop-physics a2e77f3d)
+### The restart leg's cause and D75 (16:43 PDT 2026-10-31; x-prop-push v15 220439 and 221908 on 222a7471; the fix m3-prop-physics e3d17dd7)
 
-- Pass v13 (220942) and grab v9 (221404) GREEN on 37e960eb: the Keyframed-rest fix holds (the grab grabs). Push v15 RED at the restart
+- Pass v13 (220942) and grab v9 (221404) GREEN on 222a7471: the Keyframed-rest fix holds (the grab grabs). Push v15 RED at the restart
   leg alone, twice: the push and both streams held; after the restart neither seat listed the ingot and c1's console shows no create word
   for it in the new session (the old session's copy tracked at the first word, gone 0.3 s later at the view's reset).
 - The cause, in the server log at the restart: "Skipping FF item 2 (type is MISC), will likely overwrite at some point":
   PartOne::AttachSaveStorage skips every 0xff reference whose base is an item (libespm IsItem) when it loads the save (the record counted
   among the "3 ChangeForms" is loaded after that skip). Beside it, MpActor::DropItem deletes a dropped copy two minutes after the drop and
   trims the dropper's queue at ten (the runs were shorter than two minutes; a playtest is not). Upstream's clutter policies, against
-  decision 2's record that keeps a prop's rest. A T0 through WorldState::LoadChangeForm alone (b3c66e5f, green) never met the skip; the
+  decision 2's record that keeps a prop's rest. A T0 through WorldState::LoadChangeForm alone (5fae7d62, green) never met the skip; the
   case now goes through a file save storage and AttachSaveStorage itself.
 - D75 (DECISIONS.md, under ADR-058): dropped items persist as props by default; the three policies hold only under the server setting
   propsPersist false (WorldState::propsPersist, PartOne::SetPropsPersist, read in ScampServer). DropItemTest: persisted, the copy loads
   at its drop point and the user's login hears its create word; not persisted, the item is skipped as upstream did. Restart behavior
-  (the Server section): the record's rest comes back on both screens at the load; CONFIRMED by push v16 (20261101-014442 on 71092a64,
+  (the Server section): the record's rest comes back on both screens at the load; CONFIRMED by push v16 (20261101-014442 on b763e3ac,
   GREEN with the restart leg): at the reconnect c1 heard five create words (the ingot's among them), untracked the old session's
   copy at the view's reset, then "prop ff000002 tracked, 51 units off" and "simulated here: Dynamic" a second later; the server's
   load took 4 ChangeForms with no "Skipping FF item" line; both seats listed the ingot where it rested.
 - The six "Specified Form is ObjectReference, but we tried to treat it as Actor" warnings in the push runs were the lab's own reads
-  (labState ref's actor fields on a prop, six server.ref reads in the probe), fixed in lab/gamemode (thuum main 6bffd168), not a client
+  (labState ref's actor fields on a prop, six server.ref reads in the probe), fixed in lab/gamemode (thuum main 1ec2fabc), not a client
   bug.
 
 ### Playtest 41's cabbages (2026-11-02 evening PST; Eli: "just blast a bunch of cabbages. that should be a good prop test. only some stayed synced")
@@ -824,12 +824,12 @@ Two refusals in the server log, two causes. (1) E_PROP_REACH: the blown cabbages
 them by touch 0 from 735 to 1400 units (the shout's reach), the contact's 256 refusing every one; the IMPULSE touch (3, reach 2048)
 was in the contract and on the server with no sender. Fix, client: ShoutService and MagicSyncService note this seat's own release
 (PropService.noteImpulse) and the two self-moved claim sites send touch 3 inside a 1.5 s window, touch 0 otherwise (fork
-m4-prop-blast-client 24a841ea, cherry-picked into m4-turbo2-chest 10ade7c4). (2) E_PROP_STEP on the host (ff000001, 1c0c2, 1c0c6,
+m4-prop-blast-client 81c8cb0f, cherry-picked into m4-turbo2-chest 8415e637). (2) E_PROP_STEP on the host (ff000001, 1c0c2, 1c0c6,
 1c0c7): a prop with no live row had the floor (128 units) as its budget; a blasted cabbage's first sample moved farther, TooFast
 returned before the row was written, and every later sample was measured against the never-moving record, so the host lost the prop
 for good. Fix, rule: PROP_FIRST_SAMPLE_UNITS (3000, half a second at the top speed) is the budget of a sample with no live row, the
-row is written at the first accepted sample and the elapsed budget takes over (fork m4-prop-blast 8d94232c, in the server train
-m4-turbo2-union-srv f9a0792e; wire-rules test a_hosts_first_sample_of_a_blasted_prop_passes_and_writes_the_row). Rule 5 note: the
+row is written at the first accepted sample and the elapsed budget takes over (fork m4-prop-blast 020de9ab, in the server train
+m4-turbo2-union-srv a780f1e0; wire-rules test a_hosts_first_sample_of_a_blasted_prop_passes_and_writes_the_row). Rule 5 note: the
 touch kind is the client's word, bounded by the reach alone; a later tightening admits touch 3 only after a cast or shout the server
 accepted from the claimant within 2 s. Probe after the arm: x-prop-blast (c1 shouts Unrelenting Force at a cabbage cluster the host
 c2 simulates; claims: the touch-3 grants in the server log, no E_PROP_REACH or E_PROP_STEP, every cabbage's server position within the

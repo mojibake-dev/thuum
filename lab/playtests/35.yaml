@@ -1,5 +1,5 @@
 # Playtest thirty-five's seats (thuum ADR-040 item 6: `just playtest-setup 35`; the checklist is
-# docs/private/playtest-m3-35.md): M3's NPCs across the board, the NPC ladder's playtest, on fork parity m3-npc-cast bf133744 (53's stage)
+# docs/private/playtest-m3-35.md): M3's NPCs across the board, the NPC ladder's playtest, on fork parity m3-npc-cast 5fb85e2c (53's stage)
 # (trains 51 to 55 and 53: the server's roll on every screen, the host's engine dying by itself and reporting it, the
 # puppet's head and face, the guest's dialogue claim, the hosted archer's and mage's shots). The world is the lab's
 # clean world saved as a playtest world (playtest-m3-35-clean-20261028T040030Z: `just lab-up` then `just playtest-save m3-35-clean`), so every
@@ -19,11 +19,11 @@
 # CommonLibSSE-NG ActorValues.h:16), so the Marksman 60 below changes nothing on her.
 # Everything here is server-side (labCommand); the seats type nothing.
 id: 35
-build: "fork m3-npc-cast bf133744 on its stage (train 53, unmerged: x-npc-archer, x-npc-caster and T2 green; its gate after Eli's report), over fork parity 1b866786 (train 55 merged 2026-10-28 02:25Z); the lab's server image skymp-server:m3-npc-cast, the clones' clean-m1-next 'm3-npc-cast client bf133744'"
+build: "fork m3-npc-cast 5fb85e2c on its stage (train 53, unmerged: x-npc-archer, x-npc-caster and T2 green; its gate after Eli's report), over fork parity c85dab3d (train 55 merged 2026-10-28 02:25Z); the lab's server image skymp-server:m3-npc-cast, the clones' clean-m1-next 'm3-npc-cast client 5fb85e2c'"
 world: playtest-m3-35-rotfern-prisoner-20261028T040633Z   # rotfern (profile 1) from 34b, Prisoner (profile 2) from 30's end world, needs zeroed
 hold:
   minutes: 150
-  reason: "playtest thirty-five: M3's NPCs across the board (fork parity m3-npc-cast bf133744 (53's stage), the NPC ladder)"
+  reason: "playtest thirty-five: M3's NPCs across the board (fork parity m3-npc-cast 5fb85e2c (53's stage), the NPC ladder)"
 server:
   # this server alone runs with NPCs on and the morning clock (ADR-035 point 9): playtest-setup lays the run-own
   # settings overlay (server-settings-run.json beside the world) and starts the server on it

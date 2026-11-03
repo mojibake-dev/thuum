@@ -158,7 +158,7 @@ def checks(rs: dict, results: dict[str, dict], gate: list[str], branch: str, hea
     out.append((ok3, f"3. the branch's stage: server {image.rsplit('/', 1)[-1]} ({'the registry still serves it' if registry_id == sid else 'the registry serves another id'}), "
                      f"clones {'name' if named else 'do not all name'} '{branch} client {sha8 or '?'}'"))
     # paper only: docs, or the T2 sessions' declarations (skymp-wire/difftest/sessions/, difftest's inputs, which the
-    # server and client images do not run); T2 itself must be green on the head with them (m3-npc-talk c1be67d1,
+    # server and client images do not run); T2 itself must be green on the head with them (m3-npc-talk dee28c05,
     # 2026-10-27: a declaration-only commit after the stage would otherwise restage a train whose build is unchanged)
     docs_only = changed is not None and all(p.endswith(".md") or p.startswith("skymp-wire/difftest/sessions/") for p in changed)
     ok4 = head8 == sha8 or (bool(sha8) and docs_only)
@@ -331,7 +331,7 @@ def main(argv: list[str]) -> int:
         tagged = image if image.endswith(f"-{sha8}") else f"{image}-{sha8}"
         registry_id = ssh(f"docker pull -q {tagged} >/dev/null && docker image inspect --format '{{{{.Id}}}}' {tagged}").strip() or None
         if registry_id and played and registry_id != played:
-            # one build under two manifest digests (m3-npc-talk c1be67d1, 2026-10-27: the bare tag the stage ran and the
+            # one build under two manifest digests (m3-npc-talk dee28c05, 2026-10-27: the bare tag the stage ran and the
             # commit's own tag held one config, created 13:53:14.007239683, and the same seven layers, as sha256:8685aafe
             # and sha256:bd96e385): the content is the config's creation time and the layer list, and the same content is
             # the registry still serving the set's build

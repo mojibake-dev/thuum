@@ -235,7 +235,7 @@ and 8 a second only ever stops a flood.
 ## Impose (observers render the server's decision)
 
 - The figure's spell set is the server's (ADR-046, decision 2, 2026-10-23;
-  fork m3-train-38, parity a25caf02 since 11:04 PDT, the gate
+  fork m3-train-38, parity 4ba2fbb3 since 11:04 PDT, the gate
   20261023-173049 green with a lone teleport fault rerun twice green; its
   CI image bakes the stable toolchain by name since the same train): a distributor such as SPID hands every
   non-player actor the layer's abilities at its load, and a figure is such
@@ -248,8 +248,8 @@ and 8 a second only ever stops a flood.
   or a hosted resident is never touched (isFigureBase: the Player base or a
   base this game made). The Player base stays; perks and keywords take a
   native enumeration when a case shows them. Oracle: x-figure-spells
-  20261023-183306 GREEN on parity a25caf02 (lab-api ee94dffa, lab-driver
-  8947851d): each seat's figure of the other player read added [] and extra
+  20261023-183306 GREEN on parity 4ba2fbb3 (lab-api ac44873e, lab-driver
+  87fe2644): each seat's figure of the other player read added [] and extra
   [] at 3 s and at 20 s, c2's figure of test 1 with Firebolt 0x12FD0 in its
   right hand (the equipped spell sits in the hand slot, not among the added
   spells, so the strip never meets it). Two facts for the figure model: the

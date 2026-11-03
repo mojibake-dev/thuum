@@ -8,7 +8,7 @@ SkyrimSE 1.6.1170 (the program `/SkyrimSE-1.6.1170.0.exe.unpacked.exe`; REA was 
 reverse lookup of the RVA in addrlib/versionlib-1-6-1170-0.bin through lab/addr.py, every CommonLibSSE-NG name cited to
 its header in this tree. Engine names beyond CommonLib's are HYPOTHESIS, as is every inferred side effect, until a Frida
 trace confirms them. The fork's code read: lab/.cache/wt/cast (PuppetApi.cpp, PuppetHooks.cpp) and the parent session's
-train-wt copy of skymp5-client's talkService.ts (the one-and-two-second re-asks of f5ec2f7a).
+train-wt copy of skymp5-client's talkService.ts (the one-and-two-second re-asks of a8ac10fa).
 
 ## The short answer
 
@@ -210,7 +210,7 @@ Where the second activation comes from on the claimant's seat, and not on the ho
     menu to appear easily does, the driver's short press does not, which is why the probes read the host-like shape
     and the playtests did not. In the other order (ours first, the release after the menu opened) the engine's release
     is the second, if the handler still runs the Activate event in the menu's input context (unread; the trace tells).
-(b) The client's re-asks. TalkService.watchClaim (fork f5ec2f7a and later) calls activatePickRef again one and two
+(b) The client's re-asks. TalkService.watchClaim (fork a8ac10fa and later) calls activatePickRef again one and two
     seconds after the grant while `Ui.isMenuOpen("Dialogue Menu")` is false on that update. A start the engine performs
     a frame later (the pending start from 39637 after a greeting, or a menu that opens late) turns the re-ask into the
     clearing second activation. The in-dialogue word is logged on the first update that sees the menu open, so a FALSE

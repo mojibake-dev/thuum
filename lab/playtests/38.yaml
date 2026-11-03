@@ -1,13 +1,13 @@
 # Playtest thirty-eight's seats (docs/private/playtest-m3-38.md): the overnight train's stage, fork m3-turbo-train-3n
-# e14dc298 (its dist is b588e0ff's, GitLab job 14000: the two difftest commits after it change no client; the image
-# m3-turbo-train-3n-b588e0ff, the same server code), before its gate (sky-c2's GPU wedge at 02:44 PDT stopped the
-# night's gate; core's host reboot at 11:01 PDT recovered it). Raise Wall and the non-host reanimate are 3o ee44f7d1
+# 38cea9bf (its dist is cf29e5f6's, GitLab job 14000: the two difftest commits after it change no client; the image
+# m3-turbo-train-3n-cf29e5f6, the same server code), before its gate (sky-c2's GPU wedge at 02:44 PDT stopped the
+# night's gate; core's host reboot at 11:01 PDT recovered it). Raise Wall and the non-host reanimate are 3o 33240fd4
 # (schema 20), a second lay at a break Eli picks. The world is 37's end, saved at 23:30 PDT on the 28th
 # (playtest-m3-37-end-20261029T063051Z-20261029T063051Z, 883 records: rotfern and Prisoner at their newest).
 # Both seats at the camp OUTDOORS (Survival starts only outdoors in the lab, lab-survival-indoor-rule), test 2 beside
 # test 1 (thirty-four's shape). Perks as 37's. Everything here is server-side (labCommand); the seats type nothing.
 id: 38
-build: "fork m3-turbo-train-3n e14dc298 on its stage (dist b588e0ff GitLab 14000, image m3-turbo-train-3n-b588e0ff), before its gate"
+build: "fork m3-turbo-train-3n 38cea9bf on its stage (dist cf29e5f6 GitLab 14000, image m3-turbo-train-3n-cf29e5f6), before its gate"
 world: playtest-m3-37-end-20261029T063051Z-20261029T063051Z   # 37's end world, rotfern (profile 1) and Prisoner (profile 2) at their newest
 hold:
   minutes: 300

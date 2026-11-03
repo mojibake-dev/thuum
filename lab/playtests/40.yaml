@@ -1,8 +1,8 @@
-# Turbo 2's seats (docs/private/playtest-turbo-2.md, sitting one first, then two): the merged base, fork parity 64dbacfe (the
-# object-animation pair merged 2026-11-02T13:04Z, the host layer on main 8139d579, after the night's traps, container, permit,
-# bondblock and end grace merges), thuum main 43c31c1b, the server image skymp-server:m4-object-animation-64dbacfe (sha256
-# ea9234be, parity's head), the dist GitLab client-build 16578 of 64dbacfe (SkyrimPlatformImpl.dll 8743078b) in both clones'
-# clean-m1 (promoted at the host layer's merge), lab-api 046cb720. The turbo shape: the server runs every switch OFF (locks,
+# Turbo 2's seats (docs/private/playtest-turbo-2.md, sitting one first, then two): the merged base, fork parity ad1aa50a (the
+# object-animation pair merged 2026-11-02T13:04Z, the host layer on main 482f157b, after the night's traps, container, permit,
+# bondblock and end grace merges), thuum main 4acca9ad, the server image skymp-server:m4-object-animation-ad1aa50a (sha256
+# ea9234be, parity's head), the dist GitLab client-build 16578 of ad1aa50a (SkyrimPlatformImpl.dll 8743078b) in both clones'
+# clean-m1 (promoted at the host layer's merge), lab-api 078d3805. The turbo shape: the server runs every switch OFF (locks,
 # weatherSync, perks, leveling; the deployed settings keep them ON for the gates), and each item turns its own on by the
 # overlay's line, a server restart and both seats relaunched (numidium). Survival OFF (Eli, 10-31): the switch global
 # 828:ccQDRSSE001-SurvivalMode.esl at 0 on both records, set at the lay through the server's setglobal. The world: 39's end,
@@ -14,7 +14,7 @@
 # The hold's reason starts with "playtest": lab-api's perks step refuses any other (E_NO_PLAYTEST). Everything here is
 # server-side (labCommand); the seats type nothing.
 id: 40
-build: "fork parity 64dbacfe (the object-animation pair merged), thuum main 43c31c1b, the server image skymp-server:m4-object-animation-64dbacfe (sha256 ea9234be), the dist GitLab client-build 16578 of 64dbacfe in both clones' clean-m1, lab-api 046cb720; switches locks, weatherSync, perks and leveling OFF; Survival off (Eli, 10-31)"
+build: "fork parity ad1aa50a (the object-animation pair merged), thuum main 4acca9ad, the server image skymp-server:m4-object-animation-ad1aa50a (sha256 ea9234be), the dist GitLab client-build 16578 of ad1aa50a in both clones' clean-m1, lab-api 078d3805; switches locks, weatherSync, perks and leveling OFF; Survival off (Eli, 10-31)"
 world: playtest-m3-39-paused-20261031T014638Z   # 39's end (saved when Eli paused 39, 2026-10-31T01:46Z), the newest saved playtest world
 hold:
   minutes: 300

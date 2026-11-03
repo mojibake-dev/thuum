@@ -922,7 +922,7 @@ class PuppetFactsTests(unittest.TestCase):
         self.assertTrue(ev.evaluate("c1.npc_state(0x13483).isProtected == true and c1.npc_state(0x13483).isEssential == false"))
         with self.assertRaises(AssertionData):
             ev.evaluate("c1.npc_state(0x13482).isProtected")
-        # the Talk prompt's mechanism: the puppet blocked, the live resident not (8eafa85d's clear)
+        # the Talk prompt's mechanism: the puppet blocked, the live resident not (67256b72's clear)
         self.assertTrue(ev.evaluate("c2.npc_state(0x13483).activationBlocked == true and c1.npc_state(0x13483).activationBlocked == false"))
         # the cell the reference stands in, a door's interior after a crossing (npc-handoff)
         self.assertTrue(ev.evaluate("c1.npc_state(0x13483).cell == 0x9732"))

@@ -2,7 +2,7 @@
 
 Drafted 00:4x PDT 2026-10-31 from docs/VERB.md (pile item 9 of docs/private/turbo-2-prework.md; M4's dungeon row:
 traps, pressure plates, linked refs, puzzle pillars, toward the exit scenario d-bleak-falls). From a code map of the
-fork at parity dc3ec679. Nothing of it is built; the prework is the read, x-bleak-traps.
+fork at parity 6dbabc7a. Nothing of it is built; the prework is the read, x-bleak-traps.
 
 ## Intent
 
@@ -30,7 +30,7 @@ DOORs carry (ACTI.cpp reads the VMAD alone).
 | a trap's kill of an NPC | engine | R2 recorded: ADR-048's hazard death with "an activation beside the body" (:3488-3496) |
 | a pillar's turn (an ACTI's script PlayAnimation on itself) | engine | imposed: the server's Papyrus has no script, so the turn is the host's report of the pillar's state (its animation name, lastAnimation today, remoteServer.ts:386-399 "pillars in bleakfalls are not reliable") |
 | the lever's check of the pillars and its activation of the linked door | engine (defaultPillarPuzzleLever) | imposed: the lever's script runs on the host's game; its door activation is an engine-internal activation (caster the lever) the client never sends (activationService.ts:47-76 sends a non-player caster only when caster equals target), so the server never opens the door for the other seat today: the fix is the host reporting the linked activation (caster lever, target door) and the server opening the door (SetOpen, R0 by the host's word) |
-| the door's open state | code (isOpen) for a DOOR; the puzzle portcullis is an ACTI (NorPortcullisLarge01 0x3e726, lab/esm.py 01:58 PST 2026-11-01) whose rise is its script's animation | a DOOR's isOpen as today from the host's linked report through Activate's own path; the portcullis has no server state, each engine's script plays it on the relay (fork m4-traps 333a1cdc); across a restart it stands as the engines reload it (a known limit for d-bleak-falls' restart leg: pull the lever after the restart, or restart before the door) |
+| the door's open state | code (isOpen) for a DOOR; the puzzle portcullis is an ACTI (NorPortcullisLarge01 0x3e726, lab/esm.py 01:58 PST 2026-11-01) whose rise is its script's animation | a DOOR's isOpen as today from the host's linked report through Activate's own path; the portcullis has no server state, each engine's script plays it on the relay (fork m4-traps cc62e749); across a restart it stands as the engines reload it (a known limit for d-bleak-falls' restart leg: pull the lever after the restart, or restart before the door) |
 | the puzzle's state (the three pillars' faces) across a restart | engine | imposed: recorded as each pillar's last animation on its record (today's lastAnimation, MpChangeForms.h:134-135), restored at the cell's load |
 | the "puzzle failed" spears when the lever is pulled wrong | engine | native on the host; the other seat's spears through the children relay above |
 
@@ -121,7 +121,7 @@ cell's host and only between references the game files link (XAPR or XLKR of the
 
 ## Server
 
-- Where the logic lives (01:43 PST 2026-11-01, fork m4-traps 702567ba, the server half): ActionListener::OnActivate sends a caster
+- Where the logic lives (01:43 PST 2026-11-01, fork m4-traps b163fc62, the server half): ActionListener::OnActivate sends a caster
   that is no actor and not the target to OnLinkedActivation before the hosted caster's rule (which threw "Bad hoster" on
   a lever's report until now). The pair is the game files' through WorldState's activation-parent table, filled as each
   reference loads (the target's XAPR names the caster: the spike wall 0x54b15's names the plate 0x567f2, the portcullis
@@ -190,7 +190,7 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   script calling playAnimation and Activate. The design this read forces is an ADR (world scripts run on the cell's host, their
   activations relayed, their animations recorded), written next; the server half built here (RelayedActivation, the linked
   report) stays as the relay's wire.
-- Server, ADR-059 decision 2's last piece (fork m4-puzzle-relay cf70e418 off m4-traps 346249e8, 08:01 PST 2026-11-01; T0 TrapRelayTest's
+- Server, ADR-059 decision 2's last piece (fork m4-puzzle-relay 7a480818 off m4-traps 19e8d981, 08:01 PST 2026-11-01; T0 TrapRelayTest's
   pillar case both ways): a player's activation of a scripted world object (an ACTI or FURN whose record or base carries a script,
   the VMAD read once per base) is relayed to every other game in the cell as RelayedActivation with the player's actor as the
   caster: the host's engine runs the script where the cell is simulated (a guest's pillar turn counts on the host's lever), and the
@@ -208,13 +208,13 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   0xaa8cc and 0xaa8cd (lab/esm.py ref and id on sky-srv), the engine's own child of every pillar turn, with no consequence the
   server owns. The probe's claims name the codes from v2 on: no E_TRAP_NOT_HOST, E_TRAP_UNLINKED or E_TRAP_RATE, and every
   E_TRAP_NO_REF the marker's ([[lab-refusal-claims-name-codes]] in spirit: a no-refusal claim names its codes).
-- ADR-059 decision 3 BUILT (fork m4-object-animation off m4-world-scripts-host 9bb3d3ed, 14:2x PST 2026-11-01; the head in
+- ADR-059 decision 3 BUILT (fork m4-object-animation off m4-world-scripts-host 38ac3350, 14:2x PST 2026-11-01; the head in
   docs/LOG.md): the host's engine's world-object animation events reach the guests. Client: ObjectAnimationService hooks
   sendAnimationEvent for the family the trap and puzzle scripts play, matched in native (HookPattern; from the scripts' own
   names in the game's pex files and the bases' VMAD, read 14:23 PST 2026-11-01: the pillars' Trigger0N and Turned0N, a lever's FullPull
   and FullPulledDown, a two-state activator's open, close and opened, the plate's Down, the swinging wall's 90/180/270 For,
   Half, End and Back and Rearm, TrapBase's Reset and Idle; the engine's exact set HYPOTHESIS until x-object-anim reads it;
-  fork e1db19c8), notes
+  fork dceb62e0), notes
   the event and on the next update reports it when this seat hosts the reference's cell and the reference is no actor or
   door; a relayed ObjectAnimation plays through the engine's own PlayAnimation (the path remoteServer's lastAnimation replay
   uses). Server: OnObjectAnimation (above) records it as lastAnimation and relays; T0 ObjectAnimationTest (recorded and
@@ -277,14 +277,14 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   Actor::ProcessHitVictim and Actor::DamageActor ran on c1 for the figure, and the trace printed no row for them either: the trace
   is wrong before the engine is (the attaches do not fire where they sit, or the agent is not in the game's process; x-object-anim
   v3's fourteen DamageActor rows came through a different script). So the two silent plate runs decide nothing about the trap's
-  physics yet. Trace v3 proves itself (lab/frida/trap-path-trace.js, main 173bff7d: the process id against the platform log's pid,
+  physics yet. Trace v3 proves itself (lab/frida/trap-path-trace.js, main eb6ed459: the process id against the platform log's pid,
   the module base, each hook's resolved address and first eight bytes, per-hook call counts before any filter, a kernel32!Sleep
   count as the Interceptor's pulse, a liveness row every ten seconds); probe x-trap-path v4 (sha1 c83f645a) is v3's steps with it.
   Also in that run's server log, twice at 13:10:50: "Script 'TrapSwingingWall' not found in the script storage": the server's Papyrus
   VM asked for the wall's script at the relayed activation; Skyrim.esm's scripts are not in the server's storage by ADR-059's
   design, so the line is noise, not a finding (a filter for the eleven host-scoped names is a later tidy). Decision 4's client half
   keeps its HYPOTHESIS; the TrapHit branch waits on v4's rows.
-- x-object-anim v4 GREEN (22:43 PST 2026-11-01; 20261102-063627 on the pillar-fix head 64dbacfe over layer 8d4b177c, every claim of the three
+- x-object-anim v4 GREEN (22:43 PST 2026-11-01; 20261102-063627 on the pillar-fix head ad1aa50a over layer 6d059c11, every claim of the three
   legs). Decision 1's lifecycle rule CONFIRMED: with its OnCellLoad admitted the pillar's script left its empty state, and the host's
   turn moved the pillar (c1's screenshots before and after show the eagle face giving way to the snake face) and played
   "Trigger01" through the hook ("object animation aa8cb Trigger01 reported" on c1 at 06:41:12.5, "played" on c2 27 ms earlier by
@@ -308,7 +308,7 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   hooked; the host's own body on the plate first, the figure after) reads the player's rows as proof of the hooks and the
   figure's rows, or their absence, as the physics' word; if the engine never fires the event for a figure, decision 4 needs
   the figure's body in the world first, not a different hook.
-- Decision 4's client half BUILT (21:58 PST 2026-11-01): fork m4-trap-hit fd90067f (over c085a3ad, off the pair's 32795060; server-only push, the
+- Decision 4's client half BUILT (21:58 PST 2026-11-01): fork m4-trap-hit 71e1dd13 (over ddbfce5c, off the pair's ed7aa29a; server-only push, the
   client build when it stages). Skyrim Platform hooks the ProcessTrapHit native's callback (game/Offsets.h ProcessTrapHit,
   REL::ID(56212), AE only: r8 the hit reference, r9 the trap, the Papyrus floats as stack arguments five, six and fourteen, read
   through gum's nth-argument as float32 low dwords; HYPOTHESIS until trap-path-trace.js) and raises `trapHit` {trap, target,
@@ -347,7 +347,7 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   lab/frida/trap-path-trace.js, probe x-trap-path by path): per swing one 56212 row (trap 0x54b15, the figure, damage 75), one
   37509, two 38586 (Papyrus thread then main), then DamageActor with no attacker; a swing with DamageActor and no 56212 row, a
   56212 row whose R9 is not the trap or whose float is not the pick, or two 56212 rows per swing falsifies it.
-- The pair's second stage read (21:34 PST 2026-11-01; x-object-anim v3 20261102-051618 on 32795060 over layer 339a9d12): legs A and B GREEN,
+- The pair's second stage read (21:34 PST 2026-11-01; x-object-anim v3 20261102-051618 on ed7aa29a over layer 745e643f): legs A and B GREEN,
   leg C red. A: the host's plate fires ("567f2 activates 54b15" 3), the wall's 180For, 180Back and Rearm and the plate's Down reach
   c1's service and c2 plays them (the engine's names for TrapSwingingWall rotation 1 and PressurePlate: CONFIRMED, the HYPOTHESIS
   list was right for these two). B (H3 CONFIRMED): the guest's figure on the plate fires the plate on the host's engine (5 more
@@ -371,9 +371,9 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   by NiControllerManager sequences through TESObjectREFR::PlayAnimation_Impl (CommonLibSSE-NG Offsets.h:546, 14189/14297;
   src/RE/T/TESObjectREFR.cpp:812-840 is the Papyrus path's shape), which the NotifyAnimationGraph hook never sees; the platform
   hooks it and raises the sequence's name as the same sendAnimationEvent, so one JS family covers both (fork m4-object-animation
-  63df9393, local until the grace's parity is in). Which family the pillar uses is HYPOTHESIS until lab/frida/pillar-anim-trace.js
+  ab9b7fd8, local until the grace's parity is in). Which family the pillar uses is HYPOTHESIS until lab/frida/pillar-anim-trace.js
   (both hooks, non-actor references) runs on c1 in probe v4 (lab/.cache/probes x-object-anim 2059c95e).
-- Decision 4's server half BUILT (21:17 PST 2026-11-01): fork m4-trap-hit c085a3ad (off the pair's 32795060, SCHEMA_VERSION 31; server-only push,
+- Decision 4's server half BUILT (21:17 PST 2026-11-01): fork m4-trap-hit ddbfce5c (off the pair's ed7aa29a, SCHEMA_VERSION 31; server-only push,
   CI's T0 pending). The contract is docs/WIRE.md's TrapHit (t 72) `{ refr, target, damage }` C2S, R1: the host's engine computes
   the number (the scripts' leveled pick through ProcessTrapHit), the server validates it by membership in the trap's own table
   (wire-rules traps::hit over the VMAD's LvlDamage1 to LvlDamage6 and TrapHitBase's damage, base then reference, read by
@@ -414,7 +414,7 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   which cells this seat hosts at every grant and release) was bound in C++ and called from TypeScript but never declared in the
   compiled TESModPlatform.pex, so the call threw "Native function not found" on every seat and the host-scoped scripts stayed
   blocked on the host (x-object-anim v3 20261102-045036: the plate 0x567f2 never activated the wall). Declared on m4-object-animation
-  32795060 (lab/pex.py add-native, the .psc line beside it); the stage repeats on that head. The lesson is the pex rule's: a new
+  ed7aa29a (lab/pex.py add-native, the .psc line beside it); the stage repeats on that head. The lesson is the pex rule's: a new
   TESModPlatform native is the binding, the .psc line and the .pex declaration, and the dump is the check before any push.
 - Decision 4's server half, static (20:53 PST 2026-11-01): the server needs no new parser for the trap's table. libespm reads a record's
   whole VMAD (RecordHeader::GetScriptData, skymp/libespm/src/RecordHeader.cpp:43-66; Utils.cpp:177-204 fills each script's name,
@@ -438,7 +438,7 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   hosted-cell gate a guest's engine runs none, and TrapHit (the host's number on the figure, the server's table) is the only path.
   Decision 5 (counts): a replay must be limited to scripts whose activation history has no side effect on other references (a
   pillar's turn), never a lever's (its failure fires darts); the list is by script name.
-- READ CONFIRMED (x-bleak-traps v4- READ CONFIRMED (x-bleak-traps v4- READ CONFIRMED (x-bleak-traps v4 20261101-153828, green, first run, m4-traps 346249e8 under the layer's rows; 07:52 PST 2026-11-01): with
+- READ CONFIRMED (x-bleak-traps v4- READ CONFIRMED (x-bleak-traps v4- READ CONFIRMED (x-bleak-traps v4 20261101-153828, green, first run, m4-traps 19e8d981 under the layer's rows; 07:52 PST 2026-11-01): with
   the scripts admitted and the engine's activation kept on their bases, Bleak Falls Temple runs. A) the host on the plate: its
   PressurePlate fires (c1 "Sent a trigger's own activation for 567f2"), the engine's activation parent activates the wall with
   the plate as the caster ("Sent a linked activation of 54b15 by 567f2"), the server relays once per activation ("567f2 activates
@@ -451,15 +451,15 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   relayed, c2 playing both. E) the puzzle lever with the pillars unsolved: defaultPillarPuzzleLever fires its four failure darts
   once each (0x39fdd, 0x3720f, 0x2ad49, 0x2ad43), all four relayed through the links the server read from the script's
   properties; the door marker is never named on the failure path (so no E_TRAP_NO_REF, and the marker-caster path waits for a
-  solved pull). No E_TRAP_ or E_ACTIVATE_REACH line in the run. Scenario b-bleak-traps (main 0f5ced37) claims A, B, D and E.
-- Platform, ADR-059 decision 1 (- Platform, ADR-059 decision 1 (fork m4-world-scripts-host 80616308 off m4-traps dc881a11, 06:07 PST 2026-11-01; a Windows build): Skyrim
+  solved pull). No E_TRAP_ or E_ACTIVATE_REACH line in the run. Scenario b-bleak-traps (main 9053286c) claims A, B, D and E.
+- Platform, ADR-059 decision 1 (- Platform, ADR-059 decision 1 (fork m4-world-scripts-host b69bf508 off m4-traps 7ab2d1c7, 06:07 PST 2026-11-01; a Windows build): Skyrim
   Platform's LoadAdmittedScripts reads a second row kind, "<plugin> host: <class> ...", into a host-scoped set; OnSendEventEnter reads
   the event's reference's parent cell and AdmittedByChain passes a host-scoped name only when that cell is in the hosted set;
   TESModPlatform.SetCellHosted(cellFormId, hosted) fills the set and skymp5-client's hostService calls it (callNative, on the next
   update) at every grant, release, clear and restore. papyrus-map.py writes the marker from the tsv's scope=host column (main
-  bf0296d9). Not in v4's dist: the read runs with the rows everywhere; the row flips to host when this platform is staged, and its
+  41da7e87). Not in v4's dist: the read runs with the rows everywhere; the row flips to host when this platform is staged, and its
   own read is whether a guest's plate stays silent while the host's fires (H3's other half). HYPOTHESIS until then.
-- Server, ADR-059 decision 2's first two pieces (fork m4-traps dc881a11, 05:58 PST 2026-11-01; T0 TrapRelayTest's puzzle room case):
+- Server, ADR-059 decision 2's first two pieces (fork m4-traps 7ab2d1c7, 05:58 PST 2026-11-01; T0 TrapRelayTest's puzzle room case):
   MpObjectReference::Init reads a reference's VMAD and, for defaultPillarPuzzleLever, puts its refActOn* and puzzleDoorActivator
   object properties into activationChildsByActivationParent from the parent's side (delay 0), so the puzzle lever's darts and
   marker are links the relay knows; and OnLinkedActivation takes the caster by id with the form optional, so a STAT marker the
@@ -467,9 +467,9 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   through it. A never-loaded TARGET (the lever activating the marker) stays E_TRAP_NO_REF by design: its consequence arrives as
   the marker's own linked activation of the portcullis. Probe v4 re-stamped 343f06bc with that expectation.
 - x-bleak-traps v4 6fc6748f (05:49 PST 2026-11-01; ADR-059 slice 1): the two blocks lifted for Bleak Falls Temple's pieces, the scripts admitted
-  by name on the layer branch layer-world-scripts 20877978 (lab/layer/papyrus-admitted.tsv's named rows, papyrus-map.py's fourth
-  column, main afa69250) and the engine's activation kept on their bases by the client's activationUnblockedBases (fork m4-traps
-  20b1da65, the relaunch step's json write). Reads A to E in the probe's header: the plate's own fire and the wall's linked
+  by name on the layer branch layer-world-scripts 6b865ab0 (lab/layer/papyrus-admitted.tsv's named rows, papyrus-map.py's fourth
+  column, main 4135464c) and the engine's activation kept on their bases by the client's activationUnblockedBases (fork m4-traps
+  0ec0407b, the relaunch step's json write). Reads A to E in the probe's header: the plate's own fire and the wall's linked
   activation relayed to the guest; the guest's plate (its own engine and the host's for its figure, H3); the guest's pillar turning
   on its own screen alone (decision 2's gap); the lever's portcullis on both; the puzzle lever's four darts refused E_TRAP_UNLINKED
   (links by script property, the link table's next source). H1 (OnActivate under the native block) is moot where the block is
@@ -492,7 +492,7 @@ b-bleak-traps and b-puzzle-relay's relaunch step: "1a4bb c6440 21513 3e726 aa8ce
 playtest setup laid it, and both seats' skymp5-client-settings.txt carried no such key, so a blocked plate's script fired but its
 default processing (the activation parents) never activated the wall. The gates were green on their own premise: the gate audit's
 class (numidium's audit, ADR-062's baseline row). The pillars worked because a press on a blocked activator still reaches its own
-script. Resolution: ADR-062 slice 1a (fork m4-scripts-work d8fc5fa2) lifts the engine's activation on activators and movable statics
+script. Resolution: ADR-062 slice 1a (fork m4-scripts-work f08abd57) lifts the engine's activation on activators and movable statics
 in a cell this game HOSTS, following the hosting at every grant and release, and the list retires; tonight's stopgap is the same
 key laid by a relaunch on both seats, at Eli's word. The b-* scenarios drop their relaunch writes when slice 1 stages.
 
@@ -500,24 +500,24 @@ key laid by a relaunch on both seats, at Eli's word. The b-* scenarios drop thei
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared (the reference trace owed)
 - [x] engine surface cited or delegated (the code map of 2026-10-31)
-- [x] server logic + T0 (fork m4-traps 16d29f6c: OnLinkedActivation, the host's linked report, the relay, the budget; dc881a11: links from script properties, the caster by id; TrapRelayTest three cases)
-- [x] message + validator (same commit; 702567ba, RelayedActivation MsgType 70, SCHEMA_VERSION 28; decision 3's
+- [x] server logic + T0 (fork m4-traps 2e156211: OnLinkedActivation, the host's linked report, the relay, the budget; 7ab2d1c7: links from script properties, the caster by id; TrapRelayTest three cases)
+- [x] message + validator (same commit; b163fc62, RelayedActivation MsgType 70, SCHEMA_VERSION 28; decision 3's
   ObjectAnimation MsgType 71, SCHEMA_VERSION 30, fork m4-object-animation)
 - [x] decision 2 whole: a player's activation of a scripted world object relayed to the cell's other games, both ways
-  (fork m4-puzzle-relay, MERGED to parity e6c5d01a 20:09 PST 2026-11-01 in the bondblock train); x-puzzle-relay v3 green 030924 and
-  promoted to lab/scenarios/b-puzzle-relay.yaml (b133be9a): the guest's turns run on the host, the host's reach the guest, the
+  (fork m4-puzzle-relay, MERGED to parity fcbced40 20:09 PST 2026-11-01 in the bondblock train); x-puzzle-relay v3 green 030924 and
+  promoted to lab/scenarios/b-puzzle-relay.yaml (6b45c119): the guest's turns run on the host, the host's reach the guest, the
   solved pull opens the portcullis; the pillars' marker 0x4fcdf E_TRAP_NO_REF by design
-- [x] decisions 1 and 3 whole (fork m4-object-animation, MERGED to parity 64dbacfe with layer-world-scripts-host to main 8139d579,
+- [x] decisions 1 and 3 whole (fork m4-object-animation, MERGED to parity ad1aa50a with layer-world-scripts-host to main 482f157b,
   05:09 PST 2026-11-02, numidium: the sweep 20261102-064754 114 of 114 green in 126 runs, verdict watch on b-npc-talk's two
   lone-red reruns; both clones promoted): the hosted-cell gate (host-scoped script rows, SetCellHosted, the lifecycle events admitted
   everywhere), ObjectAnimation (MsgType 71) from the host's two engine families (the behavior graph's event and the NiControllerManager
-  sequence) to the guests, recorded as lastAnimation. T3: b-object-anim (promoted from x-object-anim v4, green 063627; 66607f91),
+  sequence) to the guests, recorded as lastAnimation. T3: b-object-anim (promoted from x-object-anim v4, green 063627; 7875c655),
   b-puzzle-relay, b-bleak-traps. What a player gets: plates, walls, levers and pillars play on every screen as the host's engine plays
   them; a guest's own engine runs none of the cell's scripts; a trap still harms no guest (decision 4, TrapHit, on its branch)
 - [x] native hook + T1 (decisions 1 and 3: SetCellHosted (TESModPlatform, declared in the pex), the SendAnimation hook's reference
   range and the PlayAnimation_Impl hook (14297), AE only; T1 is the lab's platform log lines)
-- [x] TS handler, first cut (relayedActivationService.ts plays the relay, activationService.ts sends a hosted cell's non-player activations, objectReferenceEx.ts keeps the engine's activation on activationUnblockedBases; 20b1da65, tsc green); its hosted-cell shape is ADR-059 decision 1's platform change
-- [x] T2 green (the pair's verb-merge on the per-sha tag of 64dbacfe, 2026-11-02; every session identical; no difftest session
+- [x] TS handler, first cut (relayedActivationService.ts plays the relay, activationService.ts sends a hosted cell's non-player activations, objectReferenceEx.ts keeps the engine's activation on activationUnblockedBases; 0ec0407b, tsc green); its hosted-cell shape is ADR-059 decision 1's platform change
+- [x] T2 green (the pair's verb-merge on the per-sha tag of ad1aa50a, 2026-11-02; every session identical; no difftest session
   triggers ObjectAnimation or TrapHit yet, the fake clients host no cell)
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)

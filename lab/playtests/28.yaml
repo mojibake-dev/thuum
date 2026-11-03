@@ -1,6 +1,6 @@
 # Playtest twenty-eight's seats (thuum ADR-040 item 6: `just playtest-setup 28`; the checklist is
 # docs/private/playtest-m2-28.md; M2's close, docs/M2-CLOSE.md): train-30 on its stage under the merged
-# essentials layer (the render without FSMP, cf363c44). Twenty-seven's world, restored as a COPY into the
+# essentials layer (the render without FSMP, ad4af7ea). Twenty-seven's world, restored as a COPY into the
 # live world directory: ADR-043's slice one migrates that copy to the served order at its first load (the
 # snapshot itself stays raw, and restores onto a pre-slice server), so b-formdesc-world must be green on
 # this stage before setup runs (M2-CLOSE.md section 6). Under the layer Apocalypse holds full slot 0x1A
@@ -9,7 +9,7 @@
 # playtest-console, set-percentages); the one thing a seat types itself is test 1's `player.addperk 7934b`
 # (Overdraw40, the headshot rule's perk, which lives in the shooter's game).
 id: 28
-build: "fork m2-train-30 44372078 (CI 2349, T2 32 identical) on stage-layer-train30 893170e: apocrypha's essentials layer c38a3b04 (the 0x7 drop, the head parts on their masters' bits, RaceMenu's menu loose)"
+build: "fork m2-train-30 67679548 (CI 2349, T2 32 identical) on stage-layer-train30 893170e: apocrypha's essentials layer 1289987b (the 0x7 drop, the head parts on their masters' bits, RaceMenu's menu loose)"
 world: playtest-m2-27-20261020T183558Z   # twenty-seven's world, saved 11:35 PDT after its checklist (Survival answered on both seats, the Apocalypse MCM global 40bef)
 hold:
   minutes: 180

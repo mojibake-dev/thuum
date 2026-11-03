@@ -1,7 +1,7 @@
 # The essentials layer's reds of 2026-10-20
 
 The layer's first full gate (`just layer-merge stage-layer-train29`, run set
-20261020-220005-layer-stage-layer-train29 on render cf363c44: FSMP out, the
+20261020-220005-layer-stage-layer-train29 on render ad4af7ea: FSMP out, the
 head-parts gender flags patched) ended red at 25 of 62 with two reds, after
 the morning's three (docs/verbs/racemenu-sync.md's LAYER FINDING; b-spell's
 served band; b-push's refused Ragdoll, probe x-push-knock-frida) had been
@@ -75,8 +75,8 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
   the interface paths; the one BSA overlap (SkyUI_SE.bsa's
   interface\racesex_menu.swf, SkyUI loading last as a client-only plugin
   must) is in both heads and latent. Under the previous layer stage
-  1496763f skee DID initialise (29 CreateDefaultMap lines in 192512 and
-  193623, RacePartDefaultGen at +5 s); under 68a56247 its race-part pass
+  573f2e63 skee DID initialise (29 CreateDefaultMap lines in 192512 and
+  193623, RacePartDefaultGen at +5 s); under 5e50f6a9 its race-part pass
   never ran. The heads differ client-side in FSMP out, the two esl-flagged
   Survival patches, and plugin-patch's hdpt-gender-both on Playable
   Headparts All Races.esp, the only new input to skee's head-part pass: so
@@ -105,15 +105,15 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
   CONFIRMED on the fixed layer's stage (stage-layer-train30 b53d922, laid
   17:05 PDT; smoke 20261021-000157 green): both seats' skee64.log carry 29
   RaceMap::CreateDefaultMap and 51 RacePartDefaultGen lines, none under
-  68a56247, so RaceMenu's chargen initialises and the race menu is
+  5e50f6a9, so RaceMenu's chargen initialises and the race menu is
   RaceMenu's again; a-rotfern, a-racemenu and b-duel decide the rest.
   a-rotfern GREEN on it, 20261021-000439 (no CTD; the race pick lands
   through RaceMenu's menu): the crash's cause and fix CONFIRMED. a-racemenu
   GREEN on it, 20261021-000831 (the preset's eight parts through the menu
   open and close, the relaunch and the reconnect): the head-part flags on
   their masters' bits and RaceMenu's menu back, both CONFIRMED.
-- The render: apocrypha/layer-essentials c38a3b04 (16:45 PDT; contains main
-  fd20b1e6), no slot moves: the NPC_ 0x7 drop-record; the head parts on
+- The render: apocrypha/layer-essentials 1289987b (16:45 PDT; contains main
+  3cb3f9bb), no slot moves: the NPC_ 0x7 drop-record; the head parts on
   their masters' gender bits (766 Skyrim.esm, 39 Dawnguard.esm: the 805
   DATA bytes 01x533 05x2 09x202 11x55 18x1 19x12 become 01x5 03x307 05x223
   09x7 0bx118 0dx77 13x25 15x30 1ax1 1bx9 1dx3); RaceMenu's
@@ -125,7 +125,7 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
 ## 3. b-duel 20261020-232356 and b-god 20261020-233136 (under read)
 
 - b-duel, the Flames row (step 65): 0.822 against the green 0.7293 (layer
-  1496763f) and 0.7198 to 0.7358 (no layer); server and seat agree, so
+  573f2e63) and 0.7198 to 0.7358 (no layer); server and seat agree, so
   less damage applied, not a desync. Read 16:43 PDT: the server took 12
   hits summing 2.339 s (red) against 19 summing 3.418 s (green), the same
   183 ms cadence, the same one capped 365 ms gap, no refusal (the ADR-039
@@ -161,8 +161,8 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
   (HYPOTHESIS for the lift). So b-god's shot is a brittle aim, not a server
   fault: the scenario's fix is to aim c2 at c1's body (a pitch down), as
   b-headshot aims at the head on purpose. Since the look step cannot pitch
-  a seat's aim, the fix is the range: c2 shoots from 150 units (main 7f65c0c9,
-  scenario ad41f03b; a routine strengthening, bounds unchanged). Decider: b-god
+  a seat's aim, the fix is the range: c2 shoots from 150 units (main a6ca45cd,
+  scenario ede4704f; a routine strengthening, bounds unchanged). Decider: b-god
   in the train stage's probes.
 
 ## 2. a-racemenu 20261020-224305 step 18: layer head parts in the record
@@ -195,16 +195,16 @@ record. Read 2026-10-20 16:00 to 16:20 PDT; apocrypha's facts as quoted.
 ## The deciders (2026-10-20, 17:04 to 17:15 PDT)
 
 All three green on the fixed layer's stage (stage-layer-train30 b53d922,
-render c38a3b04): a-rotfern 20261021-000439 (no CTD), a-racemenu
+render 1289987b): a-rotfern 20261021-000439 (no CTD), a-racemenu
 20261021-000831 (the preset's eight parts through the menu, the relaunch
 and the reconnect), b-duel 20261021-001214 (18 Flames hits, 0.7351); both
 seats' skee64.log carry RaceMenu's chargen init again. apocrypha lifted
 docs/MODS.md's and plugin-patches.tsv's HYPOTHESIS tags on them (layer head
-64b2f067). b-god's range fix runs as the train stage's last probe.
+a36bdb94). b-god's range fix runs as the train stage's last probe.
 
 ## The train stage's probes (2026-10-20, 17:25 to 17:50 PDT)
 
-On fork m2-train-30 44372078 over the fixed layer: smoke-two-players 002801,
+On fork m2-train-30 67679548 over the fixed layer: smoke-two-players 002801,
 a-restart-persistence 003024, b-duel 003256, b-spells-reconnect 003639 green;
 b-formdesc-world 002549, b-figure-values 003901 and b-hailstone 004204 red,
 each read:
@@ -243,7 +243,7 @@ each read:
   own regeneration between the server's reports); the end values agreed.
   The assert counted the jitter: it becomes rises("health", 1) == 0 with
   lab-api's threshold argument (lab-api main a69d91d; scenario on main
-  cb9e4e00); the probe reruns when the lab-api image swaps after
+  88a97c29); the probe reruns when the lab-api image swaps after
   twenty-eight.
 - b-god 20261021-004426 GREEN with the shooter at 150 units.
 - b-hailstone 004204: row 1 (the Nord at the Orc) green at 0.85; row 2 (the
@@ -253,7 +253,7 @@ each read:
   whole. The record (numidium's esm.py): the base effect has NO
   resist value and the Shatter is resisted by ResistFrost, so the engine
   halves the Shatter and lets the base effect through, the server's own
-  total; the band follows the record (main 053dd276) and the rerun
+  total; the band follows the record (main 7c02e965) and the rerun
   20261021-005051 is GREEN.
 
 ## Playtest twenty-eight's findings as they land (2026-10-20 evening)
@@ -341,7 +341,7 @@ each read:
   game up "17 listed, 22 removed, 0 added, 0 missing" then "17 listed, 0
   removed, 0 added, 0 missing", Teleportation 0x280A86DF and Flames known
   = 1 throughout. The reconnect keeps a listed spell, as b-spells-reconnect
-  said; test 1's loss predates tonight. lab-api a69d91d6 deployed 18:33
+  said; test 1's loss predates tonight. lab-api 20962843 deployed 18:33
   (rises(av, at_least) live; server image and clones untouched).
 
 ## Consequence for M2's close

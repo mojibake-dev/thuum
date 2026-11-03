@@ -1,7 +1,7 @@
 # RE: the ContainerMenu's in-place refresh, or what redraws an open chest when its inventory changes under it (2026-10-28, 17:57 PDT)
 
 The re-analyst's read for memo D52 B after playtest 37 (docs/research/m3/decisions-after-npc-stream.md, D52; the
-fork's two refreshes in skyrim-platform PuppetApi.cpp `RefreshContainerMenu`, commit ef7b427d on m3-face-twelve, both
+fork's two refreshes in skyrim-platform PuppetApi.cpp `RefreshContainerMenu`, commit a4102bf5 on m3-face-twelve, both
 of which "took the store side" and showed no new rows). pyghidra on SkyrimSE 1.6.1170 (the program
 `/SkyrimSE-1.6.1170.0.exe.unpacked.exe`; REA was disconnected again). Every Address Library ID below is the AE id, a
 reverse lookup of the RVA in addrlib/versionlib-1-6-1170-0.bin through lab/addr.py; every CommonLibSSE-NG name is cited
@@ -237,7 +237,7 @@ AddObjectToContainer calls posted nothing to redraw it afterwards.
 
 ## What the fork does today (read, not run)
 
-`RefreshContainerMenu` (PuppetApi.cpp at ef7b427d:757-800): on gameThrQ, `UI::GetMenu<ContainerMenu>()`,
+`RefreshContainerMenu` (PuppetApi.cpp at a4102bf5:757-800): on gameThrQ, `UI::GetMenu<ContainerMenu>()`,
 `ContainerMenu::GetTargetRefHandle()`, a formID check, then (1) `UIMessageQueue::CreateUIMessageData(strings->
 inventoryUpdateData)` with `inventoryRef = handle`, `updateObj = nullptr`, `AddMessage(strings->containerMenu,
 kInventoryUpdate, data)`, and (2) `menu->GetItemList()->Update(target)`. Statically (1) is the vanilla message with the

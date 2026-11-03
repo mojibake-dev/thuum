@@ -84,7 +84,7 @@ The engine systems in scope, each with its CommonLibSSE-NG surface (the pin b932
 - The sleep gate: the sleep-end handler id 40417 (no CommonLib name), the Survival toggle above, the player flag byte the
   decompile reads at +0xbe1 (unnamed in the header).
 
-What the project does today, read for that alone (the handoff worktree at 0b61fc80): skymp5-client actorValuesService.ts
+What the project does today, read for that alone (the handoff worktree at 0238e3b8): skymp5-client actorValuesService.ts
 (the report on `skillIncrease`, `levelIncrease`, and the close of "LevelUp Menu", "StatsMenu" and "Loading Menu", :24-41; the
 record applied on the next update through SetActorValueBase, SetPlayerSkill and SetPlayerExperience and echoed once, :77-114),
 perkService.ts (the tree perks read at the StatsMenu's close and every 5 s, PerkPick reported; PerkState applied: Game.setPerkPoints,
@@ -112,9 +112,9 @@ x-skill-use-read 20261031-092918, -093933, -094735 (leveling.md:240-248); x-skil
 p-level-up 20261031-152612 (GREEN standalone) and 154211 in the leveling gate 20261031-153419 with a-actor-values 155000 and
 b-figure-values 155252 (LOG.md:4279-4289); actor-values' x-av2-probe 20261008-102852 and -110553, x-av3-probe 20261008-132006,
 x-av-health-probe 20261008-234952, a-actor-values 20261008-111013 and x-relaunch-reports 20261021-015132, -015600
-(actor-values.md:70-98, :275-325); x-perk-pick 20261101-082532 (GREEN; b-perk-pick main e9436a15); x-perk-damage v3
+(actor-values.md:70-98, :275-325); x-perk-pick 20261101-082532 (GREEN; b-perk-pick main daac9e97); x-perk-damage v3
 20261101-131600 and b-perk-damage 134214 in the perk-effects gate 20261101-133134 (LOG.md:4723-4726, :4783); x-skill-book
-20261102-212928 (GREEN; b-skill-book main 2d42914c; leveling.md:305-309); playtest 40's six skill-book reads at 20:22Z with no
+20261102-212928 (GREEN; b-skill-book main 91872dc1; leveling.md:305-309); playtest 40's six skill-book reads at 20:22Z with no
 "skill uses sent" on that seat (results/playtest-40; LOG.md:5261-5268; leveling.md:258-262); playtest 41's words (LOG.md:5349-5351
 item 6, :5371-5377 the points fix on fork m5-perk-points, :5474-5475 "now can get a perk from leveling but still no
 stam/health/mag possibility"); the census row "Progression and leveling UI | 9" (docs/research/engine-unknowns-2026-11-03.md:27,
@@ -240,7 +240,7 @@ reads. The order that earns the thaw cheapest: R7 first (a lab read, no seat), t
 -2026-11-02.md:105, :169): both seats level up in one session, each offered a perk point and an attribute pick, with c2.view(c1)
 claims on the figure's maximum and no leak of either record into the other, green twice on the head that carries the fix and red
 on the parent. Until then nothing in this system merges: leveling.md:33's pick row stays "later", m5-perk-points stays the R0 fix
-of the count alone (BUILT on fork m5-perk-points 59bed946, then 10687731 per PLAN.md:1284; no merge line in the LOG by this
+of the count alone (BUILT on fork m5-perk-points dcfc2e08, then bbec6de7 per PLAN.md:1284; no merge line in the LOG by this
 doc's stamp; live on playtest 41's server by redeploy, perks.md:275-276), and no progression UI code reaches a seat. The verb
 docs' Engine surface cites these E-numbers from the next pass on; leveling.md's HYPOTHESIS at :133 maps to E4 and E5, perks.md's
 at :100 to E10, actor-values.md's Stats menu question at :86-89 to E15 and E8.

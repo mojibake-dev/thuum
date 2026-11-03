@@ -1,6 +1,6 @@
 # RE read: where a hosted body's resurrection can be hooked (1.6.1170)
 
-Static read for npc-fate's reanimation hook (fork m3-reanimate 9ef0d567,
+Static read for npc-fate's reanimation hook (fork m3-reanimate 1a3dc981,
 skyrim-platform Hooks.cpp `HostedResurrect`, a write_vfunc on
 VTABLE_Character[0] slot 0xAB). Binary: SkyrimSE-1.6.1170.0.exe.unpacked.exe
 in the sky-re Ghidra project (REA was down). Ids are Address Library ids from

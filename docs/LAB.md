@@ -521,7 +521,7 @@ new value and was taken as a fall, and its later report of the set value was
 cropped by CropHealthRegeneration (thuum-magnus). A set downward is safe. Until
 the server lets an owner's set win over reports that predate it (a server fix,
 not a lab-api one), a scenario that raises a value reads it right after the set.
-The fix is built (fork m2-snapback eef10842, 2026-10-20: a raised percentage
+The fix is built (fork m2-snapback 8d5d7170, 2026-10-20: a raised percentage
 holds until the client's report reaches it; docs/verbs/attributes.md); the
 read-right-after stays until it merges.
 A teleport's `rot` reaches the client in degrees, and MoveRefrToPosition
@@ -917,7 +917,7 @@ flagged nightly run (the signature above names the session). To confirm the
 mechanism: log the discarded bool at CallNative.cpp:482; count the
 functor's vtable slots 1 and 3 with Frida in a flagged session. For
 playtest 34 the flagged seat is relaunched rather than chased.
-The fix is on fork parity fa8809a1 (train-45 merged 2026-10-25 14:20 PDT,
+The fix is on fork parity 0bc54e17 (train-45 merged 2026-10-25 14:20 PDT,
 the gate of eighteen green); none of the nineteen runs on it carried a
 flagged session, so the deadline path's landing is unread: the first
 "[ragdoll] ... unanswered after 1000 ms" line in any run's console log,
@@ -973,7 +973,7 @@ snapshot, no promotion. Every push gets a line in /srv/lab/turbo.log on sky-srv.
     skymp5-client" line in skyrim-platform.log within 20 s.
   - A hot reload keeps the connection and never logs in again, so a service
     armed once from the login's messages does not come back. Until fork
-    m3-turbo-knobs 7fbb5e74 and e9953d0c, PlayerGlobalsService's watch list
+    m3-turbo-knobs 61f22afa and 846a1f84, PlayerGlobalsService's watch list
     and HostService's maps were class fields: on 2026-10-28 the needs record
     froze two seconds after a hot push, and a reloaded host's roster stopped.
     Both now keep their state in sp.storage. Not kept, accepted: TimeService's
@@ -982,8 +982,8 @@ snapshot, no promotion. Every push gets a line in /srv/lab/turbo.log on sky-srv.
   - The first lay of a bundle that carries those fixes is `client-hot` and
     then `just playtest-relaunch <c>` at once, one seat at a time: the old
     services saved nothing. After that a hot push keeps the globals and the
-    hosting, so from m3-turbo-knobs 26e3d0cf on no relaunch follows a push.
-    Measured on 2026-10-28 on 26e3d0cf's own bundle: c2's needs record took
+    hosting, so from m3-turbo-knobs 29207fe2 on no relaunch follows a push.
+    Measured on 2026-10-28 on 29207fe2's own bundle: c2's needs record took
     a full 61-value report 8 s after the push and ticked on, and c1, the
     Riverwood host, kept relaying its cells' NPCs through the reload with no
     release.

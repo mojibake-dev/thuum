@@ -31,7 +31,7 @@ the principles tonight. This plan makes them enforceable, runs the audits they i
    attribute pick); an open ContainerMenu took three redraw designs and none held; the AI's night lock moves a door
    without any Papyrus native. Most share ONE engine path that no doc models: a reference's life on a seat that does
    not own it (load, 3D attach, promote, demote, unload, the dead state applied at load).
-2. **Over-validation.** The server can emit 159 distinct E_ codes (union-srv-3 35509f7a): 114 CONSISTENCY (28 of them the
+2. **Over-validation.** The server can emit 159 distinct E_ codes (union-srv-3 b926a7d4): 114 CONSISTENCY (28 of them the
    wire's shape and rate), 26 OWNER-CHECK, 9 R0-NUMBER, 10 unsure; plus two owner-checks with no code (the snap-back on
    a 4096-unit jump or a cell change, MovementValidation.cpp:123-127; "WorldSpace doesn't match" in
    CheckInteractionAbility, MpObjectReference.cpp:2576). The design law's R1 rung ("host computes, server validates")
@@ -101,7 +101,7 @@ the principles tonight. This plan makes them enforceable, runs the audits they i
 
 ### W3. Ownership for scripts and content (thuum-cf; apocrypha for the layer rows)
 
-- ADR-062's slices: 1a BUILT (d8fc5fa2), 1b pushed (c9596809), 2 (the record-and-relay rows), 3 (q-golden-claw and
+- ADR-062's slices: 1a BUILT (f08abd57), 1b pushed (9b413fb1), 2 (the record-and-relay rows), 3 (q-golden-claw and
   q-embershard green twice); then papyrus-admitted.tsv's host rows and activationUnblockedBases are deleted.
 - The content census, committed as `docs/research/content-census-2026-11-03.md` (43 rows): each list gets the channel or
   ownership rule it stands for (ADR-063 decision 5), riding ADR-062's hooks where one exists (TeachWord for the word
@@ -127,7 +127,7 @@ the principles tonight. This plan makes them enforceable, runs the audits they i
 - The audit's 20 MISSING rows get their claims, the five most likely to break first; the always set gains one
   both-directions two-seat scenario.
 - The reviewer is independent of the author. Rule 13's scenario review has been mine since 2026-10-13, and I approved
-  c-riverwood's restated claim (20e78923), which passed the very case that went red. From now: a scenario commit that
+  c-riverwood's restated claim (0e6215f2), which passed the very case that went red. From now: a scenario commit that
   relaxes or rewrites a claim goes to Eli; any other scenario commit gets a fresh reviewer agent checking it against the
   two-seat contract before the gate runs it.
 - Done when the audit, rerun with the same brief, reads 0 MISSING and the lint is green on main.

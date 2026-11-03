@@ -224,7 +224,7 @@ player (R0: remoteServer.ts takes the server's percentages, and Skyrim
 Platform's AddTarget hook refuses those value effects when another actor
 cast them, Hooks.cpp), so the engine's own resistance never runs on them:
 Hailstone's 30 on a Nord would land whole where the engine halves frost
-damage. The rule, built on fork m2-train30-resist 8219604e (stacked on
+damage. The rule, built on fork m2-train30-resist f6eff0ea (stacked on
 m2-train30-conditions, whose GetActorValue and race-ability modifier it
 reads):
 
@@ -257,11 +257,11 @@ reads):
   Magic. T3: x-hailstone (both seats, the Nord's 15 and the Orc's 15 by
   different paths) on the branch's stage, then b-hailstone as its scenario.
 - First lab read, b-hailstone 20261021-004204 on the train stage (fork
-  m2-train-30 44372078 over the fixed layer): on the Nord, Hailstone's base
+  m2-train-30 67679548 over the fixed layer): on the Nord, Hailstone's base
   effect (no resist value in the record) went through whole and its Shatter
   (ResistFrost 43) was halved on the race's 50, 15 + 7.5, the engine's own
   number (the scenario's first band had said 0.85 and follows the record
-  now, main 053dd276); on the Orc the Shatter alone, whole, 0.85. The rule
+  now, main 7c02e965); on the Orc the Shatter alone, whole, 0.85. The rule
   CONFIRMED on the Health half.
 - HYPOTHESIS until a read of the Stamina half: the engine's order and cap
   for a dual value modifier's second value, and whether the engine resists
@@ -613,12 +613,12 @@ code read (docs/research/train-31-reads.md) found the heal applied end to
 end already with this one defect and the snap-back beneath it. The engine's
 own neighbours only remark on a non-hostile spell (SayOnHitByMagicEffectScript's
 non-hostile topic) and draw no weapon. An effect whose record the server
-cannot read counts as hostile, as before. Fork m2-train-31 b0e4ba38,
+cannot read counts as hostile, as before. Fork m2-train-31 2e7914a2,
 ActionListener::OnSpellHit; T0 unit/HealOtherTest.cpp (Healing Hands heals
 10 of 250 at the stream's first hit with no StartCombat snippet; Firebolt
 still begins the fight); T3 b-heal-other (to write).
 
-## Cure spells (memo D56 A, 20:13 PDT 2026-10-28; fork m3-cure-disease ce16dde5)
+## Cure spells (memo D56 A, 20:13 PDT 2026-10-28; fork m3-cure-disease 73b22ab7)
 
 Eli: "A for both." Sanguinare Vampiris (Skyrim.esm SPEL 0xb8780) runs on a seat today: a vampire's hit applies it in
 the player's own game and VampireDiseaseEffectScript turns the player three game days later, client-side, with no

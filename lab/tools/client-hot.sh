@@ -15,8 +15,8 @@
 #    (SkyrimPlatform.cpp's LoadFiles) within 20 s, read with a shared read; none is a failure, the file stays laid.
 # 5. C:\sky-lab\hot.txt marks the seat (a rollback clears it with the rest of the clone); /srv/lab/turbo.log gets
 #    "<UTC> hot <stamp> <vmid> <sha8>".
-# From fork m3-turbo-knobs 26e3d0cf on, a hot push needs no relaunch: the needs reporter's list and the host's maps
-# live in sp.storage (7fbb5e74, e9953d0c). Measured 2026-10-28 on 26e3d0cf's own bundle: c2's needs record took a
+# From fork m3-turbo-knobs 29207fe2 on, a hot push needs no relaunch: the needs reporter's list and the host's maps
+# live in sp.storage (61f22afa, 846a1f84). Measured 2026-10-28 on 29207fe2's own bundle: c2's needs record took a
 # full 61-value report 8 s after the push and ticked on; c1, Riverwood's host, kept relaying its cells' NPCs
 # through the reload with no release. A seat on an older client still relaunches after a push.
 set -euo pipefail

@@ -155,9 +155,9 @@ scenario.
 Closed 2026-10-21 11:13 PDT (docs/M2-CLOSE.md; LOG): playtest twenty-nine
 the T4 half (2026-10-20, Eli: "lets aim to close this out on test 29"),
 the scenario half the sweep 20261021-144529-m2-close (70 scenarios on
-Train-31 9ad635cd over the re-laid layer, 69 green, b-push pending at the
+Train-31 e87267c4 over the re-laid layer, 69 green, b-push pending at the
 merge under ADR-042b by Eli's word), Train-31 merged to fork parity
-9ad635cd and the layer to main b0252470 as one stage under one sweep, both
+e87267c4 and the layer to main 90beeb82 as one stage under one sweep, both
 clones promoted. Carried to M3 by name: docs/M2-CLOSE.md section 4 plus
 b-push (the refused second Ragdoll under the layer, deterministic, its
 sender the next probe's hook; push.md), the rows after twenty-nine listed
@@ -367,7 +367,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         back down and sends it back; 7 of 11 upward sets in two runs); a
         server-applied heal would snap back the same way. STAYS in M2
         (Eli 2026-10-20), a verb fix on a train: BUILT 2026-10-20 on fork
-        m2-snapback eef10842 (the percentage hold, attributes.md; T0; its
+        m2-snapback 8d5d7170 (the percentage hold, attributes.md; T0; its
         scenario b-snapback on review), for the train after twenty-eight.
         The rule: an owner's set and the
         server's own changes win over
@@ -375,7 +375,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         OnChangeValues); until then a scenario sets downward or reads at
         once (docs/LAB.md, numidium's note).
     - Train-28 (playtests twenty-four and twenty-five's findings, 2026-10-19;
-      merged to fork parity e3806870 2026-10-20T02:00Z, gate 20261020-013037
+      merged to fork parity 0a20755a 2026-10-20T02:00Z, gate 20261020-013037
       ten green with b-shadowbond the watch item, T2 32 sessions identical),
       each its verb doc's row:
       - figure values: a figure carries its player's recorded maxima, not a
@@ -404,31 +404,31 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         loads and frame rate held; no MCM, cloaks without physics, no
         warmth, bare aspens, rotfern undressed by the slot shift (ADR-043,
         ACCEPTED 2026-10-19; the layer's three fixes render 2026-10-20 06:23).
-    - Train-29 MERGED 2026-10-20 13:40, fork parity 4720d0d3 (built
-      overnight on Eli's word; fork m2-train-29 709c90b0: 18c0e603's client
+    - Train-29 MERGED 2026-10-20 13:40, fork parity 7293c944 (built
+      overnight on Eli's word; fork m2-train-29 84bc14fa: c3751c1d's client
       and server content, a rune try measured and reverted, and the CI
-      fresh-tree fix merged with parity d5f478c3; staged 04:02 with its
+      fresh-tree fix merged with parity 4e7c0609; staged 04:02 with its
       gate's always set green and both clones' clean snapshot retaken on
       it, the essentials layer stacked on it for playtest twenty-seven;
       after the report, the 8df default and the login-time globals send
-      (50a56e4a) and the T2 declaration move (4720d0d3) joined it; the
+      (9387130b) and the T2 declaration move (7293c944) joined it; the
       layered gate's three reds read to the layer's headparts plugin, the
       served Firebolt and a refused second Ragdoll, and the layer-free gate
       20261020-201530-merge-m2-train-29 ran 10 of 10 green with T2
       identical across 32 sessions; both clones promoted; docs/LOG.md;
       each row's facts in docs/research/train-29-rows.md), in build order:
-      - the client's Papyrus event filter: MERGED (b2db6354, docs/verbs/
+      - the client's Papyrus event filter: MERGED (bfbed728, docs/verbs/
         papyrus-events.md): a parent-chain walk so every MCM passes, the
         layer's plugin list read at Skyrim Platform's load, OnUpdate per
         script (ADR-044 ACCEPTED 2026-10-19, CONFIRMED by x-survival-unblock3
         20261020-024406 and by twenty-seven's Survival box and eight MCM
         entries); b-papyrus-events approved by Eli 2026-10-20 and in the
         layer sweep.
-      - Lightning Strike on the observer: MERGED (07b33046) and the launch
+      - Lightning Strike on the observer: MERGED (a62f9e4c) and the launch
         CONFIRMED (x-lightning-strike 20261020-085414: the observer's game
         launches the lobber 0x0c0cfe00); the bolt seen on test 2's screen in
         twenty-seven.
-      - Finger of Death: IsEssential (354) MERGED on the server (eea3a5d5,
+      - Finger of Death: IsEssential (354) MERGED on the server (bc468a0e,
         T0; twenty-seven: the fail branch hurt the caster alone); the
         scripted kill stays the caster's game's (the ash pile), ADR-029's
         default, until the allowlist verb.
@@ -454,16 +454,16 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         angle on the observer waits for a flights record for spell
         projectiles (Train-30's lab row, BUILT 2026-10-20).
       - small, all MERGED: the OpenContainer wait loop's 15 s deadline
-        (18c0e603, activation-reach.md); EffectWasDualCast (724) with the
+        (c3751c1d, activation-reach.md); EffectWasDualCast (724) with the
         dual flag from the cast message through the cast record to the
-        evaluator (eea3a5d5, T0); the refs-near and papyrus-events driver
+        evaluator (bc468a0e, T0); the refs-near and papyrus-events driver
         steps on thuum main.
 
     - ADR-043's build (ACCEPTED 2026-10-19; the world stores every form as a
       FormDesc, a saved world carries its order and migrates, a login whose
       appearance does not resolve is refused): sized in
       docs/research/formdesc-world-map.md. Slice one BUILT overnight
-      2026-10-20 on fork m2-formdesc-world d0693ef4 (not merged; CI green,
+      2026-10-20 on fork m2-formdesc-world 1d8a2b18 (not merged; CI green,
       13 of 13, 401 test cases): formVersion 2 with the presence guard;
       the load order saved beside the records (load-order.json for the file
       and zip drivers, a loadOrder document for mongo, passed through the
@@ -475,13 +475,13 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       that sees it; seven T0 cases (round trip, save under A load under B,
       v1 under a saved order, the parked plugin, the drivers). Its rule-6
       scenario b-formdesc-world APPROVED by Eli 2026-10-20 13:49 and on
-      main de069a7b (scenario 973a412c; the fixture adr043-preslice-25 on main
-      ebc4d726, twenty-five's eight raw records with the order they were
+      main 6fe6489b (scenario 3884f2f9; the fixture adr043-preslice-25 on main
+      6a6939cc, twenty-five's eight raw records with the order they were
       written under; lab-api's `server: world:` restore and FormDesc ids in
       the known step on main 3fd7ae5); it proves the migration on a stage
       whose order differs from the fixture's, the layer stage, so it sits in
       gate.yaml's pending until the formdesc branch stages there; the branch
-      carries parity 4720d0d3 since its merge 80cf1e35 (pipeline 2279, green).
+      carries parity 7293c944 since its merge 80c9e9b4 (pipeline 2279, green).
       Slice one stays in M2 and merges through its stage's gate. Slice two
       moves to M3, before the friend deploys (Eli 2026-10-20): decision 3
       (the login refusal; the record is kept but LoadChangeForm still skips
@@ -491,10 +491,10 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
 
     - Train-30 (the rows found on 2026-10-20 before and during playtest
       twenty-seven; each to its verb doc as it is built), ASSEMBLED 15:13
-      as fork m2-train-30 1d88a6b7 (four merges on parity 4720d0d3: the
+      as fork m2-train-30 f008e6c8 (four merges on parity 7293c944: the
       spells fix, ADR-043 slice one, the dent gate, the Hailstone
       conditions with the resistance rule; pipeline 2309 green, ctest
-      included, T2 identical at 32 sessions; then 44372078, clang-format
+      included, T2 identical at 32 sessions; then 67679548, clang-format
       alone over three files for the fork's Formatting check; its pipeline
       2349 green in every job, T2 at it numidium's), the one stage
       for playtest twenty-eight (docs/M2-CLOSE.md), in build order:
@@ -506,7 +506,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         all fifteen and sent them; a fresh relaunch restored all seventeen).
         Read: there is no reload on a reconnect; the one difference from a
         launch is removing and re-adding the same spells in one frame
-        (HYPOTHESIS). BUILT 2026-10-20 on fork m2-train30-spells 096d2cd8
+        (HYPOTHESIS). BUILT 2026-10-20 on fork m2-train30-spells 2b6bc288
         (client only, pipeline 2236 green): the list applied as a diff with
         a second pass a second later (docs/verbs/learned-spells.md); T3
         b-spells-reconnect approved by Eli and on main (red by design until
@@ -514,7 +514,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       - Survival's login race: the record's restore of 828 and 8df rode the
         login send and lost to the Creation's 5 s check once in two
         relaunches (test 2, 18:23Z), so the per-global default (built,
-        fork m2-train30-globals-default edb2608c, thuum
+        fork m2-train30-globals-default 9e9d7e1f, thuum
         lab-survival-prompt-default bac34a7) is the belt and the lab's
         fixture is the clones' template save carrying 8df = 1 and 828 = 0
         (numidium's snapshot retake after the playtest).
@@ -530,7 +530,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         done already tbh", relayed by numidium): behind the arm's five
         fixes; engine-facing, so its own stage, gated with b-spell and the
         rune probes. BUILT 14:02 PST the same day, fork m2-rune-glyph
-        1d21c9ba (SCHEMA_VERSION 32; spell-cast.md's row carries the read
+        dd5aa100 (SCHEMA_VERSION 32; spell-cast.md's row carries the read
         and the probe x-rune-glyph by path); the stage after the arm's
         train.
       - Finger of Death's kill: the allowlisted server-side kill (ADR-029's
@@ -541,20 +541,20 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       - Hailstone and kin: GetActorValue (14) and HasMagicEffect (214) as
         server condition functions, since Hailstone's own effects gate on
         them and apply nothing today (spell-cast.md). BUILT 2026-10-20 on
-        fork m2-train30-conditions f2c0ba33 with T0 (the current Health,
+        fork m2-train30-conditions a9469ef4 with T0 (the current Health,
         Magicka or Stamina; any other value from the player's record plus
         the server's own modifiers; a running effect by its MGEF); two
         HYPOTHESES in the doc, since resolved: the parameters CONFIRMED
         from the record bytes (the actor value index; the MGEF id in the
         file's own index space, mapped through the owning record,
-        39affd73), and the race's constant abilities read from the records
-        into the one modifier (52ea63f8: a Nord's 50 ResistFrost, an
+        6a6839fb), and the race's constant abilities read from the records
+        into the one modifier (c7d149f5: a Nord's 50 ResistFrost, an
         Altmer's Highborn magicka), T0 for both; a Hailstone probe for its
         T3 after the branch stages.
       - the resistance rule, found by the Hailstone row: the server imposes
         another actor's damage on a player and the player's engine refuses
         those effects, so the engine's resistance never ran on them. BUILT
-        2026-10-20 on fork m2-train30-resist 8219604e, stacked on the
+        2026-10-20 on fork m2-train30-resist f6eff0ea, stacked on the
         conditions branch (libespm reads the MGEF's resist value; wire-rules
         resistance_factor, the element after Magic Resistance, each capped at
         the player's 85; MpActor::ResistanceFactorOf at ApplyEffects' one
@@ -563,15 +563,15 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         dual modifier's second value until x-hailstone, the same probe.
       - the lab: a flights record for spell projectiles in the driver (the
         Scattershock angle; BUILT 2026-10-20: fork m2-train30-flights
-        951b5bbc raises projectileFlight for a spell's projectiles, the
+        773babb1 raises projectileFlight for a spell's projectiles, the
         driver records projectile and spell as columns nine and ten,
         spell-cast.md), and the arrows step counting PROJ 50 (its PARW
         count was always 0): the count BUILT 2026-10-20 on thuum main,
         rides the next driver deploy; one base's presence stays the
         projectiles step's (marksman.md).
 
-- Playtest twenty-seven (2026-10-20 morning, fork m2-train-29 709c90b0 under
-  the essentials layer 29d83a0b; world playtest-m2-26-20261020T004645Z):
+- Playtest twenty-seven (2026-10-20 morning, fork m2-train-29 84bc14fa under
+  the essentials layer 21103dd8; world playtest-m2-26-20261020T004645Z):
   every row ticked. The layer's three fixes (aspens, Artesian's cloaks under
   FSMP, rotfern whole with her stagger patch reverted); Survival Mode's own
   box on both seats, the first in a connected game, warmth from a WIC
@@ -589,7 +589,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   (13:05 PDT): FSMP out, the cape physics worked but looked jank; the
   cloaks go back to vanilla capes in apocrypha's next render, which the
   layer stage and sweep take. Rendered 13:26: apocrypha/layer-essentials
-  cf363c44 (FSMP, both Artesian physics packages and the Survival
+  ad4af7ea (FSMP, both Artesian physics packages and the Survival
   collection's HDT patch pair out; warmth kept by the collection's non-HDT
   patches, patched light at build so they hold slots 11 and 12 and no
   other plugin moves; nothing else in the layer leaned on FSMP), carrying
@@ -599,8 +599,8 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   mod), CONFIRMED 14:07 by x-layer-headparts 20261020-210719 on the layer
   stage (racemenu-sync.md); the stage's smoke green with no FSMP log.
 
-- Playtest twenty-eight (2026-10-20 evening, fork m2-train-30 44372078 on
-  the fixed essentials layer c38a3b04; world playtest-m2-27-20261020T183558Z
+- Playtest twenty-eight (2026-10-20 evening, fork m2-train-30 67679548 on
+  the fixed essentials layer 1289987b; world playtest-m2-27-20261020T183558Z
   migrated by slice one): Eli's report 18:18, "im not super happy with this
   test ngl. deffo some backsliding in what i expected". Ticked: rotfern
   herself under the layer's order and after a restart; the reconnect keeps
@@ -631,7 +631,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
   m2-close nightly over this stage and the merges per ADR-042a follow.
     - Train-31 (the rows of twenty-eight's report; the closing train since
       Eli's "lets aim to close this out on test 29": fork m2-train-31,
-      head 3b579f41 on 2026-10-20 20:10, every row below BUILT with its T0,
+      head a40559fd on 2026-10-20 20:10, every row below BUILT with its T0,
       pipeline 2423 green, T2 32 of 32 identical at 20:45: stage-ready; it
       stages on the morning's
       merged base and playtest twenty-nine runs on it; each row to its
@@ -651,12 +651,12 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         fixes the two defects (a held heal counts as hostility and starts
         a fight; the Respite slot's HasPerk refuses as E_CONDITION_UNKNOWN
         where the record's answer is false) with the snap-back fix beneath
-        (fork m2-snapback eef10842, b-snapback) so the server's raise
+        (fork m2-snapback 8d5d7170, b-snapback) so the server's raise
         survives the next stale report; and RunSelfSpell's
         FireAndForget-only gate widens to Concentration so vanilla Healing
         on yourself is the server's too. The hostility part BUILT
-        2026-10-20 19:05 on fork m2-train-31 b0e4ba38 (T0
-        unit/HealOtherTest.cpp); the self stream BUILT 19:36, 6f7b7a06
+        2026-10-20 19:05 on fork m2-train-31 2e7914a2 (T0
+        unit/HealOtherTest.cpp); the self stream BUILT 19:36, 88ea219b
         (docs/verbs/self-cast.md, T0 unit/SelfCastTest.cpp); CI pending.
       - spell projectiles' aim parity: the caster's launch angles sent with
         the cast and the observer's figure launching from them, as arrows do
@@ -664,7 +664,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         measures the gap first). Eli at the report: "marksman check was
         great. just copy that for the spells": the arrows held on both
         screens in twenty-eight, so the row copies the arrow-path shape.
-        BUILT 2026-10-20 19:50 on fork m2-train-31 c3dae632, no wire change
+        BUILT 2026-10-20 19:50 on fork m2-train-31 7e886795, no wire change
         (the cast carried the launch already; the caster's game now fills
         it for every projectile and the figure's cast takes it; the
         measured gap was 65 units of origin at equal angles,
@@ -674,7 +674,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         degrees off; the 2.5 to 34.5 units left are the caster's own bolt
         moving from the Launch call's origin before its first update, so
         the cast now carries the flight's position as the origin (the
-        commit after 3b579f41 on m2-train-31, for the morning's stage).
+        commit after a40559fd on m2-train-31, for the morning's stage).
       - Survival's need globals per player (hunger, cold, fatigue values
         and their states) in the playerGlobals list, R2 (docs/verbs/
         player-globals.md), after a read of which globals the Creation
@@ -735,7 +735,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         (its player damage yields to the server's numbers already), the
         victim's game gets the death from the server. HYPOTHESIS:
         WB_IsResist's default, the figure's local kill racing a differing
-        server verdict. BUILT 2026-10-20 19:05 on fork m2-train-31 b0e4ba38
+        server verdict. BUILT 2026-10-20 19:05 on fork m2-train-31 2e7914a2
         (docs/verbs/scripted-effects.md; wire-rules scripted_effects with
         T0, PartOne::ClaimScriptedKill, unit/ScriptedKillTest.cpp; CI
         pending; b-fod-kill to write).
@@ -769,14 +769,14 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         (x-relaunch-reports 20261021-015132 and -b 015600): the hold armed
         only at the record's send and cleared only by a report dominating
         all 164 bases, never echoed by the client. BUILT 2026-10-20 19:36
-        on fork m2-train-31 6f7b7a06 (docs/verbs/actor-values.md: the hold
+        on fork m2-train-31 88ea219b (docs/verbs/actor-values.md: the hold
         armed at the login, the comparison over skills, attributes and
         level, the refusal naming the bases, the client's echo; T0 both
         sides; CI 2423 green); b-relaunch-reports GREEN 20261021-041549 on
         the tonight stage (the early report refused and the echo taken
         0.1 s later), for Eli's review.
 - Playtest twenty-nine (2026-10-20, seats 21:33 on fork m2-train-31
-  3b579f41, re-staged at Eli's word 22:02 on 9ad635cd with the two fixes
+  a40559fd, re-staged at Eli's word 22:02 on e87267c4 with the two fixes
   the stage's probes called for; the staged essentials layer plus main's
   settings; the repaired 28 world; report 22:33): the closing playtest
   (docs/M2-CLOSE.md section 3b). Every item ticked but three marked
@@ -809,7 +809,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
       - a stream's origin on the other screen (Flames): the figure's
         concentration cast starts at its own hand along the relayed aim;
         the caster's stream starts at its own node, as the bolts did
-        before b5075e04; the same launch-position carry for a stream's
+        before ca15652c; the same launch-position carry for a stream's
         first projectile, or the aim's origin per update (spell-cast.md).
       - the victim's own game plays the disintegration the caster's does
         (SetCriticalStage and the ash pile) when the server's kill came
@@ -843,13 +843,13 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
         cell-host's round trip, docs/research/transport-clock.md): the
         polls never called renet's own update, so no lost reliable packet
         was ever resent and every round trip read 0; fixed on fork branch
-        wire-renet-clock (off 9ad635cd) with a T0 that fails without it;
-        no wire change. Merged into fork m3-cell-host (1c21308a), so it
+        wire-renet-clock (off e87267c4) with a T0 that fails without it;
+        no wire change. Merged into fork m3-cell-host (c40fcc1e), so it
         lands with cell-host's merge, unless cell-host stalls past the
         friend-deploy date, when it gets its own gate (agreed with
         numidium 2026-10-21 08:4x); the lab measures it under netem loss
         (the new `server: netem` step, main 2294723) with the probe
-        x-renet-loss, before on parity at 9ad635cd after Train-31's merge
+        x-renet-loss, before on parity at e87267c4 after Train-31's merge
         and after on m3-cell-host's stage; a red after-reading stages
         wire-renet-clock alone to separate the two branches.
       - from the 03:30 sweep's read (2026-10-21 morning, the four reds,
@@ -965,7 +965,7 @@ fork at parity 89db8732 that the chart rests on is in LOG.md. Since
 Building closed 2026-10-31 01:31 PDT (08:31Z; LOG; the T4 close is docs/M3-CLOSE.md's, Eli 2026-11-01): the exit's last item, a guest's loot of a body released
 from the puppet state (D71), went green on m3-guest-loot v6 and the merge's gate ran 14 of 14 green
 (20261031-074556-merge-m3-guest-loot: the always set, c-riverwood, c-dungeon-enemies, b-npc-body-release
-and the container-handler set, T2 green beside it), fork parity d10789f7, both clones promoted. Ten
+and the container-handler set, T2 green beside it), fork parity 19e8c397, both clones promoted. Ten
 days from the start. Dark on the merged build and pending by name, as the STATE line below says:
 props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-loot (the D37 layer).
 
@@ -992,29 +992,29 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   doc's probes: x-cell-attach (solo, the cell events and the grid math),
   then b-cell-host on a creature cell; the exits c-riverwood and
   c-dungeon-enemies after npc-handoff and npc-fate. Built the first night
-  on fork m3-cell-host: the cell host table (wire-rules cells, afc792c1,
+  on fork m3-cell-host: the cell host table (wire-rules cells, deadea18,
   six T0) and the wire contract (CellLoaded 47, HostGrant 48, HostRelease
-  49 with validators, fixtures and the C++ message layer, ea0e24d3); the
+  49 with validators, fixtures and the C++ message layer, 92068887); the
   verb doc's cell_of resolved to libespm's existing exterior-cell index;
   the round trip's exposure designed (Server::client_rtt_ms, on
   wire-renet-clock). The morning of 2026-10-21 (07:00 to 07:15): reach
   made a fact with decisions (the 5x5 load against the 3x3 grid,
-  8f17d7a4), the bridge's Cells, the core's integration (9aadeaea:
+  fb898f17), the bridge's Cells, the core's integration (f908eb4b:
   CellOf and HostOf, the facts, HostGrant and HostRelease sent, the
   hosted flag frozen by default, the cell-change rule, Host 14 ignored,
   the hosters map retired, CellHostTest), then the client's HostService
-  (5f10768c, 07:22: CellLoaded from cellFullyLoaded plus the attach poll,
+  (6ee9cba7, 07:22: CellLoaded from cellFullyLoaded plus the attach poll,
   the grants with the monotonic epoch, isHostedHere and isMine at the four
   sites; tryHost and the HostStart/HostStop handling retired; tsc clean).
   Then (07:25 to 07:50): the round trip (wire-renet-clock merged into
   the branch, client_rtt_ms through IServer::GetRttMs to the table every
-  tick, f2b59a33), the T2 session cell-host.yaml at the spawn's cell
-  0xbbb1 (5fef550a), the host table listed for the lab (38f29158 and the
+  tick, e2dc7d46), the T2 session cell-host.yaml at the spawn's cell
+  0xbbb1 (31199f9c), the host table listed for the lab (9527e872 and the
   gamemode's labState cellHost and ref, main 6c1adbe), libespm's exterior
-  index guarded against a worldspace's persistent cell (29a7b56e, the
+  index guarded against a worldspace's persistent cell (c236dc01, the
   doc's HYPOTHESIS measured), the driver's cell-events steps (4b69e9c),
   the probe x-cell-attach and the scenario b-cell-host (9a5272e, Eli's
-  review). CI 2481 green at 8145082b; the later heads building. Waits:
+  review). CI 2481 green at 32cb679e; the later heads building. Waits:
   lab-api's server.host, server.ref, a snapshot compare and the run's
   npcEnabled (numidium, after the M2 merges), a stage-client with the new
   driver, then x-cell-attach, b-cell-host and the verb's T2 run on sky-srv.
@@ -1023,7 +1023,7 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   the non-host games, the cleaner and the copies retired, the loader's
   bans lifted; its code waits on the re-analyst's prototypes (41370,
   41453, 37356) and cell-host's probes.
-  cell-host DONE 2026-10-21 13:47: fork parity 535544db, b-cell-host green
+  cell-host DONE 2026-10-21 13:47: fork parity 259bf390, b-cell-host green
   twice on its stage and in the gate, T2 33 identical, the verb doc closed
   (docs/verbs/cell-host.md; three lab fixes on the way: the CellLoaded
   budget 128 then 32, the client's 30 s refresh of its loaded set, a copy
@@ -1071,46 +1071,46 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
 - Exit: `c-riverwood` (two players, NPC schedules run under host one; host
   one leaves; host two takes over; NPCs continue; restart restores) and
   `c-dungeon-enemies` (bandits fight both players under one host).
-- npc-puppet DONE 2026-10-22 05:54 PDT; the walk cycle re-opened by playtest 31 the same morning and CLOSED by train-33 (fork parity fb6f3f09, 18:13 PDT, the gate 9 of 9): the graph's Speed and Direction are data channels fed from the movement step's fields, which the puppet's detour now writes every frame from the host's sample (docs/research/m3/re-puppet-locomotion.md); the stride on film at results/train-33-stride; train-32 (parity 16b8854a, 12:4x) carried the playtest's other fixes; train-33 also settled a standing figure or puppet onto a still record (b-duel's stagger-pushed figure) and the host's own cell report (fork parity 19e7ca9b, main fbee62d; the gate run set 20261022-122513-merge-m3-npc-puppet nine of nine on lab-driver ebb6969 (smoke, a-restart-persistence, b-duel, b-npc-puppet 123325, b-cell-host, a-melee-reach, a-racemenu, b-spell, b-invis-recast), after the first set 113519 went eight of nine red on a-restart-persistence 113744 by the driver's random near sample; T2 33 identical beside it; the record below). Begun 2026-10-21 17:41 PDT, Eli's approval of the Train-34 (fork parity 7e59c32c, 2026-10-22 21:40 PDT, the gate 20261023-041115 nine of nine) carried playtest 32's four fixes: the walk-in-place guard, the NPC headshot's race from the NPC_ base, the promote's undo of the activation block, and the activation reply sent only to the activating player. Train-35 (fork parity ac557132, 23:48 PDT, the gate 20261023-061702 ten of ten) carried the night's finding: a health percentage lives in [0, 1] on the wire and the puppet apply never kills, so a host's actor floored below zero no longer dies on the other screen. Train-36 (fork parity 7b3a17c6, 2026-10-23 03:01 PDT, the gate 20261023-092824 nine of nine) carried playtest 33's two: the save's game-file actors loaded onto the grid as the save attaches (a late seat had run eight residents frozen and unblocked, their records deferred) and the puppet's activation blocked natively from the demote (a dialogue opened on an unblocked puppet never closed); train-37 (fork parity 69958274, 08:07 PDT, the gate 20261023-143826 nine of nine) made the roster and the demote read the engine's high-process actors, since the attach events name temporary references alone; x-npc-late-join green on all eight residents on its stage.
+- npc-puppet DONE 2026-10-22 05:54 PDT; the walk cycle re-opened by playtest 31 the same morning and CLOSED by train-33 (fork parity a76125cb, 18:13 PDT, the gate 9 of 9): the graph's Speed and Direction are data channels fed from the movement step's fields, which the puppet's detour now writes every frame from the host's sample (docs/research/m3/re-puppet-locomotion.md); the stride on film at results/train-33-stride; train-32 (parity 9f3ced84, 12:4x) carried the playtest's other fixes; train-33 also settled a standing figure or puppet onto a still record (b-duel's stagger-pushed figure) and the host's own cell report (fork parity 6139dc60, main fbee62d; the gate run set 20261022-122513-merge-m3-npc-puppet nine of nine on lab-driver ebb6969 (smoke, a-restart-persistence, b-duel, b-npc-puppet 123325, b-cell-host, a-melee-reach, a-racemenu, b-spell, b-invis-recast), after the first set 113519 went eight of nine red on a-restart-persistence 113744 by the driver's random near sample; T2 33 identical beside it; the record below). Begun 2026-10-21 17:41 PDT, Eli's approval of the Train-34 (fork parity 03e7d163, 2026-10-22 21:40 PDT, the gate 20261023-041115 nine of nine) carried playtest 32's four fixes: the walk-in-place guard, the NPC headshot's race from the NPC_ base, the promote's undo of the activation block, and the activation reply sent only to the activating player. Train-35 (fork parity 8b43aa72, 23:48 PDT, the gate 20261023-061702 ten of ten) carried the night's finding: a health percentage lives in [0, 1] on the wire and the puppet apply never kills, so a host's actor floored below zero no longer dies on the other screen. Train-36 (fork parity e7aa226d, 2026-10-23 03:01 PDT, the gate 20261023-092824 nine of nine) carried playtest 33's two: the save's game-file actors loaded onto the grid as the save attaches (a late seat had run eight residents frozen and unblocked, their records deferred) and the puppet's activation blocked natively from the demote (a dialogue opened on an unblocked puppet never closed); train-37 (fork parity ff7e53c1, 08:07 PDT, the gate 20261023-143826 nine of nine) made the roster and the demote read the engine's high-process actors, since the attach events name temporary references alone; x-npc-late-join green on all eight residents on its stage.
   one-shot plan after playtest thirty's spinning wolves): the measured
   cause (docs/verbs/npc-puppet.md "Why now": the hosted flag never reached
   a game-file actor's client copy, so the host never reported it and every
   screen re-applied a frozen record every 2 s through a self keep-offset
   whose turn renews itself each frame), ADR-045 proposed, Stage 1 on fork
-  m3-npc-puppet a29bfb08 (the server's id and flag change, the bans lifted,
+  m3-npc-puppet daa46851 (the server's id and flag change, the bans lifted,
   T0). Stages 2 (Skyrim Platform's puppet switch and two detours), 3 (the
   client), 4 (numidium's grammar), 5 (P0 to P5, b-npc-puppet, the gate) and
   6 (docs) follow with no playtest between; playtest 31 after the merge.
 
 - STATE 2026-10-23 17:45 PDT (the day's chart line, replacing the 15:2x
-  one): cell-host DONE (parity 535544db), npc-puppet DONE (19e7ca9b), trains
-  34 to 38 merged (parity a25caf02). The four limits Eli asked for before
-  playtest 34: train-39 the quitting host (fork m3-train-39 f88cd50d: the
+  one): cell-host DONE (parity 259bf390), npc-puppet DONE (6139dc60), trains
+  34 to 38 merged (parity 4ba2fbb3). The four limits Eli asked for before
+  playtest 34: train-39 the quitting host (fork m3-train-39 d4792a20: the
   stale-host rule, the pass under 10 s measured three times, no login
   blips; carried inside 40; merge at D12); train-40 doors (m3-train-40
-  10375935: D6 the follow behind cellFollow and npcHandoff, D10 the cold
+  62875e84: D6 the follow behind cellFollow and npcHandoff, D10 the cold
   start by ring proven in the lab, the refusal log; the door finding fixed,
   a hosted NPC's door is its host engine's to walk through with the server
   judging and asking, the viewer's half two ways; four fixes from the door
   read; staging, the door probe v4 decides D6's proof, then T2 and the gate;
   merge at D6 and D12); train-41 the roll pushed to both (m3-train-41
-  45ae4194: ActorFate 51, the server's one roll at the first loader's level
+  53042d89: ActorFate 51, the server's one roll at the first loader's level
   ahead of the engine's attach, the respawn re-roll, two Skyrim Platform
   detours on the sites the lab confirmed, the leveled wrapper and the outfit
   resolver 16155, behind npcFate off by default until the parity probe;
-  ADR-049 PROPOSED; stages after 40); train-42 deaths (m3-train-42 31fbfa12:
+  ADR-049 PROPOSED; stages after 40); train-42 deaths (m3-train-42 1ba20d5d:
   the death-word seam built, option-independent; the rest waits on ADR-048,
   the mixed trust model, the path mapped in docs/research/m3/death-path.md).
   Decisions with Eli: D6, D12, ADR-048 with C-ii, ADR-049. Playtest 34 after
   the four and their reads; its checklist at Eli's word.
 
 - STATE 2026-10-24 16:45 PDT (the day's chart line, replacing the 17:45
-  one): trains 39 to 43 merge-ready by citation at fork m3-train-43 de9d048e
+  one): trains 39 to 43 merge-ready by citation at fork m3-train-43 417cb746
   (gate set 155001 all sixteen, T2 green, gate-cite's five checks; 43 the
   hands pin, D17); Eli's answers (15:49 PDT, the memo): D1 B, D2 a middle
   ground, D3 to D11 A, D12 B with A as the background, D13 to D17 A; and
   "Hold until built": the merge waits for train-44 (fork m3-train-44
-  53b9fd65, stacked on 43, built 16:05 to 16:39 PDT, CI running): D1-B the
+  576c3cde, stacked on 43, built 16:05 to 16:39 PDT, CI running): D1-B the
   host's checked death report (ActorDeath 52; the server takes a death it
   has no number for when it can check the cause against its own evidence:
   the killer's numbered hit, the host's samples' drop, an activation beside
@@ -1123,7 +1123,7 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   numidium's stage, T2 and gate of sixteen plus the two, Eli's look, the
   merge of 39 to 44, the clones' promotion, playtest 34 (its checklist
   drafted in docs/private/playtest-m3-34.md, the build named).
-  18:42 PDT, the same line's end of day: 44's head is 6cdc2b35 (the trap
+  18:42 PDT, the same line's end of day: 44's head is 8efabb10 (the trap
   trigger's own activation forwarded as the hazard evidence after the
   scripts' read; the death report read from the health floor after the
   first fall run fired nothing under the engine's deferred kill); both
@@ -1137,11 +1137,11 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   change and wait for Eli's look. Research drafted during the waits:
   docs/research/m3/encounter-zones.md (ADR-049's owed clamp). 20:13 PDT:
   MERGE-READY by citation (gate set 20261025-015916-gate-m3-train-44,
-  eighteen green on their last runs, T2 green at 6cdc2b35, gate-cite's five
+  eighteen green on their last runs, T2 green at 8efabb10, gate-cite's five
   checks); the command in the memo's "Merge-ready (44)"; Eli's word next.
   22:23 PDT: MERGED on Eli's "Merge now" (numidium's verb-merge citing the
-  set): trains 39 to 44 on fork parity 6cdc2b35 (from a25caf02), both clones
-  promoted to clean-m1 at 6cdc2b35 (22:24), thuum main cd39f801 with the
+  set): trains 39 to 44 on fork parity 8efabb10 (from 4ba2fbb3), both clones
+  promoted to clean-m1 at 8efabb10 (22:24), thuum main 9f63421b with the
   pin; D2 settled as A2 party-mean (the default). The lab stands on the
   merged build. Next: playtest 34 at Eli's word from the checklist; the quit
   crash's three discriminators on the stage after it; then the playtest's
@@ -1152,31 +1152,31 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   four M3 reds, none the code's (a spin bound too tight, god mode lost at
   a restart, a one-in-five roll, and the client's unbounded wait on the
   engine's ragdoll call); the three scenarios are amended and green again,
-  and the fourth is train-45 (fork m3-train-45 fa8809a1, the ragdoll wait
+  and the fourth is train-45 (fork m3-train-45 0bc54e17, the ragdoll wait
   bounded, client only), MERGED at 14:20 on Eli's word with a gate of
-  eighteen green (parity fa8809a1, the clones promoted, thuum main
-  9c1652dd). Eli chose the quit-crash checks before the playtest: six of
+  eighteen green (parity 0bc54e17, the clones promoted, thuum main
+  98ee1d11). Eli chose the quit-crash checks before the playtest: six of
   six quits crash alike on every seat, path and build, with or without our
   client, so the crash is the Skyrim Platform and SKSE stack's, not ours;
   the leak is NAMED (the engine's always-open Loading Menu's movie held past
   the heap teardown), the holders mode and the bisect order wait for after
   the playtest. The fall scenario's subject is a fixed wolf (no roll). The
-  lab stands on skymp-server:m3-train-45 and clean-m1 at fa8809a1; playtest
+  lab stands on skymp-server:m3-train-45 and clean-m1 at 0bc54e17; playtest
   34 at Eli's word from docs/private/playtest-m3-34.md.
-- STATE 2026-10-25 18:24 PDT: playtest 34 ran on fa8809a1 (14:33 to 16:11,
+- STATE 2026-10-25 18:24 PDT: playtest 34 ran on 0bc54e17 (14:33 to 16:11,
   called by Eli) and every defect it showed is built: train-46 (fork
-  m3-train-46 aaafffe5, server: the pass between live hosts at a crossing,
+  m3-train-46 c40a36a3, server: the pass between live hosts at a crossing,
   the server-made actor's death by the NPC rule, the hosted hit's weapon
   mismatch said at info, the corpse's occupancy released by its looter's
   closing activation) is MERGED (18:44 PDT, Eli: "Merge now"; fork parity
-  aaafffe5, thuum main bfc41e0b; gate 20261026-001639 eighteen of eighteen,
+  c40a36a3, thuum main b5a50371; gate 20261026-001639 eighteen of eighteen,
   T2 green, the four fixes read true at T3; four scenarios committed from
   the greens, b-host-own-hit, b-npc-handoff-cross, b-npc-body-release and
   b-npc-protected); train-47 (client,
-  f70cf19f: the looted body's inventory as a diff alone, the hosted
+  dd4fd3bf: the looted body's inventory as a diff alone, the hosted
   server-made copy dressed once, the late fate's redress-or-reload of the
   3D, a puppet's own activation not forwarded) and train-48 (server,
-  9b412a10: a disabled actor's death schedules no respawn, a dead player
+  361884b2: a disabled actor's death schedules no respawn, a dead player
   hosts nothing) are built ahead, CI green, waiting on Eli's letters to the
   memo docs/research/m3/decisions-after-playtest-34.md (D18 to D23). The
   playtest's reads: the invisible dungeon pair was the late fate's 3D, the
@@ -1191,7 +1191,7 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   npc-stream first, deaths by the engine next, one NPC path, the owner table
   as a later ADR, the safeguards back on. Trains 47 to 50 HELD unmerged
   pending Eli's word per survivor. npc-stream slice 1 (ACTIONS) BUILT on
-  fork m3-npc-stream c2129b4a (the hosted set and the in-flight mark in
+  fork m3-npc-stream b3e12090 (the hosted set and the in-flight mark in
   Skyrim Platform, the hook widened, a hosted actor's actions as UpdateAction
   under its own id, the puppet's replay admitted for every action, the
   relay's source dropping what the action covers; CI building), probes P1
@@ -1205,35 +1205,35 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   reconciler, 52 deaths by the engine, 53 bows and spells, 54 gaze and face plus the safeguards, 55 the
   dialogue claim (ADR-051, npc-talk), one gate, playtest 35 at the end; about seven working days.
 - STATE 2026-10-26 14:53 PDT: the ladder's code is BUILT but train 53 (bows and spells, after Step R's
-  reads): 47b d049eddc; 51 m3-npc-path 4be36aed (ADR-051 PROPOSED); 52 m3-npc-death 55a95002 (DamageCause
-  55/63); 54 m3-npc-face 867c4210 (the gaze and the face, the stream counters); 55 m3-npc-talk 0d453dc1
-  (ADR-052 PROPOSED, ActorClaim 56/64); voice v4 m3-npc-voice 8da16ef6; D22's brake m3-pass-margin 11bf32f3
+  reads): 47b 66fd89a4; 51 m3-npc-path f552ccc3 (ADR-051 PROPOSED); 52 m3-npc-death ec3ea013 (DamageCause
+  55/63); 54 m3-npc-face 2b96ea56 (the gaze and the face, the stream counters); 55 m3-npc-talk 977bfbc6
+  (ADR-052 PROPOSED, ActorClaim 56/64); voice v4 m3-npc-voice ed71ee67; D22's brake m3-pass-margin ec4e0c1d
   (memo D36). The lab: the stream's gate running (one login-transient red, reruns at its end), then Step R,
   the voice stage, 50b, 51, 52, 54, 55 in numidium's queue; each merges on a green gate (D32 B).
-- STATE 2026-10-26 15:40 PDT: the STREAM MERGED (fork parity 66f04f2a, 22:14Z, 25 green; b-npc-handoff-cross
+- STATE 2026-10-26 15:40 PDT: the STREAM MERGED (fork parity 03895571, 22:14Z, 25 green; b-npc-handoff-cross
   an ADR-027 watch item); Step R DONE (P3 and P6 v3 green, H6 confirmed; the bow and spell reads' records in
-  hand, their projectile reads re-timed in v2); 50b cut as m3-train-50b 951ea43d; the brake current
-  045f5ca0; train 53's server half built, m3-npc-cast 30e72b86 (a hosted NPC's spell list recorded R2, its
+  hand, their projectile reads re-timed in v2); 50b cut as m3-train-50b cad9ce48; the brake current
+  ebac8ba6; train 53's server half built, m3-npc-cast a08fc5cd (a hosted NPC's spell list recorded R2, its
   hits validated R1), the bow relay and the spell client next on it. The lab: the voice v4 stage (merge only
   on a green P7 v4), then 50b, 51, 52, 54, 55, 53.
-- STATE 2026-10-26 22:50 PDT: 50b MERGED (parity 951ea43d; b-cell-host's lone red was D18-B meeting the
+- STATE 2026-10-26 22:50 PDT: 50b MERGED (parity cad9ce48; b-cell-host's lone red was D18-B meeting the
   scenario's old fixed wait, its premise fixed on main); the voice stays off (P7 v4 red on its premise, v5
   by path for 52's stage); Step R's bow and spell reads green; the host's dropped arrows and the outfit's
-  double roll found and fixed; train 53 built (m3-npc-cast 78b877b1, the bow relay, the spell path); every
-  ladder branch green on its current head; 51 (m3-npc-path 39cf3f4d) in T2 then its gate, merge-ready
+  double roll found and fixed; train 53 built (m3-npc-cast a8370176, the bow relay, the spell path); every
+  ladder branch green on its current head; 51 (m3-npc-path a8d10c99) in T2 then its gate, merge-ready
   after it; D32 (merge authority), D36 (the brake) and D37 (DeathDropOverhaul's drop) wait on Eli.
 - STATE 2026-10-27 01:21 PDT: Eli's letters: D32 B ("plough ahead to test 35"), D36 C and D37 B ("recommended on
-  both"), D38 B. 51 MERGED (parity 39cf3f4d, 08:19Z; the gate cut by c2's RTX wedge, core's recovery, finished
+  both"), D38 B. 51 MERGED (parity a8d10c99, 08:19Z; the gate cut by c2's RTX wedge, core's recovery, finished
   by its rest, 29 runs; watch item b-npc-body-release's old point). 52 staging (P7 v5 first); 54, 55, 53 follow
   on green; the D37 layer (layer-d37-ddo-out) stages at the end with the full sweep, then playtest 35.
 
-- STATE 2026-10-31 01:50 PDT (the pass's chart line): M3 DONE. m3-guest-loot v6 MERGED to fork parity d10789f7 (08:31Z, numidium;
+- STATE 2026-10-31 01:50 PDT (the pass's chart line): M3 DONE. m3-guest-loot v6 MERGED to fork parity 19e8c397 (08:31Z, numidium;
   the gate 20261031-074556 14 of 14, T2 green beside), c-dungeon-enemies and b-npc-body-release out of lab/gate.yaml's pending.
-  Staging: m3-wall-pose 1e836299 (D74's handshake, parity merged in; probe x-raise-wall v4 960011fb; b-spell-placed-wall's
-  amendment after the read, its own commit). Built, pushed and queued in the lab's order (each on 1e836299, so each merges after
-  wall-pose does): m3-quest-report-dedupe 4ca5783c, m4-containers-rest 0adb994e, m3-talk-console-guard 19431840, m5-leveling
-  e9c1521e (the server half, switch off; pipeline 4143 green on the Smithing fix), m4-locks 387e4537 (whole, switch on in the
-  deploy settings). m3-prop-physics b421d1b2 waits for its launch read (x-prop-launch v2 ce95029f). Reads by path for the slot
+  Staging: m3-wall-pose 286d1fbf (D74's handshake, parity merged in; probe x-raise-wall v4 960011fb; b-spell-placed-wall's
+  amendment after the read, its own commit). Built, pushed and queued in the lab's order (each on 286d1fbf, so each merges after
+  wall-pose does): m3-quest-report-dedupe 8fda40c0, m4-containers-rest 4683272b, m3-talk-console-guard e54555cb, m5-leveling
+  8313350d (the server half, switch off; pipeline 4143 green on the Smithing fix), m4-locks d04793a0 (whole, switch on in the
+  deploy settings). m3-prop-physics c080bbdb waits for its launch read (x-prop-launch v2 ce95029f). Reads by path for the slot
   after containers: x-container-rest 69f2ad68, x-bleak-traps a5335d63, x-talk-console b3156979, x-lockpick e5014621,
   x-skill-use-read f3cfb4df (the leveling client hook's Frida read). Survival off for the rest of testing (D72). Dark: props (D68),
   Raise Wall's copies (D70) until wall-pose merges. Pending by name: b-body-loot (D37). Turbo 2 Sunday evening as set.
@@ -1242,37 +1242,37 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   building is over; the milestone closes at T4 when Eli's playtests tick the rows of docs/M3-CLOSE.md (the closeout set, written
   tonight in M2-CLOSE.md's shape), starting with the turbo sittings of 2026-11-02. The rule from here: a milestone's DONE needs the
   T4 close on record; T3 green is BUILT.
-- STATE 2026-10-31 04:41 PDT (the pass's chart line): fork parity b289cbda (m3-attach-uaf, the Windows coverage crash's use-after-free,
+- STATE 2026-10-31 04:41 PDT (the pass's chart line): fork parity 84eee5ea (m3-attach-uaf, the Windows coverage crash's use-after-free,
   MERGED through ADR-053's R0 path at 11:24Z, its first use: T0 13/13, T2 green, the GitHub proof green, no lab gate). Staging:
-  m3-wall-pose 0e4b34e5 with x-raise-wall v5 88877000 (v5's two reds on a08787b5 read: Apocalypse re-uses its two wall references
+  m3-wall-pose 45388e25 with x-raise-wall v5 88877000 (v5's two reds on 474ba51b read: Apocalypse re-uses its two wall references
   across casts, disabled at the release and raised again by the next cast; the fix skips disabled references only and widens the
   report window to 6 s; b-spell-placed-wall's shape A amendment drafted, its own commit after the read). The cascade for the probes'
-  client builds: m5-leveling ef618dee (whole, stages as is for x-skill-use 549cec01), m4-locks 7a098d1c (leveling merged; the
-  console's Lock takes a key, 2d79199f), m4-weather f7709626, m5-perks 1bd5abae; parity merges into each before its gate; probes
+  client builds: m5-leveling 6919bcca (whole, stages as is for x-skill-use 549cec01), m4-locks 6d938df4 (leveling merged; the
+  console's Lock takes a key, b1efca15), m4-weather 627e8c07, m5-perks 421d4219; parity merges into each before its gate; probes
   x-lockpick e5014621, x-weather bd44bf04, x-perk-pick 5e0f733f; scenario drafts for all five in the scratchpad, each its own
-  commit after its read. m3-prop-physics e6befc5e (parity merged) waits for x-prop-launch v2 ce95029f after them. lab-api reads a
-  seat's weather (c.weather()). Dedupe, containers' rest and the talk guard still on 1e836299, after wall-pose. Turbo 2 as set.
-- STATE 2026-10-31 05:54 PDT (the pass's chart line): m3-wall-pose MERGED to fork parity e713862c (12:51Z, numidium: the gate 8 of 8 with
+  commit after its read. m3-prop-physics 414f26d7 (parity merged) waits for x-prop-launch v2 ce95029f after them. lab-api reads a
+  seat's weather (c.weather()). Dedupe, containers' rest and the talk guard still on 286d1fbf, after wall-pose. Turbo 2 as set.
+- STATE 2026-10-31 05:54 PDT (the pass's chart line): m3-wall-pose MERGED to fork parity 2fda2a19 (12:51Z, numidium: the gate 8 of 8 with
   b-spell-placed-wall v4 green at 122522, b-npc-caster green on its relaunched rerun, T2 beside, clones promoted; the scenario out of
   lab/gate.yaml's pending): Raise Wall's copies stand where the caster's engine stands them (D70/D74 shape A), the mod's reference
-  re-use handled. The post-wall parity merged into the cascade, each tsc green and on both remotes: m5-leveling b6748da0, m4-locks
-  4b52cd12, m4-weather 7ff8acbf, m5-perks 5c4b3509, m3-prop-physics 2ad267fa; their dists build in sequence, the probes run on the
-  prior dists (x-skill-use v3 4585b2a0 on ef618dee's first, staged now). Two small ones: b-quest-stage-restart on main (its first run
-  owed), m2-effect-conditions-row 027ffa28 (R0, the refusal row named). Turbo 2 as set.
-- STATE 2026-10-31 09:22 PDT (the pass's chart line): m5-leveling MERGED to fork parity b6748da0 (16:20Z, the gate 10 of 10 with p-level-up:
+  re-use handled. The post-wall parity merged into the cascade, each tsc green and on both remotes: m5-leveling 92271160, m4-locks
+  8ca7634e, m4-weather 71724387, m5-perks 1bf8b49b, m3-prop-physics 2d427639; their dists build in sequence, the probes run on the
+  prior dists (x-skill-use v3 4585b2a0 on 6919bcca's first, staged now). Two small ones: b-quest-stage-restart on main (its first run
+  owed), m2-effect-conditions-row 49b52e44 (R0, the refusal row named). Turbo 2 as set.
+- STATE 2026-10-31 09:22 PDT (the pass's chart line): m5-leveling MERGED to fork parity 92271160 (16:20Z, the gate 10 of 10 with p-level-up:
   skills by use on two seats, One-handed 20 to 27 by 168 hits, the character's level 2 at skill 25, kept across a relaunch and a
   restart). The lab's reads along the way: a seat placed north or east of lab-spawn's origin falls (the summit note), a swing target
   drifts out of a sword's reach after a dozen hits (batches of twelve with a re-teleport), the client's message handlers may call no
-  natives (deferred to the next update in locks, perks and weather). Parity merged into m4-locks 9ece63c2, m4-weather 6c9de3df,
-  m5-perks afd12dae (which carries the effect-conditions row), m3-prop-physics f923e0a7; probes x-lockpick v3 daaee288, x-weather v2
+  natives (deferred to the next update in locks, perks and weather). Parity merged into m4-locks 83e95d82, m4-weather a1c203df,
+  m5-perks 2ad281de (which carries the effect-conditions row), m3-prop-physics 2c2e3437; probes x-lockpick v3 daaee288, x-weather v2
   9f7c2cfd, x-perk-pick 5e0f733f, x-container-rest v4 3817b193 next, each scenario committing on its read. Turbo 2 as set.
-- STATE 2026-10-31 10:43 PDT (the pass's chart line): parity still b6748da0. Weather: x-weather v2 GREEN (171309 on m4-weather 6c9de3df's
-  build; two hypotheses confirmed, two to the scenario's legs), b-weather on main ca1a5f1d, the double login apply fixed at 79a74960; its
+- STATE 2026-10-31 10:43 PDT (the pass's chart line): parity still 92271160. Weather: x-weather v2 GREEN (171309 on m4-weather a1c203df's
+  build; two hypotheses confirmed, two to the scenario's legs), b-weather on main dbdbed5b, the double login apply fixed at f73de11a; its
   gate follows locks' merge. Locks: x-lockpick v3 (164727) reached the menu on the prompt's deferral, the pick leg red on a single turn
-  (the sweet spot is the engine's roll); v4 b5e2cc64 (Lockpicking 100, fourteen absolute angles) runs on the restaged 9ece63c2, its gate
-  after. New: fork m5-skill-set a68d1b80 (server-only; pipeline 4244 green): a server set of a skill moves the leveling progress entry
+  (the sweet spot is the engine's roll); v4 b5e2cc64 (Lockpicking 100, fourteen absolute angles) runs on the restaged 83e95d82, its gate
+  after. New: fork m5-skill-set 0f071a9c (server-only; pipeline 4244 green): a server set of a skill moves the leveling progress entry
   with the base (the console's SetAV snapped back at the next use before); the R0 path when numidium has a slot. Queued behind: perks
-  afd12dae (x-perk-pick), physics f923e0a7 (x-prop-launch v2), dedupe d0085bb0, containers ae2cbfd6, talk guard 7be4eb41, each with a
+  2ad281de (x-perk-pick), physics 2c2e3437 (x-prop-launch v2), dedupe 45b9e2d3, containers 44d4c225, talk guard 1dbce073, each with a
   parity re-merge before its gate. Sunday's lay: the four switches OFF by layer-render, Survival off (D72).
 - STATE 16:43 PST 2026-11-02 (turbo 2's arm two, the evening): shared containers are NOT DONE again (ADR-061's outcome, Eli: "ok corpse fix
   works worse than before" and the standing rule "we already said we dont want the whole menu to open and close out from under a
@@ -1280,10 +1280,10 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   multi-party sync is BACKLOG with its Frida plan (ContainerMenu::ProcessMessage), exclusive access is a server switch
   (containerSharing, shared by default, Eli: "we're not even live"); the client keeps the record by base counts under an open menu
   (the own echo draws nothing) and never reopens. Eli's A for reanimation (ADR-060): a commanded NPC is its commander's game's
-  for the effect's life, BUILT on fork m4-reanimate-claim 9cc3c94c (the cells rule's Commanded claim, the host snippet retired),
-  its probe x-reanimate-claim after the arm. Perk points are a picks counter (m5-perk-points 10687731); the cabbage blast's two
-  halves (m4-prop-blast 8d94232c server, the client half in the chest bundle); the server-only train for the break
-  m4-turbo2-union-srv and the client bundle m4-turbo2-chest 10ade7c4. The broken figure on c1 (Prisoner's look on the player's
+  for the effect's life, BUILT on fork m4-reanimate-claim 2dc75ab6 (the cells rule's Commanded claim, the host snippet retired),
+  its probe x-reanimate-claim after the arm. Perk points are a picks counter (m5-perk-points bbec6de7); the cabbage blast's two
+  halves (m4-prop-blast 020de9ab server, the client half in the chest bundle); the server-only train for the break
+  m4-turbo2-union-srv and the client bundle m4-turbo2-chest 8415e637. The broken figure on c1 (Prisoner's look on the player's
   base, 00:15:36Z) is an open read, not tonight's heads.
 - STATE 17:09 PST 2026-11-02: ADR-062 ACCEPTED (Eli: "shouldn't every script incident be transmitted and accepted? skyrim is not a competative
   game. trust should LARGELY be the default"): the NEXT BUILD after turbo 2's arm two, three slices after the re-analyst's day on the
@@ -1301,64 +1301,64 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   green at T3 on scenarios whose multiplayer case the audit found unread or god-moded): the audit's 51 PARTIAL and 2 COVERED
   verbs (npc-fate's deaths and loot, cell-host, npc-handoff, npc-stream, the casts, marksman, shouts, quest-stage,
   prop-physics, leveling, perks, locks, traps, weather, time and the rest of the table). BROKEN tonight, with its fix's place:
-  shared containers (the live view BACKLOG, ADR-061); traps in play (the lab's lever never laid; ADR-062 slice 1a d8fc5fa2 built,
+  shared containers (the live view BACKLOG, ADR-061); traps in play (the lab's lever never laid; ADR-062 slice 1a f08abd57 built,
   the stopgap offered); the ambush scripts (the spider's drop, the alcove draugr, Arvel's web, the claw door) and the claw itself
-  (ADR-062 slices 1 and 2); the reanimate on the host's engine (ADR-060 built, m4-reanimate-claim 9cc3c94c, unrun); the blast's
-  claims (the bundle 59af5508, unrun); the restart desync (m3-follow-vouch fa50c5b5 green at T0, in union-srv-2 85b6c096); the
+  (ADR-062 slices 1 and 2); the reanimate on the host's engine (ADR-060 built, m4-reanimate-claim 2dc75ab6, unrun); the blast's
+  claims (the bundle 654d3b2a, unrun); the restart desync (m3-follow-vouch c94c4072 green at T0, in union-srv-2 f67fb0f8); the
   carried prop's refusals (ADR-063 decision 4, in union-srv-2); the guest's frozen kill in ambush furniture (the bundle's push,
   unrun); the death sound at a cell re-entry (traced on the bundle, probe x-npc-death-reentry); the naked bandit (the redress
   unread, probe x-fate-dress-bleak); the figure on base 7 (unread); the attribute pick at a level-up (never built; its shape
   with numidium for Eli). The audit's 20 MISSING rows are the gate's own debt: each wants the multiplayer case a player hits.
-- STATE 2026-11-02 14:05 PST (turbo 2's arm one, Eli's close at 12:32 PST, and the day's queue): wall-range MERGED (parity 4b6f5fa3: F1's band, F5's
-  reanimation end, the container drop); the R0 train m4-turbo2-r0-train 6d7fcc84 (F9 restart-dead c3eb2550 plus skill books 38659a3e,
+- STATE 2026-11-02 14:05 PST (turbo 2's arm one, Eli's close at 12:32 PST, and the day's queue): wall-range MERGED (parity 4fdb2d31: F1's band, F5's
+  reanimation end, the container drop); the R0 train m4-turbo2-r0-train 188a8dea (F9 restart-dead 98ca8b0d plus skill books 4cce81f2,
   GREEN at T3 as x-skill-book 212928, b-skill-book promoted) in numidium's one T2; the big client train m4-turbo2-train (the deaths head
-  de969496 with F3, F4 and F8's debounce; prop-statics a290aba0 plus its PropTest fix df3b8819, ADR-058 slice two, the Riverwood cart
-  wheel by a settings list; the settle head 7aac21d4, F2's furniture hold and the viewing seat's hide) stages on the R0 parity with
-  REUSE_DIST, probes x-prop-static and x-handoff-hide by path; Eli's Undead FX default is a settings entry (c9177cbc, probe
-  x-global-default running); the queued rune glyph BUILT as m2-rune-glyph 1d21c9ba (SCHEMA_VERSION 32), its own stage after the
+  6fdd3d69 with F3, F4 and F8's debounce; prop-statics f07ba07e plus its PropTest fix 0def5a22, ADR-058 slice two, the Riverwood cart
+  wheel by a settings list; the settle head a020511c, F2's furniture hold and the viewing seat's hide) stages on the R0 parity with
+  REUSE_DIST, probes x-prop-static and x-handoff-hide by path; Eli's Undead FX default is a settings entry (2d659fc6, probe
+  x-global-default running); the queued rune glyph BUILT as m2-rune-glyph dd5aa100 (SCHEMA_VERSION 32), its own stage after the
   train. Arm two's checklist is drafted in docs/private/playtest-turbo-2.md; Eli is pinged by numidium at seats-ready.
-- STATE 2026-10-31 21:07 PDT (the pass's chart line): fork parity 6414dcd2. The day merged containers' rest (ae2cbfd6, 00:44Z: the lid
+- STATE 2026-10-31 21:07 PDT (the pass's chart line): fork parity 4f746162. The day merged containers' rest (44d4c225, 00:44Z: the lid
   on every screen, the second occupant, the take's reach, the disconnect's release, the saved-open chest shut at the load) and physics
-  slice one (6414dcd2, 04:03Z: the drop's copy created at the drop point, D73's Dynamic rest, D75's persistence, b-prop-push whole; the
+  slice one (4f746162, 04:03Z: the drop's copy created at the drop point, D73's Dynamic rest, D75's persistence, b-prop-push whole; the
   lab's prop an iron ingot, the basket Eli's at the camp). Weather's probe is green and b-weather is on main (its gate next); locks' pick
-  leg is beyond the lab's hands (v6's trace) with v7's script lever optional; the skill-set fix (a68d1b80 line) waits for an R0 slot;
-  the talk guard, dedupe v2 and perks queue with their probes. All six branches carry 6414dcd2 (talk guard 9b6c3836, dedupe d822d7c7,
-  perks 0cfbb82d, weather bf231bc1, locks 701d8b20, skill-set ee7f60d4). Sunday's lay: the four switches OFF by layer-render, Survival
+  leg is beyond the lab's hands (v6's trace) with v7's script lever optional; the skill-set fix (0f071a9c line) waits for an R0 slot;
+  the talk guard, dedupe v2 and perks queue with their probes. All six branches carry 4f746162 (talk guard 8d8ccd07, dedupe 9b35e218,
+  perks 6fc3f0b7, weather 434cedcf, locks 03808d6e, skill-set 8168f73b). Sunday's lay: the four switches OFF by layer-render, Survival
   off (D72), props on by default on the merged base.
-- STATE 2026-10-30 15:03 PDT (the pass's chart line): the union m3-pass-train-3-win MERGED to fork parity 0e23c820 (its full
+- STATE 2026-10-30 15:03 PDT (the pass's chart line): the union m3-pass-train-3-win MERGED to fork parity b8a9d4c6 (its full
   sweep 20261030-164127, 99 of 102 green, red only on pending; thuum main d39fbd3 with apocrypha's defaults layer). Exit: c-riverwood
   GREEN (a watch item on its restart leg's restore lag), c-dungeon-enemies PENDING on the guest's loot of a body (D71: the server
   admits, the non-host's engine never opens the body released from the puppet state with its AI left off; the read x-body-open-guest
   running, the fix the train after), so M3 is NOT DONE today. Dark on the merged build: props (D68, the physics train stages after
   playtest 39), Raise Wall's copies (D70; the caster-reported pose built as m3-wall-pose on 2026-10-31, D74, at its stage). Pending by name: b-body-loot (the D37 layer unmerged),
   b-spell-placed-wall (D70), c-dungeon-enemies and b-npc-body-release (D71; the host's handler stalls in the paused menu too). Built
-  and waiting: m3-prop-physics dde874b5 (the union head merged), m3-quest-sge-stages dc3ec679 (D69 B), m3-quest-report-dedupe 7eb968bb.
+  and waiting: m3-prop-physics 3586f2db (the union head merged), m3-quest-sge-stages 6dbabc7a (D69 B), m3-quest-report-dedupe 32c7bdca.
 - STATE 2026-10-28 19:3x PDT (playtest 37's turbo night; Eli: "stop queueing things for tonight, we're blasting
   today as hard as possible"): the shared chest's two faults read and fixed (the pause guard, then the item-menu
-  gates by name and the take's baseline), the face survivor and the vendor gate (m3-face-twelve b181518b); the
-  parallel builds landed on their own fork branches and merged into m3-turbo-train-3 0e4942bb (schema 19, its dist
-  and server image go together): quest-stage a54e5eca (ADR-056, memo D55 B, the world's quest stages behind a
-  shared list, a new verb under npc-talk), empty-label 06e38831, door-walk 2dca472a (D54 B), hands d902d919
-  (finding 45), fate-dress 5b89bf35 (findings 43 and 46), hunger 853dd4fc (the food's Survival amounts, SetGlobal),
-  npc-caster 05a285f6 (creature casts from the launch, the ability behind a cloak's hit, resurrections by the host's
-  engine, Eli's ask); m3-death-range 2069d4d2 (the 0xff death report) waits for the next train. Findings 40 to 49 in
+  gates by name and the take's baseline), the face survivor and the vendor gate (m3-face-twelve 717fc686); the
+  parallel builds landed on their own fork branches and merged into m3-turbo-train-3 f0b27ac6 (schema 19, its dist
+  and server image go together): quest-stage 35f83867 (ADR-056, memo D55 B, the world's quest stages behind a
+  shared list, a new verb under npc-talk), empty-label c581142d, door-walk 88c350b6 (D54 B), hands f6e80c57
+  (finding 45), fate-dress 9f577d2e (findings 43 and 46), hunger 3bc52755 (the food's Survival amounts, SetGlobal),
+  npc-caster fc493be9 (creature casts from the launch, the ability behind a cloak's hit, resurrections by the host's
+  engine, Eli's ask); m3-death-range a46fa688 (the 0xff death report) waits for the next train. Findings 40 to 49 in
   docs/private/playtest-m3-37.md; the lay by numidium at the train's green, then Eli's reads in the order of pain
   (the chest, the shop topic, the face, the atronach, a reanimation, x-quest-stage at the train's stage).
 
 
-**STATE 14:05 PDT 2026-10-29 (the weekend pass's audit of parity bf133744 against this chart; one line per item):**
-- cell-host DONE (parity 535544db, 10-21). npc-puppet DONE (19e7ca9b, a25caf02, 10-22/23). Trains 39 to 44 MERGED (6cdc2b35), 45
-  (fa8809a1), 46 (aaafffe5), 47b/48/49 as 50b (951ea43d). The stream's slices 1 to 3 MERGED (66f04f2a). The NPC ladder is ON PARITY
-  whole: 51 (39cf3f4d), 52 deaths by the engine and 54 gaze, face, counters (240a31de, 10-27 20:41Z), 55 the dialogue claim with
-  D22's brake (1b866786, 10-28 02:25Z), 53 bows and spells (bf133744, 10-28 07:07Z); the voice is ON by default since P7 v5 green
+**STATE 14:05 PDT 2026-10-29 (the weekend pass's audit of parity 5fb85e2c against this chart; one line per item):**
+- cell-host DONE (parity 259bf390, 10-21). npc-puppet DONE (6139dc60, 4ba2fbb3, 10-22/23). Trains 39 to 44 MERGED (8efabb10), 45
+  (0bc54e17), 46 (c40a36a3), 47b/48/49 as 50b (cad9ce48). The stream's slices 1 to 3 MERGED (03895571). The NPC ladder is ON PARITY
+  whole: 51 (a8d10c99), 52 deaths by the engine and 54 gaze, face, counters (a9e47e0e, 10-27 20:41Z), 55 the dialogue claim with
+  D22's brake (c85dab3d, 10-28 02:25Z), 53 bows and spells (5fb85e2c, 10-28 07:07Z); the voice is ON by default since P7 v5 green
   (the earlier "stays off" line is stale).
-- NOT merged, riding the turbo trains cut after the ladder (3 to 3o; 3o ee44f7d1 staging 2026-10-29 with its gate, 3n e14dc298 the
+- NOT merged, riding the turbo trains cut after the ladder (3 to 3o; 3o 33240fd4 staging 2026-10-29 with its gate, 3n 38cea9bf the
   fallback): shared containers, the door pass, the face and vendor gate, quest-stage (ADR-056), hands, the 0xff death report
   (m3-death-range, on 3c to 3o), empty-label, door-walk, fate-dress, hunger, npc-caster, cast-relay, follow-mode, reanimate,
   cloak-look, corpse-loot, bind-silent, launch-geometry, has-perk, spell-placed (ADR-057, Raise Wall) and the reanimate fallback
-  (ac620176), trains 56 (pt35 fixes) and 57 (voice lines). Playtest 38 ran on 3n's stage (findings 64 to 76, docs/private/playtest-
+  (df187029), trains 56 (pt35 fixes) and 57 (voice lines). Playtest 38 ran on 3n's stage (findings 64 to 76, docs/private/playtest-
   m3-38-findings.md).
-- The pass's trains (docs/private/pass-m3-close.md): m3-pass-train-1 7a223e0d (3o plus the dead-placed loader, finding 65, and the
+- The pass's trains (docs/private/pass-m3-close.md): m3-pass-train-1 497ea6d1 (3o plus the dead-placed loader, finding 65, and the
   held roster's replay at the grant, finding 66; T0 green) with m3-client-bits (66's belt, 67, 68, 71) as its -win; P2 to P4 follow.
 - NO code anywhere, the pass's own list: the two exit scenarios c-riverwood and c-dungeon-enemies (P2); NPC melee reach and hit cone
   (the rules exist in melee.rs, the gate at ActionListener's "Player against player only" keeps NPCs out; P2); the encounter zone
@@ -1371,15 +1371,15 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   (the T1 box, "none: events through Skyrim Platform"); the pass closes them by probes or the ledger (P3, P4).
 
 **STATE 18:24 PDT 2026-10-29 (the pass's evening, one line per item; the 14:05 block above stands for the morning):**
-- The pass's trains, each reviewed against the hard rules by a fresh agent and fixed before any stage: P1 m3-pass-train-1 b0cda83a
-  (the placed-dead corpse 65, the held roster 66 keyed by reporter and bounded) with the client bits f9c6b7ca (67, 68, 71 and the
-  rented-bed correction, finding 31) as P1-win 9721ff72; P2 58208e9f (NPC melee reach and cone, the login's Change Location event,
+- The pass's trains, each reviewed against the hard rules by a fresh agent and fixed before any stage: P1 m3-pass-train-1 9ced8083
+  (the placed-dead corpse 65, the held roster 66 keyed by reporter and bounded) with the client bits 885dab1f (67, 68, 71 and the
+  rented-bed correction, finding 31) as P1-win a3bc3b86; P2 e6c0c684 (NPC melee reach and cone, the login's Change Location event,
   quest sharing mode all under D58 B and D62 with the INDX check and a bounded record, the fragment suppression made real in the
-  .pex) as P2-win dca7fe09; P3 50a44336 (ADR-058 slice one with the review's six fixes, P2 merged) as P3-win ffa51358. T2: P2 green
-  at 0b49a28e and again on 58208e9f (02:11Z), P1 green on b0cda83a (02:39Z), P3 red once on its session's assumed id (fixed by
-  the harness's created-form placeholder) then green on 6901781c with D64 folded in (03:08Z); the union P3-win e65a345b compiles on
+  .pex) as P2-win 278d28c3; P3 88e72156 (ADR-058 slice one with the review's six fixes, P2 merged) as P3-win 1d3325e6. T2: P2 green
+  at f1b71d38 and again on e6c0c684 (02:11Z), P1 green on 9ced8083 (02:39Z), P3 red once on its session's assumed id (fixed by
+  the harness's created-form placeholder) then green on f61a2b39 with D64 folded in (03:08Z); the union P3-win 72c44f04 compiles on
   both platforms and its T2 is the last before the stage (20:09 PDT).
-- D63 A (the four allowed quests stand), D64 C (the transport's 60 Hz flush clock, m3-send-rate b6f4deb4, green on CI), D65 A
+- D63 A (the four allowed quests stand), D64 C (the transport's 60 Hz flush clock, m3-send-rate 11a3e466, green on CI), D65 A
   (Reading List's radar stays; the driver throttles its lines); ADR-058's slice two deferred to M4 on the esm read.
 - The exit scenarios c-riverwood and c-dungeon-enemies are committed and wait on the lab; the eight M3 verb docs stand at 196 to
   about 65 hypothesis tags, every remaining one a named pending read or the template's own words; mount.md drafts the owner table's
@@ -1388,15 +1388,15 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
 **STATE 00:29 PDT 2026-10-30 (the pass's night, one line per item; the 18:24 block stands for the evening):**
 - The union m3-pass-train-3-win is the new base (D67, taken under the pass's rule after 3o's gate stopped on its two findings and
   the eighth wedge): trains 1 to 3 with D64 (the transport's 60 Hz flush clock), D66 (a single stream's holes counted, casts.rs
-  HOLE_MS) and the Raise Wall fix (m3-sp-pack-form 9fad9f08: Skyrim Platform packed a class-less form type, MSTT 36, as None, so
-  every native on the wall's base aborted and the observer's wall never came; HYPOTHESIS until the watcher claim) at 820a565c
-  (997fedf1 plus one difftest commit: D66's declaration as the exact f32), green on client and server (pipeline 3962's client,
+  HOLE_MS) and the Raise Wall fix (m3-sp-pack-form 0bd2d77c: Skyrim Platform packed a class-less form type, MSTT 36, as None, so
+  every native on the wall's base aborted and the observer's wall never came; HYPOTHESIS until the watcher claim) at ef984db2
+  (d674b294 plus one difftest commit: D66's declaration as the exact f32), green on client and server (pipeline 3962's client,
   3974's server and difftest) and T2 GREEN seat-free (numidium, 19 declared divergences held); then the layer, the stage with its
-  fourteen probes and three traces, one full sweep as the gate, layer-merge and verb-merge, playtest 39. 3n e14dc298 stays the fallback.
+  fourteen probes and three traces, one full sweep as the gate, layer-merge and verb-merge, playtest 39. 3n 38cea9bf stays the fallback.
 - Two findings from 3o's gate, both read without a guess: b-spell-placed-wall (the fix above, and the scenario's v2 frame
   12353ab: c1 at (0, -366), inside its cell's reach of the wall, its copies read through c2's figure's cell); b-npc-talk's hold
   (SetDontMove is lifeState 9 at Actor+0xC8, Actor::Move zeroes the velocity while it reads 9, only Resurrect clears it; nothing in
-  the fork range defaa7e2..ee44f7d1 moves a hosted NPC on its host; c1 alone moved Sven in the red run's log):
+  the fork range aae7191b..33240fd4 moves a hosted NPC on its host; c1 alone moved Sven in the red run's log):
   lab/frida/dontmove-trace.js under x-npc-hold v4 at the stage decides between the engine and the call.
 - The lab: the eighth wedge at 06:34Z; core reproduced the mechanism with bare QEMU (two GP107 bus resets in one second) and
   lab-api's 20 s seat stagger (f0480e2) is the fix; the morning reboot is Eli's word; sky-srv is down since core's 07:17Z reboot.
@@ -1404,17 +1404,17 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
 
 ### M4: World and dungeons (6 to 10 weeks, Class B). Started 2026-10-30 (the weekend pass)
 
-- STATE (06:22 PST 2026-11-01, thuum-magnus; the dated record is LOG.md): locks MERGED (fork parity 395cdc49, 2026-11-01: the server's lock
+- STATE (06:22 PST 2026-11-01, thuum-magnus; the dated record is LOG.md): locks MERGED (fork parity 487e1262, 2026-11-01: the server's lock
   from the REFR's XLOC, the key path, the console pair on the server, LockReport and LockPrompt; the minigame's own pick is T4;
   b-locks pending on the lab's close of the Lockpicking Menu, not the verb: x-locks-open v1 to v3); weather MERGED (one sky per
-  worldspace, b-weather); containers' rest MERGED ae2cbfd6 (b-container-rest; the open handler's menu-mode poll fix on fork
-  m4-container-open-poll 5ee4d72b awaits its gate); dropped items and kicked objects MERGED 6414dcd2 (ADR-058 slice one,
-  b-prop-push with the restart); word walls BUILT (fork m4-word-wall 0ef96899: WordWall 69, the server's TeachWord from the
+  worldspace, b-weather); containers' rest MERGED 44d4c225 (b-container-rest; the open handler's menu-mode poll fix on fork
+  m4-container-open-poll 06771bf3 awaits its gate); dropped items and kicked objects MERGED 4f746162 (ADR-058 slice one,
+  b-prop-push with the restart); word walls BUILT (fork m4-word-wall e7325a38: WordWall 69, the server's TeachWord from the
   trigger's own record, the hook on OnTrigger, the trigger's sphere as the reach; x-word-wall at its stage, b-word-wall drafted;
   the chant behind ADR-059's layer rows); traps, plates, levers, pillars: READ 2026-11-01 (x-bleak-traps v3: nothing runs, every
   piece a Papyrus script behind two blocks), ADR-059 written (world scripts run on the cell's host), slice one staged (the layer's
   named rows, the client's activationUnblockedBases, the server's links from script properties and the marker caster, fork
-  m4-traps 5a1a16b8; the platform's hosted-cell gate on fork m4-world-scripts-host 80616308); statics and doors as before; the
+  m4-traps bd9c787b; the platform's hosted-cell gate on fork m4-world-scripts-host b69bf508); statics and doors as before; the
   exit d-bleak-falls after ADR-059's slices.
 - Doors and locks, lockpicking, traps, pressure plates, puzzle pillars,
   linked refs (the lever that opens the door), statics.
@@ -1433,47 +1433,47 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   the exclusive switch containerSharing exists, shared by default); corpse
   loot, the open animation and sound for observers, the distance check on
   PutItem and TakeItem, the reloot timer and the saved-open container are
-  DONE (containers' rest ae2cbfd6, 2026-10-31).
+  DONE (containers' rest 44d4c225, 2026-10-31).
 - Word walls teach through the server's shout record (Eli, 2026-10-12,
   playtest fourteen: "leave it in dungeons"): a wall's word goes into the
   record the console and logins use (docs/verbs/shouts.md).
 - Exit: `d-bleak-falls` (both players through the puzzle door and the traps,
   with a restart mid-dungeon).
 
-- STATE (20:09 PST 2026-11-01, thuum-magnus): traps' decision 2 whole on parity e6c5d01a (the puzzle relay both ways, b-puzzle-relay); the
+- STATE (20:09 PST 2026-11-01, thuum-magnus): traps' decision 2 whole on parity fcbced40 (the puzzle relay both ways, b-puzzle-relay); the
   shadowbond run-out swap fixed there (the mod's script blocked everywhere, the procs the server's relay); decision 3 (the host's
-  animations to the guests) and decision 1's hosted-cell gate built on m4-object-animation 7c82e51e, the pair's stage next (its
-  layer branch e94ec494 flips the traps row to host scope); decisions 4 (harm) and 5 (counts) planned in traps.md.
+  animations to the guests) and decision 1's hosted-cell gate built on m4-object-animation ca7811f8, the pair's stage next (its
+  layer branch ca434db6 flips the traps row to host scope); decisions 4 (harm) and 5 (counts) planned in traps.md.
 
 ### M5: Progression (4 to 8 weeks, Class A/B). Started 2026-10-31 (the weekend pass)
 
-- STATE (05:09 PST 2026-11-02, thuum-magnus): the object-animation pair MERGED, fork parity 64dbacfe (from 235aad49) and the host-scoped layer
-  on main 8139d579, both clones promoted (numidium: the sweep 20261102-064754, 114 of 114 green in 126 runs, verdict watch on
+- STATE (05:09 PST 2026-11-02, thuum-magnus): the object-animation pair MERGED, fork parity ad1aa50a (from c8c21cd1) and the host-scoped layer
+  on main 482f157b, both clones promoted (numidium: the sweep 20261102-064754, 114 of 114 green in 126 runs, verdict watch on
   b-npc-talk's two lone-red reruns; five c1 startup crashes at the terrain race, each green on rerun, a lab-api fault signature owed).
   ADR-059's decisions 1 to 3 are whole: the host runs the cell's world scripts (lifecycle events everywhere), the guests play the host's
-  activations and animations (b-object-anim promoted, 66607f91). The end grace merged before it (235aad49, R0). Open on branches:
-  decision 4, TrapHit (m4-trap-hit 0b3dadc2 with this parity: server half T0 green, client half built, the hook point unconfirmed
+  activations and animations (b-object-anim promoted, 7875c655). The end grace merged before it (c8c21cd1, R0). Open on branches:
+  decision 4, TrapHit (m4-trap-hit 51a48dec with this parity: server half T0 green, client half built, the hook point unconfirmed
   after two silent traces; x-trap-path v3 running); decision 5 (counts) unstarted. This is the base turbo 2 starts on this morning.
-- STATE (06:22 PST 2026-11-01, thuum-magnus): skills by use MERGED b6748da0 (p-level-up 10 of 10: the 40488 hook, UESP's formulas on the
-  server, the level and skills on the record); perks as transactions MERGED 395cdc49 (b-perk-pick: the pick validated against the
+- STATE (06:22 PST 2026-11-01, thuum-magnus): skills by use MERGED 92271160 (p-level-up 10 of 10: the 40488 hook, UESP's formulas on the
+  server, the level and skills on the record); perks as transactions MERGED 487e1262 (b-perk-pick: the pick validated against the
   tree and the points; Skyrim Platform's array results fixed on the way) and the perk records' EFFECTS in the server's damage
-  formula MERGED 27f5c0a4 (b-perk-damage: kModAttackDamage and kModArmorRating with their keyword conditions; other entry points
+  formula MERGED 5534294c (b-perk-damage: kModAttackDamage and kModArmorRating with their keyword conditions; other entry points
   and conditions stay a documented limit); the console's SetLevel and AdvSkill on the server (m5-skill-set); enchanting, alchemy
   and pickpocketing as transactions: not begun (memo D77 D, the benches after the playtest); vampirism: the design owed.
 - STATE (18:36 PST 2026-11-02, thuum-cf): playtest 41 closed (numidium's LOG entry). Heads for the gate, none to a seat: m3-handoff-settle
-  019921fb (npc-handoff D9's settle: the passing report imposed on the new host ahead of the word, a stale copy's report back out
-  within 1 s dropped as Stale; its scenario b-npc-handoff-door-hosts 019b0cd3 waits for deploy-srv and the gate) and m4-scripts-work
-  f7ce5b37 (ADR-062 slice 1b: the natives' entry hooks, the scriptNative event, the client census and script-kill marks, cause 3
+  63bebcd9 (npc-handoff D9's settle: the passing report imposed on the new host ahead of the word, a stale copy's report back out
+  within 1 s dropped as Stale; its scenario b-npc-handoff-door-hosts 9406670d waits for deploy-srv and the gate) and m4-scripts-work
+  ddfbd605 (ADR-062 slice 1b: the natives' entry hooks, the scriptNative event, the client census and script-kill marks, cause 3
   the host's word). Props: BROKEN, worse than at arm one; no live change again; the arbitration rule under ADR-063 decision 4 is
   written in prop-physics.md first, then props.rs with T0, the two-seat probe and its scenario (prop-physics not-done until then).
-- STATE (19:21 PST 2026-11-02, thuum-cf): the root-cause plan's day 1 (numidium's plan, Eli's calls): the 29 T3 boxes unticked (932b0f8d,
-  verb-lint green); the stale tags being settled from their runs by an agent; b-npc-handoff-door-hosts v2 (dd472cc6) in the
-  playtest's direction with both roles, awaiting the fresh review, its red run on 35509f7a and its green on the settle head
-  (m3-handoff-settle 9606963e, GREEN on pipeline 4782 after a runner flake on 4778); the props arbitration BUILT on
-  m4-prop-arbitration aafb26ba (pipeline 4780 GREEN), its probe x-prop-arbitration by path for numidium's stage, the engine model next. ADR-062 slice 1b f7ce5b37 green, staged by
+- STATE (19:21 PST 2026-11-02, thuum-cf): the root-cause plan's day 1 (numidium's plan, Eli's calls): the 29 T3 boxes unticked (0b84816a,
+  verb-lint green); the stale tags being settled from their runs by an agent; b-npc-handoff-door-hosts v2 (6a7d8814) in the
+  playtest's direction with both roles, awaiting the fresh review, its red run on b926a7d4 and its green on the settle head
+  (m3-handoff-settle 08b479d6, GREEN on pipeline 4782 after a runner flake on 4778); the props arbitration BUILT on
+  m4-prop-arbitration 8deb7809 (pipeline 4780 GREEN), its probe x-prop-arbitration by path for numidium's stage, the engine model next. ADR-062 slice 1b ddfbd605 green, staged by
   numidium after its rules review.
-  The race permit (Eli, 2026-11-01: rotfern's race for test client 1 alone) MERGED to fork parity 7fe600e6 (18:18 PST 2026-11-01; the gate 12 of
-  12, T2 38 of 38; the menu hide follows in the bondblock train), BUILT WHOLE on fork m5-race-permit b59ab993 (13:56 PST 2026-11-01:
+  The race permit (Eli, 2026-11-01: rotfern's race for test client 1 alone) MERGED to fork parity 5c8c284c (18:18 PST 2026-11-01; the gate 12 of
+  12, T2 38 of 38; the menu hide follows in the bondblock train), BUILT WHOLE on fork m5-race-permit e356a3da (13:56 PST 2026-11-01:
   server setting restrictedRaces, two facts on the race rule, CreateActor's restrictedRaces and permittedRaces at SCHEMA_VERSION 29,
   apocrypha's menu hide, T0 RacePermitTest, T2 session race-permit, T3 b-race-permit); numidium stages it after the container gate,
   merge on green (docs/verbs/character-creation.md, "The permit").

@@ -27,9 +27,9 @@ Milestone: M3   Class: B
 
 ## Why now: playtest thirty's wolves (measured 2026-10-21)
 
-The first live run with the server's NPCs on (fork parity 535544db,
+The first live run with the server's NPCs on (fork parity 259bf390,
 cell-host merged) showed the forest cell's wolves spinning in place on both
-screens within a minute; the relay echo's fix (m3-relay-echo 41f554ad) and a
+screens within a minute; the relay echo's fix (m3-relay-echo 3f3a3ecb) and a
 swap of the host changed nothing. Two defects of the copies model, measured
 (numidium's reads on the host seat, results playtest-30-wolves/01 to 08; the
 code trace, the prior-art read and the REA read of the same afternoon,
@@ -37,7 +37,7 @@ docs/LOG.md):
 
 1. The host never learns it hosts an actor from the game files. CreateActor
    sent such an actor under id + 0x100000000 (PartOne.cpp:979-983 on
-   535544db); the grant's flip went out as UpdateProperty isHostedByOther
+   259bf390); the grant's flip went out as UpdateProperty isHostedByOther
    under the raw u32 id (UpdateHoster, MpObjectReference.cpp:737-747;
    skymp.rs:426); the client routed any id under 0xff000000 to its
    engine-reference branch, which applies inventory, isOpen, isHarvested and
@@ -105,9 +105,9 @@ code read (skymp-hosting.md, on parity ef44a1d8 unless a tree is named):
 | a copy lacking the reference's linked refs, aliases, editor location and scripts (ADR-035 :1226-1227, untested) | ADR | native: the kept reference has them; that the host's schedules then run as the solo references did is H8 |
 | a leveled base rolled per game (formView.ts:155-156; a placed LVLN such as 0x85547 resolved by each engine); a death's respawn after 25 s (MpActor.cpp:1941) | code, record | later: npc-fate (one roll per cell by the server; deaths that persist); until then a kept leveled reference may differ in species between games, and between the server and the games: H10 (playtest 32, place 2: the forest predators 0x85547 and 0x85549 are LvlAnimalForestPredator 0x1e7a0 placements; the server's record of 0x85549 resolved its template chain to EncBearCave, EncBear and dealt a 130-point unarmed hit while both games showed a wolf; both players died on arrival, 02:23:11Z and 02:23:15Z) |
 | essential, protected, unique, crime-faction and playable-race NPCs never loaded (WorldState.cpp:519-585; on m3host :506 npcEnabled, :541 CrimeFactionsList 0x26953, :585-587 the race list) | code | imposed: the three bans lifted behind npcEnabled on the probe-only setting (ADR-035 point 9); dead-at-start and initially disabled references stay skipped (:477-501 on m3host) |
-| the puppet's health, equipment and inventory (the copy's deferred kill and 1,000,000 health, formView.ts:313-319; the 25% step toward the relayed percentage, movementApply.ts:63-67) | code | imposed as today on the kept reference (startDeferredKill, skyrimPlatform.ts:2202; the step); the live values: later, npc-stream (HostedActorState); FOUND 2026-10-22 (x-npc-death 20261023-054215): the step kills what the host floors: a host-made health below zero (a script, a fall; the engine's deferred kill holds the host's actor alive at -128.87%) reaches the puppet as the relayed percentage and the damageActorValue step takes the puppet's health through zero, where the deferred kill did not hold with the AI off: dead on the puppet screen, standing on the host's. Train-35 (fork parity ac557132, 2026-10-22 23:48 PDT; the gate 20261023-061702 ten of ten with m0-death, T2 33 identical): the host's report clamps healthPercentage to [0, 1] (movementGet), the validator refuses a report outside it (wire-validate, Range, with its test), and the step floors its target at one percent, so a puppet dies by the server's death state alone |
+| the puppet's health, equipment and inventory (the copy's deferred kill and 1,000,000 health, formView.ts:313-319; the 25% step toward the relayed percentage, movementApply.ts:63-67) | code | imposed as today on the kept reference (startDeferredKill, skyrimPlatform.ts:2202; the step); the live values: later, npc-stream (HostedActorState); FOUND 2026-10-22 (x-npc-death 20261023-054215): the step kills what the host floors: a host-made health below zero (a script, a fall; the engine's deferred kill holds the host's actor alive at -128.87%) reaches the puppet as the relayed percentage and the damageActorValue step takes the puppet's health through zero, where the deferred kill did not hold with the AI off: dead on the puppet screen, standing on the host's. Train-35 (fork parity 8b43aa72, 2026-10-22 23:48 PDT; the gate 20261023-061702 ten of ten with m0-death, T2 33 identical): the host's report clamps healthPercentage to [0, 1] (movementGet), the validator refuses a report outside it (wire-validate, Range, with its test), and the step floors its target at one percent, so a puppet dies by the server's death state alone |
 | a persistent NPC through a door (Embry into the inn, readings-18:36-43) | trace | native on the host; on a puppet: later, npc-handoff (a relayed report in another cell moves the reference with MoveTo, TESObjectREFR.h:456, where today's copy respawns, movementApply RespawnNeededError, skymp-hosting.md:278-279) |
-| the observer's shape kept: head tracking on the look-at point, blockActivation, the local attack events blanked unless relayed (movementApply.ts:37-59; animation.ts:383-394 for a view with default animations disabled) | code | imposed as today on the puppet (setDefaultAnimsDisabled(refrId, true), formView.ts:454 on m3host); undone at the promote since train-34 (fork parity 7e59c32c, 2026-10-22 21:40 PDT; 8eafa85d: PuppetService.ensureLive runs blockActivation(false), clearLookAt and setHeadTracking(true) before setPuppet(false); the demote-time block 8eafa85d also added was dropped again by 7e59c32c, the apply's per-sample block standing, after the IDRC box read in the first gate; CONFIRMED on parity 7e59c32c by x-npc-talk-prompt 20261023-055858 through npc-state's activationBlocked: the first host's Alvor false right after its grant, c2's puppet true, c2's promoted Alvor false after the handoff; the player's E itself stayed unproven in that run, a geometry matter at the mill, and is the later talk step's): playtest 32's handoffs (2026-10-22, 19:02 to 19:09 PDT) left every resident that had been a puppet with a Talk prompt and E dead on both screens once live (Eli: "there's a prompt it does nothing"); the view's hosted branch had lifted the weapon-drawn mode and the default-anims block alone |
+| the observer's shape kept: head tracking on the look-at point, blockActivation, the local attack events blanked unless relayed (movementApply.ts:37-59; animation.ts:383-394 for a view with default animations disabled) | code | imposed as today on the puppet (setDefaultAnimsDisabled(refrId, true), formView.ts:454 on m3host); undone at the promote since train-34 (fork parity 03e7d163, 2026-10-22 21:40 PDT; 67256b72: PuppetService.ensureLive runs blockActivation(false), clearLookAt and setHeadTracking(true) before setPuppet(false); the demote-time block 67256b72 also added was dropped again by 03e7d163, the apply's per-sample block standing, after the IDRC box read in the first gate; CONFIRMED on parity 03e7d163 by x-npc-talk-prompt 20261023-055858 through npc-state's activationBlocked: the first host's Alvor false right after its grant, c2's puppet true, c2's promoted Alvor false after the handoff; the player's E itself stayed unproven in that run, a geometry matter at the mill, and is the later talk step's): playtest 32's handoffs (2026-10-22, 19:02 to 19:09 PDT) left every resident that had been a puppet with a Talk prompt and E dead on both screens once live (Eli: "there's a prompt it does nothing"); the view's hosted branch had lifted the weapon-drawn mode and the default-anims block alone |
 
 ### Sequences and combinations (ADR-033)
 
@@ -499,7 +499,7 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
 ## Impose (observers render the server's decision)
 
 - Mechanism: PuppetService calls the Skyrim Platform export
-  setPuppet(actorId, true) (as built, fork d9a003fd: PuppetApi.cpp, the flag
+  setPuppet(actorId, true) (as built, fork 741dded2: PuppetApi.cpp, the flag
   set at once in the mutex-guarded set Puppets, the engine calls queued to
   the game thread, performAction's shape), which runs Q4's demote natively
   (re-ai-puppet.md:351-354): StopCombatAndAlarmOnActor(actor, false), the
@@ -536,7 +536,7 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   data channels fed from MiddleHighProcessData by the movement step alone, so
   the detour writes the host's relayed sample there every frame,
   docs/research/m3/re-puppet-locomotion.md; x-npc-legs 202106 and
-  x-npc-legs-burst 202522 on a9c43bf0: the puppets' Speed follows each walk,
+  x-npc-legs-burst 202522 on 8744d5c5: the puppets' Speed follows each walk,
   the engine's own moveStart and moveStop pair with it and are taken, and the
   half-second frames show the stride, results/train-33-stride; the Dynamic
   plan's entries); H3 (translateTo's mover moves an actor whose movement step
@@ -580,8 +580,8 @@ Rate limit / bounds: none new; the stream keeps its own (movement every
   Q4's promote natively (:337-349): SetPosition to the last relayed point and
   heading, the flag cleared, EnableAI(true), EvaluatePackage(true, false);
   before it the TS promote undoes what the puppet apply imposed beyond the AI
-  bit (the activation block, the look-at, head tracking; 8eafa85d, after
-  playtest 32's dead Talk prompts; on parity 7e59c32c since 2026-10-22
+  bit (the activation block, the look-at, head tracking; 67256b72, after
+  playtest 32's dead Talk prompts; on parity 03e7d163 since 2026-10-22
   21:40 PDT, the demote itself making no Papyrus-backed call);
   the recorded combat target is npc-handoff's to restore. HostRelease or the
   connection's end: demote. A reference the engine detaches drops its flag;
@@ -602,7 +602,7 @@ puppet; the roles the re-analyst gave their callees (44302's VATS factor,
 37364, 20121, 20122, 39896, the list-B job 41454, 69349's TLS tag and dead r9)
 and the skipped step's data-block fields are static labels no run reads, and
 the verb depends on none of them. K2, a refused furniture exit on a puppet is
-answered with IdleForceDefaultState on the next update (786a029d); the path
+answered with IdleForceDefaultState on the next update (d0d53bf5); the path
 has not fired since x-npc-legs 202106 and is unread, and the furniture state
 itself rides the relay (npc-stream: exits stay on the relay by design).
 
@@ -621,7 +621,7 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
 - CreateActor, MsgType 33: refr_id (Option<u64>, skymp.rs:1159) for an ESM
   actor carries its own form id instead of id + 0x100000000, and
   base_record_type (Option<String>, :1149; DOOR alone until now) carries
-  NPC_ for it (Stage 1, fork a29bfb08, PartOne.cpp's CreateActor): values
+  NPC_ for it (Stage 1, fork daa46851, PartOne.cpp's CreateActor): values
   within the types, no shape change, no validator rule on them. The
   client's tests of those values (remoteServer.ts skipFormViewCreation and
   :372, formView.ts:131-136) are the switch to the engine reference.
@@ -629,7 +629,7 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
   carries the server's word per actor, explicit true or false, for every
   actor: in CreateActor's props and at every grant and release through
   UpdateHoster, game-file actors under their own id included (fork
-  7fef1bec, 2026-10-22; the first cut withheld it from them, since under
+  a2a5d7d2, 2026-10-22; the first cut withheld it from them, since under
   upstream's long id the flip never reached the copy: the ESM defect of
   skymp-hosting.md:149-159 and cell-host.md:274-276; it reaches the view
   bound to the engine's reference). The field's shape is unchanged.
@@ -668,7 +668,7 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
   (ADR-035 point 9; cell-host's lab setting) admits Riverwood's residents,
   the guards and the humanoid bandits the exits need; initially disabled
   references stay skipped (:477-501), dead-at-start ones load as corpses
-  since fork m3-dead-placed 2f886731 (2026-10-29, finding 65). The hosted word
+  since fork m3-dead-placed 965790df (2026-10-29, finding 65). The hosted word
   (revised 2026-10-22, ADR-045 point 2): CreateActor's props carry
   isHostedByOther explicitly for every actor (a player's figure true; any
   other actor true unless the listener hosts its cell), and UpdateHoster
@@ -678,7 +678,7 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
   offline actor's messages to its cell's host, and a userless neighbour's
   word ("true", it is never the hoster) would otherwise land in the host's
   own stream after its "false" (CellHostTest's stray word, jobs 10667,
-  10688, 10690; fork 1b0a7d0d). PartOne::OnActorSighting (the roster,
+  10688, 10690; fork bd5410b5). PartOne::OnActorSighting (the roster,
   ActorSightings 50): an entry is taken only from the host of the cell of
   the sighted position (WorldState::CellOf), for a game-file actor with no
   user that does not already stand there and that no other game hosts
@@ -747,7 +747,7 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
 
 ## Tests
 
-- T0: C++ (fork a29bfb08, revised 7fef1bec): CellHostTest's game-file
+- T0: C++ (fork daa46851, revised a2a5d7d2): CellHostTest's game-file
   case, Whiterun's cow 0x10ebaf (unit/NpcExists.cpp's actor) travels under
   its own id with baseRecordType NPC_ and the explicit word (hosted by
   other on both screens while nobody hosts), the grant flips it to false
@@ -846,7 +846,7 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
   the spin falsifies the cause. Beside it: labState ref 0x85547 read twice
   (the frozen record) and c1's console "block anim" lines.
   OUTCOME (2026-10-21 21:0x, run 20261022-040233-x-npc-spin-autopsy on the
-  last seat with 535544db's client): the record held (x 123592.1172, y
+  last seat with 259bf390's client): the record held (x 123592.1172, y
   -80300.7188 twice) and the console history was all "block anim
   attackStart_ForwardPowerShort" lines, but the Frida script never loaded:
   a top-level helper named ptr shadowed Frida's global ptr() ("TypeError:
@@ -860,7 +860,7 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
   moot for the verb. Both script defects are fixed on main (LAB_PARAMS,
   readPtr); the buffering is lab-api's (numidium) before P1's trace.
 - x-npc-puppet-2's FIRST RUN (2026-10-21 21:25 to 21:35 PDT, run
-  20261022-042521 on the npc-puppet stage eab366b2, numidium; the Frida
+  20261022-042521 on the npc-puppet stage a0dc90fb, numidium; the Frida
   trace empty for the reasons above, every other reading real):
   - the switch: npc-puppet {puppet: true} answered done and the state read
     aiEnabled false 10 s later; npc-puppet {puppet: false} read aiEnabled
@@ -909,12 +909,12 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
     drops ignoredAnims (moveStart, moveStop, turnStop, TurnLeft, TurnRight,
     the two Cyclic blends) at the source for every actor it reports, right
     for a figure whose keep-offset AI makes them, wrong for a puppet whose
-    movement controller never runs. Fix on fork m3-train-32 b6dd852b: an
+    movement controller never runs. Fix on fork m3-train-32 10a60f72: an
     NPC source keeps the five locomotion events (the Cyclic blends stay the
     local graph's); the receiver's applyAnimation already replays any event.
     The reading that closes it: x-npc-legs on that build, c2's watch events
     for Sigrid with moveStart and moveStop, and a frame with a stride.
-  - x-npc-legs 20261022-190831 on train-32 16b8854a ({now} PDT, numidium's
+  - x-npc-legs 20261022-190831 on train-32 9f3ced84 ({now} PDT, numidium's
     read): the relayed events reach the puppets and the turn-to-walks are
     taken (NPC_TurnToWalkRight90 at 16.3 and 41.2, Left180 at 27.4 and
     53.9, bAnimationDriven 1 for the turn), Dorthe's moveStart is taken,
@@ -956,7 +956,7 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
     each walk's ends, x-npc-legs 20261022-202106 at 46.2 and 48.2, 60.8 and
     66.1, and x-npc-legs-burst 20261022-202522, and the fed Direction faced
     the stride along the track, 202522 f13 to f20; F2 and F3 not needed). Fix
-    on fork m3-train-33 a9c43bf0: setPuppetLocomotion(actorFormId, speed,
+    on fork m3-train-33 8744d5c5: setPuppetLocomotion(actorFormId, speed,
     directionDeg, turnRateDeg), an SP export the client calls at each relayed
     sample in place of the two variable writes, stored per puppet under the
     registry's lock; the Move detour writes the sample every frame into
@@ -971,7 +971,7 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
     stays at :1027. The reading that closes H2: c2's Speed and bInMoveState
     above zero through a walk, the engine's own moveStart and moveStop in c2's
     events, a stride in x-npc-legs-burst's frames.
-  - THE HOST'S BASELINE (x-npc-legs-host 20261022-195031 on parity 16b8854a,
+  - THE HOST'S BASELINE (x-npc-legs-host 20261022-195031 on parity 9f3ced84,
     {now} PDT, numidium's read): through the same minute the host's graphs
     read Speed about 80 at a walk (Sigrid max 80.1, Alvor 80.1, Faendal 81.6)
     and about 220 at a run (Dorthe 221.4), SpeedSampled 103 to 123 walking
@@ -985,13 +985,13 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
     no fault in itself. Train-33's read is therefore Speed, SpeedSampled and
     Direction on c2 against these values: about 80 walking, about 220
     running, Direction changing with the track.
-  - TRAIN-33 WORKS ON TWO OF THREE (x-npc-legs 20261022-202106 on a9c43bf0's
+  - TRAIN-33 WORKS ON TWO OF THREE (x-npc-legs 20261022-202106 on 8744d5c5's
     stage, {now} PDT, numidium's read): the fed inputs reach the graph.
     Sigrid's puppet on c2: Speed changing 17 times to a peak of 106.2,
     SpeedSampled 168.0, Direction 15 changes, the speed following each walk
     (72 at 46.2 s, 106 at 46.6, 80 at 46.7, 79 at 48.0, 0 at 48.2) and the
     engine's OWN moveStart and moveStop paired with it and taken (46.2 and
-    48.2; 60.8 and 66.1; 68.3), where 19e7ca9b refused every moveStop.
+    48.2; 60.8 and 66.1; 68.3), where 6139dc60 refused every moveStop.
     Faendal the same, 4,700 units out: Speed to 126.2, 58 changes, moveStart
     and moveStop taken, moving in 234 of 270 samples. Alvor glided: a steady
     walk from 38.9 to 44.7 s at 51 to 84 units/s with Speed 0 and no
@@ -999,7 +999,7 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
     taken, then IdleStop refused and IdleHammerTableEnter taken: his puppet's
     graph took the chair enter, refused the exit, and a furniture state that
     consumes no Speed was carried across the yard (distance is not it,
-    Faendal is farther). Two things from it, on train-33 786a029d: (a) the
+    Faendal is farther). Two things from it, on train-33 d0d53bf5: (a) the
     host reports a game-file actor's Speed (the graph's own input, 80 at a
     walk) instead of SpeedSampled, which ran 1.3 to 1.5 times higher and
     blended the puppets toward a jog; (b) a refused furniture exit on a
@@ -1007,11 +1007,11 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
     with IdleForceDefaultState on the next update; the path has not fired
     since this run (202106) and is unread, and the furniture state itself
     rides the relay (npc-stream: exits stay on the relay by design; Known
-    limits K2). The reading that closes H2 on 786a029d: c2's Speed near the
+    limits K2). The reading that closes H2 on d0d53bf5: c2's Speed near the
     host's through the walks, the engine's own moveStart and moveStop, a
     stride in the burst's frames; the furniture state on a puppet is otherwise
     npc-stream's (the sit and sleep state).
-  - H2 CONFIRMED ({now} PDT): x-npc-legs-burst 20261022-202522 on a9c43bf0,
+  - H2 CONFIRMED ({now} PDT): x-npc-legs-burst 20261022-202522 on 8744d5c5,
     forty frames at 500 ms (40 of 40 over 19,507 ms, frame 0 at 20:27:32.97Z,
     the watch 79 s around them). Sigrid's puppet on c2: Speed 76 to 106 from
     9.3 to 16.1 s with moveStart 9.3 and moveStop 16.1 taken, 72 to 80 from
@@ -1027,14 +1027,14 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
     events). What stays HYPOTHESIS under its own name: the gait from Speed
     alone (F6, the host-seat gait calibration,
     re-puppet-locomotion.md:150-152, a Frida plan with no probe file and no
-    run; 786a029d reports the host's Speed, 80 at a walk, so the blend sits at
+    run; d0d53bf5 reports the host's Speed, 80 at a walk, so the blend sits at
     the host's gait); the turn rate (0 fed; TurnDelta from the channel is the
     heading's own; it names no probe yet); the stage order (F5, moot while the
     read holds). Not tags: the refused furniture exit's reset is Known limits
-    K2; cell-host's own-cell guard (2ce4fd36, the event on time in 214026) is
+    K2; cell-host's own-cell guard (1f281dff, the event on time in 214026) is
     cell-host.md's.
   - THE SPEED AT THE HOST'S, AND ALVOR'S CAUSE (x-npc-legs 20261022-204726 on
-    786a029d, {now} PDT): the puppets' Speed now sits at the host's (Sigrid
+    d0d53bf5, {now} PDT): the puppets' Speed now sits at the host's (Sigrid
     77.8 against the host's 80.1, Dorthe 223.1 running against 221.4,
     Faendal 83.3 against 81.6; SpeedSampled 96.6, 268.6 and 120.7), every
     moveStart and moveStop taken, the enable count 2. Alvor glided again
@@ -1046,15 +1046,15 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
     keeps as his AI's current furniture between the forge's and the tanning
     rack's markers, and applyPuppetPose fed 0 whenever the run mode was
     Standing, the gate kept from the variable-write version. Fix on
-    929e3bc2 (pipeline 2647): the host's Speed is fed as reported, whatever
+    cca0197a (pipeline 2647): the host's Speed is fed as reported, whatever
     the run mode; the host's channel is 0 when an actor truly stands. The
     read: Alvor walking between the markers at Speed near 80 on c2.
   - ALVOR FED ({now} PDT): x-npc-legs 20261022-214026 on the train's fourth
-    head 2ce4fd36 (929e3bc2's speed feed plus cell-host's own-cell guard):
+    head 1f281dff (cca0197a's speed feed plus cell-host's own-cell guard):
     Alvor walked and was fed, Speed changing 15 times to 77.8, SpeedSampled
     81.9, moveStart and moveStop taken, moving in 22 of 240 samples; Sigrid
     77.8 with four starts and four stops, Faendal 83.3; Dorthe sat. The
-    furniture run-mode cause is confirmed. The gate runs on 2ce4fd36; its
+    furniture run-mode cause is confirmed. The gate runs on 1f281dff; its
     merge is playtest 32's build. HYPOTHESIS by name after it: the list at
     :1027 (the gait from Speed alone, F6, the host's Speed now fed; the turn
     rate, 0 fed; the refused exit's reset Known limits K2 and the own-cell
@@ -1139,7 +1139,7 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
   x-npc-cow-solo 051307 GREEN (the detours' presence and the engine's
   wolves do not hang a landing); the second seat, a non-host showing
   puppets, never hung in any run; in 054932 the exception trace attached
-  after the grant and saw no throw. Fixes, fork 931de577: the add and
+  after the grant and saw no throw. Fixes, fork 1c49d76f: the add and
   remove guard is the JavaScript thread's re-entrancy depth inside
   HandleEnter and HandleLeave, and both callbacks are wrapped. A SECOND
   BUG from the same run's server log: c1 streamed "107d07" at 7.5 Hz from
@@ -1150,14 +1150,14 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
   actor's model after a free (the id manager reuses freed slots). Fix,
   the same head: a message about the player goes out only under a slot
   whose form is the player's own, and nothing for the player until that
-  form is here. The three earlier fixes (9faa4be0) stand. Memory:
+  form is here. The three earlier fixes (dfd97be8) stand. Memory:
   frida-lab-script-pitfalls, feedback-trace-reading-axes. Rows: ship
   SkyrimPlatformImpl.pdb in the client artifact (the hooks-API frame
   stayed an offset); the Papyrus hook's Enter still scans the handler map
   from the hooked thread.
 - THE LANDING HANG, SECOND READING (2026-10-21 23:38 to 2026-10-22 00:4x PDT): the
   hook fix did not hold (b-npc-puppet 063157, b-cell-host 063508 on
-  931de577 hung c1 the same way), so the 23:06 entry above names a real
+  1c49d76f hung c1 the same way), so the 23:06 entry above names a real
   defect that was not the cause. The lab closed in from the outside
   (numidium): the client's two switches off, one at a time and both
   (x-npc-switch-a 064935, -b 065308, -c 065645) all HUNG; a lone c2
@@ -1190,7 +1190,7 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
   constructor; a C++ throw there (CallNative.cpp's "Expected self to be
   non-null" and kin) unwound through V8's frames to the outer callback's
   wrapper and left the nested entry's handler registered. Fix, fork
-  7dd03c88: the latent native is called in the wrapped callback and
+  d7d5f8ab: the latent native is called in the wrapped callback and
   resolved through a Napi::Promise::Deferred (no executor, no thread-local
   pointer), so a failing latent call is a JavaScript error; and baseId 0 is
   a player (CreateActorMessage.h's optional defaults to 0 and the wire
@@ -1200,10 +1200,10 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
   records store no baseId, baseDesc 7:Skyrim.esm). Owed: the trace in the
   relaunch shape (x-npc-napi-relaunch) naming the failing latent native,
   then the client path for that actor; the lone profile-1 login on clean
-  with 7dd03c88 as the proof; b-npc-puppet and b-cell-host; the gate.
+  with d7d5f8ab as the proof; b-npc-puppet and b-cell-host; the gate.
   Memory: skyrim-platform-thread-shape, frida-lab-script-pitfalls.
 - THE FIXED LANDING'S TWO REDS (2026-10-22 01:1x to 01:30 PDT; numidium's
-  runs on 54df2a42): b-npc-puppet 081631 landed both seats in under 5 s
+  runs on 569bc453): b-npc-puppet 081631 landed both seats in under 5 s
   and held the grant asserts, then failed c1.npc_state(0x13483).aiEnabled:
   the host demoted 23 actors at the Riverwood attach and promoted 5
   (1066df, 10962a, 1e62b, 60b22, 1066de), none of the named residents;
@@ -1212,15 +1212,15 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
   persistent cell for them, so isHostedHere never counted them as the
   host's, and the grant's cell walk (Cell.getNthRef) listed only the
   cell's own references; the walk also ran at the message's tick ("Game.
-  getFormEx can't be called in this context", 27 lines). Fix 7fef1bec:
+  getFormEx can't be called in this context", 27 lines). Fix a2a5d7d2:
   the server's word per actor (ADR-045 point 2 revised, above). b-cell-host
   081903 failed the handoff because the cell's second predator killed c2
   1.6 s after it arrived (129.92 unarmed damage, a power attack at the
   race's number through TES5DamageFormula: a real fight, as npc-puppet
   means it) and the respawn unloaded c2's set, so c1's leave found no
-  second loader; fix, thuum main b46e3ed7 (its own commit, rule 13): god
+  second loader; fix, thuum main ef66885b (its own commit, rule 13): god
   mode on both seats at the scenario's start, the hosting assertions
-  unchanged. Next on 7fef1bec (pipeline 2598): T2 on sky-srv, the stage,
+  unchanged. Next on a2a5d7d2 (pipeline 2598): T2 on sky-srv, the stage,
   the lone profile-1 login, b-npc-puppet with every named resident's live
   line, b-cell-host, the gate; the lab held to 05:05 PDT so the nightly
   waits.
@@ -1248,7 +1248,7 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
 - Owner: agent (Frida); Eli (x64dbg) only on a falsified P4.
 
 - THE ROSTER'S FIRST LAB RESULT AND THE SILENT WIRE LOG (2026-10-22 02:36 to
-  03:19 PDT). ad1f2356 staged at 02:57: x-npc-lone-seat 095809 green, b-cell-host
+  03:19 PDT). 6a89fdd5 staged at 02:57: x-npc-lone-seat 095809 green, b-cell-host
   100312 green, T2 green (33 identical), b-npc-puppet 100041 RED and numidium's
   x-npc-sigrid-ref 100845 the same from one seat: zero "sights" lines on the
   server, zero live lines on c1, Sigrid's record still in Alvor's house 20 s after
@@ -1259,10 +1259,10 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
   02:36 (4,194,407 bytes): the plugin dropped every line past its 4 MiB cap, the
   file persists across launches and sits inside clean-m1-next, so every run since
   started with c1's refusals invisible. MpClientPlugin.dll is current on every
-  game folder (2607's dist). Fixes, all readings: 23d8abfa (the client looks each
+  game folder (2607's dist). Fixes, all readings: 14f3a92d (the client looks each
   sighted reference up afresh at report time and traces every roster sent:
   "roster: N sighting(s) sent, U unknown of A attached, H cell(s) hosted"),
-  757066f3 (the server logs each roster's arrival once in ten seconds per
+  c6665aa7 (the server logs each roster's arrival once in ten seconds per
   reporter and each drop reason once a minute per actor; the wire log rotates
   to MpClientPlugin-logs.1.txt past 4 MiB), pipeline 2609. numidium empties the
   wire log when client-dist lays a dist. The next b-npc-puppet reads three ways:
@@ -1272,7 +1272,7 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
   finding from c2's live wire log: every one of its 1,835 send lines is a type 5
   UpdateEquipment refused for an inventory entry of count -1 (baseId 0x13790);
   that seat's equipment has never gone out on the wire. Its own branch (LOG).
-- THE HANDOFF'S TWO HALVES (2026-10-22 03:37 to 04:00 PDT). On 757066f3 the
+- THE HANDOFF'S TWO HALVES (2026-10-22 03:37 to 04:00 PDT). On c6665aa7 the
   roster works: b-npc-puppet 104032 held steps 14 (c1's Sigrid AI on, c2's
   off, no copies) and 24 (both tracks 285 to 294 units over the minute,
   0.004 units apart at the end, turns 0.52 and 0.16, no spin), the server
@@ -1292,10 +1292,10 @@ itself rides the relay (npc-stream: exits stay on the relay by design).
   keeps the AI bit. Fix: a game-file actor whose form the server takes back
   while live here goes puppet at the loss (formView.destroy(lost) from
   formViewArray, PuppetService.demoteOnLoss; the native clears the bit
-  alone with no 3D, Is3DLoaded TESObjectREFR.h:435). eedc2f58 then
-  19e7ca9b, pipeline 2614; the chain and the gate after it.
+  alone with no 3D, Is3DLoaded TESObjectREFR.h:435). 82936221 then
+  6139dc60, pipeline 2614; the chain and the gate after it.
 
-## The roster that races the grant (built 13:33 PDT 2026-10-29, fork m3-grant-roster 5b6ef482)
+## The roster that races the grant (built 13:33 PDT 2026-10-29, fork m3-grant-roster 95d1f0d4)
 
 Playtest 38's finding 66 ("attempted to kill a bandit outside bleakfalls. all damage was ignored"): rotfern stepped out
 of the barrow at 20:00:49Z, the server granted it the exterior block at 20:00:51.189Z, and its roster of the same
@@ -1312,14 +1312,14 @@ id's first "sights" line stands within 1 s of the grant line (a log-timestamp pa
 CellHostTest proves the mechanism, the lab the timing). A client belt for later: hostService.onHostGrant resetting
 lastSightings so the next poll reports at once.
 
-The review of m3-pass-train-1 (18:08 PDT 2026-10-29) hardened the hold (7b8ff8ea): the dedupe key is the pair (reporter, reference),
+The review of m3-pass-train-1 (18:08 PDT 2026-10-29) hardened the hold (dc4a50ec): the dedupe key is the pair (reporter, reference),
 so a second reporter's roster no longer evicts the first's entry and the grant replays the new host's own entries while keeping the
 others for their own grant inside the expiry; the hold is bounded across cells (kHeldSightingsTotal 1024, the oldest dropped at
 the cap with a warn once per 10 s), swept once a second from the cell-host tick (the 30 s expiry no longer waits for a new
 sighting of the same cell), and a reporter's entries are forgotten at its disconnect beside the cells rule's gone. CellHostTest's
 two new cases drive the pair key and the bound; HeldSightingsCount is the lab's read.
 
-## Scenes on the viewing seat (playtest 41, 15:05 PST 2026-11-02; fork m4-turbo2-union-scene 5e402af7)
+## Scenes on the viewing seat (playtest 41, 15:05 PST 2026-11-02; fork m4-turbo2-union-scene e6494f96)
 
 Eli, arm two of turbo 2: "the sven scene is wack, it starts over when the other player walks up and animations play for neither".
 The read (results/playtest-41, both consoles and the server): quest 0x954d9 is DialogueRiverwoodIntroScene; both seats' drivers
@@ -1334,7 +1334,7 @@ The rule: scenes are the host's (CLAUDE.md's design law: we do not reimplement w
 relay). PuppetService.stopLocalScene, from reconcile's puppet branch: a scene the engine plays here on a flagged puppet
 (Actor.getCurrentScene, isPlaying) is stopped (Papyrus Scene.Stop), once per scene and actor until the engine starts it again (the
 two-second poll re-stops it); a live actor's scene is left alone. TypeScript only, pushed as the turbo client bundle on top of the
-union 08b530d5 (runes and the scene in one break). HYPOTHESIS until the break and a probe: Scene.Stop on the guest leaves the host's
+union 9849cb0d (runes and the scene in one break). HYPOTHESIS until the break and a probe: Scene.Stop on the guest leaves the host's
 relayed idles free to play on the puppets, and the engine's restart of a begin-on-near scene is caught within the poll. A probe
 (x-scene-guest, b-npc-handoff's Riverwood frame at the intro's hour) claims the guest's "scene ... stopped" line and a relayed idle
 played on the puppet within the scene's window; the quest's stages come from the host under quest sharing where the quest is shared,
@@ -1344,11 +1344,11 @@ and the guest's local quest stays where its stopped scene left it otherwise (the
 
 Doc drafted 2026-10-21, before any code. Build begun 2026-10-21 17:41 PDT
 on the plan Eli approved (one shot, six stages, docs/LOG.md's entry).
-Fork m3-npc-puppet (off parity 535544db with m3-relay-echo 41f554ad):
-Stage 1 server a29bfb08; Stage 3 client eaa3b6d0; Stage 2 Skyrim Platform
-d9a003fd (the exports, the set, the two detours with R1's Move shape); the
-fixes 6f08c050 (the test: a created actor subscribes at its own first
-SetPos) and eab366b2 (the hooks: Actor's runtime fields through
+Fork m3-npc-puppet (off parity 259bf390 with m3-relay-echo 3f3a3ecb):
+Stage 1 server daa46851; Stage 3 client 8a7ad1cf; Stage 2 Skyrim Platform
+741dded2 (the exports, the set, the two detours with R1's Move shape); the
+fixes 83a070b0 (the test: a created actor subscribes at its own first
+SetPos) and a0dc90fb (the hooks: Actor's runtime fields through
 GetActorRuntimeData()). CI GREEN at 18:3x: pipeline 2562, server-build
 (every T0 case, the two new CellHostTest cases and NpcExists' Alvor among
 them) and client-build (the Windows dist with the detours) both success.
@@ -1357,32 +1357,32 @@ new actor had no listeners at the grant in the test's sequence), 2558 red
 on the Windows compile of the hooks. Playtest thirty closed at Eli's word
 21:00; P0 ran and measured nothing (the Dynamic plan's outcome); the
 grammar merged (main 9b4bec3); the stage up (verb-stage m3-npc-puppet
-eab366b2 from main 9b4bec3, clean-m1-next snapshotted 21:21, smoke
+a0dc90fb from main 9b4bec3, clean-m1-next snapshotted 21:21, smoke
 20261022-042248 GREEN, T2 running identical); x-npc-puppet-2's first run
 20261022-042521 GREEN with H1, H3, H5 and H11 confirmed, the slide gone,
 H2 supported (the Dynamic plan's reading), its P1 trace waiting on
 lab-api's fetch fix; b-npc-puppet committed alone (main 3a3aef0), Eli's
 review pending.
-THE WALK CYCLE CLOSED 2026-10-22 18:13 PDT: train-33 merged to fork parity fb6f3f09 (gate 20261023-004438 nine of nine, T2 33 identical), the puppet's graph fed natively each frame (H2 CONFIRMED above), the figure settled onto a still record, the host's own cell reported; the tags that stay by name: the refused furniture exit's reset, the own-cell guard (both unexercised), the turn rate, the gait from Speed alone (F6).
-DONE 2026-10-22 05:54 PDT: fork parity 19e7ca9b (verb-merge, gate run set 20261022-122513-merge-m3-npc-puppet nine of nine on lab-driver ebb6969 (smoke, a-restart-persistence, b-duel, b-npc-puppet 123325, b-cell-host, a-melee-reach, a-racemenu, b-spell, b-invis-recast), after the first set 113519 went eight of nine red on a-restart-persistence 113744 by the driver's random near sample; T2 33 identical beside it), thuum main fbee62d. 
+THE WALK CYCLE CLOSED 2026-10-22 18:13 PDT: train-33 merged to fork parity a76125cb (gate 20261023-004438 nine of nine, T2 33 identical), the puppet's graph fed natively each frame (H2 CONFIRMED above), the figure settled onto a still record, the host's own cell reported; the tags that stay by name: the refused furniture exit's reset, the own-cell guard (both unexercised), the turn rate, the gait from Speed alone (F6).
+DONE 2026-10-22 05:54 PDT: fork parity 6139dc60 (verb-merge, gate run set 20261022-122513-merge-m3-npc-puppet nine of nine on lab-driver ebb6969 (smoke, a-restart-persistence, b-duel, b-npc-puppet 123325, b-cell-host, a-melee-reach, a-racemenu, b-spell, b-invis-recast), after the first set 113519 went eight of nine red on a-restart-persistence 113744 by the driver's random near sample; T2 33 identical beside it), thuum main fbee62d. 
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (2026-10-21; the dispositions stand on the 2026-10-18 references and x-npc-puppet's two runs, to be re-read on the merged base)
 - [x] engine surface cited or delegated (CommonLib file:line for every field and switch; the detours' prototypes read by the re-analyst through REA on sky-re, 2026-10-21 08:43: 41370, 41466, 41453, 41454, 69349, 37356 and its chain, every claim CONFIRMED-STATIC or HYPOTHESIS with its instruction; the Frida trace that confirms them named)
-- [x] server logic + T0 (a29bfb08 and 6f08c050; pipeline 2562 green: CellHostTest's game-file case and the 0xff flip, NpcExists' nested flag and Alvor)
+- [x] server logic + T0 (daa46851 and 83a070b0; pipeline 2562 green: CellHostTest's game-file case and the 0xff flip, NpcExists' nested flag and Alvor)
 - [x] message + validator (same commit) (no wire change: CreateActor's refr_id and base_record_type carry values within their types; the contract line in docs/WIRE.md; wire-validate's tests stand, 2562)
-- [x] native hook + T1 (built d9a003fd and eab366b2, the Windows dist compiled in 2562; every id resolved by `just addr`; no host-less T1 exists in the fork, so the proof is the seat's: "[verb:npc-puppet] detours installed: animation queue true, movement step true" in c1.log, the demote and promote lines, and P1's trace 20261022-044255: zero Move translations through the puppet phase, the original's output from the promote on, every controller's step stamped; 21:50 PDT)
-- [x] TS handler (eaa3b6d0 and d9a003fd: PuppetService, HostService's rule, the view's engine path and Rule A gates, the puppet apply; tsc clean, client-build green in 2562)
-- [x] T2 green (2026-10-21 21:39 PDT, numidium: test-proto at m3-npc-puppet eab366b2's image, all 33 difftest sessions identical between the legacy and the wire stacks; no ESM actor in a session by design, the Tests section)
-- [ ] T3 scenario green, no HYPOTHESIS tags (unticked 17:19 PDT 2026-10-29 by the pass's inventory: ticked at 123325 while tags stood; the earlier tick's text kept: (2026-10-22 05:54 PDT: b-npc-puppet 123325 green on 19e7ca9b's stage, the gate run set 20261022-122513-merge-m3-npc-puppet nine of nine on lab-driver ebb6969 (smoke, a-restart-persistence, b-duel, b-npc-puppet 123325, b-cell-host, a-melee-reach, a-racemenu, b-spell, b-invis-recast), after the first set 113519 went eight of nine red on a-restart-persistence 113744 by the driver's random near sample; T2 33 identical beside it; the tags that stay carry a name: H2 re-opened by playtest 31 the same morning (the puppet slid; the relay dropped its locomotion events), fixed on fork m3-train-32 and read there; H6 and H7 npc-stream's; H8 npc-handoff's))
+- [x] native hook + T1 (built 741dded2 and a0dc90fb, the Windows dist compiled in 2562; every id resolved by `just addr`; no host-less T1 exists in the fork, so the proof is the seat's: "[verb:npc-puppet] detours installed: animation queue true, movement step true" in c1.log, the demote and promote lines, and P1's trace 20261022-044255: zero Move translations through the puppet phase, the original's output from the promote on, every controller's step stamped; 21:50 PDT)
+- [x] TS handler (8a7ad1cf and 741dded2: PuppetService, HostService's rule, the view's engine path and Rule A gates, the puppet apply; tsc clean, client-build green in 2562)
+- [x] T2 green (2026-10-21 21:39 PDT, numidium: test-proto at m3-npc-puppet a0dc90fb's image, all 33 difftest sessions identical between the legacy and the wire stacks; no ESM actor in a session by design, the Tests section)
+- [ ] T3 scenario green, no HYPOTHESIS tags (unticked 17:19 PDT 2026-10-29 by the pass's inventory: ticked at 123325 while tags stood; the earlier tick's text kept: (2026-10-22 05:54 PDT: b-npc-puppet 123325 green on 6139dc60's stage, the gate run set 20261022-122513-merge-m3-npc-puppet nine of nine on lab-driver ebb6969 (smoke, a-restart-persistence, b-duel, b-npc-puppet 123325, b-cell-host, a-melee-reach, a-racemenu, b-spell, b-invis-recast), after the first set 113519 went eight of nine red on a-restart-persistence 113744 by the driver's random near sample; T2 33 identical beside it; the tags that stay carry a name: H2 re-opened by playtest 31 the same morning (the puppet slid; the relay dropped its locomotion events), fixed on fork m3-train-32 and read there; H6 and H7 npc-stream's; H8 npc-handoff's))
 - [x] parity scenario green, or its later list reviewed with it (ADR-031) (b-cell-host green in the gate; the engine-alone references r-npc-packages, r-npc-fight and r-cell-leave of 2026-10-18 are the diff's base, their reruns on the merged base listed in the Dynamic plan)
 - [x] sequences and combinations green, every checklist item with its scenario (ADR-033) (the handoff and the restart inside b-npc-puppet; the figure beside a puppet in b-cell-host; playtest 31's checklist carries the rest by item)
 - [x] ledger and suppression registry updated (no Papyrus native added: setPuppet and isPuppet are Skyrim Platform exports, listed in the Suppress section's registry; docs/NATIVES.md unchanged)
 
 Play: BROKEN, playtest 41 (2026-11-02, LOG 15:05): the guest's own DialogueRiverwoodIntroScene ran over the host's Sven and
 Hilde and restarted at the walk-up, animations playing for neither (Eli: "the sven scene is wack"); Hilde posed wrong on the
-host until the second player arrived; the scene stop (m4-turbo2-union-scene 5e402af7) unread in play.
+host until the second player arrived; the scene stop (m4-turbo2-union-scene e6494f96) unread in play.
 
-## Playtest thirty-three (2026-10-23, fork parity ac557132; fixes on m3-train-36, parity 7b3a17c6 since 03:01 PDT, and m3-train-37, parity 69958274 since 08:07 PDT)
+## Playtest thirty-three (2026-10-23, fork parity 8b43aa72; fixes on m3-train-36, parity e7aa226d since 03:01 PDT, and m3-train-37, parity ff7e53c1 since 08:07 PDT)
 
 - A late-joining seat found eight residents frozen at its own engine's
   placement, unblocked and unsampled, until a lookup loaded their records.
@@ -1406,12 +1406,12 @@ host until the second player arrived; the scene stop (m4-turbo2-union-scene 5e40
   at a cell's), and PuppetService's cellAttach demote never saw them either.
   A resident with no saved record is therefore loaded by nobody and runs
   live in both games (Hilde 0x35534 in that run, playtest 32's six before).
-  Train-36 (fork parity 7b3a17c6, 2026-10-23 03:01 PDT; the gate
+  Train-36 (fork parity e7aa226d, 2026-10-23 03:01 PDT; the gate
   20261023-092824 nine of nine, T2 33 identical): WorldState::LoadDeferredActors
   as the save attaches, every saved game-file actor on the grid at its saved
   position (NpcExists' case, Hod 0x1348a), which puppeted seven of the eight
   residents on the late seat (x-npc-late-join 092309).
-  The roster's source is train-37's (fork parity 69958274, 2026-10-23
+  The roster's source is train-37's (fork parity ff7e53c1, 2026-10-23
   08:07 PDT; the gate 20261023-143826 nine of nine, train-36's T2 cited for a
   client-only diff): the export getHighProcessActors lists the engine's high-process
   actors (RE::ProcessLists::highActorHandles, CommonLibSSE-NG
@@ -1434,14 +1434,14 @@ host until the second player arrived; the scene stop (m4-turbo2-union-scene 5e40
 - E on such an unblocked puppet opened the engine's dialogue with an AI-off
   actor, which never answers, and the Dialogue Menu stayed open (test 2 stuck
   until a relaunch). The block was the apply's per relayed sample, and
-  7e59c32c had dropped the demote-time call. Train-36 (parity 7b3a17c6):
+  03e7d163 had dropped the demote-time call. Train-36 (parity e7aa226d):
   PuppetApi's Demote sets
   TESObjectREFR::SetActivationBlocked(true) (CommonLibSSE-NG TESObjectREFR.h:464)
   and the Promote clears it; the TS blockActivation calls are gone for puppets
   (the figures keep the per-sample one), so no Papyrus-backed call runs at the
   attach or per sample for the village.
-- Held: the bench (1db977ed), the handoff both ways in about 4 s, talk on the
-  promoted seat after a handoff (8eafa85d's claim, which x-npc-talk-prompt
+- Held: the bench (1a8585dd), the handoff both ways in about 4 s, talk on the
+  promoted seat after a handoff (67256b72's claim, which x-npc-talk-prompt
   055858 had read in the state), the walk ("a Tiny bit jumpy, otherwise doing
   ok").
 
@@ -1452,7 +1452,7 @@ PuppetApi Demote) cleared the AI bit of an actor with no 3D as well ("the bit
 alone"). An unloaded actor is simulated by nobody's engine, and no word
 reaches a record nobody subscribes, so an actor whose record sat in an
 unhosted interior at a reconnect stayed AI-off for good: npc-handoff's D11
-(b-npc-handoff-night 092208) found it. Since fork m3-train-40 a146ee0c the
+(b-npc-handoff-night 092208) found it. Since fork m3-train-40 fc7b2718 the
 no-3D branch leaves the actor alone (AI and activation untouched, a log
 line); the engine's low-process schedule moves it, the roster of the host it
 walks in on sights it, and the server's word rebinds and places the copy when
@@ -1462,7 +1462,7 @@ asserts (the leaving host's Sigrid "aiEnabled false" from the lab spawn, and
 the restart's "exactly one seat AI on") read the old mechanism and move to
 "no loaded live copy" once npc-state carries is3DLoaded (numidium's grammar).
 
-The rule generalized (05:40 PDT, fork m3-train-40 856fed7d): the loss path was
+The rule generalized (05:40 PDT, fork m3-train-40 0328a073): the loss path was
 one road to an AI-off copy in a cell this engine does not load; the server's
 Teleport of a viewer's reference into an unattached house was another
 (b-npc-handoff-night 114904: c2's copy, demoted loaded, moved indoors, then

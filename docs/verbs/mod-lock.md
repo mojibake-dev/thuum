@@ -175,7 +175,7 @@ without a Hello), a setting, not a hypothesis.
 - [ ] ledger and suppression registry updated (no natives; the HTTP check's retirement noted)
 
 Note (21:57 PDT 2026-10-30, apocrypha): the defaults layer's injected spell (Quick Reflexes into USSEP) carried its name as a two-byte
-garbage string, Skyrim.esm being localized and USSEP not; fixed on apocrypha/layer-souls 5e37aefd (the injection drops FULL and DESC
+garbage string, Skyrim.esm being localized and USSEP not; fixed on apocrypha/layer-souls 86bfc0e4 (the injection drops FULL and DESC
 when the localized flags differ), so the Souls stage lays USSEP at 21,106,757 B, CRC32 73EAEC17, SHA-256 5d1f44fa..., replacing
 7CA7F25F. The lock's manifest takes the new bytes with the Souls layer; cosmetic, on no crash path (the 04:25Z login crash is the
 load-time equip-slot path, the plugin exonerated byte for byte).

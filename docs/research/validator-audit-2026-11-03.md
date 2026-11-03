@@ -1,7 +1,7 @@
 # Validator audit: every refusal the server can emit, classed by ADR-063 decision 4
 
 Read-only census, 2026-11-03 (playtest 41's root-cause plan, W2). Ref read: the fork's `origin/m4-turbo2-union-srv-3`
-(35509f7a), by `git grep` and `git show`. ADR-063 decision 4: the server validates consistency only (two owners
+(b926a7d4), by `git grep` and `git show`. ADR-063 decision 4: the server validates consistency only (two owners
 colliding, item conservation, bounds that would break the world for the others); it does not check the owner's engine
 against the record's idea of where the owner stands or what it may touch. This file is the audit's table; each
 OWNER-CHECK row retires only with its replacing rule written first (the hand-off it guarded, its tie-break) and a
@@ -135,6 +135,6 @@ acceptance is a consistency question or the owner's goes to Eli as one decision 
 - E_CLIENT_* (14 codes): emitted by the game client (wire-client-ffi), not the server; E_RACE_PERMIT and
   E_SHOUT_FROM_HIT are client-side too.
 - E_VAL_WORLD and E_VAL_FINITE: doc-comment typos (wire-schema/src/skymp.rs:1585-1586), never emitted.
-- E_SHOT_EQUIPMENT: retired, in a comment at AL:1554. E_PROP_REACH: retired at 85b6c096, in the comment at AL:3243.
+- E_SHOT_EQUIPMENT: retired, in a comment at AL:1554. E_PROP_REACH: retired at f67fb0f8, in the comment at AL:3243.
 - Named in docs but absent from server code: E_MOD_LOCK* (lab tooling), E_MARKER_RATE and _TYPE, E_TRAPHIT_RANGE,
   E_COMMAND_UNLOADED, E_PVE_FILE.

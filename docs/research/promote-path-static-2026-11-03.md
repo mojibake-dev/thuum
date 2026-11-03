@@ -2,8 +2,8 @@
 
 A static read for ADR-064 system 1's model (a reference's life on a non-owning seat: promote and demote), beside numidium's
 promote rows from the runs 052100, 055217 and 060106. Every row below is a HYPOTHESIS from the code until a run or a trace
-confirms it (rule 2). Lines are the fork at m3-handoff-settle f609a339 (the settle's half (a) included); the parent union-srv-3
-35509f7a has the same lines but the pass block's reliable send.
+confirms it (rule 2). Lines are the fork at m3-handoff-settle 57c1add0 (the settle's half (a) included); the parent union-srv-3
+b926a7d4 has the same lines but the pass block's reliable send.
 
 ## What the server sends at each promotion
 
@@ -74,7 +74,7 @@ was outdoors.
 
 R1's lines refuted G1's reading of the stale sample's source for the first promotion and confirmed the ORDER as the gap: the gate
 decided to move the copy ("moved to the record below") 88 ms before the server logged the first report at the engine's position, and
-the move landed about a second later. The fix on m3-promote-record (after d66de5fd): the client holds a promoted actor's stream until
+the move landed about a second later. The fix on m3-promote-record (after efa2eee7): the client holds a promoted actor's stream until
 its copy is placed at the record (remoteServer's word handler on the flip, HostService.holdUntilPlaced / placed), the view's one-shot
 resets at every promotion, and the server sends the actor's record keyframe ahead of every hoster word (SendActorKeyframe at a grant,
 a claim, a release and a lease end). G1 and G2 above stand as the code's gaps; the order was the third.

@@ -4,7 +4,7 @@ The machinery is ADR-041's (turbo-srv, turbo-client, turbo-log, turbo-back) with
 measures alive. The cadence ADR-053 set stays for the days after; this is the day's shape.
 
 ## The morning (numidium)
-1. 56's stage over parity (fork m3-pt35-fixes 7b61b533), the world composed as 35's (rotfern test 1, Prisoner
+1. 56's stage over parity (fork m3-pt35-fixes 08ffb980), the world composed as 35's (rotfern test 1, Prisoner
    test 2), both seats relaunched, the streams, no hold longer than the day.
 2. First thing on the stage: x-voice-lines with `just frida lab/frida/voice-lines.js c1` (57's Dynamic read).
 3. No gate before play. 56's five probes run in the gaps Eli leaves (a probe takes the seats five minutes) or at
@@ -33,7 +33,7 @@ confirms and the build lands), bows that kill by the engine, the head after tele
 motion against 35, the feel.
 
 ## Knobs for the day (00:24 PDT)
-The motion feel numbers are settings (fork m3-turbo-knobs a29f237a, in the morning's stage if its pipeline is
+The motion feel numbers are settings (fork m3-turbo-knobs 16442bc5, in the morning's stage if its pipeline is
 green): `skymp5-client.movement` in the seat's skymp5-client-settings.txt with `leadSeconds` (0.2, the running
 lead), `leadDecay` (0.5, its run-out per standing sample), `deadbandMoving` (8), `deadbandStill` (1),
 `popDistance` (256), `popWindowMs` (600), `jumpDistance` (1024), `sendRateMs` (130, the player's own samples
@@ -73,7 +73,7 @@ seat's console for the live read.
 ## The morning's order (00:32 PDT)
 1. The layer-merge sweep (97 scenarios) ends about 07:00 PDT; green merges the D37 layer and promotes the
    clones (a red stops for a read).
-2. 56's stage (m3-turbo-knobs a29f237a if green, else 7b61b533), the composed world, both seats relaunched and
+2. 56's stage (m3-turbo-knobs 16442bc5 if green, else 08ffb980), the composed world, both seats relaunched and
    streamed.
 3. x-voice-lines with `just frida lab/frida/voice-lines.js c1` (57's read), about five minutes.
 4. client-hot's first use: a same-bytes push of a seat's current client (the tool's live proof), then `just
@@ -81,7 +81,7 @@ seat's console for the live read.
 5. "Seats ready" to Eli; the day runs as the runbook says.
 
 ## The pausing (00:58 PDT, apocrypha)
-Skyrim Souls RE 3.2.0 rides the morning's stage as a layer (apocrypha/layer-souls 34aa1e76): every menu the mod
+Skyrim Souls RE 3.2.0 rides the morning's stage as a layer (apocrypha/layer-souls bcf753de): every menu the mod
 covers stays unpaused (the console excepted), no slow motion, movement in menus on, Engine Fixes not brought (the
 mod runs without it, its warning turned off). What Eli looks at: the inventory and a container open while the
 other player keeps moving; a container's list while the other player moves items (the D46 probe's question); any

@@ -8,7 +8,7 @@ lab's measurement (a probe under packet loss) pending.
 
 wire-transport's `Server::poll` and `Client::poll` called the transport's
 update alone, `self.transport.update(dt, &mut self.renet)`
-(crates/wire-transport/src/lib.rs:330 and :582 on 9ad635cd). renet's own loop
+(crates/wire-transport/src/lib.rs:330 and :582 on e87267c4). renet's own loop
 calls two updates a frame, `server.update(dt)` then `transport.update(dt,
 &mut server)` (renet 2.0.0 README.md:76-78, :138-140), and the netcode
 transport's update does not call renet's (renet_netcode 2.0.0
@@ -39,7 +39,7 @@ observer's figure casting" (docs/verbs/spell-cast.md) is the symptom's shape.
 
 ## The fix
 
-Fork branch wire-renet-clock (off m2-train-31 9ad635cd): `self.renet.update(dt)`
+Fork branch wire-renet-clock (off m2-train-31 e87267c4): `self.renet.update(dt)`
 before the transport's update in both polls, renet's order; a `Server::
 client_rtt_ms(client)` accessor (renet's rtt in seconds, converted without
 `as`, None for a client not connected) for the cell-host handoff; a loopback
@@ -62,7 +62,7 @@ exposes it (the cell-host verb's `IServer::GetRttMs`).
 
 ## Measured on parity before the fix (2026-10-21, numidium)
 
-- x-renet-loss 20261021-182102 on merged parity 9ad635cd (no clock fix),
+- x-renet-loss 20261021-182102 on merged parity e87267c4 (no clock fix),
   both seats in tgm, 25 percent egress loss from the setup on, six 3 s
   Flames holds: red at round one, c2's figure of c1 never cast (drainMs 0,
   drainEndMs -1): a start never sent again under loss.
@@ -74,7 +74,7 @@ exposes it (the cell-host verb's `IServer::GetRttMs`).
 
 ## The after-reading (2026-10-21, cell-host's stage, the clock fix in)
 
-x-renet-loss 20261021-184702 on fork m3-cell-host c0e4a029 (wire-renet-clock
+x-renet-loss 20261021-184702 on fork m3-cell-host e8f1f9a3 (wire-renet-clock
 merged): rounds one to three green under 25 percent egress loss, round four
 red: c2's figure of c1 started its cast (drainMs 2699) and ended it 6349 ms
 in, 2.7 s late against the probe's 5500 bound; rounds five and six not

@@ -1,6 +1,6 @@
 # Verb: spell-placed-object
 
-Status: MERGED to fork parity e713862c (12:51Z 2026-10-31, numidium's verb-merge: the gate 8 of 8 with b-spell-placed-wall v4, T2 green; shape A, D70 and D74); sequence rows open: the rhythm, the hands, the interrupt, both seats, the relaunched caster. Drafted 2026-10-28 PDT, thuum-magnus. From playtest 37's Raise Wall
+Status: MERGED to fork parity 2fda2a19 (12:51Z 2026-10-31, numidium's verb-merge: the gate 8 of 8 with b-spell-placed-wall v4, T2 green; shape A, D70 and D74); sequence rows open: the rhythm, the hands, the interrupt, both seats, the relaunched caster. Drafted 2026-10-28 PDT, thuum-magnus. From playtest 37's Raise Wall
 finding, the M2-CLOSE carry (docs/M2-CLOSE.md:148-154) and ADR-029's open
 question (docs/DECISIONS.md:830-831).
 
@@ -35,11 +35,11 @@ nativePtrRaw->formType) and the VM registers no Papyrus class for
 MovableStatic (36), so CommonLib's PackHandle (RE/P/PackUnpack.h: SetNone, then
 a return when GetScriptObjectType finds no class) handed every native a None
 and the call aborted; the caster's own copy stood because the script's
-PlaceAtMe never crosses the platform. Fix on the fork, m3-sp-pack-form 9fad9f08,
-merged into m3-pass-train-3-win 997fedf1 with the client build: a form whose
+PlaceAtMe never crosses the platform. Fix on the fork, m3-sp-pack-form 0bd2d77c,
+merged into m3-pass-train-3-win d674b294 with the client build: a form whose
 type has no class is packed as Form, the class every native that takes a Form
 accepts (the file's own static-VM idiom). CONFIRMED at T3 by x-raise-wall
-20261030-124309 on the union 820a565c (the v2 frame): the watcher's six claims
+20261030-124309 on the union ef984db2 (the v2 frame): the watcher's six claims
 held (both bases listed at the pose; the glow 174.09 against 173.95 from the
 records, the wall 178.75 with its 48 units of depth; runtime_of 1 and 1), zero
 "Bad call result 4" on either seat, two skip lines on c1 and none on c2. The
@@ -191,7 +191,7 @@ re-positioning (out of scope).
   placement from the view's copies), retrying for 2 s to cover the script's
   half-second rise; when none stands there (a relaunch mid-set, the copy
   gone) it places the server's as any seat does (fork m3-spell-placed-client
-  bb7cc946, built as this rule rather than the earlier draft's "cast open or
+  acc36bf1, built as this rule rather than the earlier draft's "cast open or
   ended under 6 s", which a relaunched caster would have failed).
 - How: a check in formView's spawn path (ownPlacedCopyStands).
 - Release condition: no own copy at the pose for 2 s.
@@ -215,7 +215,7 @@ are the caster's alone (ADR-057).
 ## Message contract
 
 - Message name / numeric type: PlacedRequest (MsgType 61, wire id 69) and
-  PlacedReport (MsgType 62, wire id 70), fork m3-wall-pose 23e334b9
+  PlacedReport (MsgType 62, wire id 70), fork m3-wall-pose db8426ad
   (SCHEMA_VERSION 22, 2026-10-31; shape A, D70 and D74). CreateActorProps
   keeps `placed_by: Option<u32>` (skymp.rs, SCHEMA_VERSION 20), the caster's
   server id; DestroyActor unchanged.
@@ -274,7 +274,7 @@ are the caster's alone (ADR-057).
 - SP binding: none new (Game.findClosestReferenceOfType, the skip's own
   primitive).
 - TS handler: services/services/spellPlacedService.ts answers a
-  PlacedRequest (fork m3-wall-pose 866ff864): per base, the engine's own
+  PlacedRequest (fork m3-wall-pose 85165ded): per base, the engine's own
   reference nearest the point 200 units ahead of the player along its yaw
   (radius 160; the view's copies, told by the cleaner's protection, and
   references disabled or deleted are skipped, an earlier cast's objects faded at its release; v4's rule, a reference reported for an earlier set skipped, lost every second cast, x-raise-wall v5), polled every 100 ms,
@@ -345,12 +345,12 @@ m4-turbo2-wall-range, the tests carrying the camp's two casts), deployed under t
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (ticked 17:02 PDT 2026-10-29 by the pass: the Inventory's 23 rows each carry a disposition; Rung R0 for the objects, declared at the top)
 - [x] engine surface cited or delegated
-- [x] server logic + T0 (fork m3-spell-placed 5b951a9c: wire-rules placements.rs, PartOne's placement, removal and sweep, unit/SpellPlacedTest.cpp); shape A: placements.rs's request and report path, the bridge, PartOne's SendPlacementRequests and ReportPlacedObject, SpellPlacedTest rewritten, m3-wall-pose 69ca1221 and 7ac26664 (the local cargo tests green; the C++ T0 is pipeline 4115's)
-- [x] message + validator (same commit: CreateActorProps.placed_by, SCHEMA_VERSION 20, check_create_actor, the fixture pair, CreateActorMessage.h); shape A: PlacedRequest and PlacedReport with their validator, fixtures and C++ structs, fork m3-wall-pose 23e334b9 (SCHEMA_VERSION 22, 2026-10-31)
+- [x] server logic + T0 (fork m3-spell-placed 2470b577: wire-rules placements.rs, PartOne's placement, removal and sweep, unit/SpellPlacedTest.cpp); shape A: placements.rs's request and report path, the bridge, PartOne's SendPlacementRequests and ReportPlacedObject, SpellPlacedTest rewritten, m3-wall-pose 6024d5b3 and f338ed2a (the local cargo tests green; the C++ T0 is pipeline 4115's)
+- [x] message + validator (same commit: CreateActorProps.placed_by, SCHEMA_VERSION 20, check_create_actor, the fixture pair, CreateActorMessage.h); shape A: PlacedRequest and PlacedReport with their validator, fixtures and C++ structs, fork m3-wall-pose db8426ad (SCHEMA_VERSION 22, 2026-10-31)
 - [x] native hook + T1 (none needed)
-- [x] TS handler (fork m3-spell-placed-client bb7cc946: createActorMessage.ts widened, formView.ts ownPlacedCopyStands); shape A: spellPlacedService.ts and the two message types, m3-wall-pose 866ff864 (tsc green)
-- [x] T2 green (shape C's T0 green on 3k d7548ccf and on 3o-win ee44f7d1 and its T2 with the union 0e23c820; shape A's T0 the pipeline 4188 of e713862c, its T2 green beside the wall's gate, numidium's verb-merge 2026-10-31 12:51Z)
-- [ ] T3 scenario green, no HYPOTHESIS tags (b-spell-placed-wall v4, thuum main 9e012045, GREEN at the wall's gate: run 20261031-122522 on e713862c, 71 steps, 05:31 PDT 2026-10-31; the walk read c2 at -113.8 and c1 at 132 from its start; the shape A section's HYPOTHESIS tags all read; un-pended in lab/gate.yaml) (UNTICKED 19:02 PST 2026-11-02: 9 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
+- [x] TS handler (fork m3-spell-placed-client acc36bf1: createActorMessage.ts widened, formView.ts ownPlacedCopyStands); shape A: spellPlacedService.ts and the two message types, m3-wall-pose 85165ded (tsc green)
+- [x] T2 green (shape C's T0 green on 3k 18a3da2e and on 3o-win 33240fd4 and its T2 with the union b8a9d4c6; shape A's T0 the pipeline 4188 of 2fda2a19, its T2 green beside the wall's gate, numidium's verb-merge 2026-10-31 12:51Z)
+- [ ] T3 scenario green, no HYPOTHESIS tags (b-spell-placed-wall v4, thuum main 7be8e705, GREEN at the wall's gate: run 20261031-122522 on 2fda2a19, 71 steps, 05:31 PDT 2026-10-31; the walk read c2 at -113.8 and c1 at 132 from its start; the shape A section's HYPOTHESIS tags all read; un-pended in lab/gate.yaml) (UNTICKED 19:02 PST 2026-11-02: 9 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
@@ -378,7 +378,7 @@ Play: BROKEN, playtest 41 (2026-11-02, LOG 15:33 item 1): the wall appears on th
 - For Eli: ADR-029's open question, answered here as C, not an allowlist entry;
   whether the rise and shader earn a client slice; the caps.
 
-## The pose model falls (D70, 14:00 PDT 2026-10-30; b-spell-placed-wall on the union 0e23c820)
+## The pose model falls (D70, 14:00 PDT 2026-10-30; b-spell-placed-wall on the union b8a9d4c6)
 
 RED three times, the cold rollback included (204953, 205125 relaunched, 205303 cold), on claim 3 alone: the caster's own MSTT, read
 from the observer's figure, stood 262.13, 262.13 and 248.10 from c1 where the server's copy stands at 192 along the yaw (expected
@@ -416,7 +416,7 @@ the measured 206 with the caster's own motion inside the cast's window; the base
 cast; reach from the caster) and places the copies there, the table keeping the forms and the lifetime. Shape C with 206.25 along the
 record's yaw would place along a heading the engine did not use. The train after the guest-loot train.
 
-## Shape A built (00:15 PDT 2026-10-31; fork m3-wall-pose 23e334b9, 69ca1221, 866ff864, 7ac26664, off parity dc3ec679)
+## Shape A built (00:15 PDT 2026-10-31; fork m3-wall-pose db8426ad, 6024d5b3, 85165ded, f338ed2a, off parity 6dbabc7a)
 
 The handshake (D74): at the accepted cast of a listed spell the server asks the caster's game for the entry's bases (PlacedRequest:
 the set's id, the bases as form ids, the window of 6 s: 3 s until 2026-10-31) and the caster's game answers once per base when the reference has settled
@@ -442,24 +442,24 @@ rather than a silent miss. The scenario's amendment (its own commit, rule 13): t
 is claimed against the caster's own engine copy, the server's lines become the request, two accepted reports and two "placed 1 form"
 lines a cast; no tolerance loosened.
 
-x-raise-wall v5 (88877000) read at a08787b5's stage (04:05 PDT 2026-10-31; runs 20261031-104852 cold and -105243 relaunched, both
+x-raise-wall v5 (88877000) read at 474ba51b's stage (04:05 PDT 2026-10-31; runs 20261031-104852 cold and -105243 relaunched, both
 red at the second cast with three "placed 1 form" lines, not four): the first cast held every claim (the request, two accepted
 reports, two forms placed where reported, c2's distances equal to c1's own copies', one runtime reference of each base on both
 seats, the skip lines, the removal), so HYPOTHESIS (1) to (4) above are cleared. The second cast showed the engine's real
 behaviour: the script keeps the SAME two references across casts. At the first release both stand disabled (c1's listing 9 s
 after it: ff0009bf and ff00097c, disabled true, deleted false, at their poses); at the second cast they are re-enabled and the wall
 raised again under the same ids, and nothing new is created (c1's listing 4 s into cast two: exactly those two ids, at 206.25 and
-196.875 from the caster). a08787b5's search skipped a reported reference standing within 8 units of where it was reported, so the
+196.875 from the caster). 474ba51b's search skipped a reported reference standing within 8 units of where it was reported, so the
 halo (back at the exact pose) was never reported and the wall was found only once it had moved, mid-rise, 2.5 s after the request,
 and went out unsettled at the deadline (z 14596 and 14600 against the settled 14629: 29 to 33 low). The fix (m3-wall-pose
-b36d93aa, its bridge test 0e4b34e5): eligibility is disabled-or-deleted, never reported-before (a disabled reference is the earlier cast's object faded at its
+67c0cf70, its bridge test 45388e25): eligibility is disabled-or-deleted, never reported-before (a disabled reference is the earlier cast's object faded at its
 release; a re-enabled one is this cast's), and REPORT_WINDOW_MS is 6,000 (the wall began its rise about 2.3 s after the request on
 both runs, which a 3 s window less the 500 ms reply margin cannot settle). HYPOTHESIS until v5 reruns on the fix: the second cast
 reports both bases settled inside the window, the server's copies for set 1 stand where c1's re-raised wall stands, and no
 unsettled line. Noted for the checklist, not a claim: the caster's wall fades at the release while the other seat's copy lingers
 the table's 5 s (lingerS, the deploy entry); the mod's Delete never runs, so the linger is the only end the other seat sees.
 
-x-raise-wall v5 GREEN on 0e4b34e5 (04:44 PDT 2026-10-31, run 20261031-113932, 59 steps, every claim held): both casts request, report
+x-raise-wall v5 GREEN on 45388e25 (04:44 PDT 2026-10-31, run 20261031-113932, 59 steps, every claim held): both casts request, report
 and place the same way (the ACTI reported 0.33 s after the request, the MSTT 1.2 s, cast two exactly as cast one, so the 2.3 s of the
 red runs was the old skip's artifact and the 6 s window is headroom), cast two re-using cast one's references (c1's ff0008e7 and
 ff0008b6 both times) at the same settled pose (z 14677 and 14629), the server's copies ff000002/3 then ff000004/5 at that pose,

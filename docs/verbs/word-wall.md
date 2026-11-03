@@ -2,7 +2,7 @@
 
 Drafted 00:4x PDT 2026-10-31 from docs/VERB.md (pile item 11 of docs/private/turbo-2-prework.md; M4's "word walls
 teach through the server's shout record", docs/verbs/shouts.md:453-454; Eli, playtest fourteen: "leave it in
-dungeons"). From a code map of the fork at parity dc3ec679. Nothing of it is built.
+dungeons"). From a code map of the fork at parity 6dbabc7a. Nothing of it is built.
 
 ## Intent
 
@@ -46,7 +46,7 @@ the player's; the word is the game files' and the record is the server's.
 What the server validates (R1): the reported reference is a word wall trigger (its WordWallTriggerScript names a word,
 myWord01, a WOOP), the player in the cell of and within the activation reach of the WALL the script names (wordWall01; the
 trigger's own bounds are the chamber, a box of about 4,000 units a side, so a reach to it meant nothing: pipeline 4391
-taught from 2,600 units; the wall's bounds are about 320 units, fork bdeb086e, 01:58 PST 2026-11-01), the word not known already (a
+taught from 2,600 units; the wall's bounds are about 320 units, fork 245fa191, 01:58 PST 2026-11-01), the word not known already (a
 repeat is idempotent).
 Rate limit / bounds: one report per wall per player; a budget of 2 then 1 a second.
 
@@ -108,7 +108,7 @@ Rate limit / bounds: one report per wall per player; a budget of 2 then 1 a seco
 
 ## Server
 
-- Where the logic lives (01:13 PST 2026-11-01, fork m4-word-wall f32fcebc): ActionListener::OnWordWall resolves the reported trigger
+- Where the logic lives (01:13 PST 2026-11-01, fork m4-word-wall 55d96b97): ActionListener::OnWordWall resolves the reported trigger
   per report (no table at startup, no scan of every reference): PartOne::WordOfWall reads the WordWallTriggerScript's
   myWord property from the reference's script data and its base ACTI's (libespm's RecordHeader::GetScriptData, the
   reference's value winning as ScriptVariablesHolder reads them), made global through that record's lookup and checked
@@ -151,9 +151,9 @@ Rate limit / bounds: one report per wall per player; a budget of 2 then 1 a seco
   is the precedent in that hook) so the chant and the glowing word play as in the game, with the server's TeachWord then a
   repeat of the seat's own; or the word arrives silently by the server's snippet with the HUD notice alone. The first is
   the player's experience of a word wall; the second is what the server half gives today.
-- CONFIRMED at T3 (x-word-wall 20261101-153103, b-word-wall's draft by path on m4-traps 346249e8: every claim held: the record
+- CONFIRMED at T3 (x-word-wall 20261101-153103, b-word-wall's draft by path on m4-traps 19e8d981: every claim held: the record
   empty before, "learns word 13e22 at wall 709d2" once, wordsKnown "0x13e22" on c1, the second pass teaching nothing more, the
-  relaunch keeping it, c2's own record, the restart keeping both; promoted as b-word-wall, main 92c03ed9). The chant (x-word-wall-chant
+  relaunch keeping it, c2's own record, the restart keeping both; promoted as b-word-wall, main 6ebe674c). The chant (x-word-wall-chant
   20261101-153506 under the layer's named rows): the trigger's scripts RAN on the seat: OnLoad at the trigger's 3D load, two
   OnTriggerEnter (one per listening script), the hook's report 270 ms later, OnUpdate (WordWallTriggerScript's
   RegisterForSingleUpdate) 540 ms after the entry, then MS13 0x39645 set to stage 60 by the seat's script and taken by the
@@ -181,7 +181,7 @@ Rate limit / bounds: one report per wall per player; a budget of 2 then 1 a seco
   login's record, and a shout cast is judged against the record anyway, E_SHOUT_WORD), SetStage(MS13, 60) (the Golden Claw's
   stage at the word: the quest-stage verb's rule decides what the server records), ApplyCrossFade and the IMODs (R3), the wall's
   playAnimation (Learned, Dark1Wild to Dark3ExitWild: R3, the seat's own wall), the sounds and the enabler (R3). HYPOTHESIS until
-  the layer probe x-word-wall-chant v1 7babc547 (05:53 PST 2026-11-01; the layer branch layer-world-scripts 20877978's rows, on a build with the verb) reads the
+  the layer probe x-word-wall-chant v1 7babc547 (05:53 PST 2026-11-01; the layer branch layer-world-scripts 6b865ab0's rows, on a build with the verb) reads the
   show, the trigger's events, the one server learn line and MS13's stage as the quest-stage verb logs it; the verb's server half and hook ship
   first and do not wait on it.
 - x-word-wall-read by path: c1 at Bleak Falls' word wall (its reference by lab/esm.py on the cell), Skyrim Platform's
@@ -193,12 +193,12 @@ Rate limit / bounds: one report per wall per player; a budget of 2 then 1 a seco
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared (the reference trace owed)
 - [x] engine surface cited or delegated (the code map of 2026-10-31; the wall's script read owed)
-- [x] server logic + T0 (fork m4-word-wall bb901be7: OnWordWall, PartOne::WordOfWall, the natives; e1b4288f: the trigger's primitive as the reach, libespm's XPRM type; WordWallTest four cases)
-- [x] message + validator (same commit; f32fcebc, SCHEMA_VERSION 27)
+- [x] server logic + T0 (fork m4-word-wall 29ad8ea7: OnWordWall, PartOne::WordOfWall, the natives; e59d9237: the trigger's primitive as the reach, libespm's XPRM type; WordWallTest four cases)
+- [x] message + validator (same commit; 55d96b97, SCHEMA_VERSION 27)
 - [x] native hook + T1 (none: Skyrim Platform's sendPapyrusEvent hook, an existing API, filtered in native to the game-file range and the exact event OnTrigger)
-- [x] TS handler (wordWallService.ts on OnTrigger, c31208c0; the server's TeachWord snippet lands through the shouts path; tsc green)
+- [x] TS handler (wordWallService.ts on OnTrigger, e38237c8; the server's TeachWord snippet lands through the shouts path; tsc green)
 - [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags (x-word-wall 20261101-153103 green by path; b-word-wall promoted main 92c03ed9; the gate is the pair's full sweep) (UNTICKED 19:02 PST 2026-11-02: 3 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
+- [ ] T3 scenario green, no HYPOTHESIS tags (x-word-wall 20261101-153103 green by path; b-word-wall promoted main 6ebe674c; the gate is the pair's full sweep) (UNTICKED 19:02 PST 2026-11-02: 3 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [x] ledger and suppression registry updated (NATIVES.md: Game.TeachWord, Game.UnlockWord, Game.IsWordUnlocked, Actor.AddShout implemented, R0, verb word-wall)

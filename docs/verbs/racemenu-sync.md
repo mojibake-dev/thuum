@@ -634,14 +634,14 @@ above keep a hostile preset from carrying anything but a look.
   green run's byte for byte (the same 8747-byte preset recorded and
   relayed; the ADR-026 rule checks RNAM, not the gender bit), and c2's own
   look changed at its re-login by the same skip. Fix in the no-FSMP
-  render, apocrypha/layer-essentials cf363c44 (13:26): a build-time,
+  render, apocrypha/layer-essentials ad4af7ea (13:26): a build-time,
   size-preserving plugin patch (lab/layer/plugin-patches.tsv,
   lab/tools/plugin-patch.py, applied before the esm copies and the
   SHA256SUMS, so server and clients hold the same bytes) sets both gender
   bits on the plugin's 805 HDPT DATA bytes (| 0x06: 01x533 to 07, 09x202
   to 0f, 11x55 to 17, 18 to 1e, 19x12 to 1f; the records are uncompressed,
   the file 276,478 B as before), as 790d3b6c did for rotfern's parts;
-  CONFIRMED by x-layer-headparts 20261020-210719 on the cf363c44 layer
+  CONFIRMED by x-layer-headparts 20261020-210719 on the ad4af7ea layer
   stage (c1's head parts equal to the server's record at login and again
   after a relaunch, c2's too; the stage's smoke 20261020-210408 green with
   the layer and no hdtsmp64 log among its artifacts, so FSMP is gone). Eli,
@@ -819,7 +819,7 @@ load time against the apply's trace, and harden the apply by comparing the
 engine's node scale with NiOverride's record and calling its
 UpdateNodeTransform when they differ.
 
-## Train 56: node overrides re-applied at every 3D load (22:11 PDT 2026-10-27; fork m3-pt35-fixes 9aec660b)
+## Train 56: node overrides re-applied at every 3D load (22:11 PDT 2026-10-27; fork m3-pt35-fixes 2ee2b835)
 
 Playtest 35: rotfern's head node read 0.94 at the engine against RaceMenu's
 1 after every teleport and after a relaunch that loaded into Bleak Falls,

@@ -1,6 +1,6 @@
 # Decisions for playtest 34 (2026-10-23, thuum-magnus for Eli, relayed by numidium)
 
-Eli asked that the four limits still expected on parity a25caf02 be built before
+Eli asked that the four limits still expected on parity 4ba2fbb3 be built before
 playtest 34: headshots on bandits (the server's gear roll not yet pushed),
 doors (npc-handoff), deaths (a host-made zero-health NPC alive at the floor and
 the 25 s respawn; npc-fate), and a quitting host's village frozen about 24 s
@@ -29,8 +29,8 @@ How to answer: "all recommended", or the ones to change, e.g. "D2 B, D10 C".
   each of B's checks needs a lab read.
   
   - Decision: jump right to B
-  - Built (thuum-magnus, 2026-10-24 16:20 PDT, fork m3-train-44 597bb9dc,
-    dd285ad9, 6e827918): the ActorDeath message (MsgType 52), the server's
+  - Built (thuum-magnus, 2026-10-24 16:20 PDT, fork m3-train-44 54798208,
+    e7950b98, faeb232a): the ActorDeath message (MsgType 52), the server's
     checks (the reporter simulates the actor; a hit by the named killer the
     server numbered within 3 s; a drop of 200 units in the host's samples
     within 4 s; an activation within 512 units within 5 s; essential and
@@ -46,7 +46,7 @@ How to answer: "all recommended", or the ones to change, e.g. "D2 B, D10 C".
     17:51 PDT: the first lab run (20261025-004503) fell 4000 units and
     fired nothing: the engine's deferred kill on every viewed actor holds
     the death, so the report now comes from the host's health-floor poll,
-    not deathStart (fork m3-train-44 6cdc2b35; its rerun decides).
+    not deathStart (fork m3-train-44 8efabb10; its rerun decides).
     18:26 PDT: GREEN at T3 (20261025-012351: the fall's drop of 3813 units
     in the host's samples, the death on both seats); committed as
     b-npc-death-report. The trap's half stays open.
@@ -66,7 +66,7 @@ How to answer: "all recommended", or the ones to change, e.g. "D2 B, D10 C".
   - A3. The party's low end: the lowest level among the same players. The level-1 never meets a cave bear because a level-30 walked in ahead; the level-30 meets wolves. The safe pick for a mixed pair, dull for the strong one.
   - A4. The world's level: a server setting (npcRollLevel, say 10), the same for everyone until the operator raises it. A designed difficulty, as a dedicated TES3MP server often runs; nobody's arrival changes it; a lone level-1 meets level-10 lists.
   - Recommended: A2, with A3 as the switch for a friends' night with a newcomer. All three are one line where PartOne sets the roll's level around the fate pass (fateLoaderLevel), behind one setting (npcRollLevel: loader | party-mean | party-min | a number), a T0 each; the pin probe reads server.fate(id).level. A slice of an afternoon, after the merge.
-  - Built (16:30 PDT, fork m3-train-44 e3b39ac8): all three behind
+  - Built (16:30 PDT, fork m3-train-44 1d8efca5): all three behind
     npcRollLevel (PartOne::FateRollLevel), party-mean the default, A3 as
     "party-min", A4 as a number, the old rule as "loader"; T0
     NpcRollLevelTest. The pick is a line in lab/deploy/sky-srv/
@@ -180,7 +180,7 @@ Today the village belongs to a gone game for about 24 s: the connection timeout
   lab calibrates the number, and the merge waits for Eli's answer.
 
 - Decision: leaning towards B, that's the best practice way right? but also A as a background. 
-- Built (16:25 PDT, fork m3-train-44 cf8b6007): B on top of A. The
+- Built (16:25 PDT, fork m3-train-44 c6a27e31): B on top of A. The
   re-analyst read the quit path (every quit is one byte store, Main::quitGame;
   WinMain's one call to the engine's shutdown routine runs on the main thread
   with the network thread alive; the engine never calls ExitProcess), so the
@@ -231,13 +231,13 @@ Today the village belongs to a gone game for about 24 s: the connection timeout
 - B. Accept per-screen weapons for 34 as a known limit (armor, helmet and race the server's on every screen) and pin the weapons in M3's next train.
 - Recommended: A if 34 is a day or more away, else B; your word on the day decides it.
 - GREEN at T3 (00:32 PDT): x-npc-fate-outfit v3 on 43's stage (072041), the weapons the server's on both bandits at 20 and 60 s; the pin probe green on the same stage. The only question left is the merge's place: A rides 43 with 41 and 42 into 34, B leaves it for the next train.
-- Built ahead of the answer, not merged (23:56 PDT): fork m3-train-43 962fc913, stacked on 42, the 16128 detour (re-npc-roll.md section 11); its read is x-npc-fate-outfit v3 on 43's stage after 42's.
+- Built ahead of the answer, not merged (23:56 PDT): fork m3-train-43 02c001ca, stacked on 42, the 16128 detour (re-npc-roll.md section 11); its read is x-npc-fate-outfit v3 on 43's stage after 42's.
 
 - Decision: A 
 
 ## Merge-ready (09:55 PDT, 2026-10-24)
 
-Train-43 at de9d048e carries 39 to 42 inside it and is merge-ready by citation:
+Train-43 at 417cb746 carries 39 to 42 inside it and is merge-ready by citation:
 the gate set 20261024-155001-gate-m3-train-43 (the nine plus the seven
 committed scenarios) all green on their last runs, T2 green at that head
 (33 sessions), gate-cite's five checks passing, the stage held on the lab.
@@ -250,14 +250,14 @@ branch's stage and gate, about two hours of lab.
 
 ## Merge-ready (44) (20:13 PDT, 2026-10-24)
 
-Train-44 at fork m3-train-44 6cdc2b35 (stacked on 43 de9d048e, so 39 to 43
+Train-44 at fork m3-train-44 8efabb10 (stacked on 43 417cb746, so 39 to 43
 ride inside it) is merge-ready by citation: the gate set
 20261025-015916-gate-m3-train-44 (eighteen scenarios: the three always, the
 ten M3 b- scenarios, the four watch, and the two committed today) all green
-on their last runs, verdict watch; T2 green at 6cdc2b35 (18:58 PDT, every
+on their last runs, verdict watch; T2 green at 8efabb10 (18:58 PDT, every
 session identical); gate-cite's five checks passing (one build; the registry
 serving skymp-server:m3-train-44; the clones naming "m3-train-44 client
-6cdc2b35"; 6cdc2b35 the staged commit; nothing replaced it). The one red of
+8efabb10"; 8efabb10 the staged commit; nothing replaced it). The one red of
 the set, b-host-quit 20261025-025053 at c2's first teleport (a settle, before
 any claim), went green twice on ADR-027's lone-red reruns (030427, 030801)
 and is the watch item; numidium's agent reads its cause.
@@ -284,11 +284,11 @@ One command at your word (numidium's): `GATE_SET=20261025-015916-gate-m3-train-4
 T2=skip just verb-merge m3-train-44 b-npc-puppet b-cell-host b-npc-handoff-door
 b-npc-handoff-restart b-npc-handoff-night b-host-kill b-npc-death b-npc-loot
 b-npc-respawn b-npc-death-report b-host-quit`. verb-merge adds the always
-scenarios and gate.yaml's watch; parity goes to 6cdc2b35 and both clones are
+scenarios and gate.yaml's watch; parity goes to 8efabb10 and both clones are
 promoted; then playtest 34 from docs/private/playtest-m3-34.md.
 
-MERGED 22:23 PDT, 2026-10-24, on your "Merge now": fork parity 6cdc2b35,
-both clones promoted at 22:24, thuum main cd39f801 with the pin; D2 as A2.
+MERGED 22:23 PDT, 2026-10-24, on your "Merge now": fork parity 8efabb10,
+both clones promoted at 22:24, thuum main 9f63421b with the pin; D2 as A2.
 Playtest 34 at your word.
 
 ## The trains, in order, with sizes
@@ -296,14 +296,14 @@ Playtest 34 at your word.
 1. Train-39, the quitting host (D12): the server's stale-host rule, a T0 in
    CellHostTest with the clock margins, and a lab read (the game stopped, the cell
    passed within the grace plus the threshold). Half a day with its gate and T2 (a
-   server change). BUILT 2026-10-23 13:26 PDT, fork m3-train-39 206190dc; the
+   server change). BUILT 2026-10-23 13:26 PDT, fork m3-train-39 efefb899; the
    stage with T2 and the kill-the-host read are numidium's next.
 2. Train-40, doors (D6, D11, D10): the client's MoveTo of an engine reference
    across cells (MayMoveActor's return, the follow table, the roster moving a
    record out of an interior), with the restart split rule; D7, D8 and D9 as a
    second slice after the playtest unless time allows. Two days with the door
    scenario (a resident through a door seen from both seats).
-   BUILT 2026-10-23 14:00 PDT, fork m3-train-40 f64d556f stacked on
+   BUILT 2026-10-23 14:00 PDT, fork m3-train-40 df5ee477 stacked on
    m3-train-39: D6 behind the cellFollow server setting and the npcHandoff
    client key (both default on, since Eli's D6 answer is open), D10 (the
    first grants provisional for 5 s, the nearer player by grid ring), (e)

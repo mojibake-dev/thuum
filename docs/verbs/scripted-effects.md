@@ -159,7 +159,7 @@ visuals), the victim's game takes the death as every death.
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (2026-10-20)
 - [x] engine surface cited or delegated (the record and the script, read on sky-srv 2026-10-20)
-- [x] server logic + T0 (fork m2-train-31 b0e4ba38, 2026-10-20 19:05 PDT; the caster's share left to its own game at 9ad635cd after b-fod-kill 20261021-042635 killed the caster too: the server's share and the script's stacked; docs/research/train-31-reads.md section 9)
+- [x] server logic + T0 (fork m2-train-31 2e7914a2, 2026-10-20 19:05 PDT; the caster's share left to its own game at e87267c4 after b-fod-kill 20261021-042635 killed the caster too: the server's share and the script's stacked; docs/research/train-31-reads.md section 9)
 - [x] message + validator (same commit): no message; the settings list validated in Rust
 - [ ] native hook + T1: none needed
 - [ ] TS handler: none needed

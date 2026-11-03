@@ -100,7 +100,7 @@ IronSword and swings with attackStart.
 - **Exceptions.** Dead targets and a target on top of the attacker pass.
 - **Refusal.** A hit outside the bound is dropped and logged E_HIT_CONE.
 - **Scope.** Players and humanoid NPCs (a playable race), as targets and as host-reported aggressors, as the reach is
-  since fork m3-npc-reach 7a80172c (14:17 PDT 2026-10-29); creatures and the non-playable humanoid races keep the old bound.
+  since fork m3-npc-reach ffb525c6 (14:17 PDT 2026-10-29); creatures and the non-playable humanoid races keep the old bound.
 - **Inputs.**
   - libespm reads the race's widest strike angle (RACE ATKD);
   - the C++ core passes the heading, the positions and the kept power flag

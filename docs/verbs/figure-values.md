@@ -243,7 +243,7 @@ Rate limit / bounds: the bases are bounded by actor-values' validator (finite,
   figure by the same mark (dynamic form id, kAttackDamageMult 0), else
   calling the original; the slot-0x104 guard then goes, since the write it
   tried to stop happens before it. BUILT 2026-10-20 on fork m2-train30-dent
-  e6a8270a: HookHandler::Replace (gum_interceptor_replace, frida-gum
+  ddb01d41: HookHandler::Replace (gum_interceptor_replace, frida-gum
   16.0.19 gum/guminterceptor.h:49-51; the fork's Frida layer had attach-style
   hooks only until this), game/Offsets.h DamageActor REL::ID(37335) AE only
   as PerformAction, the replacement and its install in FridaHooks.cpp
@@ -255,9 +255,9 @@ Rate limit / bounds: the bases are bounded by actor-values' validator (finite,
   `c1.watched(c2).rises("health") == 0` (lab-api rises(), the count of the
   rises in the watched health series the driver records, main b7b0429),
   `server.actor(c2).healthPercentage < 0.99` and the bar at the server's
-  percentage (scenario 52f06e1e, main 5f64b26; in gate.yaml's pending
+  percentage (scenario ba7a31d5, main 5f64b26; in gate.yaml's pending
   until the dent branch stages, after the spells branch). First run on the
-  train stage (fork m2-train-30 44372078 over the fixed layer, b-figure-values
+  train stage (fork m2-train-30 67679548 over the fixed layer, b-figure-values
   20261021-003901): the gate holds and the assert's shape was wrong. The
   figure's health in c1's game (steps/032-c1-watch-stop.json, 69 samples,
   100 to 83.65) fell 38 times and rose 30, every rise between 0.009 and
@@ -290,7 +290,7 @@ Rate limit / bounds: the bases are bounded by actor-values' validator (finite,
 - [x] engine surface cited or delegated (fork parity d5b05e89, 2026-10-18)
 - [x] server logic + T0 (unit/FigureValuesTest.cpp: no maxima before a record, the owner's race bases unchanged, the three property updates on a record, the maxima in a later CreateActor)
 - [x] message + validator (same commit: no new message, CreateActor's optional props filled for observers; docs/WIRE.md)
-- [x] native hook + T1 (train-28's Hooks.cpp FigureHealthDamage, replaced by train-30's DamageActor gate on fork m2-train30-dent e6a8270a; T1 is the Windows build's)
+- [x] native hook + T1 (train-28's Hooks.cpp FigureHealthDamage, replaced by train-30's DamageActor gate on fork m2-train30-dent ddb01d41; T1 is the Windows build's)
 - [x] TS handler (formView.ts applyFigureMaxima)
 - [ ] T2 green (difftest session figure-values: the three property updates declared against the legacy stack)
 - [ ] T3 scenario green, no HYPOTHESIS tags (b-figure-values; x-figure-values-hit for the victim case)

@@ -1,7 +1,7 @@
 # Frida reads, train-29: the dent (c1) and the rune tier (c2)
 
 Read-only memo, 2026-10-20. Runs 20261020-085705-x-figure-values-hit-frida and 20261020-085906-x-rune-visible-frida,
-both verdict green on their weak asserts; build m2-train-29 client 18c0e603, server image m2-train-29, game 1.6.1170
+both verdict green on their weak asserts; build m2-train-29 client c3751c1d, server image m2-train-29, game 1.6.1170
 (result.json build). Traces, logs, result.json, watch traces and three screenshots copied to scratchpad/frida-reads/.
 Row citation: "c1 L6" is line 6 of c1-figure-dent-trace.js.jsonl. Every row is in each file twice (the `send()` payload
 wrapped as {"type":"send","payload":...} on an odd line, the `console.log` copy on the next even line; lab/frida/README.md:9
@@ -160,7 +160,7 @@ figure, so four casts would leave four armed runes in the observer's game).
 
 ## D. Second read, both seats (run 20261020-092130-x-rune-visible-frida2)
 
-Same stage and clones (build m2-train-29 client 18c0e603, result.json), verdict green; artifacts under
+Same stage and clones (build m2-train-29 client c3751c1d, result.json), verdict green; artifacts under
 scratchpad/frida-reads/frida2/. "c1 L4" is line 4 of frida2/c1-rune-tier-trace.js.jsonl (92 lines, 46 rows), "c2 L4" of
 frida2/c2-rune-tier-trace.js.jsonl (148 lines, 74 rows); even lines cited as before. Function extents below are bounded by
 the next Address Library id (lab/addr.py addrlib 1.6.1170: 43934 0x7d7c40 to 43935 0x7d7cf0; 44216 0x7ed8b0, 44217
@@ -251,7 +251,7 @@ where fetched, and the screenshots). Sources read: lab/frida/figure-dent-trace.j
 lab/.cache/probes/x-figure-values-hit-frida.yaml and x-rune-visible-frida.yaml, docs/research/train-29-rows.md:130-168
 and :206-238, docs/verbs/figure-values.md:124-155 and :217-236, docs/verbs/spell-cast.md:1271-1377,
 docs/DECISIONS.md:1360-1395, docs/TE-MAP.md:62, docs/research/apocalypse/target-location.md:18, fork origin/parity
-(602a2dd2) Hooks.cpp FigureHealthDamage, MagicApi.cpp:270-302, FridaHooks.cpp:433-446,
+(9ef0a394) Hooks.cpp FigureHealthDamage, MagicApi.cpp:270-302, FridaHooks.cpp:433-446,
 PapyrusTESModPlatform.cpp:1074-1105, skymp5-client sync/movementApply.ts:172-186, sync/actorvalues.ts:32-46,
 view/formView.ts:304, CommonLibSSE-NG include/RE/P/Projectile.h:78-107 and :133-166, src/RE/P/Projectile.cpp:179-222,
 lab/addr.py addrlib 1.6.1170 for ids 34452, 34453, 43934, 43935, 44216 to 44218, 44222, 44223.

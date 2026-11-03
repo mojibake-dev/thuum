@@ -3,7 +3,7 @@
 Drafted 2026-10-20 (train-30's first row) from playtest twenty-seven's lost
 spells. The server half is old (M1: the record's learnedSpells, the equip
 gate); this doc gives it a home and fixes the client half. Code on fork
-m2-train30-spells (096d2cd8, client only).
+m2-train30-spells (2b6bc288, client only).
 
 ## Intent
 
@@ -140,7 +140,7 @@ Rate limit / bounds: none new; no wire change.
 - [x] server logic + T0: unchanged (M1's record and gate)
 - [x] message + validator (same commit): no new message
 - [x] native hook + T1: none
-- [x] TS handler: sync/spell.ts syncSpells and remoteServer.ts (fork m2-train30-spells 096d2cd8, pipeline 2236 green)
+- [x] TS handler: sync/spell.ts syncSpells and remoteServer.ts (fork m2-train30-spells 2b6bc288, pipeline 2236 green)
 - [x] T2 green: no wire change
 - [ ] T3 scenario green, no HYPOTHESIS tags (b-spells-reconnect on the fix's stage)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031): not applicable, no player action

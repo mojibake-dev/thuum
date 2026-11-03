@@ -291,7 +291,7 @@ worldOrCell nonzero, every float finite. Appended to the contract (ADR-012);
 the MsgType after HostRelease (49).
 
 UpdateMovement (2), a validator change without a shape change (fork
-m3-train-35, parity ac557132 since 2026-10-22 23:48 PDT; docs/verbs/npc-puppet.md,
+m3-train-35, parity 8b43aa72 since 2026-10-22 23:48 PDT; docs/verbs/npc-puppet.md,
 x-npc-death 20261023-054215): healthPercentage must lie in [0, 1], else Range. The
 engine's deferred kill lets a host's actor sit below zero health (a script,
 a fall) and the percentage read negative; the client clamps it at the source
@@ -316,7 +316,7 @@ Validator (wire-validate check_fates): 1 to 64 entries, each refrId nonzero,
 at most 32 worn, every id nonzero.
 
 PlayerBowShot (id 30, MsgType 22) names its shooter since train 53 (fork
-m3-npc-cast 78cec009, 2026-10-26; SCHEMA_VERSION 18): `idx`, the sender's own
+m3-npc-cast 6702399f, 2026-10-26; SCHEMA_VERSION 18): `idx`, the sender's own
 idx for its own shot, a hosted actor's for one its game simulates (0 is a real
 actor, so the sender's own idx is the sentinel, slice 3's idiom); u32::MAX is
 refused (E_VAL_RANGE), and whether the sender may shoot for that idx is the
@@ -327,7 +327,7 @@ listener's copy to its host, one per hosted neighbour). docs/verbs/npc-stream.md
 slice 6.
 
 ActorClaim (id 64, MsgType 56), client to server, reliable, R0 (fork m3-npc-talk
-0d453dc1, 2026-10-26; docs/verbs/npc-talk.md, ADR-052): `{ idx: u32 (the actor as
+977bfbc6, 2026-10-26; docs/verbs/npc-talk.md, ADR-052): `{ idx: u32 (the actor as
 the server indexes it), claim: bool (true asks, false releases) }`, a player's
 claim on an NPC another game simulates, for a dialogue. The server grants it
 when the claimant stands in the actor's cell within activation reach, the actor
@@ -343,7 +343,7 @@ QuestStage (id 65, MsgType 57), both directions, reliable (fork m3-quest-stage,
 2026-10-28; docs/verbs/quest-stage.md, ADR-056): `{ quest: u32 (the QUST's form
 id in the load order both ends share, 0 with a list), stage: u16 (the engine's
 stage index), shared: [u32] (server to client only: the shared quests, sent at
-a login with quest 0) }`. Since fork m3-quest-mode 11cbf4cb (14:41 PDT 2026-10-29, D58 B;
+a login with quest 0) }`. Since fork m3-quest-mode e950fb46 (14:41 PDT 2026-10-29, D58 B;
 SCHEMA_VERSION 21): `mode: u8` (0 list, 1 all; a client's message carries 0 or is
 refused), and in mode 1 the login message's `shared` is the DENIED list (may be
 empty; the validator refuses an empty list with quest 0 in mode 0 only); the
@@ -365,7 +365,7 @@ quest other than 0; the list names each quest once and never 0; budget 16 then
 QUST in the load order), E_QUEST_UNLISTED; a stage already recorded is a no-op.
 
 DamageCause (id 63, MsgType 55), server to client, reliable, R0 output (fork
-m3-npc-death b82a82e5, 2026-10-26; docs/verbs/npc-fate.md, ADR-050 decision 2,
+m3-npc-death 354b13c2, 2026-10-26; docs/verbs/npc-fate.md, ADR-050 decision 2,
 deaths by the engine): `{ idx: u32 (the victim as the server indexes it),
 attacker: u32 (the aggressor's form id, 0 for none), health: f32 (the
 RESULTING percentage, 0 to 1, absolute: never a delta, since the hold rule
@@ -381,7 +381,7 @@ check_damage_cause): idx in range, health finite and 0 to 1.
 
 ActorDeath (id 60, MsgType 52), client to server, reliable, once per death,
 R1 for causes 0, 1, 2 and 4 and R2 for cause 3 since ADR-062 decision 2
-(fork m3-train-44 597bb9dc, 2026-10-24; ADR-048's B, Eli's D1 "jump right
+(fork m3-train-44 54798208, 2026-10-24; ADR-048's B, Eli's D1 "jump right
 to B"; the R2 cause 2026-11-03): `{ refrId: u32 (the dead actor, nonzero: a game-file actor, or since
 fork m3-death-range, playtest 37's finding 47, a server-made one from
 0xff000000 up, whose death otherwise ran the server's 3 s word), cause: u8 (0
@@ -423,7 +423,7 @@ restores ADR-048's A, the server's number alone. Appended to the contract
 (ADR-012); the two MsgTypes after ActorSightings (50).
 
 UpdateEquipment (id 13, MsgType 5) gains a sender for a hosted actor (fork
-m3-npc-stream 2673d1ab, 2026-10-26; docs/verbs/npc-stream.md slice 3): the
+m3-npc-stream e2ea071a, 2026-10-26; docs/verbs/npc-stream.md slice 3): the
 host's HostedStateService sends it under the actor's idx when the actor's
 hands change and once at the first poll, with what the actor wears alone
 (the worn slots and the hands, worn flags set, the hands' spells; never its
@@ -469,7 +469,7 @@ The action budget (UpdateAction 44) is re-derived for a host that streams its
 actors' actions: 48 at once, 16 a second (UNMEASURED, from x-npc-stream-p1's
 rate). Appended to the contract (ADR-012); the MsgType after ActorDeath (52).
 
-Slice 5 (train 54, fork m3-npc-face ac435de8, 2026-10-26; D30-C): HostedActorState
+Slice 5 (train 54, fork m3-npc-face 58152d96, 2026-10-26; D30-C): HostedActorState
 gains `gazeTarget: u32` (the head-track target as the server knows it, 0 none),
 `gazeSlot: u8` (the engine's HEAD_TRACK_TYPE of the highest set slot, below
 6), `emotionType: u8` (the engine's EmotionType, at most 7) and `emotionValue:
@@ -578,13 +578,13 @@ the paths the corpus never exercises.
 
 A session names a form the server creates during the run (a drop, a placement) as
 `"{{created:<baseId>}}"` instead of a fixed id (18:23 PDT 2026-10-29, fork m3-prop-physics
-f559b0d9): the fakeclient keeps the latest form id each CreateActor named per base and
+05184f99): the fakeclient keeps the latest form id each CreateActor named per base and
 resolves the string when it sends (0 and an error event when none came), and the harness
 resolves the same string in a declared divergence per stack, from that client's `created`
 table in its normalized events, before matching. The first T2 of the prop-physics session had
 assumed the generator's next id (0xff000004) and read the claim refused when earlier sessions
 had allocated forms on the same server; the session names its dropped dagger by its base
-(80254) now. The two stacks' generators differ by design, so `created` is never compared. A declared divergence may name per-field tolerances by dotted path (`within: {"data.health": 0.001}`) for the numbers the server takes from its own clock, which no replay reproduces to the digit (D66's counted gap: 8f9c11bd's T2 on a loaded host read 0.94792 where a quiet one read 0.94784, 2026-10-30); every other field matches exactly.
+(80254) now. The two stacks' generators differ by design, so `created` is never compared. A declared divergence may name per-field tolerances by dotted path (`within: {"data.health": 0.001}`) for the numbers the server takes from its own clock, which no replay reproduces to the digit (D66's counted gap: a4541cd0's T2 on a loaded host read 0.94792 where a quiet one read 0.94784, 2026-10-30); every other field matches exactly.
 
 ## Fuzzing
 
@@ -630,18 +630,18 @@ a player is fixed to the depth of the cdylib and no further.
 A form index (`idx`) names a form only within one server's run: each stack
 allocates indices by its own form count, and a server that loads records
 ahead of the engine (the fate pass, train-41) shifts every index against the
-legacy image while the messages stay the same (43's T2 at d2210492: 33
+legacy image while the messages stay the same (43's T2 at 47637942: 33
 sessions differing in idx alone, 293 against 64 for the first player).
 difftest therefore renames every idx in a client's stream to the form id its
 CreateActor (MsgType 33) paired it with (`refr:<id>`, at any depth) before
 the diff: the comparison reads identity, not allocation order. An index no
 CreateActor named stays a number and differs as before; a session
 declaration that names an index literally misses on both stacks and should
-name the form instead. Fork skymp-wire/difftest, m3-train-41 e7a5e211.
+name the form instead. Fork skymp-wire/difftest, m3-train-41 9cd639fa.
 
 ### CreateActor's placedBy for a spell-placed world object (spell-placed-object, M3; ADR-057)
 
-CreateActor (t 33) gains the optional prop `placedBy: u32` (SCHEMA_VERSION 20; fork m3-spell-placed 5b951a9c): the
+CreateActor (t 33) gains the optional prop `placedBy: u32` (SCHEMA_VERSION 20; fork m3-spell-placed 2470b577): the
 server id of the caster whose accepted cast of a listed spell placed the form from the server's `spellPlacedObjects`
 table (Raise Wall's wall MSTT and glow ACTI first). It is nonzero and travels only with `baseRecordType` MSTT or ACTI;
 any other pairing is E_VAL_RANGE in validate_server, and the transport refuses the message from a client by direction.
@@ -652,7 +652,7 @@ places it as any server form. The removal is the usual DestroyActor 5 s after th
 ### PlacedRequest (t 61) and PlacedReport (t 62): the caster's engine names the pose (spell-placed-object, M3; ADR-057 shape A, D70)
 
 Shape C's fixed step fell at T3 (D70: the engine stands Raise Wall 206 ahead along a heading the record's yaw does not carry), so
-since fork m3-wall-pose 23e334b9 (SCHEMA_VERSION 22, 2026-10-31) the server asks and the caster answers. PlacedRequest (id 69,
+since fork m3-wall-pose db8426ad (SCHEMA_VERSION 22, 2026-10-31) the server asks and the caster answers. PlacedRequest (id 69,
 MsgType 61), server to client, reliable, to the caster alone at its accepted cast of a listed spell: `{ set: u64 (the set's id the
 reports name), bases: [u32] (the entry's bases as form ids in the load order both ends share, one to eight, none 0), windowMs: u32
 (1 to 10,000; the rule's 3,000) }`. PlacedReport (id 70, MsgType 62), client to server, reliable, once per base per set: `{ set: u64,
@@ -669,7 +669,7 @@ ignored, so one settings file serves a server of either shape until the train me
 
 ### SkillUse (t 63): a player's skill uses for the server's formulas (leveling, M5)
 
-Since fork m5-leveling 553863f8 (SCHEMA_VERSION 23, 2026-10-31): SkillUse (id 71, MsgType 63), client to server, reliable, once a
+Since fork m5-leveling c60305f5 (SCHEMA_VERSION 23, 2026-10-31): SkillUse (id 71, MsgType 63), client to server, reliable, once a
 second while the player acts: `{ uses: [{ skill: u8 (the skill's ActorValue, 6 One-handed to 23 Enchanting), amount: f32 (the action's
 base amount as the engine computed it, summed over the second) }] }`, one to eighteen entries, each skill once. Validator: no use,
 a skill outside 6 to 23 or listed twice, an amount of 0 or below or over 100,000 are E_VAL_RANGE; non-finite E_VAL_NONFINITE; a
@@ -681,7 +681,7 @@ as ActorValues (t 40). Fixtures 63-SkillUse-0 and -1; WireJsonContractTest reads
 
 ### LockReport (t 64), LockPrompt (t 65) and CreateActor's lock prop (locks, M4)
 
-Since fork m4-locks c324c015 (SCHEMA_VERSION 24, 2026-10-31): the server holds every door's and container's lock (the REFR's XLOC read
+Since fork m4-locks 3578539c (SCHEMA_VERSION 24, 2026-10-31): the server holds every door's and container's lock (the REFR's XLOC read
 by libespm, then the record). CreateActor (t 33) gains the optional prop `lock: { level: u8 (the XLOC byte: 0 or 1 Novice, 25
 Apprentice, 50 Adept, 75 Expert, 100 Master, 255 requires its key), key: u32 (the key's base form id, 0 none), locked: bool }`, absent
 for a reference the game files leave unlocked; the same three fields travel as UpdateProperty "lock" at a change. The client applies
@@ -753,7 +753,7 @@ alone, for a pair the target's activation parents name (XAPR), at most eight a s
 ### CreateActor's restrictedRaces and permittedRaces (character-creation, the permit; M5)
 
 CreateActor (t 33) gains the optional props `restrictedRaces: [u32]` and `permittedRaces: [u32]` (SCHEMA_VERSION 29; fork
-m5-race-permit e46d87d8, 2026-11-01): the races the server restricts to listed profiles (server setting `restrictedRaces`,
+m5-race-permit f48945b3, 2026-11-01): the races the server restricts to listed profiles (server setting `restrictedRaces`,
 docs/verbs/character-creation.md, the permit) and, of those, the ones the receiving player's own profile may wear, as form ids
 in the load order both ends share, cap RACES 128. They travel on a player's own CreateActor (`isMe`) alone and only while the
 server restricts a race; a figure's CreateActor never carries them. validate_server: both or neither, `isMe` true, no id 0 or
@@ -777,7 +777,7 @@ through ObjectAnimationMessage.h. No difftest session triggers it yet (the fake 
 
 ### TrapHit (t 72): the host's report of a trap's hit on another player's body (traps, M4; ADR-059 decision 4)
 
-Since fork m4-trap-hit c085a3ad (21:17 PST 2026-11-01, SCHEMA_VERSION 31): TrapHit (id 80, MsgType 72), client to server, reliable:
+Since fork m4-trap-hit ddbfce5c (21:17 PST 2026-11-01, SCHEMA_VERSION 31): TrapHit (id 80, MsgType 72), client to server, reliable:
 `{ refr: u32 (the trap, a game-file world object, never 0), target: u32 (the hit actor, another player's, never 0), damage: f32
 (the number the host's engine dealt; finite, 0 or above) }`; validator E_VAL_NONFINITE, E_VAL_RANGE, the sender's budget 16 then
 8 a second (E_VAL_RATE, UNMEASURED). The cell's host's engine runs the trap's scripts (TrapBase.fireTrap resolves MovingTrap's
@@ -798,7 +798,7 @@ x-object-anim v3's trap-hit trace.
 
 ### SpellCast (t 23) gains `decal` (the rune's glyph on the observer; queued by Eli 2026-11-02)
 
-Since fork m2-rune-glyph 1d21c9ba (1d21c9ba plus its client build's two fixes) (14:02 PST 2026-11-02, SCHEMA_VERSION 32; 31 is m4-trap-hit's): SpellCastData gains the optional
+Since fork m2-rune-glyph dd5aa100 (dd5aa100 plus its client build's two fixes) (14:02 PST 2026-11-02, SCHEMA_VERSION 32; 31 is m4-trap-hit's): SpellCastData gains the optional
 `decal: { normalX: f32, normalY: f32, normalZ: f32, materialId: u32 }`, the surface the caster's own target-location launch picked,
 read in its game from the engine's decal placement (Skyrim Platform's runeDecal, a hook on Address Library 44186's entry for the
 player's own projectile: the pick's position, its normal scaled to 69.99, the material id from 44190; unitized by the hook).

@@ -10,10 +10,10 @@ _spec = importlib.util.spec_from_file_location("gate_cite", Path(__file__).resol
 gc = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(gc)
 
-IMAGE = "10.10.70.12:5000/skymp-server:m2-train-28-e3a5b367"
+IMAGE = "10.10.70.12:5000/skymp-server:m2-train-28-635a3c10"
 SID = "sha256:acf0"
-DESC = {"c1": "stage-layer-train28 layer 58a62461, m2-train-28 client e3a5b367, 2026-10-19",
-        "c2": "stage-layer-train28 layer 58a62461, m2-train-28 client e3a5b367, 2026-10-19"}
+DESC = {"c1": "stage-layer-train28 layer d48c87dc, m2-train-28 client 635a3c10, 2026-10-19",
+        "c2": "stage-layer-train28 layer d48c87dc, m2-train-28 client 635a3c10, 2026-10-19"}
 SET = {"id": "20261020-001500-layer-stage-layer-train28", "state": "done", "verdict": "watch",
        "scenarios": ["smoke-two-players", "b-shadowbond", "a-melee-reach"],
        "runs": {"smoke-two-players": [{"run": "r1", "verdict": "green"}],
@@ -31,7 +31,7 @@ RESULTS = {r: result() for r in ("r1", "r2", "r3", "r4")}
 GATE = ["smoke-two-players", "b-shadowbond"]
 
 
-def run(rs=SET, results=RESULTS, gate=GATE, head8="e3a5b367", changed=(), registry=SID, live=SID, live_descs=DESC, turbo=()):
+def run(rs=SET, results=RESULTS, gate=GATE, head8="635a3c10", changed=(), registry=SID, live=SID, live_descs=DESC, turbo=()):
     return gc.checks(rs, results, list(gate), "m2-train-28", head8, list(changed), registry, live, dict(live_descs), list(turbo))
 
 
@@ -51,7 +51,7 @@ class GateCite(unittest.TestCase):
         self.assertFalse(rows[1][0])
         self.assertIn("not checked", rows[2][1])
         # a client on two clones is two builds too
-        other = {"c1": DESC["c1"], "c2": DESC["c2"].replace("58a62461", "0badc0de")}
+        other = {"c1": DESC["c1"], "c2": DESC["c2"].replace("d48c87dc", "0badc0de")}
         self.assertFalse(run(results={**RESULTS, "r4": result(desc=other)})[1][0])
 
     def test_a_solo_run_beside_two_seat_runs_is_one_build(self):
@@ -71,16 +71,16 @@ class GateCite(unittest.TestCase):
         bare = "10.10.70.12:5000/skymp-server:m2-train-28"
         results = {r: result(image=bare) for r in RESULTS}
         rows = run(results=results)
-        self.assertTrue(all(ok for ok, _ in rows), rows)    # the clones name e3a5b367, the registry's tag has the id
+        self.assertTrue(all(ok for ok, _ in rows), rows)    # the clones name 635a3c10, the registry's tag has the id
         self.assertFalse(run(results=results, registry="sha256:repushed")[2][0])
-        two = {"c1": DESC["c1"], "c2": DESC["c2"].replace("e3a5b367", "0badc0de")}
+        two = {"c1": DESC["c1"], "c2": DESC["c2"].replace("635a3c10", "0badc0de")}
         self.assertFalse(run(results={r: result(image=bare, desc=two) for r in RESULTS}, live_descs=two)[2][0])
         self.assertFalse(run(results={r: result(image=bare.replace("m2-train-28", "parity")) for r in RESULTS})[2][0])
 
     def test_a_head_past_the_stage(self):
         self.assertFalse(run(head8="1234abcd", changed=["skymp5-client/src/x.ts", "docs/a.md"])[3][0])
         self.assertTrue(run(head8="1234abcd", changed=["docs/verbs/shadowbond.md"])[3][0])
-        # a T2 declaration after the stage builds nothing (m3-npc-talk c1be67d1, 2026-10-27); the wire's code does
+        # a T2 declaration after the stage builds nothing (m3-npc-talk dee28c05, 2026-10-27); the wire's code does
         self.assertTrue(run(head8="1234abcd", changed=["skymp-wire/difftest/sessions/npc-talk.yaml", "docs/a.md"])[3][0])
         self.assertFalse(run(head8="1234abcd", changed=["skymp-wire/difftest/sessions/npc-talk.yaml",
                                                          "skymp-wire/crates/wire-bridge/src/rules.rs"])[3][0])
@@ -91,21 +91,21 @@ class GateCite(unittest.TestCase):
         rs["scenarios"].append("b-push")
         rs["runs"]["b-push"] = [{"run": "r5", "verdict": "red"}, {"run": "r6", "verdict": "red"}]
         results = {**RESULTS, "r5": result(), "r6": result()}
-        rows = gc.checks(rs, results, GATE, "m2-train-28", "e3a5b367", [], SID, SID, dict(DESC), [], ["b-push"])
+        rows = gc.checks(rs, results, GATE, "m2-train-28", "635a3c10", [], SID, SID, dict(DESC), [], ["b-push"])
         self.assertTrue(all(ok for ok, _ in rows), rows)
         self.assertIn("red only on b-push, pending at the merge", rows[0][1])
         # not pending: the red stands
-        self.assertFalse(gc.checks(rs, results, GATE, "m2-train-28", "e3a5b367", [], SID, SID, dict(DESC), [], [])[0][0])
+        self.assertFalse(gc.checks(rs, results, GATE, "m2-train-28", "635a3c10", [], SID, SID, dict(DESC), [], [])[0][0])
         # a second red that is not pending
         two = copy.deepcopy(rs); two["runs"]["b-shadowbond"].append({"run": "r7", "verdict": "red"})
-        self.assertFalse(gc.checks(two, {**results, "r7": result()}, ["smoke-two-players"], "m2-train-28", "e3a5b367", [], SID, SID,
+        self.assertFalse(gc.checks(two, {**results, "r7": result()}, ["smoke-two-players"], "m2-train-28", "635a3c10", [], SID, SID,
                                    dict(DESC), [], ["b-push"])[0][0])
         # a lab fault that stayed beside it
         err = copy.deepcopy(rs); err["runs"]["b-shadowbond"].append({"run": "r7", "verdict": "error"})
-        self.assertFalse(gc.checks(err, {**results, "r7": result()}, ["smoke-two-players"], "m2-train-28", "e3a5b367", [], SID, SID,
+        self.assertFalse(gc.checks(err, {**results, "r7": result()}, ["smoke-two-players"], "m2-train-28", "635a3c10", [], SID, SID,
                                    dict(DESC), [], ["b-push"])[0][0])
         # a pending scenario the merge names itself must still be green
-        self.assertFalse(gc.checks(rs, results, GATE + ["b-push"], "m2-train-28", "e3a5b367", [], SID, SID, dict(DESC), [], ["b-push"])[0][0])
+        self.assertFalse(gc.checks(rs, results, GATE + ["b-push"], "m2-train-28", "635a3c10", [], SID, SID, dict(DESC), [], ["b-push"])[0][0])
 
     def test_the_gate_lists_read_as_verb_merge_reads_them(self):
         lists = gc.gate_lists()
@@ -124,12 +124,12 @@ class GateCite(unittest.TestCase):
         self.assertTrue(all(ok for ok, _ in rows), rows)
         self.assertEqual([m[:2] for _, m in rows], ["1.", "2.", "3.", "4.", "5."])
         # a gate that played another commit than the one the merge takes stops it
-        moved = gc.own_gate(run(head8="7e59c32c", changed=["skymp5-client/src/services/services/puppetService.ts"]))
+        moved = gc.own_gate(run(head8="03e7d163", changed=["skymp5-client/src/services/services/puppetService.ts"]))
         self.assertFalse(moved[3][0])
-        self.assertIn("differs from e3a5b367 in more than docs", moved[3][1])
+        self.assertIn("differs from 635a3c10 in more than docs", moved[3][1])
 
     def test_a_turbo_push_or_a_new_stage_after_the_set_began(self):
-        self.assertFalse(run(turbo=["2026-10-20T00:30:00Z client 20261020T003000Z 711 e3a5b367"])[4][0])
+        self.assertFalse(run(turbo=["2026-10-20T00:30:00Z client 20261020T003000Z 711 635a3c10"])[4][0])
         self.assertFalse(run(live="sha256:other")[4][0])
         self.assertFalse(run(live_descs={"c1": "x", "c2": "y"})[4][0])
 
@@ -140,7 +140,7 @@ def re_ok(name):
 
 
 UTC = datetime.timezone.utc
-LAYER_DESC = "stage-layer-train28 layer 58a62461, 2026-10-19"
+LAYER_DESC = "stage-layer-train28 layer d48c87dc, 2026-10-19"
 LAYER_RUN = {"verdict": "green", "started": "2026-10-19T23:00:00Z",
              "build": {"server": {"image": "10.10.70.12:5000/skymp-server:m2-train-27", "id": "sha256:0ld"},
                        "clients": {c: {"snapshot": "clean-m1-next", "description": LAYER_DESC} for c in ("c1", "c2")}}}
@@ -166,7 +166,7 @@ class LayerCite(unittest.TestCase):
         self.assertFalse(layer(run=two)[0][0])
         train = copy.deepcopy(LAYER_RUN)
         for c in train["build"]["clients"].values():
-            c["description"] = "m2-train-28 client e3a5b367, 2026-10-19"
+            c["description"] = "m2-train-28 client 635a3c10, 2026-10-19"
         self.assertFalse(layer(run=train)[0][0])
 
     def test_a_layer_change_since_the_stage_or_new_mods_on_persist(self):
@@ -196,7 +196,7 @@ REST = {"id": "20261027-093000-gate-m3-npc-path-rest", "state": "done", "verdict
 
 
 class SameContent(unittest.TestCase):
-    """Check 3 reads one build under two manifest digests by its content (m3-npc-talk c1be67d1, 2026-10-27)."""
+    """Check 3 reads one build under two manifest digests by its content (m3-npc-talk dee28c05, 2026-10-27)."""
 
     def test_equal_fingerprints_are_one_build(self):
         fp = '2026-10-27T13:53:14.007239683-07:00 ["sha256:aa","sha256:bb"]\n'
@@ -219,11 +219,11 @@ class ChainCite(unittest.TestCase):
         self.assertEqual([e["run"] for e in rs["runs"]["a-melee-reach"]], ["r3", "r4", "r6"])
         self.assertEqual(rs["summary"]["counts"], {"green": 4})
         results = {f"r{i}": result() for i in range(1, 8)}
-        rows = gc.checks(rs, results, ["smoke-two-players", "b-spell"], "m2-train-28", "e3a5b367", [], SID, SID, dict(DESC), [])
+        rows = gc.checks(rs, results, ["smoke-two-players", "b-spell"], "m2-train-28", "635a3c10", [], SID, SID, dict(DESC), [])
         self.assertTrue(all(ok for ok, _ in rows), rows)
         # one build across both sets: a rest played on another stage is two
         self.assertFalse(gc.checks(rs, {**results, "r7": result(sid="sha256:other")}, ["b-spell"], "m2-train-28",
-                                   "e3a5b367", [], SID, SID, dict(DESC), [])[1][0])
+                                   "635a3c10", [], SID, SID, dict(DESC), [])[1][0])
 
     def test_a_set_that_ended_with_its_own_verdict_took_no_rest(self):
         green = {**CUT, "verdict": "green"}
@@ -249,7 +249,7 @@ class ChainCite(unittest.TestCase):
         self.assertEqual(why, "")
         self.assertEqual([e["run"] for e in rs["runs"]["b-spell-placed-wall"]], ["r8"] * 3)
         results = {f"r{i}": result() for i in range(1, 9)}
-        rows = gc.checks(rs, results, ["smoke-two-players", "b-spell"], "m2-train-28", "e3a5b367", [], SID, SID,
+        rows = gc.checks(rs, results, ["smoke-two-players", "b-spell"], "m2-train-28", "635a3c10", [], SID, SID,
                          dict(DESC), [], pending=["b-spell-placed-wall"])
         self.assertTrue(rows[0][0], rows[0])
         # unpended, the same rest is short of it
@@ -263,7 +263,7 @@ class ChainCite(unittest.TestCase):
         rs, _ = gc.chain([CUT, red])
         self.assertEqual(rs["verdict"], "red")
         results = {f"r{i}": result() for i in range(1, 8)}
-        self.assertFalse(gc.checks(rs, results, ["b-spell"], "m2-train-28", "e3a5b367", [], SID, SID, dict(DESC), [])[0][0])
+        self.assertFalse(gc.checks(rs, results, ["b-spell"], "m2-train-28", "635a3c10", [], SID, SID, dict(DESC), [])[0][0])
 
     def test_one_set_reads_as_itself(self):
         rs, why = gc.chain([SET])

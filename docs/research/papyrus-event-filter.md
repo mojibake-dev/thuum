@@ -60,7 +60,7 @@ the SKSE mod-event callback `OnConfigManagerReady`, the one call that registers 
   handles was enough for their menus).
 - History and why. Upstream 431c1a49 (2021-04-20, "[FIX] Allow SkyUI events (#91)") added the SKI_
   loop verbatim onto an older total blank; the fork added GRIM_ALT (d1fb786c, 2026-10-12), the
-  ActiveEffect halves (2fe894e1, 320cfda8) and WB_DestroyAfterDelay_Script (abe87806, 2026-10-19:
+  ActiveEffect halves (2fe894e1, 320cfda8) and WB_DestroyAfterDelay_Script (a0e1f892, 2026-10-19:
   Lightning Strike's bolt activator hung in the sky of the game that placed it; "R3, visual, in every
   game", FridaHooks.cpp:125-133). The filter exists because the server owns state: quests are per-
   player by default and world-shared by allowlist (ADR-008, DECISIONS.md:91-97); "each client's game

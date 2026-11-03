@@ -276,7 +276,7 @@ class Settings:
     # every connect and reconnect 3 s slower (the nightly 20261026-104926: 197 steps at 3.04 s or more, 0.009 s
     # before), which pushed m0-death's check past the server's 25 s respawn (145408); and its close posts a kHide
     # that IDRC's box ignores ("it stayed after a close", x-quit-scan 021707), while the box has not come since the
-    # Frida watcher went headless (20f10f31). The end check still reads a box (E_RUN_PAUSED). CLEAR_START_BOX=1 turns
+    # Frida watcher went headless (c69a18f1). The end check still reads a box (E_RUN_PAUSED). CLEAR_START_BOX=1 turns
     # it back on for a seat that needs it.
     clear_start_box: bool = False
     start_box_wait_s: float = 3.0

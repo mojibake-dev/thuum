@@ -1,7 +1,7 @@
 # Playtest thirty-six's seats, the turbo day (memo D49; docs/private/playtest-m3-36.md): copied from 35's profile with
 # 36's world and build; the hold is renewed or released for the probes in Eli's gaps.
 # Playtest thirty-five's seats (thuum ADR-040 item 6: `just playtest-setup 35`; the checklist is
-# docs/private/playtest-m3-35.md): M3's NPCs across the board, the NPC ladder's playtest, on fork parity m3-npc-cast bf133744 (53's stage)
+# docs/private/playtest-m3-35.md): M3's NPCs across the board, the NPC ladder's playtest, on fork parity m3-npc-cast 5fb85e2c (53's stage)
 # (trains 51 to 55 and 53: the server's roll on every screen, the host's engine dying by itself and reporting it, the
 # puppet's head and face, the guest's dialogue claim, the hosted archer's and mage's shots). The world is the lab's
 # clean world saved as a playtest world (playtest-m3-35-clean-20261028T040030Z: `just lab-up` then `just playtest-save m3-35-clean`), so every
@@ -21,11 +21,11 @@
 # CommonLibSSE-NG ActorValues.h:16), so the Marksman 60 below changes nothing on her.
 # Everything here is server-side (labCommand); the seats type nothing.
 id: 36
-build: "fork m3-turbo-knobs defaa7e2 on its stage (train 56, the turbo day D49: no gate before play; its probes in the gaps, the gate at night) over parity bf133744 with the NPC ladder and the D37 layer merged"
+build: "fork m3-turbo-knobs aae7191b on its stage (train 56, the turbo day D49: no gate before play; its probes in the gaps, the gate at night) over parity 5fb85e2c with the NPC ladder and the D37 layer merged"
 world: playtest-m3-36-rotfern-prisoner-20261028T131908Z   # 35's end world (rotfern and Prisoner at their newest), both characters' Survival needs zeroed
 hold:
   minutes: 300
-  reason: "playtest thirty-six: M3's NPCs across the board (fork parity m3-npc-cast bf133744 (53's stage), the NPC ladder)"
+  reason: "playtest thirty-six: M3's NPCs across the board (fork parity m3-npc-cast 5fb85e2c (53's stage), the NPC ladder)"
 server:
   # this server alone runs with NPCs on and the morning clock (ADR-035 point 9): playtest-setup lays the run-own
   # settings overlay (server-settings-run.json beside the world) and starts the server on it

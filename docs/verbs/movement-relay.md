@@ -133,7 +133,7 @@ unchecked (the next movement verb).
 - Passed: with magic readied, test 1's crouch and its stand showed on test
   2's screen within about a quarter second.
 
-## The figure's glide knobs (2026-10-28, fork m3-follow-mode c84da2c3)
+## The figure's glide knobs (2026-10-28, fork m3-follow-mode c05380f7)
 
 The other player's figure is moved once per sample (about every 130 ms plus a frame) by one engine translateTo
 (skymp5-client/src/sync/movementApply.ts, translateTo), the planner fed an offset so the AI plays the walk. The knobs

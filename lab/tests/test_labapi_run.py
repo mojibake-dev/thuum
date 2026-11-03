@@ -2614,7 +2614,7 @@ class ClientResets(RunTests):
         self.services.runner.s = dataclasses.replace(self.settings, client_reset=mode, **extra)
         self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
         pve = self.services.control._b
-        pve.snaps[901] = [{"name": "clean-sp", "parent": None, "description": "m3-turbo client b588e0ff, 2026-10-29"},
+        pve.snaps[901] = [{"name": "clean-sp", "parent": None, "description": "m3-turbo client cf29e5f6, 2026-10-29"},
                           {"name": "current", "parent": "clean-sp"}]
         return pve
 
@@ -2661,7 +2661,7 @@ class ClientResets(RunTests):
                         body2["notes"])
         # the snapshot the disk descends from, as a rolled-back seat records it (gate-cite.py's check 2)
         self.assertEqual(body2["build"]["clients"], body1["build"]["clients"])
-        self.assertEqual(body2["build"]["clients"]["c1"]["description"], "m3-turbo client b588e0ff, 2026-10-29")
+        self.assertEqual(body2["build"]["clients"]["c1"]["description"], "m3-turbo client cf29e5f6, 2026-10-29")
         result = json.loads((self.tmp / "results" / body2["run"] / "result.json").read_text())
         self.assertEqual(result["client_reset"]["c1"]["kind"], "relaunch")
         # the count goes on: the next run is the second since the rollback
@@ -2804,13 +2804,13 @@ class ClientResets(RunTests):
 
     def test_a_hot_push_mark_rolls_the_seat_back_in_the_same_run(self):
         pve = self._warm()
-        pve.hot_mark = "20261028T182237Z 26e3d0cf C:\\Games\\Skyrim Special Edition 1.6.1170\\Data\\Platform\\Plugins\\skymp5-client.js"
+        pve.hot_mark = "20261028T182237Z 29207fe2 C:\\Games\\Skyrim Special Edition 1.6.1170\\Data\\Platform\\Plugins\\skymp5-client.js"
         mark = len(pve.calls)
         reset, body = self._reset()
         self.assertEqual((body["verdict"], reset["kind"]), ("green", "rollback"), body)
         self.assertEqual(len(pve.relaunches), 1, "the relaunch read the mark and stopped nothing")
         self.assertEqual(self._vm_resets(pve, mark), [("stop", 901), ("rollback", 901, "clean-sp"), ("start", 901)])
-        self.assertIn("C:\\sky-lab\\hot.txt marks a hot push on it (20261028T182237Z 26e3d0cf", reset["reason"])
+        self.assertIn("C:\\sky-lab\\hot.txt marks a hot push on it (20261028T182237Z 29207fe2", reset["reason"])
 
     def test_a_vm_that_is_not_running_rolls_back(self):
         pve = self._warm()

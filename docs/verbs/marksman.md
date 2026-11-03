@@ -475,7 +475,7 @@ figure's own arrow dropped" and reports nothing (nothing flew).
 ## Playtest thirty-two's tenth arrow (2026-10-22)
 
 rotfern (test 1; the Long Bow 0x3B562 and iron arrows 0x1397D, both picked
-up in the world) shot Embershard's bandits on parity fb6f3f09: shots
+up in the world) shot Embershard's bandits on parity a76125cb: shots
 accepted from 01:51:56.180 to 01:52:16.080 UTC (eight stamps in the log
 read, "OnPlayerBowShot - ff000000 shot 1397d from 3b562"), the headshot
 kill of 39fe4 among them at 01:52:11.449. The next, at 01:52:19.646, was
@@ -498,7 +498,7 @@ dumped after each shot and the client's UpdateEquipment sends logged, on a
 train that logs accepted equipment updates at debug. A row of marksman's
 until then.
 
-## Playtest 37's refused volleys (finding 45, 2026-10-28; fork m3-hands d902d919)
+## Playtest 37's refused volleys (finding 45, 2026-10-28; fork m3-hands f6e80c57)
 
 Eli: "i just had a moment where headshots didnt work." The server: 32 E_SHOT_EQUIPMENT refusals in one evening,
 ten in a row at 01:14:55Z to 01:15:32Z while rotfern swapped Flames and the bow, two more after a relaunch. The
@@ -507,7 +507,7 @@ inventory lacked, 64b3f five times in two seconds; a spell slot not learned) and
 worn item of that report, the bow included, so the record's hands froze at the pre-swap state; and after a relaunch
 the client's onLoadGame sends the engine's hands 3 s after the load ("Currently only armor is equipped after
 relogging", sendInputsService.ts), which writes the record's hands without the bow until the next equip event. The
-fix on m3-hands d902d919, server-only: OnPlayerBowShot judges a bow or arrow the hands lack by the INVENTORY (a count
+fix on m3-hands f6e80c57, server-only: OnPlayerBowShot judges a bow or arrow the hands lack by the INVENTORY (a count
 of at least one accepts, logged "hands stale: shot from <bow> accepted on the inventory" once per shooter per 10 s;
 a bow or arrow the inventory lacks is E_SHOT_NO_BOW or E_SHOT_NO_ARROW; E_SHOT_EQUIPMENT retired, b-npc-archer's
 claim renamed in its own commit); OnHit's shot gate reads the inventory the same way; OnUpdateEquipment drops each
@@ -523,14 +523,14 @@ setInventory, but the platform's SetInventory equips the player (0x14) with forc
 the player armor sticks while weapons do not (upstream's own comment in sendInputsService's onLoadGame, "Currently only
 armor is equipped after relogging"); three seconds after the load that service reports the engine's hands, empty, and
 OnUpdateEquipment replaces the record's equipment whole, so the bow is gone from the record and every shot was judged
-against an empty hand. Fix on fork m3-hands b7d14614: the player's hands are set as applyHands sets a puppet's, a
+against an empty hand. Fix on fork m3-hands 6b4da374: the player's hands are set as applyHands sets a puppet's, a
 tenth of a second after setInventory (its adds land on gameThrQ after the JS tick): the worn weapon to the right hand,
 the wornLeft entry to the left, the worn ammo by equipItem, each only when the hand does not hold it and the item is in
 the inventory, nothing added. HYPOTHESIS (H-45a) that equipItemEx sticks where the un-forced equip did not, until
 x-hands-relaunch: the record's worn keeps 0x3b562 across a relaunch step and the first shot after it is accepted with
 no E_SHOT_NO_BOW and no "hands stale" line.
 
-## Train 53 (2026-10-26, fork m3-npc-cast 78cec009; docs/verbs/npc-stream.md slice 6)
+## Train 53 (2026-10-26, fork m3-npc-cast 6702399f; docs/verbs/npc-stream.md slice 6)
 
 The shot names its shooter (PlayerBowShot's idx, SCHEMA_VERSION 18) so a
 hosted NPC's shot travels the same path as a player's: the host's game

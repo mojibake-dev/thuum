@@ -3,8 +3,8 @@
 ADR-050 (Eli, 02:22 PDT: "proceed with the pivot. open ADR-050 and start
 npc-stream") was built the same day: npc-stream's three slices (the host's
 actions, values and hands travel as themselves; the puppets perform them
-through the engine's own entries) on fork m3-npc-stream 66f04f2a, and the
-voice slice on its own branch m3-npc-voice a7cba312. The first stage crashed
+through the engine's own entries) on fork m3-npc-stream 03895571, and the
+voice slice on its own branch m3-npc-voice 21d7e7c5. The first stage crashed
 the puppet seat three times (the variables descriptor wrote the humanoid
 master behaviour's fixed indexes into creature graphs, no bounds check; v2
 gates the graph by project and size); the second and third stages ran clean
@@ -160,11 +160,11 @@ it: the brake merges only on D36's letter, the mod stays until D37's.
 
 ### D36. The pass thrash at a cell border (D22 revisited, 14:27 PDT)
 D22's letter ("recommended" = A, no brake) stood on x-handoff-cross v2's read of one pass in three
-minutes. Numidium's read of b-npc-handoff-cross's GREEN nightly run on aaafffe5 (20261026-132333)
+minutes. Numidium's read of b-npc-handoff-cross's GREEN nightly run on c40a36a3 (20261026-132333)
 found 836 "passes 13482 into cell" lines: Alvor working the border between 9731 and 9732 changed
 hosts tens of times a second, every flip a demote on one seat and a promote on the other, which the
 scenario's claims never counted. Pre-existing on main, not the stream's. The brake is built ahead on
-fork m3-pass-margin 11bf32f3 (two rules tests green; x-handoff-cross v3 counts the passes).
+fork m3-pass-margin ec4e0c1d (two rules tests green; x-handoff-cross v3 counts the passes).
 - A. Leave as today: the pass fires at every crossing sample; an actor on a border flaps hosts.
 - B. A tenure of 10 s after a pass, during which the sender keeps the actor (a clock, read differently
   on two servers in T2).
@@ -229,12 +229,12 @@ item, as a rerun's green is inside one set).
   stands, not what it claims.
 
 - Decision: B (Eli, 00:44 PDT: "D38 B i suppose"). After the card's recovery, `just deploy-srv` runs before the rest:
-  since the stage's deploy (main 84330e1d) only three scenario files changed, b-npc-body-release (d85701d's
+  since the stage's deploy (main 751faa1d) only three scenario files changed, b-npc-body-release (d85701d's
   approach), b-npc-stream-equipment (e42dbca's two claims on the server-made bandit) and the new b-npc-copy-fate,
   which is not in the rest; the rest plays the first two as main has them.
 
 ### D39. Train 52's probes red on their premise (01:45 PDT, numidium)
-On 52's stage (m3-npc-death f9859083) P7 v5 was green, and all three death probes were red the same way: Sven
+On 52's stage (m3-npc-death dd51e45e) P7 v5 was green, and all three death probes were red the same way: Sven
 (0x13491) walked his package away from the one approach, so no swing or shot from either seat reached the server
 (x-npc-death-guest 083747, x-npc-death-host 084109, x-npc-headshot-host 084400; zero OnWeaponHit on 13491).
 thuum-06's v3 of all three holds him first (start-combat on the host, so he stands and fights its god-mode player;
@@ -265,7 +265,7 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   server's and the death stands on both screens", npc-fate.md), so the change aligns the claim with the
   design rather than weakening it (x-npc-death-host v3 20261027-091759 took the second path).
 - 02:32 PDT: the bodies' distance is 52's code (a dead ragdoll takes no setPosition), fixed on
-  m3-npc-death cc1d9025 and restaged; a code fix restages, a premise fix reruns.
+  m3-npc-death 8561473a and restaged; a code fix restages, a premise fix reruns.
 - 04:25 PDT 2026-10-27: b-npc-copy-fate's victim claim restated from the player to any target
   ("OnWeaponHit - ff00000[2-9a-f] hits"): in 52's gate (111854) four residents reached the placed bandit
   first and it fought them, its swings counted as train 51 means (E_HIT_WEAPON judged the aggressor's
@@ -284,10 +284,10 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   re-settle a seat's corpse; the record follows the host) is recorded in npc-fate.md for playtest 35.
 - 05:07 PDT 2026-10-27: b-npc-respawn 115833 (52's gate's third red) read as 52's own code: the life check's
   guard skipped the stand-up on the host, which binds a corpse when it logs in after the sweep (the
-  respawn's container reaches the host of the moment only). Fixed on m3-npc-death 7cd47e24 (the check
+  respawn's container reaches the host of the moment only). Fixed on m3-npc-death 774bc940 (the check
   resurrects any copy whose record says alive; it still never kills a simulated one). D40: a code red
   WITH a fix in hand is a restage, not a stop; numidium cuts or finishes the gate, I push on its word,
-  52 restages on 7cd47e24 and runs its probes with b-npc-respawn and the two premise fixes, then its gate.
+  52 restages on 774bc940 and runs its probes with b-npc-respawn and the two premise fixes, then its gate.
   The reset case of a live copy on a dead record on the simulating seat is named in npc-fate.md, unprobed.
 - 05:13 PDT 2026-10-27: b-npc-stream-actions 120242 (the cut gate's fourth red, 1 of 6) read as a premise red:
   the "block anim" print names no actor, and a creature's own blocked attack at c2's connect point, far from
@@ -301,7 +301,7 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   held the cell as pinned). A lab premise, not 52's: main c1f44fb gives c2 fifteen seconds after its
   reconnect before the move, the claims unchanged; finish-train's rerun plays it.
 - 07:00 PDT 2026-10-27: b-host-own-hit 135408 (52's gate's first red) read as a premise red: the campfire pair's
-  detection of c1 is the camp's own timing (no target in 90 s; green at 110935 on the cut gate; 7cd47e24
+  detection of c1 is the camp's own timing (no target in 90 s; green at 110935 on the cut gate; 774bc940
   changed only the life check). Main 9a2441d has the host's game start the fight (approach to 200 units,
   start-combat on both, inCombat asserted), the claims unchanged. A lone red reruns at the gate's end under
   ADR-027; numidium decides whether the rerun plays the deployed file or this one.
@@ -349,7 +349,7 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   lands in the next train before playtest 35.
 - 09:20 PDT 2026-10-27: rest3's b-npc-death-engine 161323 lost the killer with the sword as well (the report 77 ms
   after the pending line, no killer; the green 123746's came 2.3 s later from the engine's own kill move): H1
-  refuted for the killer, the server's credit (54's 240a31de) the fix. Call: the killer line loosened on main
+  refuted for the killer, the server's credit (54's a9e47e0e) the fix. Call: the killer line loosened on main
   895f135 to the pending line's aggressor or the report's killer until 54 merges, a loosening named here as
   copy-fate's was; the strict line returns in 54's scenario commit with x-npc-death-blow proving the credit.
   Not a restage of 52: the fix is in the next train and 52's death path otherwise holds on every claim.
@@ -357,7 +357,7 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   scenario green by weakening its assertions"): a claim relaxed only to wait for its fix is exactly that, where
   copy-fate's was restated to what 51 changed; D40 settles open calls and lifts no hard rule. Main 3055859
   reverts it whole; the killer line is strict. 52 ships inside 54 as one merge train (ADR-030): m3-npc-face
-  carries 7cd47e24 and the credit 240a31de, 54's gate plays the strict line on the build with the credit, and
+  carries 774bc940 and the credit a9e47e0e, 54's gate plays the strict line on the build with the credit, and
   parity goes 51 to 54 with 52's commits inside; no further rest for 52. 52's premise-fix watch items stand.
 - 10:43 PDT 2026-10-27: x-npc-stream-face 173514 (54's stage) read as a premise red: the gaze path ran for the
   creatures near the host (targets streamed, relayed, taken by c2's puppets at slot 3) while the residents
@@ -409,16 +409,16 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   three minutes. One probe after the ladder reads it at T3: an actor walked or moved 300 units into the other
   host's square (npc-pose or a placed NPC's travel package), the pass line once, the follow lines before it, and
   the seats' AI swapping once. numidium holds it on the after-ladder list with the lab-api items.
-- 14:26 PDT 2026-10-27: x-npc-corpse-drift 211727 GREEN on 55's stage: with the promote fix (c1be67d1) the corpse
+- 14:26 PDT 2026-10-27: x-npc-corpse-drift 211727 GREEN on 55's stage: with the promote fix (dee28c05) the corpse
   stayed at one point through 24 reads over four minutes on both seats, a restart and the host's reconnect
   included. H-54e's fix holds at T3; its mechanism (the promote switching AI on a dead actor at the reconciler's
   flip) stays the code's one candidate. b-npc-death's fall-point bounds stay strict with that.
-- 15:00 PDT 2026-10-27: 55's T2 (job 12909 at c1be67d1) red on the npc-talk session alone: two wire-only notices
+- 15:00 PDT 2026-10-27: 55's T2 (job 12909 at dee28c05) red on the npc-talk session alone: two wire-only notices
   undeclared (c2's HostGrant at epoch 2 and the DestroyActor of c1's actor), both the session's end as
   cell-host.yaml declares them; the claim handler grants no cell (OnActorClaim; PartOne's one HostGrant sender is
-  the cell-host routine), so neither is the claim's. A sessions-only commit on m3-npc-talk (1b866786) declares
+  the cell-host routine), so neither is the claim's. A sessions-only commit on m3-npc-talk (c85dab3d) declares
   them. Call with numidium: gate-cite accepts skymp-wire/difftest/sessions/** differences (they build nothing),
-  T2 reruns with SESSIONS=tree at the new head, and 55's stage keeps c1be67d1's images; no restage.
+  T2 reruns with SESSIONS=tree at the new head, and 55's stage keeps dee28c05's images; no restage.
 - 16:09 PDT 2026-10-27: x-npc-talk-claim v3 230022 (55's stage) red at its own stillness assert, before any claim:
   with the host's npc-ai off Sven still walked a loop over the 9731/9732 border at 9.0 (195 x and 122 y in five
   seconds, package 0), the second time the lever failed to stop a walker. Call (numidium's a, b, c): a, a driver
@@ -435,7 +435,7 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
 - 16:44 PDT 2026-10-27: x-npc-talk-claim v6 233908 GREEN on 55's stage: the dialogue claim works end to end (the
   grant 157 ms after the E, the menu open on the guest, the release at its close, the host live again). Promoted
   as b-npc-talk (main, its own commit) for 53's gate. 55's three probes green (talk-claim, handoff-cross v4, the
-  corpse-drift read); the gate runs on c1be67d1 and merges 1b866786 under the paper rule.
+  corpse-drift read); the gate runs on dee28c05 and merges c85dab3d under the paper rule.
 - 17:29 PDT 2026-10-27: b-npc-death-blow 002258 (55's gate) red on the credit line alone: all six measured swings
   landed and the two for the numbered hit made the eighth lethal, which rolled the engine's kill move; my
   arithmetic (eight sevens are 56, not under 50). Main dca3b06: four measured swings, 42 at most before
@@ -445,7 +445,7 @@ Calls recorded under D40 (thuum-magnus and numidium between them):
   0x9712 (Riverwood02, grid 5,-11) is moved by c1's own engine to 300 inside c2's 0x9731 (Riverwood04, grid 5,-12;
   grids by esm.py's XCLC, the border at y -45056) with npc-pose's TranslateTo at 150 u/s, her AI off and
   SetDontMove on the host first (HYPOTHESIS: a TranslateTo under a running AI is fought; the reads tell). Read at the
-  fork (parity 1b866786): the deep pass writes no "passes" line (ActionListener's cell-host line sits under
+  fork (parity c85dab3d): the deep pass writes no "passes" line (ActionListener's cell-host line sits under
   hostedCellChange, false once the follow moved the record); its line is D9's "now simulates 13483 in cell 9731; the
   sender's game is told to demote", written at every Pass verdict. Claims: the margin follow line, D9's line once,
   no refusal, the follow row gone (server.follow), c2 hosting 9731 still, the seats' AI swapped, the record and c2's
@@ -483,7 +483,7 @@ scenarios), death sync (b-npc-death-engine, -guest, -report, -blow, b-npc-death)
   refusal (fixed, 03ba40f) cost one aborted set.
 
 ### D44. 53's archer red: fix and restage before 35, with a cutoff (19:52 PDT 2026-10-27, thuum-magnus under D40)
-53's stage (m3-npc-cast ecec018e) read: x-npc-caster 024159 GREEN; x-npc-archer 023756 RED on its two shot
+53's stage (m3-npc-cast 5bc6e8e9) read: x-npc-caster 024159 GREEN; x-npc-archer 023756 RED on its two shot
 claims, a CODE red with the fix in hand. The archer fired seven arrows on the host (PROJ 50 in flight on c1's
 polls; the puppet's attackRelease taken 1 on c2) and every launch threw in the client's projectileLaunched
 handler ("'Game.getFormEx' can't be called in this context", c1.log, seven lines 19:40:36 to 19:40:55), so no
@@ -494,7 +494,7 @@ the player's own shot keeps its launch and does its natives on the update tick, 
 with controller.once("update"). Options: A, fix (the hosted branch keeps the launch and reports on the next
 update, the file's own idiom) and restage 53, 35 after the probes and T2 (about 21:45 PDT by numidium's
 clock); B, 35 now on 53's stage as it stands, NPC bows a known limit, spells in; C, 35 on 55's parity without
-bows or spells. Decision: A (the goal names bows), fork m3-npc-cast bf133744; numidium relaunches ladder 53 on it
+bows or spells. Decision: A (the goal names bows), fork m3-npc-cast 5fb85e2c; numidium relaunches ladder 53 on it
 with the no-gate switch (the Windows build, the stage, x-npc-archer, x-npc-caster, T2, TRAIN END 21, the 35
 set-up re-armed). Cutoff 22:30 PDT: not green by then, B on the stage standing, numidium saying so first.
 
@@ -506,15 +506,15 @@ set-up re-armed). Cutoff 22:30 PDT: not green by then, B on the stage standing, 
   D43 PROPOSED there: A leave as today, B rest-only (TES3MP's shape, corpse-rest and item-rest as two whole verbs
   in M4, 7 to 11 days), C the whole arc with motion streams (20 to 30 days plus RE), D ragdoll pose; recommended
   B. Eli decides later; nothing before playtest 35 depends on it.
-- 20:31 PDT 2026-10-27 (D44's outcome): A held. The restage at bf133744 (20:12 PDT) read x-npc-archer 032303 GREEN
+- 20:31 PDT 2026-10-27 (D44's outcome): A held. The restage at 5fb85e2c (20:12 PDT) read x-npc-archer 032303 GREEN
   (four hosted shots reported, the placed archer's taken under its id, one relayed arrow in flight on c2, no arrow of
-  the puppet's own) and x-npc-caster 032625 GREEN (H-53b confirmed); the first stage's T2 was green on ecec018e and
-  the fix is client-only. T2 on bf133744 runs, then numidium's 35 set-up; well inside the 22:30 cutoff.
-- 21:06 PDT 2026-10-27 (D41 and D44 closed): playtest 35 is set up on 53's stage bf133744 (T2 green at 20:58 after
+  the puppet's own) and x-npc-caster 032625 GREEN (H-53b confirmed); the first stage's T2 was green on 5bc6e8e9 and
+  the fix is client-only. T2 on 5fb85e2c runs, then numidium's 35 set-up; well inside the 22:30 cutoff.
+- 21:06 PDT 2026-10-27 (D41 and D44 closed): playtest 35 is set up on 53's stage 5fb85e2c (T2 green at 20:58 after
   numidium's build-picker fix, main bd4b7e8), seats ready 21:03:09 PDT, the hold to 00:02 PDT; the build frozen until
   Eli's report; 53's gate and merge after it, then the D37 layer (D41).
 - 21:12 PDT 2026-10-27: 35 re-set on rotfern and Prisoner's composed world (Eli's ask to numidium at 21:05); seats
-  ready 21:10:06 PDT, the hold to 00:09 PDT; the build unchanged (53's stage bf133744), frozen until the report.
+  ready 21:10:06 PDT, the hold to 00:09 PDT; the build unchanged (53's stage 5fb85e2c), frozen until the report.
 - 21:31 PDT 2026-10-27: playtest 35 called early by Eli with three asks and a fourth read (checklist's Result): a late
   joiner's missing in-progress action, the guest's claim never sent for Sven, dialogue voice relaying the first
   line only, rotfern's head node 0.94 after every teleport. The log read runs (pt35-read-1); D45 (the fix train's
@@ -591,7 +591,7 @@ inventory, the container menu's live updates while another player moves items a 
   archer probe's causes (an NPC attacker) applied. The fix maps the local player to 0x14 and lets a cause with no
   attacker apply the server's number anyway (no killer credited). f moves into train 56 (small, pinned); b (the
   voice's later lines) stays 57's behind the re-analyst's read.
-- 22:11 PDT 2026-10-27 (D45 built): train 56 on fork m3-pt35-fixes 6bc6657c, items a, c, d, e and f (f moved in once
+- 22:11 PDT 2026-10-27 (D45 built): train 56 on fork m3-pt35-fixes 5ec2cbef, items a, c, d, e and f (f moved in once
   the logs pinned it); five probes by path, probe-check ok. One shape lesson: CreateActor takes no new typed field
   (wire-legacy decodes the lab's capture positionally; the late-join action is a custom property). 57: the voice's
   later response lines (the re-analyst's read runs now) and item g's measurement. Lab order unchanged: 53's gate
@@ -639,7 +639,7 @@ minute, a server or Skyrim Platform change in about ten, the compile being physi
 server log and the seats' consoles, one turbo-log line per push, merges at the end of the day, the nightly the
 only net; the costs named (Eli's time the limit, regressions a day late, a thin scenario library, authority bugs
 that corrupt a world quietly). Eli: "yea cook on shit and we'll do a turbo day tomorrow". Decision: 2026-10-28 is
-a turbo day on 56's stage (7b61b533 over parity bf133744), no gate before play; the voice trace runs first thing
+a turbo day on 56's stage (08ffb980 over parity 5fb85e2c), no gate before play; the voice trace runs first thing
 for 57; authority changes (a claim, a death, an inventory or persistence rule) still take CI's T0 and T2 before a
 push; the gate and the merge at night; the runbook is docs/research/process/turbo-day.md.
 
@@ -647,18 +647,18 @@ push; the gate and the merge at night; the runbook is docs/research/process/turb
 Eli: "given you're cooking all night on this, id LIKE to add head tracking/mouth movement and the pausing to this
 build as well. i feel like those are reasonable asks". Head tracking: the host's engine tracks heads near ITS player
 only (H-54d), so on the guest's screen a resident far from its host stood stiff (35: "HIS face and head doesn't move
-the way hilde's does", Hilde being live under Prisoner's claim). Built on fork m3-turbo-knobs 8acf15f9: a puppet
+the way hilde's does", Hilde being live under Prisoner's claim). Built on fork m3-turbo-knobs a84839fd: a puppet
 with no relayed gaze looks at the LOCAL player within 450 units (knob movement.localGazeRadius, hysteresis 100), a
 relayed target still winning; in the morning's stage if its pipeline is green. Mouth movement: the puppet's lips
-move with every line it says; the lines it never said are 57's (the continuation on m3-voice-lines 3eef89d3, built,
+move with every line it says; the lines it never said are 57's (the continuation on m3-voice-lines a37b1725, built,
 staged after the trace). The pausing: Skyrim Souls RE - Updated as a mod layer (D46), handed to apocrypha with the
 lab's facts (Address Library present, Engine Fixes absent: its preloader lives in the game root, which add-mods.ps1
 cannot lay); apocrypha decides the menus, the Engine Fixes question and whether it goes in for the morning (a
 layer-stage with a smoke, the sweep at night) or the evening.
 - 00:58 PDT 2026-10-28 (D46 decided, apocrypha): Skyrim Souls RE - Unpaused Menus 3.2.0 (Vermunds and Fudgyduff,
   2026-09-25; Nexus 27859, file 810395 the 1.6.1170 and 1.6.1179 build, 810396 the 1.7.104 build) as the row
-  skyrim-souls-re-3.2.0@1.6.1170 in lab/layer/essentials.tsv on branch apocrypha/layer-souls 34aa1e76 (off main
-  b901eb0e), the menu choices as deltas in a new lab/layer/ini-patches.tsv applied by lab/tools/ini-patch.py: every
+  skyrim-souls-re-3.2.0@1.6.1170 in lab/layer/essentials.tsv on branch apocrypha/layer-souls bcf753de (off main
+  09717d46), the menu choices as deltas in a new lab/layer/ini-patches.tsv applied by lab/tools/ini-patch.py: every
   Souls menu unpaused as shipped (Inventory, Container, Barter, Gift, Favorites, Magic, Tween, Stats, LevelUp,
   Training, Journal, Map, Book, Lockpicking, SleepWait, Tutorial, MessageBox, Custom), movement in menus on, no slow
   motion, bConsole false (the lab's console steps type against a paused world), bHideEngineFixesWarning true.
@@ -729,15 +729,15 @@ Recommended B. A train of its own after the turbo trains merge; the refresh is t
   change; T0 on the occupant set; a probe with two seats in one chest reads the refresh. Bodies share the branch, so two
   looters on one corpse follow.
 
-2026-10-28 17:3x PDT, D52 B's state after playtest 37: two players in one chest works on the server (dbfc8e82, the
-refused move's re-sync 9fb04fec); the HYPOTHESIS that the open ContainerMenu redraws from an inventory change was
+2026-10-28 17:3x PDT, D52 B's state after playtest 37: two players in one chest works on the server (e3fa27a6, the
+refused move's re-sync 8bab121c); the HYPOTHESIS that the open ContainerMenu redraws from an inventory change was
 answered no, and the two engine refreshes we tried (the inventory-update message with a null item, the item list's
 re-read for the container) both took the store side. The working fallback is chestRedraw "reopen" (the menu closed
 and the chest activated again at each change), two-way and whole, which Eli calls "a UI nightmare"; the in-place
 refresh the engine itself uses under an open menu is the re-analyst's read (docs/research/m3/re-container-menu-refresh.md).
 
 ### D53. NPCs facing each other, and their talking animations, on the observer's screen (11:36 PDT 2026-10-28, Eli's item 6 and item 4's scene)
-The local gaze (D50, 8acf15f9) makes a puppet with no relayed target look at the LOCAL player; the host's engine relays a
+The local gaze (D50, a84839fd) makes a puppet with no relayed target look at the LOCAL player; the host's engine relays a
 target only when it tracks one, and it tracks heads near its own player alone (H-54d), so two residents talking far from
 their host face nobody on the observer, and Eli reads it as wrong ("it needs to work for NPCS talking to eachother on
 both"). The dialogue idles do reach the observer (ActionSync traces for IdleDialogueStart, MotionDrivenDialogueGeneric,
@@ -769,7 +769,7 @@ C as the next step if B's heuristic misses.
   TESModPlatform::AddItemEx returns without doing anything while the game is paused, and the ContainerMenu pauses it
   (CommonLib ContainerMenu.h:14, kPausesGame), so under the open menu nothing of the other seat's take or put ever landed;
   the redraws read an unchanged inventory, the item list's re-read blanked the selection (finding 30's "cannot place"),
-  and only the close-and-reopen fallback showed the change. Fixed on fork m3-face-twelve ed606faf (client build on): a
+  and only the close-and-reopen fallback showed the change. Fixed on fork m3-face-twelve 63376de3 (client build on): a
   pause by an item menu no longer drops the change, and the engine's own inventory-update message (Papyrus AddItem's
   shape, to "Top Menu") is posted from the game thread after each change lands; refreshContainerMenu is the batch's end
   (the message twice, Skyrim Souls' shape); ItemList::Update and the mode knob are gone; chestRedraw unset means the
@@ -777,7 +777,7 @@ C as the next step if B's heuristic misses.
 
 ### D54. A non-persistent resident at a door (15:5x PDT 2026-10-28, thuum-magnus, from the tail after the door pass went live)
 
-Since skymp-server:m3-door-pass-802b74f2 (21:59Z) every placed resident's door in Riverwood walked through under its host
+Since skymp-server:m3-door-pass-a3d92133 (21:59Z) every placed resident's door in Riverwood walked through under its host
 (Sven, Dorthe, Frodnar, Hod, Gerdur, Alvor, 1348c into their houses and the inn, the records following), except one:
 "door 1cbb0: 35534 may not cross into 1cb84 (refused); the actor stays" at 22:18:43Z and 22:24:40Z. 0x35534 is HildeRef
 and 0x1cb84 RiverwoodSvensHouse (the master file). ADR-047 D6's door fact admits "an interior entered by a persistent
@@ -819,7 +819,7 @@ there in the room to hear one dialog line you get it, but like sven if you have 
 it doesnt get telegraphed. sometimes the rumor dialog propagates, but svens did not."
 
 The mechanism (numidium's read, checked against the day's tails): a quest stage set by a dialogue fragment or a script
-runs on the talker's game alone, and since 2ce8b523 the fragment gate keeps a relayed line's fragments off the
+runs on the talker's game alone, and since 9ccc8176 the fragment gate keeps a relayed line's fragments off the
 watcher on purpose; so each game's quest state drifts from the other's, and every line or topic whose conditions read
 that state (Sven's Faendal line in A Lovely Letter; the bounty rumor's INFO that would not even resolve on the watcher,
 finding 34) is offered on one seat and not the other. The lines that cross are the ones both games' states allow.

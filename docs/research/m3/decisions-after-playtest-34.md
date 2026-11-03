@@ -1,11 +1,11 @@
 # Decisions after playtest 34 (DRAFT, 2026-10-25 16:12 PDT, thuum-magnus for Eli, relayed by numidium)
 
-Playtest 34 ran on fork parity fa8809a1 (trains 39 to 45) from 14:33 PDT on
+Playtest 34 ran on fork parity 0bc54e17 (trains 39 to 45) from 14:33 PDT on
 2026-10-25, with two world resets on Eli's word (22:18Z and 23:07Z, the copy
 playtest-m3-34b-rotfern-20261025T2217Z). Its findings that were defects are
-built, on train-46 (server, fork m3-train-46 aaafffe5: the pass between live
+built, on train-46 (server, fork m3-train-46 c40a36a3: the pass between live
 hosts, the server-made actor's death rule, E_HIT_WEAPON at info, the corpse's
-occupancy released) and train-47 (client, fork m3-train-47 3a8a50a8, built
+occupancy released) and train-47 (client, fork m3-train-47 44ff717c, built
 ahead: the body's inventory as a diff alone, the hosted server-made copy
 dressed once). Seven findings are calls rather than defects, D18 to D24 below,
 each with its options and the recommendation last, numbered after the memo
@@ -69,7 +69,7 @@ built on B.
 Section 5's "the non-host can't interact with the body" and "rotfern couldn't
 take armor, test 2 could" read, in the lines, as the container rule (D16-A:
 one occupant within 512 units) plus a defect (the corpse's closing activation
-never released the occupant; fixed on train-46 aaafffe5). With the fix, the
+never released the occupant; fixed on train-46 c40a36a3). With the fix, the
 rule stands as upstream's for every container: the second player at an open
 body is refused with no menu and no message until the first closes.
 - A. Leave as today: one looter at a time, the second waits, nothing said.
@@ -175,8 +175,8 @@ crash log per quit; nothing else is lost.
   taste for the two features. B is a dozen lines in the thunk we already
   own and holds whatever plugin leaks next; A keeps a dialog at every quit
   of every playtest.
-- Built ahead, not merged (19:33 PDT, fork m3-train-49 1c25b0e6, a client
-  dist off parity aaafffe5): OnQuitShutdown's fast exit behind
+- Built ahead, not merged (19:33 PDT, fork m3-train-49 5f643929, a client
+  dist off parity c40a36a3): OnQuitShutdown's fast exit behind
   skymp5-client's quitFastExit setting (default on) and the plugin export
   setQuitFastExit; probe x-quit-fast by path. Awaits the letter.
 - The bisect's read (19:36 PDT, x-quit-bisect-ngd-ddo 20261026-022931):
@@ -225,35 +225,35 @@ is which brake.
 
 - Decision: recommended.
 
-## MERGED (46) (18:44 PDT, 2026-10-25): Eli "Merge now"; fork parity aaafffe5 (from fa8809a1), thuum main bfc41e0b; the clones keep parity's client fa8809a1 (no client change on the train). Trains 47 (f70cf19f) and 48 (9b412a10) both contain aaafffe5 already and wait on the letters.
+## MERGED (46) (18:44 PDT, 2026-10-25): Eli "Merge now"; fork parity c40a36a3 (from 0bc54e17), thuum main b5a50371; the clones keep parity's client 0bc54e17 (no client change on the train). Trains 47 (dd4fd3bf) and 48 (361884b2) both contain c40a36a3 already and wait on the letters.
 
 ## Merge-ready (46) (18:24 PDT, 2026-10-25; numidium's citation)
 
-Train-46 at fork m3-train-46 aaafffe5 (five commits over parity fa8809a1:
-53432d22 the pass between live hosts, fe1ee08f the server-made actor's
-death by the NPC rule, 5d391c4b its unit case, c7c389af E_HIT_WEAPON at
-info, aaafffe5 the corpse's occupancy released) is merge-ready by citation:
+Train-46 at fork m3-train-46 c40a36a3 (five commits over parity 0bc54e17:
+78ed369c the pass between live hosts, 53bd5959 the server-made actor's
+death by the NPC rule, b06dc26c its unit case, 68f41e34 E_HIT_WEAPON at
+info, c40a36a3 the corpse's occupancy released) is merge-ready by citation:
 gate-m3-train-46 (20261026-001639) GREEN 18 of 18 with no reruns
-(smoke-two-players to b-invis-recast 011953); T2 green at aaafffe5
+(smoke-two-players to b-invis-recast 011953); T2 green at c40a36a3
 (17:16:36 PDT); gate-cite's five checks passing (one build; the registry
 serving skymp-server:m3-train-46; the clones naming "m3-train-46 client
-aaafffe5"; aaafffe5 the staged commit; nothing replaced it). The stage's
-probes: x-host-own-hit GREEN (234109, committed b-host-own-hit b09d7b25),
-x-handoff-cross v2 GREEN (235039, committed b-npc-handoff-cross 81211790),
+c40a36a3"; c40a36a3 the staged commit; nothing replaced it). The stage's
+probes: x-host-own-hit GREEN (234109, committed b-host-own-hit 46258f59),
+x-handoff-cross v2 GREEN (235039, committed b-npc-handoff-cross 750b4f4f),
 x-body-release v2 with every claim held (235731; red on a mod's start-up
 box alone) and x-npc-protected v2 with the floor held (000257; red on the
 bear's own death line alone), both v3s running as this is written. The
 command at Eli's word: `GATE_SET=20261026-001639-gate-m3-train-46 T2=skip
 just verb-merge m3-train-46`, the eleven M3 b- scenarios named as for 45.
 Built ahead of its letters and not merging with it: train-47 (client,
-f70cf19f) and train-48 (server, 9b412a10).
+dd4fd3bf) and train-48 (server, 361884b2).
 
 ## The trains, in order
-1. train-46 (server), fork m3-train-46 aaafffe5: after Eli's report, numidium's
+1. train-46 (server), fork m3-train-46 c40a36a3: after Eli's report, numidium's
    stage with x-handoff-cross, x-host-own-hit and x-body-release by path, T2,
    the gate of eighteen, merge; the committable scenarios follow from the
    greens (rule 13).
-2. train-47 (client), fork m3-train-47 3a8a50a8 on 46: stage with x-body-loot
+2. train-47 (client), fork m3-train-47 44ff717c on 46: stage with x-body-loot
    and the copy's hit (the console PlaceAtMe server action, numidium's), T2
    cited, gate, merge; D19-B is its design; D23-B's first half (redress when
    the bases agree) and, if the reload reads clean, its second.

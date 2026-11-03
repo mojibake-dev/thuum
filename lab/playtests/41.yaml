@@ -1,16 +1,16 @@
 # Turbo 2's arm two (Eli, 2026-11-02 about 12:52 PST: "once all those fixes have landed spin up those streams and drop us back in
 # riverwood"; the turbo shape corrected the same afternoon: the arm plays on the stage, the gates and merges after it). The build is the
-# big train's stage, fork m4-turbo2-train 1a1f304b: the deaths client (F3 frozen bodies, F4 the thrall standing, F8 the loot path's one
+# big train's stage, fork m4-turbo2-train 11e6b00e: the deaths client (F3 frozen bodies, F4 the thrall standing, F8 the loot path's one
 # redraw and the relay's container skip), physics slice two (the listed movable static, Riverwood's HandCart01Wheel), the settle and the
-# viewing seat's hide (F2's stuck puppets, Hilde's ghost), over the R0 train 6d7fcc84 (F9 the restart's resurrection, skill books)
-# and parity 4b6f5fa3 (F1 Raise Wall's band, F5 the thrall's end); the dist is the deaths head's GitLab build with the union's TS built
-# on the Mac (REUSE_DIST). The Undead FX default (05178e:UndeadFX.esp to 1, c9177cbc) is in the deployed settings. The rune glyph
+# viewing seat's hide (F2's stuck puppets, Hilde's ghost), over the R0 train 188a8dea (F9 the restart's resurrection, skill books)
+# and parity 4fdb2d31 (F1 Raise Wall's band, F5 the thrall's end); the dist is the deaths head's GitLab build with the union's TS built
+# on the Mac (REUSE_DIST). The Undead FX default (05178e:UndeadFX.esp to 1, 2d659fc6) is in the deployed settings. The rune glyph
 # (m2-rune-glyph, schema 32) arrives mid-arm as a turbo push of the union m4-turbo2-union. The switches as arm one ended: leveling and
 # perks ON, locks and weatherSync OFF (playtest-switch flips one). The world: 39's end again (Eli ditched arm one's), the clock 7.9,
 # npcEnabled, bars full, no god mode; the playtest-28 duplicates trimmed server-side after the setup (cloaks, wheat, blue mountain
 # flowers to one each, the second Dragonborn book). Both seats at the Riverwood guard camp; everything server-side.
 id: 41
-build: "fork m4-turbo2-train 1a1f304b (the big train over the R0 train 6d7fcc84 and parity 4b6f5fa3), the dist GitLab build 16823 of de969496 with the union TS, thuum main 80f42576 or later; leveling and perks ON, locks and weatherSync OFF; Survival off; the Undead FX default"
+build: "fork m4-turbo2-train 11e6b00e (the big train over the R0 train 188a8dea and parity 4fdb2d31), the dist GitLab build 16823 of 6fdd3d69 with the union TS, thuum main f7c847db or later; leveling and perks ON, locks and weatherSync OFF; Survival off; the Undead FX default"
 world: playtest-m3-39-paused-20261031T014638Z   # 39's end, as arm one began (arm one's world is evidence only)
 hold:
   minutes: 300

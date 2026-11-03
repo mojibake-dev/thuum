@@ -1,6 +1,6 @@
 # The NPC death path on the server and the clients (code map for train-42, ADR-048)
 
-Read 2026-10-23 by an agent on the fork worktree (branch m3-train-41 at 818287c3);
+Read 2026-10-23 by an agent on the fork worktree (branch m3-train-41 at 2d1a71f6);
 lines are that tree's. Edit nothing was the brief; this is the map train-42 builds
 from once Eli answers ADR-048 (A, B or C, and C-ii).
 
@@ -114,7 +114,7 @@ beside isProtected; every dead actor re-arms today, DeathEvent.cpp:65-70).
    to server, reliable, once per death: {idx, cause (fall, hazard, script,
    npc_hit, unknown), killer (0 none), pos}. UpdateMovement is unreliable,
    per-sample, R2 relay; HostedActorState has no death, no cause, no handler
-   and a larger scope. Template: commit a891e6a6 (ActorFate), sixteen files,
+   and a larger scope. Template: commit 2f0e5a84 (ActorFate), sixteen files,
    plus PacketParser.cpp's OnHit case shape (:80-84) for an inbound message
    and the client's deathStart sink gated like hitService.ts:150-160.
 2. The checks in ActionListener::OnActorDeath, each refusal a warn line with a

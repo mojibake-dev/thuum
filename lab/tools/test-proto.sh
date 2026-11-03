@@ -103,7 +103,7 @@ def get(path):
     return json.load(urllib.request.urlopen(req, timeout=60))
 head = sha or get("/repository/branches/" + urllib.parse.quote(ref, safe=""))["commit"]["id"]
 # Every successful difftest-build in the newest thousand jobs, any branch's: one project-wide page of a hundred ran out
-# on a busy day (m3-npc-talk c1be67d1, 2026-10-27: a parity merge left skymp-wire alone, so it built none of its own,
+# on a busy day (m3-npc-talk dee28c05, 2026-10-27: a parity merge left skymp-wire alone, so it built none of its own,
 # and the branch's last build was older than the newest hundred jobs of five branches, so T2 read no artifact at all).
 jobs = []
 for page in range(1, 11):
@@ -128,8 +128,8 @@ def stale_paths(at):
     tree = os.environ.get("SESSIONS", "") != ""
     return [p for p in wire if not (tree and p.startswith("skymp-wire/difftest/sessions/"))]
 # of the ancestors' builds, newest first, the first whose skymp-wire is the head's: across a merge the newest by time
-# can sit on the other side (m3-npc-cast bf133744, 2026-10-28: parity's 1b866786 build, after the branch merged
-# m3-npc-talk in, lacks the branch's own wire changes, and the branch's ecec018e build holds the head's skymp-wire);
+# can sit on the other side (m3-npc-cast 5fb85e2c, 2026-10-28: parity's c85dab3d build, after the branch merged
+# m3-npc-talk in, lacks the branch's own wire changes, and the branch's 5bc6e8e9 build holds the head's skymp-wire);
 # the newest ancestor at all when none of the first six does, which the compare below refuses as stale
 pick = own
 if not pick:
@@ -273,9 +273,9 @@ PY
 # of its own). A good Hello is welcomed and the login proceeds; a Hello with one
 # hash broken (--break-mod 0, the first full plugin) is refused with 502
 # E_MOD_LOCK_MISMATCH and the fakeclient exits 3 without logging in.
-# An image whose fakeclient has no --manifest predates the lock (fork m3-mod-lock 1992edc2 brought it): the cases
+# An image whose fakeclient has no --manifest predates the lock (fork m3-mod-lock f27222ff brought it): the cases
 # are skipped there, by name, since test-proto plays every branch's image (2026-10-28: train 56's merge T2 on
-# 26e3d0cf would have gone red on cases its image cannot run). The test is the image's own binary, not the branch.
+# 29207fe2 would have gone red on cases its image cannot run). The test is the image's own binary, not the branch.
 echo "== mod-lock: a good Hello welcomed, a broken one refused (502)"
 modlock_rc=0
 if ! ssh_srv "$dc exec -T skymp-server-test grep -q -a -e --manifest /srv/skymp/fakeclient"; then

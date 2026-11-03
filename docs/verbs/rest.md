@@ -106,7 +106,7 @@ Milestone: M1   Class: B
   (a rented bed changes only the seat-local ownership, RentRoomScript's
   SetActorOwner through the fragment, never synced and never read by the
   server's IsSleepFurniture); and the stream itself. Fixes on fork
-  m3-rest-correction (skymp5-client, from 56d995de): F1, TimeService's
+  m3-rest-correction (skymp5-client, from 653dc76d): F1, TimeService's
   report and correction wait until Actor.GetSleepState reads 0, no Fader
   Menu is open and the Sleep/Wait Menu has been closed for a tick, one
   logTrace line per held tick ("rest: the correction waits, sleep state N,
@@ -294,7 +294,7 @@ clock's `time` block does. A switched-off kind is refused, E_REST_OFF.
 
 ### Findings at the union's stage (2026-10-30; x-rented-bed 130908, read by an agent)
 
-Two faults in the rented-bed correction (fork 6a3427fa, in the union as part of P1-win), neither the cause of that run's red (the
+Two faults in the rented-bed correction (fork cd28dea1, in the union as part of P1-win), neither the cause of that run's red (the
 stand point was) and neither a blocker, both owed a fix in a later train:
 - The correction's open loop in remoteServer.ts paces itself by Utility.wait(0.1), game time, which the pausing Sleep/Wait Menu
   stops: its first pass ran before the menu opened and the next after it closed, so openedAsBed never saw the menu and the "gave
@@ -325,9 +325,9 @@ stand point was) and neither a blocker, both owed a fix in a later train:
       (time scale 10) and written down as not followed
 - [x] scenario reviewed by Eli (a-rest, thuum 7b12fa7: approved)
 
-Finding 31's fix rides the pass (18:11 PDT 2026-10-29): fork m3-rest-correction 6a3427fa (F1, the clock correction and the RestIntent
+Finding 31's fix rides the pass (18:11 PDT 2026-10-29): fork m3-rest-correction cd28dea1 (F1, the clock correction and the RestIntent
 wait for the engine's wake: GetSleepState 0, no Fader Menu, the Sleep/Wait Menu closed a tick, one trace line per held tick and
 one at the release; F2, a bed's open fact is its Sleep/Wait Menu, so the furniture wait and its "gave up" line end for beds) is
-merged into m3-client-bits f9c6b7ca and m3-pass-train-1-win 9721ff72, the first pass train to stage; x-rented-bed (by path, v1 of
+merged into m3-client-bits 885dab1f and m3-pass-train-1-win a3bc3b86, the first pass train to stage; x-rented-bed (by path, v1 of
 2026-10-29 00:4x) reads it there: one "slept 8 h" on the server, at least one held tick and exactly one release on c1, both seats
 answering a minute after. HYPOTHESIS until that run, as the Dynamic plan says.

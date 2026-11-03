@@ -2017,7 +2017,7 @@ check 1 and ADR-042a's whole-set gate.
 
 **Context.** lab/gate.yaml's `pending` leaves a scenario red by design out of
 a full sweep, but only out of a sweep started after its line. The m2-close
-sweep (20261021-144529, 70 scenarios on m2-train-31 9ad635cd over
+sweep (20261021-144529, 70 scenarios on m2-train-31 e87267c4 over
 stage-layer-train31) read 69 green and b-push red under the essentials
 layer: c2 ragdolls where it stands and is never thrown (y -206 against under
 -650 in 20261021-165252-b-push, -150 in its rerun 175115), the layer's
@@ -2118,7 +2118,7 @@ match per stored form at load, negligible. Until it lands, a world
 restored under a changed order is re-based by hand as tonight, or not
 restored.
 
-The map (docs/research/formdesc-world-map.md, read against fork e3806870
+The map (docs/research/formdesc-world-map.md, read against fork 0a20755a
 the same evening) sizes the work. Twelve raw fields in five structs hold a
 runtime id: the appearance's race, head parts and texture set (stored as
 JSON text inside appearanceDump), the inventory entry's base, enchantment
@@ -2321,7 +2321,7 @@ none of the named residents, because they are persistent references and
 Papyrus GetParentCell answers the worldspace's persistent cell for them,
 so the client's cell test can never count them as the host's. The property
 is back for every actor, explicit either way, and the client reads it
-alone; the server derives it from the grant (fork 7fef1bec).
+alone; the server derives it from the grant (fork a2a5d7d2).
 
 **Context.** Playtest thirty, the first with the server's NPCs on, showed
 every wolf at the forest cell spinning in place on both screens within a
@@ -2367,7 +2367,7 @@ output blocked breaks at each handoff (its #810, #898).
    no 0xff idle or stagger blank, no echo.
 
 **Consequences.** One fork branch (m3-npc-puppet) carries the server's id
-and flag change (Stage 1, a29bfb08), the Skyrim Platform puppet switch with
+and flag change (Stage 1, daa46851), the Skyrim Platform puppet switch with
 its two detours (the engine's own animation job re-admitted for puppets;
 the movement step skipped with the character controller's step time kept,
 TE#901's lesson), the client's PuppetService and the view's engine path,
@@ -2431,15 +2431,15 @@ Decisions.
 Consequences. Decision 1 rides npc-fate's build (the record's worn list
 reaches the engine's actor on every seat, the host's included, with the
 hosted word; the headshot section of playtest thirty-three passes with it).
-Decision 2 is a client train of its own, merged as fork parity a25caf02 on
+Decision 2 is a client train of its own, merged as fork parity 4ba2fbb3 on
 2026-10-23 11:04 PDT (m3-train-38: the strip at every equipment apply and a
 ten-second sweep of each figure's view; the gate 20261023-173049 with b-duel,
 b-spell and p-spell-bolt green on its stage), with x-figure-spells (the lab's
-figure-spells read, main b70546b9) as the probe reading a figure's added
+figure-spells read, main 88cea0c7) as the probe reading a figure's added
 spells against its hands after load: GREEN 20261023-183306 on parity
-a25caf02, both figures added [] and extra [] at 3 s and 20 s, the equipped
+4ba2fbb3, both figures added [] and extra [] at 3 s and 20 s, the equipped
 Firebolt in the hand slot and untouched. p-spell-bolt's later
-list keeps the probe effects declared (main 626108f6): the dummies land on a
+list keeps the probe effects declared (main 280eae4e): the dummies land on a
 figure from the wildlife's cloaks, which the strip does not touch.
 
 - [x] accept (Eli, 2026-10-23, in the words above)
@@ -2554,8 +2554,8 @@ host. that's a good rule to have." The rule: a persistent actor's door into a
 cell another live host holds is a crossing like D9's adjacent one; the move
 judge passes it to that host at once (an interior is deep by definition), an
 exit passes it back under D22's margin brake, a stranger's door report stays
-refused. Built on fork m3-door-pass 2a18f926 (stacked on m3-shared-containers
-dbfc8e82), T0 at the crate and CellHostTest; the refusal line at the door is
+refused. Built on fork m3-door-pass 5d43e7aa (stacked on m3-shared-containers
+e3fa27a6), T0 at the crate and CellHostTest; the refusal line at the door is
 a stranger's or an unhosted actor's alone now. T3: a door leg into a hosted
 interior, its own commit. The pass's first live run: Hod into rotfern's hosted
 inn at 00:47:23Z (playtest 37, finding 39).
@@ -2566,7 +2566,7 @@ and turned back; now every actor's door counts, persistent or not: into a live
 host's cell the move passes (D9's shape), into an unhosted interior the record
 follows the host's report and freezes there when the report stops (D6's
 follow, the host's client reporting the actor by its form from indoors, the
-HYPOTHESIS the T3 door leg reads). Server-only, fork m3-door-walk 2dca472a:
+HYPOTHESIS the T3 door leg reads). Server-only, fork m3-door-walk 88c350b6:
 CellMoveFacts' door fact without IsPersistentReference, the judge's door arm
 unchanged, CellHostTest's two non-persistent cases (RiverwoodSvensHouse
 0x1cb84). Decision 1's "entered by a persistent actor" reads "entered through
@@ -2864,7 +2864,7 @@ Decisions.
    player" on the server; an engine reference's binding is kept for the
    session; the NPC activation rung is declared (R2 for a door or furniture
    the host's engine uses, R0 where shared state moves); D11's release
-   (856fed7d, every engine runs an unloaded actor's schedule) is written as
+   (0328a073, every engine runs an unloaded actor's schedule) is written as
    its own decision.
 4. The per-actor owner table (actor to player, epoch, since; claim, pass,
    relinquish, reassign; the cell as the policy) is written as an ADR when
@@ -2883,18 +2883,18 @@ forwarded survive any model; the hosted copy's once-dress (D19-B) is held,
 retired by decision 3; from 48 the dead host (D18-B) and the disabled death
 (D21-B) survive; 49 (D24-B's fast exit) stands on D24's four reads (neither
 quit crash is ours). npc-stream's first train is fork m3-npc-stream off
-parity aaafffe5; its probes are the draft's P1 to P5 and b-npc-stream. The
+parity c40a36a3; its probes are the draft's P1 to P5 and b-npc-stream. The
 cost accepted: about four to five days before the next playtest, against
 continuing to patch; the casting precedent's numbers are the argument.
 
 D71 (14:29 PDT 2026-10-30, the pass; numidium's memo on c-dungeon-enemies' three reds, taken under the pass's rule, Eli may veto):
-the non-host's loot. Facts: M3's exit scenario is red three times on the union 0e23c820, the cold rollback included (210543,
+the non-host's loot. Facts: M3's exit scenario is red three times on the union b8a9d4c6, the cold rollback included (210543,
 210957, 211413), at one claim: c2's ContainerMenu after its activation of the body it killed. Everything before holds (the fight
 under one host, the engine's death by the host's report, every view agreeing). c2's trail: the body released from the puppet state
 at its death with the AI left off (PuppetApi.cpp Promote's dead branch, H-54e), the driver's Activate false 72 s later, the server's
 admission (its OpenContainer, the handler's "waiting for 'ContainerMenu open' (a corpse)"), the engine never opening, the
 handler's give-up and closing activation. The host's engine opens the same body (b-npc-body-release's cold run). So findings 58 and
-62's "anyone loots any body from any seat" (10988419) is admitted by the server and refused by the non-host's engine; it was never
+62's "anyone loots any body from any seat" (c1de7167) is admitted by the server and refused by the non-host's engine; it was never
 read green at T3 (x-shared-chest's claim was never run to green; the old scenarios counted server lines). HYPOTHESIS, two
 candidates the read separates: H5, a dead actor with its AI off takes no activation (the release leaves it off because H-54e saw
 a body stand up with the AI on); H1, the death never completes on a puppet (kill by message with the process stopped), so the
@@ -2909,9 +2909,9 @@ death, then the body's AI switched on before a third try) in the first lab gap a
 and b-npc-body-release.
 The read (15:08 PDT): x-body-open-guest v2 (20261030-215922) GREEN, H5 holds: the guest's copy refuses the activation with
 its AI off after both kills (the server's and the host's engine's), and takes it once the AI is on, the body shifting 45 units in
-5 s meanwhile (H-54e's walk). The fix, fork m3-guest-loot 05ac32a9 (client only): the AI on around the server's open and off again
+5 s meanwhile (H-54e's walk). The fix, fork m3-guest-loot f3e484b9 (client only): the AI on around the server's open and off again
 at the first sight of the menu or after 2 s; the promote's dead branch unchanged. With it the host handler's menu-mode wait
-(39e5c2f5). Gate: c-dungeon-enemies, b-npc-body-release, x-body-open-guest-fix (by path; b-body-open-guest on green).
+(647674ec). Gate: c-dungeon-enemies, b-npc-body-release, x-body-open-guest-fix (by path; b-body-open-guest on green).
 
 ## ADR-051: An engine that no longer loads a puppet releases it to its schedule, and the first engine to sight it moves the record
 
@@ -2923,7 +2923,7 @@ stands in a cell nobody hosts (a house at night, an interior no game has loaded)
 nobody: no CreateActor, no word, no host (ADR-047 D11, npc-handoff.md decision (g)). An engine
 that holds such an actor AI-off and UNLOADED runs no schedule for it, never sights it and never
 brings it out: the seat that won a post-restart grant kept Riverwood's residents in their houses
-(b-npc-handoff-night 114904, 092208). The fork's fix (856fed7d, train-43) is the release:
+(b-npc-handoff-night 114904, 092208). The fork's fix (0328a073, train-43) is the release:
 releasePuppet puts the flag off at once and the AI and the activation back on on the game
 thread with no package evaluation; the puppet service's two-second poll releases every tracked
 puppet whose 3D is gone and re-demotes it when it loads on a seat that does not host it; the
@@ -3021,11 +3021,11 @@ word"), the menu stays up over a puppet. Two seats cannot show it; the expeditio
   `retain(f.cell != cell || f.kind == Claim)`), the lease, the release, the claimant's leaving and
   the actor's death still end it, and simulator_of already reads the claim first. The unit test's
   regrant case asserts the kept claim and a third-player grant case is added; the patch is saved
-  (thuum-cf's scratchpad claim-outlives-grant.patch, 65 lines, applies to m3-turbo-knobs 8b088be1).
+  (thuum-cf's scratchpad claim-outlives-grant.patch, 65 lines, applies to m3-turbo-knobs 41d9c69e).
 - C: keep decision 3 and tell the claimant: the grant's word carries a reason so the client closes
   the Dialogue Menu itself. More wire for a worse outcome.
 Recommended B. Not in the turbo day's build: it reverses an accepted decision, so it rides the next
-train after Eli's letter. The client's renewal (8b088be1, every 60 s while the menu is open) is
+train after Eli's letter. The client's renewal (41d9c69e, every 60 s while the menu is open) is
 inside decision 2 as written and is in the build.
 
 Note 14:18 PDT 2026-10-28 (playtest 37, Eli: "it seems like rotfern can steal an interaction from prisoner but not the
@@ -3315,7 +3315,7 @@ Status: ACCEPTED 18:0x PDT 2026-10-28 (Eli through numidium: "i recommended as B
 docs/research/m3/decisions-after-npc-stream.md). Written 18:2x PDT 2026-10-28 (thuum-magnus), before the first slice.
 
 Context. A quest stage set by a dialogue fragment or a script runs on the talker's game alone, and since fork
-2ce8b523 the fragment gate keeps a relayed line's fragments off the watcher on purpose (npc-stream.md, H-57a and b
+9ccc8176 the fragment gate keeps a relayed line's fragments off the watcher on purpose (npc-stream.md, H-57a and b
 CONFIRMED by playtest 37's shop test). So each game's quest state drifts from the other's, and every line or topic whose
 conditions read that state is offered on one seat and not the other: Sven's Faendal line in A Lovely Letter (playtest
 37, Eli: "sven convo the line about faendal, the quest one, doesnt appear on prisoners thing"), the bounty rumor whose
@@ -3366,7 +3366,7 @@ the stage is shared.
 
 Status: ACCEPTED under the overnight rule of 2026-10-28 ("take the recommended option, record the call"), 07:2x PDT
 2026-10-29 (thuum-magnus; written PROPOSED 22:01 PDT 2026-10-28; Eli, playtest 37: "im impatient, can we try getting
-raise wall working?"). Built and T0 green on m3-turbo-train-3o-win ee44f7d1. Eli's veto reverses it to ADR-029's
+raise wall working?"). Built and T0 green on m3-turbo-train-3o-win 33240fd4. Eli's veto reverses it to ADR-029's
 allowlist entry (B below) at the cost of the natives.
 
 Context. Apocalypse's Raise Wall (SPEL 0xcc14, a self-delivery concentration spell) places a wall MSTT 0x98529 (a
@@ -3398,7 +3398,7 @@ base id validated against the spell's list) and Wind Running's per-update placem
 and impact anchors take the same table with their own pose rules. Built after playtest 37's lay.
 
 D70 (14:00 PDT 2026-10-30, the pass; numidium's memo on b-spell-placed-wall's three reds, taken under the pass's rule, Eli may veto):
-the pose model. Facts: on the union 0e23c820 the scenario's claim 3 (the caster's own wall against the server's copy, 192 along the
+the pose model. Facts: on the union b8a9d4c6 the scenario's claim 3 (the caster's own wall against the server's copy, 192 along the
 yaw) failed three runs out of three, the cold rollback included (204953, 205125, 205303): the copy stood 75 to 88 units from the
 caster's engine wall, which stood 104 to 118 ahead of the caster and moved 14 units between runs at the same stand; the server
 placed once per cast, the observer holds one runtime copy of each form (the morning's CallNative fix), so the server half and the
@@ -3434,7 +3434,7 @@ ground plane and 256 up (the pitch read's 206.25 and 196.875 with the caster's o
 rise of half a second, the settle, two trips). The table's forward and dz are read and ignored so the deploy settings, restored to the
 Raise Wall entry in both files, serve a server of either shape until the merge: a shape C server (parity meanwhile) places D70's
 known-wrong wall again, a shape A server places as reported; the playtest's item 8 keeps its limit until the merge. Built as fork
-m3-wall-pose (23e334b9, 69ca1221, 866ff864, 7ac26664); the probe x-raise-wall v4, the scenario's amendment after its read.
+m3-wall-pose (db8426ad, 6024d5b3, 85165ded, f338ed2a); the probe x-raise-wall v4, the scenario's amendment after its read.
 
 D72 (01:0x PDT 2026-10-31, Eli): Survival Mode for the rest of testing. The memo (docs/verbs/player-globals.md, playtest 39's F1
 "survival doesnt kill"): A) leave the mod's rule and fix the set-up; B) make an engine drain reach the record; C) a server drain at the
@@ -3520,7 +3520,7 @@ verbatim: "ok close out this arm of the playtest. that's enough things for now. 
 slice two as decision 4 wrote it; prop-physics.md's slice-two section carries the build.
 
 D73 (19:56 PDT 2026-10-30, the pass; taken under the pass's rule from the physics stage's reads, Eli may veto): decision 3 refined, a
-body is Dynamic unless another seat streams it awake right now. Facts (m3-prop-physics dde874b5 on the merged base): x-prop-grab v8
+body is Dynamic unless another seat streams it awake right now. Facts (m3-prop-physics 3586f2db on the merged base): x-prop-grab v8
 (20261031-024409): the guest's grab of a follower's Keyframed body released in the same instant it took (the claim's touch 1 and
 touch 2 logged together), the grant arrived after the hand had let go, and the held E's release fired an activation 1.3 s into the
 grant that the server took as a pickup ("Deleting 0xff item" at 02:47:38.003, the basket gone on both seats within 20 ms): a Keyframed
@@ -3530,10 +3530,10 @@ without the wake flag took no contact at all. The old decision 3 (every follower
 therefore gave no local physics to the first touch of anything: the kick waited a round trip on a body that does not move, the grab
 could not close. The refinement: a follower's body is Keyframed only while another seat's stream is live (from the first awake sample
 to 150 ms after the asleep sample, or a second after the last awake one), and Dynamic with leave to wake otherwise; a freshly tracked
-body with no live stream is Dynamic; the simulator's body is Dynamic with leave to wake (46f1a2dc); the grant's flip sets no motion on
+body with no live stream is Dynamic; the simulator's body is Dynamic with leave to wake (7a647687); the grant's flip sets no motion on
 a body already Dynamic and the loss of the simulation sets none (the next awake sample does). So a kick or a grab acts on a resting
 body at once, locally, and the claim and the stream follow from the moved pose; while a stream is live the body glides as before.
-Garry's Mod's shape, nearer: every body physical locally, the authority's stream correcting it. Built: fork m3-prop-physics 0bb02f74
+Garry's Mod's shape, nearer: every body physical locally, the authority's stream correcting it. Built: fork m3-prop-physics c47a339f
 (tsc clean; the held-hand guess a2256945 reverted as unproven, the pickup being the vanish's cause). HYPOTHESIS until the probes on
 the next stage: the resting Dynamic copies settle alike on both seats (a small divergence of resting clutter is accepted, as ADR-058
 accepts a sample's lag), the glide holds under Keyframed as before, and a grab now closes on the Dynamic body so its E consumes no
@@ -3544,7 +3544,7 @@ server and the stream are not the cause; the claimant's engine loses its copy at
 v9, v10b, grab v7) had been placed by setPosition (the first track's snap, the asleep sample's jump); the drop's copy, created at its
 place and never placed, took the same Dynamic set and settled. HYPOTHESIS H-P4: setPosition leaves a Keyframed body's Havok collision
 where it was, and the Dynamic set resolves the mismatch violently (the engine's known pitfall with SetPosition on physics objects).
-The fix, fa225f01: a follower's jumps and the first placement move the body by the engine's keyframed translate (translateTo at a speed
+The fix, 670ead48: a follower's jumps and the first placement move the body by the engine's keyframed translate (translateTo at a speed
 that lands within 100 ms when the 3D is loaded; setPosition only before it loads), and the rest-Dynamic set waits 300 ms for the
 translate. Probes on the restage: push v11 1e8203e4, pass v10c 02af9dc2 (the record recorded by snapshots, no pos claims: the evaluator
 evaluates every operand of an or, so a missing listing raises), grab v8 7689e959, drop v5 426cf923.
@@ -3593,7 +3593,7 @@ the mode-all relay, the report path and the login message all worked. Eli expect
 grow the allowed list with the misc and rumor quests players meet (a curated list, finding 76 its first entry); B) what is each
 seat's own is the engine's OWN START of such a quest, stage 0 and the record's start-up stages (QUST INDX, the StartUpStage flag),
 and its later stages are the world's like any other quest's, the denylist the brake and the fragment suppression keeping a relayed
-stage's script off the applying seat; C) leave rumors per seat. Taken: B, built on fork m3-quest-sge-stages (dc3ec679, T0 green: the
+stage's script off the applying seat; C) leave rumors per seat. Taken: B, built on fork m3-quest-sge-stages (6dbabc7a, T0 green: the
 D62 test became D69's on FreeformHeartwoodMill, whose stage 10 carries the flag and whose 20 does not), the train after the union's
 merge, with its own T3 (a rumor's later stage crossing) before it merges.
 
@@ -3604,7 +3604,7 @@ every 0xff item reference when it loads the save ("Skipping FF item 2 (type is M
 clutter policies for a world where dropped items were transient. Options: A) keep upstream's policies and drop the restart claim (a prop
 lives two minutes); B) persist dropped items as props by default, the three policies behind a server setting (propsPersist false restores
 them), a cleanup lever for a crowded world later (a console sweep or a reloot-like rule, no timer); C) persist only while a seat is near.
-Taken: B (m3-prop-physics a2e77f3d: WorldState::propsPersist, PartOne::SetPropsPersist, DropItemTest through AttachSaveStorage in both
+Taken: B (m3-prop-physics e3d17dd7: WorldState::propsPersist, PartOne::SetPropsPersist, DropItemTest through AttachSaveStorage in both
 settings). Known cost: every dropped item is a record for good until a lever says otherwise; the lab's worlds are clean per run.
 
 
@@ -3792,7 +3792,7 @@ Context. Memo D52 B (playtest 37) chose TES3MP's live view: a chest two players 
 they happen. Three builds tried to redraw the engine's ContainerMenu in place while the record landed under it: the item list's
 re-read (37: "showed nothing and took the store button"), the engine's inventory-update message through refreshContainerMenu
 (40's F8: the selection ended on the player's pane and a press on a book ran EquipItem), and the record by base counts with the
-same redraw (41, c38e4bf6; Eli's trace, verbatim: "no changes / rotfern tries to remove apple, / eats it instead / this doesnt
+same redraw (41, 2b7d7e70; Eli's trace, verbatim: "no changes / rotfern tries to remove apple, / eats it instead / this doesnt
 show on prisoners screen / rotfern cannt place items / prisoner can remove and place / prisoner places sword / boots appear /
 rotfern takes sword, no sword appears"). The common factor is the mutation of a container under its open menu: the platform's
 addItemEx and removeItem change InventoryChanges without the engine's own container-changed path, and whatever the redraw
@@ -3843,14 +3843,14 @@ applied already; the probe's 1.5 s claim catches it. H3: a burst of foreign chan
 a batch (one reopen per 300 ms burst) is the first tuning if the flicker annoys.
 
 Outcome, 16:36 PST 2026-11-02: decision 1's reopen FAILED Eli's test the same evening and is REJECTED as a mechanism. The seats ran it
-(m4-turbo2-chest b0939b7e) on a corpse: c1 "live body b6fe4: the record applied by base counts under the open ContainerMenu
+(m4-turbo2-chest b86da361) on a corpse: c1 "live body b6fe4: the record applied by base counts under the open ContainerMenu
 (2 added, 4 removed)" at 00:28:19Z, then a reopen ping-pong between the two occupants (every re-activation re-sent the record
 to the other seat, whose reopen re-sent it back: "2 players in the container now" at :25.8, :31.9, :37.2, :39.7, :51.5) and a
 phantom take ("Source inventory doesn't have enough 0x12eb7" at :36.8). Eli, verbatim: "ok corpse fix works worse than before",
 then "the container works pretty ok but the inventory screen flicker is still there and we already said we dont want the
 whole menu to open and close out from under a guy". Eli's rule, standing: NO MENU IS EVER CLOSED AND REOPENED UNDER A PLAYER
 TO SYNC IT. Decision 3's fallback is built by Eli's own clause: containerSharing "exclusive" exists as the switch (fork
-m4-container-exclusive, head 8e7d6e56), a chest's and a corpse's alike, and its default is "shared" while nobody is live
+m4-container-exclusive, head c2617764), a chest's and a corpse's alike, and its default is "shared" while nobody is live
 (Eli, later the same evening: "dont worry about setting the container exclusivity. we're not even live"); the client bundle
 drops the reopen (the live
 apply keeps the record by base counts, so an occupant's own echo draws nothing; a foreign change, possible under "shared" alone,
@@ -4037,7 +4037,7 @@ Decision.
 Consequences. CLAUDE.md's design law gains the rule's one line; VERB.md gains the Ownership section, and its Authority line and
 reviewer checklist read R2 as the default. No code moves by this ADR alone; ADR-062's slices are its first build. Two audits run
 through the lens:
-- the gate audit (docs/research/gate-audit-2026-11-02.md, read-only, at cf99ffec) answers the fourth question for the 73 items
+- the gate audit (docs/research/gate-audit-2026-11-02.md, read-only, at 5a5ed11b) answers the fourth question for the 73 items
   PLAN marks DONE, BUILT or MERGED: 20 MISSING, 51 PARTIAL, 2 COVERED;
 - the validator audit answers decision 4 for every existing R1 check: kept where it guards consistency, retired where it checks
   the owner, each retirement a fork change through the normal gate. Its first rows are E_PROP_CELL and E_PROP_REACH in
@@ -4123,7 +4123,7 @@ Decision.
    UI, and state no native reaches take no new code until their system doc is confirmed on both viewpoints and a
    two-player test covers the change. Scripts (ADR-062), tooling and test repair are not frozen.
 
-Consequences. Tooling: verb-lint (on main, 5b0aac19; into docs-lint after the 29 boxes are unticked); the scenario lint
+Consequences. Tooling: verb-lint (on main, 3df010af; into docs-lint after the 29 boxes are unticked); the scenario lint
 and the mutation run (lab-api's parser, a kill-switch relaunch per verb); verb-merge refuses a doc naming an unrun probe
 or holding an open tag on a player-visible row; a per-launch console file on the seats. Docs: VERB.md's Engine surface
 cites its system doc; the 29 boxes unticked with the date and the reason; the open count rises at first, as decompiler

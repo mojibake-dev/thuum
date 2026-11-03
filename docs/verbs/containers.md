@@ -1,7 +1,7 @@
 # Verb: containers
 
 Written 00:3x PDT 2026-10-31 (pile item 7 of docs/private/turbo-2-prework.md; M4's "containers and loot" row) from a
-code map of the fork at parity dc3ec679. It records memo D52's shared containers (fork m3-shared-containers dbfc8e82,
+code map of the fork at parity 6dbabc7a. It records memo D52's shared containers (fork m3-shared-containers e3fa27a6,
 built 2026-10-28 without a verb doc) and carries the rest of the row as fork m4-containers-rest.
 
 ## Intent
@@ -122,7 +122,7 @@ Rate limit / bounds: the inventory messages' own (PutItem, TakeItem budgets).
   every player who opens a container is in it, memo D52) or "exclusive" (one occupant at a time: MpObjectReference's
   CONT branch refuses every other player's activation while an occupant holds it, "[verb:containers] E_CONTAINER_BUSY:
   <player> activates <container> held by <occupant>", and the refused seat hears Debug.Notification "Someone is using
-  this"; the occupant's close, its leaving reach or its disconnect frees it). Fork m4-container-exclusive, head 8e7d6e56:
+  this"; the occupant's close, its leaving reach or its disconnect frees it). Fork m4-container-exclusive, head c2617764:
   the default is "shared" (Eli, the same evening, after a flip to exclusive and back: "dont worry about setting the
   container exclusivity. we're not even live"); "exclusive" is the switch for a live server; the live multi-party view
   is the backlog (ADR-061's outcome).
@@ -136,9 +136,9 @@ Rate limit / bounds: the inventory messages' own (PutItem, TakeItem budgets).
   ContainerMenu is open on the reference: the record by base counts (this seat's own transfer, echoed by the server,
   changes nothing and draws nothing, "the record matches the engine"), another occupant's change applied and then the
   engine's inventory-update redraw asked once per burst (possible under "shared" alone). The reopen (CloseMenu and the
-  container asked again, b0939b7e) ping-ponged between two occupants and is REJECTED by Eli's rule: no menu is ever closed
+  container asked again, b86da361) ping-ponged between two occupants and is REJECTED by Eli's rule: no menu is ever closed
   and reopened under a player to sync it (ADR-061's outcome). The in-place redraw left stale rows in playtests 37, 40 and
-  41 and is the backlog's trace. Fork m4-turbo2-chest, the commit after b0939b7e.
+  41 and is the backlog's trace. Fork m4-turbo2-chest, the commit after b86da361.
 - Kill switch config key: the server's `containerSharing` (above).
 
 ## Tests
@@ -175,7 +175,7 @@ Rate limit / bounds: the inventory messages' own (PutItem, TakeItem budgets).
 - Breakpoint plan: none.
 - Owner: agent.
 
-- Finding and fix (06:16 PST 2026-11-01, x-locks-open v2 20261101-140443; fork m4-container-open-poll 5ee4d72b off parity 27f5c0a4): the
+- Finding and fix (06:16 PST 2026-11-01, x-locks-open v2 20261101-140443; fork m4-container-open-poll 06771bf3 off parity 5534294c): the
   open handler (remoteServer.ts onOpenContainerMesage) polled Ui.isMenuOpen through Utility.wait, which the VM suspends in menu
   mode, so a wait begun before the menu opened resumed only at its close; the open was never seen and the occupant left by the
   give-up path at the 15 s deadline (late for a short open; the state since Skyrim Souls RE's unpaused menus joined the layer,
@@ -192,8 +192,8 @@ Rate limit / bounds: the inventory messages' own (PutItem, TakeItem budgets).
 - [x] native hook + T1 (none)
 - [x] TS handler (fork m4-containers-rest: the lid's Open and Close on the isOpen change)
 - [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags (x-container-rest v4 20261031-195055 on ae2cbfd6: every leg green, the one red a count's
-      premise, v5 7fbc6645 corrected; b-container-rest on thuum main 2a74212f, its first run at the train's gate)
+- [ ] T3 scenario green, no HYPOTHESIS tags (x-container-rest v4 20261031-195055 on 44d4c225: every leg green, the one red a count's
+      premise, v5 7fbc6645 corrected; b-container-rest on thuum main 872e75e6, its first run at the train's gate)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [x] ledger and suppression registry updated (none: no native, no suppression)

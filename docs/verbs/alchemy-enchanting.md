@@ -2,7 +2,7 @@
 
 Drafted 2026-10-31 from docs/VERB.md (pile item 14 of docs/private/turbo-2-prework.md: "alchemy and enchanting as crafting
 transactions"). A design memo, not a build: the two benches make forms the inventory cannot carry, and that is the verb's whole
-problem. From a code map of the fork at parity d10789f7: craftService.ts (the forge's transaction: the furniture's streak of
+problem. From a code map of the fork at parity 19e8c397: craftService.ts (the forge's transaction: the furniture's streak of
 items leaving the player, then the product arriving, sent as CraftItem {workbench, craftInputObjects, resultObjectId}), the
 server's recipe check against COBJ (unit/CraftTest.cpp: the forge, Dragonborn's and Hearthfires' recipes), and the inventory's
 entry (Inventory.h: a base form id and a count, with optional extras: health, enchantmentId, chargePercent, soul, poisonId,

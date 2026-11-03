@@ -1,6 +1,6 @@
 # Engine unknowns under shipped verbs: the open HYPOTHESIS tags, by engine system
 
-Read-only census, 2026-11-03 (playtest 41's root-cause plan, W1), of docs/verbs/*.md at thuum 6453e2f9. Scope: the 72
+Read-only census, 2026-11-03 (playtest 41's root-cause plan, W1), of docs/verbs/*.md at thuum 244cb5b2. Scope: the 72
 rows docs/research/gate-audit-2026-11-02.md takes from PLAN.md as DONE, MERGED or BUILT (headshot kept: it shipped with
 train 27 and M2's close although PLAN.md:179 says NEXT); natures-balance, mod-lock, mount, vampirism,
 alchemy-enchanting, script-variables and validation left out. Counts match the gate audit's on the 25 docs re-read;
@@ -19,7 +19,7 @@ never in locks.md's engine table.
 
 | System | Open | The three most player-visible | Dynamic plan: run or not |
 | --- | --- | --- | --- |
-| Containers and menus | 5 | npc-fate.md:2495 (H5): a dead body with its AI off may refuse activation, so the guest's loot menu never opens; npc-fate:2589: a dead actor needs more than 150 ms after EnableAI to accept an activation; activation-reach.md:138: a second activation clears an occupant left by a menu that never opened | x-body-open-guest ran (v2 215922, v6 merged d10789f7), no result written back; the activation-reach probe never ran; containers.md: 0 tags |
+| Containers and menus | 5 | npc-fate.md:2495 (H5): a dead body with its AI off may refuse activation, so the guest's loot menu never opens; npc-fate:2589: a dead actor needs more than 150 ms after EnableAI to accept an activation; activation-reach.md:138: a second activation clears an occupant left by a menu that never opened | x-body-open-guest ran (v2 215922, v6 merged 19e8c397), no result written back; the activation-reach probe never ran; containers.md: 0 tags |
 | Death, ragdoll and bodies | 28 | npc-fate:2396 (H-56a): a host's bow kill yields the engine's own death report; npc-fate:1412: KillImpl hands every ragdoll to Havok at the kill (D78's pose design rests on it); npc-fate:2474-2481 (H1 to H3): reanimation across hosts | x-npc-arrow-death by path, unrun; :1412 no trace; x-reanimate-claim unrun; stale: :2426 says unrun though x-reanimate-host ran three times (125920, 133744, 135637); :120 says unrun though x-dead-placed-loot v2 went GREEN (133512); no tag for the death sound |
 | Props and Havok | 14 | prop-physics.md:191: walking into a cart wheel fires the contact and moves it (F13); :170: the proxy contact fires for Keyframed bodies, so a non-host's touch claims; :350: grabRelease fires only on the holder's seat | x-prop-static by path, unrun; prop-contact.js written (LOG.md:3026), never run; the grab read never ran; only the launch traces ran |
 | NPC AI, packages, hand-off and doors | 32 | npc-handoff.md:43 (H1): a promote starts the resident from its last read position (playtest 41's Hod: promoted at the pre-door sample; the fix tagged at :755); :677: Disable holds a puppet-flagged actor (F2's ghost fix); npc-talk.md:317 (H-55a): a greeting already in flight when the claim lands | c-riverwood's claim 2 drafted, unrun (its red 20261101-084608 rewritten into a passing form); x-handoff-hide unrun; x-npc-talk-cross 131626 RED, the tag left as it was |
@@ -64,6 +64,6 @@ written "by path" and does not run before the merge. The next engine read comes 
 - The one full cycle in order: skill books on 11-02: static read, tag, x-skill-book GREEN 212928, cleared
   (leveling.md:269, :309).
 - Tags cleared on paper: on 10-29 the inventory found 196 tag lines with 4 closed in place; two commits about 15 minutes
-  apart (88f049e5 at 17:21, 70338e6d at 17:34) cut npc-puppet from 40 to 11 and cell-host from 20 to 3 by writing back
+  apart (e4c87b28 at 17:21, 172f6e1d at 17:34) cut npc-puppet from 40 to 11 and cell-host from 20 to 3 by writing back
   older runs, relabelling decompiler reads CONFIRMED-STATIC and declaring limits, not by new lab evidence. Meanwhile
   tags whose probes did run were never updated (npc-fate.md:120 and :2426, spell-cast.md:1032, shouts.md:180).

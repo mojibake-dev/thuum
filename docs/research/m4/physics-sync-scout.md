@@ -2,7 +2,7 @@
 
 Status: D43 "the physics-sync arc", PROPOSED, for Eli to read later; binds nothing (D42, docs/research/m3/
 decisions-after-npc-stream.md:455-466). A research agent's read, no code, no fork change. Sources:
-CommonLibSSE-NG at b93280e8, the fork at origin/parity 1b866786 through `git show` (the checkout stays at
+CommonLibSSE-NG at b93280e8, the fork at origin/parity c85dab3d through `git show` (the checkout stays at
 11c126b9), the docs on main, the web as cited (TES3MP 0.8.1 at 49be5b64, CoreScripts 3e397a11; Skyrim Together
 dev 25a0049a, a map only, ADR-005 and rule 7). Inferred engine behaviour is HYPOTHESIS; unconfirmed web
 claims are UNVERIFIED.
@@ -21,7 +21,7 @@ missing"). M4 names the rows (docs/PLAN.md:1220 "dropped items and kicked object
 
 ## Findings
 
-### F1. What the fork does today (origin/parity 1b866786)
+### F1. What the fork does today (origin/parity c85dab3d)
 
 - Movement is accepted for actors alone: ActorUpdatableBy returns the form's AsActor, null for anything else
   (skymp5-server/cpp/server_guest_lib/ActionListener.cpp:59-83); OnUpdateMovement goes through it (:155). A

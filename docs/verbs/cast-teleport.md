@@ -488,7 +488,7 @@ by x-double-arrow2 20261012-071438) and poison's OnEquip log (b3682b71).
   jump's length in one frame where the glide spread it over 0.2 s, the
   claim playtest twenty-three left open.
 
-## Train 56: the running lead runs out before the settle (22:11 PDT 2026-10-27; fork m3-pt35-fixes d0828a79)
+## Train 56: the running lead runs out before the settle (22:11 PDT 2026-10-27; fork m3-pt35-fixes a1bba4c5)
 
 Playtest 35 (Eli: "a player running is snapped back a tiny bit after
 jogging"; pt35-read-1 D): the server corrected nobody; c1 wrote 108 "settle"

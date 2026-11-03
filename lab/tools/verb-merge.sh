@@ -56,7 +56,7 @@ if [ "${T2:-}" = skip ]; then
 else
   # T2 on the head's own image: its server-build pushes skymp-server:<branch>-<sha8>, so wait for that, then test the per-sha
   # tag and never the bare one, which can still name the previous head's image (m2-stream-end-grace's R0, 2026-11-02: T2 at
-  # 04:10:20Z ran ea15e8bb's image, 8eddb2c4's server-build finished 04:14:29Z) and whose pull re-points the lab's own image
+  # 04:10:20Z ran f3e2c995's image, 99a19b61's server-build finished 04:14:29Z) and whose pull re-points the lab's own image
   # mid-gate (the permit gate 20261102-002715, two builds)
   sb=""
   for _ in $(seq 1 60); do

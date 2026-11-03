@@ -4,13 +4,13 @@ Sources: scratchpad/pt25 (log-read, probes-read, probes-read-2, bond-red, unarme
 placed-objects with the REA appendix); docs/private/playtest-m2-25.md, -26.md and the -27 draft (re-read
 19:10 PDT); docs/verbs/spell-cast.md:1271-1376; docs/verbs/figure-values.md; ADR-029 and ADR-037
 (docs/DECISIONS.md:742-831, 1339-1443); docs/research/apocalypse/ effect-conditions.md;
-docs/private/apocalypse-census-spells.tsv. Fork code is read on origin/m2-train-28 (e3806870; parity
+docs/private/apocalypse-census-spells.tsv. Fork code is read on origin/m2-train-28 (0a20755a; parity
 88c43e77 is behind it) with `git show`; CommonLibSSE-NG at the pinned b93280e8. Facts carry file:line;
 inferences are marked HYPOTHESIS. Nothing was edited.
 
 Actors in every run and playtest here: ff000000 = test 1 = c1 (the caster), ff000001 = test 2 = c2. Playtest
-25's build: fork m2-train-28 c0fd719e with 2314fdc2's client dist; the probe runs used server image
-m2-train-28 and client c0fd719e.
+25's build: fork m2-train-28 9e075f32 with 20ddff8d's client dist; the probe runs used server image
+m2-train-28 and client 9e075f32.
 
 ## Row 1. Apocalypse's MCM missing under the essentials layer (and Survival's quest)
 
@@ -140,7 +140,7 @@ before its engine's local hit, which changed nothing (attackDamageMult 0 on the 
 Cause as read. The figure-side guard did not hold. FigureHealthDamage (Hooks.cpp:222-242: on
 VTABLE_Character[0] vfunc 0x104, drop the call when the victim's formID >= 0xFF000000 and its
 kAttackDamageMult reads 0; installed at :414) IS in the tested dist: commit 073610b7 is an ancestor of
-2314fdc2. Two hypotheses, both HYPOTHESIS: (H-a) the vfunc is a notification after the number lands,
+20ddff8d. Two hypotheses, both HYPOTHESIS: (H-a) the vfunc is a notification after the number lands,
 ADR-037's own caveat (gate 2: "HYPOTHESIS until the lab: that this virtual is where the number is applied";
 Skyrim Together gates Actor::DamageActor 37335 one call earlier, docs/TE-MAP.md:62); (H-b) the figure test
 fails at the hit (the value not 0 as read, or the figure's class not reaching that slot). The three

@@ -220,7 +220,7 @@ it should to starve them"). Not the clock (20x by the run overlay and by the liv
 quarter-game-hour tick) and not Survival (hunger and exhaustion never kill, apocrypha's read): the reports STOPPED at the
 seat's hot push (numidium's log read: the last line 13:25:21Z, two seconds after client-hot) because this service kept the
 list to watch in a class field filled once by the login's message, and a reloaded client never logs in again. Fixed
-7fbb5e74: the list in sp.storage, a resumed service reports every watched value once. After the 18:23Z and 18:24Z relaunches
+61f22afa: the list in sp.storage, a resumed service reports every watched value once. After the 18:23Z and 18:24Z relaunches
 on the fixed bundle no "recorded" line had come by 18:33Z; whether the seats run (Eli stopped at 11:21 PDT; a console or a
 save menu pauses Survival's ticks) is numidium's dump read, a regression the fallback reading. The cold Kill: Survival's one
 lethal need calls PlayerRef.Kill() at Survival_ColdNeedValue (81b) 1000; the server cannot honour a client-side kill (no C2S
@@ -248,11 +248,11 @@ The setting is Undead FX 4.2's GLOB US_Setting_Decay_UseOld (05178e:UndeadFX.esp
 The verb already had the shape: a `playerGlobals` entry may be an object ('global', 'default', 'killAt') (wire-rules
 player_globals::from_json), and the login sends a default for a listed global the record is silent on (at_login); a player's MCM
 change reports through the watch and the record keeps it, so the default is the server's word for everyone and every new player
-and the plugin stays raw. No fork code: the lab's two settings files list the global with default 1 (thuum main c9177cbc, in
+and the plugin stays raw. No fork code: the lab's two settings files list the global with default 1 (thuum main 2d659fc6, in
 layer-render's shape). ADR-053: a server-only change that moves the engine's FX on every seat keeps one probe at the slot,
 x-global-default by path (d8f5cd9b): both seats read 1 at login; c1 sets 0 as the MCM would and reads 0 while c2 keeps 1; a relaunch
-and a server restart keep both. GREEN on its first run (20261102-220306, numidium, on the deployed c9177cbc settings): every claim
-held, the default is live on the lab. Promoted to b-global-default (thuum main 80f42576, its own commit) at 14:07 PST 2026-11-02; it joins the
+and a server restart keep both. GREEN on its first run (20261102-220306, numidium, on the deployed 2d659fc6 settings): every claim
+held, the default is live on the lab. Promoted to b-global-default (thuum main f7c847db, its own commit) at 14:07 PST 2026-11-02; it joins the
 next gate's set beside b-player-globals.
 
 ## Status
@@ -265,7 +265,7 @@ player through its own death path (MpActor::Kill, the respawn following as for a
 server's word: global X at V reached its killAt". Survival's cold need, 81b:ccQDRSSE001-SurvivalMode.esl, carries
 killAt 1000 in both server settings files (the mod's own CheckIfMaxCold threshold; apocrypha's read). The client's
 own Kill stays untrusted (rule 5): the seat's deferred kill holds the player until the server's word. Built on fork
-m3-door-pass after 9fb04fec: wire-rules player_globals.rs `kill_at` and `lethal()` with the crate's test, the bridge's
+m3-door-pass after 8bab121c: wire-rules player_globals.rs `kill_at` and `lethal()` with the crate's test, the bridge's
 player_globals_lethal, PartOne::LethalPlayerGlobals, the handler's kill, PlayerGlobalsTest's case (GameHour standing
 in for the cold need). HYPOTHESIS H-D51a (the seat's deferred kill swallows Survival's own Kill, so the server's word
 is the one death) until x-player-cold-kill reads it; the probe gains the global's set through the lab `global` step
@@ -282,10 +282,10 @@ and the server's `isDead`.
       and the PlayerGlobals message declared in the 27 other sessions whose
       seats move (sent on a seat's first movement after a login, so a seat
       that never moves receives none). Since the login-time send (train-29,
-      above) every seat receives it at its login, so fork 4720d0d3 declares
+      above) every seat receives it at its login, so fork 7293c944 declares
       it once, for every client of every session, in difftest's
       divergences.yaml beside the login clock, and the 37 per-session
-      entries are gone (T2 on 50a56e4a had shown c1's undeclared in every
+      entries are gone (T2 on 9387130b had shown c1's undeclared in every
       session where c1 never moved)
 - [ ] T3 scenario green: b-player-globals 20261018-103133 on train-24 (UNTICKED 19:02 PST 2026-11-02: 11 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
       (c1's global 3, c2's 0, before and after the server restart), in the
@@ -337,12 +337,12 @@ itself (PartOne::SetUserActor, with the clock's send), not with the other
 login sends at the first movement report; the client's service holds the
 message as pending and applies it at its first in-game update, a few
 seconds before the Creation's check. CONFIRMED the same day: on the server
-of fork 50a56e4a, x-survival-restore-timing 20261020-185534, 185906 and
+of fork 9387130b, x-survival-restore-timing 20261020-185534, 185906 and
 190218 all green, the send 37 to 74 ms after the connect (against 4,200 ms
 when it rode the first movement report), no box on the caster's 8 s
 screenshots, the two-seat asserts holding after the fresh relaunch (the
 lab's other login sends stay at the first movement). Fork m2-train-29, server
-only, MERGED to parity 4720d0d3 (2026-10-20 13:40; its T2 declaration moved
+only, MERGED to parity 7293c944 (2026-10-20 13:40; its T2 declaration moved
 to difftest's common file); the T0 case now logs the actor in a second time, as a reconnect does,
 and reads the send. The default from the section above stays the belt.
 The proper cure for every script that reads a global before any update
@@ -379,7 +379,7 @@ and the help-shown flags per need (0x8E0 to 0x8E2) are left as the game's.
 T4: playtest twenty-nine item 7 (what the bars show after a restart): Eli,
 2026-10-20 22:4x: a no, "those reset when test 2 came back".
 MEASURED 2026-10-21 (x-survival-needs-relaunch 20261021-182745 on merged
-parity 9ad635cd, numidium; the first run 181741 red on the probe's own
+parity e87267c4, numidium; the first run 181741 red on the probe's own
 bound, cold falling in a warm spot): before the relaunch the three read
 500, 560, 600 as set; the server restored them at the relaunched login
 ("sent 58 to watch, 5 values after a login") and at +5, +30 and +90 s the
@@ -562,7 +562,7 @@ lab/deploy/sky-srv/server-settings.json and the 1.7.104 file (2026-10-21
 them. A probe that sets high values with the flags at 0 cannot measure
 ticking (it pauses under the box).
 
-## Survival's food (2026-10-28, playtest 37; fork m3-hunger 853dd4fc)
+## Survival's food (2026-10-28, playtest 37; fork m3-hunger 3bc52755)
 
 Eli: "food doesnt replenish hunger." numidium's live read CONFIRMED it (the hunger need 81a at 1000 through 115 reads
 while Eli ate): the food's Survival script never runs on a seat. The mechanism, read from the game files on sky-srv

@@ -10,7 +10,7 @@ handed to them: A read the architecture against the prior art and the design
 law; B classified every fix of trains 34 to 50; C characterized the casting
 problem from the record and matched its signals against the NPC work. Their
 reports are quoted below with their citations (the fork at m3-train-50
-dac4c0ff; the docs on main). The synthesis and the recommendation are mine, at
+a57727a7; the docs on main). The synthesis and the recommendation are mine, at
 the end; Eli decides.
 
 ## The short answer
@@ -228,7 +228,7 @@ tables; the engine's handshake over a measured constant) and ADR-034.
 
 ## Part 2. The signals in the NPC work (2026-10-21 to 10-26)
 
-Scale: 140 fork commits since M2's close, 86 of them from fb6f3f09 to train-50
+Scale: 140 fork commits since M2's close, 86 of them from a76125cb to train-50
 in 74 hours; seventeen trains (34 to 50); five playtests (30 to 34). My reading
 of the 86: about 24 build decided features, about 37 fix built behaviour (a
 dozen of those re-fix a fix from the same window or replace a premise found
@@ -241,9 +241,9 @@ wrong), about 25 are CI, test and lab tooling.
   actions on the action replay (DECISIONS.md:1296); its verb, npc-stream, is a
   DRAFT with every box open (npc-stream.md:730-760), and the PerformAction hook
   reads the player alone (FridaHooks.cpp:461). Symptoms are patched one at a
-  time: locomotion events relayed for NPCs (b6dd852b) "arrived but changed
+  time: locomotion events relayed for NPCs (10a60f72) "arrived but changed
   nothing" (animation.ts:305); a refused chair exit answered with
-  IdleForceDefaultState, itself HYPOTHESIS (786a029d; animation.ts:394-411);
+  IdleForceDefaultState, itself HYPOTHESIS (d0d53bf5; animation.ts:394-411);
   bow animations on one screen and jerky sitting (LOG.md:2438). Unmet so far: a
   hosted NPC's hand-cast events are dropped at the relay's source
   (animation.ts:321) while its casts still go out (magicSyncService.ts:82-84), so
@@ -255,17 +255,17 @@ wrong), about 25 are CI, test and lab tooling.
   "no isMine gate"): the habit ADR-031 named ("The suppressions cut events, not
   numbers", DECISIONS.md:903; "Cut at the number", :947) and an exception to
   ADR-045's Rule A (:2352). The compensations followed: the clamp and one-percent
-  floor (ac557132, d40d4fa6), a twice-a-second health poll in place of the
-  engine's death event because "deathStart was the wrong ear" (6cdc2b35;
-  npc-fate.md:1040), the kill mark's expiry (c5faa067), the life mirror
-  (61ffa74e), resurrectActor (5ee047df). Eli asked first for the structural
+  floor (8b43aa72, 5b90e4c5), a twice-a-second health poll in place of the
+  engine's death event because "deathStart was the wrong ear" (8efabb10;
+  npc-fate.md:1040), the kill mark's expiry (11482657), the life mirror
+  (5ffd078a), resurrectActor (62a4ae6b). Eli asked first for the structural
   answer: "what's stopping it from being as simple as 'npc's health hits 0, by
   any damage. that death propagats?'" (DECISIONS.md:2532).
 - (c) HYPOTHESIS: the cell is the unit of authority (TES3MP's layer,
   DECISIONS.md:1261) while Skyrim tracks these actors one by one: persistent
   references answer GetParentCell with the worldspace's persistent cell
   (:2307-2308), residents are placed indoors and walk out (LOG.md:2244),
-  cellAttach never fires for them (69958274), the engine loads 5x5 against the
+  cellAttach never fires for them (ff7e53c1), the engine loads 5x5 against the
   server's 3x3 (LOG.md:2248). Each fact became a per-actor exception (signal 2),
   so the model is now per actor with a cell default, reached by patch. ADR-035
   itself cites the per-object primary copy as the general model (Bharambe, Pang
@@ -274,11 +274,11 @@ wrong), about 25 are CI, test and lab tooling.
 
 **2. Fixes that re-open one question: yes.** "Which game simulates this actor,
 and does every game know" re-answered in more than twenty commits since 10-21
-(7fef1bec, ad1f2356, 8785d34e, 69958274, 89c35590, 1e4a5cd6, 8dc3b974,
-a5e431e2, a146ee0c then 3d103426 then 856fed7d, 53432d22, 9b412a10, f70cf19f
-among them). The roll's site moved after each falsification (1a3a91c4,
-962fc913, 227f9c18); the puppet's activation block took three tries (8eafa85d,
-7e59c32c, 8785d34e).
+(a2a5d7d2, 6a89fdd5, ada97a8c, ff7e53c1, 03eb98f0, 7d46becf, a1c7b41e,
+d698fe38, fc7b2718 then 00a8ea96 then 0328a073, 78ed369c, 361884b2, dd4fd3bf
+among them). The roll's site moved after each falsification (5351478f,
+02c001ca, 637b2345); the puppet's activation block took three tries (67256b72,
+03e7d163, ada97a8c).
 
 **3. Growing known-limit lists: yes, partly scope.** Thirty found one thing,
 the spin; thirty-two five fixes and nine rows (LOG.md:2275), thirty-four about fifteen
@@ -296,8 +296,8 @@ widening a bound or a claim, all self-approved, each with a measured reason.
 
 **5. Two code shapes for one question: yes.** The cell grant beside the
 per-actor word, follow and pass; engine references beside PlaceAtMe copies for
-server-made NPCs, which alone produced three defects on 10-25 (fe1ee08f,
-fdd0b123, 89f8a9ef); the numbered death beside the host's report and its poll;
+server-made NPCs, which alone produced three defects on 10-25 (53bd5959,
+ea2d6431, 12dd81b3); the numbered death beside the host's report and its poll;
 the fate's ahead pin beside its late path (D23's invisible NPCs came from the
 late one).
 
@@ -323,10 +323,10 @@ diagnosis, "Every failure lived in a dimension the method had not asked about"
 (DECISIONS.md:1085), fits playtests 31 to 34.
 
 **Not the pattern.** Much of the volume is owed under any model: decided
-features (D1 to D24), legacy defects NPCs exposed (54df2a42, 7cb7db42, fa8809a1,
-757066f3), a quit crash two plugins cause (LOG.md:2478-2480). Where the casting
+features (D1 to D24), legacy defects NPCs exposed (569bc453, dea00cb6, 0bc54e17,
+c6665aa7), a quit crash two plugins cause (LOG.md:2478-2480). Where the casting
 lesson was used it converged in hours: locomotion moved to the engine's own data
-channel (a9c43bf0), the stride on film the same afternoon (LOG.md:2250-2252);
+channel (8744d5c5), the stride on film the same afternoon (LOG.md:2250-2252);
 the roll pinned at the engine's own sites; the roster on ProcessLists.
 
 ## VERDICT: MATCH, in named places rather than across the whole NPC effort
@@ -343,7 +343,7 @@ cost five hours against a forty-five-hour detour.
 
 ## B. The patch history of trains 34 to 50 (verdict: not the casting problem at the design layer; two seams patched the casting way at the implementation layer)
 
-Reviewer B classified the 86 fork commits from fb6f3f09 (train-33's parity)
+Reviewer B classified the 86 fork commits from a76125cb (train-33's parity)
 to train-50: (i) a designed slice built, (ii) a defect in a sound design, (iii)
 a workaround for a structural flaw, (iv) lab, CI and test work. Its full table
 is in the session's scratchpad (review-b-patch-history.md); the counts, the
@@ -368,7 +368,7 @@ trend, the clusters and the verdict follow.
 | C6 deaths | 7 | 3 | 1 | edges, one seam |
 | C7 activations | 0 | 4 | 0 | edges of an undeclared rung |
 | D display | 0 | 2 | 0 | edges |
-| C2 puppet state, client | 0 | 8 | 1 | papered over (and 7e59c32c, iv) |
+| C2 puppet state, client | 0 | 8 | 1 | papered over (and 03e7d163, iv) |
 | C3 view lifecycle | 1 | 3 | 3 | papered over, contained |
 | C4 inherited shapes | 2 | 4 | 1 | papered over, converging |
 
@@ -376,21 +376,21 @@ Trend. The (iii)s are present and flat, not growing: 0, 3, 2, 1 by day, or 0 of 
 
 ## Clusters
 
-C1, who simulates, on the server: 206190dc, 2b14f213, f88cd50d, cf8b6007, 89c35590, e4474bcf, 53432d22, 9b412a10. A model finding its edges. Every rule was a memo letter before it was code (D6, D9, D10, D12, D18), all of it lives in one table (wire-rules cells.rs) behind one question (simulator_of), each rule has its T0 and a committed T3, and the one (ii) is a threshold refined by its own measurement. It is the general shape of per-object authority migrated between machines [Roblox; Colyseus]. No structural change needed; D7's damping and D8's keyframe are designed and unbuilt. One interaction was foreseeable: D10's cold start by ring splits neighbouring cells between players by design, which made common the D9 crossing that playtest 34 hit (LOG.md:2436) while ADR-047 had left D9 to a second slice.
+C1, who simulates, on the server: efefb899, c213a2ca, d4792a20, c6a27e31, 03eb98f0, 87e77191, 78ed369c, 361884b2. A model finding its edges. Every rule was a memo letter before it was code (D6, D9, D10, D12, D18), all of it lives in one table (wire-rules cells.rs) behind one question (simulator_of), each rule has its T0 and a committed T3, and the one (ii) is a threshold refined by its own measurement. It is the general shape of per-object authority migrated between machines [Roblox; Colyseus]. No structural change needed; D7's damping and D8's keyframe are designed and unbuilt. One interaction was foreseeable: D10's cold start by ring splits neighbouring cells between players by design, which made common the D9 crossing that playtest 34 hit (LOG.md:2436) while ADR-047 had left D9 to a second slice.
 
-C2, who simulates, on the client: 8eafa85d, 7e59c32c, 8785d34e, 69958274, 32dffbda, 5ee047df, a146ee0c, 3d103426, 856fed7d, f70cf19f, and 227f9c18's promote half. Defects of one kind on four consecutive days, across playtests 32 and 33, gate 43's night scenario and playtest 34: a path sets or clears part of the puppet bundle (the AI bit, the native flag, the activation block, look-at and head tracking, the tracked set) under a condition another path does not check (no 3D, dead, resurrecting, who may report). Each is a (ii); together they are the owner's pattern, at the implementation layer. The rule they converge on fits one line: AI off exactly when the actor is loaded here, is not this game's by the server's word, and is alive or a blocked body. It is spread over about eight entry points: puppetService.ts:41-80 (two polls), :125, :161, :206, :232, :255, FateApi.cpp's resurrectActor and PuppetApi.cpp's no-3D branch; the file's header still says the switch is the cell's grant alone (puppetService.ts:12), the rule ADR-045 revised to the word per actor (DECISIONS.md:2297-2311). Two of these patches composed into playtest 34's invisible, detecting bandits: the late re-roll dropped the 3D and 856fed7d's rule read "no 3D" as "not loaded here" and released ten of thirteen live (decisions-after-playtest-34.md:110-124). Retiring change: one reconciler per actor, the desired state computed in one function from (word, loaded here, dead, kind) and applied idempotently from every event and one poll, "loaded here" read from the actor's cell being attached rather than its 3D, the native side exposing primitives only; the control-loop shape [K8s; Borg]. HYPOTHESIS that it would have prevented the D11 triple and D23's blind promote. Separately, 856fed7d changed who simulates an unloaded actor (every engine's low-process schedule, the host's roster reconciling), which ADR-035 points 4 and 8 rule otherwise; it lives only in a verb doc amendment and needs an ADR.
+C2, who simulates, on the client: 67256b72, 03e7d163, ada97a8c, ff7e53c1, f8c32c2d, 62a4ae6b, fc7b2718, 00a8ea96, 0328a073, dd4fd3bf, and 637b2345's promote half. Defects of one kind on four consecutive days, across playtests 32 and 33, gate 43's night scenario and playtest 34: a path sets or clears part of the puppet bundle (the AI bit, the native flag, the activation block, look-at and head tracking, the tracked set) under a condition another path does not check (no 3D, dead, resurrecting, who may report). Each is a (ii); together they are the owner's pattern, at the implementation layer. The rule they converge on fits one line: AI off exactly when the actor is loaded here, is not this game's by the server's word, and is alive or a blocked body. It is spread over about eight entry points: puppetService.ts:41-80 (two polls), :125, :161, :206, :232, :255, FateApi.cpp's resurrectActor and PuppetApi.cpp's no-3D branch; the file's header still says the switch is the cell's grant alone (puppetService.ts:12), the rule ADR-045 revised to the word per actor (DECISIONS.md:2297-2311). Two of these patches composed into playtest 34's invisible, detecting bandits: the late re-roll dropped the 3D and 0328a073's rule read "no 3D" as "not loaded here" and released ten of thirteen live (decisions-after-playtest-34.md:110-124). Retiring change: one reconciler per actor, the desired state computed in one function from (word, loaded here, dead, kind) and applied idempotently from every event and one poll, "loaded here" read from the actor's cell being attached rather than its 3D, the native side exposing primitives only; the control-loop shape [K8s; Borg]. HYPOTHESIS that it would have prevented the D11 triple and D23's blind promote. Separately, 0328a073 changed who simulates an unloaded actor (every engine's low-process schedule, the host's roster reconciling), which ADR-035 points 4 and 8 rule otherwise; it lives only in a verb doc amendment and needs an ADR.
 
-C3, engine references under SkyMP's view lifecycle: b1aa119e, c60ab674, 8dc3b974, 10375935, 720f9a53, acaf4b34, a5e431e2. Papered over, but contained: six commits from 16:44 to 19:36 PDT on 10-23, no product commit since. SkyMP builds a view at the subscription and destroys it at the unsubscribe, a copy's lifecycle; an engine reference outlives every subscription, so a hosted cell change needs the viewer's move sent ahead of its own DestroyActor (8dc3b974) and the lookup done at message time (acaf4b34, a5e431e2). The residue stays: the Teleport-ahead ordering in ActionListener, and FOLLOW_SETTLE_MS, whose comment still blames a stale or reordered sample (cells.rs:32-39) for a flip-back that acaf4b34 traced to the host's own view moving its actor, a Rule A breach c60ab674 introduced. Retiring change: an engine reference's binding kept for the session, keyed by form id, the subscription governing only the stream and the word; leaving the grid then means "no word", which C2's rule turns into a puppet or a release. HYPOTHESIS; the ordering trick and the settle window would have no job.
+C3, engine references under SkyMP's view lifecycle: 45713556, a607f7f9, a1c7b41e, 62875e84, c119eb9e, 7f74336f, d698fe38. Papered over, but contained: six commits from 16:44 to 19:36 PDT on 10-23, no product commit since. SkyMP builds a view at the subscription and destroys it at the unsubscribe, a copy's lifecycle; an engine reference outlives every subscription, so a hosted cell change needs the viewer's move sent ahead of its own DestroyActor (a1c7b41e) and the lookup done at message time (7f74336f, d698fe38). The residue stays: the Teleport-ahead ordering in ActionListener, and FOLLOW_SETTLE_MS, whose comment still blames a stale or reordered sample (cells.rs:32-39) for a flip-back that 7f74336f traced to the host's own view moving its actor, a Rule A breach a607f7f9 introduced. Retiring change: an engine reference's binding kept for the session, keyed by form id, the subscription governing only the stream and the word; leaving the grid then means "no word", which C2's rule turns into a puppet or a release. HYPOTHESIS; the ordering trick and the settle window would have no job.
 
-C4, inherited shapes: dc6e3adb (a player's appearance read for an NPC's race), 8eafa85d, ac557132 and d40d4fa6 (the figure's per-sample block, health step and sample death on puppets), d2003056 (SPID on figures), fe1ee08f (the players' 25 s respawn on server-made NPCs), c7c389af and fdd0b123 (a hosted copy dressed from its base's own roll), 89f8a9ef (the 25 s respawn re-enabling a disabled actor), and the deferred kill under C6. Each is a behavior SkyMP built for players or their copies that reached NPCs by default and was carved out when a playtest found it; formView.ts tests the id range eleven times (:89, :143, :157, :207, :418, :431, :558, :578, :655, :778, :786). A structural flaw papered over, though converging (fe1ee08f keys the respawn once on "not a player"). Retiring change: an NPC path of its own: on the client an NPC view apart from the figure's; on the server the NPC rules keyed once on "not a player"; a server-made NPC as a fated actor whose engine reference the client makes by PlaceAtMe instead of finding, so D17's pin, D19's hands, the death and respawn rules and D21 are one rule set. HYPOTHESIS; the one new mechanism is a fate keyed before PlaceAtMe returns.
+C4, inherited shapes: b117c8f6 (a player's appearance read for an NPC's race), 67256b72, 8b43aa72 and 5b90e4c5 (the figure's per-sample block, health step and sample death on puppets), b330465a (SPID on figures), 53bd5959 (the players' 25 s respawn on server-made NPCs), 68f41e34 and ea2d6431 (a hosted copy dressed from its base's own roll), 12dd81b3 (the 25 s respawn re-enabling a disabled actor), and the deferred kill under C6. Each is a behavior SkyMP built for players or their copies that reached NPCs by default and was carved out when a playtest found it; formView.ts tests the id range eleven times (:89, :143, :157, :207, :418, :431, :558, :578, :655, :778, :786). A structural flaw papered over, though converging (53bd5959 keys the respawn once on "not a player"). Retiring change: an NPC path of its own: on the client an NPC view apart from the figure's; on the server the NPC rules keyed once on "not a player"; a server-made NPC as a fated actor whose engine reference the client makes by PlaceAtMe instead of finding, so D17's pin, D19's hands, the death and respawn rules and D21 are one rule set. HYPOTHESIS; the one new mechanism is a fate keyed before PlaceAtMe returns.
 
-C5, the roll pushed into the engine: a891e6a6, 818287c3, 8535e336, 510f190c, 1a3a91c4, 0a10f977, 3aabd51e, 962fc913, 7ec13787, e3b39ac8, 227f9c18. A model finding its edges, and the casting lesson applied: the server's answer goes in at the engine's own decision (the roll's out array, 8535e336; the outfit resolver's entries tagged through the engine's own setter, 1a3a91c4; the container adder, after which "the engine's dresser equips the server's weapon as its own best pick, so no forced equip", 962fc913), and the engine produces the consequences. Its (ii)s are a static site the lab corrected as rule 2 expects, an ordering, a thread context and a Papyrus answer; species and the whole worn set held at T3 within ten hours (LOG.md:2335, :2352). Residue: the late path for a fate that arrives after the engine rolled, accepted as "one pop" (DECISIONS.md:2714) with the base compare owed (npc-fate.md:999-1000). No structural change for the method; the late path shrinks toward the respawn alone if fates reach the client before the engine's roll in more cases (an interior's at its door, a login's at connect). HYPOTHESIS.
+C5, the roll pushed into the engine: 2f0e5a84, 2d1a71f6, 035fc671, fa9874f4, 5351478f, 3d224c08, cc21ae6f, 02c001ca, 93ca1ec1, 1d8efca5, 637b2345. A model finding its edges, and the casting lesson applied: the server's answer goes in at the engine's own decision (the roll's out array, 035fc671; the outfit resolver's entries tagged through the engine's own setter, 5351478f; the container adder, after which "the engine's dresser equips the server's weapon as its own best pick, so no forced equip", 02c001ca), and the engine produces the consequences. Its (ii)s are a static site the lab corrected as rule 2 expects, an ordering, a thread context and a Papyrus answer; species and the whole worn set held at T3 within ten hours (LOG.md:2335, :2352). Residue: the late path for a fate that arrives after the engine rolled, accepted as "one pop" (DECISIONS.md:2714) with the base compare owed (npc-fate.md:999-1000). No structural change for the method; the late path shrinks toward the respawn alone if fates reach the client before the engine's roll in more cases (an interior's at its door, a login's at connect). HYPOTHESIS.
 
-C6, deaths: 645f9344, 95abf0dc, d908abca, 1d09fa04, 61ffa74e, 597bb9dc, dd285ad9, 6e827918, c5faa067, 154ca7d4, 6cdc2b35. Built to ADR-048 B's letter and green at T3 (b-npc-death-report, LOG.md:2401). One seam: every view starts the engine's deferred kill on its actor, the host's own included (formView.ts:398-400, its comment still about the figure), so the first report listened for an event that cannot fire (6e827918), the report now polls the floor (6cdc2b35) and filters the server's own kills with a 10 s mark (c5faa067). Retiring change: for actors this game simulates, the engine's zero crossing caught natively in place of the poll, or the deferred kill lifted on the host and a refused report answered by a resurrect; an ADR call, since it is Rule A's declared exception (npc-fate.md:113). HYPOTHESIS.
+C6, deaths: 4a345953, 3cb843a8, 69a8a972, 59f54e92, 5ffd078a, 54798208, e7950b98, faeb232a, 11482657, 8ce658e8, 8efabb10. Built to ADR-048 B's letter and green at T3 (b-npc-death-report, LOG.md:2401). One seam: every view starts the engine's deferred kill on its actor, the host's own included (formView.ts:398-400, its comment still about the figure), so the first report listened for an event that cannot fire (faeb232a), the report now polls the floor (8efabb10) and filters the server's own kills with a 10 s mark (11482657). Retiring change: for actors this game simulates, the engine's zero crossing caught natively in place of the poll, or the deferred kill lifted on the host and a refused report answered by a resurrect; an ADR call, since it is Rule A's declared exception (npc-fate.md:113). HYPOTHESIS.
 
-C7, the player's activation pipeline on NPCs: 1db977ed, 1e4a5cd6, 91690a6d, aaafffe5, with 154ca7d4 and f70cf19f beside them. The client blocks an actor's activation and waits for the server's reply, the player's shape, and each object type was decided when found (a reply routed to the host, a door teleported past the verdict and now bounced back as a snippet, a body's occupancy). cell-host.md:313-328 describes a hosted actor's activation as reported and recorded but declares no rung for it. Edges of an undeclared rung, cheap to retire: the rung declared once (R2 for a door or furniture the host's engine uses, not blocked on the host; R0 where shared state moves: containers, bodies, locks), after which the bounce has no job. HYPOTHESIS.
+C7, the player's activation pipeline on NPCs: 1a8585dd, 7d46becf, f53592d6, c40a36a3, with 8ce658e8 and dd4fd3bf beside them. The client blocks an actor's activation and waits for the server's reply, the player's shape, and each object type was decided when found (a reply routed to the host, a door teleported past the verdict and now bounced back as a snippet, a body's occupancy). cell-host.md:313-328 describes a hosted actor's activation as reported and recorded but declares no rung for it. Edges of an undeclared rung, cheap to retire: the rung declared once (R2 for a door or furniture the host's engine uses, not blocked on the host; R0 where shared state moves: containers, bodies, locks), after which the bounce has no job. HYPOTHESIS.
 
-D, a puppet's display: fb6f3f09 and 8074833a. Small; the one bend is the speed heuristic in place of the turn input (movementApply.ts:137).
+D, a puppet's display: a76125cb and 25be67c7. Small; the one bend is the speed heuristic in place of the turn input (movementApply.ts:137).
 
 ## Verdict
 
@@ -398,12 +398,12 @@ Not the casting problem. The history reads as a sound model finishing its cases 
 
 The evidence that decides it:
 1. No method was replaced, and none is shown incapable. Every fix keeps the ADRs' shapes: the cell host (ADR-035), AI-off engine references under the server's word per actor (ADR-045), the server's roll on every engine (ADR-046, ADR-049), the boundary rules (ADR-047), the checked death report (ADR-048 B). The casting stretch ended with its method replaced: about ten commits patched the figure's replay of the caster's graph events (40d15f6d on 10-11 through 9795d9bd on 10-14, one self-described as "a candidate", another as "the interim"), three branches died (LOG.md:1282-1283), and the fix was a different method, the caster's actions replayed through the engine's PerformAction (0d69f6fe, 3f8d8f77): inputs, not outputs [AoE; Fiedler]. Nothing in trains 34 to 50 is an engine refusing what we feed it, the way the figure's graph refused relayed events.
-2. Where the NPC work faced that choice it took the input side: the locomotion feed writes the engine's own process data (a9c43bf0, train-33, LOG.md:2274), the roll answers the engine's own roll (C5), and npc-stream plans NPC actions as UpdateAction through cast-action's PerformAction hook (npc-stream.md:48, :184).
+2. Where the NPC work faced that choice it took the input side: the locomotion feed writes the engine's own process data (8744d5c5, train-33, LOG.md:2274), the roll answers the engine's own roll (C5), and npc-stream plans NPC actions as UpdateAction through cast-action's PerformAction hook (npc-stream.md:48, :184).
 3. The (iii)s are 6 of 60 product commits and flat, every (i) traces to a decision, and the chains converge to T3 greens that stay green (C3's six commits in one evening; C5's pin and outfit in ten hours; C6's report in three commits).
 4. What recurs is C2 and C4, in all three playtests; each finding is a missing path or an inherited default in code that has one rule to state, not an engine-level impossibility. Two such patches composed into playtest 34's invisible bandits, which is how scattered transitions fail.
-5. One decision entered by patch: 856fed7d's release makes every engine simulate an unloaded actor's schedule, against ADR-035 points 4 and 8, with no ADR. That is the owner's fear in miniature; it should be written as a decision.
+5. One decision entered by patch: 0328a073's release makes every engine simulate an unloaded actor's schedule, against ADR-035 points 4 and 8, with no ADR. That is the owner's fear in miniature; it should be written as a decision.
 
-Two process notes. Two visible defects were facts written before the builds that missed them: the re-roll's 3D drop (re-npc-roll.md:51-52, e71db41 at 10-23 14:33, before 8535e336 at 15:23; found as D23) and the deferred kill on the host's own actors (npc-fate.md:112, thuum 5358d3d on 10-22, before 6e827918 on 10-24; found by the fall probe). And one lab artifact steered the product: 7e59c32c removed a correct call over a mod's box and reopened playtest 33's stuck dialogue.
+Two process notes. Two visible defects were facts written before the builds that missed them: the re-roll's 3D drop (re-npc-roll.md:51-52, e71db41 at 10-23 14:33, before 035fc671 at 15:23; found as D23) and the deferred kill on the host's own actors (npc-fate.md:112, thuum 5358d3d on 10-22, before faeb232a on 10-24; found by the fall probe). And one lab artifact steered the product: 03e7d163 removed a correct call over a mod's box and reopened playtest 33's stuck dialogue.
 
 What would move the verdict toward the owner's fear: a finding that needs a change to what a puppet is (AI off at one gate, fed the engine's own inputs) or to where the roll is imposed (the engine's roll sites), or C2 and C4 findings that persist after the reconciler and the NPC path exist.
 
@@ -487,7 +487,7 @@ says MATCH in named places) and converge on the specifics:
    a time (formView.ts tests the id range eleven times; "a server-made NPC is
    an NPC on the server and a figure on the client"). The fix is an NPC path
    of its own: an NPC view apart from the figure's on the client, the NPC rules
-   keyed once on "not a player" on the server (fe1ee08f began it), server-made
+   keyed once on "not a player" on the server (53bd5959 began it), server-made
    NPCs fated.
 
 5. **Process.** The casting era's safeguards were skipped for this verb set
@@ -496,9 +496,9 @@ says MATCH in named places) and converge on the specifics:
    inventory, parity and sequence boxes open. Two visible defects were facts
    already written in the research before the builds that missed them (the
    re-roll's 3D drop, the deferred kill on the host's own actors). One decision
-   entered by patch with no ADR (856fed7d: every engine runs an unloaded
+   entered by patch with no ADR (0328a073: every engine runs an unloaded
    actor's schedule, against ADR-035 points 4 and 8). And a lab artifact once
-   steered the product (7e59c32c).
+   steered the product (03e7d163).
 
 **So the answer to the question is: partly, in named places.** The model is
 not wrong and nothing shows it incapable; but three commitments are the

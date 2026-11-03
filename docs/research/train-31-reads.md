@@ -5,8 +5,8 @@ Eli's calls at playtest twenty-eight's report
 record names (Healing Hands on another player heals them; Azure
 Reconstruction does not heal a player who is not the caster's summon), and a
 scripted kill is the server's in both games. The code read below (a read
-agent over fork m2-train-30 44372078 in lab/.cache/wt/t30train, and
-m2-snapback eef10842 for the hold; cites are file:line there) says what
+agent over fork m2-train-30 67679548 in lab/.cache/wt/t30train, and
+m2-snapback 8d5d7170 for the hold; cites are file:line there) says what
 exists. The record read of the three spells lands in section 5. Nothing here
 is built; the rows are PLAN's Train-31.
 
@@ -93,7 +93,7 @@ per-hand streams of m2-visuals); the delivery needs nothing more.
   reliable when it differs; the client applies it with damageActorValue
   (sync/actorvalues.ts:32-46). Reports go every 2 s
   (sendInputsService.ts:178-181), so a rise the server did not cause is
-  clamped within one report. The hold of m2-snapback eef10842
+  clamped within one report. The hold of m2-snapback 8d5d7170
   (heldPercentages; SetPercentages arms a hold for a value that rose;
   OnChangeValues asks TakeReportedPercentage first; wire-rules
   attributes.rs APPLIED_WITHIN 2e-3, HOLD_MS 10 s) protects a SERVER raise
@@ -300,7 +300,7 @@ but magicSyncService.ts:94 filled them for a target-location cast only, and
 MagicApi.cpp:270-282 read them only under `delivery == kTargetLocation`;
 for Firebolt the figure's bolt left the figure's magic node
 (MagicApi.cpp:257-266) along the relayed aim. No run had spell flights rows:
-m2-train30-flights 951b5bbc had never been staged (PLAN and LOG called it
+m2-train30-flights 773babb1 had never been staged (PLAN and LOG called it
 BUILT on its branch). The Launch-entry rows both seats record did measure
 the gap: b-hailstone 20261021-005051 (green) and -004204, four casts, the
 caster's own launch origin against the figure's in the observer's game 64.4,
@@ -314,7 +314,7 @@ and 022-c2-watch-stop.json (cast 1), 032 and 033 (cast 2). The row's build
 is in docs/verbs/spell-cast.md ("A spell projectile flies the arrow's way").
 
 The row's first probe (b-spell-aim 20261021-042101 on the tonight stage of
-3b579f41, red at "position" 34.49, "angle" 0.0; both watch-stops read): the
+a40559fd, red at "position" 34.49, "angle" 0.0; both watch-stops read): the
 figure's ten Firebolts launched from the caster's recorded origin exactly
 (launch gap 0.00 in every pair) with the same angles, so the fix moved the
 origin as meant. What remains is the caster's own game: its bolt sits 2.46
@@ -326,7 +326,7 @@ in third person after the view toggle (right and forward, (0.65, -0.76,
 0.00). So the cast should carry the bolt's first-update position as the
 origin when the flight was seen (the bow rule took the launch's origin and
 the flight's angles; for arrows the two origins never differ): one client
-line on m2-train-31 (the commit after 3b579f41, magicSyncService.ts), for
+line on m2-train-31 (the commit after a40559fd, magicSyncService.ts), for
 the morning's stage; b-spell-aim stays pending on it. HYPOTHESIS: why the
 caster's bolt moves between Launch and its first update (the hand's sweep
 during the release in third person reads right for 30 units; the 2.5 units
@@ -401,7 +401,7 @@ copy stays unused.
 
 ## 9. Tonight's stage probes (2026-10-20, 21:10 to 21:35 PDT)
 
-The stage of 3b579f41 over the staged layer (stage-layer-train31-tonight
+The stage of a40559fd over the staged layer (stage-layer-train31-tonight
 0e69f61, numidium): smoke 20261021-040923 green; b-relaunch-reports 041549
 green (the early report refused with its base named, the echo taken 0.1 s
 later, the One-Handed set after the first relaunch surviving the second);
@@ -414,14 +414,14 @@ kill: server.log 04:28:33.303 "EvaluateDeathItem ff000000", the caster died
 114 ms after its target. The server took the caster's 64.4 and the caster's
 own game ran the mod's script, which took 64.4 again and reported 0; a
 report of 0 kills (MpActor::SetPercentage). The fail branch hid the same
-stacking at the one-point floor. Fix, fork m2-train-31 9ad635cd: the
+stacking at the one-point floor. Fix, fork m2-train-31 e87267c4: the
 caster's share is its own game's (the script runs there and reports the
 fall, as every self-inflicted script damage is taken, ADR-029's default),
 the server keeps the target's death and pays the caster only for an actor
 no game plays; the scenario is unchanged (c1's 0.36 comes from its report);
 the unit test's caster stays whole. b-spell-aim 042101 red, read in section
 6 (the figure launched from the recorded origin exactly; the caster's own
-bolt moves before its first update; fix b5075e04 for the morning).
+bolt moves before its first update; fix ca15652c for the morning).
 
 Found at the setup (numidium, 21:31): test 1's Magicka read 120 after the
 setup's SetAV 400; a second set held. The log: the set landed between the

@@ -372,7 +372,7 @@ not know.
   ragdoll; Eli judges the feel at twenty-four).
 
 
-## Playtest thirty-two's NPC targets (2026-10-22, fork parity fb6f3f09; fixed on m3-train-34 dc6e3adb, parity 7e59c32c since 21:40 PDT)
+## Playtest thirty-two's NPC targets (2026-10-22, fork parity a76125cb; fixed on m3-train-34 b117c8f6, parity 03e7d163 since 21:40 PDT)
 
 With the server's NPCs on (npc-puppet), every headshot on a game-file actor
 was refused E_HEADSHOT_RACE: PartOne::ClaimHeadshot read the target's race
@@ -382,7 +382,7 @@ UTC). Tonight's overlay put "0:Skyrim.esm" into headshot.races in the run's
 own settings (numidium, restored at the close-out) and one passed end to end,
 01:52:11Z "headshot: ff000000 kills 39fe4 with fe01e801 on a claimed bow
 hit", the kill, the death item and the 25 s respawn following (the respawn
-point is npc-fate's). Train-34 dc6e3adb reads the race through
+point is npc-fate's). Train-34 b117c8f6 reads the race through
 MpActor::GetRaceId (the appearance when there is one, else the NPC_ base's
 RNAM through its template chain, EvaluateTemplate with UseTraits), and
 HeadshotTest's new case loads Alvor 0x13482 under npcEnabled, reads race
@@ -390,7 +390,7 @@ HeadshotTest's new case loads Alvor 0x13482 under npcEnabled, reads race
 stay the mod's (the ten playable races and ElderRace), so a bandit of a
 playable race takes a headshot and a wolf does not, as the mod has it.
 
-Playtest thirty-three (2026-10-23, parity ac557132, Bleak Falls Temple): the
+Playtest thirty-three (2026-10-23, parity 8b43aa72, Bleak Falls Temple): the
 race fix did its part, eight claims reached the check. Seven were refused
 E_HEADSHOT_HELMET for a helmet the server's own outfit roll had put on the
 bandit (GetOutfitObjects through the template chain, the worn list in its

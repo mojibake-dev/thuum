@@ -22,7 +22,7 @@ Milestone: M3   Class: B
 | the actor's movement to the talker (the dialogue package) | npc-puppet's relay | relayed from the claimant as any host's |
 | what the dialogue does: a stage, gold, an item, a follower | M6 | later (M6): no shared effect yet; the Known limits say so |
 | the actor's AI ending its package mid-step on the old host | the demote | native on the old host (a handoff's shape) |
-| the menu that never opens (a refused dialogue on a just-promoted actor) | H-55a read: the menu opened inside the second of the grant (x-npc-talk-claim v6 233908; b-npc-talk from 53's gate) | a menu that never opens releases the claim after ten seconds (ada2ba1f), the lease behind it |
+| the menu that never opens (a refused dialogue on a just-promoted actor) | H-55a read: the menu opened inside the second of the grant (x-npc-talk-claim v6 233908; b-npc-talk from 53's gate) | a menu that never opens releases the claim after ten seconds (337c3aed), the lease behind it |
 
 ### Sequences and combinations (ADR-033)
 
@@ -76,7 +76,7 @@ second (UNMEASURED).
   CONFIRMED (x-npc-talk-claim v6 233908: the grant 157 ms after the E, the Dialogue Menu inside the
   4 s wait). H-55b (ActivatePickRef on a reference that is no longer the pick does nothing), a known
   limit: unexercised (the crosshair stayed on him, "crosshair 13491"); the activation runs within
-  200 ms of the E, and a menu that never opens releases the claim after ten seconds (ada2ba1f).
+  200 ms of the E, and a menu that never opens releases the claim after ten seconds (337c3aed).
 
 ## Suppress (engine's own behavior blocked on non-hosts)
 
@@ -93,7 +93,7 @@ second (UNMEASURED).
 
 Known limits: H-55b, ActivatePickRef on a reference that is no longer the pick, is unexercised (the
 crosshair stayed on him, "crosshair 13491"); the activation runs within 200 ms of the E, and a menu
-that never opens releases the claim after ten seconds (ada2ba1f). What the dialogue does (a stage,
+that never opens releases the claim after ten seconds (337c3aed). What the dialogue does (a stage,
 gold, an item, a follower) is each engine's own until M6: a guest's talk changes no shared state,
 and the Inventory's M6 row points here. The lab's hold (lab-driver npc-hold, Actor.SetDontMove) stops a walking resident at the END of his current
 sandbox leg, three to eighteen seconds after the call (x-npc-hold v2 232956 measured three to six on one sample; b-npc-talk's
@@ -133,20 +133,20 @@ the flag never set, cleared after, or the host re-moving him), and the stillness
   after the Dialogue Menu's close: the exit line is spoken on the claimant's engine right after the
   close, and a release sent at the close reached the server first, so the line's report was dropped
   as a non-simulator's; playtest 37, Eli: "some tiny greetings are lost too. like the 'alright'
-  when i end a convo"; fork m3-pass-promote c7c76870, 2026-10-28; the lease stays the safety net).
+  when i end a convo"; fork m3-pass-promote ae45544e, 2026-10-28; the lease stays the safety net).
 - The claimed partner is held still for the claim's life (Actor.setDontMove at the grant, released
-  with the claim; fork m3-face-twelve 56300846): playtest 37's wiggle (Eli: "sven and gerdur ... dont
+  with the claim; fork m3-face-twelve f1b689a7): playtest 37's wiggle (Eli: "sven and gerdur ... dont
   fully stop for the convo"), the promoted actor's package steering under the claimed dialogue
   (NPC_TurnToWalkLeft180 a second after the promote, 80 units of drift in 20 s, the watcher's puppet
   settling 4 to 6 units behind). Why the engine does not stop a just-promoted partner is ANSWERED
   (finding 19, docs/research/m3/re-claimed-dialogue-state.md): the engine's own E release after the
   promote was a second TESNPC::Activate whose set-then-clear left talkingToPC FALSE, the byte that
-  gates the package step; one activation per claim (4fa48629), H-55e CONFIRMED live 00:21:12Z on
-  2ce8b523's dist; the hold stays the belt; the client logs the engine's own in-dialogue word at the
+  gates the package step; one activation per claim (4c98ca19), H-55e CONFIRMED live 00:21:12Z on
+  9ccc8176's dist; the hold stays the belt; the client logs the engine's own in-dialogue word at the
   menu's open. The release also waits for the actor's last line to settle (2.5 s, within 10 s of the
-  close; 310c0d77): Orgnar's post-dialogue line began 19 ms after the 3 s graced release and was
+  close; 8db6bddf): Orgnar's post-dialogue line began 19 ms after the 3 s graced release and was
   dropped as a non-simulator's (22:04:00Z).
-- One activation per claim (fork m3-face-twelve 4fa48629; the re-analyst's read,
+- One activation per claim (fork m3-face-twelve 4c98ca19; the re-analyst's read,
   docs/research/m3/re-claimed-dialogue-state.md): playtest 37's finding 19 read the engine's own
   Actor.IsInDialogueWithPlayer() FALSE for a claimant's promoted partner with the menu open and TRUE
   for the host's own. The talking-to-player byte (HighProcessData::talkingToPC, +0x458) is set by
@@ -157,7 +157,7 @@ the flag never set, cleared after, or the host re-moving him), and the stillness
   our activatePickRef were two. Now activatePickRef runs nothing while the Dialogue Menu is open,
   while the MenuTopicManager's speaker is the pick or while the pick already talks to the player, and
   consumeActivatePress marks the claim's E press done on the ActivateHandler so its release activates
-  nothing (H-55e CONFIRMED live on 2ce8b523's dist, 00:21:12Z: the claimant's seat read "is in dialogue with
+  nothing (H-55e CONFIRMED live on 9ccc8176's dist, 00:21:12Z: the claimant's seat read "is in dialogue with
   the player by the engine" on the first claim; HYPOTHESIS H-55f: the consumed press activates nothing;
   the formal read is x-npc-talk-claim v7, unwritten (v6 of 2026-10-27 was the last run, b-npc-talk
   carries its claims): two log-counts on c2, "is in dialogue with the player by the engine" >= 1 and
@@ -190,19 +190,19 @@ actor's factions with vendor hours, conditions and a location test (Orgnar's Ser
 within the previous 20 s kept nothing for the AI-off puppet, or the recompute at the start fails its cell test and
 re-arms the throttle), while the handoff's promote minutes before a talk lets it refill; CONFIRMED in its cure: the
 cache was the gate (the forced recompute before the activation restored the services topic, Eli 20:41 PDT 2026-10-28
-on 0e4942bb's dist, "shop worked!", the "vendor faction resolved" lines of c2's platform log), which of the two
+on f0b27ac6's dist, "shop worked!", the "vendor faction resolved" lines of c2's platform log), which of the two
 emptyings unread and moot. The package reading
 is FALSIFIED by the read: no package field is on the condition's path, and the promoted actor runs a package within
-its first AI frame. The fix on fork m3-face-twelve (after ed606faf): ActivatePickRef resets the cache with the
+its first AI frame. The fix on fork m3-face-twelve (after 63376de3): ActivatePickRef resets the cache with the
 engine's own sentinel (the stamp at -FLT_MAX, Actor.h:671) and asks GetVendorFaction again before the activation,
 waiting a frame at most 30 times for a vendor whose faction does not resolve, then opening anyway with the cell and
 hour logged. The first live run (c2's platform log, 03:40Z): the wait ran all 30 frames "no vendor faction yet (cell
 133c6, hour 5.26)" and the dialogue opened anyway, with the shop topic there: the pin's GetVendorFaction returns the
 value it read before recomputing (Actor.cpp:610), and the loop nulled the cache each frame before asking, so it read
 null forever while the recompute it forced filled the cache each frame and the menu found it; fixed on m3-face-twelve
-after becfd02e (the cache read after the recompute; the wait ends at its first frame). So the mechanism stands by the
+after 65cf61cc (the cache read after the recompute; the wait ends at its first frame). So the mechanism stands by the
 outcome and by the forced recompute, not yet by a "resolved" line. H-58b CONFIRMED at T4 by the outcome, 20:41 PDT 2026-10-28 (Eli: "shop worked!", Prisoner claiming Orgnar in the Sleeping Giant
-hosted by rotfern on the 0e4942bb dist; the "activatePickRef waits ... vendor faction resolved" lines of c2's platform
+hosted by rotfern on the f0b27ac6 dist; the "activatePickRef waits ... vendor faction resolved" lines of c2's platform
 log are the evidence, pulled by numidium); the probe x-npc-vendor-claim, named as the formal read but never written by path as of 2026-10-29 (the T4 cure and x-npc-vendor's log line are the evidence until it is), would be (c2 claims Orgnar while
 c1 hosts the inn, the Dialogue Menu's topics read for the services row).
 
@@ -251,13 +251,13 @@ back through `just addr`):
   re-evaluation writes 0 over 9 (static). Actor_SetDialogueWithPlayer 37200
   issues the same 37818 stop without touching lifeState.
 
-The fork (a code read of defaa7e2..ee44f7d1, 151 commits): nothing moves,
+The fork (a code read of aae7191b..33240fd4, 151 commits): nothing moves,
 re-drives or re-flags a live hosted NPC on its own host's seat, and the native
 call path the hold uses is untouched. Ranked unlikely: talkService's unhold
-(c0876327, talkService.ts:273-280, a setDontMove(false) behind a held flag the
+(9fb75ff6, talkService.ts:273-280, a setDontMove(false) behind a held flag the
 shipped code never sets true; the one in-range writer of the exact flag);
-HostService's storage restore (e9953d0c); formView's promotion move
-(c7c76870, both sides the worldspace in Tamriel); the three new engine hooks
+HostService's storage restore (846a1f84); formView's promotion move
+(ae45544e, both sides the worldspace in Tamriel); the three new engine hooks
 (HostedResurrect slot 0xAB, Reanimate 38820, SendTopicInfoEvent 35225), each a
 pass-through for a live AI-on actor; the door pass (cells.rs 491-506), which
 needs a door on Sven's 9.0 leg. The server never echoes a hosted NPC's movement
@@ -301,34 +301,34 @@ login's duration decides (relaunch mode logs in faster, so the hold lands
 earlier in his schedule). Known limit for b-npc-talk v7's 24 s pair until a
 driver-side settle or a stillness fact exists.
 
-### Playtest 36, the turbo day (11:36 PDT 2026-10-28; fork m3-turbo-knobs f5a8f7d1 over 56's stage)
+### Playtest 36, the turbo day (11:36 PDT 2026-10-28; fork m3-turbo-knobs 71e5def3 over 56's stage)
 Eli ticked items 1 and 2: "the claiming SEEMS to work but check logs"; "rotfern walked to embershard mine, prisoner was
 still talking to sven". The logs: eight claims granted on Sven, Hilde and Sigrid's household, every one released at the
 Dialogue Menu's close; one E_CLAIM_HELD pair when test 1 pressed E on Sven under test 2's claim (by design, one claim per
 actor). Two findings from the tails. (a) A dialogue of 175 s outlived CLAIM_LEASE_MS 120 s; today the cell's regrant to the
 claimant itself (17:56:18Z) had already dropped the claim row (ADR-052 decision 3, cells.rs grant() retains no follow in
 the cell), so the only trace was E_CLAIM_NONE at the release; with the lease, or a grant to a third player, the partner
-turns into a puppet under the open menu. Fix 8b088be1: the held claim is sent again every 60 s while the menu is open (the
+turns into a puppet under the open menu. Fix 41d9c69e: the held claim is sent again every 60 s while the menu is open (the
 server renews its holder's claim, ClaimVerdict Reclaimed, by design). The grant's drop is an ADR-052 amendment PROPOSED
 (B: a claim outranks a grant for its lease; the patch saved in thuum-cf's scratchpad). (b) E on a corpse sent a claim
-(E_CLAIM_DEAD, 3 s waited): f5a8f7d1 skips dead actors, a body is the engine's own activation. Unread: two dialogues on
+(E_CLAIM_DEAD, 3 s waited): 71e5def3 skips dead actors, a body is the engine's own activation. Unread: two dialogues on
 Sven that opened and closed within 400 to 600 ms of the grant (17:55:01Z and 17:55:07Z) before the third stuck; the menu's
 early close is x-voice-inflight v2's read (by path, unrun: c2's claim on Sven granted and not released within three seconds
 after the host's two lines; HYPOTHESIS H-55a still: a greeting in flight, x-npc-talk-cross 131626 RED reading Hilde's
 greeting 33 ms before the activation, playtest 37's finding 3 naming the puppet's sound-path item in flight drained as
-greetings at the promote, the say's interrupt on m3-face-twelve ef7b427d).
+greetings at the promote, the say's interrupt on m3-face-twelve a4102bf5).
 
 ## Status
 
-Built 14:53 PDT on fork m3-npc-talk 0d453dc1 (off m3-npc-face 867c4210 with m3-pass-margin 11bf32f3 merged in, so the claim and the margin share the follows table's kinds); probe x-npc-talk-claim by path (38 steps); the T2 session npc-talk.yaml; CI pending.
+Built 14:53 PDT on fork m3-npc-talk 977bfbc6 (off m3-npc-face 2b96ea56 with m3-pass-margin ec4e0c1d merged in, so the claim and the margin share the follows table's kinds); probe x-npc-talk-claim by path (38 steps); the T2 session npc-talk.yaml; CI pending.
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (14:43 PDT)
 - [x] engine surface cited or delegated
-- [x] server logic + T0 (14:53 PDT, fork m3-npc-talk 0d453dc1: OnActorClaim, PartOne::ClaimActor and ReleaseClaim, cells.rs claim rows; CellHostTest's talk case, cells.rs's claim test)
+- [x] server logic + T0 (14:53 PDT, fork m3-npc-talk 977bfbc6: OnActorClaim, PartOne::ClaimActor and ReleaseClaim, cells.rs claim rows; CellHostTest's talk case, cells.rs's claim test)
 - [x] message + validator (same commit): ActorClaim 56/64, the budget, the fixtures
 - [x] native hook + T1: activatePickRef (a CommonLib call, no id; no T1 needed)
 - [x] TS handler: TalkService (npcTalk, talkKey)
-- [x] T2 green (ticked 17:02 PDT 2026-10-29 by the pass: train 55's T2 green on the head's own difftest build, LOG 2026-10-27 16:09 PDT, merged to parity 1b866786 2026-10-28T02:25Z)
+- [x] T2 green (ticked 17:02 PDT 2026-10-29 by the pass: train 55's T2 green on the head's own difftest build, LOG 2026-10-27 16:09 PDT, merged to parity c85dab3d 2026-10-28T02:25Z)
 - [ ] T3 scenario green, no HYPOTHESIS tags
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
@@ -340,7 +340,7 @@ As docs/VERB.md's.
 
 ## 55's stage read (16:44 PDT, x-npc-talk-claim v6 20261027-233908, GREEN)
 
-The claim end to end on m3-npc-talk c1be67d1: c2's E on Sven's puppet sent
+The claim end to end on m3-npc-talk dee28c05: c2's E on Sven's puppet sent
 ActorClaim ("claim 13491 (local 13491) sent on E", 23:41:55.264 on c2's
 clock), the server granted it ("ff000001 claims 13491 in cell 9731 for a
 dialogue; it simulates the actor for the lease"), c2's game ran
@@ -368,7 +368,7 @@ stays M6 (PLAN.md).
 
 ## Train 55 merged (19:26 PDT 2026-10-27)
 
-Fork parity 1b866786, cited by the gate 20261027-234255 (28 runs, two
+Fork parity c85dab3d, cited by the gate 20261027-234255 (28 runs, two
 premise reds answered in its rest) and the chain; the claim's scenario
 b-npc-talk (main 4854286, from x-npc-talk-claim v6 233908) plays from 53's
 gate on. The Status boxes tick at that gate's green.
@@ -383,7 +383,7 @@ with no ClaimEnded word (zero "ended with its lease" lines; rotfern's later
 release met E_CLAIM_NONE). At the client, the Dialogue Menu's close event
 never reached onMenuClose, and the E handler returned silently behind
 `pending || claimed` for Prisoner's nine presses on Sven. The fixes
-(0f007157, ada2ba1f): wire-rules cells.rs accepts the claimant's report into
+(f579dff7, 337c3aed): wire-rules cells.rs accepts the claimant's report into
 any cell and the Claim row keeps its kind and lease, naming the new cell
 (test a_claim_travels_with_its_actor_across_cells: no pass, no follow, the
 host's own report refused, the release and the lease still find it); the

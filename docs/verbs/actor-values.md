@@ -307,7 +307,7 @@ send and refused after it, and every later organic report could sit under
 the record on a base the engine computes by itself (InventoryWeight and
 kin; HYPOTHESIS, the new log line names the base next time).
 
-Fork m2-train-31 6f7b7a06, four parts, one shape:
+Fork m2-train-31 88ea219b, four parts, one shape:
 
 - the hold is armed at the login itself (PartOne::SetUserActor, when a
   record exists), as the player's globals are sent there, so a fresh
@@ -325,7 +325,7 @@ Fork m2-train-31 6f7b7a06, four parts, one shape:
 T0: wire-rules tests (the shortfall, an uncompared base), unit/
 ActorValuesTest.cpp "A relaunch's login holds the record from the fresh
 session's first report until the echo". T3: b-relaunch-reports GREEN
-20261021-041549 on the tonight stage of m2-train-31 3b579f41: each
+20261021-041549 on the tonight stage of m2-train-31 a40559fd: each
 relaunch's early report refused with the base named, the client's echo taken
 about 0.1 s later ("recorded 164 bases"), the One-Handed set after the first
 relaunch surviving the second restart and relaunch. T4: playtest twenty-nine

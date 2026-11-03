@@ -1592,7 +1592,7 @@ function run(step: Step, player: Actor): unknown {
       // as held's are (lab-api's c.inventory(ref).count(item), beside the
       // server's record, server.inventory(ref): the root-cause plan's W4
       // two-seat container claims). Not getContainerForms: before fork
-      // 2b8c7592 a native's array result threw on every dist (x-perk-pick
+      // c1fd8fc7 a native's array result threw on every dist (x-perk-pick
       // 20261101-065822), and these three return a number or a form.
       const r = form(a.ref);
       if (!r) return { error: "no such ref" };
@@ -2616,7 +2616,7 @@ function run(step: Step, player: Actor): unknown {
         isEssential: npc.isEssential(),
         isProtected: npc.getLeveledActorBase()?.isProtected() ?? null,
         // E does nothing on a blocked reference: every relayed puppet sample sets it, the promote
-        // clears it (8eafa85d), the Talk prompt's mechanism (x-npc-talk-prompt v3)
+        // clears it (67256b72), the Talk prompt's mechanism (x-npc-talk-prompt v3)
         activationBlocked: npc.isActivationBlocked(),
         // the cell the reference stands in in this game (a door's interior after a crossing, npc-handoff)
         cell: npc.getParentCell()?.getFormID() ?? 0,
