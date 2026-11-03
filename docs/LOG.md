@@ -6784,3 +6784,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   simulating" becomes the copy's cell 133c6 (held) plus a stream witness, c1's count of its hosted-state lines for 1348a snapshotted
   after the exit's until and claimed equal 15 s later (the host's last state line in 151537 was 6 s before the exit, none after),
   with is3DLoaded recorded, not claimed, and a LOG note on the route dependence.
+- 07:54 PST 2026-11-03 (15:54Z 11-03) (thuum-cf): door v24 DRAFTED in the drafts cache (lab/.cache/drafts/b-npc-handoff-door-hosts-v24.yaml, sha1
+  e0b4bc58; parses and lints; the tracked file stays v23): in leg B's post-exit block the claim `c1.npc_state(0x1348a).is3DLoaded ==
+  false` is replaced by the stream witness `c1.log_count("HostedStateService: state 1348a:") == snapshot("state_exit_b")`, the count
+  taken right after the exit's until and again after the 15 s wait (the host's own reports for him must not grow; in 151537 the last
+  came 6 s before the exit and none after), with the copy's cell 133c6 kept and the 3D recorded by the npc-state read; every other
+  step and claim as v23. A rewritten claim: its fresh review runs, and under W4 it waits for Eli's word (numidium carries the read
+  and the proposal). The gate is held on it; r3 b8d82f05 stays the fork head.
