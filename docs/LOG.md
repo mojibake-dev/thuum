@@ -5968,3 +5968,24 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   progression-ui, ai-world-state and containers static halves), none thawed; playtest 41's kept logs do not cover the chest
   phantom's 23:18Z window, so containers' R3 needs a run. R4 staging on the break-3 build (union-srv-3 35509f7a, the union's
   dist, the 12f199e6 bundle next).
+- 01:27 PST 2026-11-03 (09:27Z 11-03) (thuum-cf): the door scenario's third shape in a night. The fresh reviewer's re-check of v16 (my v15 plus the
+  no-combat premise from numidium's 085226 read) said BLOCKER, three ways that stand without the fix: a hosted cell never passes to a
+  nearer seat in steady state (wire-rules cells.rs `consider`: only inside ADR-047 D10's 5 s cold start; a host loses a cell by
+  becoming ineligible, then the grace passes it after 5 s), so v15's "swap to the nearer seat" never happens and its "hosts cell"
+  until could hold on any newly reached cell; `approach {formId, cell: record}` teleports to the SEAT'S OWN engine copy (runner.py
+  reads the seat's npc-state; `cell: record` only picks the frame), which by the premise was the stale copy; and the visitor's
+  indoor copy is neither indoors (its own report carried him through 13407 to the door's far side) nor frozen (puppetService
+  releases an unloaded puppet after releaseGraceMs 4 s, D11, and the schedule walks it toward the record's own destination). Plus
+  the hold-line claim that could not fail (A1's promotion logs one too), v14's exit claims to restore, and the fight as the until's
+  own red. v17 (main 04338dbd, 106 steps) takes the review's option (a): gameHour 2.0 so every engine keeps him at his bed, c1 on
+  the street with its copy claimed in 133c7 unloaded, then the server's `MoveTo 0x1348a 0x14` (ExecuteMoveTo through labCommand)
+  puts the RECORD at c1's feet and c1's promotion meets the bedside copy; claimed: the record in 3c within 300 of c1, no pass,
+  follow or move into 133c7 across it (the parent's red), the hold's line naming the bed and the street by regex, "not placed" 0,
+  c1 running him within 150; then the sleep package walks him home by 13423 under the follow (an until on the door line, 240 s).
+  The swap probe v15 (b92eae91) is that leg under the seat substitution. Open with the reviewer: MoveTo on a game-file record
+  through labCommand, which path gives the hold its record at a server move, the parent's report from an unloaded copy, the hold's
+  move on a copy with no 3D. m3-system1: round four 88b07f57 GREEN on 4900; the follow vouch REVERTED out (bf2aa7c0, 34a92ed6) as
+  an owner-check loosening without its collision scenario (x-host-restart-follow v1 cannot reproduce break 2's thin loaded set,
+  numidium's review); its pipeline building. All five engine model docs exist (containers.md filed e1559ea0; its R3 needs a fresh
+  run, the kept playtest-41 logs lack the window). Lesson: a hand-off premise must come from the cells rule as written (a host
+  leaves or becomes ineligible), never from "nearer"; and a probe's approach step aims at the seat's own copy.

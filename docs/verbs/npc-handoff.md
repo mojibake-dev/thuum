@@ -803,9 +803,15 @@ line, and the hold places the next promoted copy at the stale record outdoors, s
 from a jump is the door line (a walk logs "door 13407: 1348a's host ... walks it through to 3c" first; 055217's and 060106's jumps
 logged none), and a walk out once placed home would be P4 refuted and a premise finding for leg A, not the bounce. The bounce's
 return: 36 ms by a pass back (055217), 1.0 s by the follow's stale rule (065955's "moves 1348a into cell 133c7" after the refused
-report back; 070357 the same shape). T3: b-npc-handoff-door-hosts v14 (thuum 55b888f7, 2026-11-03, READY FOR THE GREENS by
-ADR-064's re-check of v13 1939d97c, whose two nits v14 carries: the settle drop's line recorded beside the door count at each
-grant, a swallowed return's witness, and the mutation sentence; v13 1939d97c, v12 a3cd74b5, v11 fe2d0eff, v10 6cfc1c4c, v9 02420ca6, v8 d474f718, v7 1c8f3455). v6's two red runs on the fix's parent 35509f7a settled the
+report back; 070357 the same shape). T3: b-npc-handoff-door-hosts v17 (thuum 04338dbd, 2026-11-03, with the fresh
+reviewer; its leg A makes P8's condition server-side after 084006 showed a fresh seat's engine spawning him home at the house's load
+and the review of v16 refused the visitor shape three ways: a hosted cell never passes to a nearer seat in steady state, `approach
+{cell: record}` goes to the seat's own copy, and the visitor's indoor copy is neither indoors after its own door report nor frozen past
+D11's 4 s release; v17 starts at gameHour 2.0, the street seat's engine copy at his bed, and the server's MoveTo of the RECORD to that
+seat's feet promotes it against the bedside copy: the hold's line naming both places is the stale case's witness, the parent's red
+the bedside copy's report into 133c7; then the sleep package walks him home by 13423 under the follow; leg B unchanged, its exit until
+carrying the fight as its own red after 085226 and 084329 showed Hod fighting the visiting player indoors; v16 c51c2a2c, v15 b6e25119,
+v14 55b888f7 READY FOR THE GREENS by the re-check of v13 1939d97c, whose two nits v14 carried; v13 1939d97c, v12 a3cd74b5, v11 fe2d0eff, v10 6cfc1c4c, v9 02420ca6, v8 d474f718, v7 1c8f3455). v6's two red runs on the fix's parent 35509f7a settled the
 shape (numidium's reads): leg A 20261103-051454 was red at its premise with fresh seats and NO pass logged at Hod's house door, while
 the swap probe 20261103-052100 REPRODUCED playtest 41's bounce at the house door ("ff000000 passes 1348a into cell 9731 (D9)" at
 05:22:17.325, "ff000001 passes 1348a into cell 133c7 (D9)" 56 ms later, the pair every 14 s as he retried his door), the street
@@ -840,7 +846,7 @@ world, c1 lands on the street alone, hosts 9712 and 9731 (claimed) and the until
 (the grant ends the follow, claimed), c2 enters from lab-spawn, and at 22:00 the fallback sandbox near his editor location walks
 him out by 0x13419 (the door 13419 line, "passes 1348a into cell 133c6" as the bounce line, the hour between 20 and 21.8 at the
 premise's end and past 21.9 at the exit). The exterior cell claim of v5 and v6 is dropped (the record outdoors and
-the 150-unit bound carry it). The by-path probe x-handoff-door-hosts-swap v12 (v14's grant claims and recorded lines) plays leg A with the roles swapped on the parent (a run
+the 150-unit bound carry it). The by-path probe x-handoff-door-hosts-swap v15 (v17's leg A under the seat substitution) plays leg A with the roles swapped on the parent (a run
 stops at its first red, so the scenario's second leg never reaches the parent); a third run at handoffPassSettleMs 0 reads the
 reliable placement alone. HYPOTHESIS until those runs:
 the mechanism above (every stamp fits it), and that the street seat's copy stands indoors at the promote (the precondition,
