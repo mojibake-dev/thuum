@@ -1,27 +1,39 @@
 // serialize-on-demand-actor.js (thuum, the re-analyst 2026-11-03; docs/research/adr065-serialize-on-demand-2026-11-03.md, "The actor
 // class"): serialize-on-demand.js's recipe (GREEN, run 20261103-131511) for a LOADED actor FORM (ACHR 0x3E only). At AddChange's inner
-// (AL 35576) marking FORM with FLAG (default kLifeState: a kill), on the marking thread: 36035, 36037, slot 0x0D (19527, no Actor
-// override), 35715, slot 0x0E (37649 Actor::SaveGame), the plain body read from the buffer, 36081; record freed, buffer destroyed,
-// entry re-read. Against the REFR script: NO slot 0xF2 pre-call (37622 Actor::MovetoLow is the unload's AI demotion; hooked only to
-// prove it never runs here); two more premises (not the player; farGeometry before and after 0x0E: HYPOTHESIS, a set flag makes 0x0E
-// remove the far skin); a save-shaped record (level 0 or 1, the process block present); the body sectioned by the engine's own writers
-// (19528, 39429, 38987, 39009, 39023 hooked on this thread, buffer position +0x14 at entry and exit). DECODED: level, boolBits, the 56
-// fixed bytes (myKiller, weight), ActorState (lifeState at its byte 4), the four Modifiers; RAW with offsets: the initial data, extras,
-// inventory, the process block, casters, avStorage, the tail (boolFlags): the 20 KiB cap. length2 nonzero means the pack deflated the
-// body (35932, under the setting byte AL 380705); the engine inflates inside 36080 (35933, no signature in the note), never called here:
-// deflated: true, and the decode is of the plain body read before the pack. MODE check (default): the premises, one row each, no 0x0D,
-// no 0x0E, nothing allocated; serialize: the recipe, one row. No map write, no kSaving, no TLS +0x670, no reference maps. The stash
-// (35570) and the map write are hooked for FORM: a record that comes gets a compare row; a promoted actor never stashes (change-forms.md
-// D7), the serialize row says so, and no stash row is then no error. Every engine call is wrapped, but a fault inside 0x0D or 0x0E is
-// only CONVERTED to a JS exception (a lock taken inside stays held): the premises are the real safety. Every id, offset, signature and
-// layout is the static read's (the note, CommonLib, `just addr`): HYPOTHESIS until a run reads as expected (rule 2); slots and
-// singletons CONFIRMED-STATIC. LAB_PARAMS: FORM (required), MODE, FLAG (0xffffffff: any mark), RUNS (1). Ready prints Process.id.
-// Size: above the 20 KiB cap (the REFR skeleton alone is 20.7 KB), so put wait: 15 after the frida step before the kill.
+// (AL 35576) marking FORM with FLAG (default kLifeState: a kill): 36035, 36037, slot 0x0D (19527, no Actor override), 35715, slot 0x0E
+// (37649 Actor::SaveGame), the plain body read from the buffer, 36081; record freed, buffer destroyed, entry re-read. DEFER (default
+// true): the kill's mark only ARMS a pending run, and the recipe, premises included, runs at the NEXT 35576 return on Main.threadID,
+// for any form, milliseconds later (the AI marks constantly), so 0x0D and 0x0E run outside the kill's own frame (SetLifeState,
+// KillImpl, the ragdoll hand-off, where 37649 would read the high process mid-transition, 35715's Havok block ragdolling bodies, and
+// a lock re-taken by 39429 would hang, not crash); DEFER false runs inline; the rows print deferredMs and the host mark's form. Against
+// the REFR script: NO slot 0xF2 pre-call (37622 Actor::MovetoLow is the unload's AI demotion; hooked only to prove it never runs here);
+// three more premises (not the player; far skin absent, since a set farGeometry makes 0x0E strip it by RemoveItem and mark kInventory,
+// which would make entryUntouched false for the engine's own reason, HYPOTHESIS; the live state is read before and after 0x0E, the
+// far-skin flag being the only expected write); a save-shaped record (level 0 or 1, the process block present); the body sectioned by
+// the engine's own writers (19528, 39429, 38987, 39009, 39023 hooked on this thread, buffer position +0x14 at entry and exit). DECODED:
+// level, boolBits, the 56 fixed bytes (myKiller, weight), ActorState (lifeState at its byte 4), the four Modifiers; RAW with offsets:
+// the initial data, extras, inventory, the process block, casters, avStorage, the tail (boolFlags). length2 nonzero means the pack
+// deflated the body (35932, under the setting byte AL 380705); the engine inflates inside 36080 (35933, no signature in the note),
+// never called here: deflated: true, the plain body printed, the decode made of it (read before the pack). MODE check (default): the
+// premises, one row each, no 0x0D, no 0x0E, nothing allocated, always inline (the census must see every mark); serialize: the recipe,
+// one row. Run order: check with FLAG 0xffffffff and RUNS 8 first, the kill's mark census (each premises row prints the mark's flags
+// and thread), then serialize with FLAG 0x400 and RUNS 2 (kDying, then kDead). No map write, kSaving, TLS +0x670 or reference maps.
+// The stash (35570) and the map write are hooked for FORM: a record that comes gets a compare row; a promoted or persistent actor
+// never stashes (change-forms.md D7; the unload walk 19230 skips IsPersistent), the serialize row says so, and no stash row is then
+// no error. The compare's limit for a non-promoted actor: the first differing offset is PREDICTED at the level u32 (levelBoolBits: 0
+// or 1 on demand, 3 after the stash's MovetoLow) and every later offset shifts with the process block, so "not equal at levelBoolBits"
+// is the expected reading, not a fault; a section-aligned compare would need the stash's own marks. Every engine call is wrapped, but
+// a fault inside 0x0D or 0x0E is only CONVERTED to a JS exception (a lock taken inside stays held): the premises and DEFER are the
+// real safety. Every id, offset, signature and layout is the static read's (the note, CommonLib, `just addr`): HYPOTHESIS until a run
+// reads as expected (rule 2); slots and singletons CONFIRMED-STATIC. LAB_PARAMS: FORM (required), MODE, FLAG (0xffffffff: any mark),
+// RUNS (1), DEFER (true). Ready prints Process.id. Size: above the 20 KiB cap (the REFR skeleton alone is 20.7 KB): put wait: 15 after
+// the frida step before the kill, and read the trace's ready t against the kill's console step before trusting a negative.
 const PARAMS = (typeof LAB_PARAMS === 'object' && LAB_PARAMS) ? LAB_PARAMS : {};
 const FORM = Number(PARAMS.FORM);
 const MODE = PARAMS.MODE === 'serialize' ? 'serialize' : 'check';
 const FLAG = PARAMS.FLAG === undefined ? 0x400 : Number(PARAMS.FLAG); // Actor.h:234 kLifeState = 1 << 10
 const RUNS = PARAMS.RUNS === undefined ? 1 : Number(PARAMS.RUNS);
+const DEFER = PARAMS.DEFER === undefined ? true : (PARAMS.DEFER !== false && PARAMS.DEFER !== 'false'); // serialize only: see the header
 function emit(obj) {
   obj.t = Date.now();
   send(obj);
@@ -58,16 +70,16 @@ const OFFSETS = {
     avStorageSave: 0x6d1030, // 39023 the ActorValueStorage block (mark avStorage)
   },
 };
-// TESForm.h:353-356; BGSSaveLoadGame.h:61-62, :94, :96; BGSSaveLoadManager.h:114; TESDataHandler.h:76-88 (clearingData from 0xDA0,
-// HYPOTHESIS); Main.h:78, :87; BGSSaveGameBuffer.h:30-32, BGSSaveFormBuffer.h:23-25; TESForm.h:136-137, Actor.h:440
+// TESForm.h:353-356 (:73 kPersistent, bit 10); BGSSaveLoadGame.h:61-62, :94, :96; BGSSaveLoadManager.h:114; TESDataHandler.h:76-88
+// (clearingData from 0xDA0, HYPOTHESIS); Main.h:78, :87; BGSSaveGameBuffer.h:30-32, BGSSaveFormBuffer.h:23-25; TESForm.h:136-137, Actor.h:440
 const FORM_FLAGS = 0x10, FORM_ID = 0x14, IN_GAME_FLAGS = 0x18, FORM_TYPE = 0x1a;
 const CHANGES_MAP = 0x330, MANAGER_FLAGS = 0x340, DRY_RUN = 0x120, CLEARING_DATA = 0xda5, RESET_GAME = 0x11, MAIN_THREAD = 0x28;
 const BUF = { data: 0x08, pos: 0x14, header: 0x18, flags: 0x1b, form: 0x28, size: 0x30 };
 const SLOT_CHECK = 0x0d, SLOT_SAVE = 0x0e, SLOT_MOVETO_LOW = 0xf2;
 // Actor at 1.6.1170: CommonLib's runtime block plus 8 (Actor.h:712): boolBits :647, currentProcess :651, movementController :667,
 // boolFlags :686; ActorState at 0xC0 (:737), actorState1 at its +8 (ActorState.h:203), lifeState bits 21-24 (:114); AIProcess::high
-// +0x10 (AIProcess.h:197), processLevel +0x137 (:225); HighProcessData::farGeometry +0x468 (:357); FormTypes.h:202; TESObjectREFR.h:155
-const ACHR = 0x3e, PLAYER_ID = 0x14, A_BOOLBITS = 0xe8, A_PROCESS = 0xf8, A_MOVEMENT = 0x150, A_BOOLFLAGS = 0x204, A_STATE1 = 0xc8;
+// +0x10 (AIProcess.h:197), processLevel +0x137 (:225); HighProcessData::farGeometry +0x468 (:357); FormTypes.h:202; TESObjectREFR.h:154
+const ACHR = 0x3e, PLAYER_ID = 0x14 /* the player's form id, not an offset; FORM_ID's 0x14 (TESForm.h:354) is a coincidence */, A_BOOLBITS = 0xe8, A_PROCESS = 0xf8, A_MOVEMENT = 0x150, A_BOOLFLAGS = 0x204, A_STATE1 = 0xc8;
 const P_HIGH = 0x10, P_LEVEL = 0x137, H_FAR = 0x468, K_PROMOTED = 1 << 25;
 const LIFE = ['kAlive', 'kDying', 'kDead', 'kUnconcious', 'kReanimate', 'kRecycle', 'kRestrained', 'kEssentialDown', 'kBleedout']; // ActorState.h:9-17
 const CAP = 65536, REFUSED_ROWS = 8;
@@ -117,7 +129,8 @@ const decode = function (b, marks, saveStart) {
     d.level = U(saveStart); // 37649's first u32: AIProcess +0x137 (kHigh 0 to kLow 3) or 0xffffffff for no process
     d.boolBits = U(saveStart + 4);
     const refr = span('refr')[0], proc = span('process')[0], st = span('actorState')[0], mods = span('modifiers'), av = span('avStorage')[0];
-    d.regions.refr = refr; d.regions.process = proc || 'absent'; d.regions.actorState = st; d.regions.modifiers = mods; d.regions.avStorage = av;
+    d.regions.refr = refr; d.regions.process = proc || 'absent'; d.regions.actorState = st; d.regions.avStorage = av;
+    mods.forEach(function (m, k) { d.regions['modifiers' + k] = m; }); // flat, so sectionAt can match them
     if (!refr || !st || mods.length !== 4 || !av) { d.note = 'marks incomplete: regions only'; return d; }
     const f = proc ? proc[1] : refr[1];
     d.regions.fixed = [f, st[0]]; // u8 soundCallBackSet, twelve u32 (updateTargetTimer, voiceTimer, lastUpdate age, checkMyDeadBodyTimer, actionValue,
@@ -173,9 +186,9 @@ if (off === undefined || !(FORM > 0)) {
     return { found: found, flags: value.readU32(), record: value.add(8).readPointer() };
   };
   const farGeometry = function (form) { const high = ptrAt(ptrAt(form, A_PROCESS), P_HIGH); return high.isNull() ? 'no high process' : u8(high, H_FAR); };
-  const actorInfo = function (form) { // reads only: the live state the record should reflect
-    const proc = ptrAt(form, A_PROCESS);
-    return { process: String(proc), level: proc.isNull() ? 'none' : u8(proc, P_LEVEL), farGeometry: farGeometry(form), lifeState: (u32(form, A_STATE1) >>> 21) & 0xf,
+  const actorInfo = function (form) { // reads only: the live state the record should reflect; a faulted read prints -1
+    const proc = ptrAt(form, A_PROCESS), st1 = u32(form, A_STATE1);
+    return { process: String(proc), level: proc.isNull() ? 'none' : u8(proc, P_LEVEL), farGeometry: farGeometry(form), lifeState: st1 < 0 ? -1 : (st1 >>> 21) & 0xf,
       boolBits: hex(u32(form, A_BOOLBITS)), boolFlags: hex(u32(form, A_BOOLFLAGS)), movementController: String(ptrAt(form, A_MOVEMENT)) };
   };
 
@@ -203,6 +216,8 @@ if (off === undefined || !(FORM > 0)) {
     const type = u8(form, FORM_TYPE);
     add('form type ACHR 0x3E', hex(type), type === ACHR);
     add('not the player (id 0x14, the singleton)', hex(FORM) + ' vs ' + String(s.player), FORM !== PLAYER_ID && !s.player.isNull() && !s.player.equals(form));
+    const fg = type === ACHR ? farGeometry(form) : -1; // HighProcessData +0x468; 37649 strips the far skin (RemoveItem) when it is set
+    add('far skin absent (a set farGeometry would make 0x0E strip it and mark kInventory)', String(fg), fg === 0 || fg === 'no high process');
     const vt = ptrAt(form, 0);
     const slot = function (i) { return vt.isNull() ? NULL : ptrAt(vt, i * 8); };
     const slotC = slot(SLOT_CHECK), slotS = slot(SLOT_SAVE), slotL = slot(SLOT_MOVETO_LOW);
@@ -214,14 +229,15 @@ if (off === undefined || !(FORM > 0)) {
     if (!map.isNull()) entry = readEntry(map);
     add('entry present', entry.found ? hex(entry.flags) : 'none', entry.found);
     add('entry record null (else send the stashed one)', String(entry.record), entry.found && entry.record.isNull());
-    return { ok: checks.every(function (c) { return c.ok; }), checks: checks, entry: entry, type: type, slotC: slotC, slotS: slotS, map: map, info: actorInfo(form) };
+    return { ok: checks.every(function (c) { return c.ok; }), checks: checks, entry: entry, type: type, fflags: fflags, slotC: slotC, slotS: slotS, map: map, info: type === ACHR ? actorInfo(form) : null };
   };
 
   // marks: the writers' buffer positions on the recipe's thread (the hooks see our own NativeFunction calls too)
   let tracing = null; // { tid, buf, marks }
-  const markHook = function (name) {
+  const markHook = function (hook, name) {
     return {
       onEnter(args) {
+        counts[hook] += 1; // before the filter (the pitfalls rule)
         if (tracing === null || this.threadId !== tracing.tid) return;
         const b = args[1].equals(tracing.buf) ? args[1] : (args[0].equals(tracing.buf) ? args[0] : null);
         if (b === null) return;
@@ -232,10 +248,11 @@ if (off === undefined || !(FORM > 0)) {
   };
 
   let onDemand = null; // the last on-demand result, for the compare at a stash
-  const serialize = function (form, p, threadId) {
-    const row = { event: 'serialize', form: hex(FORM), thread: threadId, entryFlags: hex(p.entry.flags), live: p.info };
-    row.stashExpected = (p.entry.flags & K_PROMOTED) !== 0 ? 'no stash row expected: a promoted reference never stashes (kPromoted; change-forms.md D7)' : 'yes, at the purge';
-    let buf = null, rec = NULL, step = 'ctor 36035';
+  const serialize = function (form, p, q) {
+    const row = { event: 'serialize', form: hex(FORM), thread: q.runThread, markThread: q.markThread, deferredMs: q.deferredMs, deferredVia: q.via, entryFlags: hex(p.entry.flags), live: p.info };
+    row.stashExpected = (p.entry.flags & K_PROMOTED) !== 0 ? 'no stash row expected: a promoted reference never stashes (kPromoted; change-forms.md D7)'
+      : (((p.fflags >>> 10) & 1) !== 0 ? 'no stash row expected: a persistent reference never stashes (kPersistent, TESForm.h:73; the unload walk 19230 skips it)' : 'yes, at the purge');
+    let buf = null, out = null, step = 'ctor 36035';
     try {
       const raw = Memory.alloc(BUF.size); // ours; the engine owns only the data at +0x08
       for (let o = 0; o < BUF.size; o += 8) raw.add(o).writeU64(0);
@@ -253,7 +270,7 @@ if (off === undefined || !(FORM > 0)) {
         const flags2 = u32(buf, BUF.flags);
         row.headerFlags = hex(flags2);
         row.dropped = hex((p.entry.flags & ~flags2) >>> 0);
-        tracing = { tid: threadId, buf: buf, marks: [] };
+        tracing = { tid: q.runThread, buf: buf, marks: [] };
         step = 'initial data 35715';
         row.kind = nf.initialData(buf, form, flags2);
         const saveStart = u32(buf, BUF.pos);
@@ -261,6 +278,7 @@ if (off === undefined || !(FORM > 0)) {
         row.farGeometryBefore = farGeometry(form);
         slotFn(p.slotS, 'void')(form, buf);
         row.farGeometryAfter = farGeometry(form);
+        row.liveAfter = actorInfo(form); // 0x0E's only expected write is the far-skin flag (refused above): this should equal live
         row.header = toHex(buf.add(BUF.header), 9);
         step = 'plain body';
         const plainLen = u32(buf, BUF.pos);
@@ -270,10 +288,10 @@ if (off === undefined || !(FORM > 0)) {
         row.decoded = decode(plain, tracing.marks, saveStart);
         tracing = null;
         step = 'pack 36081';
-        const out = Memory.alloc(16);
+        out = Memory.alloc(16);
         out.writeU64(0); out.add(8).writeU64(0);
         nf.pack(out, buf);
-        rec = out.readPointer();
+        const rec = out.readPointer();
         if (rec.isNull()) throw new Error('the pack gave no record');
         const h = recordHeader(rec);
         const bytes = new Uint8Array(rec.readByteArray(Math.min(h.total, CAP)));
@@ -288,7 +306,7 @@ if (off === undefined || !(FORM > 0)) {
       }
     } catch (e) { row.error = 'at ' + step + ': ' + e; }
     tracing = null;
-    try { if (!rec.isNull()) { nf.deallocate(nf.heapOf(), rec, 0); row.recordFreed = true; } } catch (e) { row.freeError = String(e); }
+    try { const r = out === null ? NULL : out.readPointer(); if (!r.isNull()) { nf.deallocate(nf.heapOf(), r, 0); row.recordFreed = true; } } catch (e) { row.freeError = String(e); } // re-read from out: a fault after 36081's allocation must not leak
     try { if (buf !== null) { nf.bufDestroy(buf); row.bufferDestroyed = true; } } catch (e) { row.destroyError = String(e); }
     try {
       const after = readEntry(p.map);
@@ -309,35 +327,45 @@ if (off === undefined || !(FORM > 0)) {
     emit({ event: 'compare', equal: false, firstDiff: i, section: section, onDemandLength: a.length, engineLength: b.length });
   };
 
-  const counts = { innerAdd: 0, innerAddForm: 0, triggers: 0, runs: 0, refused: 0, stash: 0, stashForm: 0, mapWrite: 0, mapWriteForm: 0, movetoLow: 0, movetoLowForm: 0 };
+  const counts = { innerAdd: 0, innerAddForm: 0, triggers: 0, runs: 0, refused: 0, stash: 0, stashForm: 0, mapWrite: 0, mapWriteForm: 0, movetoLow: 0, movetoLowForm: 0,
+    refrSave: 0, processSave: 0, actorStateSave: 0, modifiersSave: 0, avStorageSave: 0 };
   let busy = false; // 0x0E may re-enter AddChange (the far-skin RemoveItem)
-  const act = function (form, flags, threadId) {
-    counts.triggers += 1;
+  let pending = null; // DEFER: the kill's mark, run at the next 35576 return on Main.threadID (any form)
+  const act = function (q) { // q: { form, flags, markThread, t, runThread, deferredMs, via }
     if (counts.runs >= RUNS || busy) return;
     busy = true;
     try {
-      const p = premises(form, threadId);
+      const p = premises(q.form, q.runThread);
       if (p.ok) counts.runs += 1; else counts.refused += 1; // a refused trigger does not consume RUNS
       if (p.ok || counts.refused <= REFUSED_ROWS) {
         if (MODE === 'check') { for (const c of p.checks) emit({ event: 'check', name: c.name, value: c.value, ok: c.ok }); emit({ event: 'info', live: p.info }); }
         const failed = p.checks.filter(function (c) { return !c.ok; }).map(function (c) { return c.name; });
-        emit({ event: p.ok ? 'premises' : 'refused', mode: MODE, trigger: hex(flags), thread: threadId, ok: p.ok, failed: failed,
-          entryFlags: hex(p.entry.flags), entryRecordNull: p.entry.record.isNull() });
+        emit({ event: p.ok ? 'premises' : 'refused', mode: MODE, trigger: hex(q.flags), markThread: q.markThread, thread: q.runThread, deferredMs: q.deferredMs, deferredVia: q.via,
+          ok: p.ok, failed: failed, entryFlags: hex(p.entry.flags), entryRecordNull: p.entry.record.isNull() });
       }
-      if (p.ok && MODE === 'serialize') serialize(form, p, threadId);
+      if (p.ok && MODE === 'serialize') serialize(q.form, p, q);
     } catch (e) { emit({ event: 'error', where: 'act', error: String(e) }); }
     busy = false;
   };
   const firstBytes = function (name) { return rva(at(name)) + ':' + toHex(at(name), 4); };
-  const hookBytes = { innerAdd: firstBytes('innerAdd'), stash: firstBytes('stash'), movetoLow: firstBytes('movetoLow'), actorSave: firstBytes('actorSave') };
+  const hookBytes = {}; // every hook's resolved address and first bytes, read before the attach (the pitfalls rule)
+  ['innerAdd', 'stash', 'mapWrite', 'movetoLow', 'refrSave', 'processSave', 'actorStateSave', 'modifiersSave', 'avStorageSave'].forEach(function (n) { hookBytes[n] = firstBytes(n); });
+  const mainTid = function () { const m = ptrAt(at('main'), 0); return m.isNull() ? -1 : u32(m, MAIN_THREAD); };
   const attachErrors = [];
   const attach = function (name, cb) { try { Interceptor.attach(at(name), cb); } catch (e) { attachErrors.push(name + ': ' + e); } };
   attach('innerAdd', {
     onEnter(args) { counts.innerAdd += 1; this.form = args[1]; this.flags = args[2].toUInt32(); this.id = u32(args[1], FORM_ID); },
     onLeave(retval) {
+      if (pending !== null && !busy && this.threadId === mainTid()) { // the deferred run, at the next main-thread mark (never the arming one)
+        const q = pending; pending = null; q.runThread = this.threadId; q.deferredMs = Date.now() - q.t; q.via = hex(this.id); act(q);
+      }
       if (this.id !== FORM) return;
       counts.innerAddForm += 1;
-      if ((retval.toUInt32() & 0xff) === 1 && (this.flags & FLAG) !== 0) act(this.form, this.flags, this.threadId);
+      if ((retval.toUInt32() & 0xff) !== 1 || (this.flags & FLAG) === 0) return;
+      counts.triggers += 1;
+      const q = { form: this.form, flags: this.flags, markThread: this.threadId, t: Date.now(), runThread: this.threadId, deferredMs: 0, via: null };
+      if (!DEFER || MODE === 'check') { act(q); return; } // check mode reads inline so the census sees every mark
+      if (pending === null && counts.runs < RUNS && !busy) { pending = q; emit({ event: 'mark', form: hex(FORM), flags: hex(q.flags), thread: q.markThread, armed: true }); }
     },
   });
   attach('movetoLow', {
@@ -348,11 +376,11 @@ if (off === undefined || !(FORM > 0)) {
       emit({ event: 'movetoLow', form: hex(FORM), caller: rva(this.returnAddress), insideRecipe: busy, thread: this.threadId });
     },
   });
-  attach('refrSave', markHook('refr'));
-  attach('processSave', markHook('process'));
-  attach('actorStateSave', markHook('actorState'));
-  attach('modifiersSave', markHook('modifiers'));
-  attach('avStorageSave', markHook('avStorage'));
+  attach('refrSave', markHook('refrSave', 'refr'));
+  attach('processSave', markHook('processSave', 'process'));
+  attach('actorStateSave', markHook('actorStateSave', 'actorState'));
+  attach('modifiersSave', markHook('modifiersSave', 'modifiers'));
+  attach('avStorageSave', markHook('avStorageSave', 'avStorage'));
   attach('stash', {
     onEnter(args) { counts.stash += 1; this.id = u32(args[1], FORM_ID); this.ret = this.returnAddress; },
     onLeave() {
@@ -391,7 +419,7 @@ if (off === undefined || !(FORM > 0)) {
   const s0 = singletons();
   let ver0 = -1;
   try { ver0 = nf.saveVersion(); } catch (e) { attachErrors.push('saveVersion: ' + e); }
-  emit({ event: 'ready', version: version, pid: Process.id, base: String(exe.base), form: hex(FORM), mode: MODE, flag: hex(FLAG), runs: RUNS, hooks: hookBytes,
+  emit({ event: 'ready', version: version, pid: Process.id, base: String(exe.base), form: hex(FORM), mode: MODE, flag: hex(FLAG), runs: RUNS, defer: DEFER, hooks: hookBytes,
     game: String(s0.game), manager: String(s0.manager), main: String(s0.main), handler: String(s0.handler), player: String(s0.player),
     managerFlags: s0.game.isNull() ? -1 : hex(u32(s0.game, MANAGER_FLAGS)), dryRun: s0.manager.isNull() ? -1 : u8(s0.manager, DRY_RUN),
     deflateSetting: u8(at('deflateSetting'), 0), mainThread: s0.main.isNull() ? -1 : u32(s0.main, MAIN_THREAD), saveVersion: ver0, attachErrors: attachErrors });
