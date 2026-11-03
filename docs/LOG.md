@@ -6594,3 +6594,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   three and the two bodies 37 apart held); GREEN on e23bd229 (125136) and r3 touches nothing in a fall, so numidium reruns it cold on
   r3's seats before any word. The gate (verb-merge: the always set, the touched verbs, watch) waits on both answers; then the merge
   and playtest 42.
+- 06:22 PST 2026-11-03 (14:22Z 11-03) (thuum-cf; numidium's rerun): death-freeze v3's cold rerun on r3's seats GREEN (20261103-141811; step 110's
+  twelve claims held, c2's headZ -133.4 against -93.9 in the red run, c1's -132.7, both copies dead 37 apart, c2's "released from the
+  puppet state after the ragdoll" 1). By the lab's rule (red, then cold green, is green) the red was a flake, most likely the
+  head-height claim reading before c2's fall had settled (HYPOTHESIS); the word for its author: a settle wait or an until on headZ
+  before that claim, never a looser bar. So on 5e0e975b everything is GREEN except door v22's leg B premise (0x9731 unhosted at step
+  82). The gate (verb-merge: the always set, npc-handoff's, npc-fate's, cell-host's and npc-puppet's scenarios, and watch) plays the
+  door scenario from sky-srv's deployed tree, so it waits for v23 committed and numidium's deploy-srv; if v23 lands by about 15:00Z
+  the gate runs 15:00 to 17:00Z, the merge follows, and playtest 42 fits Eli's morning. The leg-B run reader is still on 134832.
