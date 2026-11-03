@@ -6448,3 +6448,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the dry-run byte 0, clearingData's +0xDA5 zero, resetGame 0, Main.threadID 1708, REFR, slots 19527 and 19528, the entry 0x90001000
   with a null record); at the purge the stash wrote 0xe3a7a's record byte-identical to 114726's (40 bytes, FNV-1a 0x4ebbb261), so the
   record is deterministic across sessions for the same state (ADR-065 decision 7's premise). The serialize run follows on c1.
+- 05:18 PST 2026-11-03 (13:18Z 11-03) (thuum-cf): x-scene-guest v3 by path (sha1 4ffaf665; v2.1 archived): both seats on x-prop-static's
+  standable smithy spots, c1 at (20758, -45608, -104) about 910 from Hilde's rack and under 400 from Sven's mill positions (the
+  scene's phase 1 and 2 conditions met on arrival, the quest starting on the location's entry as before), c2 at (20758, -45398, -104)
+  facing south; the host assert claims 0x9731 beside 0x9732; c1's npc-state of Hilde right before the 240 s until as the settling
+  read, recorded; every claim of v2.1 stands. Under ADR-064 rule A a premise change leaving every claim plus one recorded read needs
+  no new review; the header names the premise's source (the run reader's record of 125517). e4397635's own pipeline settled GREEN
+  (4981, all six jobs) before b64d1bad superseded it; b64d1bad's waiter runs. r3's stage inputs, as numidium listed them: door v22
+  (main 8609b4f4, file 1acc441f; lab-status read for the seat-count snapshot grammar first), swap v20 (75bd28b9), death-reentry v5
+  (20a6c65d) and death-freeze v3 (0ab95c48) as regression reads, scene-guest v3 (4ffaf665), x-essential-bind v1 and
+  x-respawn-teleport-hold v2 after their review; then the gate (verb-merge's always set plus the touched verbs and watch) for the
+  merge and playtest 42. Still reading: the binding commit's review, the two respawn probes' review, numidium's own r3 review; the
+  serialize run is on c1.
