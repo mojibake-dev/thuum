@@ -2014,6 +2014,20 @@ and about 120 below the eye (about 13 counts a degree on this seat; the rune pro
   m4-turbo2-restart-dead 98f785ce, the server): MpActor::NoteHostSampledDead at a dead sample from the simulator, cleared at the
   stand-up; a live sample stands a body dead before this process only after its host has sampled it dead once, or within a
   reanimate's window (ActorDeathTest's case rewritten: the first live sample stands nothing, a dead then a live one stands it).
+  F9's guard keyed on the DEATH's stamp, and x-npc-death-reentry v4 on break 3 (20261103-100946, numidium's read) found the hole:
+  a host RELAUNCHED after a death stamped in this process loaded Hilde alive and its first sample stood her up ("35534 stands again
+  with health 1.000 on ff000000's sample, 171 s after its death"), the client never having bound the dead record for its own
+  hosted copy before reporting; playtest 41's "the dead stay dead across the restart" held only because a server restart keeps the
+  clients' engines. Round six on the system-1 merge branch (m3-system1-r2 23fb0c73): the stamp is the HOST's (MpActor::NoteHoster
+  from UpdateHoster clears it at every change of host, so a relaunched host or a later joiner must sample the body dead before any
+  live sample of its stands it; the refused sample's line at info: "<host>'s live sample (health H) of <id> stands nothing: its game
+  has not sampled the body dead (a fresh process, a new host, or the corpse's loading frame); the record stays dead"; an accepted
+  reanimate within its window still stands a placed corpse); the client holds a dead word's reports until the engine's copy is dead
+  here (the bind), never asks a move for a body, releases at 8 s with a line; a dead record's carried action (the create word's
+  lastAction, the late-join replay) is dropped with a line instead of played (100946's watcher played the carried death Ragdoll
+  beside the bind's own four events; whether those carry the death sound stays HYPOTHESIS, Eli's ear or a Frida read of the
+  sound's play). T0: ActorDeathTest's new case (the host changes; the new host's first live sample stands nothing; its dead then
+  live samples stand the body). The lab read is x-npc-death-reentry v4's leg B on the merge head.
 - Where the fixes stand (14:44 PST 2026-11-02): F5 MERGED with wall-range (fork parity 4fdb2d31, 21:12Z); F9 MERGED as the R0 train
   m4-turbo2-r0-train (parity 188a8dea, 22:42Z, with skill books; T0 13 of 13, T2 green); F3 and F4 ride the client train
   m4-turbo2-train 11e6b00e (with prop-statics and the settle head), arm two's build, its gate after the arm (Eli's turbo order). The
