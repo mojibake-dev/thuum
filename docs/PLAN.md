@@ -1278,7 +1278,8 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   works worse than before" and the standing rule "we already said we dont want the whole menu to open and close out from under a
   guy"): the live view's three in-place redraws left stale rows (37, 40, 41) and the reopen ping-ponged between two occupants; live
   multi-party sync is BACKLOG with its Frida plan (ContainerMenu::ProcessMessage), exclusive access is a server switch
-  (containerSharing, shared by default, Eli: "we're not even live"); the client keeps the record by base counts under an open menu
+  (containerSharing, shared by default, Eli: "we're not even live"; the switch deleted by ADR-067 decision 6 on 2026-11-03, exclusive
+  the one model); the client keeps the record by base counts under an open menu
   (the own echo draws nothing) and never reopens. Eli's A for reanimation (ADR-060): a commanded NPC is its commander's game's
   for the effect's life, BUILT on fork m4-reanimate-claim 2dc75ab6 (the cells rule's Commanded claim, the host snippet retired),
   its probe x-reanimate-claim after the arm. Perk points are a picks counter (m5-perk-points bbec6de7); the cabbage blast's two
@@ -1430,7 +1431,8 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   2026-11-02: the server sends every occupant the record, but no redraw of
   the engine's open ContainerMenu has held and a reopen is forbidden by
   Eli's rule; backlog with the Frida plan on ContainerMenu::ProcessMessage;
-  the exclusive switch containerSharing exists, shared by default); corpse
+  the exclusive switch containerSharing existed, shared by default, until
+  ADR-067 decision 6 made exclusive the one model on 2026-11-03); corpse
   loot, the open animation and sound for observers, the distance check on
   PutItem and TakeItem, the reloot timer and the saved-open container are
   DONE (containers' rest 44d4c225, 2026-10-31).

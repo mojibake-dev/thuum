@@ -7481,3 +7481,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   and the gameThrQ Promote undid it (finding 58's "never opened a blocked body" read so). Merged into m3-turbo3-sys2-container 4fb20983,
   pipeline 5132 (server and Windows client); 5130 builds the server half alone for the chest legs on the slice's dist. Probe
   x-container-hold v1's corpse-leg header now names both dists (sha1 d925582f). Both halves' fresh reviews running beside.
+- 15:24 PST 2026-11-03 (23:24Z 11-03) (thuum-cf): The hold's server half's fresh review: FIX FIRST on one rule-5 hole, fixed as written and pushed as
+  m3-turbo3-sys2-container 2225c932: ResyncAfterRefusedMove sent the TARGET's inventory to the mover for any target, so a forged TakeItem
+  naming another player within reach (an MpActor is an MpObjectReference) read that player's inventory; now the container's record goes
+  to the mover only for a CONT or a corpse, a living actor's inventory staying its owner's (the pre-existing E_CONTAINER_CELL and REACH
+  paths shared the shape and are closed by the same line). The review's notes: b-container-rest's claim 2 goes red on this build until
+  D-C4's rewrite lands (the draft commits alone at the staging word); the thuum docs still described the switch (cleaned now:
+  containers.md's live-view paragraph and kill-switch line, PLAN.md's two mentions, engine/containers.md's exclusive-access row and its
+  "stays unflipped" sentence, each marked SUPERSEDED by decision 6); the client's chestRedraw "reopen" branch would close a watcher's
+  menu on another chest when a holder closes this one (default inplace is safe; the chaff pass deletes the branch and routes the
+  game-file apply through ContainerApplyQueue); DoReloot with a holder inside sends the pre-reloot record at the shut (pre-existing);
+  a refused activation still fires ActivateChilds and the server's OnActivate (the lock gate's shape); the shut line's listener count
+  includes hosted NPC listeners. Verified by the reviewer: compile idioms, the refusal order, the close-time send on every shut path
+  (corpses carry baseContainerAdded from spawn, so bodies sync at close too), the five T0 cases, clang-format 21.1.8.

@@ -126,14 +126,13 @@ ADR-061 decision 3 is deleted). Not persisted: a hold is runtime state like a ce
   back shut.
 - Papyrus natives touched (ledger lines added): none.
 - Kill switch: none (fixes).
-- The live view and its fallback (ADR-061, playtest 41): the server setting `containerSharing`, "shared" (the default:
-  every player who opens a container is in it, memo D52) or "exclusive" (one occupant at a time: MpObjectReference's
-  CONT branch refuses every other player's activation while an occupant holds it, "[verb:containers] E_CONTAINER_BUSY:
-  <player> activates <container> held by <occupant>", and the refused seat hears Debug.Notification "Someone is using
-  this"; the occupant's close, its leaving reach or its disconnect frees it). Fork m4-container-exclusive, head c2617764:
-  the default is "shared" (Eli, the same evening, after a flip to exclusive and back: "dont worry about setting the
-  container exclusivity. we're not even live"); "exclusive" is the switch for a live server; the live multi-party view
-  is the backlog (ADR-061's outcome).
+- The live view and its fallback (ADR-061, playtest 41), SUPERSEDED 2026-11-03 by ADR-067 decisions 1 and 6: the server
+  setting `containerSharing` is deleted (fork m3-turbo3-sys2-container) and exclusive is the one model (the Authority
+  section's hold paragraph: the refusal "[verb:containers] E_CONTAINER_BUSY: <player> activates <container> held by
+  <occupant>; refused", the notification naming the holder, the close-time sync); the live multi-party view is dropped,
+  not solved. The history: fork m4-container-exclusive c2617764 built the switch with "shared" as the default (Eli, the
+  same evening, after a flip to exclusive and back: "dont worry about setting the container exclusivity. we're not even
+  live").
 
 ## Client
 
@@ -147,7 +146,7 @@ ADR-061 decision 3 is deleted). Not persisted: a hold is runtime state like a ce
   container asked again, b86da361) ping-ponged between two occupants and is REJECTED by Eli's rule: no menu is ever closed
   and reopened under a player to sync it (ADR-061's outcome). The in-place redraw left stale rows in playtests 37, 40 and
   41 and is the backlog's trace. Fork m4-turbo2-chest, the commit after b86da361.
-- Kill switch config key: the server's `containerSharing` (above).
+- Kill switch config key: none since ADR-067 decision 6 (the `containerSharing` switch is deleted; exclusive is the one model).
 
 ## Tests
 
