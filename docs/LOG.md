@@ -7412,3 +7412,20 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   fork's wire-test was red on clippy 1.99's chunks_exact_to_as_chunks (the CI image's toolchain is newer than the local stable 1.96);
   decode_record_hex now walks as_chunks::<2>() with the pair destructured (adr065-sys1-wire e1eaf8ca, clean under cargo +1.99.0 clippy
   across the workspace), re-merged as m3-adr065-system1 436ce96b, pipeline 5123 (server and Windows client builds).
+- 14:51 PST 2026-11-03 (22:51Z 11-03) (thuum-cf): The exclusive container hold's scope (ADR-067 decisions 1 and 6, Eli's first item of decision 7) read and
+  decided: docs/private/container-hold-scope.md. The map (an agent on m3-adr065-system1): the hold is BUILT and unmerged as fork
+  m4-container-exclusive c2617764 (the containerSharing switch, E_CONTAINER_BUSY with a Debug.Notification snippet, T0), an ancestor of
+  neither parity nor the slice; today's fork admits every opener, redraws every other occupant's open menu live, sends nothing at a
+  close (a watcher learns a CONT's new contents only at its next subscribe or open) and never activation-blocks a corpse, so the
+  engine opens a body's loot menu before the server's word (E25). The calls, recommendation taken under decision 8: D-C1 A, land
+  c2617764 as the ONE model (the switch deleted, the refusal with the holder named, the live redraw deleted, the record to the cell's
+  listeners when the set empties, a non-occupant's move refused E_CONTAINER_OCCUPANT and resynced; no wire change); D-C2 A, a dead
+  body activation-blocked like a chest so its loot opens through OpenContainer (HYPOTHESIS: the engine's activate(player, true) on a
+  dead actor opens the loot menu; the probe reads it); D-C3 C, no lease (prune at the next open; the stale hold counted by the probe);
+  D-C4, b-container-rest's claim 2 rewritten to the refusal in its own commit (the draft lab/.cache/drafts/b-container-rest-v2.yaml,
+  sha1 229e22a5: four lid opens, three shuts; Eli reviews); D-C5, server-only branch m3-turbo3-sys2-container off m3-adr065-system1
+  (one dist at SCHEMA 33 serves both stages), merged on T0 and T2 as R0. Building: the server half by an agent on that branch (c2617764
+  merged at 1f3bd25e), the client half (the body's block) on m3-turbo3-sys2-container-client; probe x-container-hold v1 by path (sha1
+  b6620877; 89 steps, 21 claims: the refusal, the close and reopen, the corpse leg recorded, the lost closing activation recorded).
+  Docs: containers.md's Authority carries the hold (R0, the codes, the sync points, no setting), its Tests the dropped live view and
+  the hold's T3; STATE.md's kInventory and kOpenState rows note open and close as the sync points; PLAN.md's M4 state line.

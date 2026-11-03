@@ -58,6 +58,14 @@ What the server validates (R1): the mover occupies the container (D52), stands i
 E_CONTAINER_REACH), and holds the items it puts; a refusal resyncs both inventories to the mover (the engine moved the
 item locally already).
 Rate limit / bounds: the inventory messages' own (PutItem, TakeItem budgets).
+The hold (ADR-067 decisions 1 and 6, 2026-11-03; fork m3-turbo3-sys2-container): R0. One seat holds a container at a time, a
+chest's or a corpse's: the first activation adds the one occupant, a second player's activation while it is held is refused
+E_CONTAINER_BUSY with a notification on its seat (the holder named when its name is at hand), the holder's close, its leaving reach
+(the prune at the next open), its disconnect or the reference's disable frees it. The contents sync at open (the record to the
+opener) and at close (the record to the cell's listeners when the set empties); nothing redraws an open menu, and no verb may ask
+for it (decision 1 dropped the live view, not solved it). A move from a seat that does not hold the container is refused
+E_CONTAINER_OCCUPANT and the mover resynced. There is no setting: exclusive is the one model (the containerSharing switch of
+ADR-061 decision 3 is deleted). Not persisted: a hold is runtime state like a cell's host; isOpen stays its shadow in the record.
 
 ## Engine surface
 
@@ -146,16 +154,21 @@ Rate limit / bounds: the inventory messages' own (PutItem, TakeItem budgets).
 - T0: unit/PartOne_ActivateTest.cpp, the Containers cases: a put from 900 units off refused and the mover resynced, the
   same put taken at the barrel, a take from afar refused; a reloot asked for 30 s keeps that moment in the record and a
   load keeps it (not the 1 s window); a container saved open loads shut; a disconnect releases the occupant and the
-  other user hears isOpen false; under containerSharing "exclusive" the second player is refused and notified while the
-  first is in it, admitted once the first leaves, both in it again under "shared" (ADR-061).
-- T3 for the live view (ADR-061 decision 2, BACKLOG since the reopen's failure): x-shared-chest-phantom v2 after lab-api's
+  other user hears isOpen false; the second player is refused and notified while the first is in it and admitted once the
+  first leaves (ADR-067 decision 6; the shared case is gone with the switch); the close sends the record to the cell's
+  listeners; a non-occupant's move is refused and resynced, no exception.
+- The live view is DROPPED by ADR-067 decision 1 (2026-11-03), not solved: the paragraph below stays as the record of what was
+  tried; no scenario may claim an open menu's redraw.
+- T3 for the live view (ADR-061 decision 2, was BACKLOG since the reopen's failure): x-shared-chest-phantom v2 after lab-api's
   transfer step and server.inventory(<refr>): c1 opens, c2 joins; c2 stores a weapon and a food while c1's menu is open;
   c1 takes the weapon, c2 the food; the roles swapped; a body as well as a CONT; after every change each seat's engine
   inventory of the container equals the record, no "Source inventory doesn't have enough" or unauthorized equip in the
   server log, each seat's menu redrawn in place (never closed). The backlog's gate, with the Frida plan on
-  ContainerMenu::ProcessMessage. Tonight's T3 is exclusive access: b-container-exclusive after a probe (c2's E on a chest
-  c1 has open: E_CONTAINER_BUSY in the server log, the notification snippet on c2, no OpenContainer; c1 closes, c2 opens;
-  the same on a corpse).
+  ContainerMenu::ProcessMessage. The hold's T3: x-container-hold v1 by path (c2's E on a chest c1 has open: E_CONTAINER_BUSY
+  in the server log, no OpenContainer handler line on c2, c2's menu closed, the notification in its screenshot; c1 closes, c2
+  opens; the corpse leg on the server-only branch records whether c2's own engine opened a menu, E25; the lost closing
+  activation recorded), then b-container-exclusive in its own commit; b-container-rest's claim 2 (two occupants) is rewritten
+  to the refusal in its own commit under decision 6.
 - T1: none.
 - T2: the smoke session's container leg as today.
 - T3 scenario id: lab/scenarios/b-container-rest.yaml (after the probe): c1 opens the lab's chest, c2's screenshot

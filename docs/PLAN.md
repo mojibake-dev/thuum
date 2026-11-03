@@ -1445,6 +1445,17 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   animations to the guests) and decision 1's hosted-cell gate built on m4-object-animation ca7811f8, the pair's stage next (its
   layer branch ca434db6 flips the traps row to host scope); decisions 4 (harm) and 5 (counts) planned in traps.md.
 
+- STATE (14:49 PST 2026-11-03, thuum-cf): ADR-067 (Eli, after playtests 42 and 43): the live container view DROPPED, not solved (decision 1: the
+  contents sync at open and at close), one occupant per container (decision 6), corpses accounted for where they land as physics
+  objects (decisions 2 to 4), the stray copy moved (decision 5, LIVE as m3-turbo3-sys1-f1-c1600f98). The exclusive container hold
+  BUILDING on fork m3-turbo3-sys2-container off m3-adr065-system1 (m4-container-exclusive's switch merged and deleted: exclusive is the
+  one model, E_CONTAINER_BUSY with a notification, the close sends the record to the cell's listeners, a non-occupant's move refused
+  E_CONTAINER_OCCUPANT and resynced); probe x-container-hold v1 by path (sha1 b6620877); b-container-rest's claim 2 (two occupants)
+  to be rewritten under decision 6 in its own commit; b-container-exclusive owed. The corpse slice (decisions 3 and 4 by ADR-065's
+  path: the owner's rest, ChangeForm 72 to 74 at SCHEMA_VERSION 33, the two natives) WHOLE on m3-adr065-system1 436ce96b, pipeline
+  5123, its stage next with x-corpse-record v2 (sha1 0ee1ea9c, the restart leg). Eli's order (decision 7): containers, then scripting
+  and quests, then physics objects, in turbo mode (decision 8: probes and RE as needed, no full ceremony before a playtest).
+
 ### M5: Progression (4 to 8 weeks, Class A/B). Started 2026-10-31 (the weekend pass)
 
 - STATE (05:09 PST 2026-11-02, thuum-magnus): the object-animation pair MERGED, fork parity ad1aa50a (from c8c21cd1) and the host-scoped layer
