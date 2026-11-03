@@ -6513,3 +6513,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the flip; the respawn's container is built from GetSpawnPoint (the editor placement, unbent by the MoveTo), sent to the host alone
   before the standalone word. r3's by-path set complete: swap v20 75bd28b9, scene-guest v3 4ffaf665, essential-bind v2, respawn v3;
   door v22 main 8609b4f4; the gamemode and fake main b5e02c05; the fork head 5e0e975b.
+- 05:36 PST 2026-11-03 (13:36Z 11-03) (thuum-cf; numidium's launch): r3's STAGE is launched on m3-system1-r3 5e0e975b (fork pipeline 4994 GREEN,
+  client-build and server-build; 4981 and 4984 green before it) with LABAPI 4992 (thuum main 257908f6: door v22's seat-count snapshot
+  grammar, the loader fix, the transfer step); it rolls both seats back, deploy-srv from main 60d368f1 (the gamemode's respawnFated
+  shape b5e02c05 in it), and plays seven probes in order: door v22 (1acc441f), swap v20 (75bd28b9), death-reentry v5 (20a6c65d),
+  death-freeze v3 (0ab95c48), scene-guest v3 (4ffaf665), essential-bind v2 (f31696a9), respawn-teleport-hold v3 (3bd6ba39, read only
+  if 6 is green). No push to m3-system1-r3 until the probes end. The gate and the merge wait for both reviews' GO on
+  e23bd229..5e0e975b: mine is GO (e4397635 reviewed fresh NOTES ONLY, nothing applied; b64d1bad reviewed fresh NOTES ONLY, applied
+  as written in 5e0e975b, no further review under rule A; 24 ActorDeathTest cases green); numidium's reviewer still reads.
