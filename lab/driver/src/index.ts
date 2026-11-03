@@ -1604,6 +1604,42 @@ function run(step: Step, player: Actor): unknown {
       }
       return { ref: r.getFormID(), items };
     }
+    case "transfer": {
+      // A store or a take without the menu's keys (x-shared-chest-phantom;
+      // thuum docs/engine/containers.md section 4): Papyrus
+      // ObjectReference.RemoveItem with the other container, silent, moves
+      // {count} (1) of the form {item} from the player into the reference
+      // {to}, or from the reference {from} into the player. The menu's own
+      // store and take are the engine's RemoveItem with a move-to reference
+      // too, so skymp5-client's containersService hears this one as it hears
+      // those (UNCONFIRMED until a lab run). A source holding fewer than
+      // {count} is refused before the call; the answer counts the item on
+      // both sides before and after (getItemCount), so a step that moved
+      // nothing shows, and lab-api reds a transfer answering {error}.
+      if ((a.to === undefined) === (a.from === undefined)) return { error: "transfer takes one of {to} and {from}" };
+      const store = a.to !== undefined;
+      const item = Game.getFormEx(num(a.item));
+      if (!item) return { error: `no such item ${num(a.item).toString(16)}` };
+      const ref = form(store ? a.to : a.from);
+      if (!ref) return { error: `no such ref ${num(store ? a.to : a.from).toString(16)}` };
+      const id = ref.getFormID();
+      const count = Math.max(1, num(a.count, 1));
+      const before = { player: player.getItemCount(item), container: ref.getItemCount(item) };
+      const has = store ? before.player : before.container;
+      if (has < count) {
+        const source = store ? "the player" : id.toString(16);
+        return { error: `${source} holds ${has} of ${item.getFormID().toString(16)}, fewer than ${count}` };
+      }
+      if (store) player.removeItem(item, count, true, ref);
+      else ref.removeItem(item, count, true, player);
+      return {
+        item: item.getFormID(),
+        ...(store ? { to: id } : { from: id }),
+        count,
+        player: { before: before.player, after: player.getItemCount(item) },
+        container: { before: before.container, after: ref.getItemCount(item) },
+      };
+    }
     case "look": {
       // thuum docs/verbs/cast-teleport.md: the player's view, pitch (degrees,
       // down is positive) and heading (degrees; the current one when absent),

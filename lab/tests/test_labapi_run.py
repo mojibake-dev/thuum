@@ -80,6 +80,7 @@ class Doubles:
         self.closable: set[str] = set()  # the clients whose close-menu removes the named menu from self.menus
         self.npcs: dict[str, dict[int, dict]] = {}  # the NPCs a client's npc-state reports, by form id
         self.chests: dict[str, dict[int, dict[int, int]]] = {}  # the containers a client's inventory reads: ref -> base id -> count
+        self.carried: dict[str, dict[int, int]] = {}  # the items a client's player carries for transfer: base id -> count
 
     def turn(self):
         for name in self.names:
@@ -126,6 +127,29 @@ class Doubles:
                 assert isinstance(ref, int) and not isinstance(ref, bool), step["args"]
                 chest = (self.chests.get(name) or {}).get(ref)
                 data = {"ref": ref, "items": {str(b): n for b, n in chest.items()}} if chest is not None else {"error": "no such ref"}
+            elif step["action"] == "transfer":
+                # the driver's contract: form ids, never names, and one of to and from (lab-api resolves and checks them
+                # first); the count moves between the player and the chest as removeItem moves it, and a missing ref or a
+                # source holding fewer than count answers {error}, as the driver does
+                a = step["args"]
+                assert ("to" in a) != ("from" in a), a
+                item, ref, count = a.get("item"), a.get("to", a.get("from")), a.get("count", 1)
+                assert all(isinstance(v, int) and not isinstance(v, bool) for v in (item, ref)), a
+                chest = (self.chests.get(name) or {}).get(ref)
+                pack = self.carried.setdefault(name, {})
+                source, target = (pack, chest) if "to" in a else (chest, pack)
+                if chest is None:
+                    data = {"error": f"no such ref {ref:x}"}
+                elif source.get(item, 0) < count:
+                    who = "the player" if "to" in a else f"{ref:x}"
+                    data = {"error": f"{who} holds {source.get(item, 0)} of {item:x}, fewer than {count}"}
+                else:
+                    before = {"player": pack.get(item, 0), "container": chest.get(item, 0)}
+                    source[item] -= count
+                    target[item] = target.get(item, 0) + count
+                    data = {"item": item, ("to" if "to" in a else "from"): ref, "count": count,
+                            "player": {"before": before["player"], "after": pack[item]},
+                            "container": {"before": before["container"], "after": chest[item]}}
             elif step["action"] == "av-table":
                 data = {"ids": list(range(1000, 1164))}
             elif step["action"] == "add-perks":
@@ -1613,6 +1637,65 @@ class InventorySteps(RunTests):
         self.assertEqual(body["verdict"], "red", body)
         self.assertIn("E_RUN_ITEM", body["failures"][0]["error"], body["failures"])
         self.assertFalse([a for _, a, _ in self.doubles.seen if a == "inventory"], "the driver never saw the step")
+
+
+CHEST_MOVES = """
+id: chest-moves
+clients: [c1, c2]
+steps:
+  - c1: connect
+  - c2: connect
+  - c2: transfer {item: "Skyrim.esm:IronSword", to: "0x371e9"}
+  - c1: transfer {item: 0x12eb7, from: 0x371e9, count: 2}
+  - c1: dump-state
+"""
+
+CHEST_SHORT = """
+id: chest-short
+clients: [c1]
+steps:
+  - c1: connect
+  - c1: transfer {item: 0x12eb7, from: 0x371e9}
+  - c1: dump-state
+"""
+
+
+@needs_deps
+class TransferSteps(RunTests):
+    def test_a_store_and_a_take_reach_the_driver_as_ids_and_answer_both_counts(self):
+        """x-shared-chest-phantom's moves: c2 stores a sword from its player into the chest, c1 takes two from its own
+        copy; a table name and a written "0x371e9" reach the driver as ids, and each step's note carries the item's
+        count on the player and in the chest before and after, so a move that moved nothing shows."""
+        self.doubles.carried["c2"] = {0x12EB7: 1}
+        self.doubles.chests["c2"] = {0x371E9: {}}
+        self.doubles.chests["c1"] = {0x371E9: {0x12EB7: 2}}
+        run_id, body = self._run(CHEST_MOVES)
+        self.assertEqual(body["verdict"], "green", json.dumps(body, indent=1))
+        sent = [(c, a) for c, act, a in self.doubles.seen if act == "transfer"]
+        self.assertEqual(sent, [("c2", {"item": 0x12EB7, "to": 0x371E9}), ("c1", {"item": 0x12EB7, "from": 0x371E9, "count": 2})])
+        store, take = body["steps"][2]["note"], body["steps"][3]["note"]
+        self.assertIn('"container": {"after": 1, "before": 0}', store, body["steps"][2])
+        self.assertIn('"player": {"after": 0, "before": 1}', store, body["steps"][2])
+        self.assertIn('"player": {"after": 2, "before": 0}', take, body["steps"][3])
+        self.assertEqual((self.doubles.carried["c1"], self.doubles.chests["c1"][0x371E9]), ({0x12EB7: 2}, {0x12EB7: 0}))
+
+    def test_a_refused_transfer_is_a_red_step(self):
+        """The driver answers a source holding fewer than count, or a reference its game lacks, as {error}; the run takes
+        that as a red step, as it takes an ok: false, and plays nothing after it (a pass would leave the claims after it
+        to measure a store that never happened)."""
+        for chests, why in (({0x371E9: {}}, "371e9 holds 0 of 12eb7, fewer than 1"), ({}, "no such ref 371e9")):
+            with self.subTest(why=why):
+                self.doubles.chests["c1"] = chests
+                run_id, body = self._run(CHEST_SHORT)
+                self.assertEqual(body["verdict"], "red", body)
+                self.assertEqual([(f["kind"], f["client"], f["error"]) for f in body["failures"]], [("step-error", "c1", why)])
+                self.assertEqual([(s["action"], s["ok"]) for s in body["steps"]], [("connect", True), ("transfer", False)])
+
+    def test_an_item_no_table_holds_is_red_before_the_driver(self):
+        run_id, body = self._run(CHEST_SHORT.replace("0x12eb7", '"Skyrim.esm:NoSuchItem"'))
+        self.assertEqual(body["verdict"], "red", body)
+        self.assertIn("E_RUN_ITEM", body["failures"][0]["error"], body["failures"])
+        self.assertFalse([a for _, a, _ in self.doubles.seen if a == "transfer"], "the driver never saw the step")
 
 
 @needs_deps

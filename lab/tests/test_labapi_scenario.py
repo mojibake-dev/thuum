@@ -480,6 +480,29 @@ class NpcKillStep(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 load_scenario(head + bad + "\n")
 
+    def test_transfer_stores_into_or_takes_from_one_container(self):
+        # x-shared-chest-phantom's store and take without the menu's keys: an item and exactly one of to (from the
+        # player into the chest) and from (from the chest into the player); both or neither never reaches the driver
+        from labapi.scenario import load_scenario
+
+        head = "id: x-chest\nclients: [c1, c2]\nsteps:\n  - c2: "
+        step = load_scenario(head + "transfer {item: 0x13790, to: 0x371e9}\n").steps[0]
+        self.assertEqual((step.kind, step.client, step.action, step.args), ("client", "c2", "transfer", {"item": 0x13790, "to": 0x371E9}))
+        self.assertEqual(load_scenario(head + "transfer {item: 0xa, from: 0x371e9, count: 100}\n").steps[0].args,
+                         {"item": 0xA, "from": 0x371E9, "count": 100})
+        # a FormDesc or a table name passes as written; the runner resolves it
+        self.assertEqual(load_scenario(head + 'transfer {item: "Skyrim.esm:IngotIron", from: "000d62:rotfern.esp"}\n').steps[0].args,
+                         {"item": "Skyrim.esm:IngotIron", "from": "000d62:rotfern.esp"})
+        for bad in ("transfer", "transfer {}", "transfer {item: 0x13790}", "transfer {to: 0x371e9}",
+                    "transfer {item: 0x13790, to: 0x371e9, from: 0x371e9}", "transfer {item: 0, to: 0x371e9}",
+                    "transfer {item: true, to: 0x371e9}", 'transfer {item: "", to: 0x371e9}', "transfer {item: [0xa], to: 0x371e9}",
+                    "transfer {item: 0x13790, to: [0x371e9]}", "transfer {item: 0x13790, from: 0}",
+                    "transfer {item: 0x13790, to: 0x371e9, count: 0}", "transfer {item: 0x13790, to: 0x371e9, count: 101}",
+                    "transfer {item: 0x13790, to: 0x371e9, count: 1.5}", "transfer {item: 0x13790, to: 0x371e9, count: true}",
+                    'transfer {item: 0x13790, to: 0x371e9, count: "2"}', "transfer {item: 0x13790, ref: 0x371e9}"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(head + bad + "\n")
+
     def test_log_count_and_a_restart_that_sets_the_clock(self):
         # a client's log lines counted mid-run, and a restart that lays the clock anew (npc-handoff's reads)
         from labapi.scenario import load_scenario

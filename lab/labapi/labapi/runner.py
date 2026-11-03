@@ -127,6 +127,11 @@ Write-Output ('{"games": [' + ($games -join ', ') + '], "dumps": [' + $list + ']
 # a FormDesc in braces inside a console step's text (guests.PLUGIN_RELATIVE's shape), typed as the run's id
 _CONSOLE_FORM = re.compile(r"\{([0-9a-f]{1,6}:[^{}]+?\.(?:esp|esm|esl))\}", re.I)
 
+# the client steps whose {error} answer fails the step as an ok: false answer does: the driver answers most refusals
+# as data, which the run takes as a pass (its own repeat already fails a repetition answering one), and a transfer it
+# refused would pass and leave the claims after it measuring a store or a take that never happened
+_RED_ON_ERROR = {"transfer"}
+
 
 class RunnerError(Exception):
     """E_RUN: the lab itself failed; the verdict is error, not red."""
@@ -1065,9 +1070,11 @@ class Runner:
             rec.verdict = "red"
             return False, str(e)
         qs = await self.board.run_step(step.client, step.action, args, self.s.step_timeout_s)
-        if qs.ok:
-            return True, self._answer(rec, index, step, qs.result.get("data"))
-        error = str(qs.result.get("error", "step failed"))
+        data = qs.result.get("data")
+        refused = qs.ok and step.action in _RED_ON_ERROR and isinstance(data, dict) and "error" in data
+        if qs.ok and not refused:
+            return True, self._answer(rec, index, step, data)
+        error = str(data["error"]) if refused else str(qs.result.get("error", "step failed"))
         rec.failures.append({"step": index, "kind": "timeout" if error == "timeout" else "step-error", "client": step.client, "error": error})
         rec.verdict = "red"
         return False, error
@@ -2100,9 +2107,10 @@ class Runner:
         recipe becomes the recipe's form id (its station passes through: a
         reference id, or a name a later refs table resolves), race-pick's
         race its form id, known's and held's ids theirs, inventory's ref its
-        form id, and a FormDesc in braces inside console text the run's id in
-        the console's hex ("player.equipspell {044d44:Apocalypse - Magic of
-        Skyrim.esp} right" types 1a044d44 under the essentials layer)."""
+        form id, transfer's item and its to or from theirs, and a FormDesc in
+        braces inside console text the run's id in the console's hex
+        ("player.equipspell {044d44:Apocalypse - Magic of Skyrim.esp} right"
+        types 1a044d44 under the essentials layer)."""
         out = dict(args or {})
         try:
             if action == "console" and isinstance(out.get("text"), str):
@@ -2119,6 +2127,10 @@ class Runner:
                 out["ids"] = [self.tables.base_id(x) if isinstance(x, str) else x for x in out["ids"]]
             if action == "inventory" and isinstance(out.get("ref"), str):
                 out["ref"] = self.tables.base_id(out["ref"])
+            if action == "transfer":
+                for key in ("item", "to", "from"):
+                    if isinstance(out.get(key), str):
+                        out[key] = self.tables.base_id(out[key])
         except KeyError as e:
             raise RunnerError(f"E_RUN_ITEM: {e}") from None
         return out

@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field, field_validator
 # a managed guest, a client verb on an unmanaged one.
 # craft: lab-driver reproduces the crafting menu's inventory effect at a station
 # (UNCONFIRMED until a lab run); lab-api resolves the recipe name to its form id.
-CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "node-rotation", "face-keyframes", "quest-stage", "set-stage", "draw-weapon", "anim-event", "figure-action", "repeat", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "set-av", "watch-start", "watch-stop", "markers", "known", "add-perks", "favorite", "favorites", "held", "inventory", "globals", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "refs-near", "look", "solo-start", "place-npc", "place-ref", "npc-ai", "npc-hold", "npc-kill", "npc-state", "look-at", "npc-damage", "figure-spells", "npc-puppet", "npc-pose", "cell-events-start", "cell-events-stop", "play-idle", "combat-spell", "start-combat", "stop-combat", "papyrus-events", "papyrus-log", "quit"}
+CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "node-rotation", "face-keyframes", "quest-stage", "set-stage", "draw-weapon", "anim-event", "figure-action", "repeat", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "set-av", "watch-start", "watch-stop", "markers", "known", "add-perks", "favorite", "favorites", "held", "inventory", "transfer", "globals", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "refs-near", "look", "solo-start", "place-npc", "place-ref", "npc-ai", "npc-hold", "npc-kill", "npc-state", "look-at", "npc-damage", "figure-spells", "npc-puppet", "npc-pose", "cell-events-start", "cell-events-stop", "play-idle", "combat-spell", "start-combat", "stop-combat", "papyrus-events", "papyrus-log", "quit"}
 # Server-side verbs (rung R0) go to the labCommand RPC; CONTRACT.md lists them.
 SERVER_ACTIONS = {"teleport", "give", "set-appearance", "open-race-menu", "set-percentages", "kill", "respawn", "papyrus-av", "staff-rank", "learn-spell",
                   "kill-ref", "respawn-ref", "server-console"}
@@ -303,6 +303,31 @@ def _inventory_args(args: dict[str, Any]) -> dict[str, Any]:
     return dict(args)
 
 
+def _transfer_args(args: dict[str, Any]) -> dict[str, Any]:
+    """transfer {item, to | from, count?}: a store into a container or a take from it in the seat's own game without the
+    menu's keys (the driver's Papyrus ObjectReference.RemoveItem with the other container: x-shared-chest-phantom,
+    docs/engine/containers.md section 4), `count` (1 to 100, 1 when absent) of the form `item` from the player into the
+    reference `to`, or from the reference `from` into the player. Each is a form id, a FormDesc or a table name, which
+    lab-api resolves before the driver sees it. The driver refuses a source holding fewer than count, and the run takes
+    that answer as a red step (runner.py), never as a pass."""
+    unknown = sorted(set(args) - {"item", "to", "from", "count"})
+    if unknown:
+        raise ValueError(f"transfer takes item, to or from, and count, not {unknown}")
+    if "item" not in args:
+        raise ValueError(f"transfer names its item (transfer {{item: 0x13790, to: 0x371e9}}), got {args!r}")
+    if ("to" in args) == ("from" in args):
+        raise ValueError("transfer takes one of to (a store from the player) and from (a take into the player), "
+                         f"got {sorted(args)}")
+    for key, what in (("item", "an item's"), ("to", "a container reference's"), ("from", "a container reference's")):
+        v = args.get(key)
+        if key in args and (isinstance(v, bool) or not ((isinstance(v, int) and v > 0) or (isinstance(v, str) and v.strip()))):
+            raise ValueError(f"transfer's {key} is {what} form id, a FormDesc or a table name, got {v!r}")
+    count = args.get("count", 1)
+    if isinstance(count, bool) or not isinstance(count, int) or not 1 <= count <= 100:
+        raise ValueError(f"transfer's count is a whole number from 1 to 100, got {count!r}")
+    return dict(args)
+
+
 _CONSOLE_NAME = re.compile(r"[A-Za-z][A-Za-z0-9]*")
 
 
@@ -559,6 +584,8 @@ def parse_step(raw: Any, clients: list[str]) -> Step:
         args = _ref_command_args(action, args, clients)
     if action == "inventory":
         args = _inventory_args(args)
+    if action == "transfer":
+        args = _transfer_args(args)
     if action == "server-console":
         args = _server_console_args(args)
     if action == "close-menu" and not (isinstance(args.get("name"), str) and args["name"].strip()):
