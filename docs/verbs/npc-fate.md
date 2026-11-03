@@ -732,7 +732,7 @@ in the scenario's server block, for the sweep's own read.
   KillSilent and Resurrect stand as the ledger has them (docs/NATIVES.md:
   201-202, :223; headshot.md:151 has the server's Actor.Kill at R0). The lab
   gamemode gains two labCommands for probes, kill-ref {formId, killerProfileId}
-  and respawn-ref {formId} (lab/gamemode/gamemode.js's respawn-ref: since 2026-11-03 the fate's own RespawnFated through the server's respawnFated property, the sweep's wire with tTeleport; inPlace stands him where he fell), the
+  and respawn-ref {formId} (lab/gamemode/gamemode.js's respawn-ref: since 2026-11-03 the fate's own RespawnFated through the server's respawnFated property, the sweep's wire with tTeleport; inPlace stands him where he fell; the lever skips the sweep's eligibility, and a placed corpse it stands up keeps placedDead, so that body's next death never schedules a return, numidium's review of m3-system1-r3 5e0e975b), the
   server's own kill (ConsoleCommands.cpp:255-268's ExecuteKill) by id; the
   scenario's kills are the person's (a bow), the probes' these.
 - Settings: `npcFate` (the kill switch), per server, beside npcEnabled
