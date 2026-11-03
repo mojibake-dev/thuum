@@ -236,7 +236,15 @@ the self's TESForm pointer) and taken by the hook at the entry (TakeLatent), so 
 resurrect and delete count as "(platform)" like the direct calls; the census flushes on time from the platform's OnUpdate
 (ScriptNatives::Tick) so a quiet seat emits its last window; the self probe accepts every placed kind through TESForm::AsReference
 (a placed hazard among a row's first calls no longer stands the row down); the form argument's read is guarded the same way.
-HYPOTHESIS rows: H-1b1 (rewritten) the latent note's self is the pointer the native receives (CallNative's rawSelf is the
+Round three (20:18 PST 2026-11-02; the re-review of round two: fix two, then one seat): a latent note carries a token and is forgotten
+when the dispatch is refused or when the call's stack returns (onResult), an aged note is dropped at the next look (the 15 s
+backstop), only the 24 rows' keys with a non-null self are noted, and the key is the resolved function's own class and name (a call
+through a subclass resolves to the parent's row); the self probe is a plain read of the form type again (a virtual call through a
+wrong but readable pointer would run another class's slot under the mutex, which SEH cannot catch), accepting every placed kind,
+REFR through PlacedHazard and an Explosion; the essential case's cause-4 report carries a noted hit so only MayDie refuses it.
+Known limit: a note carries no call id, so a script calling the same native on the same self inside the window takes the platform's
+note and the platform's call goes out live (the counts right, the attribution swapped once); Lock and Kill are direct-path rows,
+unaffected. HYPOTHESIS rows: H-1b1 (rewritten) the latent note's self is the pointer the native receives (CallNative's rawSelf is the
 TESForm the VM hands the native; a mismatch shows as a latent row counted live on a guest at a relayed apply, where only the
 platform could have called it); H-1b2 every SpSnippet runs through callNative, so one of the two marks covers it; H-1b3 the self
 probe tells a wrong row (a register holding another form of the right kind passes it). The guests' lifecycle handlers (finding 9)
@@ -264,4 +272,4 @@ are until the slice is built; the build opens its fork branch as m4-scripts-work
 - [ ] T3 scenario green, no HYPOTHESIS tags (b-papyrus-events approved by Eli 2026-10-20 and on main, d1d8370, asserting the Creation's check ran connected with the prompt flag from the per-player default; its first run is the layer-merge sweep; x-mcm-register's HUD count still to read)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031): not applicable, no player action
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
-- [x] ledger and suppression registry updated (no server native; the Suppress section above is the registry entry; slice 1b's 24 hooked natives are named in NATIVES.md's hand-maintained Reason column with the hook's rung R2 and the verb papyrus-events; the Rung COLUMN stays the server VM's own rung, so the five rows the server implements or delegates (Enable, Disable, their NoWait forms, Lock, SetLockLevel, PlaceAtMe) keep R0 there and carry the hook's R2 in their Reason text, 19:55 PST 2026-11-02)
+- [x] ledger and suppression registry updated (no server native; the Suppress section above is the registry entry; slice 1b's 24 hooked natives are named in NATIVES.md's hand-maintained Reason column with the hook's rung R2 and the verb papyrus-events; the Rung COLUMN stays the server VM's own rung (R0 where the server implements the native: Enable, Disable and their NoWait forms, Activate, Delete, SetOpen, Lock, SetLockLevel; PlaceAtMe's delegation keeps Eli's R0 row), the hook's R2 in each Reason text, 19:55 PST 2026-11-02)
