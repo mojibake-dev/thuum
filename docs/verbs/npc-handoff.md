@@ -680,9 +680,13 @@ stands in an interior this game has not loaded (Cell.isAttached false) is HIDDEN
 reference, and reconcile never releases a hidden actor to its schedule; when its record is back in a loaded cell (it came out, or this
 game walked in) it is shown (Enable, moved to the record) and reconciled (the house granted makes it live, the word makes it a
 puppet). The host's own reference is never hidden. Unhosted cells freeze; a seat that does not load a cell sees none of its actors:
-the design law's reading of D6 for the viewer. HYPOTHESIS until x-handoff-hide (by path): Disable holds a puppet-flagged actor (the
-server's own snippet did not hold Hilde: that snippet ran while the Teleport's move was in flight, and the release re-enabled nothing,
-so the order of the two is the probe's read) and the enable-and-move at the attach lands within the door scenario's 15 s. The same
+the design law's reading of D6 for the viewer. HYPOTHESIS until x-handoff-hide (by path) runs: the hide fires on the viewer once the
+record stands in a cell it has not loaded, the D11 release never runs on a hidden actor (its copy a puppet 25 s on, no "released ...
+no 3D here" line), and the show's enable-and-move lands within 15 s of the attach (its v2 claims these after ADR-064's fresh review of
+2026-11-03). "Disable holds a puppet-flagged actor" (the server's own snippet did not hold Hilde: that snippet ran while the
+Teleport's move was in flight, and the release re-enabled nothing) stays HYPOTHESIS past that run: this frame makes no ghost (Alvor's
+package keeps him home on c2's engine too) and npc-state has no enabled field, so a ghost premise (Hilde into 1cb84 under a host,
+playtest 40's witness) or an npc-state enabled field is its read; the probe records c2's console getdisabled meanwhile. The same
 head carries the furniture hold (movementApply.ts: a puppet in furniture far from its record is told IdleFurnitureExit and, still
 held, placed; the settle loop of f4a39's coffin and ff000d9d's bed in playtest 40).
 
