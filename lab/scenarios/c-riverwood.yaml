@@ -115,6 +115,12 @@ steps:
   # claim 2: host one leaves. c1's last read of each subject is taken right before its game goes (a seat's
   # npc_state is its last npc-state step of that id, kept for the run); the relaunch step returns once c1
   # is off the online list, the grace passes the village to c2, and the promotes land within a tick
+  # the gate audit (2026-11-02, docs/research/gate-audit-2026-11-02.md): the premise of the walker's switch goes in
+  # the setup, not the claim: the host's engine holds Gerdur where she stands (npc-hold, Actor.SetDontMove) before the
+  # handoff, so her schedule cannot walk her through a door into her house (0x133c7) during the window, and the live
+  # switch is claimed outright below (the 20e78923 restatement, aiEnabled == is3DLoaded, passed the red case; undone)
+  - c1: npc-hold {formId: 0x13489, held: true}
+  - wait: 2
   - c1: npc-state {formId: 0x13482}
   - c1: npc-state {formId: 0x13489}
   - c1: relaunch {until: gone}
@@ -135,11 +141,9 @@ steps:
       - server.host(0x9732).hosted == true
       - server.host(0x9732).client == "c2"
       - c2.npc_state(0x13482).aiEnabled == true
-      # the walker's switch is read where she stands: her schedule can walk her through a door into her house
-      # (0x133c7), a cell nobody hosts, before the handoff (20261101-084608: Gerdur indoors with no 3D on c2, no
-      # promote due, Alvor live), so the live switch is claimed against her being loaded on c2, the form
-      # b-npc-handoff-night reads (thuum-magnus, 02:1x PDT 2026-11-01; the standing resident's line stays as it was)
-      - c2.npc_state(0x13489).aiEnabled == c2.npc_state(0x13489).is3DLoaded
+      # the walker's switch, outright: the host held her outdoors before the handoff (the setup above), so she is
+      # loaded on c2 and promoted; the audit's correction of the 2026-11-01 restatement
+      - c2.npc_state(0x13489).aiEnabled == true
       # continuity across the handoff within the same measured 256 for the standing subject (Alvor at his forge; c1's last
       # read is seconds older). The walker 0x13489 carries no position claim here: c1's last read comes before its relaunch
       # and c2's after the pass, about 21 s apart in the gate runs of 2026-10-31 (containers' 213214, 214040, 214510 and
