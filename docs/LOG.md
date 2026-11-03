@@ -7212,3 +7212,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   verified the decode against 0x620240's disassembly, the ready-row bytes against the served census logs, and the example row against
   Sven's served record (00 29 5a at 2097; the census's 2091 refused with the +6 hint). 79,795 bytes, node --check clean, unrun; its
   cross-seat run (numidium's x-apply-cross-seat-sven v2 on 192345's kDead record) waits for the lab after playtest 42's turbo arm.
+- 11:58 PST 2026-11-03 (19:58Z 11-03) (numidium): playtest 42 is up, system 1 on the STAGED r3 (fork m3-system1-r3 df9e1009, server
+  skymp-server:m3-system1-r3, the dist client-build of df9e1009, SkyrimPlatformImpl a82f61d945dd1524), the gate after it (Eli:
+  "fine go with those decisions", "is the playtest ready?"), then turbo rounds on system 1 alone (Eli: "id like to do turbo mode for
+  system 1 today once playtesting starts. i think for each system leg ill wanna do a few rounds of turbo mode after the playtest
+  drops"). Ahead of the items, on the stage: door v24 (D-P13 A) GREEN 13 of 13 (20261103-193533) and b-npc-death GREEN 6 of 6 with
+  its restart leg (194826), so every item of the checklist (docs/private/playtest-42.md v4) carries a green two-seat run on this build.
+  Also: the Sven round trip of the mid-game apply on c2 (x-apply-roundtrip-sven, 193005, apply-on-demand v2.2) GREEN, the non-leveled
+  path (the root kept, 19535 fed directly, 2 units at settled): the cross-seat run's engine-fact gate is met. The seats from
+  lab/playtests/42.yaml (playtest-setup and playtest-ready all ok at 11:56): 39's end world, test 1 rotfern on c1 (stream 48989;
+  Overdraw40, Marksman 60), test 2 Prisoner on c2 (49989; none), the Riverwood guard camp at 18.75, npcEnabled, bars full, no god
+  mode; the hold to 22:55Z; the recorder on (results/playtest-42/, 300 s cycles; it wanted docs/private/playtest-m2-<n>.md, so a
+  link stands in, the name check to fix later).
