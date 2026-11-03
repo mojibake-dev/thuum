@@ -1,4 +1,4 @@
-// serialize-on-demand-actor.js v2.1, the id census after its review (thuum, the re-analyst 2026-11-03; docs/research/adr065-serialize-on-demand-2026-11-03.md, "The actor
+// serialize-on-demand-actor.js v2.2, the census under a replaced Update (thuum, the re-analyst 2026-11-03; docs/research/adr065-serialize-on-demand-2026-11-03.md, "The actor
 // Runs 20261103-153648 (check) and 153929 (serialize, RUNS 2): GREEN on the promoted bandit 0x39fe4 through Character's slot 0x0E
 // 40266, deferred through PlayerCharacter::Update in 1 and 17 ms; 4,795 and 4,481 bytes at kDying and kDead, the entry untouched.
 // class", Q7): serialize-on-demand.js's recipe (GREEN, run 20261103-131511) for a LOADED actor FORM (ACHR 0x3E only). At AddChange's
@@ -7,11 +7,39 @@
 // same body that still calls the five writers; run 143818 read 0x727d40 on the bandit and refused until this premise admitted it), the
 // plain body read from the buffer, 36081; record freed, buffer destroyed, entry re-read. A kill's kLifeState marks fire OFF the main
 // thread (runs 143818 and 144049: threads of the engine's death path, never Main.threadID), so DEFER (default true): the mark only ARMS
-// a pending run, and the recipe, premises included, runs on Main.threadID at the first of PlayerCharacter::Update's return (40447,
-// VTABLE_PlayerCharacter slot 0xAD, Actor.h:371: once per frame on the main thread, HYPOTHESIS) or the next main-thread AddChange
-// (alone, run 144049 waited 13,115 ms while the player stood still), outside the kill's own frame (SetLifeState, KillImpl, the ragdoll
+// a pending run, and the recipe, premises included, runs on Main.threadID inside PlayerCharacter::Update's REPLACEMENT (40447,
+// VTABLE_PlayerCharacter slot 0xAD, Actor.h:371 `void Update(float a_delta)`, once per frame on the main thread, HYPOTHESIS;
+// Interceptor.replace with a NativeCallback that first calls the original through a NativeFunction at the same address, Frida's
+// documented replace idiom), after the original returned and outside the kill's own frame (SetLifeState, KillImpl, the ragdoll
 // hand-off, where 37649 would read the high process mid-transition, 35715's Havok block ragdolling bodies, and a lock re-taken by
-// 39429 would hang, not crash); DEFER false runs inline; the rows print deferredMs and deferredVia. Against the REFR script: NO slot
+// 39429 would hang, not crash). No AddChange fallback any more (it ran inside a listener and was blind, the guard below; run 144049's
+// 13,115 ms wait was its only use): if the replacement never fires, a 1 s watchdog refuses the armed run after 2 s with a 'no Update
+// return' row (the updates since the arm, Update's thread against Main.threadID, updateReplaced, updateFaults) and the liveness row
+// says so. DEFER false runs inline inside the AddChange listener: for the record's bytes only, since its on-thread witnesses (the
+// writer marks, the census) are blind by the guard; the rows print deferredMs and deferredVia.
+// THE LISTENER GUARD (frida-gum main c73c1bbf, 2026-11-02, gum/guminterceptor.c, read 2026-11-03): _gum_function_context_begin_invocation
+// sets a thread-local guard key (gum_interceptor_guard_key, :2254) before the on_enter listeners run and clears it at :2364, and
+// _gum_function_context_end_invocation sets it at :2415 around the on_leave listeners and clears it at :2480; any hooked function entered
+// while the key is set bypasses its listeners (:2249-2252). The key is cleared BEFORE a replacement's body runs (:2364 precedes the jump
+// to replacement_function at :2371-2380), and inside a replacement only the replaced function itself bypasses (the calling_replacement
+// check at :2262-2271: the peek :2262, the condition :2263-2267, the bypass :2268-2271; the documented chain-to-original). v2.1 and before ran the recipe inside PlayerCharacter::Update's onLeave, so
+// every hook on the recipe's own thread was blind to the recipe's callees: the writer marks read [] in 153648, 153929 and 183149 and the
+// census read total 0 in 183149, artifacts of the guard, not of the engine. Expected now: the five writer marks per record (the body
+// sectioned, the decode whole) and the census rows (36037's header id, 35715's cell ids, the body's 36048 and 36047 calls), the recipe's
+// bytes unchanged from 153929's. The replacement is reverted (Interceptor.revert, then flush) from the JS thread
+// (setTimeout 0, outside any engine frame of ours); a revert while Update is in flight is deferred by frida-gum until the context's
+// trampoline_usage_counter is 0 (:1832). The lab's injector is frida-inject 17.19.0 (lab/frida/README.md:5, lab/labapi/labapi/config.py:159):
+// Interceptor.replace, revert and flush, NativeCallback and Process.getCurrentThreadId are all on frida.re/docs/javascript-api (read
+// 2026-11-03); frida's docs say the replacement is kept alive until revert (gumquickinterceptor.c:1095 JS_DupValue, :1137 freed on revert); the
+// reference here outlives the revert for the liveness row.
+// ONE REPLACEMENT PER GAME PROCESS (guminterceptor.c:822-823, :853-856 GUM_REPLACE_ALREADY_REPLACED; gumjs throws "already replaced this
+// function", gumquickinterceptor.c:1116-1117; a revert removes only the calling script's entry, :1151-1162) and lab-api eternalizes the script
+// (frida-inject -e, config.py:159-166, runner.py:2354): a second instance on the seat fails to replace; the symptom is attachErrors 'already
+// replaced this function', updateReplaced false and every arm refused 2 s later; relaunch the seat or wait for the earlier instance's cleanup
+// row (runs spent, ttl; TTL seconds, default 600, is the replacement's life without a result). The lab appends to the same
+// <script>.log across instances (runner.py:2354-2360), so align on the new ready row's t and pid; hookBytes.playerUpdate reads e9 when an
+// earlier attach already patched the prologue (attach and replace share one function context, guminterceptor.c:816-817; fine).
+// Against the REFR script: NO slot
 // 0xF2 pre-call (37622 Actor::MovetoLow is the unload's AI demotion; hooked only as a witness: in run 144049 the engine ran it on the
 // promoted bandit at the player's exit, from 37501, whose IsPersistent gate (HYPOTHESIS, the decompile) then skipped the stash: D7 again); three more premises (not
 // the player; far skin absent, since a set farGeometry makes 0x0E strip it by RemoveItem and mark kInventory, which would make
@@ -69,6 +97,7 @@ const FLAG = PARAMS.FLAG === undefined ? 0x400 : Number(PARAMS.FLAG); // Actor.h
 const RUNS = PARAMS.RUNS === undefined ? 1 : Number(PARAMS.RUNS);
 const CENSUS = PARAMS.CENSUS === undefined ? true : (PARAMS.CENSUS !== false && PARAMS.CENSUS !== 'false'); // the id census inside the recipe (D6)
 const DEFER = PARAMS.DEFER === undefined ? true : (PARAMS.DEFER !== false && PARAMS.DEFER !== 'false'); // serialize only: see the header
+const TTL_S = PARAMS.TTL === undefined ? 600 : Number(PARAMS.TTL); // seconds the replacement may live without a result; an eternalized script never unloads, so the revert is ours or never
 function emit(obj) {
   obj.t = Date.now();
   send(obj);
@@ -98,7 +127,7 @@ const OFFSETS = {
     refrCheckSave: 0x2da4f0, // 19527 TESObjectREFR::CheckSaveGame = Actor's slot 0x0D
     actorSave: 0x686710, // 37649 Actor::SaveGame, VTABLE_Actor (207511) slot 0x0E (Actor.h:275)
     characterSave: 0x727d40, // 40266 Character::SaveGame, VTABLE_Character (207886) slot 0x0E (Character.h:31): an inlined copy of 37649's body; every NPC's 0x0E
-    playerUpdate: 0x732660, // 40447 PlayerCharacter::Update, VTABLE_PlayerCharacter (208040) slot 0xAD (Actor.h:371): the per-frame main-thread trigger (hooked)
+    playerUpdate: 0x732660, // 40447 PlayerCharacter::Update, VTABLE_PlayerCharacter (208040) slot 0xAD (Actor.h:371): the per-frame main-thread trigger (REPLACED: Interceptor.replace, the original called first through a NativeFunction at the same address)
     movetoLow: 0x6826d0, // 37622 Actor::MovetoLow, slot 0xF2 (Actor.h:440): hooked as a witness; the recipe never calls it (the engine did at the exit in 144049)
     refrSave: 0x2da5c0, // 19528 TESObjectREFR::SaveGame inside 37649 (mark refr)
     processSave: 0x6e4710, // 39429 AIProcess::SaveGame (mark process)
@@ -415,7 +444,7 @@ if (off === undefined || !(FORM > 0)) {
   const counts = { innerAdd: 0, innerAddForm: 0, triggers: 0, runs: 0, refused: 0, stash: 0, stashForm: 0, mapWrite: 0, mapWriteForm: 0, movetoLow: 0, movetoLowForm: 0,
     refrSave: 0, processSave: 0, actorStateSave: 0, modifiersSave: 0, avStorageSave: 0, playerUpdate: 0 };
   let busy = false; // 0x0E may re-enter AddChange (the far-skin RemoveItem)
-  let pending = null; // DEFER: the kill's mark, run at the next 35576 return on Main.threadID (any form) or PlayerCharacter::Update's return
+  let pending = null; // DEFER: the kill's mark, run inside PlayerCharacter::Update's replacement on Main.threadID after the original returned (no listener runs it: the guard)
   let updateThread = -1; // PlayerCharacter::Update's thread, every frame; read against the ready row's mainThread
   const act = function (q) { // q: { form, flags, markThread, t, runThread, deferredMs, via }
     if (counts.runs >= RUNS || busy) return;
@@ -432,36 +461,55 @@ if (off === undefined || !(FORM > 0)) {
       if (p.ok && MODE === 'serialize') serialize(q.form, p, q);
     } catch (e) { emit({ event: 'error', where: 'act', error: String(e) }); }
     busy = false;
+    if (counts.runs >= RUNS) scheduleCleanup('runs spent');
   };
   const firstBytes = function (name) { return rva(at(name)) + ':' + toHex(at(name), 4); };
   const hookBytes = {}; // every hook's resolved address and first bytes, read before the attach (the pitfalls rule)
   ['innerAdd', 'stash', 'mapWrite', 'movetoLow', 'refrSave', 'processSave', 'actorStateSave', 'modifiersSave', 'avStorageSave', 'playerUpdate', 'setNumericId', 'lookupByID'].forEach(function (n) { hookBytes[n] = firstBytes(n); });
   const mainTid = function () { const m = ptrAt(at('main'), 0); return m.isNull() ? -1 : u32(m, MAIN_THREAD); };
-  const runPending = function (threadId, via, id) { // the deferred run, on Main.threadID only, never inside the arming call
+  const runPending = function (threadId, via) { // the deferred run, on Main.threadID only, inside Update's replacement (never inside a listener: the guard)
     if (pending === null || busy || threadId !== mainTid()) return;
-    if (via !== 'PlayerCharacter::Update' && Date.now() - pending.t < 250) return; // AddChange is the fallback: two frames are 33 ms, 250 covers a hitch, 144049 waited 13,115
-    const q = pending; pending = null; q.runThread = threadId; q.deferredMs = Date.now() - q.t; q.via = id === undefined ? via : via + ' ' + hex(id); act(q);
+    const q = pending; pending = null; q.runThread = threadId; q.deferredMs = Date.now() - q.t; q.via = via; act(q);
   };
+  let reverted = false, cleanupWhy = null;
+  const t0 = Date.now(); // the TTL's clock: the replacement's life without a result
+  const cleanup = function (why) { // the replacement off, from the JS thread: frida-gum defers the context's destroy while Update is in flight (guminterceptor.c:1832)
+    if (reverted) return;
+    if (!updateReplaced) { reverted = true; cleanupWhy = why; emit({ event: 'cleanup', why: why, reverted: false, note: 'nothing replaced' }); return; }
+    reverted = true; cleanupWhy = why;
+    try { Interceptor.revert(at('playerUpdate')); Interceptor.flush(); emit({ event: 'cleanup', why: why, reverted: true }); } catch (e) { emit({ event: 'cleanup', why: why, error: String(e) }); }
+  };
+  const scheduleCleanup = function (why) { if (!reverted) setTimeout(function () { cleanup(why); }, 0); };
   const attachErrors = [];
   const attach = function (name, cb) { try { Interceptor.attach(at(name), cb); } catch (e) { attachErrors.push(name + ': ' + e); } };
   attach('innerAdd', {
     onEnter(args) { counts.innerAdd += 1; this.form = args[1]; this.flags = args[2].toUInt32(); this.id = u32(args[1], FORM_ID); },
     onLeave(retval) {
-      runPending(this.threadId, 'AddChange', this.id); // precedes this call's own mark, so the arming call never runs its pending
       if (this.id !== FORM) return;
       counts.innerAddForm += 1;
       if ((retval.toUInt32() & 0xff) !== 1 || (this.flags & FLAG) === 0) return;
       counts.triggers += 1;
       const q = { form: this.form, flags: this.flags, markThread: this.threadId, t: Date.now(), runThread: this.threadId, deferredMs: 0, via: null };
       if (!DEFER || MODE === 'check') { act(q); return; } // check mode reads inline so the census sees every mark
-      if (pending === null && counts.runs < RUNS && !busy) { pending = q; emit({ event: 'mark', form: hex(FORM), flags: hex(q.flags), thread: q.markThread, armed: true }); }
+      if (pending === null && counts.runs < RUNS && !busy) { q.updatesAtArm = counts.playerUpdate; pending = q; emit({ event: 'mark', form: hex(FORM), flags: hex(q.flags), thread: q.markThread, armed: true, updatesAtArm: q.updatesAtArm }); }
       else emit({ event: 'mark', form: hex(FORM), flags: hex(q.flags), thread: q.markThread, armed: false, reason: pending !== null ? 'pending armed' : (busy ? 'busy' : 'runs spent') });
     },
   });
-  attach('playerUpdate', { // PlayerCharacter::Update: once per frame on the main thread (HYPOTHESIS), the deferred run's per-frame chance
-    onEnter() { counts.playerUpdate += 1; },
-    onLeave() { updateThread = this.threadId; runPending(updateThread, 'PlayerCharacter::Update'); },
-  });
+  // PlayerCharacter::Update REPLACED, not attached: the recipe must run outside every listener (the guard, header). The original is called first
+  // through a NativeFunction at the same address (the calling_replacement bypass, guminterceptor.c:2262-2271); the body is guarded so a JS
+  // exception never unwinds into the engine. hookBytes read playerUpdate's first bytes above, before this patch (the pitfalls rule).
+  const origUpdate = new NativeFunction(at('playerUpdate'), 'void', ['pointer', 'float'], { exceptions: 'propagate' }); // void Update(float a_delta), Actor.h:371: the chain to the original through the same address; propagate: no exceptor scope around the engine's frame (gumquickcore.c:4540-4541; the default is steal, :4805), so a C++ throw inside the frame reaches its own handler and a fault is the engine's crash with its dump, never a stolen longjmp (gumexceptor.c:530-548 takes every type; gumexceptor-windows.c:135-137 maps a C++ throw to GUM_EXCEPTION_SYSTEM)
+  let updateFaults = 0, updateFaultLast = null, updateReplaced = false, inUpdate = false; // the original in flight on the main thread: the watchdog waits for its return
+  const updateCallback = new NativeCallback(function (self, delta) { // kept alive by Interceptor until the revert (gumquickinterceptor.c:1095 JS_DupValue, :1137 freed on revert); the liveness row's reference outlives the revert
+    try {
+      inUpdate = true; try { origUpdate(self, delta); } finally { inUpdate = false; } // exceptions: 'propagate' (above): an engine fault here is the engine's crash as without Frida; the catch below covers this JS body only
+      counts.playerUpdate += 1;
+      updateThread = Process.getCurrentThreadId();
+      runPending(updateThread, 'PlayerCharacter::Update');
+    } catch (e) { updateFaults += 1; updateFaultLast = String(e); if (updateFaults === 1) emit({ event: 'error', where: 'playerUpdate replacement', error: String(e), updates: counts.playerUpdate }); }
+  }, 'void', ['pointer', 'float']);
+  const REPLACE = MODE === 'serialize' && DEFER; // check mode and DEFER false run inline (the act from the AddChange listener): no replacement, nothing arms, the watchdog stays silent; one replacement per process (guminterceptor.c:822-823, :855) and an eternalized script (config.py:159) holds it until its own cleanup
+  if (REPLACE) { try { Interceptor.replace(at('playerUpdate'), updateCallback); Interceptor.flush(); updateReplaced = true; } catch (e) { attachErrors.push('playerUpdate replace: ' + e); } } // flush: the same commit rule as the census attach
   attach('movetoLow', {
     onEnter(args) {
       counts.movetoLow += 1;
@@ -508,12 +556,19 @@ if (off === undefined || !(FORM > 0)) {
       emit({ event: 'write', form: hex(FORM), flags: hex(u32(args[2], 0)), record: String(ptrAt(args[2], 8)), caller: rva(this.returnAddress) });
     },
   });
-  setInterval(function () { emit({ event: 'liveness', counts: counts, updateThread: updateThread }); }, 10000);
+  let noUpdateRefusals = 0;
+  setInterval(function () { // the watchdog: an armed run that Update's replacement has not taken in 2 s is refused ('no Update return'); the next mark may re-arm
+    if (updateReplaced && !reverted && !busy && pending === null && Date.now() - t0 > TTL_S * 1000) { scheduleCleanup('ttl ' + TTL_S + ' s'); return; }
+    if (pending === null || busy || inUpdate || Date.now() - pending.t < 2000) return;
+    const q = pending; pending = null; counts.refused += 1; noUpdateRefusals += 1;
+    emit({ event: 'refused', reason: 'no Update return', mode: MODE, trigger: hex(q.flags), markThread: q.markThread, armedMs: Date.now() - q.t, updatesSinceArm: counts.playerUpdate - (q.updatesAtArm || 0), updateThread: updateThread, mainThread: mainTid(), updateReplaced: updateReplaced, updateFaults: updateFaults });
+  }, 1000);
+  setInterval(function () { emit({ event: 'liveness', counts: counts, updateThread: updateThread, updateReplaced: updateReplaced, replacement: String(updateCallback), updateFaults: updateFaults, updateFaultLast: updateFaultLast, inUpdate: inUpdate, noUpdateRefusals: noUpdateRefusals, pending: pending !== null, reverted: reverted, cleanupWhy: cleanupWhy }); }, 10000);
 
   const s0 = singletons();
   let ver0 = -1;
   try { ver0 = nf.saveVersion(); } catch (e) { attachErrors.push('saveVersion: ' + e); }
-  emit({ event: 'ready', version: version, pid: Process.id, base: String(exe.base), form: hex(FORM), mode: MODE, flag: hex(FLAG), runs: RUNS, defer: DEFER, census: CENSUS, hooks: hookBytes,
+  emit({ event: 'ready', version: version, pid: Process.id, base: String(exe.base), form: hex(FORM), mode: MODE, flag: hex(FLAG), runs: RUNS, defer: DEFER, census: CENSUS, updateReplaced: updateReplaced, hooks: hookBytes,
     game: String(s0.game), manager: String(s0.manager), main: String(s0.main), handler: String(s0.handler), player: String(s0.player), playerUpdateSlot: s0.player.isNull() ? 'no player' : rva(ptrAt(ptrAt(s0.player, 0), SLOT_UPDATE * 8)),
     managerFlags: s0.game.isNull() ? -1 : hex(u32(s0.game, MANAGER_FLAGS)), dryRun: s0.manager.isNull() ? -1 : u8(s0.manager, DRY_RUN),
     deflateSetting: u8(at('deflateSetting'), 0), mainThread: s0.main.isNull() ? -1 : u32(s0.main, MAIN_THREAD), saveVersion: ver0, attachErrors: attachErrors });

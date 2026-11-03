@@ -1098,11 +1098,13 @@ bytes as the static read gave them. The rows (frida/c1-apply-on-demand-...-7.js.
   3D's init consumes it (19535 on 36014's path, 36 ms after the finish, on the task thread); the body re-lies within 11 units after 5 s.
   PARK is not needed for a leveled actor: the engine's own path carries the record's pose to the rebuilt body. change-forms.md C4 (numidium,
   1d527cec) says the same.
-- Corrected expectations from the static read: Q4's (5), one setter pair per non-root body (18 for 19), was wrong: SetPosition and
-  SetRotation ran once each inside the read, so the per-body application goes another way (the 19 havokBody calls; a motion-state write or
-  a setter the script did not hook), HYPOTHESIS. The release's store did not go through 11977 (savedHavokSet 0) and the park did not go
-  through the hooked flush entry (flushEntry 0): both use paths the script did not hook; the extra's bytes and its sub-buffer pointer are
-  the witnesses that decided, and they suffice.
+- Corrected expectations from the static read: Q4's (5), one setter pair per non-root body (18 for 19), was wrong for the off-thread read
+  that did fire: SetPosition and SetRotation ran once each inside 19535 on thread 11824, so the per-body application goes another way (the
+  19 havokBody calls; a motion-state write or a setter the script did not hook), HYPOTHESIS. The MAIN-thread zeros (savedHavokSet 0 for the
+  park inside 35567, flushEntry 0, formsLog 0, no 12358 row for the release inside 35568) are NOT evidence of other paths: they are Frida's
+  listener guard (the subsection below), which blinds every hook on the recipe's own thread while the recipe runs inside Update's onLeave.
+  First written here as "other paths" and corrected 18:5xZ 11-03. The extra's bytes and its sub-buffer pointer, read after each call, are
+  the witnesses that decided, and they suffice; v2.2's replace-based trigger lets the on-thread rows appear in the next run.
 - Open, for the cross-seat run: a one-seat round trip cannot separate the record's block from the live pose at the mark (the same bytes), so
   the owner's record applied to a GUEST copy whose pose differs is the run that shows a guest body taking the owner's pose; by this run's
   mechanism it will (the release's store is replaced either way on the leveled path). Also open: why the release's store (0x8c7368f2)
@@ -1139,6 +1141,11 @@ in the binary (HYPOTHESIS until the run, rule 2). The read lock returns at once 
 write bit (BSAtomic.h:70-91), so the census adds the wait any main-thread LookupByID has; the recipe thread holds no all-forms lock (inside
 12094 it holds the subject's ExtraDataList read lock), and it runs on the serializing thread, Main's under DEFER. HYPOTHESIS until the run: that every 35928 of the
 recipe is on the recipe's thread (the gate would drop another thread's silently; total against the record's id-bearing fields tells).
+First run, 20261103-183149 (numidium, the bandit, v2.1 on the r3 image): the recipe ran at both marks (records of 4,774 and 4,460 plain
+bytes), the ready row proved the hook (0x620240:40534883) and the attach raised no error, yet both idCensus rows read total 0 with
+droppedOtherThreads 0: the hook was live and never entered. The cause is Frida's listener guard (the subsection below): the recipe runs
+inside PlayerCharacter::Update's onLeave, so 36037's call to 35928 bypassed the hook on that thread. The resident run 183432 (Sven 0x13491)
+is void for the census by the same rule; its record bytes stand. v2.2 moves the trigger to a replacement; the census reruns on it.
 
 **Subjects and expectations.** The dead promoted bandit 0x39fe4 (a leveled base): a type-2 base (the clone), type-1 cell and template ids,
 type-0 indices for any plugin form in its inventory or effects. A Riverwood resident (a game-file base): type 1 throughout except the plugins'
@@ -1150,3 +1157,82 @@ id), and the receiver's SetNumericID assigns its own index at the apply. Type 2:
 reports its clone's id for the actor; the server translates on relay), or, when the census shows the clone is the record's only type-2 id,
 a receiver-side rewrite of that one field to the receiver's own clone. Type 3 should not occur for any vanilla id: a load-index-00 id with bit 22 or 23 set would alias to kind 3 (or to kind 1 short a bit),
 and no vanilla master reaches 0x400000, so a kind-3 row on this load order is that aliasing or a hook fault, aliasing first; never a form.
+
+### D6 static read: LoadGame's walk over a record from another seat, and why a header flag cannot be masked (re-analyst, 18:5xZ 11-03)
+
+Numidium's objection to masking kInventory in the apply's FLAGS parameter, settled by the decompiles (pyghidra on the unpacked 1.6.1170
+exe; `f` is the reader's change flags, BGSLoadFormData::changeFlags at BGSLoadFormBuffer +0x40, BGSLoadFormData.h:28, which the decode 36080
+fills from the Value's flags, so the apply script's FLAGS parameter is exactly `f`; everything from a decompile HYPOTHESIS by rule 2).
+
+1. TESObjectREFR::LoadGame (19529, 0x2da720) walks the body in this order, each section gated as written: TESForm::LoadGame (14613) under
+   `f & 1` (6 fixed bytes: formFlags and inGameFormFlags under masks); the base under `(f >> 7) & 1` (one 3-byte id through the load-side id
+   reader 36000, LookupByID 14617, RTDynamicCast to TESBoundObject; when NON-NULL and different from the current base, 12358(ref, 0, 1), C4's
+   lock-wrapped Set3D(nullptr), then slot 0x84 SetObjectReference; a NULL skips the swap and keeps the base); kEmpty `(f >> 21) & 1` for
+   non-actors (no bytes); the scale under `(f >> 4) & 1` (4 bytes); the extras under the COMBINED non-zero test `(f & (isActor ? 0xa6061840 :
+   0xa6021c40)) != 0`: ExtraDataList::LoadGame (12095), a count-prefixed list of [type byte, a payload only that type's case knows], self-
+   delimited; the inventory under the COMBINED test `(f & 0x8000020) != 0` (bit 5 or bit 27 alone consumes it): InventoryChanges::LoadGame
+   (16143) over [varint count, entries of 3-byte id, i32 countDelta, varint n, n extra lists], self-delimited; kAnimation `(f >> 28) & 1`:
+   the queue read 36023, the ONLY length-prefixed section (a varint length, skippable); kOpenDefaultState for non-actors (no bytes); an
+   unconditional no-byte tail. So a flag bit cleared without its bytes cut either changes nothing (the other bit of a combined mask still
+   consumes the section) or starts the next reader on the wrong bytes.
+2. Actor::LoadGame (37650, 0x686de0) and Character's (40267, 0x727d50, an inlined copy that jumps into 37650's tail) read the actor block
+   UNCONDITIONALLY and check nothing: u32 level to 37502 first (the process destroyed or created), u32 boolBits, then 19529, then
+   AIProcess::LoadGame (39430) whenever a process exists (no flag test, no count check), then fixed fields, ActorState (18 bytes applied
+   whole, lifeState included), handles and MagicItem ids by 3-byte id, four Modifiers blocks, ActorValueStorage (39024: varint counts into
+   fresh allocations), the spell list (u32 count), the movement controller, the combat block, and three tail fields gated only on the
+   header's version byte. No magic, no section length, no count bound: a misaligned start feeds counts and ids from inventory bytes, so the
+   failure is silent corruption for small garbage (timers, lifeState, values, spells) and a hang or an access violation for a large count
+   (an unbounded list loop, or an allocation of gigabytes returning null and written through); the only refusal on the apply path is 35569's
+   type byte, which a flags-only mismatch passes. The only other readers of `f` in the chain: 39430's re-equip under `(f & 0x8000020) != 0`
+   and Actor::Revert (not run by the apply).
+3. InventoryChanges::LoadGame (16143, 0x239350): the owner's existing kContainerChanges extra is removed first (11938), then a fresh
+   InventoryChanges (16040, or a stack one when the owner can carry none; the bytes are consumed either way) is filled entry by entry
+   (16030: the id through 36000 and 14617, countDelta, the extra lists through 12095); then `if (entry->object == NULL ||
+   !TESForm::IsInventoryObject(object))` (14538) frees the entry: DROPPED, no log, no fault, the walk aligned. A type-0 index missing from
+   this seat's form-id map decodes to 0 (35927 through 35555, the REFR note's silent case), 14617(0) is null, so a guest applying a sender's
+   record keeps every vanilla item and silently loses the sender's plugin items, and its own prior inventory changes with them. For D6 the
+   inventory's type-0 ids are therefore a loss, not a crash, with one case beside the drop (numidium): a type-0 index the receiver's map
+   DOES hold, for another form, substitutes that item instead of dropping it; both lab seats load the same clean-m1-next save, whose
+   form-id table seeds both maps in the file's order (35559), so the early indices may coincide and the substitution is plausible, not
+   exotic; the receiver's worn list before and after the apply tells which happened. The base's type-2 id (bit 7) is the danger: null
+   keeps the base, a DIFFERENT created form on the receiver (the receiver's own clones take the same 0xFF ids in their own order) swaps
+   the base to the wrong actor.
+4. A cut is feasible: the recipe's 0x0E (40266) reaches 19528, which calls InventoryChanges' save (16142, 0x239220) exactly once under the
+   same `(flags & 0x8000020) != 0` and writes the whole inventory block between its entry and its return (the count placeholder, per entry
+   the id, the count delta and the extra lists, the count patched last by 36052, which may INSERT bytes when the count outgrows the
+   placeholder), so a mark hook on 16142 on v2.2's now-visible recipe thread, reading buf+0x14 at entry and at RETURN, brackets the span; a
+   sender-side cut of those bytes from the raw plain body, bits 5 and 27 cleared in the header flags the apply writes through 35509, and
+   length1 rewritten (a deflated record inflated first) yields a body 19529 walks consistently, since 0x08000020 gates nothing else there and
+   its only other reader, 39430's re-equip, is then skipped (the guest keeps its own equipment). Not before the census; a record whose own
+   0x0D cleared both bits needs no cut.
+
+## Frida's listener guard: a recipe run inside a hook callback sees none of its own callees' hooks (read 18:4xZ 11-03)
+
+frida-gum's interceptor (gum/guminterceptor.c at main c73c1bbf, 2026-11-02) sets a thread-local guard key at the start of every hooked
+invocation (_gum_function_context_begin_invocation, gum_interceptor_guard_key set at :2254) and bypasses any hooked function entered while
+the key is set (:2249-2252, "goto bypass"); the key stays set while the on_enter listeners run and is cleared at :2364, before the jump to
+the original or to a replacement (:2379-2385); _gum_function_context_end_invocation sets it again at :2415 around the on_leave listeners and
+clears it at :2480. Inside a replacement's body the key is clear, and only the replaced function itself bypasses (the calling_replacement
+check at :2260-2271), which is the documented chain-to-original idiom (frida.re/docs/javascript-api, Interceptor.replace). The NativeFunction
+`traps` option is unrelated: its default does invoke Interceptor callbacks; `none` suppresses them; `all` adds Stalker.
+
+Consequence for every script here that defers a recipe to PlayerCharacter::Update's onLeave (the REFR script's DEFER, the actor script,
+apply-on-demand.js): the recipe's own calls, and everything the engine does inside them on that thread, bypass every hook of the script on
+that thread. Rows that this voided: the actor script's writer marks (marks [] in 153648, 153929 and 183149; the decode worked from the
+bytes) and the id census of 183149 (total 0); apply-on-demand.js 174905's release row (12358 inside 35568), the park's 11977 row inside
+35567, the flush entry and the forms log on the main thread. Rows it never touched: anything on another thread (19535 and data3D on 11824
+in 174905, the post-apply snapshots, every pointer and byte read after a call), so C4's pose verdict and the sub-buffer identity stand.
+Reading rule from now on: a "0 calls" count for an on-thread callee of a recipe run inside a listener reads as unobserved, never as absent.
+
+The fix (v2.2 of the actor and apply scripts): the trigger becomes Interceptor.replace on PlayerCharacter::Update (Actor.h:371, slot 0xAD,
+`Update(float a_delta)`) with a NativeCallback that chains to the original through a NativeFunction at the same address and then runs the
+pending recipe outside any listener; the AddChange hook only arms; Interceptor.revert in the cleanup. Its fresh review (FIX FIRST, two
+blocking, applied as written) added two facts: the chained original runs with exceptions 'propagate', because NativeFunction's default
+'steal' wraps the engine's whole frame in Frida's exceptor and turns any exception in it, a C++ throw included, into a JS throw (a longjmp
+out of the engine with no crash and no dump; gumquickcore.c:4540-4541, :4805; gumexceptor.c:530-548; gumexceptor-windows.c:135-137), so a
+fault is now the engine's own crash with its dump; and one replacement per process on an eternalized script (frida-inject -e), so the
+actor script replaces only for a deferred serialize run, both revert on runs spent, result or a 600 s TTL, and a second instance on an
+unrelaunched seat would read "already replaced this function" (every lab run relaunches its seat, so each census is one fresh instance).
+Expected on the next runs: the census
+rows (the header's kind-1 row from 36037 first), the writer marks, and in the apply the release row with its caller inside 35568 and the
+park's savedHavokSet row with `ours: false` inside 35567.

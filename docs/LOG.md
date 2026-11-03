@@ -7126,3 +7126,19 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the ref ids near both records' ends are type 1 (the actor's own, the player's 400014), and every '80 0x xx' created-id candidate was a
   float, so the bytes settle nothing. Next: v2.2 (the recipe in a replacement of Update) on both subjects, then, if Sven reads kind 1
   only, the cross-seat apply (drafted unreviewed: c1's kDead record onto c2's own dead Sven, moved first so the claims can fail).
+- 11:18 PST 2026-11-03 (19:18Z 11-03) (thuum-cf): serialize-on-demand-actor.js and apply-on-demand.js v2.2: the deferred trigger moves from an attach on PlayerCharacter::Update to
+  Interceptor.replace (Actor.h:371, slot 0xAD), the replacement chaining to the original through a NativeFunction at the same address with
+  exceptions 'propagate' and then running the pending recipe OUTSIDE any listener, because frida-gum's interceptor sets a thread-local guard
+  for the whole of every onEnter and onLeave listener and bypasses every hooked function called while it is set (guminterceptor.c at
+  c73c1bbf: begin_invocation :2249-2254, :2364; end_invocation :2415, :2480; a replacement's body runs with it clear, :2262-2271 the
+  same-function bypass): the recipes' own on-thread callees were never observed (the writer marks [] in 153648/153929/183149, the D6
+  census total 0 in 183149 and 183432, 174905's main-thread release, park, flush and forms rows), rows from other threads unaffected, so C4
+  and the sub-buffer identity stand and the note's "other paths" sentence is corrected. The AddChange hook only arms; a 1 s watchdog refuses
+  an arm Update's replacement has not taken in 2 s ('no Update return'); the replacement reverts on runs spent, result or a 600 s TTL; the
+  actor script replaces only for a deferred serialize run (one replacement per process on an eternalized script). Fresh review FIX FIRST
+  (2 blocking: 'propagate', because the default 'steal' turns any exception in the engine's frame into a JS longjmp; the per-process
+  exclusivity) and five notes, all applied as written. The note gains the guard section, the D6 static read (19529's walk gates the extras
+  and the inventory by combined masks, so a header flag cannot be masked without cutting its bytes; the actor block is read unchecked, so a
+  misalignment corrupts silently or faults; InventoryChanges::LoadGame DROPS an entry whose id resolves to null, aligned, and a type-0 index
+  the receiver's map holds substitutes an item; a cut is feasible by a mark hook on 16142 at entry and return) and the corrections. Both
+  scripts unrun; the censuses (the bandit, then Sven) are numidium's reruns in the idle lab; the apply's rerun after the merge.
