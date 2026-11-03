@@ -2050,6 +2050,12 @@ and about 120 below the eye (about 13 counts a degree on this seat; the rune pro
   as host-sampled dead and its recovery sample stands the record up ("resurrection by its host's engine"): the engine's rule wins over
   the server's kill, which is R2's shape. x-essential-bind v2 records the server's two lines after the dead hold's release (stands
   nothing, resurrection) without claiming either; its run turns this row into a fact or a correction.
+  The run (x-essential-bind v2, 20261103-141231, r3's stage on 5e0e975b) corrected it: c2's copy under the typed flag read health
+  1.000, not a bleedout zero, so c2 never stamped the body, and its first live sample after the hold's release stood nothing by the
+  WITNESS rule ("ff000001's live sample (health 1.000) of 1066df stands nothing: the dead sample is another host's (ff000000); the
+  record stays dead", 14:14:14.924Z); no resurrection line followed. So the server's kill held against the engine's essential rule
+  on a seat that never sampled the body dead itself: round eight's witness stamp seen in play. An essential actor's engine would
+  stand the record up only through its own zero sample first, which this shape never produced; that case stays unread.
 - Where the fixes stand (14:44 PST 2026-11-02): F5 MERGED with wall-range (fork parity 4fdb2d31, 21:12Z); F9 MERGED as the R0 train
   m4-turbo2-r0-train (parity 188a8dea, 22:42Z, with skill books; T0 13 of 13, T2 green); F3 and F4 ride the client train
   m4-turbo2-train 11e6b00e (with prop-statics and the settle head), arm two's build, its gate after the arm (Eli's turbo order). The
