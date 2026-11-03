@@ -4155,3 +4155,137 @@ C. The engine model first, by rule: a premise fact a lab run teaches (where the 
 that moves the record, an AI reaction to a visitor) goes into docs/engine/<system>.md as a row with its run id before
 the next scenario version relies on it, and the scenario cites the row. A scenario resting on an unread engine fact
 states it as HYPOTHESIS in its header and is not the first read of it.
+
+## ADR-065: The save is the state: the engine's own change tracking is the observe point, and the server's record is a save game owned piece by piece
+
+Status: PROPOSED 03:48 PST 2026-11-03 (numidium), under Eli's goal for the night, verbatim: "make a serious breakthrough that will pave the
+way for the rest of this project to be easy. if that means some breakthrough in how we understand how to assign ownership in the
+engine, or we get some big blocker on scripts to lift making versions of a lot of the other features possible", and its list,
+"scripts (all), containers, physics". It applies ADR-063 (ownership, not permission) to state rather than permission, and it
+generalizes ADR-062's slices 1 and 2. Its ground is docs/engine/change-forms.md: the re-analyst's static read and the census
+20261103-111808, both of 2026-11-03. The evidence it still owes is listed under Open; nothing here reaches a seat before its
+row is CONFIRMED (ADR-064).
+
+Context. Every verb so far has written its own channel: a hook on a Papyrus native or an engine function, a message, a validator, an
+applier. ADR-062's accepted plan does the same for scripts. Slice 1 hooks named natives (SetStage, AddItem, RemoveItem, Activate,
+PlayAnimation, Lock, SetOpen, Kill, Cast, the weather). Slice 2 adds one row per gap (RefState, ScriptPlacement, AliasFill,
+WorldGlobal, the standing), each with "its change form field". That is six and a half working days, and the list is ours. So a
+missing row is found by a playtest: the night lock, the Golden Claw's alias item and the guest's frozen bodies were each found that
+way. System 1's breaks have the same root in another form. A seat's engine builds a reference from its own save (P9), the host's
+sighting moves the record (P10), and a fresh engine stands up the dead (D4). Each was patched one by one.
+
+The engine already has the complete list: its save game. A save restores a single-player world exactly, so the world's whole
+persistent state is in it, in three parts.
+
+1. Change forms: per form, a mask of change flags and one section per set flag. The flags are CommonLib's ChangeFlags enums:
+   - TESObjectREFR.h:141-160: moved, Havok moved, cell changed, scale, inventory, ownership, base object, item extra, lock,
+     empty, open state, promoted, animation, encounter zone and others;
+   - Actor.h:234 on: life state, package data, merchant container, dismembered limbs and the five modifier sets;
+   - TESQuest.h: flags, script delay, already run, instance data, runtime data, objectives, script, and stages at :208;
+   - TESObjectCELL.h, TESNPC.h, TESObjectDOOR.h, TESFaction.h, BGSLocation.h and the rest.
+   About 80 flags across about 25 form types. UESP lists the same bits (Skyrim Mod:ChangeFlags: CHANGE_REFR_MOVE bit 1,
+   CHANGE_REFR_INVENTORY bit 5, CHANGE_QUEST_STAGES bit 31), as does CommonLib.
+2. The global data tables: globals, weather, the calendar and the rest (UESP, Skyrim Mod:Save File Format).
+3. The Papyrus VM's objects: each script object's state name and variables. CommonLib's BSScript::Object has currentState
+   (Object.h:44), variables (:49) and GetProperty and GetVariable by name (:31-34). IVirtualMachine::FindBoundObject finds them
+   by handle (IVirtualMachine.h:81). Plus the suspended stacks, the threads a script was running.
+
+The engine marks each change of part 1 itself, through one virtual: TESForm::AddChange(flags), slot 0x0A of TESForm's vtable
+(TESForm.h:133, beside RemoveChange 0x0B, SaveGame 0x0E, LoadGame 0x0F and Revert 0x12). 145 vtables share one body for it.
+That body (Address Library 14607), a forced entry (14608) and TESNPC's override all lead into one function,
+BGSSaveLoadGame's AddChange (35576). A mark carries no value: it ORs a category bit into a per-form map
+(change-forms.md A1 to A5). The census on a solo seat in Riverwood (20261103-111808, 57,513 marks in about 170 s, no crash)
+saw these act by act:
+- a container's open and close: kOpenState added and removed, every time;
+- an equip: the player's kInventory;
+- a Papyrus kill: kLifeState, KillImpl's kHavokMoved and kInventory;
+- a Havok drop: a creation mark, then kHavokMoved every frame until it sleeps;
+- a global's write: nothing;
+- the AI alone: NPCs' doors, locks, package data, cell changes and dialogue reach it (B1 to B7). CommonLib's note on SetDelete (slot 0x23,
+TESForm.h:158) shows the pattern: flip the bit, then AddChange(1). thuum-cf's decompiles (docs/research/adr062/papyrus-native-entries.md)
+found PlaceActorAtMe calling AddChange(0x40000000), SetDestroyed AddChange(1), Quest.Stop AddChange(2) and SetCurrentStageID
+AddChange(0x80000000). The known exception belongs to part 2: GlobalVariable.SetValue writes the value with no call, because the
+save writes every global whole.
+
+This is the dirty-mask model of the TRIBES networking paper. Each object keeps a state mask, "each bit representing a
+class-dependent set of related data", and the network layer sends each object's most recent masked state (Frohnmayer and Gift,
+"The TRIBES Engine Networking Model", https://www.gamedevs.org/uploads/tribes-networking-model.pdf; accessible: SnapNet,
+"Netcode Architectures Part 4: Tribes", http://www.snapnet.dev/blog/netcode-architectures-part-4-tribes/). Skyrim's engine keeps
+that mask for its save. We have been rebuilding it by hand, one verb at a time.
+
+Decision (proposed).
+1. The state list is the save's: every change flag of every form type, every global table the save writes, every script object's
+   state and variables. docs/STATE.md gives one row per flag and table with its rung (R0 to R3) and its channel. A flag with no
+   row is undeclared state, so the design law's "undeclared state is a bug" becomes a lint over CommonLib's enums.
+2. Observe. Every seat has one hook on AddChange, in each form class's vtable. The seat that owns the form (ADR-063) collects
+   (form, flags) for the frame and reports the flagged state at the frame's end.
+   - A non-owner's call is never reported, only counted. A non-owner's engine changing persistent state is a missing
+     suppression, system 1's whole class of bug, and the count makes it visible.
+   - An applied delta's own echo is marked and dropped.
+3. The wire is the engine's own serializers (thuum-cf's sharpening, 2026-11-03). At its frame's end the owner calls the changed
+   form's SaveGame (slot 0x0E) into a buffer: SaveGame writes exactly the fields the set flags name. The receiver applies the
+   bytes to its copy with LoadGame (slot 0x0F). No per-flag encoder or applier is written while 0x0F works mid-game; a per-flag
+   applier (the engine's own setter) is the fallback, written only for a flag where 0x0F does not.
+4. Materialize first (safe by construction). A reference's record is applied before its first simulated frame on any seat.
+   - The engine applies a saved reference's state at its cell's load (change-forms.md D1, D2: a record stored at the
+     unload in save-file format, applied by LoadGame at the cell's init before the 3D loads), so the record goes through that
+     path (D3), written into the changes map before the cell loads.
+   - Otherwise it is applied at the reference's 3D load, before AI and scripts run.
+   No seat simulates or reports a reference before its record stands. This retires the load-time fixes: the bind kill, the
+   promote hold, the dead hold and the redress wait.
+5. Scripts. The owning seat's VM runs an object's scripts, and a non-owner's VM receives no events for it. The gate is the
+   one the fork has today: FridaHooks' OnSendEventEnter and ScriptNatives, at IVirtualMachine::SendEvent (slot 0x24,
+   IVirtualMachine.h:89), keyed on the object's reference's cell host. SendEvent is the single decision point for OnCellAttach,
+   OnCellDetach, OnLoad, OnUnload and OnReset. OnInit never passes it (the VM dispatches it itself from CreateObject2), so its
+   exception is structural, not a choice (docs/research/adr065-papyrus-state-2026-11-03.md).
+   At an ownership hand-off the handed objects' script state goes with them: the handle, the type name, the state, the flags
+   and the positional variables (objects as handle plus type name, arrays up to 128). It is applied before the new owner's
+   first event. The save's Papyrus section is not portable per object (a per-save string table, references as save-time
+   addresses), so this part has its own small encoder and decoder over the engine's identity, unlike decision 3. Stacks,
+   latent waits, update registrations and queued functors cannot be carried.
+6. The server recognizes each change form in Rust before anything else sees it (rule 12): the header (form id, form type,
+   flags, version, length) is parsed, a form id outside the shared load order's ranges or a version other than the server's is
+   refused, and only the sections the server validates are decoded (an inventory's conservation, bounds that break the world,
+   ADR-063). The rest is recorded as the form's section, opaque, and served to a seat that loads the form.
+
+Consequences.
+- ADR-062's slice 1 hooks and slice 2 rows become rows of STATE.md fed by one hook. Its natives census stays as the cross-check of
+  which natives reach which flags.
+- Containers: a container's contents are its inventory flags (kInventory, kLeveledInventory, kEmpty), so any path that moves an
+  item (the menu, a script, an NPC's loot) reports the same way. The open menu's redraw stays system 2's own problem.
+- Physics: a prop at rest is kMoved and kHavokMoved from its owner. Flight stays the owner's stream (R2). The record at rest is the
+  engine's own.
+- Deaths are kLifeState. Materializing first removes the death replay at load (D1) and the resurrection by a fresh host (D4).
+- NPC placement: kMoved and kCellChanged applied before the first frame remove the seat's own save placement (P9).
+- The AI's own state changes are observed wherever they reach AddChange, with no native: system 5, the night lock.
+- The remaining work is per flag, about 80 rows, each the same shape: the wire type, the applier, its T0 and its two-seat
+  scenario. Today it is per feature and per native, with no end to the list.
+
+Open, the evidence owed before ACCEPTED. Each item is a HYPOTHESIS row in docs/engine/change-forms.md with the read that
+settles it.
+- The transplant (change-forms.md D3, section 3's read 2): a record one seat's engine stored, written into another seat's
+  changes map before its cell loads, materializes the reference in that state. This is decision 4's premise.
+- Census v3: the forced entry's marks (kAnimation), a lock and an unlock, and the quest stage as an act (the
+  background rows show 86 stage marks from AL 25000).
+- Mid-game apply (thuum-cf's risk 1). The engine applies change forms before a cell attaches when it loads a save. Does
+  LoadGame alone refresh a live form's 3D, an open inventory menu and its AI, or does it need FinishLoadGame (0x11) and a
+  re-attach? The first read: 0x0E on a changed chest on the owner, 0x0F on the non-owner's copy, with the menu and
+  refs-near read beside it.
+- One save format (risk 2). Change forms carry form ids and a version byte (BGSLoadFormBuffer::GetVersion, slot 01). So one
+  exe save version and one load order across a server's seats are the precondition. The modlock gives the order; ADR-025's
+  two exe versions (1.6.1170 and 1.7.104) need one version per server or a refusal at the recognizer.
+- The global tables (risk 3). GlobalVariable.SetValue writes with no AddChange, so a global table is read whole on its
+  owner. The census reads whether the engine's own global writes (the clock, a quest fragment's) take the same path.
+- Script objects (risk 4): the encoder for decision 5's carry, and two reads the Papyrus note names. On a guest entering the
+  host's interior: SendEvent, the OnInit dispatcher and the attach sink, to show OnInit bypasses the gate. Under a console save
+  on the host: Object::Save, Variable::Save and SaveHandle, for the record the encoder must match. The suspended stacks at a
+  hand-off, such as a trap's wait loop, stay open: an object mid-thread restarts on the new owner by its own events.
+- Echoes: telling an applied delta's own AddChange calls from the owner's.
+- Materialize first (Q5): whether BGSSaveLoadGame's queued sub buffers are the engine's path for applying a saved
+  reference's state at its cell's load.
+
+Alternatives.
+- Keep the per-native hooks (ADR-062 as written): our list, incomplete by construction; rejected as the primary channel, kept as the
+  cross-check.
+- Generate a whole save from the record and load it at every connect: part of decision 4's path at a login, but a save load per
+  cell entry is too coarse.
