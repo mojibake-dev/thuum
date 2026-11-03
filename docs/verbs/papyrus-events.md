@@ -166,7 +166,7 @@ first build counts the rate with a Frida tracer, ADR-044 decision 3).
 - Breakpoint plan for a human session: none needed.
 - Owner: agent (lab probes).
 
-## ADR-062, slice 1: the hosted cell's scripts run (17:12 PST 2026-11-02; BUILD PENDING, the next build after turbo 2's arm two)
+## ADR-062, slice 1: the hosted cell's scripts run (17:12 PST 2026-11-02; slice 1a BUILT on fork m4-scripts-work d8fc5fa2, the gate and the lift; the hooks of decision 2 follow the re-analyst's table)
 
 Eli (playtest 41): "shouldn't 'scripts work' be a holistic fix? something structural is just not working"; at the sign-off:
 "shouldn't every script incident be transmitted and accepted? skyrim is not a competative game. trust should LARGELY be the
@@ -201,6 +201,16 @@ PlayAnimationAndWait (the sendAnimationEvent hook carries them), Lock and SetLoc
 Actor.Kill (a new death-report evidence kind, "a host-run script killed it", recorded), Spell.Cast (the cast hooks), the weather's
 ForceActive (the weather report). Each hook filters in native before the bridge (rule 9: the self reference's cell hosted here,
 the caller a script frame, not the engine's own call) and gets its docs/NATIVES.md line with its rung (rule 10).
+
+Built in slice 1a (d8fc5fa2): FridaHooks.cpp OnSendEventEnter reads the self's cell for actors as for references, passes a world
+object's event in a hosted cell (its lifecycle events anywhere) and a simulated actor's (Hosted and not a puppet) wherever it
+stands, consults the layer's host names no more (their lifecycle rule stays for an older papyrus-scripts.txt); objectReferenceEx
+lifts the engine's activation on activators and movable statics in a hosted cell (doors, containers, furniture and items keep the
+server's flows), HostService walks the cell's references by kind (Cell.getNumRefs, getNthRef) at every grant and release, and
+ActivationService sends no Activate for the player's own press on a lifted object. The lab's lever activationUnblockedBases stays
+readable until slice 3's scenarios drop their relaunch writes. HYPOTHESIS H1a: Cell.getNumRefs and getNthRef enumerate an exterior
+cell's activators on a loaded cell (Papyrus's own, UESP "Cell Script"); H1b: a blocked activator's own press reaches its script
+(playtest 41's pillars say yes) and a lifted one's default processing fires its activation parents once per press (the spike wall).
 
 Tests: T0 for each verb's new report path where one is new (the scripted kill's evidence in ActorDeathTest; an NPC's scripted
 AddItem recorded in PartOne_ActivateTest's shape); T1 none; T2 difftest's sessions unchanged (the reports are the same messages);
