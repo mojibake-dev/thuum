@@ -588,9 +588,12 @@ spawned inside the ground: it falls through the strip's collision on the dropper
 same 150), the stream faithful, the sync green (the grant, two streams started and one asleep, the host's apply, one copy per seat
 within 7.5 in z). The basket (a MISC) of the same world rests on the strip where it is placed (pass v10b's record at 14670; push v11's
 marker basket at its floor), and push v13's premise drops a Basket01 by the same path: if it rests within 64 of the drop point, the
-weapon's copy is the special case. HYPOTHESIS: a WEAP reference the view creates by PlaceAtMe and sets Keyframed (dealWithRef), then
+weapon's copy is the special case. REFUTED by x-prop-drop v6 GREEN 202154 (2026-10-31, below: the SteelSword's copy spawns ahead
+and up, falls onto the strip and rests on both seats; settled 19:38 PST 2026-11-02 from the engine model docs/engine/havok-props.md E19): the
+earlier reading was that a WEAP reference the view creates by PlaceAtMe and sets Keyframed (dealWithRef), then
 Dynamic by this service, carries no working collision against the ground (the engine's own drop, DropObject, builds the weapon's
-world physics; a weapon's L_WEAPON layer and shape may need it), where a MISC's clutter shape works under the same sequence. Reads
+world physics; a weapon's L_WEAPON layer and shape may need it), where a MISC's clutter shape works under the same sequence; the
+sinking was the spawn height (the drop fix of b421d1b2), not the collision. Reads
 owed, not tonight: a Frida or console read of the placed sword's collision layer and motion on the dropper's seat after the Dynamic
 set; and the design item, the server's copy ADOPTING the engine's own dropped reference (the record bound to the reference the
 engine made, its physics the engine's) instead of a second reference the engine's is deleted for. Until then a dropped weapon is
@@ -716,8 +719,10 @@ lays on clean-m1 with item 7 SKIPPED.
   claim by touch 1, its stream started and asleep, c1's follow applied, then c1's "untracked: out of reach" and the basket near
   neither seat: the released basket rolled down the marker's slope. Nothing in the verb's path moved the body in either case.
 - The prop for the lab is now an IronIngot (0x5ace4, MISC with Havok, a box that slides and stops): push v15, pass v13, grab v9 with
-  the same steps and bounds; the basket is the playtest's prop at Riverwood's camp. HYPOTHESIS until the runs: the capsule's contact
-  reaches a small box on the floor as it does a basket (Skyrim kicks ingots underfoot).
+  the same steps and bounds; the basket is the playtest's prop at Riverwood's camp. CONFIRMED by x-prop-push v16 GREEN
+  20261101-014442 and b-prop-push GREEN 20261101-032302 (the walker's nudge moved the ingot's record more than 16 units and both
+  seats' copies rested within 32 of each other; settled 19:38 PST 2026-11-02 from the engine model docs/engine/havok-props.md E9): the capsule's
+  contact reaches a small box on the floor as it does a basket.
 
 ### The basket runs read in full, and the grab's real cause (13:56 PDT 2026-10-31; numidium's read agent on 201426, 201809, 202618; the fix m3-prop-physics 37e960eb)
 
