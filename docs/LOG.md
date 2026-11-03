@@ -5475,3 +5475,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   stam/health/mag possibility" (leveling.md:33's "later" row, never built); weather "SEEMS ok but no promises"; "a bucket carried
   doesnt show" (the server refused the carrier: E_PROP_REACH on 12dfc's drop at 01:37:04Z, E_PROP_CELL on both of 19074's
   touches at 01:38:05Z), and the cabbages launched out of sight ("i didnt see where the went enough to test").
+
+- 17:55 PST 2026-11-02 the gate audit's asks (ADR-063, numidium's audit): c-riverwood holds Gerdur before the handoff and claims her live switch outright
+  (the 20e78923 restatement undone); the 14 literal >= 0 claims became claims (b-puzzle-relay's three, b-prop-push's kind == 0, the quest
+  scenarios' mode-all send >= 1) or went (b-npc-copy-fate, b-npc-handoff-cross, b-story-arrival, c-dungeon-enemies, the fragment-skip
+  reads), one commit per scenario; the containers default corrected on paper; PLAN's three-state line. Break 3 heads: union-srv-2
+  85b6c096 (the follow vouch + ADR-063 decision 4's retired prop checks), the bundle 59af5508 (the blast's read reaches the room, the
+  silent bind kill's anim-event trace for the re-entry death sound; probe x-npc-death-reentry). Green: 4749 slice 1a, 4750, 4751.

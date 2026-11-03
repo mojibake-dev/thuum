@@ -1294,6 +1294,21 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   created items, the claw; WorldGlobal; the standing), R2 and declared unvalidated, each with its wire bounds, fixtures, change form
   field, migration and restart scenario, two and a half days; (3) q-golden-claw and q-embershard green twice, one and a half days.
   About six and a half working days. The census: docs/research/adr062/.
+- STATE 17:55 PST 2026-11-02, the three states (ADR-063's audit, docs/research/gate-audit-2026-11-02.md, and playtest 41's play):
+  VERIFIED IN PLAY tonight: the perk point from a level (the picks counter), PvP skill experience, NPCs dead across the
+  restart, the server-known key lock (0x371e9's key), Bleak Falls' pillar puzzle and Embershard's bridge (ADR-059's relay), the
+  cobwebs, the observer's rune glyph, per-character read state, skill books, the chest with one occupant. MECHANISM ONLY (built,
+  green at T3 on scenarios whose multiplayer case the audit found unread or god-moded): the audit's 51 PARTIAL and 2 COVERED
+  verbs (npc-fate's deaths and loot, cell-host, npc-handoff, npc-stream, the casts, marksman, shouts, quest-stage,
+  prop-physics, leveling, perks, locks, traps, weather, time and the rest of the table). BROKEN tonight, with its fix's place:
+  shared containers (the live view BACKLOG, ADR-061); traps in play (the lab's lever never laid; ADR-062 slice 1a d8fc5fa2 built,
+  the stopgap offered); the ambush scripts (the spider's drop, the alcove draugr, Arvel's web, the claw door) and the claw itself
+  (ADR-062 slices 1 and 2); the reanimate on the host's engine (ADR-060 built, m4-reanimate-claim 9cc3c94c, unrun); the blast's
+  claims (the bundle 59af5508, unrun); the restart desync (m3-follow-vouch fa50c5b5 green at T0, in union-srv-2 85b6c096); the
+  carried prop's refusals (ADR-063 decision 4, in union-srv-2); the guest's frozen kill in ambush furniture (the bundle's push,
+  unrun); the death sound at a cell re-entry (traced on the bundle, probe x-npc-death-reentry); the naked bandit (the redress
+  unread, probe x-fate-dress-bleak); the figure on base 7 (unread); the attribute pick at a level-up (never built; its shape
+  with numidium for Eli). The audit's 20 MISSING rows are the gate's own debt: each wants the multiplayer case a player hits.
 - STATE 2026-11-02 14:05 PST (turbo 2's arm one, Eli's close at 12:32 PST, and the day's queue): wall-range MERGED (parity 4b6f5fa3: F1's band, F5's
   reanimation end, the container drop); the R0 train m4-turbo2-r0-train 6d7fcc84 (F9 restart-dead c3eb2550 plus skill books 38659a3e,
   GREEN at T3 as x-skill-book 212928, b-skill-book promoted) in numidium's one T2; the big client train m4-turbo2-train (the deaths head
