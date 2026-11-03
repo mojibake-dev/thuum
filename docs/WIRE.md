@@ -438,8 +438,9 @@ minute per actor (E_EQUIP_REFUSED) and sends the host nothing on a refusal
 unchanged. An entry's count is u32: a count below one is refused at the
 shape (wire-json's test).
 
-HostedActorState (id 61, MsgType 53), client to server, unreliable (the first
-for an actor after a grant marked reliable, the keyframe), at most once per
+HostedActorState (id 61, MsgType 53), client to server, unreliable except three samples sent reliable (the first for an actor
+after a grant, the keyframe; a stand-up, finding 54; the alive-to-dead flip, the host's dead-sample stamp on the server since
+m3-system1-r2's round nine), at most once per
 500 ms per hosted actor and only on a change, R2 bounded (fork m3-npc-stream,
 2026-10-26; ADR-050 decision 1, docs/verbs/npc-stream.md slice 2): `{ idx:
 u32 (the actor as the server indexes it; the sender's own refused), health:
