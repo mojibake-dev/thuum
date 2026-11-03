@@ -210,3 +210,5 @@ to 64 weathers; one word per player per place entered and per change stood throu
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [x] ledger and suppression registry updated (none)
+
+Play: MECHANISM ONLY; playtest 41 (2026-11-02, break 2), Eli: "weather SEEMS ok but no promises".

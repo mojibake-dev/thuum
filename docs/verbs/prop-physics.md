@@ -247,6 +247,10 @@ hook's event send hops to the JS thread.
 - [ ] sequences and combinations green (ADR-033)
 - [ ] ledger and suppression registry updated
 
+Play: BROKEN, playtest 41 (2026-11-02): "a bucket carried doesnt show" (the server refused the carrier, E_PROP_REACH and
+E_PROP_CELL), the cabbages launched out of sight, the smithy's wheel did not move, and at the close "item physics sync is more
+broken than it was when we STARTED testing" (LOG 15:33 item 2, break 2, 18:30); the mine's cart synced until the seats parted.
+
 ## The build's departures from the first draft (14:54 PDT 2026-10-29, the server half)
 
 - The rules are pure: owner_of, transform and host_changed take now_ms, and transform takes the cell's host (an unclaimed prop is the

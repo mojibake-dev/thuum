@@ -941,6 +941,9 @@ Doc drafted 2026-10-21, before any code.
 - [x] sequences and combinations green, every checklist item with its scenario (ADR-033): the table above, each row with its run; the two rows that name later verbs carry by name
 - [x] ledger and suppression registry updated: no native touched (docs/NATIVES.md unchanged); the Suppress section above is the registry entry (the per-actor ask and grant retired from the senders, the ids kept)
 
+Play: BROKEN, playtest 41 (2026-11-02, LOG 17:22): "also npcs were desynced when it came back" after the server restart (every
+walk refused: the follow vouch read an incomplete loaded set); the vouch fix (m3-follow-vouch) laid at break 3, unread in play.
+
 MERGED (18:44 PDT, 2026-10-25): train-46 on fork parity aaafffe5 carries the
 pass between live hosts (npc-handoff D9) and the corpse's release; the dead
 host (D18-B) rides train-48, built ahead on Eli's letter.

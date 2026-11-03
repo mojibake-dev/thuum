@@ -310,6 +310,9 @@ dungeon's XLOC, the lab's commanded chest).
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [x] ledger and suppression registry updated (NATIVES.md: Lock, IsLocked, GetLockLevel, SetLockLevel, GetKey implemented, R0, verb locks)
 
+Play: BROKEN, playtest 41 (2026-11-02, LOG 17:22): Alvor's door locked by the host's AI at night with no native the server sees
+(no XLOC to seed it), ADR-064's fifth frozen system.
+
 ## Open questions
 
 - The minigame under the lab: v3's single turn did not pick a Novice lock; v4 (Lockpicking 100 and the absolute sweep, the

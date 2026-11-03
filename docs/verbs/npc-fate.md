@@ -2084,6 +2084,10 @@ b-npc-fate scenario; the quit crash is cell-host's row.
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
 
+Play: BROKEN, playtest 41 (2026-11-02): bodies still freeze on the guest and the resurrection still lies (LOG 15:33 item 5);
+Sven's reanimate got up on Prisoner's screen alone (16:12); the dead stay dead across the restart, "but on a cell reentry i hear
+their deaths again" (break 2); c1 crashed in Sven's redress on an actor with no 3D (17:51).
+
 ## Reviewer checklist
 
 1. Is the rung right, and is the reason for not going one rung higher real?

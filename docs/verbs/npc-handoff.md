@@ -871,6 +871,10 @@ first, then its green runs on this head (numidium's order of the night).
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
 
+Play: BROKEN, playtest 41 (2026-11-02, break 3): "hod just tried to leave the sleeping giant inn... cannot seem to... i thought
+we fixed this": 1348a handed back and forth at door 13419 by D9 three times in half a second (02:08:01Z); reproduced in the lab
+(20261103-052100) and traced (R1, 20261103-065955; docs/engine/non-owning-seat.md).
+
 ## D22's brake read on 55's stage (14:21 PDT, x-handoff-cross v3 20261027-211054)
 
 The brake held Riverwood's border traffic as follows and passed nobody in

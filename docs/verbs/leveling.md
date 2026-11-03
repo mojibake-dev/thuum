@@ -326,6 +326,9 @@ them (its two lines of the night are Sneak's at 20:27): the engine's rise for a 
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
 
+Play: BROKEN, playtest 41 (2026-11-02, break 2): no attribute pick at the level-up, "still no stam/health/mag possibility" (this
+doc's later row for the pick, never built); skill books gave both seats experience (LOG 15:33 item 6).
+
 ## Open questions
 
 - Which amounts the server can pair with an action it saw (hits, casts, crafts arrive; sneak seconds, gold traded and

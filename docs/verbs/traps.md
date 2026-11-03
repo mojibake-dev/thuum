@@ -523,3 +523,7 @@ key laid by a relaunch on both seats, at Eli's word. The b-* scenarios drop thei
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [x] ledger and suppression registry updated (no new native; the suppression rows are the inventory's)
+
+Play: BROKEN, playtest 41 (2026-11-02, LOG 16:53, 17:33): the spike wall never fired in play (its activationUnblockedBases key
+was laid by the trap scenarios' relaunch alone, never for play); the Hall of Stories pillars and Embershard's bridge worked; the
+traps stopgap laid at break 3, unread in play.

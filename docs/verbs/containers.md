@@ -198,6 +198,10 @@ Rate limit / bounds: the inventory messages' own (PutItem, TakeItem budgets).
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [x] ledger and suppression registry updated (none: no native, no suppression)
 
+Play: BROKEN, playtest 41 (2026-11-02): "still broken in the EXACT same way" (LOG 15:33 item 7: both seats stop applying the
+chest's changes about 14 s after the second joins, and a store turns into a use); ADR-061's reopen "works worse than before"
+(16:36).
+
 ## Open questions
 
 - The refill adds the base list on top of what the container holds (EnsureBaseContainerAdded), where the master

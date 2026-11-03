@@ -1378,6 +1378,10 @@ DONE 2026-10-22 05:54 PDT: fork parity 19e7ca9b (verb-merge, gate run set 202610
 - [x] sequences and combinations green, every checklist item with its scenario (ADR-033) (the handoff and the restart inside b-npc-puppet; the figure beside a puppet in b-cell-host; playtest 31's checklist carries the rest by item)
 - [x] ledger and suppression registry updated (no Papyrus native added: setPuppet and isPuppet are Skyrim Platform exports, listed in the Suppress section's registry; docs/NATIVES.md unchanged)
 
+Play: BROKEN, playtest 41 (2026-11-02, LOG 15:05): the guest's own DialogueRiverwoodIntroScene ran over the host's Sven and
+Hilde and restarted at the walk-up, animations playing for neither (Eli: "the sven scene is wack"); Hilde posed wrong on the
+host until the second player arrived; the scene stop (m4-turbo2-union-scene 5e402af7) unread in play.
+
 ## Playtest thirty-three (2026-10-23, fork parity ac557132; fixes on m3-train-36, parity 7b3a17c6 since 03:01 PDT, and m3-train-37, parity 69958274 since 08:07 PDT)
 
 - A late-joining seat found eight residents frozen at its own engine's

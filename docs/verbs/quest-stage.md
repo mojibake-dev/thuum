@@ -275,6 +275,9 @@ both seats mortal at the spawn for 150 s, the drop line on each seat, the server
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
 
+Play: BROKEN, playtest 41 (2026-11-02, LOG 16:53): Arvel carries no Golden Claw (MS13's alias-created item, ALCO 0x39647, has no
+server rule), so the claw door had nothing to open it.
+
 ## Reviewer checklist
 
 See docs/VERB.md.

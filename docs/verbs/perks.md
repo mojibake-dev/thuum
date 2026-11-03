@@ -271,3 +271,6 @@ Rate limit / bounds: a budget of 8 then 2 a second (UNMEASURED); a perk set of a
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
+
+Play: VERIFIED IN PLAY, playtest 41 (2026-11-02, break 2): after the points fix (LOG 15:57) rotfern takes a perk at a level-up,
+Eli: "now can get a perk from leveling".

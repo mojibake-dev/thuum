@@ -355,6 +355,9 @@ m4-turbo2-wall-range, the tests carrying the camp's two casts), deployed under t
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
 
+Play: BROKEN, playtest 41 (2026-11-02, LOG 15:33 item 1): the wall appears on the watcher without its rise and vanishes about
+0.5 s late.
+
 ## Open questions
 
 - Answered by apocrypha's read (2026-10-28): WB_OcatosRecitalFail_Script only

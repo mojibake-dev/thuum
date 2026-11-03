@@ -333,3 +333,6 @@ the claims' line counts alone (c1-console.log was not in v6's artifacts; v7 list
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031): not applicable, no player action
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [x] ledger and suppression registry updated (no server native; the Suppress section above is the registry entry; slice 1b's 24 hooked natives are named in NATIVES.md's hand-maintained Reason column with the hook's rung R2 and the verb papyrus-events; the Rung COLUMN stays the server VM's own rung (R0 where the server implements the native: Enable, Disable and their NoWait forms, Activate, Delete, SetOpen, Lock, SetLockLevel; PlaceAtMe's delegation keeps Eli's R0 row), the hook's R2 in each Reason text, 19:55 PST 2026-11-02)
+
+Play: BROKEN, playtest 41 (2026-11-02, LOG 16:53): at Bleak Falls the world scripts the layer's host row did not name never ran
+(six the row lacked): the spider froze, Arvel never fell, the draugr waited to be hit; ADR-062's slices replace the row.
