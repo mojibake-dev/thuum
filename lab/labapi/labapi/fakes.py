@@ -263,7 +263,7 @@ class FakeState:
         self.cells: dict[str, str] = {}
         # cell id -> {hosted, actorId, epoch}: the server's host table (labState kind cellHost)
         self.hosts: dict[int, dict[str, Any]] = {}
-        # form id -> a non-player actor's record (labState kind ref): a hosted NPC
+        # form id -> a non-player actor's record (labState kind ref): a hosted NPC, or a chest with its inventory
         self.refs: dict[int, FakeActor] = {}
         self.stream_rows: dict[int, list[dict[str, int]]] | None = None  # by profile id; None answers found: false
 
@@ -294,7 +294,9 @@ class FakeState:
                     return {"found": False, "actorId": ref_id}
                 return {"found": True, "actorId": ref_id, "x": ref.x, "y": ref.y, "z": ref.z, "rot": [0, 0, 0], "cell": ref.cell,
                         "isDead": ref.isDead, "healthPercentage": ref.healthPercentage,
-                        "magickaPercentage": ref.magickaPercentage, "staminaPercentage": ref.staminaPercentage, "worn": ref.worn}
+                        "magickaPercentage": ref.magickaPercentage, "staminaPercentage": ref.staminaPercentage, "worn": ref.worn,
+                        # the record's items, the gamemode's mp.get(id, "inventory") entries (server.inventory(<ref>))
+                        "inventory": [{"baseId": b, "count": c} for b, c in sorted(ref.inventory.items())]}
             actor = self.actors.get(int(payload.get("profileId", -1)))
             if actor is None:
                 return {"found": False}

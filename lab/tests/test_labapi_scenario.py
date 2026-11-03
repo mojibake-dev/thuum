@@ -465,6 +465,21 @@ class NpcKillStep(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 load_scenario(head + bad + "\n")
 
+    def test_inventory_names_its_reference(self):
+        # a chest as the seat's own game holds it (c.inventory(ref), beside server.inventory(ref): the root-cause plan's
+        # W4); a bare inventory would reach the driver as "no such ref" and pass, as a bare close-menu did
+        from labapi.scenario import load_scenario
+
+        head = "id: x-chest\nclients: [c1, c2]\nsteps:\n  - c2: "
+        step = load_scenario(head + "inventory {ref: 0x371e9}\n").steps[0]
+        self.assertEqual((step.kind, step.client, step.action, step.args), ("client", "c2", "inventory", {"ref": 0x371E9}))
+        # a FormDesc or a table name passes as written; the runner resolves it
+        self.assertEqual(load_scenario(head + 'inventory {ref: "000d62:rotfern.esp"}\n').steps[0].args, {"ref": "000d62:rotfern.esp"})
+        for bad in ("inventory", "inventory {}", "inventory {ref: 0}", "inventory {ref: true}", 'inventory {ref: ""}',
+                    "inventory {ref: [0x371e9]}", "inventory {ref: 0x371e9, count: 1}", "inventory {formId: 0x371e9}"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(head + bad + "\n")
+
     def test_log_count_and_a_restart_that_sets_the_clock(self):
         # a client's log lines counted mid-run, and a restart that lays the clock anew (npc-handoff's reads)
         from labapi.scenario import load_scenario

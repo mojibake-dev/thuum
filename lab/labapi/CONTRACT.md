@@ -80,7 +80,8 @@ Response: `{"found": true, "entries": [{"baseId": 77495, "count": 1}]}` or
 `{"found": false}`. `baseId` is the item's base form id as an integer.
 lab-api resolves a scenario's `"Skyrim.esm:IronSword"` to a base id through
 the hand-maintained `items` table in `guests.yaml`; a plain integer or
-`0x`-hex form id in a scenario needs no table entry.
+`0x`-hex form id in a scenario needs no table entry. A chest's or a body's
+entries come with the `ref` kind (below).
 
 
 ### online
@@ -141,16 +142,25 @@ client whose player's actorId (the `actor` kind's) is the holder, "" when none.
 
 Request: `{"payload": {"kind": "ref", "actorId": <int>}}`. Answer: `{"found":
 true, "actorId", "x", "y", "z", "rot", "cell", "isDead", "healthPercentage",
-"magickaPercentage", "staminaPercentage", "worn"}`, an actor's record by form id
-(a hosted NPC), the `actor` kind's fields without the appearance verdicts, or
-`{"found": false, "actorId"}` for a form the server holds no position for.
+"magickaPercentage", "staminaPercentage", "worn", "inventory"}`, an actor's
+record by form id (a hosted NPC), the `actor` kind's fields without the
+appearance verdicts, or `{"found": false, "actorId"}` for a form the server
+holds no position for.
 `worn` is the record's equipment (`mp.get(id, "equipment")`, read inside a try)
 as a seat's npc-state counts it: the ARMO and WEAP form ids marked worn in a
 slot or either hand, one per form, sorted, typed through the server's espm, so
 ammo and a torch drop; `null` when the server holds no equipment for the id.
 Scenarios read `server.ref(0x85547).x`, compare `server.ref(<id>).worn` with
 `c1.npc_state(<id>).worn` (npc-stream's hands), and keep one with a `server:
-snapshot` step to compare against later.
+snapshot` step to compare against later. `inventory` is the record's items
+(`mp.get(id, "inventory")`'s entries, read inside a try), the `inventory` kind's
+`entries` for a reference, a chest's or a body's; `null` where the record holds
+none or the read is refused. Scenarios read it as
+`server.inventory(0x371e9).count("Skyrim.esm:IronSword")`, and the same chest as
+a seat's own game holds it, from that seat's `inventory {ref}` step
+(lab-driver's GetNumItems, GetNthForm and GetItemCount), as
+`c1.inventory(0x371e9).count(...)`: one count over both, so a two-seat claim
+sets what each player's game shows beside the record (the root-cause plan's W4).
 
 ### stream
 

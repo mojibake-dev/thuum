@@ -26,6 +26,25 @@ class BoardTests(unittest.TestCase):
         board.clear_views()
         self.assertIsNone(board.npc_state("c2", 0x13483))
 
+    def test_inventory_answers_are_kept_by_the_ref_they_named(self):
+        # two chests read in one run stay apart (c.inventory(ref), the root-cause plan's W4)
+        from labapi.board import StepBoard
+
+        board = StepBoard(clock=lambda: 100.0)
+        for ref, items in ((0x371E9, {str(0x12EB7): 1}), (0x3975B, {str(0xF): 25})):
+            step = board.enqueue("c2", "inventory", {"ref": ref})
+            board.poll("c2")
+            board.complete(step.id, {"ok": True, "data": {"ref": ref, "items": items}})
+        missing = board.enqueue("c2", "inventory", {"ref": 0x99999})
+        board.poll("c2")
+        board.complete(missing.id, {"ok": True, "data": {"error": "no such ref"}})
+        self.assertEqual(board.inventory("c2", 0x371E9)["items"], {str(0x12EB7): 1})
+        self.assertEqual(board.inventory("c2", 0x3975B)["items"], {str(0xF): 25})
+        self.assertIsNone(board.inventory("c2", 0x99999), "an error answer is no view")
+        self.assertIsNone(board.inventory("c1", 0x371E9))
+        board.clear_views()
+        self.assertIsNone(board.inventory("c2", 0x371E9))
+
     def test_quest_stage_answers_merge_by_quest(self):
         # x-quest-stage (ADR-056): a second read of one quest replaces the first; a quest the read did not name stays
         from labapi.board import StepBoard

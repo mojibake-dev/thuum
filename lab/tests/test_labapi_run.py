@@ -79,6 +79,7 @@ class Doubles:
         self.day_step: dict[str, float] = {}
         self.closable: set[str] = set()  # the clients whose close-menu removes the named menu from self.menus
         self.npcs: dict[str, dict[int, dict]] = {}  # the NPCs a client's npc-state reports, by form id
+        self.chests: dict[str, dict[int, dict[int, int]]] = {}  # the containers a client's inventory reads: ref -> base id -> count
 
     def turn(self):
         for name in self.names:
@@ -119,6 +120,12 @@ class Doubles:
                 data = {"png_b64": base64.b64encode(b"\x89PNG fake").decode()}
             elif step["action"] == "npc-state":
                 data = (self.npcs.get(name) or {}).get(int(step["args"].get("formId", 0))) or {}
+            elif step["action"] == "inventory":
+                # the driver's contract: a form id, never a name (lab-api resolves a FormDesc or a table name first)
+                ref = step["args"].get("ref")
+                assert isinstance(ref, int) and not isinstance(ref, bool), step["args"]
+                chest = (self.chests.get(name) or {}).get(ref)
+                data = {"ref": ref, "items": {str(b): n for b, n in chest.items()}} if chest is not None else {"error": "no such ref"}
             elif step["action"] == "av-table":
                 data = {"ids": list(range(1000, 1164))}
             elif step["action"] == "add-perks":
@@ -1551,6 +1558,61 @@ steps:
   - c1: connect
   - c1: approach {formId: 0x13482, distance: 150, cell: record}
 """
+
+CHEST_VIEWS = """
+id: chest-views
+clients: [c1, c2]
+steps:
+  - c1: connect
+  - c2: connect
+  - c1: inventory {ref: 0x371e9}
+  - c2: inventory {ref: "0x371e9"}
+  - c1: inventory {ref: 0x3975b}
+  - assert:
+      - c1.inventory(0x371e9).count("Skyrim.esm:IronSword") == server.inventory(0x371e9).count("Skyrim.esm:IronSword")
+      - c2.inventory(0x371e9).count("Skyrim.esm:IronSword") == 0
+      - c1.inventory(0x3975b).count("0xf") == 25 and c1.inventory(0x371e9).count("0xf") == 0
+"""
+
+CHEST_UNREAD = """
+id: chest-unread
+clients: [c1, c2]
+steps:
+  - c1: connect
+  - c1: inventory {ref: 0x371e9}
+  - assert:
+      - c2.inventory(0x371e9).count("Skyrim.esm:IronSword") == 1
+"""
+
+
+@needs_deps
+class InventorySteps(RunTests):
+    def test_each_seats_view_of_two_chests_beside_the_record(self):
+        """The root-cause plan's W4: each seat reads a chest in its own game, kept by the reference it named, and a
+        claim sets the two views beside the server's record (c2's game shows the chest empty)."""
+        from labapi.fakes import FakeActor
+
+        self.state.refs[0x371E9] = FakeActor(0.0, 0.0, 0.0, "371de:Skyrim.esm", inventory={0x12EB7: 1})
+        self.doubles.chests["c1"] = {0x371E9: {0x12EB7: 1}, 0x3975B: {0xF: 25}}
+        self.doubles.chests["c2"] = {0x371E9: {}}
+        run_id, body = self._run(CHEST_VIEWS)
+        self.assertEqual(body["verdict"], "green", json.dumps(body, indent=1))
+        sent = [(c, a["ref"]) for c, act, a in self.doubles.seen if act == "inventory"]
+        self.assertEqual(sent, [("c1", 0x371E9), ("c2", 0x371E9), ("c1", 0x3975B)], "a written \"0x371e9\" reaches the driver as its id")
+        self.assertIn('"77495": 1', body["steps"][2]["note"], body["steps"][2])
+
+    def test_a_chest_the_seat_never_read_is_red(self):
+        self.doubles.chests["c1"] = {0x371E9: {0x12EB7: 1}}
+        run_id, body = self._run(CHEST_UNREAD)
+        self.assertEqual(body["verdict"], "red", body)
+        self.assertEqual([f["kind"] for f in body["failures"]], ["assertion-data"], body["failures"])
+        self.assertIn("c2 has not reported an inventory step for 0x371e9", body["failures"][0]["error"])
+
+    def test_a_ref_no_table_holds_is_red_before_the_driver(self):
+        run_id, body = self._run(CHEST_UNREAD.replace("{ref: 0x371e9}", '{ref: "Skyrim.esm:NoSuchChest"}'))
+        self.assertEqual(body["verdict"], "red", body)
+        self.assertIn("E_RUN_ITEM", body["failures"][0]["error"], body["failures"])
+        self.assertFalse([a for _, a, _ in self.doubles.seen if a == "inventory"], "the driver never saw the step")
 
 
 @needs_deps

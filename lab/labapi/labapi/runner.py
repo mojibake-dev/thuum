@@ -2087,10 +2087,10 @@ class Runner:
         the driver carries no item table. equip's item becomes formId, craft's
         recipe becomes the recipe's form id (its station passes through: a
         reference id, or a name a later refs table resolves), race-pick's
-        race its form id, known's and held's ids theirs, and a FormDesc in braces
-        inside console text the run's id in the console's hex ("player.equipspell
-        {044d44:Apocalypse - Magic of Skyrim.esp} right" types 1a044d44 under the
-        essentials layer)."""
+        race its form id, known's and held's ids theirs, inventory's ref its
+        form id, and a FormDesc in braces inside console text the run's id in
+        the console's hex ("player.equipspell {044d44:Apocalypse - Magic of
+        Skyrim.esp} right" types 1a044d44 under the essentials layer)."""
         out = dict(args or {})
         try:
             if action == "console" and isinstance(out.get("text"), str):
@@ -2105,6 +2105,8 @@ class Runner:
                 out["form"] = self.tables.base_id(out["form"])
             if action in ("known", "held", "add-perks") and isinstance(out.get("ids"), list):
                 out["ids"] = [self.tables.base_id(x) if isinstance(x, str) else x for x in out["ids"]]
+            if action == "inventory" and isinstance(out.get("ref"), str):
+                out["ref"] = self.tables.base_id(out["ref"])
         except KeyError as e:
             raise RunnerError(f"E_RUN_ITEM: {e}") from None
         return out

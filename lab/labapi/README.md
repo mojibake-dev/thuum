@@ -88,7 +88,13 @@ progress, 1 once settled; docs/verbs/weather.md); a watch records each actor's h
 `npc-puppet {formId?, puppet}` calls the fork's setPuppet export and
 `npc-pose {formId?, x, y, z, angleZ, speed, direction}` is the puppet apply in
 one step, from lab-spawn as place-npc; `npc-hold {formId, held}` stands a named NPC
-still in that seat's game while its AI and dialogue run (Actor.SetDontMove). `- server: netem {loss_pct:
+still in that seat's game while its AI and dialogue run (Actor.SetDontMove).
+`inventory {ref}` lists a container's items in that seat's own game, a chest's or
+a body's, by its reference's form id (a FormDesc or a table name is resolved
+first); it is kept per seat and per reference and read as
+`c.inventory(<ref>).count("File.esm:EditorID")`, the count
+`server.inventory(<ref>)` makes of the server's record, so a two-seat claim sets
+what each player's game shows beside the record (the root-cause plan's W4). `- server: netem {loss_pct:
 25}` impairs the server's interface from that step on (delay_ms, jitter_ms and
 loss_pct as `server: {netem}` takes them; all zero clears it, and the run's end
 does too).
@@ -116,10 +122,12 @@ such values before parsing, and the quoted form is accepted as well.
 
 A restricted expression language evaluated over Python's ast, never through
 eval: `server.actor(c1).x|y|z|cell`, `server.inventory(c1).count("File.esm:EditorID")`,
-`c1.sees(c2)`, `c2.view(c1).x|y|z`, `abs()`, arithmetic, comparisons, `and`,
-`or`, `not`, `true`, `false`. Anything else is `E_ASSERT_SYNTAX` and turns
-the run's verdict to error, because it is a bug in the scenario, not in the
-game.
+`server.inventory(<ref>)` and `c1.inventory(<ref>)` with the same `count` (a
+chest's or a body's items: the server's record, and that seat's own game's at
+its last `inventory {ref}` step), `c1.sees(c2)`, `c2.view(c1).x|y|z`, `abs()`,
+arithmetic, comparisons, `and`, `or`, `not`, `true`, `false`. Anything else is
+`E_ASSERT_SYNTAX` and turns the run's verdict to error, because it is a bug in
+the scenario, not in the game.
 
 ## Configuration (environment)
 
@@ -193,4 +201,6 @@ the heartbeat. A step is `{"id": "s12", "action": "move", "args": {...}}`;
 the client answers `POST /lab/step/s12/result` with `{"ok": true, "data":
 {...}}`. For `dump-state` the data is `{"self": {"x": .., "y": .., "z": ..,
 "cell": ".."}, "sees": {"c2": {"x": .., "y": .., "z": ..}}}`; for
-`request-screenshot` it is `{"png_b64": "..."}`.
+`request-screenshot` it is `{"png_b64": "..."}`; for `inventory` it is `{"ref":
+<form id>, "items": {"<decimal form id>": <count>}}`, or `{"error": "no such
+ref"}` from a game without that reference.

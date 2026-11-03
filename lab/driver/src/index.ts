@@ -1573,6 +1573,25 @@ function run(step: Step, player: Actor): unknown {
       }
       return out;
     }
+    case "inventory": {
+      // A container's items as this player's game holds them, a chest's or a
+      // body's (the reference {ref}): SKSE's GetNumItems and GetNthForm list
+      // its forms and getItemCount counts each, keyed by its decimal form id
+      // as held's are (lab-api's c.inventory(ref).count(item), beside the
+      // server's record, server.inventory(ref): the root-cause plan's W4
+      // two-seat container claims). Not getContainerForms: before fork
+      // 2b8c7592 a native's array result threw on every dist (x-perk-pick
+      // 20261101-065822), and these three return a number or a form.
+      const r = form(a.ref);
+      if (!r) return { error: "no such ref" };
+      const items: Record<string, number> = {};
+      const n = r.getNumItems();
+      for (let i = 0; i < n; ++i) {
+        const f = r.getNthForm(i);
+        if (f) items[String(f.getFormID())] = r.getItemCount(f);
+      }
+      return { ref: r.getFormID(), items };
+    }
     case "look": {
       // thuum docs/verbs/cast-teleport.md: the player's view, pitch (degrees,
       // down is positive) and heading (degrees; the current one when absent),

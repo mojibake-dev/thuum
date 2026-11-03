@@ -640,6 +640,69 @@ class HeldTests(unittest.TestCase):
             ev.evaluate("c2.held(0x5ACE4) == 1")
 
 
+class InventoryViews(NearViews):
+    """c1's last inventory steps of two chests: an iron sword in one, 25 gold and an iron ingot in the other; c2 read
+    the first alone, and its game shows it empty."""
+
+    def __init__(self):
+        super().__init__()
+        self.read = {"c1": {0x371E9: {"ref": 0x371E9, "items": {str(0x12EB7): 1}},
+                            0x3975B: {"ref": 0x3975B, "items": {str(0xF): 25, str(0x5ACE4): 1}}},
+                     "c2": {0x371E9: {"ref": 0x371E9, "items": {}}}}
+
+    def inventory(self, observer, ref_id):
+        return (self.read.get(observer) or {}).get(ref_id)
+
+
+@needs_deps
+class InventoryTests(unittest.TestCase):
+    """The root-cause plan's W4: c.inventory(<ref>) is a chest as one seat's own game holds it, its count the
+    server's own, so a two-seat claim reads each seat's view beside server.inventory(<ref>)."""
+
+    def setUp(self):
+        from labapi.assertions import Evaluator
+        srv = RichServer()
+        srv.items["skyrim.esm:ingotiron"] = 0x5ACE4
+        record = {0x371E9: {"found": True, "actorId": 0x371E9, "x": 0.0, "y": 0.0, "z": 0.0, "cell": "371de:Skyrim.esm",
+                            "inventory": [{"baseId": 0x12EB7, "count": 1}]}}
+        srv.ref = lambda actor_id: record.get(actor_id, {"found": False})
+        self.ev = Evaluator(srv, InventoryViews(), ["c1", "c2"])
+
+    def test_a_seat_reads_a_chest_it_reported(self):
+        for expr in ('c1.inventory(0x371e9).count("0x12eb7") == 1', 'c1.inventory("0x371e9").count("Skyrim.esm:IronSword") == 1',
+                     'c1.inventory(0x3975b).count("0xf") == 25', 'c1.inventory(0x3975b).count("Skyrim.esm:IngotIron") == 1'):
+            with self.subTest(expr=expr):
+                self.assertTrue(self.ev.evaluate(expr))
+        self.assertEqual(self.ev.readings["c1.inventory(225769).count('0x12eb7')"], 1)
+
+    def test_an_absent_item_counts_zero(self):
+        self.assertTrue(self.ev.evaluate('c1.inventory(0x371e9).count("0xf") == 0'))
+        self.assertTrue(self.ev.evaluate('c2.inventory(0x371e9).count("0x12eb7") == 0'))  # a chest its game shows empty
+
+    def test_two_chests_are_kept_apart(self):
+        self.assertTrue(self.ev.evaluate('c1.inventory(0x371e9).count("0xf") == 0 and c1.inventory(0x3975b).count("0xf") == 25'))
+        self.assertTrue(self.ev.evaluate('c1.inventory(0x3975b).count("0x12eb7") == 0'))
+
+    def test_each_seats_view_against_the_record(self):
+        self.assertTrue(self.ev.evaluate('c1.inventory(0x371e9).count("0x12eb7") == server.inventory(0x371e9).count("0x12eb7")'))
+        self.assertFalse(self.ev.evaluate('c2.inventory(0x371e9).count("0x12eb7") == server.inventory(0x371e9).count("0x12eb7")'))
+
+    def test_an_unreported_chest_is_a_data_error(self):
+        from labapi.assertions import AssertionData, AssertionSyntax, Evaluator
+        for expr in ('c2.inventory(0x3975b).count("0xf") == 0',                     # c2 never read that chest
+                     'c1.inventory(0x99999).count("0xf") == 0',
+                     'c1.inventory("Skyrim.esm:NoSuchChest").count("0xf") == 0',    # a name no table holds
+                     'c1.inventory(0x371e9).count("Skyrim.esm:NoSuchThing") == 0'):
+            with self.subTest(expr=expr), self.assertRaises(AssertionData):
+                self.ev.evaluate(expr)
+        with self.assertRaises(AssertionData):
+            Evaluator(RichServer(), NearViews(), ["c1"]).evaluate('c1.inventory(0x371e9).count("0xf") == 0')  # no inventory steps
+        for expr in ('c1.inventory(1.5).count("0xf") == 0', 'c1.inventory(true).count("0xf") == 0', 'c1.inventory().count("0xf") == 0',
+                     "c1.inventory(0x371e9).count(0xf) == 0"):
+            with self.subTest(expr=expr), self.assertRaises(AssertionSyntax):
+                self.ev.evaluate(expr)
+
+
 class GlobalViews(NearViews):
     """c1's last globals step (docs/verbs/player-globals.md): the Craftlord's
     unspent points at 3, a global its game lacks."""

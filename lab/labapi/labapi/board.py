@@ -53,6 +53,9 @@ class StepBoard:
         self._favorites: dict[str, dict[str, Any]] = {}
         # a held step's answer: form id (decimal) -> the game's count
         self._held: dict[str, dict[str, Any]] = {}
+        # an inventory step's answers by the reference it named: {ref, items: form id (decimal) -> the count that
+        # seat's game holds in it}, a chest's or a body's (c.inventory(ref), the root-cause plan's W4)
+        self._inventories: dict[str, dict[int, dict[str, Any]]] = {}
         self._globals: dict[str, dict[str, Any]] = {}
         # a projectiles step's answer: {worldOrCell, refs: projectile base id
         # (decimal) -> the nearest reference's formId, pos, distance, or null}
@@ -127,6 +130,13 @@ class StepBoard:
             self._favorites[step.client] = body["data"]
         if step.action == "held" and isinstance(body.get("data"), dict):
             self._held[step.client] = body["data"]
+        if step.action == "inventory" and isinstance(body.get("data"), dict) and "error" not in body["data"]:
+            try:
+                key = int((step.args or {}).get("ref") or body["data"].get("ref"))
+            except (TypeError, ValueError):
+                key = 0
+            if key:
+                self._inventories.setdefault(step.client, {})[key] = body["data"]
         if step.action == "globals" and isinstance(body.get("data"), dict):
             self._globals[step.client] = body["data"]
         if step.action == "projectiles" and isinstance(body.get("data"), dict):
@@ -251,6 +261,9 @@ class StepBoard:
     def held(self, observer: str) -> dict[str, Any] | None:
         return self._held.get(observer)
 
+    def inventory(self, observer: str, ref_id: int) -> dict[str, Any] | None:
+        return (self._inventories.get(observer) or {}).get(int(ref_id))
+
     def globals(self, observer: str) -> dict[str, Any] | None:
         return self._globals.get(observer)
 
@@ -306,6 +319,7 @@ class StepBoard:
         self._known.clear()
         self._favorites.clear()
         self._held.clear()
+        self._inventories.clear()
         self._globals.clear()
         self._projectiles.clear()
         self._refs_near.clear()

@@ -5,6 +5,11 @@ the lab can grep (E_ASSERT_*).
 
   server.actor(<client>).x | .y | .z | .cell        from the state endpoint
   server.inventory(<client>).count("<file>:<id>")   from the state endpoint
+  server.inventory(<ref>).count("<file>:<id>")      a chest's or a body's items, from its record (labState ref)
+  <client>.inventory(<ref>).count("<file>:<id>")    the same reference's items as that seat's own game holds them,
+                                                     from its last inventory {ref} step naming it; count resolves the
+                                                     item as the server's does, so the two compare (the root-cause
+                                                     plan's W4)
   server.time().hour | .day | .month | .year | .daysPassed | .timeScale
                                                      the server's game clock, read when the assert runs
   <client>.npc_state(<id>).aiEnabled | .inCombat | .package | .combatTarget | .staggering | .x | .y | .z
@@ -146,6 +151,7 @@ class ViewsFacade(Protocol):
     def known(self, observer: str) -> dict[str, Any] | None: ...
     def favorites(self, observer: str) -> dict[str, Any] | None: ...
     def held(self, observer: str) -> dict[str, Any] | None: ...
+    def inventory(self, observer: str, ref_id: int) -> dict[str, Any] | None: ...
     def globals(self, observer: str) -> dict[str, Any] | None: ...
     def projectiles(self, observer: str) -> dict[str, Any] | None: ...
     def refs_near(self, observer: str) -> dict[str, Any] | None: ...
@@ -1612,6 +1618,25 @@ class _ClientRef:
             raise AssertionData(f"{self.name}'s held step did not read {int(ref_id):#x}")
         return n
 
+    def inventory(self, spec) -> InventoryView:
+        """c.inventory(<ref>): a container's items as that client's own game holds them, a chest's or a body's, from
+        its last `inventory {ref}` step naming that reference (an int, "0x..." or a FormDesc, as
+        server.inventory(<ref>) takes it); count(item) is server.inventory(<ref>)'s own, so a claim compares the two
+        (the root-cause plan's W4)."""
+        try:
+            ref_id = self._server.base_id(spec) if isinstance(spec, str) else int(spec)
+        except KeyError as e:
+            raise AssertionData(str(e)) from e
+        fn = getattr(self._views, "inventory", None)
+        data = fn(self.name, ref_id) if fn else None
+        if not isinstance(data, dict) or not isinstance(data.get("items"), dict):
+            raise AssertionData(f"{self.name} has not reported an inventory step for {ref_id:#x}")
+        try:
+            entries = tuple({"baseId": int(k), "count": int(n)} for k, n in data["items"].items())
+        except (TypeError, ValueError) as e:
+            raise AssertionData(f"{self.name}'s inventory of {ref_id:#x} is malformed: {e}") from e
+        return InventoryView(entries, self._server.base_id)
+
     def globalValue(self, desc: str) -> float:
         """c.globalValue("<hex id>:<plugin>"): the value that client's game
         holds for a global variable, from its last `globals` step
@@ -1987,6 +2012,7 @@ _FORM_SPEC_METHODS = {
     WatchView: {"launched"},
     SelfWatchView: {"launched"},
     _ServerRef: {"spell", "host", "ref", "follow", "fate", "inventory"},  # inventory: a client name or a ref
+    _ClientRef: {"inventory"},  # a ref: the container as that seat's own game holds it
 }
 # Methods that take a client's own watch and a string: c2.watched(c1).flights_match(c1.watched_self(), "angle")
 _PAIR_METHODS = {
@@ -2005,7 +2031,7 @@ _NULLARY = {
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref", "follow", "fate", "log_count", "stream"},
-    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "globalValue", "projectile", "poison", "skill", "level", "weather", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near"},
+    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "inventory", "globalValue", "projectile", "poison", "skill", "level", "weather", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near"},
     InventoryView: {"count"},
     RefsNearView: {"count", "has", "distance", "runtime_of", "pos", "disabled"},
     EffectsView: {"left", "magnitude"},
