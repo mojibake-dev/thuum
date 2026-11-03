@@ -1,4 +1,12 @@
-# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v15 2026-11-03 after 084006 on round two 0b61fc80
+# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v16 2026-11-03 after 085226 (the swap probe v12 on
+# round two) and 084329 (the settle-0 read) both stopped at the exit's until: Hod never walked out in 400 s because his COMBAT TARGET
+# had become the visiting player inside his house (c2's console in 085226: "target 0 package 734cd" at the grant, then "target
+# ff000001 package 734cd gaze 1348a" 23 s later; 070357's "Hod attacked the visiting player" reproduced), and combat holds him
+# inside whatever his package says. The fight's cause is UNREAD (candidates: trespass in an owned interior; npc-fate's late fate or
+# redress 1.4 s before, 070357's timing; the server's relayed hostility, ADR-023; system 1's or hostility-sync's row). So v16 claims
+# NO COMBAT at the visit's premise and again right before the walk-out's until (inCombat false, combatTarget 0, no state line
+# naming the visitor as his target), so a fight reads as the premise's red and never as the fix's; the state lines are recorded.
+# v15 2026-11-03 after 084006 on round two 0b61fc80
 # (RED on leg A's exit-hour claim alone; the four bounce claims held: the D9 pass at the house door was clean) and 084329 (the
 # settle-0 read: Hod never walked out after a double promotion, P4's shape again): leg A REDESIGNED as the stale copy made on
 # purpose. 084006 showed that a fresh seat's engine spawns him HOME at the house's load (no "moved ... into 133c7" and no create
@@ -138,12 +146,17 @@ steps:
   - c2: log-count {pattern: "promote gate 1348a"}
   - server: log-count {pattern: "door 13407: 1348a.s host .* walks it through to 3c"}
   - server: log-count {pattern: "report of 1348a into cell 133c7 within the settle window"}
+  - c2: log-count {pattern: "target ff000001 package"}
   - c2: screenshot
   - assert:
       - server.host(0x133c7).client == "c2"
       - server.ref(0x1348a).cell == "133c7:Skyrim.esm"
       - c2.npc_state(0x1348a).is3DLoaded == true
       - c2.npc_state(0x1348a).aiEnabled == true
+      # the premise: no fight with the visitor (085226 and 084329: combat held him inside for 400 s), the cause unread
+      - c2.npc_state(0x1348a).inCombat == false
+      - c2.npc_state(0x1348a).combatTarget == 0
+      - 'c2.log_count("target ff000001 package") == 0'
       - 'server.log_count("(passes|follows|moves) 1348a into cell 97") == snapshot("out_visit_a")'
       - 'server.log_count("(passes|follows|moves) 1348a into cell 133c7") == snapshot("back_visit_a")'
   # A2, the walk-out under c2's engine: 0x734cd takes him out by 13407 (the door line), the walk is a D9 pass to c1 at the
@@ -155,6 +168,14 @@ steps:
   - server: snapshot {name: door_a0, of: 'server.log_count("door 13407: 1348a.s host .* walks it through to 3c")'}
   - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 133c7"}
   - server: snapshot {name: back_pass_a, of: 'server.log_count("(passes|follows|moves) 1348a into cell 133c7")'}
+  # still no fight right before the walk-out is waited for (a fight that starts inside the until shows in c2's console)
+  - wait: 10
+  - c2: npc-state {formId: 0x1348a}
+  - c2: log-count {pattern: "target ff000001 package"}
+  - assert:
+      - c2.npc_state(0x1348a).inCombat == false
+      - c2.npc_state(0x1348a).combatTarget == 0
+      - 'c2.log_count("target ff000001 package") == 0'
   - until: {within: 180, expect: ['server.log_count("door 13407: 1348a.s host .* walks it through to 3c") > snapshot("door_a0")']}
   - until: {within: 30, expect: ['server.log_count("now simulates 1348a in cell 97") > snapshot("sim_a0")']}
   - wait: 5
