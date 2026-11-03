@@ -6351,3 +6351,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   The lab queue after the stage, agreed with numidium: serialize-on-demand.js (check-only, then full; numidium writes its probe from
   the capture's steps), the dead-NPC transplant, r3's stage with the respawn probe, census v3; r3 moves ahead of the transplant if
   e23bd229's probes read green.
+- 04:50 PST 2026-11-03 (12:50Z 11-03) (thuum-cf): lab/frida/serialize-on-demand.js written by the re-analyst from its note's recipe (19.9 KiB,
+  node --check clean, no em dashes; unrun). LAB_PARAMS: FORM (required), MODE ("check" default or "serialize"), FLAG (the mark that
+  triggers, default 0x1000 kLockExtra, 0xffffffff any), RUNS (default 1). Check mode runs every premise of Q4 at the trigger (35576's
+  onLeave for FORM's mark) and prints one row per premise with its verdict, calling neither 0x0D nor 0x0E and allocating nothing.
+  Serialize mode runs the recipe (36035, 36037, slot 0x0D, 35715, slot 0x0E, 36081; the record freed, the buffer destroyed, the
+  entry re-read untouched) and prints the record with its FNV-1a, plus the capture script's stash and record rows at the purge and a
+  compare row (equal, or the first differing offset and its section). Rows: ready (version, pid, base, the hooks' RVAs, the four
+  singletons, +0x340, the dry-run byte, Main.threadID), check, premises or refused, serialize or error, stash, record, write,
+  compare, liveness every 10 s. HYPOTHESIS until the first run: the buffer layout and the five call signatures, that the console
+  lock's mark runs on Main.threadID, clearingData's offset, the dry-run byte's meaning, that 0x0D and 0x0E leave the entry untouched,
+  the byte equality with the stash. Its fresh review runs before the first run (check mode first, on c1 with the capture probe's
+  steps, when numidium's stage frees the lab).
