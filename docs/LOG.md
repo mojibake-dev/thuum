@@ -7429,3 +7429,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   b6620877; 89 steps, 21 claims: the refusal, the close and reopen, the corpse leg recorded, the lost closing activation recorded).
   Docs: containers.md's Authority carries the hold (R0, the codes, the sync points, no setting), its Tests the dropped live view and
   the hold's T3; STATE.md's kInventory and kOpenState rows note open and close as the sync points; PLAN.md's M4 state line.
+- 14:52 PST 2026-11-03 (22:52Z 11-03) (numidium): Eli on the container hold's scope (thuum-cf, docs/private/container-hold-scope.md), verbatim: "m4-container-exclusive
+  works for me." Read as D-C1 to D-C5 as recommended: fork m4-container-exclusive c2617764 (built, unmerged) lands as the one model on
+  a server-only branch m3-turbo3-sys2-container off the corpse slice; the shared branch, its switch and the live redraw deleted; the
+  second opener refused (E_CONTAINER_BUSY, a notification); the contents to the cell's listeners when the set empties; a dead body
+  activation-blocked so its loot opens through OpenContainer; no lease; b-container-rest's two-occupant claim rewritten to the refusal
+  in its own commit (W4, Eli's word above). Also: b-prop-push GREEN on today's build (20261103-223344, the NPC move server over r3's
+  dist), and none of turbo 2's five prop branches (m4-prop-arbitration, m4-prop-blast, m4-prop-blast-client, m4-turbo2-union,
+  m4-turbo2-train) is in r3, so playtest 41's prop regression is not in this build; props in play are unread on it.
