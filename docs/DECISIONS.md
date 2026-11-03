@@ -4047,3 +4047,65 @@ Outcomes under decision 4 (18:36 PST 2026-11-02):
   moves again: a grab beats a touch; a non-owner's contact never takes a moving prop; ownership returns to the host only at rest
   on the owner's screen, by the owner's own final sample, never by a timer. No prop change reaches a seat except through a gate
   with a two-seat scenario (numidium and thuum-cf, 2026-11-03 02:36Z).
+
+## ADR-064: The burden of proof flips: an engine claim needs a trace, a gate reads the other screen, done means seen
+
+Status: PROPOSED about 19:05 PST 2026-11-02 by numidium, from the root-cause plan Eli approved after playtest 41
+(docs/research/root-cause-plan-2026-11-02.md). Eli's ask, verbatim: "how we can end up building a feature without knowing
+how it works underneath in the engine or how we're over validating, or how we had the allow list conceptualization of
+scripting inverted." Eli's two calls inside the plan: freeze the five break-prone systems until each has its engine
+model and a two-player test; one short playtest per fixed system. ADR-062 is the scripts half and ADR-063 the server
+half of the same inversion; this is the process half. Amends ADR-030 (the gate), ADR-031 (the inventory), ADR-033 (the
+sequences) and ADR-054 decision 3 (the read before the code).
+
+Context. Three censuses of 2026-11-03 (docs/research/): about 256 HYPOTHESIS tags open across 59 shipped verb docs, 29
+T3 boxes ticked over open claims (verb-lint), and 44 decompiler reads labelled CONFIRMED-STATIC; several of playtest
+41's breakages were never tagged at all (containers.md had 0 tags after three failed redraw designs; nothing tagged the
+death sound; the night lock was absent from locks.md's engine table). The dated pattern: the static read comes first and
+is tagged, the runtime check is written "by path" and not run before the merge, and the next read comes after a
+playtest breaks; on 10-29 two commits cut npc-puppet's tags from 40 to 11 and cell-host's from 20 to 3 by relabelling.
+The gate audit (docs/research/gate-audit-2026-11-02.md): 20 of 73 done items with no claim on any seat, `c1.view(c2)` in
+1 of 122 scenarios, 14 literal `>= 0` claims, 17 of 29 NPC scenarios in god mode, a red claim restated into a form the
+red case passes and approved by its own merger. And the arm stacked three live prop changes, none read on two seats,
+and props ended worse than at its start. The rules that should have caught each of these existed (rule 2, rule 8,
+ADR-054 decision 3); none was enforced, and each had an escape ("where a trace is cheap", a box whose wording could be
+dropped, a reviewer who was also the merger).
+
+Decision.
+1. An engine claim is HYPOTHESIS unless it cites a run or trace id. CONFIRMED-STATIC and CONFIRMED-BY-DECOMPILE retire as
+   labels: a decompiler read is a hypothesis with a source. lab/tools/verb-lint.py refuses a T3 box ticked over an open
+   claim, in CI.
+2. Engine model first, per system. `docs/engine/<system>.md` holds the engine's own path for a behaviour from input to
+   every consequence, per viewpoint (the owner's engine, a non-owner's, a seat that loads it late), its rows taken from
+   the reference trace (ADR-031's recorder), each row confirmed by a two-seat trace before code that changes the system
+   merges. Verb docs cite its lines instead of re-deriving a slice. ADR-054 decision 3's "where a trace is cheap" is
+   struck: the trace runs before the merge; a read the lab cannot take goes to Eli as rule 8 says, and the verb waits.
+   This is the characterization test applied to the engine (accessible: Michael Feathers' "characterization test";
+   foundational: Feathers, Working Effectively with Legacy Code, 2004).
+3. The gate's two-seat contract, checked by a scenario lint in CI: every claim can fail (no `>= 0`, and the claim set
+   goes red with the verb's kill switch off, a mutation run; accessible: "mutation testing"; foundational: DeMillo,
+   Lipton and Sayward, "Hints on Test Data Selection", IEEE Computer 11(4), 1978); a verb with a player-visible effect
+   claims both views with each seat acting; NPC damage on a player is claimed outside god mode; a relaunch step lays only
+   premises the deploy has.
+4. The reviewer is not the author or the merger. A scenario commit that relaxes or rewrites a claim goes to Eli (this
+   ends numidium's standing approval of 2026-10-13 for that kind); any other scenario commit, and every branch before its
+   first lab run, gets a fresh reviewer agent against the rules and the two-seat contract.
+5. Status has three words: VERIFIED IN PLAY (Eli saw it, or a two-seat claim asserted the player's view), MECHANISM ONLY,
+   BROKEN. Nothing else is "done" or "works", in PLAN, the LOG or a report.
+6. Playtests (Eli's call): one per fixed system, at most eight items, each with its green two-seat run id. In an arm, a
+   system takes at most one live change, read on two seats first; every seat's logs are kept before any relaunch.
+7. The freeze (Eli's call): a reference's life on a non-owning seat, containers and menus, Havok props, the progression
+   UI, and state no native reaches take no new code until their system doc is confirmed on both viewpoints and a
+   two-player test covers the change. Scripts (ADR-062), tooling and test repair are not frozen.
+
+Consequences. Tooling: verb-lint (on main, 5b0aac19; into docs-lint after the 29 boxes are unticked); the scenario lint
+and the mutation run (lab-api's parser, a kill-switch relaunch per verb); verb-merge refuses a doc naming an unrun probe
+or holding an open tag on a player-visible row; a per-launch console file on the seats. Docs: VERB.md's Engine surface
+cites its system doc; the 29 boxes unticked with the date and the reason; the open count rises at first, as decompiler
+reads return to HYPOTHESIS, and that higher number is the true one. Pace: a merge waits for its traces and its two-seat
+claims; a playtest is smaller and later, and should hold no surprise its gate could have shown.
+
+Risks. H1: some reads the lab cannot take (spell-cast.md:1328's aim-down pitch, the Lockpicking Menu's pick leg); they
+go to Eli's T4 by rule 8 and the verb waits, which can stall a system; the per-system order puts the cheap reads first.
+H2: two-seat traces cost lab hours; the nightly window and the stage slots carry them. H3: a grep counts a narrative line
+mentioning HYPOTHESIS; the author rewords the line, the rule stays mechanical.

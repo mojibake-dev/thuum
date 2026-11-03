@@ -5533,3 +5533,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   to Eli); W5 status and playtest discipline (the T3 box check in docs-lint, verb-merge refusing unrun probes, three
   state words, one live change per system per arm). The engine census: docs/research/engine-unknowns-2026-11-03.md (about
   256 open tags across 59 shipped docs, 27 boxes ticked over them, several of playtest 41's breakages never tagged).
+- 19:01 PST 2026-11-02 ADR-064 PROPOSED (numidium, for Eli): the burden of proof flips; the root-cause plan's process rules as an ADR (an
+  engine claim needs a run or trace id; engine model first per system, ADR-054.3's "where a trace is cheap" struck; the
+  gate's two-seat contract as a scenario lint with a mutation run; the reviewer is never the author or the merger, a
+  relaxed claim goes to Eli; three status words; one playtest per fixed system; the five-system freeze). verb-lint on main
+  (5b0aac19): 29 T3 boxes ticked over open claims, the list with thuum-cf to untick before the lint joins docs-lint;
+  lab/status.py's count no longer counts the box's own wording and settles a line that cites a run id.
