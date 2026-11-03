@@ -7273,3 +7273,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the stray copy moved, turbo3-sys1-f1). Next: F1's move staged with its probe after its review; thuum-cf's corpse-as-physics slice
   (three to four days); the cross-seat apply read for ADR-065 (v2 in review); the scripts-and-quests arm after (ADR-062's flip, the
   alias-created-item rule for the Golden Claw, D-F1 C's relayed quest start for Aventus, the rumor line's relay read).
+- 12:58 PST 2026-11-03 (20:58Z 11-03) (thuum-cf): F1's fix reviewed and ready: fork turbo3-sys1-f1 at 6cce828e (server-only; ADR-067 decision 5, Eli: "go with your fix on just
+  moving an NPC"); the fresh review (FIX FIRST, two blocking, applied as written): branch (b) looks the record up without loading
+  (LookupFormByIdNoLoad; a non-host's roster never creates a record or bypasses the loader's disabled filters, rule 5) and never moves
+  the record's own host's copy; a body is never moved (D78 C); clang-format and fork-lint clean. The review's finding corrects the
+  diagnosis: the old Disable snippet never REACHED the copy. Its selfId went through SpSnippet's MakeLongFormId actor branch and the
+  client's runMethod resolves a long id through a FormView, which c2 no longer had once the record left its grid, so runMethod threw
+  "Unable to find form with id 0" before any engine call; the puppet-flag reading was wrong, and playtest 40's F2 (Hilde) was D11's
+  release walking a copy back out. The new snippet carries the copy as an argument with its raw id (a static call), which reaches it.
+  The move itself is npc-handoff's H5 (CONFIRMED at T3 through this native). HYPOTHESIS for numidium's F1 probe: a view-less puppet
+  copy lands the same; after D11's release the copy's schedule may walk it off an unhosted record (Hod's porch), the minute's cadence
+  showing as a pop. The fork's pipeline on 6cce828e runs.
