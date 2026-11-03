@@ -6072,3 +6072,26 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   sessions without the global config); the three core repos keep their own .githooks and need it there. m3-system1-r2 4ccb4259
   green on 4923, staging now with LABAPI=4922 (headZ, scene, live until counts) and the death read; the lab held from 10:07Z for
   these runs, so the 10:30Z nightly yields to them.
+- 02:28 PST 2026-11-03 (10:28Z 11-03) (thuum-cf): R4 v4 (ded49599) on break 3, 20261103-100946, numidium's read: a RELAUNCHED HOST RESURRECTS A DEAD
+  NPC, CONFIRMED. The fresh process's engine loaded Hilde alive, the client never bound the dead record for its own hosted copy
+  before reporting, and the server took the host's first alive sample as "resurrection by its host's engine: 35534 stands again
+  with health 1.000 on ff000000's sample, 171 s after its death" (the F9 guard keyed on the death's stamp, held by this process);
+  playtest 41's "the dead stay dead across the restart" held only because a server restart keeps the clients' engines. Also: R5's
+  guard again (x13, no crash); leg A's same-session return replayed nothing; leg W's watcher load played TWO replays (the create
+  word's carried lastAction, train 56's late-join replay, as a Ragdoll event, and the bind's silent kill's four events: furniture
+  exit, sneak stop, two ragdolls), no voice line, the sound's carrier HYPOTHESIS. Round six on m3-system1-r2 (23fb0c73): the
+  server's stamp is the HOST's (MpActor::NoteHoster from UpdateHoster clears HostSampledDead at every change of host; the guard
+  drops its unstamped-death condition, so any host whose game has not sampled the body dead stands nothing with a live sample,
+  the line at info for the lab; an accepted reanimate still stands a placed corpse; T0 in ActorDeathTest); the client holds a dead
+  word's reports until the engine's copy is dead here (the bind), never asks a move for a body, releases at 8 s with a line; a dead
+  record's carried action queue is dropped with a line instead of replayed (D1's cheap half). Door v19's red run on break 3
+  (101556): RED at leg A's PREMISE, not the mutation: c1's engine had Hod outdoors with 3D at 02:00 (the seat's rollback save holds
+  him at the mill from 17.x; the hour does not place him, the save does) and the sighting path took the record out before any
+  MoveTo. v20 (main b056d01d, 117 steps): a settle phase (c1 on the street while his sleep package walks the engine's copy home
+  under c1's follow, an until on the record back in 133c7 within 300 s, the street door's line recorded), then `server: restart
+  {gameHour: 2.0}` (forgets the hosts and the follows, keeps the world and the seats' places, the client engines untouched), the
+  reconnects, and the premise claimed as v19 did; the swap probe v18 (1fa4f825); both with the reviewer. Containers: Eli asked why
+  they are not in playtest 42 (system 2, frozen, no trace ever run); numidium builds the transfer step and container-menu.js (R1);
+  x-shared-chest-phantom's fresh review is mine when the step lands. Lesson: a lab seat's rollback save places its NPCs where
+  they stood at the snapshot's hour, whatever the server's clock; a premise about an NPC's place must wait for the engine to
+  settle him by his schedule, or make the place by a server move.
