@@ -2420,6 +2420,35 @@ Spell.Cast on the host's engine), deterministic and still the engine's reanimati
 duration the engine's on the host; the thrall follows the caster's figure there. The server side stays R0 for the
 record's life and R2 for the thrall's behaviour.
 
+### ADR-060: a reanimated NPC is its commander's game's for the effect's life (16:45 PST 2026-11-02)
+
+Playtest 41, Eli, verbatim: "when i killed sven and reanimated him, the animation only played for prisoner even though rotfern
+cast the spell" and "weird reanimating sven just puts him back on his normal path"; the decision "and yes go with A". The
+snippet above (the server's own Spell.Cast on the body's host, CastReanimateOnHost) ran the Reanimate effect in the HOST's
+engine with the caster's figure as the commander: the get-up and the shader played there alone, and a commanded actor whose
+commander is a figure (no intent behind it) fell back to its packages. Built on fork m4-reanimate-claim 9cc3c94c (server
+only): the accepted reanimate hit claims the body for the caster's seat (the caster when a user plays it, else the caster's
+host) through the cells rule's new commanded claim (wire-rules cells.rs FollowKind::Commanded beside ADR-052's Claim;
+claim_commanded with the lease the effect's EFIT duration plus 10 s, 0 for good; release_any_claim at the thrall's death in
+PartOne::OnDeathState, the commander's departure in gone(), or the lease in tick()); UpdateHoster is the word, so the caster's
+puppet of the body becomes its live actor and the former host's live actor becomes a puppet; the snippet and RelayCast's skip
+of the body's host are gone, the former host hears the relayed cast as any cast's look. Lines: "[verb:npc-fate] reanimate
+<spell> by <caster> on <body>: <commander> commands it for <N> s (ADR-060)", "<body> died under <commander>'s command: the
+claim ends, <simulator> simulates it (ADR-060)", E_COMMAND_UNLOADED. T0: NpcFateTest's reanimate case on the claim (the
+caster's seat simulates the body from the hit, both games hear the word, no snippet, the relay reaches the host, the body's
+death ends the claim; the host's own cast keeps the body its own), cells.rs's commanded test (the lease, the death, the
+departure, a dialogue claim giving way).
+
+HYPOTHESIS H1 (ADR-060): the former host's engine, whose copy of the body is a puppet (AI off) from the grant on, does not
+stand its copy by its own effect from the relayed cast; the copy stands by the server's live word and follows the stream.
+HYPOTHESIS H2: the commander's own engine applied the Reanimate effect at its hit on the dead puppet before the grant arrived;
+whether the effect took (the actor resurrected and kept, or re-killed by the server's dead word) decides whether the client
+re-casts the spell on the body at the grant. HYPOTHESIS H3: the deaths2 client's released-body branch (AI off 4 s through the
+ragdoll) races the grant; the reconcile must read the server's word over its own dead branch. Probe x-reanimate-claim (c1
+kills a c2-hosted resident, c1 casts Reanimate Corpse at the body: the claim line and the UpdateHoster pair, c1's actor mine
+and alive within 3 s, c2's puppet Resurrect, npc-state isDead false on both, the thrall's server distance to c1 shrinking as
+c1 walks away, hosting back to c2 at 60 s plus the margin), then b-reanimate-claim in its own commit.
+
 ## The non-host's loot at M3's exit (D71, 14:29 PDT 2026-10-30; c-dungeon-enemies on the union 0e23c820)
 
 RED three times (210543, 210957 relaunched, 211413 cold) at claim 5's first menuOpen: c2, the puppet seat and the killer, activates

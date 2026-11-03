@@ -5401,3 +5401,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   containerSharing "exclusive" is the server default (m4-container-exclusive's second commit; chests and corpses), the client bundle
   drops the reopen (m4-turbo2-chest's commit after b0939b7e: by-counts, the own echo draws nothing), live multi-party container sync
   goes to the backlog with its Frida plan. Standing rule recorded in ADR-061: no menu is ever closed and reopened under a player.
+
+- 16:45 PST 2026-11-02 ADR-060 BUILT on fork m4-reanimate-claim 9cc3c94c (server only; pipeline pending): the cells rule's commanded claim (FollowKind::
+  Commanded, the lease from the EFIT duration plus 10 s, released at the thrall's death, the commander's departure or the lease), PartOne::
+  ClaimCommanded and ReleaseAnyClaim, the reanimate hit's branch claiming for the caster's seat, the host snippet and the relay's skip
+  retired; NpcFateTest's case on the claim. Probe x-reanimate-claim after the arm; npc-fate.md carries the section and H1 to H3.
+  Containers: Eli "dont worry about setting the container exclusivity. we're not even live", so containerSharing defaults to shared again
+  (m4-container-exclusive 8e7d6e56, the switch kept); the break's refs are the server-only train m4-turbo2-union-srv f9a0792e (union +
+  perk counter 10687731 + prop budget 8d94232c + the switch) and the client bundle m4-turbo2-chest 10ade7c4 (no reopen, the blast's
+  client half). Open read for the break's logs: a naked headless bandit on c1 in Bleak Falls (the fate's pin after the 3D, "late fate").
