@@ -2,7 +2,8 @@
 // one seat, for a DEAD actor FORM, at its kDead mark (TRIGGER mark: AddChange's inner 35576 with FLAG, deferred to PlayerCharacter::Update's
 // return as serialize-on-demand-actor.js does; TRIGGER now: the first Update return after the attach, the form by TESForm::LookupByID), on
 // Main.threadID: MODE roundtrip (default) serializes the copy's own record with the actor script's recipe (36035, 36037, slot 0x0D, 35715,
-// slot 0x0E, 36081); MODE apply takes the owner's record from RECORD (hex) with FLAGS. The record is written into the form's changes-map
+// slot 0x0E, 36081); MODE apply takes the owner's record from RECORD (hex) with FLAGS: the operator hands a kDead record (this script
+// decodes no lifeState) and the sender's writtenFlags as FLAGS. The record is written into the form's changes-map
 // entry as transplant-inject.js writes one (RECORD's bytes on the engine heap by 68115; 35509 the Value {flags, 0, record}), then 35568
 // runs (the apply's wrapper: decode, initial data, LoadGame, the pending array) and 35567 (the finish pass: InitLoadGame, the flush that
 // hands the Havok block to 19535, FinishLoadGame), with a snapshot row before, after the apply and after the finish. THE ONE ENGINE-STATE
@@ -145,7 +146,10 @@ const havokOf = function (b, flags, id) {
   r.blockFlags = hex(b[start]);
   const cnt = vi(b, start + 1);
   r.count = cnt[0];
-  if ((b[start] & 0x10) !== 0) { const dv = new DataView(b.buffer, b.byteOffset + start + 1 + cnt[1], 8); r.pitchRoll = [+dv.getFloat32(0, true).toFixed(3), +dv.getFloat32(4, true).toFixed(3)]; }
+  if ((b[start] & 0x10) !== 0) {
+    if (start + 1 + cnt[1] + 8 > b.length) { r.error = 'pitch and roll run past the body'; return r; }
+    const dv = new DataView(b.buffer, b.byteOffset + start + 1 + cnt[1], 8); r.pitchRoll = [+dv.getFloat32(0, true).toFixed(3), +dv.getFloat32(4, true).toFixed(3)];
+  }
   return r;
 };
 
@@ -183,9 +187,9 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
   const readEntry = function (map) {
     value.writeU32(0); value.add(4).writeU32(0); value.add(8).writePointer(NULL);
     const found = nf.mapRead(map, FORM, value);
-    return { found: found, flags: value.readU32(), record: value.add(8).readPointer() };
+    return { found: found, flags: value.readU32(), mid: value.add(4).readU32(), record: value.add(8).readPointer() };
   };
-  const writeEntry = function (map, flags, rec) { value.writeU32(flags); value.add(4).writeU32(0); value.add(8).writePointer(rec); nf.mapWrite(map, FORM, value); return readEntry(map); };
+  const writeEntry = function (map, flags, mid, rec) { value.writeU32(flags); value.add(4).writeU32(mid); value.add(8).writePointer(rec); nf.mapWrite(map, FORM, value); return readEntry(map); };
   const state = Memory.alloc(0x30); // 19533's state: flags u8, two counts at +4 and +8, the form, the node, the root's collision object, the buffer
   const liveBodies = function (form) { for (let o = 0; o < 0x30; o += 8) state.add(o).writeU64(0); nf.prePass(form, state); return { flags: hex(u8(state, 0)), a: u32(state, 4), b: u32(state, 8), count: u32(state, 4) + u32(state, 8), node: String(ptrAt(state, 0x18)) }; };
   const rootOf = function (form) { const ld = ptrAt(form, R_LOADED); return ld.isNull() ? NULL : ptrAt(ld, L_DATA3D); };
@@ -282,9 +286,10 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
     const row = { event: 'apply', mode: MODE, form: hex(FORM), thread: q.runThread, markThread: q.markThread, deferredMs: q.deferredMs, deferredVia: q.via, entryFlags: hex(p.entry.flags) };
     const before = snapshot(form, 'before');
     const s = singletons(), map = p.map;
-    let buf = null, rec = NULL, flagsOut = 0, body = null, step = 'start';
+    let buf = null, rec = NULL, flagsOut = 0, body = null, step = 'start', suppressSet = false;
     watch.active = true; watch.tid = q.runThread; watch.reads = 0; watch.bodies = 0; watch.setPos = 0; watch.setRot = 0; watch.flush = []; watch.parked = 0; watch.logs = [];
     try {
+      if (before.liveBodiesError !== undefined) throw new Error('the pre-pass 19533 faulted in the before snapshot (' + before.liveBodiesError + '): refused before any write');
       if (MODE === 'roundtrip') { // the actor script's recipe, the record kept for the entry
         step = 'ctor 36035';
         const raw = Memory.alloc(BUF.size);
@@ -325,7 +330,7 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
         step = 'allocate 68115';
         rec = nf.allocate(nf.heapOf(), r.bytes.length, 0, 0);
         if (rec.isNull()) throw new Error('the engine heap gave no memory');
-        rec.writeByteArray(r.bytes);
+        rec.writeByteArray(r.bytes.buffer);
       }
       step = 'body count';
       row.havok = body === null ? { note: 'deflated: block unread' } : havokOf(body, flagsOut, FORM);
@@ -334,27 +339,31 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
       row.liveBodies = before.liveBodies === undefined ? null : before.liveBodies.count;
       if (row.havok.count !== undefined && row.liveBodies !== null && row.havok.count !== row.liveBodies && !FORCE) throw new Error('body count ' + row.havok.count + ' in the record, ' + row.liveBodies + ' live: refused without FORCE');
       step = 'write 35509'; // THE engine-state write; the record pointer is the engine's from here unless 35568 refuses
-      const w = writeEntry(map, flagsOut, rec);
+      const w = writeEntry(map, flagsOut, p.entry.mid, rec);
       row.written = { flags: hex(w.flags), record: String(w.record) };
       if (!w.record.equals(rec)) throw new Error('the entry does not hold our record after the write');
       step = 'apply 35568';
       const ours = rec; rec = NULL; // from here the engine owns it (its decode frees it); never freed by us after the call
+      emit({ event: 'step', step: 'apply 35568', record: String(ours), header: row.record, writtenFlags: row.writtenFlags, pending: u32(s.game, PENDING_COUNT) }); // the last row a death leaves
       row.applyReturn = nf.applyWrap(s.game, form);
       const a = readEntry(map);
       row.afterApply = { flags: hex(a.flags), record: String(a.record), pending: u32(s.game, PENDING_COUNT) };
       if (row.applyReturn === 0) {
-        if (a.record.equals(ours)) { writeEntry(map, p.entry.flags, NULL); nf.deallocate(nf.heapOf(), ours, 0); row.restored = 'the entry put back with its old flags and a null record, our record freed'; }
+        if (a.record.equals(ours)) { writeEntry(map, p.entry.flags, p.entry.mid, NULL); nf.deallocate(nf.heapOf(), ours, 0); row.restored = 'the entry put back with its old flags and a null record, our record freed'; }
         throw new Error('35568 returned 0 (no entry, no record, a type mismatch or kLoading): read the formsLog rows');
       }
+      if (row.applyReturn !== 0 && a.record.equals(ours)) { writeEntry(map, a.flags, a.mid, NULL); row.dangling = 'the entry still held our record after a 1: nulled, not freed'; }
       snapshot(form, 'after apply');
       step = 'finish 35567';
-      if (SUPPRESS) row.suppressWasClear = nf.suppress(s.game, 0);
+      if (SUPPRESS) { row.suppressWasClear = nf.suppress(s.game, 0); suppressSet = true; }
+      emit({ event: 'step', step: 'finish 35567', suppress: SUPPRESS });
       nf.finishPass(s.game, 0);
-      if (SUPPRESS && row.suppressWasClear === 1) nf.suppress(s.game, 1);
+      if (suppressSet && row.suppressWasClear === 1) { nf.suppress(s.game, 1); suppressSet = false; }
       const f = readEntry(map);
       row.afterFinish = { flags: hex(f.flags), record: String(f.record), pending: u32(s.game, PENDING_COUNT) };
       row.result = 'ok';
     } catch (e) { row.error = 'at ' + step + ': ' + e; }
+    if (suppressSet && row.suppressWasClear === 1) { try { nf.suppress(s.game, 1); } catch (e) { row.suppressRestoreError = String(e); } } // a throw inside 35567 must not leave the bit set
     watch.active = false;
     try { if (!rec.isNull()) { nf.deallocate(nf.heapOf(), rec, 0); row.recordFreed = 'refused before the write: our record freed'; } } catch (e) { row.freeError = String(e); }
     try { if (buf !== null) { nf.bufDestroy(buf); row.bufferDestroyed = true; } } catch (e) { row.destroyError = String(e); }
@@ -390,7 +399,8 @@ if (off === undefined || !(FORM > 0) || (MODE === 'apply' && (!/^([0-9a-fA-F]{2}
   const rbSetPos = ptrAt(at('rigidBodyVtable'), SLOT_SET_POS * 8), rbSetRot = ptrAt(at('rigidBodyVtable'), SLOT_SET_ROT * 8);
   const hookBytes = {}; // every hook's resolved address and first bytes, read before the attach (the pitfalls rule)
   ['innerAdd', 'playerUpdate', 'formsLog', 'havokRead', 'havokBody', 'flushEntry', 'savedHavokSet'].forEach(function (n) { hookBytes[n] = firstBytesAt(at(n)); });
-  hookBytes.rigidSetPosition = rbSetPos.isNull() ? 'null slot' : firstBytesAt(rbSetPos); hookBytes.rigidSetRotation = rbSetRot.isNull() ? 'null slot' : firstBytesAt(rbSetRot);
+  const safeBytes = function (p) { try { return p.isNull() ? 'null slot' : firstBytesAt(p); } catch (e) { return 'unreadable: ' + e; } }; // a garbage slot must not fault the load
+  hookBytes.rigidSetPosition = safeBytes(rbSetPos); hookBytes.rigidSetRotation = safeBytes(rbSetRot);
   const mainTid = function () { const m = ptrAt(at('main'), 0); return m.isNull() ? -1 : u32(m, MAIN_THREAD); };
   const runPending = function (threadId, via, id) {
     if (pending === null || busy || threadId !== mainTid()) return;
