@@ -3850,11 +3850,13 @@ decision 2's probe is the backlog's gate, not tonight's.
 
 ## ADR-062: Scripts work: the host runs every world script of its hosted cells, and the safety moves to the natives that change server-owned state
 
-Status: PROPOSED 17:05 PST 2026-11-02 by thuum-magnus from numidium's shape, for Eli's sign-off (the next build after turbo 2's arm two). Amends
-ADR-059's IMPLEMENTATION; its principle stands: the cell's host runs the cell's world scripts, guests render the relays. Eli,
-verbatim, playtest 41: "i also feel like youre sort of fixing things one at a time, when really shouldn't 'scripts work' be a
-holistic fix? something structural is just not working." To this shape: "yes please." Earlier the same evening: "if something is
-built and running and we're saying we dont know how the engine works, then we did something wrong."
+Status: ACCEPTED 17:09 PST 2026-11-02 by Eli, verbatim via numidium: "sign off i suppose, i think shouldn't every script incident be
+transmitted and accepted? skyrim is not a competative game. trust should LARGELY be the default". PROPOSED the same evening by
+thuum-magnus from numidium's shape. Amends ADR-059's IMPLEMENTATION; its principle stands: the cell's host runs the cell's world
+scripts, guests render the relays. Eli, verbatim, playtest 41: "i also feel like youre sort of fixing things one at a time, when
+really shouldn't 'scripts work' be a holistic fix? something structural is just not working." To the shape: "yes please." Earlier
+the same evening: "if something is built and running and we're saying we dont know how the engine works, then we did something
+wrong." Eli's amendment at the sign-off (decision 2 below): a script's consequence is R2 by default, transmitted and ACCEPTED.
 
 Context. ADR-059 admitted world scripts by NAME (lab/layer/papyrus-admitted.tsv's host row, built from one dungeon's read) and
 lifted the activation block per listed base (activationUnblockedBases). Every dungeon since has failed on a name the list lacked:
@@ -3876,13 +3878,17 @@ Decision.
    platform; the name walk goes). No allow-list: papyrus-admitted.tsv's host rows and activationUnblockedBases retire (ADR-044's
    player-scoped rows for the player's own effects stay, they are a different question). Guests run none (the lifecycle events
    aside, ADR-059 decision 1) and render the relays.
-2. The safety moves to the consequences. The engine natives through which any script changes server-owned state are hooked once
-   each in Skyrim Platform (the Papyrus native's entry, found by its registration name through the re-analyst, rule 1) and
-   routed to the server, which validates, records and relays; a host-run script's change is the host's report (R2 where the
-   server records, R1 where it judges, R0 where the server's own rule answers instead). The table below is the census's: each
-   native with its scripts, the state it moves, our verb today and what this ADR adds. Most have a verb already; the gaps are
-   enable and disable, scripted placements and deletes, alias fills and their created items (the claw), scripted kills as
-   evidence, destruction stages, world globals and the player's standing.
+2. The consequences travel, and they are ACCEPTED. The engine natives through which any script changes server-owned state are
+   hooked once each in Skyrim Platform (the Papyrus native's entry, found by its registration name through the re-analyst, rule
+   1) and routed to the server as the host's report. Eli's amendment: a script's consequence is R2 by default (the host's engine
+   computes, the server records and relays, no refusal), declared unvalidated in its verb doc as rule 5 says ("record it as
+   unvalidated (R2)"): a rung choice inside the law, not an exception to it. The R0 and R1 verbs that exist stay as built (damage
+   numbers, inventory transfers, the stage rule's own checks, locks' reach); no new validator is written for a script's effect,
+   and one comes only where a later finding asks for it; the wire's bounds (the message's shape, its caps) are the only gate.
+   The table below is the census's: each native with its scripts, the state it moves, our verb today and what this ADR adds.
+   Most have a verb already; the gaps are enable and disable, scripted placements and deletes, alias fills and their created
+   items (the claw), scripted kills as evidence, destruction stages, world globals and the player's standing, every one a
+   record-and-relay row.
 3. Proof by whole dungeons, not scripts. The scenarios are q-golden-claw (Bleak Falls Barrow end to end on two seats: the campfire
    bandits, the plate and the spike wall, the pillars and the lever, the spider's drop, Arvel's web and run, the claw in his
    body, the rings and the keyhole, the word wall, with a restart in the middle) and q-embershard (the mine's bridge and its
@@ -3932,12 +3938,14 @@ locks, containers, npc-fate's death evidence, weather, actor-values, hosted stat
 enabled and deleted, ScriptPlacement generalising ADR-057's table, AliasFill with its created items, DestructionStage, WorldGlobal)
 each with validator, fixtures and contract line in one commit (rule 4), their records in the change form with a migration and a
 restart scenario (rule 6). Client: the gate and the relays' handlers already exist; the new state rows get their apply. Lab: the two
-dungeon scenarios, the gate set widened to them. Estimate: the flip and the hooks for the covered verbs (SetStage, AddItem and
-RemoveItem, Activate, PlayAnimation, Lock, SetOpen, Kill, Cast, the weather) two days plus the re-analyst's day for the entries;
-the new rules (enabled state and deletes one day, scripted placements one and a half, alias fills and created items half, scripted
-kill evidence half, destruction stages half, world globals and standing half) four and a half days; the two scenarios and their
-runs two days; about nine working days, built in three slices, each staged and walked by Eli: slice 1 the flip with the covered
-hooks (Bleak Falls walked by hand), slice 2 the new rules (the claw), slice 3 the scenarios green. What this rejects: one more name
+dungeon scenarios, the gate set widened to them. Estimate under the amendment (record and relay, no new validators): the re-analyst's day for the natives' entries first; slice 1,
+the flip (the hosted-cell lift replacing the name walk and the per-base lift) with the hooks whose verbs exist (SetStage, AddItem
+and RemoveItem, Activate, PlayAnimation, Lock and SetLockLevel, SetOpen, Kill as evidence, Cast, the weather), one and a half
+days, then Bleak Falls walked by hand on a stage; slice 2, the record-and-relay rows for the gaps (RefState for enabled, deleted
+and the destruction stage; ScriptPlacement generalising ADR-057's table with npc-fate's roll for actors; AliasFill with the
+created items, the claw; WorldGlobal; the standing), each a wire message with its bounds and fixtures in one commit and its record
+in the change form with a migration and a restart scenario, two and a half days; slice 3, q-golden-claw and q-embershard green
+twice, one and a half days plus the runs. About six and a half working days, in PLAN as the next build after turbo 2's arm two. What this rejects: one more name
 on the list (parked tonight, no more); running the vanilla scripts on the server's VM (ADR-059's reason stands); a per-dungeon
 allow-list of any shape.
 

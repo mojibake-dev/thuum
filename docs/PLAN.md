@@ -1285,6 +1285,15 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   halves (m4-prop-blast 8d94232c server, the client half in the chest bundle); the server-only train for the break
   m4-turbo2-union-srv and the client bundle m4-turbo2-chest 10ade7c4. The broken figure on c1 (Prisoner's look on the player's
   base, 00:15:36Z) is an open read, not tonight's heads.
+- STATE 17:09 PST 2026-11-02: ADR-062 ACCEPTED (Eli: "shouldn't every script incident be transmitted and accepted? skyrim is not a competative
+  game. trust should LARGELY be the default"): the NEXT BUILD after turbo 2's arm two, three slices after the re-analyst's day on the
+  natives' Papyrus entries (rule 1): (1) the flip, every world script of a hosted cell runs on its host (papyrus-admitted.tsv's host
+  rows and activationUnblockedBases retire), with the hooks whose verbs exist (SetStage, AddItem and RemoveItem, Activate,
+  PlayAnimation, Lock, SetOpen, Kill as evidence, Cast, the weather), one and a half days, Bleak Falls walked by hand on its stage;
+  (2) the record-and-relay rows for the gaps (RefState: enabled, deleted, destruction stage; ScriptPlacement; AliasFill with the
+  created items, the claw; WorldGlobal; the standing), R2 and declared unvalidated, each with its wire bounds, fixtures, change form
+  field, migration and restart scenario, two and a half days; (3) q-golden-claw and q-embershard green twice, one and a half days.
+  About six and a half working days. The census: docs/research/adr062/.
 - STATE 2026-11-02 14:05 PST (turbo 2's arm one, Eli's close at 12:32 PST, and the day's queue): wall-range MERGED (parity 4b6f5fa3: F1's band, F5's
   reanimation end, the container drop); the R0 train m4-turbo2-r0-train 6d7fcc84 (F9 restart-dead c3eb2550 plus skill books 38659a3e,
   GREEN at T3 as x-skill-book 212928, b-skill-book promoted) in numidium's one T2; the big client train m4-turbo2-train (the deaths head

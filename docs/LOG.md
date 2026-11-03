@@ -5430,3 +5430,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   q-embershard. The census behind it: lab/tools/papyrus-census.py over the load order's archives and loose scripts on sky-srv (14,302
   vanilla and 2,420 mod .pex), docs/research/adr062/papyrus-census-2026-11-02.tsv; SetStage in 6,290 vanilla scripts, Enable 874,
   Disable 760, AddItem 788, Activate 377, PlayAnimation 264, PlaceAtMe 258, Kill 119, Lock 121. Nine working days in three slices.
+
+- 17:09 PST 2026-11-02 ADR-062 ACCEPTED by Eli ("sign off i suppose, i think shouldn't every script incident be transmitted and accepted? skyrim is not a
+  competative game. trust should LARGELY be the default"): decision 2 amended to R2 by default (transmitted, accepted, recorded and
+  relayed, declared unvalidated per rule 5; the existing R0 and R1 verbs stay; no new validators for script effects). Re-estimated at
+  six and a half working days in three slices after the re-analyst's day; in PLAN as the next build after the arm.
