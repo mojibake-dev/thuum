@@ -5389,3 +5389,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   Playtest 41: Sven's reanimate ran on his host's engine with rotfern's figure as the commander (the get-up on Prisoner's screen alone,
   the thrall back on his own path); the fix is ADR-052's claim at the accepted hit (a Commanded follow kind, the lease from the effect's
   duration, released at the thrall's death), the host snippet retired. Build next on the fork; probe x-reanimate-claim.
+
+- 16:19 PST 2026-11-02 the exclusive fallback built (ADR-061 decision 3): fork m4-container-exclusive a393557c (server only, off parity 6d7fcc84): the setting
+  containerSharing "shared" (default) or "exclusive"; a container with an occupant refuses every other player's activation with
+  E_CONTAINER_BUSY and Debug.Notification "Someone is using this" on the refused seat; the close or leaving reach frees it. T0 in
+  PartOne_ActivateTest. An R0 after the arm; the flip is one settings line if x-shared-chest-phantom v2 stays red on b0939b7e.

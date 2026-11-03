@@ -118,20 +118,39 @@ Rate limit / bounds: the inventory messages' own (PutItem, TakeItem budgets).
   back shut.
 - Papyrus natives touched (ledger lines added): none.
 - Kill switch: none (fixes).
+- The live view and its fallback (ADR-061, playtest 41): the server setting `containerSharing`, "shared" (the default:
+  every player who opens a container is in it, memo D52) or "exclusive" (one occupant at a time: MpObjectReference's
+  CONT branch refuses every other player's activation while an occupant holds it, "[verb:containers] E_CONTAINER_BUSY:
+  <player> activates <container> held by <occupant>", and the refused seat hears Debug.Notification "Someone is using
+  this"; the occupant's close, its leaving reach or its disconnect frees it). Fork m4-container-exclusive a393557c.
+  The flip is one settings line; "exclusive" is the fallback if the live view's probe (below) stays red.
 
 ## Client
 
 - SP binding: none new.
 - TS handler: modelApplyUtils.ts applyModelIsOpen plays Open or Close on a CONT base ("container <id> lid Open played
-  for the server's isOpen" trace).
-- Kill switch config key: none.
+  for the server's isOpen" trace). The live view (ADR-061): view/liveContainer.ts applyLiveContainer, one apply for a
+  chest's record (remoteServer, a viewless game-file CONT) and a body's (formView, an actor's view) while this seat's
+  ContainerMenu is open on the reference: the record by base counts (this seat's own transfer, echoed by the server,
+  changes nothing and draws nothing, "the record matches the engine"), another occupant's change applied and then the
+  menu closed (TESModPlatform.CloseMenu) and the container activated again through the server 400 ms later, so the
+  engine draws the list whole ("live chest <id>: the record applied by base counts ... the menu closed and the container
+  asked again (reopen)"). The in-place redraw (refreshContainerMenu) left stale rows in playtests 37, 40 and 41 and
+  stays behind the client setting `chestRedraw: "inplace"` for its trace alone. Fork m4-turbo2-chest b0939b7e.
+- Kill switch config key: the server's `containerSharing` (above); the client's `chestRedraw` picks the redraw.
 
 ## Tests
 
 - T0: unit/PartOne_ActivateTest.cpp, the Containers cases: a put from 900 units off refused and the mover resynced, the
   same put taken at the barrel, a take from afar refused; a reloot asked for 30 s keeps that moment in the record and a
   load keeps it (not the 1 s window); a container saved open loads shut; a disconnect releases the occupant and the
-  other user hears isOpen false.
+  other user hears isOpen false; under containerSharing "exclusive" the second player is refused and notified while the
+  first is in it, admitted once the first leaves, both in it again under "shared" (ADR-061).
+- T3 for the live view (ADR-061 decision 2): x-shared-chest-phantom v2 after lab-api's transfer step and
+  server.inventory(<refr>): c1 opens, c2 joins; c2 stores a weapon and a food while c1's menu is open; c1 takes the
+  weapon, c2 the food; the roles swapped; a body as well as a CONT; after every change each seat's engine inventory of
+  the container equals the record, no "Source inventory doesn't have enough" or unauthorized equip in the server log,
+  the other seat's menu open again within 1.5 s. Green twice by path, then b-shared-chest in its own commit.
 - T1: none.
 - T2: the smoke session's container leg as today.
 - T3 scenario id: lab/scenarios/b-container-rest.yaml (after the probe): c1 opens the lab's chest, c2's screenshot
