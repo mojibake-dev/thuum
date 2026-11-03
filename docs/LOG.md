@@ -6198,3 +6198,21 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
     the hold's release line. Round seven's review was FIX FIRST; round eight is a4a7805c, and its evidence stage is running with
     no gate and no merge (door v21, swap v19, death-reentry v5, death-freeze v3, scene-guest v2.1; lab-api 4947). Containers:
     container-menu.js (6d4cbab2) reviewed GO; the transfer step (cf8032d9) reviewed FIX FIRST and is with its builder.
+- 03:43 PST 2026-11-03 (11:43Z 11-03) (thuum-cf): the re-analyst's Papyrus read for ADR-065 filed (docs/research/adr065-papyrus-state-2026-11-03.md,
+  471 lines, every decompile HYPOTHESIS, the ids from lab/addr.py's loader with six forward-checked by `just addr`; vtable slots
+  whose address equals a CommonLib id are CONFIRMED-STATIC, so IVirtualMachine.h's slot numbering holds). Q1: a bound script is
+  one BSScript::Object (Object.h:39-49) with its variables laid out ancestors-first and their names and types in the
+  ObjectTypeInfo; a VMHandle is kind (form or alias, unique-id item, active effect), mid and form id; a slice must carry the
+  handle, type name, state, flags and the positional variables (objects as handle plus type name, arrays up to 128) and cannot carry
+  stacks, latent waits, update registrations or queued functors. Q2: FindBoundObject (slot 0x1C) takes the attached-scripts lock
+  and returns the first object whose type or ancestor matches; ForEachBoundObject enumerates. Q3: the save's Papyrus section
+  (version 6: string, type, object, array, stack tables, then object data through Object::Save and Variable::Save) is NOT
+  portable per object (a per-save string table, references as save-time addresses, no per-object entry in LoadGame), so ADR-065
+  needs its own small encoder and decoder over the engine's identity. Q4: SendEvent is the one decision point for OnCellAttach,
+  OnCellDetach, OnLoad, OnUnload and OnReset (each goes through it, the relay's alias functor too), while OnInit is dispatched by
+  the VM itself and never passes SendEvent, so the fork's "oninit" entry in the gate is inert and D-S1's OnInit exception is
+  structural; today's gate (FridaHooks' OnSendEventEnter, ScriptNatives) already has every piece a cell-host key needs, and
+  ADR-065 adds the state carry at grant and release, not a gate change; Skyrim Together hooks nothing on events or state. Two
+  Frida reads named: the gate's lifecycle traffic per handle kind on a guest's interior entry (SendEvent, the OnInit dispatcher,
+  the attach sink), and the per-object record under a console save on the host (Object::Save, Variable::Save, SaveHandle), the
+  specification our serializer must match. Round eight's head is 817f78d0 (a twice-defined test case removed; no code change).
