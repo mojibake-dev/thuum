@@ -7039,3 +7039,20 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   block hash at every snapshot and at 19535's entry, the three verdict logs ungated, the kind-2 map occupancy around 35568 and
   35567, 19538 and the two setters counted per 19535 call on any thread (18 pairs for 19 bodies), the root's return time, headZ
   against the owner's. C4's "the record's pose isn't used on this path" is therefore undecided, not false.
+- 09:17 PST 2026-11-03 (17:17Z 11-03) (thuum-cf): apply-on-demand.js v2 written by the re-analyst (51,372 bytes, 614 lines; node --check clean; no em
+  dashes; unrun; the byte helpers round-trip under node, the run's 993-byte block encoding as 85 0f). New: the witnesses ungated by the
+  run window (havokRead per 19535 call for FORM on any thread with its caller's RVA, 36014's path being the 3D init and 36031's the
+  flush, the block the reader reads with its hash and varint count, the live count 19533 produced inside the call, the 19538 calls and
+  the two bhkRigidBody setters counted per call; 12358 for who releases or sets FORM's 3D and 19730 for when the pointer goes and
+  comes; the FORMS log printed whenever a vararg equals FORM's id or the format matches the known verdicts; 11977 stores with the
+  sub-buffer's version, length, block hash and count against the record's and the live pose's); the snapshots gain the
+  ExtraSavedHavokData's presence and hash (GetByType 0x3C) and the kind-2 map's occupancy, and before, rebuilt and settled carry the
+  copy's own live pose hash (36016's block, freed after hashing); a PARK option (default false): after 35568 returns 1 and before
+  35567 the record's Havok block is wrapped in the queue's own sub-buffer shape (the version byte, the varint length, the 19534
+  block) on the engine heap and handed to 11977 on the main thread, refused when the record carries no block; after the finish a poll
+  on PlayerCharacter::Update returns gives a rebuilt snapshot when data3D returns (or a 20 s timeout) and a settled one 5 s later,
+  then a result row with poseSource judged by the block 19535 read against the record's and the live pose's hashes. HYPOTHESIS until
+  the next run: the kind-2 map's layout, 36020's sub-buffer shape equal to 36023's, 36016's safety from the probe (the engine calls it
+  from Set3D on the main thread), the lock-wrapped Set3D in ExtraDataList::LoadGame's leveled case as the releaser on this seat, the
+  load buffer's size at +0x20, 19742's apply on the task thread with the extra still listed at 19535's entry, and the central
+  question, whether the rebuilt 3D takes the record's block or the live pose. Its fresh review runs; the lab after the merge.
