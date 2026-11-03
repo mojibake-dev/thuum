@@ -51,6 +51,9 @@ docs-lint:
     # a T3 box may not be ticked over an open engine claim (ADR-064 decision 1; lab/tools/verb-lint.py)
     - python3 lab/tools/verb-lint.py docs/verbs
     - just --list
+    # ADR-065 decision 1: every row of docs/STATE.md declares a Rung (lab/state.py); the regeneration check against CommonLib's
+    # flags runs locally as `just state-check`, since CI checks out no submodule
+    - python3 lab/state.py --out docs/STATE.md --lint-only
 
 # Lab tooling unit tests (addr.py, later ledger.py and lab-api). The fixture
 # tests skip without the CommonLibSSE-NG submodule; synthetic ones always run.
