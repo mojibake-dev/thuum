@@ -1029,9 +1029,17 @@ health message. A second red within two sweeps makes it a bug.
   shout and cast-order rules kept) and drops an Unarmed hit that lands
   beside such an apply on the same target. The server then claims it as a
   spell hit against the recorded cast, an area cast covering its targets
-  within the splash window as built. HYPOTHESIS until x-area-hit: the
-  apply fires in the caster's game for each actor the area took, and the
-  Unarmed stand-in is the explosion's every time.
+  within the splash window as built. x-area-hit 20261018-135726 (train-25
+  b352b82d's stage, 2026-10-18; its read below; settled 19:26 PST 2026-11-02):
+  CONFIRMED for the one actor the area took, the apply fired in the
+  caster's game for c2 and was reported beside the hit events (12
+  Scorching Hands hits counted at 0.15 to 0.2 a tick, nothing doubled),
+  and the Unarmed stand-in was the explosion's in the one burst read
+  (Shock Nova's 0x1f4 OnWeaponHit for 3.712, 115 ms after the apply, past
+  the one-update drop, widened to ten on train-26); HYPOTHESIS still that
+  the apply fires for each of several actors in one area and that the
+  stand-in is the explosion's every time (one target stood in the area,
+  one burst was read).
   Not a range matter: vanilla Flames' projectile reaches 768 units
   (Skyrim.esm PROJ 0x12FCF DATA, lab/esm.py on sky-srv) and c2 stood 400
   away; the mod has one Scorching Hands spell record (its editor id ends in

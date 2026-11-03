@@ -85,10 +85,14 @@ to 64 weathers; one word per player per place entered and per change stood throu
   20261031-171309 (the server's "user 1 hears 0 for 371de slot 0 (release)", the seat's "weather released in 371de
   (word)", Bleak Falls Temple's own torchlit sky in the screenshot, no error after); Weather.getCurrentWeatherTransition
   reads below 1 through a blend: CONFIRMED (0.65 and 0.58 mid-blend on both seats within 0.01 of each other, 1 with
-  outgoing 0 once settled). HYPOTHESIS until b-weather's legs 3b and 3c: the override survives a cell change within the
-  worldspace (x-weather's seats never left lab-spawn's cell; the scenario moves c1 to Riverwood), and the client leaves
-  a blend alone and re-forces any drift, blending or settled (the first rule re-forced a settled one alone and never fired, b-weather 091049; the
-  scenario forces SkyrimOvercastRain 0xc821f on c1 through the driver's weather step and reads the one re-apply).
+  outgoing 0 once settled). CONFIRMED by b-weather's legs 3b and 3c (b-weather 20261101-102038 and 20261101-105309, both
+  GREEN on m5-perks 395cdc49, the gate 20261101-104201-merge-m5-perks that put weather on parity 2026-11-01; settled
+  19:26 PST 2026-11-02): the override survives a cell change within the worldspace (x-weather's seats never left lab-spawn's cell; the
+  scenario moves c1 to Riverwood, where its "weather released" count stayed at the interior's 1 and it read c2's sky,
+  0x12f89 in 105309 and 0x81a in 102038), and the client leaves a blend alone and re-forces any drift, blending or settled
+  (the first rule re-forced a settled one alone and never fired while a blend ran, b-weather 20261101-091049 red at step 52,
+  the guard gone at 395cdc49; the scenario forces SkyrimOvercastRain 0xc821f on c1 through the driver's weather step and
+  read the one re-apply, "re-applied 1" once and c1 back on c2's sky within 10 s in both runs).
 
 ## Suppress
 

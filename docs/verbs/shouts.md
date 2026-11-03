@@ -177,7 +177,18 @@ bounds on casts.
 - Side effects of hooking here: none expected.
 
 - The release reported at the engine's own fire of the voice (fork
-  35a3975f, ADR-034; HYPOTHESIS until x-tgm-breath5 on its stage): SKSE's
+  35a3975f, ADR-034; REFUTED as the carrier by x-tgm-breath6
+  20261016-135744 on 0636f14e's stage, one server shout line for five
+  god-mode breaths into empty air: the event's source form names the
+  shout, not the spell, so this report sent nothing; the release is
+  reported from the player's own voice projectile launch instead, which
+  carries the variation's spell (castingSource 2; fork m2-breath-launch
+  84db2c4e, shoutService.ts onProjectileLaunched), CONFIRMED by
+  x-tgm-breath6 20261016-162045 and x-tgm-breath5 20261016-162436 on
+  84db2c4e's stage, five of five "shouts 3f9ea, variation 0 (spell 3f9eb)"
+  server lines for breaths at 0, 2, 4, 6 and 10 s and five shoutStarts on
+  c2's figure; the voice-fire listener below stays as a path that fires
+  only when the source form is a spell; settled 19:26 PST 2026-11-02): SKSE's
   action event kVoiceFire (CommonLibSSE-NG include/SKSE/Events.h:37-67,
   through SKSE::GetActionEventSource(), API.h:31) reaches the plugin once
   per shout the engine casts, with the actor and a source form; the plugin
