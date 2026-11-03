@@ -6807,7 +6807,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the event on c2 in both StabUpFace runs, while on the host the kill move killed at its tag only in the green (in the reds Sven lived
   at health 0.020 some 3.7 to 4.4 s after the event and died by the sword later). The only discriminator between green and red is the
   gap between the copy's early death and the server's word (3.2 and 3.0 s against about 0); not the kill variant, the hold, the
-  actor's state, the cell or the kill move's name. The fix on m3-system1-r3 (pushed after e... see the head below): replayActions
+  actor's state, the cell or the kill move's name. The fix on m3-system1-r3 db0e19a5 (after b8d82f05): replayActions
   drops a KillMove* event for a puppet ("<id>: the host's <event> not replayed on the puppet, a puppet's death is the server's word",
   once per puppet) and onResurrected clears deadFlaggedSince so the settle clock restarts at the last death; tsc clean, no wire
   change; its fresh review and pipeline follow; x-npc-death-freeze v4 twice is the read. The Dynamic read's shape, if the fix does
