@@ -13,6 +13,7 @@ import sys
 from pathlib import Path
 
 BOX = re.compile(r"^- \[([ xX])\] (.+)$")
+RUN_ID = re.compile(r"\b\d{8}-\d{6}\b")  # a lab run id, 20261102-131634
 
 
 def read_verb(path: Path) -> dict:
@@ -54,7 +55,11 @@ def read_verb(path: Path) -> dict:
     # not a verdict; the doc's Status box "no HYPOTHESIS tags" is the verdict
     hyp = 0
     for line in lines:
-        if "HYPOTHESIS" not in line or "CONFIRMED" in line or "still HYPOTHESIS" in line:
+        if "HYPOTHESIS" not in line or "still HYPOTHESIS" in line:
+            continue
+        # settled: confirmed in any case, or the line cites its run (the root-cause plan's rule: a claim is
+        # HYPOTHESIS unless it cites a run or trace id); a checklist box is the verdict, not a tag
+        if "confirmed" in line.lower() or RUN_ID.search(line) or BOX.match(line.strip()):
             continue
         hyp += 1
     # the Inventory's "later" rows (ADR-031): consequences a later slice takes
