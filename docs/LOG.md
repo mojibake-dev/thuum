@@ -5658,3 +5658,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   crossed the street during the wait before the until for his record in 3c), so the precondition depends on which seat holds a
   stale indoor copy. Door v7 (thuum-cf) restructures around the house door, red already shown on the parent, then the greens on
   the settle head and the run at handoffPassSettleMs 0.
+- 21:38 PST 2026-11-02 (05:38Z 11-03) (thuum-cf): door v6's two red runs on the parent 35509f7a (numidium's reads): leg A
+  20261103-051454 red at its premise (fresh seats, no pass logged at Hod's house door, the first until missed him already in the
+  inn); the swap probe 20261103-052100 REPRODUCED playtest 41's bounce at the HOUSE door: "ff000000 passes 1348a into cell 9731
+  (D9)" 05:22:17.325, "ff000001 passes 1348a into cell 133c7 (D9)" 56 ms later, the pair every 14 s as Hod retried his door; the
+  street seat's game had been inside the house in the run before. So the bounce needs the street seat's engine to hold a model of
+  him indoors, and the house door reproduces it at any exit hour; 56 ms sits inside the 1 s settle as well as being the
+  placement's case. v7 1c8f3455: leg A the house door at 08:00 from a 6.5 start (c2 the street's seat, c1 the house's), the
+  precondition built in (the street seat visits the interior, is granted it, sees him, leaves, the interior unhosts, its copy
+  claimed indoors with no 3D), each leg claiming its door's line and the pass back into its interior against a baseline; leg B the
+  inn door at 22:00 from a restart at 20.0 (c1 the street's seat with the follow into the inn claimed, the visit, c2 the inn's
+  seat); the exterior cell claim (v6's W4 item) dropped, flagged to the review. Swap probe v5 by path = leg A with the roles
+  swapped. Settle: afdb587d reviewed OK for its first lab run (the head for the greens); a texts-only round four pushed (the Stale
+  line names both rules, the bridge's and FOLLOW_SETTLE_MS's docs). Lesson: a fresh seat's engine has no model of an interior's
+  resident; the bounce's precondition is a seat that loaded the interior earlier in the session, so a two-seat premise must build
+  it in rather than assume the playtest's history.
