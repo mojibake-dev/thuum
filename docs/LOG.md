@@ -6855,3 +6855,17 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   current main) as evidence while both fresh reviews of b8d82f05..db0e19a5 read: death-freeze v4 (96ae3e4c) twice, x-warm-exit v2
   (702a3e9e), swap v20 (75bd28b9), death-reentry v5 (20a6c65d), scene-guest v3 (4ffaf665); the door scenario waits for Eli's D-P13.
   The gate and the merge wait for both GOs; the branch is held.
+- 08:09 PST 2026-11-03 (16:09Z 11-03) (thuum-cf): door v24's fresh review: FIX FIRST (two blocking), applied as written in the draft (sha1 20acc874;
+  parses and lints; the tracked file stays v23). (1) The stream witness had no positive control: 0 == 0 would hold for a pattern that
+  matches nothing or a missing console tee, and no lab count of that exact pattern has run yet; the claim gains
+  `c1.log_count("HostedStateService: state 1348a:") >= 1` (the baseline is at least 1 by construction: the visit's grant makes the
+  stream's first poll send a keyframe and print). (2) The post-grant block's `c1.npc_state(0x1348a).is3DLoaded == false` (read 25 to
+  120 s after the exit on the same buffered interior) is the same cold-route premise and takes the same witness (a c1 log-count
+  before that assert, the count equal to the exit's baseline), so TWO claims are rewritten and the W4 ask to Eli covers both. Notes
+  applied: the wording "a copy c1 HOSTED, by the server's word, would report" (the stream polls only actors the word names as c1's; a
+  copy whose engine AI ran while the word named another game prints nothing, which is the warm route's own stillness and must not be
+  claimed either), the reader's hints (a "(keyframe)" red is a re-grant to c1; a single line within a second of the exit is the last
+  sample's race), npc-state immediately before the assert. Its reads: the line is "Trace in HostedStateService: state 1348a: health
+  ..." (truncated at 128 chars, the match in the first 41), lowercase hex, the class name surviving the bundle; no other line carries
+  "state 1348a:"; the assert reads the last log-count step's count; the 30 s refresh prints no state line and cannot re-grant 133c6.
+  Also: the memory note on snapshot grammar was stale (a seat's `of:` accepted since 2026-11-03); corrected.
