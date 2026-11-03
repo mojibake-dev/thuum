@@ -5585,3 +5585,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the probe a plain read, the essential case's hit); the props arbitration's round 9fc30e95 (pipeline 4799); b-npc-handoff-door-hosts
   v4 974a9484 (the 5 s reads ordered, the door line's per-leg baseline, the parent's predicted reds) and x-handoff-door-hosts-swap v2
   by path from its leg B. numidium's parent read of v3 is running; its stamps go into v4's header.
+- 20:55 PST 2026-11-02 the night's lab reads under the plan. (1) The door scenario v3's read on the unfixed parent (20261103-041145, union-srv-3
+  35509f7a on the union's dist): RED as a premise miss at step 9, Hod's record (0x1348a) held in his house 0x133c7 for 600 s:
+  nobody hosted that interior and an unhosted cell freezes at its record, so v3 and v4 could never reach the case; his schedule
+  read from Skyrim.esm on sky-srv (lab/esm.py id): HodSleepingGiant19x3 0x35696 at 19:00 for 180 min, the sawmill 08:00 for
+  660 min, sleep 00:00 for 480 min, eat 06:00 for 60 min, so he walks out of the inn at 22:00; v5 hosts his house first, v6
+  takes the reviews. (2) Slice 1b's one-seat stage (m4-scripts-work d3d28dd8, its own dist, clean-m1-next 20:49) and
+  x-script-natives v1 (20261103-045048): red on the probe's own grammar (a seat's log_count without its log-count step), the
+  slice's facts read from c1.log: 24 of 24 natives hooked, none stood down, all 24 runtime offsets equal to the re-analyst's
+  table's RVAs (the static read's addresses now backed by a run), the first census flush 1743 calls over 22 rows in 30 s, no
+  live GlobalVariable.SetValue event (the direct mark holds); the per-row census and its "(platform)" keys reached no collected
+  artifact, so H-1b1 stays unread until v2. (3) lab-api: server.handoffPassSettleMs as a run's overlay key (b723b802), the
+  settle off at 0 to test the reliable placement alone; server.inventory(<ref>) (7a06787c).
