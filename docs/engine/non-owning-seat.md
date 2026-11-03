@@ -51,6 +51,7 @@ wire-transport lib.rs:534); the dead state's apply at load (formView's bind, dea
 | P6 | A seat that subscribes to an actor after its record moved is created at the record's position: SetPos writes the position before it subscribes the seat, so CreateActor carries it | HYPOTHESIS (a code read) | MpObjectReference.cpp:599-618, :945 (the door scenario v3's review); the leg A precondition of 051454 against 052100 differed for a reason still unexplained (the orientation or the hour) |
 | D1 | A dead record applied at a cell re-entry kills the body silently (formView's bind emits silent: true; deathService runs KillSilent), yet the death is heard again at each re-entry | the sound CONFIRMED by ear (a witness); the cause HYPOTHESIS (the kill's animation carries the sound) | playtest 41, Eli: "on a cell reentry i hear their deaths again"; the 2 s animation-event trace on m4-turbo2-chest 59af5508 is the read |
 | D2 | npc-fate's redress (AddWornOutfit and the equip path) on an actor whose 3D is not loaded crashes the seat | CONFIRMED by its crash log (a witness) | c1 at 17:51:00 PST 2026-11-02, CrashLogger: EXCEPTION_ACCESS_VIOLATION at SkyrimSE.exe+070DB20 (a null read), Sven 0x13491, an Iron Dagger and outfit 0x9D5DF on the stack, in the second the client un-hosted all 15 Riverwood NPCs (results/playtest-41/c1-crash-2026-11-02-17-51-00.log); the guard in 12f199e6 waits for the 3D, unread in a run |
+| D3 | Two seats' copies of one resident can wear different equipment at load: each seat's npc-fate rolls the late fate or redress on its own (both log "late fate for <id>: engine re-roll or redress queued" at the cell's load), so a promotion hands the next host's engine its own copy's gear, not the record's | HYPOTHESIS | 20261103-084006 (round two 0b61fc80): Hod 1348a "3 worn, right 1397e left 0, numChanges 2" on c2 at its grant against "3 worn, right 13790 left 0, numChanges 3" on c1 at its own (c2-console.log:758, c1-console.log:959); whose gear the record holds, and what the other seat shows after a host's change, unread |
 
 ## 3. What a fix relies on
 
@@ -79,6 +80,11 @@ promotion makes: in 055217's shape it would drop the report back into 133c7 and 
   64 units of the record's in the record's cell, and the server's first "passes|follows|moves 1348a" after it timed after the
   release and never from the mill's side; "not placed after N ms ...; released on the timeout" counted (none expected in the
   door's legs), on door v13's two legs, the swap probe v11 and the settle-0 read (handoffPassSettleMs 0, the placement alone).
+  First read, 20261103-084006 (door v14 on 0b61fc80): three promotions placed at the record in 49, 29 and 46 ms with the engine
+  already within a unit of it each time; his day package 0x734cd (live on both seats from the grant) walked him out through
+  door 13407 at 17.96 with the door's line, the pass to the street seat sent ahead of the word, and nothing passed him back. The
+  stale case (the engine away from the record at a promotion) was not reached: neither fresh seat had simulated him elsewhere,
+  and no gate move or create-word hold precedes the first grant (c2-console.log:669 to :749); door v15 makes it deliberately.
 
 ## 5. Thaw condition
 
