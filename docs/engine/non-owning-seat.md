@@ -83,6 +83,6 @@ promotion makes: in 055217's shape it would drop the report back into 133c7 and 
 ## 5. Thaw condition
 
 Every player-visible row above CONFIRMED on the viewpoints it names by a run or trace id (R1 to R5), and the door scenario's claims
-across each grant (b-npc-handoff-door-hosts v13, thuum main 1939d97c: no pass, follow or move of him into an exterior cell, v9's claim,
+across each grant (b-npc-handoff-door-hosts v14, thuum main 55b888f7: no pass, follow or move of him into an exterior cell, v9's claim,
 and none back into the interior, v12's, with the door line counted beside them) red on the parent 35509f7a and green twice on a head
 that imposes the record at every promotion. Until then nothing in this system merges: m3-handoff-settle stays a branch.
