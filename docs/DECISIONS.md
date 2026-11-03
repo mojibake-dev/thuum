@@ -4234,7 +4234,11 @@ Decision (proposed).
 1. The state list is the save's: every change flag of every form type, every global table the save writes, every script object's
    state and variables. docs/STATE.md gives one row per flag and table with its rung (R0 to R3) and its channel. A flag with no
    row is undeclared state, so the design law's "undeclared state is a bug" becomes a lint over CommonLib's enums.
-2. Observe. Every seat has one hook on AddChange, in each form class's vtable. The seat that owns the form (ADR-063) collects
+2. Observe. Every seat has one hook on AddChange, at the engine's funnel (clarified 11:40 PST 2026-11-03 by numidium and thuum-cf,
+   no decision changed: the vtables' shared body 14607, the forced entry 14608 and TESNPC's override all reach BGSSaveLoadGame's
+   AddChange 35576, change-forms.md A1 and A2, and census v3 hooked it directly; so one detour at 35576's entry counts every act,
+   a non-owner's included, and one at 35507, the map's OR after the gates, carries the report, since a suppressed mark never
+   reaches the save; written first as "in each form class's vtable", about 145 patches of one body). The seat that owns the form (ADR-063) collects
    (form, flags) for the frame and reports the flagged state at the frame's end.
    - A non-owner's call is never reported, only counted. A non-owner's engine changing persistent state is a missing
      suppression, system 1's whole class of bug, and the count makes it visible.
