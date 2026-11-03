@@ -7294,3 +7294,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   head. ADR-065's receiver half is shown across two seats for a dead NPC (MECHANISM ONLY, one subject); change-forms.md C4 carries it.
   For ADR-067's "every corpse where it lands" it is the engine's own path: the owner's record of the corpse at rest, applied by the watcher.
   Reads 2 (a dead record onto a live copy) and 4 (the actor record injected before the cell loads) wait for thuum-cf's script changes.
+- 13:14 PST 2026-11-03 (21:14Z 11-03) (thuum-cf): Read 1 GREEN (numidium's 20261103-210713, x-apply-cross-seat-sven on c2 solo, apply-on-demand.js v2.3, 13 of 13): c1's dead
+  record of Sven applied on c2's dead copy through the engine's own LoadGame moved the copy about 1,150 units to c1's place in one call
+  (35568's initial data), rebuilt in the same frame with the root unchanged, settled within 5 units of c1's body and head in c1's pose
+  (poseSource the record's block 0x7297124a, not the live 0xa3f2c31c), the one type-0 id re-encoded (00295a to 002958, index 10586 to
+  10584 on c2) and no active-effect miss line. Decision for the corpse slice: the watcher's corpse is laid by the owner's change-form
+  record applied through LoadGame (ADR-065's path, one mechanism for place and pose), not by a position sample and a keyframe; under
+  ADR-067 the bind kill and the death word stay, so the apply is dead-on-dead and reads 2 and 4 wait for materialize-first proper. Four
+  agents on four branches (adr065-sys1-native: SerializeChangeForm and ApplyChangeForm natives from the Frida recipes; adr065-sys1-wire:
+  ChangeForm, ChangeFormAck, ChangeFormApply with the validator, fixtures, C++ structs, the handler, the persisted store, the ack and
+  the serve at subscribe and cell load, T0; adr067-corpses-client redirected to the TS of the pipeline with the at-rest trigger;
+  adr067-corpses-srv unchanged: the owner's post-death samples to rest as the record's position), one merged branch for the stage,
+  fresh reviews each; about five working days. docs/verbs/change-form.md's status says so. F1's image turbo3-sys1-f1-6cce828e is
+  built (pipeline 5096) and goes to the lab first.

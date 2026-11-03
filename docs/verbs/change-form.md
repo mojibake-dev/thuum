@@ -1,8 +1,14 @@
 # change-form (ADR-065 for system 1: the save is the state)
 
 Status: the vertical slice for system 1, begun 13:0x PST 2026-11-03 on Eli's word ("we should be implementing the real fix
-every time"). One fork branch adr065-system1 off m3-system1-r3 df9e1009, built in three layers in parallel (native,
-wire and server, client), one stage, one gate. This doc is the contract the layers meet at; the engine facts are
+every time"), re-scoped at 13:4x PST by ADR-067 (Eli's executive decisions) and by read 1's GREEN (20261103-210713, the cross-seat
+actor apply: c1's dead record of Sven applied on c2's dead copy through the engine's LoadGame moved the copy 1,150 units to c1's
+place in one call and laid it in c1's pose within 5 units, the one type-0 id re-encoded 10586 to 10584): the FIRST TRIGGER is the
+corpse (the owner serializes the body's record when its ragdoll is at rest; the watcher applies it after its own kill, by the death
+word or by the bind, which ADR-067 keeps), so the apply is always dead-on-dead and reads 2 and 4 wait for materialize-first proper.
+The AddChange funnel's observe (decision 2) and the live-actor flags come after. One fork branch adr065-system1 off m3-system1-r3
+df9e1009, built in three layers in parallel (native, wire and server, client) beside ADR-067's server half (the owner's post-death
+samples to rest, the record's position), one stage, one gate. This doc is the contract the layers meet at; the engine facts are
 docs/engine/change-forms.md and docs/research/adr065-serialize-on-demand-2026-11-03.md.
 
 ## Intent
@@ -60,7 +66,8 @@ Every id is Address Library 1.6.1170; the RVAs and the evidence are in the resea
   (SetNumericID) during the recipe gives the remap rows (D6).
 - The apply on a loaded reference: 35509 (the record written into the entry), 35568 (the apply: the initial data, then LoadGame
   through slot 0x0F) and 35567 (the finish pass; the Havok block parked for a leveled actor's rebuilt 3D or fed to 19535
-  directly), CONFIRMED by 164416, 174905 and 193005 for a dead record on a dead copy.
+  directly), CONFIRMED by 164416, 174905 and 193005 for a dead record on a dead copy of the same seat, and by 210713 for another
+  seat's record on this seat's dead copy with the REMAP step (the place from the initial data, the pose from the record's block).
 - The apply before a cell loads: the record written into the changes map in save-file format, applied by LoadGame at the cell's
   init before the 3D loads (D1, D2 for the engine's own stash; D3 CONFIRMED for an injected REFR record; the ACHR case is
   read 4 below).
