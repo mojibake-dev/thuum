@@ -754,6 +754,11 @@ window. T3: b-npc-handoff-door-hosts (thuum 019b0cd3, its own commit): c2 inside
 landing (lab/esm.py door), c1 at Riverwood's landing, the clock at 23.0; claims one "passes 13482 into cell 133c8", none into a
 0x97xx square 30 s on, the record indoors, c2 running him, both engines in one cell. HYPOTHESIS until that run: the mechanism
 above (every stamp fits it), and whether 1 s covers the promote on the lab's LAN.
+Known limit (19:24 PST 2026-11-02): the door's pre-check reads Stale as a refusal, so a host's engine that turns an actor around
+inside one second of a pass waits at the door until the window passes (its package retries the door as Embry's did,
+playtest 37); a real turnaround that fast is the ping-pong's own shape, and the window is the cost of telling them apart.
+The fix's T0 reds (pipelines 4768, 4773) were the two CellHostTest cases that walked an actor straight back through the
+door inside the window; both now read the settle (the stale leg refused, the return after the window), head 9606963e.
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (2026-10-22 draft; the decisions as ADR-047 PROPOSED 2026-10-23, D6 to D11)
 - [x] engine surface cited or delegated (the cell getters through Skyrim Platform and libespm's CELL and record flags; moveRefrToPosition the player's own cross-cell call; no new native)
