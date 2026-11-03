@@ -260,6 +260,20 @@ the Bleak Falls walk by hand on slice 1's stage (the plate and the wall, the pil
 and run, the alcove draugr waking), then q-golden-claw and q-embershard as slice 3's scenarios. Status boxes below stay as they
 are until the slice is built; the build opens its fork branch as m4-scripts-work off parity.
 
+The first lab read (one seat, m4-scripts-work d3d28dd8's stage of 20:49Z 2026-11-03, probe x-script-natives v1 as run
+20261103-045048, numidium's read of c1.log after the probe went red on its own grammar at the hook block): "24 of 24 native entries
+hooked (ADR-062 slice 1b)" at 20:52:31.812Z and no row stood down at its self probe; every one of the 24 runtime offsets equals the
+research table's RVA (docs/research/adr062/papyrus-native-entries.md: 16 by row name, 8 in the combined rows: Enable 0xa2cc50,
+EnableNoWait 0xa2cd10, Disable 0xa2ca70, DisableNoWait 0xa2caa0, Kill 0x9e90c0, KillSilent 0x9e9090, PlaceActorAtMe 0xa2e6d0,
+SetCurrentStageID 0xa46fd0), so the table's entry addresses are CONFIRMED by a run id while every behaviour row (the calling
+convention, the self probe's meaning, the latent note's self) stays HYPOTHESIS; the first census flush "1743 tallied native call(s)
+in 30 s over 22 row(s) flushed to the census" at 20:53:10.967Z; zero live "native GlobalVariable.SetValue on" lines, so the direct
+path's mark holds for the clock's own SetValue (H-1b2's first evidence, not its proof). Unread: the per-row census and the
+"(platform)" and "(not hosted)" keys (ScriptNativeService's summary follows the platform's flush by up to 30 s and the run had
+stopped 39 s before the flush). x-script-natives v2 (by path) gives every seat claim its own log-count step, waits two flushes, claims
+the platform's flush and the service's summary apart, and adds the guest leg (a second seat in the host's cell: "(not hosted)"
+tallies and no live row for cell 9732); the relayed quest stage read for H-1b1 is its v3.
+
 ## Status
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared
