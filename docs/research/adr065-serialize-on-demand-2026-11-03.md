@@ -1146,10 +1146,45 @@ bytes), the ready row proved the hook (0x620240:40534883) and the attach raised 
 droppedOtherThreads 0: the hook was live and never entered. The cause is Frida's listener guard (the subsection below): the recipe runs
 inside PlayerCharacter::Update's onLeave, so 36037's call to 35928 bypassed the hook on that thread. The resident run 183432 (Sven 0x13491)
 is void for the census by the same rule; its record bytes stand. v2.2 moves the trigger to a replacement; the census reruns on it.
+Second run, 20261103-192013 (numidium, the bandit, v2.2 8838368e, c1 solo, GREEN): the fix's checklist held (updateReplaced true,
+attachErrors [], updateThread equal to mainThread 10196 in every liveness row, updateFaults 0; both marks armed on non-main threads 1580
+and 11220 and premised on the main thread through PlayerCharacter::Update in 10 and 17 ms; the first id row seq 0, kind 1, 0x39fe4 in
+'header (+0x18, 36037)'; the writer marks no longer empty: refr 1061 to 1201, process 1201 to 4448, actorState, four modifiers, avStorage
+4640 to 4778 at kDying; cleanup 'runs spent', reverted true, at the second run; droppedOtherThreads 0). D6 for a LEVELED actor: byKind[2] is
+0 at both marks (178 and 149 ids), so the clone is NOT written as a base under bit 7 and the loader rebuilds it from the two templates (C4's
+reading); kind 3 is 0; of kind 0, 62 and 49 rows are the seeded null 000000; the real type-0 ids are SPELLS (formType 0x16): at kDying
+0xFE014817 (three times), 0xFE014819 and 0xFE01480B (a light plugin, FE:014; indices 10582 to 10584 appended in first-use order), at kDead
+0x2B005373 (index 10585), all through the id writer at 0x627030 (inside 36048) with offsets inside the PROCESS region, none in the
+inventory. So the inventory's drop rule (paragraph 3 below) does not cover the bandit's record; the AI process block's reader of those
+spell ids (39430 and callees: null, or another form under a receiver's reused index) is the safety read before any cross-seat apply of it;
+queued to the re-analyst. Design note (numidium): the census rows ARE amendment F's re-encode table: each type-0 row carries the record
+offset of its three bytes and the sender's full form id, so a receiver can look the same form up in its own map (35554 inserting on a miss)
+and patch the three bytes with its own index before 35568; the census hook is the sender's half of the re-encode, a receiver-side Frida step
+is the probe's half, the client's native the ADR's.
 
-**Subjects and expectations.** The dead promoted bandit 0x39fe4 (a leveled base): a type-2 base (the clone), type-1 cell and template ids,
-type-0 indices for any plugin form in its inventory or effects. A Riverwood resident (a game-file base): type 1 throughout except the plugins'
-distributed forms. The census decides whether "a subject whose record is all type 1" exists on this load order at all.
+**Subjects and expectations, and what the censuses read.** Expected: the dead promoted bandit 0x39fe4 (a leveled base) with a type-2 base
+(the clone), type-1 cell and template ids, type-0 indices for any plugin form; a Riverwood resident (a game-file base) type 1 throughout
+except the plugins' distributed forms. Read (v2.2, 192013 the bandit, 192345 Sven): the type-2 expectation is REFUTED for both, byKind[2] 0
+at every mark (the clone is not written as a base; the loader rebuilds it from the two templates); kind 3 is 0; and the type-0 ids are the
+SAME five spells in both records, all in the AI PROCESS block, none in the inventory: 0xFE014817 (three times), 0xFE014819, 0xFE01480B at
+kDying and 0x2B005373 at kDead (Sven's kDead record: 3,420 bytes, FNV-1a 0x7dd12708, flags 0xaa000427, raw; 152 ids, 103 type 1, 48 nulls,
+1 type 0, encoded 00 29 5a at record offset 2097, the one patch site). The indices are session-local by direct proof: 0xFE014817 is index
+10582 in the bandit's session and 10583 in Sven's. So no subject on this load order has an all-type-1 record, the inventory's drop rule
+(paragraph 3 of the static read) covers neither, and the AI process block's reader of those spell ids is the safety read before any
+cross-seat apply (queued; the paragraphs below when they land). Sven's dead body in 192345 lay at (20954.6, -45804.7), head
+(20914.9, -45844.9), about 68 units from 183432's: ragdolls land differently per session, so a match after a cross-seat apply means
+something.
+
+**The receiver's half of the re-encode (the REMAP step, apply-on-demand.js v2.3, to write and review).** A LAB_PARAM string of rows
+`offset:formId:index` (Sven: `2097:0x2B005373:10585`), applied to the RECORD bytes after the record parses and the SUM over the sender's
+bytes is verified, before 35568. Per row: the three bytes at the offset must decode to type 0 with exactly the row's index, else the run
+refuses (a wrong offset never patches); LookupByID(formId) on the receiver (14617) must be non-null, its form type recorded (a null refuses:
+the encoder would mint an index for a form this seat lacks and the reader would resolve it to null later); the receiver's encoding comes
+from the engine's own encoder, 35928 on a 3-byte scratch with the full form id (the function the census watched), never from an index the
+script computes; the bytes are written and a `remap` row emitted (offset, formId, from, to, the receiver's index, formType); the record's
+FNV-1a is recomputed for the apply row. Rows whose bytes decode to type 1 or 2 refuse (nothing to remap: a wrong row). HYPOTHESIS: 35554's
+insert on the receiver's map is safe on the main thread under the replacement (the engine's save path does it). This is the probe's half;
+the client's native does the same on every received record once amendment F is accepted.
 
 **Consequences, as options for the ADR (no decision here).** Type 0: re-encode per seat; the sender's reverse map (GetNumericID 35927 through
 35555) gives the plugin form id, the wire carries it plugin-relative (as ADR-043 already stores every form; each seat resolves it to its own runtime

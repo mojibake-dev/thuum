@@ -7142,3 +7142,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   misalignment corrupts silently or faults; InventoryChanges::LoadGame DROPS an entry whose id resolves to null, aligned, and a type-0 index
   the receiver's map holds substitutes an item; a cut is feasible by a mark hook on 16142 at entry and return) and the corrections. Both
   scripts unrun; the censuses (the bandit, then Sven) are numidium's reruns in the idle lab; the apply's rerun after the merge.
+- 11:29 PST 2026-11-03 (19:29Z 11-03) (thuum-cf): docs/research/adr065-serialize-on-demand: D6 read on v2.2 (numidium's runs 192013 the bandit and 192345 Sven, both GREEN, the fix's
+  checklist held: updateReplaced true, updateThread equal to mainThread, the marks on non-main threads premised on main through Update's
+  replacement, the writer marks no longer empty, cleanup 'runs spent' reverted true): the type-2 expectation REFUTED for both (byKind[2] 0:
+  the leveled clone is not written as a base; the loader rebuilds it from the templates); kind 3 0; the type-0 ids the same five spells in
+  both records, all in the AI process block, none in the inventory (0xFE014817 x3, 0xFE014819, 0xFE01480B at kDying; 0x2B005373 at kDead,
+  Sven's one patch site at record offset 2097); indices session-local by direct proof (10582 against 10583 for the same form). The REMAP
+  step's shape for apply-on-demand.js v2.3 (the receiver re-encodes each census row's full form id through the engine's own 35928 and
+  patches the three bytes before 35568, with the decode and lookup checks and a remap row); the process block's spell-id reader queued as
+  the safety read; numidium's cross-seat draft moves to 192345's kDead record with REMAP.
