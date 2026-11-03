@@ -1,43 +1,45 @@
-# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v4 2026-11-03 after the fresh
-# review's three findings on v3 abb4d8bc (the reads' order at 5 s, the door line's baseline, the parent's predicted
-# reds); v3 answered the seven findings on v2 dd472cc6, which answered the review of v1 019b0cd3): a resident leaving a
-# hosted interior for a street ANOTHER live seat hosts stays with the street's host, on both screens. Playtest 41
-# (02:08Z, Hod 0x1348a leaving the Sleeping Giant by its inn-side door 0x13419, Prisoner hosting the inn and rotfern
-# the street): the pass promoted the street's game with its copy still inside, its first report handed him straight
-# back, and the two games traded him twice a second ("hod just tried to leave the sleeping giant inn... cannot seem
-# to"). The fix (fork m3-handoff-settle 9606963e): the passing report goes to the new host reliably ahead of the
-# hoster word, so its promote places the copy at the door's far side; and the new host's report back into the cell
-# within PASS_SETTLE_MS is dropped as a stale copy's sample (verdict Stale), never a pass.
-# Doors (lab/esm.py door): 0x13424 is the street-side door in 0x9712 at (23320, -44530, -8), its landing inside
-# 0x133c6 at (-250, -360, 0) facing heading -0.5 degrees (north, +y); 0x13419 is the inn-side door Hod leaves by, its
-# landing on the street at (23260, -44476, -8) facing -48 degrees.
-# Shape: the inn's seat stands at 0x13424's landing, two steps north into the room, hosting 0x133c6; the street's seat
-# stands on Riverwood's road in 0x9712 at b-npc-handoff-cross's spot and hosts it; the clock at 22.0 (claimed by
-# server.time().hour at the start), when Hod drinks at the inn and leaves for bed around midnight (his evening starts
-# in Gerdur's house 0x133c7, so his walk to the inn may itself be a pass into 0x133c6: every count below is read
-# against a baseline snapshot taken at the premise, and the counts survive leg B's restart since the server's log
-# does). Leg A: c2 inside, c1 outside. Leg B: a restart with the same clock, the roles swapped.
-# Per leg: the premise (both hosts; his record indoors with his 3D and AI on the inn's seat; the playtest's
-# precondition, the street seat's own copy of him standing indoors with no 3D, which the parent's bounce rests on,
-# npc-handoff.md's D9 settle HYPOTHESIS); the exit waited on the pass line itself against the baseline (a record
-# that never left, or a margin follow, satisfies no cell poll here); at 5 s, with nothing between the reads and the
-# claims: the door walk's own line once, exactly one more "now simulates 1348a in cell 97xx" than the baseline and no
-# more for 133c6, the record outdoors, the street's seat running him loaded in 0x9712 within 150 units of the record
-# both ways, the inn's seat with no 3D of him and its copy out of the inn; at 65 s, the counts again (no pass, follow
-# or move of him back into 0x133c6 beyond the baseline) and nobody's copy in the inn (his bedtime walk may follow the
-# street's host into 0x133c7, so the 65 s read claims no cell for him but "not the inn"). Reads for the header after
-# the runs: how long after the pass the "dropped as a stale copy's sample" line came, if it came (PASS_SETTLE_MS is
-# UNMEASURED; cells.rs names this scenario as its sizing). Mutation (v4, the review's N3): leg A on the fix's parent
-# union-srv-3 35509f7a. By npc-handoff.md's timeline the playtest's stale report came about 8 s after the pass, so at
-# the 5 s read the counts may still hold on the parent and the reds expected there are the street seat's engine claims
-# (its copy still indoors: is3DLoaded false, cell 0x133c6, x and y far from the record), with the counts going red at
-# the 65 s read when the bounce has come; and if the street seat holds no model of Hod before the pass (SetPos writes
-# the landing before it subscribes the seat, so the CreateActor carries the far side and the copy moves at the
-# promotion), the parent can stay green through the 5 s step, and the informational "moved 1348a into 3c" line tells
-# which happened. The parent's read of v3 (numidium, 2026-11-03) is the fact this header waits for. Leg B's roles run
-# on the parent as the by-path probe x-handoff-door-hosts-swap (a run stops at its first red, so the second leg never
-# reaches the parent here). Its own commit (rule 13); ADR-064's
-# fresh review before the gate plays it.
+# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v5 2026-11-03 after numidium's read of v3
+# on the fix's parent, run 20261103-041145: a premise miss, not the bug. Hod 0x1348a's clean-world record stands in his
+# house 0x133c7 (riverwood-ids.md), nobody hosted that interior, and an unhosted cell freezes at its record, so he never
+# walked to the inn and the 600 s wait for his record in 0x133c6 ran out. v4 974a9484 answered the review of v3 (the reads'
+# order at 5 s, the door line's baseline, the parent's predicted reds); v3 abb4d8bc the seven findings on v2 dd472cc6; v2
+# the review of v1 019b0cd3): a resident leaving a hosted interior for a street ANOTHER live seat hosts stays with the
+# street's host, on both screens. Playtest 41 (02:08Z, Hod leaving the Sleeping Giant by its inn-side door 0x13419,
+# Prisoner hosting the inn and rotfern the street): the pass promoted the street's game with its copy still inside, its
+# first report handed him straight back, and the two games traded him twice a second ("hod just tried to leave the
+# sleeping giant inn... cannot seem to"). The fix (fork m3-handoff-settle): the passing report goes to the new host
+# reliably ahead of the hoster word, so its promote places the copy at the door's far side; and the new host's report
+# back into the cell within handoffPassSettleMs is dropped as a stale copy's sample (verdict Stale), never a pass.
+# Doors (lab/esm.py door): 0x13424 is the inn's street-side door in 0x9712 at (23320, -44530, -8), its landing inside
+# 0x133c6 at (-250, -360, 0) facing north; 0x13419 is the inn-side door Hod leaves by, its landing on the street at
+# (23260, -44476, -8); 0x13423 is Hod's house's street-side door in 0x9731 at (23556, -47255, -19), its landing inside
+# 0x133c7 at (-506, -177, 0) facing heading 2.4 degrees (north).
+# Shape, the playtest's real path: the inn's seat begins INSIDE HOD'S HOUSE and hosts it, so his AI runs; the clock at
+# 20.0 (his evening is the inn's, his bedtime the walk out; the hours are the engine's, read from the run), so his
+# package walks him out of the house (a pass to the street's host, whose grid covers 0x9731 and 0x9712) and into the
+# unhosted inn (the street host's follow, D6, its engine walking him in: the street seat's copy stands indoors, the
+# precondition the parent's bounce rests on, claimed); then the house's seat walks over to the inn, is granted it, the
+# follow ends and it simulates him there; at his bedtime he leaves by 0x13419 and the inn host's report from the street
+# passes him to the street's host (D9): the case. Leg A: c2 the house's and then the inn's seat, c1 the street's. Leg B:
+# a restart with the same clock, the roles swapped. Per leg: the premise in order (the three hosts, his record in the
+# house, the hour; his record in the inn; the inn granted to the walker; his 3D and AI on the inn's seat; the street
+# seat's copy indoors with no 3D), the counts read against baselines snapshotted at the premise (the passes of the path
+# and his walk in are counted already; the counts survive leg B's restart since the server's log does), the exit waited
+# on the pass line itself (a record that never left, or a margin follow, satisfies no cell poll), then at 5 s, the counts
+# first and the engine and position claims with no log count among them: the door walk's line beyond its baseline, one
+# more "now simulates 1348a in cell 97xx" than the baseline and no more for 133c6, the record outdoors, the street's seat
+# running him loaded in 0x9712 within 150 units of the record both ways, the inn's seat with no 3D of him and its copy
+# out of the inn; at 65 s the counts again and nobody's copy in the inn. Reads for the header after the runs: how long
+# after the pass the "dropped as a stale copy's sample" line came, if it came (handoffPassSettleMs unset is 1 s,
+# UNMEASURED; cells.rs names this scenario as its sizing); whether the street seat's copy was moved at the promotion
+# ("moved 1348a into 3c", informational). Mutation: leg A on the fix's parent union-srv-3 35509f7a. By npc-handoff.md's
+# timeline the playtest's stale report came about 8 s after the pass, so at the 5 s read the counts may still hold on the
+# parent and the reds expected there are the street seat's engine claims (its copy still indoors: is3DLoaded false, cell
+# 0x133c6, x and y far from the record), with the counts going red at the 65 s read when the bounce has come; and if the
+# street seat's copy was moved at the promotion after all, the parent can stay green through the 5 s step and the move
+# line tells which happened. Leg B's roles run on the parent as the by-path probe x-handoff-door-hosts-swap (a run stops
+# at its first red, so the second leg never reaches the parent here). Its own commit (rule 13); ADR-064's fresh review
+# before the gate plays it.
 id: b-npc-handoff-door-hosts
 milestone: M3
 clients: [c1, c2]
@@ -45,33 +47,44 @@ server:
   snapshot: clean
   netem: null
   npcEnabled: true
-  gameHour: 22.0
-timeout_s: 3600
+  gameHour: 20.0
+timeout_s: 4200
 steps:
-  # leg A: c2 hosts the inn from inside, c1 the street
   - c1: connect
   - c2: connect
   - wait: 10
+  # leg A: c2 hosts Hod's house 0x133c7 from inside (the landing of its door 0x13423, two steps in), so his AI runs
+  # and his evening walks him to the inn; c1 hosts the street 0x9712 and, by its grid, 0x9731 where the house's door
+  # stands, so the walk out of the house is a pass to it and the walk into the unhosted inn its follow (D6)
   - c1: teleport {cell: "3c:Skyrim.esm", x: 21995, y: -44935, z: -128, rot: [0, 0, 180]}
-  - c2: teleport {cell: "133c6:Skyrim.esm", x: -250, y: -360, z: 0, rot: [0, 0, 0]}
+  - c2: teleport {cell: "133c7:Skyrim.esm", x: -506, y: -177, z: 0, rot: [0, 0, 0]}
   - wait: 5
   - c2: move {dy: 150, duration_s: 2}
   - wait: 20
   - assert:
       - server.host(0x9712).client == "c1"
-      - server.host(0x133c6).client == "c2"
-      - server.time().hour >= 22
-  # the premise: Hod indoors under the inn's seat, loaded and run there; the street's seat holds its copy of him indoors, unloaded
-  - until: {within: 600, expect: [server.ref(0x1348a).cell == "133c6:Skyrim.esm"]}
+      - server.host(0x9731).client == "c1"
+      - server.host(0x133c7).client == "c2"
+      - server.ref(0x1348a).cell == "133c7:Skyrim.esm"
+      - server.time().hour >= 20
+  # the premise's path: his record leaves the house (the pass to the street's host) and reaches the inn under the street
+  # host's follow; then the house's seat walks over to the inn, is granted it, the follow ends and it simulates him there,
+  # the street seat's own copy standing indoors where its engine walked him in (the playtest's precondition)
+  - until: {within: 900, expect: [server.ref(0x1348a).cell == "133c6:Skyrim.esm"]}
+  - c2: teleport {cell: "133c6:Skyrim.esm", x: -250, y: -360, z: 0, rot: [0, 0, 0]}
   - wait: 5
+  - c2: move {dy: 150, duration_s: 2}
+  - until: {within: 90, expect: [server.host(0x133c6).client == "c2"]}
+  - wait: 10
   - c1: npc-state {formId: 0x1348a}
   - c2: npc-state {formId: 0x1348a}
   - assert:
+      - server.ref(0x1348a).cell == "133c6:Skyrim.esm"
       - c2.npc_state(0x1348a).is3DLoaded == true
       - c2.npc_state(0x1348a).aiEnabled == true
       - c1.npc_state(0x1348a).is3DLoaded == false
       - c1.npc_state(0x1348a).cell == 0x133c6
-  # the baselines: what the log already counts before the exit (his walk into the inn, if it happened in this run)
+  # the baselines: what the log already counts before the exit (his walk in, the passes of the path)
   - server: log-count {pattern: "now simulates 1348a in cell 133c6"}
   - server: log-count {pattern: "now simulates 1348a in cell 97"}
   - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 133c6"}
@@ -80,8 +93,9 @@ steps:
   - server: snapshot {name: street_a, of: 'server.log_count("now simulates 1348a in cell 97")'}
   - server: snapshot {name: into_inn_a, of: 'server.log_count("(passes|follows|moves) 1348a into cell 133c6")'}
   - server: snapshot {name: door_a, of: 'server.log_count("door 13419: 1348a.s host .* walks it through to 3c")'}
-  # the exit: his host's engine walks him out by 0x13419 (the server's "door 13419: ... walks it through to 3c" line), its report
-  # from the street passes him to c1 (D9, "now simulates 1348a in cell 9712"); the wait is on that pass line, not on the cell
+  # the exit: his bedtime takes him out by 0x13419 (the server's "door 13419: ... walks it through to 3c" line), the inn
+  # host's report from the street passes him to the street's host (D9, "now simulates 1348a in cell 9712"); the wait is
+  # on that pass line, not on the cell
   - until: {within: 1500, expect: ['server.log_count("now simulates 1348a in cell 97") > snapshot("street_a")']}
   - wait: 5
   # the counts first (each server.log_count re-reads the whole log), then the two seats read back to back with the
@@ -110,8 +124,9 @@ steps:
   # informational: whether the street seat's copy was moved at the promotion (formView's own line); the parent's read and
   # the fix's are told apart here when the counts alone cannot
   - c1: log-count {pattern: "moved 1348a into 3c"}
-  # the settle, 65 s on: one hand-off out and none back (a second "now simulates" line, or any pass, follow or move of him back
-  # into the inn beyond the baseline, is the ping-pong; a bounce under D22's margin logs "follows ... within the pass margin")
+  # the settle, 65 s on: one hand-off out and none back (a second "now simulates" line, or any pass, follow or move of him
+  # back into the inn beyond the baseline, is the ping-pong; a bounce under D22's margin logs "follows ... within the pass
+  # margin", so the three verbs are read); his bedtime may take him on to his house, so no cell is claimed but "not the inn"
   - wait: 60
   - c1: npc-state {formId: 0x1348a}
   - c2: npc-state {formId: 0x1348a}
@@ -125,28 +140,42 @@ steps:
   - c1: screenshot
   - c2: screenshot
   # leg B: the roles swapped on a fresh clock (the restart forgets the hosts and the follows; the server's log and its counts stand)
-  - server: restart {gameHour: 22.0}
+  - server: restart {gameHour: 20.0}
   - c1: connect
   - c2: connect
   - wait: 10
+  # leg B: c1 hosts Hod's house 0x133c7 from inside (the landing of its door 0x13423, two steps in), so his AI runs
+  # and his evening walks him to the inn; c2 hosts the street 0x9712 and, by its grid, 0x9731 where the house's door
+  # stands, so the walk out of the house is a pass to it and the walk into the unhosted inn its follow (D6)
   - c2: teleport {cell: "3c:Skyrim.esm", x: 21995, y: -44935, z: -128, rot: [0, 0, 180]}
-  - c1: teleport {cell: "133c6:Skyrim.esm", x: -250, y: -360, z: 0, rot: [0, 0, 0]}
+  - c1: teleport {cell: "133c7:Skyrim.esm", x: -506, y: -177, z: 0, rot: [0, 0, 0]}
   - wait: 5
   - c1: move {dy: 150, duration_s: 2}
   - wait: 20
   - assert:
       - server.host(0x9712).client == "c2"
-      - server.host(0x133c6).client == "c1"
-      - server.time().hour >= 22
-  - until: {within: 600, expect: [server.ref(0x1348a).cell == "133c6:Skyrim.esm"]}
+      - server.host(0x9731).client == "c2"
+      - server.host(0x133c7).client == "c1"
+      - server.ref(0x1348a).cell == "133c7:Skyrim.esm"
+      - server.time().hour >= 20
+  # the premise's path: his record leaves the house (the pass to the street's host) and reaches the inn under the street
+  # host's follow; then the house's seat walks over to the inn, is granted it, the follow ends and it simulates him there,
+  # the street seat's own copy standing indoors where its engine walked him in (the playtest's precondition)
+  - until: {within: 900, expect: [server.ref(0x1348a).cell == "133c6:Skyrim.esm"]}
+  - c1: teleport {cell: "133c6:Skyrim.esm", x: -250, y: -360, z: 0, rot: [0, 0, 0]}
   - wait: 5
-  - c1: npc-state {formId: 0x1348a}
+  - c1: move {dy: 150, duration_s: 2}
+  - until: {within: 90, expect: [server.host(0x133c6).client == "c1"]}
+  - wait: 10
   - c2: npc-state {formId: 0x1348a}
+  - c1: npc-state {formId: 0x1348a}
   - assert:
+      - server.ref(0x1348a).cell == "133c6:Skyrim.esm"
       - c1.npc_state(0x1348a).is3DLoaded == true
       - c1.npc_state(0x1348a).aiEnabled == true
       - c2.npc_state(0x1348a).is3DLoaded == false
       - c2.npc_state(0x1348a).cell == 0x133c6
+  # the baselines: what the log already counts before the exit (his walk in, the passes of the path)
   - server: log-count {pattern: "now simulates 1348a in cell 133c6"}
   - server: log-count {pattern: "now simulates 1348a in cell 97"}
   - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 133c6"}
@@ -155,8 +184,14 @@ steps:
   - server: snapshot {name: street_b, of: 'server.log_count("now simulates 1348a in cell 97")'}
   - server: snapshot {name: into_inn_b, of: 'server.log_count("(passes|follows|moves) 1348a into cell 133c6")'}
   - server: snapshot {name: door_b, of: 'server.log_count("door 13419: 1348a.s host .* walks it through to 3c")'}
+  # the exit: his bedtime takes him out by 0x13419 (the server's "door 13419: ... walks it through to 3c" line), the inn
+  # host's report from the street passes him to the street's host (D9, "now simulates 1348a in cell 9712"); the wait is
+  # on that pass line, not on the cell
   - until: {within: 1500, expect: ['server.log_count("now simulates 1348a in cell 97") > snapshot("street_b")']}
   - wait: 5
+  # the counts first (each server.log_count re-reads the whole log), then the two seats read back to back with the
+  # street's seat last, then the engine and position claims with no log count among them (the record and the copy
+  # compared at one moment, within the reads' own 0.1 s)
   - assert:
       - 'server.log_count("door 13419: 1348a.s host .* walks it through to 3c") > snapshot("door_b")'
       - 'server.log_count("now simulates 1348a in cell 97") == snapshot("street_b") + 1'
@@ -175,19 +210,24 @@ steps:
       - server.ref(0x1348a).y - c2.npc_state(0x1348a).y < 150
       - c1.npc_state(0x1348a).is3DLoaded == false
       - c1.npc_state(0x1348a).cell != 0x133c6
-  - c1: screenshot
   - c2: screenshot
+  - c1: screenshot
+  # informational: whether the street seat's copy was moved at the promotion (formView's own line); the parent's read and
+  # the fix's are told apart here when the counts alone cannot
   - c2: log-count {pattern: "moved 1348a into 3c"}
+  # the settle, 65 s on: one hand-off out and none back (a second "now simulates" line, or any pass, follow or move of him
+  # back into the inn beyond the baseline, is the ping-pong; a bounce under D22's margin logs "follows ... within the pass
+  # margin", so the three verbs are read); his bedtime may take him on to his house, so no cell is claimed but "not the inn"
   - wait: 60
-  - c1: npc-state {formId: 0x1348a}
   - c2: npc-state {formId: 0x1348a}
+  - c1: npc-state {formId: 0x1348a}
   - assert:
       - 'server.log_count("now simulates 1348a in cell 97") == snapshot("street_b") + 1'
       - 'server.log_count("now simulates 1348a in cell 133c6") == snapshot("inn_b")'
       - 'server.log_count("(passes|follows|moves) 1348a into cell 133c6") == snapshot("into_inn_b")'
       - server.ref(0x1348a).cell != "133c6:Skyrim.esm"
-      - c1.npc_state(0x1348a).cell != 0x133c6
       - c2.npc_state(0x1348a).cell != 0x133c6
-  - c1: screenshot
+      - c1.npc_state(0x1348a).cell != 0x133c6
   - c2: screenshot
+  - c1: screenshot
 artifacts: [server.log, c1.log, c2.log, screenshots]
