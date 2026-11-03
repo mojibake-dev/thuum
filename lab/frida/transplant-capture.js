@@ -88,7 +88,15 @@ if (off === undefined || !(FORM > 0)) {
     const rec = value.add(8).readPointer();
     row.record = String(rec);
     if (found && !rec.isNull()) {
-      try { const h = recordHeader(rec); Object.assign(row, h); row.hex = toHex(rec, h.total); } catch (e) { row.error = String(e); }
+      try {
+        const h = recordHeader(rec);
+        Object.assign(row, h);
+        row.hex = toHex(rec, h.total);
+        let f = 0x811c9dc5;
+        const a = new Uint8Array(rec.readByteArray(h.total));
+        for (let k = 0; k < a.length; k++) { f ^= a[k]; f = Math.imul(f, 0x01000193) >>> 0; }
+        row.fnv1a = hex(f >>> 0); // the inject's SUM (its review's finding 2)
+      } catch (e) { row.error = String(e); }
     }
     emit(row);
   };

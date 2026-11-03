@@ -1,24 +1,24 @@
-// change-census.js: which persistent world changes reach the engine's own change tracking, TESForm::AddChange (thuum,
-// numidium 2026-11-03; the night's goal: one observe point for scripts, containers and physics). AddChange is TESForm's
-// virtual slot 0x0A (CommonLibSSE-NG include/RE/T/TESForm.h:133; RemoveChange 0x0B, SaveGame 0x0E, LoadGame 0x0F beside
-// it), and CommonLib's body note on SetDelete (slot 0x23, TESForm.h:158) is the pattern the census tests: flip the bit,
-// then AddChange(1). The change flags are CommonLib's: TESObjectREFR.h:141-160, Actor.h:234 on, TESQuest.h (kQuestStages
-// at :208), TESObjectCELL.h:146-152, TESNPC.h, TESObjectDOOR.h, BGSLocation.h:89. thuum-cf's static read
-// (docs/research/adr062/papyrus-native-entries.md) found PlaceActorAtMe AddChange(0x40000000), SetDestroyed AddChange(1),
-// Quest.Stop AddChange(2) and SetCurrentStageID AddChange(0x80000000), and one counter-example, GlobalVariable.SetValue,
-// which writes TESGlobal's value with no call at all. The script reads slots 0x0A and 0x0B of 59 form classes' primary
-// vtables (VTABLE_<Class>[0], Address Library ids by lab/addr.py for 1.6.1170 below), skips a target that is a stub (a
-// return within its first four bytes, a class that keeps no changes) or lies outside SkyrimSE.exe, and hooks each other
-// target once. Per call it keys (function, form type, flags, caller): the first FIRST_N calls of a key print whole (form
-// id, a reference's base form id, AddChange's answer), and every FLUSH_MS a sum row prints each key's new count. A form
-// pointer whose type byte is past the last FormType (0x8A) is counted as foreign, so a shared (folded) body shows itself.
-// Every slot target and argument meaning is a HYPOTHESIS until this trace reads as expected (rule 2). Byte budget:
-// BUDGET (1.2 MB) of rows, after which only sum rows print, one every 5 s (lab/frida/README.md's guest output limit).
-// Params: FLUSH_MS (1000), FIRST_N (8), REMOVE (true), MAX_ROWS_PER_S (150), BUDGET (1200000).
+// change-census.js v3: which persistent world changes reach the engine's own change tracking, and from where (thuum, numidium
+// 2026-11-03; docs/engine/change-forms.md). v2 hooked TESForm's slot 0x0A (CommonLibSSE-NG include/RE/T/TESForm.h:133) per
+// vtable and ran as 20261103-111808. Its fresh review (FIX FIRST) and the re-analyst's read changed the shape:
+//   - the slot's body (AL 14607) tail-jumps into BGSSaveLoadGame's AddChange (AL 35576: manager, form, flags, force), which a
+//     forced entry (AL 14608) also reaches, so v3 hooks 35576 itself: one hook sees every mark that goes through AddChange, the
+//     forced ones (kAnimation) included, and its return address is the original caller under a tail jump (the load's 35566 and
+//     35567 OR the map directly, and the stash 35570 and SaveGame 35599 clear it, outside AddChange);
+//   - TESNPC's override (TESActorBase's AL 24385) reaches 35576 for a normal form and writes a created NPC's template forms
+//     itself, so it is hooked with a per-thread guard and counted only when it does not reach 35576;
+//   - RemoveChange is hooked at its inner function (AL 35581) the same way, beside TESNPC's (AL 24386);
+//   - every target must lie in an executable range of SkyrimSE.exe (BGSMovableStatic's [0] vtable is TESFullName's, and v2
+//     hooked an RTTI pointer through it), and the ready row prints the first instruction of slot 0x0A's body to show the jump;
+//   - every changed key is printed (rows of 80), a heartbeat every 10 s carries each hook's raw count, and a type byte at or
+//     past 0x8A (FormType::Max) is foreign.
+// Change flags and form types are CommonLib's (TESObjectREFR.h:141-160, Actor.h:234 on, TESQuest.h:208, TESObjectCELL.h:146-152,
+// TESNPC.h, TESObjectDOOR.h, TESObjectBOOK.h, TESFaction.h:132, BGSEncounterZone.h:54, BGSLocation.h:78-79, TESPackage.h:266,
+// FormTypes.h). Every id and argument meaning is a HYPOTHESIS until this trace reads as expected (rule 2). Byte budget BUDGET
+// (1.2 MB) of rows, then only sum rows, one every 5 s. Params: FLUSH_MS (1000), FIRST_N (8), MAX_ROWS_PER_S (150), BUDGET.
 const PARAMS = (typeof LAB_PARAMS === 'object' && LAB_PARAMS) ? LAB_PARAMS : {};
 const FLUSH_MS = PARAMS.FLUSH_MS === undefined ? 1000 : Number(PARAMS.FLUSH_MS);
 const FIRST_N = PARAMS.FIRST_N === undefined ? 8 : Number(PARAMS.FIRST_N);
-const REMOVE = PARAMS.REMOVE === undefined ? true : !!PARAMS.REMOVE;
 const MAX_ROWS_PER_S = PARAMS.MAX_ROWS_PER_S === undefined ? 150 : Number(PARAMS.MAX_ROWS_PER_S);
 const BUDGET = PARAMS.BUDGET === undefined ? 1200000 : Number(PARAMS.BUDGET);
 let spent = 0;
@@ -30,77 +30,22 @@ function emit(obj) {
   console.log(s);
 }
 
-// Offsets by `just addr` (lab/addr.py, Address Library 1.6.1170 only), 2026-11-03: each class's VTABLE_<Class>[0] RVA,
-// its Address Library id and CommonLib's line
+// Offsets by `just addr` (lab/addr.py, Address Library 1.6.1170 only), 2026-11-03
 const OFFSETS = {
   '1.6.1170.0': {
-    vtables: {
-    TESForm: 0x1780b00, // 187895 include/RE/Offsets_VTABLE.h:311
-    TESObjectREFR: 0x17ae180, // 190259 include/RE/Offsets_VTABLE.h:649
-    Actor: 0x189d870, // 207511 include/RE/Offsets_VTABLE.h:2142
-    Character: 0x18a5558, // 207886 include/RE/Offsets_VTABLE.h:2215
-    PlayerCharacter: 0x18ab9c0, // 208040 include/RE/Offsets_VTABLE.h:2231
-    TESObjectCELL: 0x17aaa90, // 190143 include/RE/Offsets_VTABLE.h:619
-    TESWorldSpace: 0x17b2a68, // 190424 include/RE/Offsets_VTABLE.h:689
-    TESQuest: 0x17e6a40, // 195890 include/RE/Offsets_VTABLE.h:937
-    TESGlobal: 0x17c0978, // 191675 include/RE/Offsets_VTABLE.h:805
-    TESNPC: 0x17e4d50, // 195816 include/RE/Offsets_VTABLE.h:931
-    TESObjectDOOR: 0x179ede8, // 189666 include/RE/Offsets_VTABLE.h:542
-    TESObjectCONT: 0x179e0d8, // 189633 include/RE/Offsets_VTABLE.h:539
-    TESObjectACTI: 0x179bcf8, // 189485 include/RE/Offsets_VTABLE.h:524
-    TESObjectBOOK: 0x179d960, // 189577 include/RE/Offsets_VTABLE.h:536
-    TESObjectMISC: 0x179f3e0, // 189689 include/RE/Offsets_VTABLE.h:548
-    TESObjectWEAP: 0x17a11a0, // 189786 include/RE/Offsets_VTABLE.h:557
-    TESObjectARMO: 0x179d100, // 189542 include/RE/Offsets_VTABLE.h:533
-    TESFaction: 0x17e1fc0, // 195672 include/RE/Offsets_VTABLE.h:923
-    TESPackage: 0x185b2c0, // 203948 include/RE/Offsets_VTABLE.h:1515
-    BGSLocation: 0x17a3b58, // 189916 include/RE/Offsets_VTABLE.h:570
-    BGSScene: 0x17df428, // 195375 include/RE/Offsets_VTABLE.h:901
-    BGSEncounterZone: 0x17a2468, // 189877 include/RE/Offsets_VTABLE.h:563
-    TESTopicInfo: 0x17e9ad8, // 196107 include/RE/Offsets_VTABLE.h:951
-    TESTopic: 0x17e90f0, // 196084 include/RE/Offsets_VTABLE.h:948
-    BGSStoryManagerQuestNode: 0x186de58, // 205062 include/RE/Offsets_VTABLE.h:1752
-    BGSRelationship: 0x17dea88, // 195361 include/RE/Offsets_VTABLE.h:897
-    BGSListForm: 0x17b8818, // 190933 include/RE/Offsets_VTABLE.h:730
-    BGSNote: 0x17dc9c8, // 195276 include/RE/Offsets_VTABLE.h:883
-    BGSTalkingActivator: 0x1796048, // 189175 include/RE/Offsets_VTABLE.h:483
-    TESLevItem: 0x1799b98, // 189382 include/RE/Offsets_VTABLE.h:511
-    TESLevCharacter: 0x1799630, // 189369 include/RE/Offsets_VTABLE.h:508
-    TESLevSpell: 0x179a168, // 189393 include/RE/Offsets_VTABLE.h:514
-    TESClass: 0x17e1540, // 195645 include/RE/Offsets_VTABLE.h:917
-    IngredientItem: 0x1769028, // 186407 include/RE/Offsets_VTABLE.h:36
-    Hazard: 0x18c2038, // 209971 include/RE/Offsets_VTABLE.h:2783
-    Projectile: 0x18c4470, // 210006 include/RE/Offsets_VTABLE.h:2788
-    ArrowProjectile: 0x18bdca8, // 209891 include/RE/Offsets_VTABLE.h:2771
-    MissileProjectile: 0x18c28b8, // 209980 include/RE/Offsets_VTABLE.h:2784
-    BarrierProjectile: 0x18be5f0, // 209901 include/RE/Offsets_VTABLE.h:2773
-    BeamProjectile: 0x18bf090, // 209914 include/RE/Offsets_VTABLE.h:2776
-    ConeProjectile: 0x18bf900, // 209925 include/RE/Offsets_VTABLE.h:2777
-    FlameProjectile: 0x18c0dc0, // 209953 include/RE/Offsets_VTABLE.h:2781
-    GrenadeProjectile: 0x18c15f0, // 209962 include/RE/Offsets_VTABLE.h:2782
-    Explosion: 0x18c06a8, // 209940 include/RE/Offsets_VTABLE.h:2779
-    TESObjectLIGH: 0x179ac70, // 189414 include/RE/Offsets_VTABLE.h:517
-    TESFlora: 0x1797ca8, // 189287 include/RE/Offsets_VTABLE.h:496
-    TESFurniture: 0x17983c0, // 189309 include/RE/Offsets_VTABLE.h:499
-    BGSMovableStatic: 0x17948e8, // 189117 include/RE/Offsets_VTABLE.h:471
-    TESObjectSTAT: 0x179fa18, // 189715 include/RE/Offsets_VTABLE.h:551
-    AlchemyItem: 0x17662f0, // 186204 include/RE/Offsets_VTABLE.h:11
-    ScrollItem: 0x176c008, // 186591 include/RE/Offsets_VTABLE.h:58
-    SpellItem: 0x176c760, // 186619 include/RE/Offsets_VTABLE.h:61
-    TESKey: 0x1798f70, // 189342 include/RE/Offsets_VTABLE.h:505
-    TESSoulGem: 0x17a1dc0, // 189850 include/RE/Offsets_VTABLE.h:560
-    TESAmmo: 0x17967b0, // 189195 include/RE/Offsets_VTABLE.h:486
-    TESObjectTREE: 0x179ff10, // 189725 include/RE/Offsets_VTABLE.h:554
-    BGSIdleMarker: 0x17dba28, // 195235 include/RE/Offsets_VTABLE.h:872
-    TESWeather: 0x17b1be8, // 190405 include/RE/Offsets_VTABLE.h:687
-    TESRace: 0x17e7e78, // 195941 include/RE/Offsets_VTABLE.h:946
-    },
+    innerAdd: 0x604320, // 35576 BGSSaveLoadGame's AddChange (manager, form, flags, force)
+    innerRemove: 0x6044c0, // 35581 BGSSaveLoadGame's RemoveChange
+    formAdd: 0x1dff90, // 14607 TESForm::AddChange, slot 0x0A's body (checked, not hooked)
+    formRemove: 0x1dfff0, // 14609 TESForm::RemoveChange, slot 0x0B's body (checked, not hooked)
+    forcedAdd: 0x1dffc0, // 14608 the forced entry (checked, not hooked)
+    npcAdd: 0x3a93a0, // 24385 TESActorBase's AddChange override (TESNPC's slot 0x0A)
+    npcRemove: 0x3a9420, // 24386 TESActorBase's RemoveChange override
+    formVtable: 0x1780b00, // 187895 VTABLE_TESForm[0]
   },
 };
-const SLOTS = [[0x0a, 'AddChange'], [0x0b, 'RemoveChange']]; // TESForm.h:133-134
 const FORM = { id: 0x14, type: 0x1a }; // TESForm.h:354, :356
 const REFR_BASE = 0x40; // TESObjectREFR.h:495 OBJ_REFR data at 0x40, its objectReference at 0x00 (:77)
-const LAST_FORM_TYPE = 0x8a;
+const FORM_TYPE_MAX = 0x8a; // FormTypes.h: FormType::Max
 
 // FormType values, CommonLib include/RE/F/FormTypes.h (the ones this census names; others print as hex)
 const TYPE_NAMES = {
@@ -129,10 +74,10 @@ const BITS_BY_TYPE = {
     10: 'kClass', 11: 'kFace', 12: 'kDefaultOutfit', 13: 'kSleepOutfit', 24: 'kGender', 25: 'kRace' },
   0x1d: { 17: 'kTeleportExtra' },
   0x1b: { 5: 'kTeachesSkill', 6: 'kRead' },
-  0x0b: { 1: 'kFactionFlags', 2: 'kFactionReactions' },
-  0x67: { 1: 'kZoneFlags' },
+  0x0b: { 1: 'kFactionFlags', 2: 'kFactionReactions', 31: 'kFactionCrimeCounts' },
+  0x67: { 1: 'kZoneFlags', 31: 'kGameData' },
   0x68: { 30: 'kKeywordData', 31: 'kCleared' },
-  0x4f: { 26: 'kWaitingFlag' },
+  0x4f: { 26: 'kWaitingFlag', 31: 'kNeverRunFlag' },
 };
 const isRefr = function (type) { return type >= 0x3d && type <= 0x46; };
 const flagNames = function (type, flags) {
@@ -172,10 +117,6 @@ const hex = function (n) { return n < 0 ? String(n) : '0x' + n.toString(16); };
 const u32 = function (p, o) { try { return p.add(o).readU32(); } catch (e) { return -1; } };
 const u8 = function (p, o) { try { return p.add(o).readU8(); } catch (e) { return -1; } };
 const ptrAt = function (p, o) { try { return p.add(o).readPointer(); } catch (e) { return NULL; } };
-const bytesAt = function (p, n) {
-  try { return Array.prototype.map.call(new Uint8Array(p.readByteArray(n)), function (b) { return ('0' + b.toString(16)).slice(-2); }).join(' '); }
-  catch (e) { return 'unreadable'; }
-};
 
 const exe = Process.getModuleByName('SkyrimSE.exe');
 const version = fileVersion(exe.path);
@@ -186,6 +127,12 @@ if (off === undefined) {
   const lo = exe.base;
   const hi = exe.base.add(exe.size);
   const inExe = function (p) { return p.compare(lo) >= 0 && p.compare(hi) < 0; };
+  const executable = function (p) {
+    const r = Process.findRangeByAddress(p);
+    return r !== null && r.protection.indexOf('x') >= 0;
+  };
+  const at = function (name) { return exe.base.add(off[name]); };
+  const rva = function (p) { return hex(p.sub(lo).toUInt32()); };
   const callerNames = {};
   const callerOf = function (ret) {
     if (inExe(ret)) return hex(ret.sub(lo).toUInt32());
@@ -196,96 +143,130 @@ if (off === undefined) {
     }
     return callerNames[k];
   };
-
-  const targets = {};
-  const skipped = [];
-  for (const cls in off.vtables) {
-    const vt = exe.base.add(off.vtables[cls]);
-    for (const pair of SLOTS) {
-      const slot = pair[0];
-      const fn = pair[1];
-      if (fn === 'RemoveChange' && !REMOVE) continue;
-      const p = ptrAt(vt, slot * 8);
-      if (p.isNull() || !inExe(p)) { skipped.push({ cls: cls, fn: fn, why: 'outside SkyrimSE.exe', target: String(p) }); continue; }
-      const head = bytesAt(p, 8);
-      const rva = hex(p.sub(lo).toUInt32());
-      const first4 = head.split(' ').slice(0, 4);
-      if (first4.indexOf('c3') >= 0) { skipped.push({ cls: cls, fn: fn, why: 'stub', target: rva, bytes: head }); continue; }
-      const k = fn + '@' + rva;
-      if (targets[k] === undefined) targets[k] = { fn: fn, p: p, rva: rva, bytes: head, classes: [] };
-      targets[k].classes.push(cls);
-    }
-  }
-
-  const keys = {};
-  let rowsThisSecond = 0;
-  let second = 0;
-  let foreign = 0;
-  const note = function (fn, form, flags, ret, answer) {
-    const type = u8(form, FORM.type);
-    if (type < 0 || type > LAST_FORM_TYPE) { foreign += 1; return; }
-    const caller = callerOf(ret);
-    const key = fn + '|' + type + '|' + flags + '|' + caller;
-    let k = keys[key];
-    if (k === undefined) {
-      k = { fn: fn, type: type, flags: flags, caller: caller, n: 0, nTrue: 0, sent: 0, firstId: 0, lastId: 0, printed: 0 };
-      keys[key] = k;
-    }
-    const id = u32(form, FORM.id);
-    k.n += 1;
-    if (answer === 1) k.nTrue += 1;
-    if (k.n === 1) k.firstId = id;
-    k.lastId = id;
-    if (k.printed >= FIRST_N || spent > BUDGET) return;
-    const now = Date.now();
-    const s = Math.floor(now / 1000);
-    if (s !== second) { second = s; rowsThisSecond = 0; }
-    if (rowsThisSecond >= MAX_ROWS_PER_S) return;
-    rowsThisSecond += 1;
-    k.printed += 1;
-    const row = { event: 'call', fn: fn, type: TYPE_NAMES[type] || hex(type), flags: hex(flags), names: flagNames(type, flags),
-      caller: caller, id: hex(id), answer: answer };
-    if (isRefr(type)) row.base = hex(u32(ptrAt(form, REFR_BASE), FORM.id));
-    emit(row);
+  // the first jmp within ten instructions of p, and whether it lands on want (14607 and 14608 start mov rax, rcx; the jmp is +0x18)
+  const jumpOf = function (p, want) {
+    try {
+      let i = Instruction.parse(p);
+      for (let n = 0; n < 10; n++) {
+        if (i.mnemonic === 'jmp') {
+          let to = NULL;
+          try { to = ptr(i.opStr); } catch (e) { to = NULL; }
+          return { at: rva(i.address), op: i.opStr, toWant: !to.isNull() && to.equals(want) };
+        }
+        i = Instruction.parse(i.next);
+      }
+      return { error: 'no jmp in ten instructions' };
+    } catch (e) { return { error: 'unparsed: ' + e }; }
   };
 
-  let hooked = 0;
-  for (const k in targets) {
-    const t = targets[k];
-    try {
-      if (t.fn === 'AddChange') {
-        Interceptor.attach(t.p, {
-          onEnter(args) { this.form = args[0]; this.flags = args[1].toUInt32(); this.ret = this.returnAddress; },
-          onLeave(retval) { note('AddChange', this.form, this.flags, this.ret, retval.toUInt32() & 0xff); },
-        });
-      } else {
-        Interceptor.attach(t.p, {
-          onEnter(args) { note('RemoveChange', args[0], args[1].toUInt32(), this.returnAddress, -1); },
-        });
-      }
-      hooked += 1;
-    } catch (e) {
-      skipped.push({ fn: t.fn, target: t.rva, why: 'attach failed: ' + e });
-    }
+  // the checks the ready row carries: slot 0x0A of TESForm's vtable holds 14607, and 14607 and 14608 lead to 35576
+  const slotA = ptrAt(at('formVtable'), 0x0a * 8);
+  const checks = {
+    slot0A: rva(slotA), slot0AIs14607: slotA.equals(at('formAdd')),
+    formAddJump: jumpOf(at('formAdd'), at('innerAdd')), forcedAddJump: jumpOf(at('forcedAdd'), at('innerAdd')),
+    formRemoveJump: jumpOf(at('formRemove'), at('innerRemove')),
+  };
+  const refuse = [];
+  for (const name of ['innerAdd', 'innerRemove', 'npcAdd', 'npcRemove']) {
+    if (!executable(at(name))) refuse.push(name);
   }
+  if (refuse.length > 0) {
+    emit({ event: 'ready', error: 'a target is not executable', refuse: refuse, checks: checks, pid: Process.id });
+  } else {
+    const keys = {};
+    const raw = { innerAdd: 0, innerRemove: 0, npcAdd: 0, npcRemove: 0, npcOwn: 0 };
+    let rowsThisSecond = 0;
+    let second = 0;
+    let foreign = 0;
+    const inNpc = {}; // thread id -> { reached }
+    const note = function (fn, form, flags, ret, answer, force) {
+      const type = u8(form, FORM.type);
+      if (type < 0 || type >= FORM_TYPE_MAX) { foreign += 1; return; }
+      const caller = callerOf(ret);
+      const key = fn + '|' + type + '|' + flags + '|' + caller + '|' + force;
+      let k = keys[key];
+      if (k === undefined) {
+        k = { fn: fn, type: type, flags: flags, caller: caller, force: force, n: 0, nTrue: 0, sent: 0, lastId: 0, printed: 0 };
+        keys[key] = k;
+      }
+      const id = u32(form, FORM.id);
+      k.n += 1;
+      if (answer === 1) k.nTrue += 1;
+      k.lastId = id;
+      if (k.printed >= FIRST_N || spent > BUDGET) return;
+      const s = Math.floor(Date.now() / 1000);
+      if (s !== second) { second = s; rowsThisSecond = 0; }
+      if (rowsThisSecond >= MAX_ROWS_PER_S) return;
+      rowsThisSecond += 1;
+      k.printed += 1;
+      const row = { event: 'call', fn: fn, type: TYPE_NAMES[type] || hex(type), flags: hex(flags), names: flagNames(type, flags),
+        caller: caller, id: hex(id), answer: answer, force: force };
+      if (isRefr(type)) row.base = hex(u32(ptrAt(form, REFR_BASE), FORM.id));
+      emit(row);
+    };
 
-  let lastSum = 0;
-  setInterval(function () {
-    const now = Date.now();
-    if (spent > BUDGET && now - lastSum < 5000) return;
-    lastSum = now;
-    const rows = [];
-    for (const key in keys) {
-      const k = keys[key];
-      if (k.n === k.sent) continue;
-      rows.push([k.fn === 'AddChange' ? 'A' : 'R', TYPE_NAMES[k.type] || hex(k.type), hex(k.flags), k.caller, k.n - k.sent, k.n, k.nTrue, hex(k.lastId)]);
-      k.sent = k.n;
-    }
-    if (rows.length > 0 || foreign > 0) emit({ event: 'sum', cols: 'fn type flags caller new total true lastId', rows: rows.slice(0, 80), more: Math.max(0, rows.length - 80), foreign: foreign, spent: spent });
-  }, FLUSH_MS);
+    const attachErrors = [];
+    const attach = function (name, cb) { try { Interceptor.attach(at(name), cb); } catch (e) { attachErrors.push(name + ': ' + e); } };
+    attach('innerAdd', {
+      onEnter(args) {
+        raw.innerAdd += 1;
+        let ret = this.returnAddress;
+        const g = inNpc[this.threadId];
+        if (g !== undefined) { g.reached = true; ret = g.ret; } // under TESNPC's hook the return slot holds Frida's trampoline
+        this.form = args[1]; this.flags = args[2].toUInt32(); this.force = args[3].toUInt32() & 0xff; this.ret = ret;
+      },
+      onLeave(retval) { note('AddChange', this.form, this.flags, this.ret, retval.toUInt32() & 0xff, this.force); },
+    });
+    attach('innerRemove', {
+      onEnter(args) {
+        raw.innerRemove += 1;
+        let ret = this.returnAddress;
+        const g = inNpc[this.threadId];
+        if (g !== undefined) { g.reached = true; ret = g.ret; }
+        note('RemoveChange', args[1], args[2].toUInt32(), ret, -1, -1);
+      },
+    });
+    const npcHook = function (fn, counter) {
+      return {
+        onEnter(args) {
+          raw[counter] += 1;
+          this.tid = this.threadId; // 24385 and 24386 do not nest (their review): set unconditionally, so a throw leaves no stale guard
+          inNpc[this.tid] = { reached: false, ret: this.returnAddress };
+          this.form = args[0]; this.flags = args[1].toUInt32(); this.ret = this.returnAddress;
+        },
+        onLeave(retval) {
+          const g = inNpc[this.tid];
+          delete inNpc[this.tid];
+          if (g === undefined || g.reached) return; // counted at the inner function
+          raw.npcOwn += 1;
+          note(fn, this.form, this.flags, this.ret, fn === 'AddChangeNPC' ? (retval.toUInt32() & 0xff) : -1, -1);
+        },
+      };
+    };
+    attach('npcAdd', npcHook('AddChangeNPC', 'npcAdd'));
+    attach('npcRemove', npcHook('RemoveChangeNPC', 'npcRemove'));
 
-  const listed = [];
-  for (const k in targets) listed.push({ fn: targets[k].fn, rva: targets[k].rva, bytes: targets[k].bytes, classes: targets[k].classes });
-  emit({ event: 'ready', version: version, pid: Process.id, base: String(exe.base), hooked: hooked, targets: listed, skipped: skipped,
-    first_n: FIRST_N, flush_ms: FLUSH_MS, budget: BUDGET });
+    let lastSum = 0;
+    setInterval(function () {
+      const now = Date.now();
+      if (spent > BUDGET && now - lastSum < 5000) return;
+      lastSum = now;
+      const rows = [];
+      for (const key in keys) {
+        const k = keys[key];
+        if (k.n === k.sent) continue;
+        rows.push([k.fn, TYPE_NAMES[k.type] || hex(k.type), hex(k.flags), k.caller, k.force, k.n - k.sent, k.n, k.nTrue, hex(k.lastId)]);
+        k.sent = k.n;
+      }
+      for (let i = 0; i < rows.length; i += 80) {
+        emit({ event: 'sum', cols: 'fn type flags caller force new total true lastId', rows: rows.slice(i, i + 80), part: i / 80,
+          foreign: foreign, spent: spent });
+      }
+    }, FLUSH_MS);
+    setInterval(function () { emit({ event: 'heartbeat', raw: raw, foreign: foreign, keys: Object.keys(keys).length }); }, 10000);
+
+    emit({ event: 'ready', version: version, pid: Process.id, base: String(exe.base), checks: checks, attachErrors: attachErrors,
+      hooks: { innerAdd: rva(at('innerAdd')), innerRemove: rva(at('innerRemove')), npcAdd: rva(at('npcAdd')), npcRemove: rva(at('npcRemove')) },
+      first_n: FIRST_N, flush_ms: FLUSH_MS, budget: BUDGET });
+  }
 }
