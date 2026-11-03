@@ -66,6 +66,14 @@ opener) and at close (the record to the cell's listeners when the set empties); 
 for it (decision 1 dropped the live view, not solved it). A move from a seat that does not hold the container is refused
 E_CONTAINER_OCCUPANT and the mover resynced. There is no setting: exclusive is the one model (the containerSharing switch of
 ADR-061 decision 3 is deleted). Not persisted: a hold is runtime state like a cell's host; isOpen stays its shadow in the record.
+The corpse (D-C2 A, the client half 75167c3d): a dead body is activation-blocked like a chest, a reconciler state in puppetService
+(laid at the death's start, the server's death word and the bind kill; re-laid two ticks after the native lifts of the promote's
+dead branch and the dead release; lifted when the body stands), so its loot opens only on the server's OpenContainer.
+HYPOTHESIS (x-container-hold v2 reads both): the engine's activate(player, true) on a blocked dead actor opens the loot menu, on the
+host's engine-killed body (AI on) and on a watcher's released body (AI switched on by the handler); Papyrus IsDead() is already true
+at kDying (else a poll pass between the death's start and kDead would lift the block for up to one poll). Known gaps for the next
+stage (the client review's notes): a body whose cell is re-entered respawns alive and unblocked while the mark would skip the
+re-block (the marks must clear at the detach); the host's AI-on open has no retry where the released body's path has one.
 
 ## Engine surface
 

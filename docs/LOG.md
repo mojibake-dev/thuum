@@ -7501,3 +7501,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the gate: b-container-rest v2 f5992770 (claim 2 the refusal; red on parity until the merge), c-dungeon-enemies v2 f6467b15 and
   b-npc-body-release v3 7f704ffc (no E_CONTAINER_BUSY for 39fe4 in place of the vanished occupant count). Pipeline 5132 (4fb20983)
   GREEN on both builds, so the client half compiles; 5134 is the head's build. The client half's fresh review still running.
+- 15:32 PST 2026-11-03 (23:32Z 11-03) (thuum-cf): The hold's client half's fresh review: GO, five notes, two worth a follow-up and one a probe gap. The gap:
+  x-container-hold v1 had only the host open the body; the seat D-C2 A can fail on is the WATCHER's open of a blocked released body
+  whose AI the handler switches on (never read: finding 58's failures were blocked plus AI off, x-body-open-guest was unblocked plus
+  AI on, every chest is a blocked CONT), so v2 (sha1 b19a990b) adds c2's own open after both close (menu open, the second "open with 1
+  occupant", c2's handler lines counted); numidium runs v2 at the stage. The follow-ups, for the next stage's branch
+  m3-turbo3-sys2-container-r2 (the pinned head does not move): a dead body whose cell is re-entered respawns alive and unblocked while
+  deadBlocked still holds the id (forget runs only for an id reconcile sees; the marks must clear at the detach), a playtest would see
+  it; one open path for bodies (openBodyOnTimers with the AI switch conditional, retries for the host's engine-killed body too, since
+  E25 read nine refusals over 1.9 s after an AI switch); a stamp guard for IsDead at kDying (a vtable slot unnamed in Ghidra;
+  HYPOTHESIS). Verified by the reviewer: every path of the state machine (the host's engine death through deathStart, the word's
+  kill, the bind kill, the resurrect, the reanimation within one poll, the unload), the gameThrQ order that makes the two-tick re-block
+  sound, rule 9's cost, the handler's two paths, the counted lines, tsc. containers.md's hold paragraph carries the corpse half and
+  the two hypotheses.
