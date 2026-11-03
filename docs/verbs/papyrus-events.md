@@ -228,10 +228,20 @@ three calls of each row probe the self under SEH and a row whose self is no form
 wrong row is a log line, not a crash; the trace still confirms it. Kept as they are, with the reason: guests run the lifecycle
 handlers of every world object (slice 1a's decision; the engine fires OnInit, OnLoad and OnCellAttach before a host is known, and
 the tally " (not hosted)" is the census of what those handlers then attempt through the hooked natives, read on a guest first).
-HYPOTHESIS rows this slice adds: H-1b1 a latent native's body runs inside VmCall's dispatch, so the mark covers it (if not, the
-census on a guest shows "Quest.SetCurrentStageID" live events at a relayed stage); H-1b2 PlatformCall covers every SpSnippet
-(they run through callNative); H-1b3 the self probe's form-type read is enough to tell a wrong row (a register holding another
-form of the right kind passes it). Known limits: the entry hook sees the call, not its effect (a refused Kill still leaves a 10 s
+Round two (19:55 PST 2026-11-02; numidium's re-review of the first round: OK to stage on one seat, not to merge; the latent path was
+not covered, since DispatchMethodCall2 only enqueues the call and the VM runs the body later on its own thread under a new stack
+id, so the thread-local mark and the stack-id net see nothing of it; the first H-1b1 was false by construction). The latent calls
+are now noted by (row, self) in CallNative before VmCall::Run (PlatformCall::NoteLatent, the lower-cased "Class.Function" key and
+the self's TESForm pointer) and taken by the hook at the entry (TakeLatent), so the client's setCurrentStageID, enable, disable,
+resurrect and delete count as "(platform)" like the direct calls; the census flushes on time from the platform's OnUpdate
+(ScriptNatives::Tick) so a quiet seat emits its last window; the self probe accepts every placed kind through TESForm::AsReference
+(a placed hazard among a row's first calls no longer stands the row down); the form argument's read is guarded the same way.
+HYPOTHESIS rows: H-1b1 (rewritten) the latent note's self is the pointer the native receives (CallNative's rawSelf is the
+TESForm the VM hands the native; a mismatch shows as a latent row counted live on a guest at a relayed apply, where only the
+platform could have called it); H-1b2 every SpSnippet runs through callNative, so one of the two marks covers it; H-1b3 the self
+probe tells a wrong row (a register holding another form of the right kind passes it). The guests' lifecycle handlers (finding 9)
+are Eli's decision: docs/private/decisions-after-slice-1b.md (D-S1, recommended A with the bound written into ADR-063 and a guest
+read owed; numidium carries it). Known limits: the entry hook sees the call, not its effect (a refused Kill still leaves a 10 s
 mark; the census counts attempts); AddItem, RemoveItem, Lock, SetOpen and the weather are census-only in this slice; a MovableStatic
 is blocked like the other scripted kinds when not hosted (objectReferenceEx), so every seat agrees with the host's release.
 
@@ -254,4 +264,4 @@ are until the slice is built; the build opens its fork branch as m4-scripts-work
 - [ ] T3 scenario green, no HYPOTHESIS tags (b-papyrus-events approved by Eli 2026-10-20 and on main, d1d8370, asserting the Creation's check ran connected with the prompt flag from the per-player default; its first run is the layer-merge sweep; x-mcm-register's HUD count still to read)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031): not applicable, no player action
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
-- [x] ledger and suppression registry updated (no server native; the Suppress section above is the registry entry; slice 1b's 24 hooked natives carry their rung and reason in NATIVES.md's hand-maintained columns, R2, verb papyrus-events, 19:34 PST 2026-11-02)
+- [x] ledger and suppression registry updated (no server native; the Suppress section above is the registry entry; slice 1b's 24 hooked natives are named in NATIVES.md's hand-maintained Reason column with the hook's rung R2 and the verb papyrus-events; the Rung COLUMN stays the server VM's own rung, so the five rows the server implements or delegates (Enable, Disable, their NoWait forms, Lock, SetLockLevel, PlaceAtMe) keep R0 there and carry the hook's R2 in their Reason text, 19:55 PST 2026-11-02)
