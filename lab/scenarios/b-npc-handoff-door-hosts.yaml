@@ -1,4 +1,14 @@
-# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v19 2026-11-03: READY FOR THE GREENS and the parent's
+# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v20 2026-11-03 after v19's red run on break 3
+# (20261103-101556, RED at leg A's premise: c1's engine had Hod OUTDOORS with 3D at 02:00; the server's sighting path took the record
+# out, "ff000000 sights 1348a at (19179, -44737, -24) in 3c, cell 9713; the record stood in 133c7", then "moves 1348a into cell
+# 9732, which it hosts", before any MoveTo). The hour does not place him: the seat's SAVE does (its rollback snapshot holds him where
+# he stood at 17.x, the mill, and the engine spawns him there at any hour, then his sleep package walks him home). So leg A gains a
+# SETTLE PHASE: c1 stands on the street while his sleep package walks the engine's copy home from the mill (an until on the record
+# back in 133c7 under c1's follow, 300 s; the street door's line recorded), then `server: restart {gameHour: 2.0}` (a restart keeps
+# the world and the seats' places, forgets the hosts and the follows; the client processes keep their engines, so c1's copy stays at
+# his bed), both seats reconnect, and the premise is claimed as v19 did (the record home and unhosted, no follow, c1's copy in 133c7
+# with no 3D), the stale copy now the engine's own settled one; the MoveTo, the promotion block and the walk home are v19's. v19
+# 2026-11-03: READY FOR THE GREENS and the parent's
 # red run by ADR-064's re-check of v18 (639f65ec; every claim holds on m3-system1-r2 4ccb4259 and the set goes red on a build without
 # the promote fix for the right reason, the bedside copy's second report into 133c7; the red run plays first on playtest 41's
 # break-3 server b926a7d4, union-srv-3, which the lab has staged, and on parity 188a8dea, the merge's formal parent, if the thaw
@@ -172,7 +182,28 @@ steps:
   - assert:
       - server.host(0x9712).client == "c1"
       - server.host(0x9731).client == "c1"
+  # the settle phase (v20): the seat's save holds him where he stood at 17.x (the mill), so c1's engine spawns him there and his
+  # sleep package walks him home by the street door under c1's follow; the record follows him in (the sighting path may have taken
+  # it out first, 101556). Recorded: the street door's line; claimed: the record back home within 300 s
+  - server: log-count {pattern: "door 13423: 1348a.s host .* walks it through to 133c7"}
+  - until: {within: 300, expect: [server.ref(0x1348a).cell == "133c7:Skyrim.esm"]}
+  - wait: 8
+  - c1: npc-state {formId: 0x1348a}
+  - server: log-count {pattern: "door 13423: 1348a.s host .* walks it through to 133c7"}
+  # the restart at the same hour forgets the hosts and the follows and keeps the world and the seats' places; the client
+  # processes keep their engines, so c1's copy stays at his bed, now inside an interior c1 does not load
+  - server: restart {gameHour: 2.0}
+  - c1: connect
+  - c2: connect
+  - wait: 20
+  - c1: npc-state {formId: 0x1348a}
+  - assert:
+      - server.host(0x9712).client == "c1"
+      - server.host(0x9731).client == "c1"
       - server.host(0x133c7).hosted == false
+      - server.follow(0x1348a).following == false
+      - server.ref(0x1348a).cell == "133c7:Skyrim.esm"
+      - server.time().hour < 7.5
       # the stale copy's place: c1's engine has him at his bed, unloaded
       - c1.npc_state(0x1348a).cell == 0x133c7
       - c1.npc_state(0x1348a).is3DLoaded == false
