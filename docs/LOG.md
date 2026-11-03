@@ -5486,3 +5486,17 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
 - 17:56 PST 2026-11-02 c1 crashed at 01:51:00Z in Sven's redress on an actor with no 3D right after the host set emptied (npc-fate.md, the crash section;
   HYPOTHESIS the equip path's null); the bundle head m4-turbo2-chest 12f199e6 makes the late fate wait for the actor's load. Break 3's
   refs: server union-srv-2 85b6c096, client 12f199e6, the traps stopgap, on Eli's go.
+- 18:17 PST 2026-11-02 playtest 41's break 3 laid on Eli's go ("go for it", then "push the prisoner and server swap"): c1 (rotfern) crashed at
+  17:51:00 PST (CrashLogger: EXCEPTION_ACCESS_VIOLATION at SkyrimSE.exe+070DB20, a null read, Sven 0x13491 and an outfit on the
+  stack) in the second its client un-hosted all 15 Riverwood NPCs and npc-fate's redress dressed actors whose 3D was not loaded;
+  evidence on the seat (C:\lab\evidence\playtest41-c1-crash-20261103T015312Z) and at results/playtest-41/. c1 back at 18:05
+  on bundle m4-turbo2-chest 12f199e6 (the redress waits for the 3D, the spider push, the blast's read and touch-3 claim, the
+  death-sound trace) with the temple traps' activationUnblockedBases in both game folders; c2 the same at 18:13; the server
+  swapped at 18:14 to m4-turbo2-union-srv-3 35509f7a (the follow vouch; ADR-063 decision 4's first retirements, E_PROP_CELL
+  against the claimant and E_PROP_REACH, PropTest moved to the new rule in two pushes after two red server-builds, 4756 and
+  4763), both seats online 37 s after, streams live. Eli since: Souls RE's no-pause VERIFIED IN PLAY; "hod just tried to leave
+  the sleeping giant inn... cannot seem to... i thought we fixed this": BROKEN, 1348a handed back and forth at door 13419 by D9
+  three times in half a second (02:08:01Z, again at 02:08:15Z) with c2 hosting the inn 133c6 and c1 the street 9712; thuum-cf's
+  read: the promoted copy stands at the last relayed pre-door sample and its first report is judged a pass back; the fix,
+  server-only, on m3-handoff-settle (the passing movement reliable before the hoster word, a 1 s settle, UNMEASURED) with its
+  two-seat scenario. The gate never put two hosts on a door's two sides (the audit's case 3).
