@@ -1466,6 +1466,12 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   f7ce5b37 (ADR-062 slice 1b: the natives' entry hooks, the scriptNative event, the client census and script-kill marks, cause 3
   the host's word). Props: BROKEN, worse than at arm one; no live change again; the arbitration rule under ADR-063 decision 4 is
   written in prop-physics.md first, then props.rs with T0, the two-seat probe and its scenario (prop-physics not-done until then).
+- STATE (19:21 PST 2026-11-02, thuum-cf): the root-cause plan's day 1 (numidium's plan, Eli's calls): the 29 T3 boxes unticked (932b0f8d,
+  verb-lint green); the stale tags being settled from their runs by an agent; b-npc-handoff-door-hosts v2 (dd472cc6) in the
+  playtest's direction with both roles, awaiting the fresh review, its red run on 35509f7a and its green on the settle head
+  (m3-handoff-settle 9606963e, its pipeline rerun after a SIGABRT in an unrelated reloot test); the props arbitration BUILT on
+  m4-prop-arbitration aafb26ba (pipeline 4780), the probe and the engine model next. ADR-062 slice 1b f7ce5b37 green, staged by
+  numidium after its rules review.
   The race permit (Eli, 2026-11-01: rotfern's race for test client 1 alone) MERGED to fork parity 7fe600e6 (18:18 PST 2026-11-01; the gate 12 of
   12, T2 38 of 38; the menu hide follows in the bondblock train), BUILT WHOLE on fork m5-race-permit b59ab993 (13:56 PST 2026-11-01:
   server setting restrictedRaces, two facts on the race rule, CreateActor's restrictedRaces and permittedRaces at SCHEMA_VERSION 29,

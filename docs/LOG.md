@@ -5539,3 +5539,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   relaxed claim goes to Eli; three status words; one playtest per fixed system; the five-system freeze). verb-lint on main
   (5b0aac19): 29 T3 boxes ticked over open claims, the list with thuum-cf to untick before the lint joins docs-lint;
   lab/status.py's count no longer counts the box's own wording and settles a line that cites a run id.
+- 19:21 PST 2026-11-02 (thuum-cf): the props arbitration BUILT on fork m4-prop-arbitration aafb26ba (pipeline 4780, client build): the rule
+  of prop-physics.md's Ownership section in props.rs (Moving, Returned, the departure's returns), the bridge, the validator
+  (PropOwner.player 0), PartOne::SendPropOwnerWord, ActionListener (E_PROP_MOVING, the rest's word, the NotOwner answer),
+  PropTest, propService.ts (the lease mirror, the silence and the presence tests gone). b-npc-handoff-door-hosts v2 dd472cc6 in
+  the playtest's direction with both roles (the fresh review's seven findings). The 29 T3 boxes unticked (932b0f8d). m3-handoff-
+  settle 9606963e: two CellHostTest cases moved past the settle window (4768, 4773), then a SIGABRT in PartOne_ActivateTest's
+  reloot case at 287 of the suite (4778), read as a flake under a loaded runner; rerun.
