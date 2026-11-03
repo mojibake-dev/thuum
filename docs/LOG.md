@@ -6791,3 +6791,26 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   came 6 s before the exit and none after), with the copy's cell 133c6 kept and the 3D recorded by the npc-state read; every other
   step and claim as v23. A rewritten claim: its fresh review runs, and under W4 it waits for Eli's word (numidium carries the read
   and the proposal). The gate is held on it; r3 b8d82f05 stays the fork head.
+- 07:55 PST 2026-11-03 (15:55Z 11-03) (thuum-cf): the guest's half-up body READ (the three death-freeze runs side by side: 140538 red, 141811
+  green, 152912 red). It is a SECOND ragdoll frozen mid-fall, not an unsettled read: c2's head and root coordinates are identical to
+  five decimals at the 1 s, 4 s and final reads in every run (140538: head z -93.949, root -106.757; 152912: -58.135 / -112.708; the
+  green -133.414 / -128.626, the head below the root), so v4's extra 6 s could not matter. In both reds c2's copy died about 3 s
+  BEFORE the record: c2's "resurrected 13491 (puppet true, AI was off true, dead before true, dead after false)" at 14:08:13.957 and
+  15:31:29.424 (the 2 s dead check found a dead body under a live record and stood it up); the server's word then killed it again
+  (the record dead on c2 at 14:08:16.946 / 15:31:31.584); and puppetService released it "after the ragdoll's 4.0 s" at 14:08:17.695
+  / 15:31:32.501 with the clock counted from the FIRST death (deadFlaggedSince, never cleared by onResurrected), 0.75 to 1.0 s into
+  the second fall; setPuppet(false) with the AI off then left nothing ticking the graph and the skeleton stopped where it was
+  (152912's restBody moved the reference 70 units while the head node stayed, 54 units off the new root). In the green the copy died
+  once, at the record's instant, had its full 4 s of ragdoll, and lay flat. What killed the copy early (HYPOTHESIS): the host's kill
+  move (KillMove1HMStabUpFace, KillMoveD), relayed to the puppet's graph as a plain animation event (formView's replayActions; the
+  figures' kill moves are blanked at the hook for 0xff000000+ only), whose victim animation kills at its KillActor tag 2.7 s after
+  the event on c2 in both StabUpFace runs, while on the host the kill move killed at its tag only in the green (in the reds Sven lived
+  at health 0.020 some 3.7 to 4.4 s after the event and died by the sword later). The only discriminator between green and red is the
+  gap between the copy's early death and the server's word (3.2 and 3.0 s against about 0); not the kill variant, the hold, the
+  actor's state, the cell or the kill move's name. The fix on m3-system1-r3 (pushed after e... see the head below): replayActions
+  drops a KillMove* event for a puppet ("<id>: the host's <event> not replayed on the puppet, a puppet's death is the server's word",
+  once per puppet) and onResurrected clears deadFlaggedSince so the settle clock restarts at the last death; tsc clean, no wire
+  change; its fresh review and pipeline follow; x-npc-death-freeze v4 twice is the read. The Dynamic read's shape, if the fix does
+  not hold: npc-state every 0.5 s from the kill move's event (lab-api's wait takes fractions) with isInKillMove, isBleedingOut,
+  bIsSynced and the puppet flag added to the driver, and the knock state (ActorState's knockState, Actor::IsInRagdollState) as a
+  platform native or a Frida read, plus hooks on KillActorHandler, Actor::Kill, KillImpl and the Resurrect native on c2.
