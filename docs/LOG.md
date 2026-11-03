@@ -6926,3 +6926,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   builds). The next re-stage (death-freeze v5 twice as the proof, then x-warm-exit v2, swap v20, death-reentry v5, scene-guest v3;
   the door scenario by Eli's D-P13) waits on its two fresh reviews (mine reading; numidium's beside it). The apply script's review is
   still reading; numidium's round-trip probe waits on its verdict.
+- 08:28 PST 2026-11-03 (16:28Z 11-03) (numidium's re-stage on db0e19a5): death-freeze v4 GREEN twice (20261103-161847, 20261103-162349), and both
+  runs show the mechanism, not luck: c2's console has "the host's KillMoveShortB not replayed on the puppet" (161847) and "the host's
+  KillMoveShortD not replayed on the puppet" (162349), one each, and "resurrected 13491" 0 in both; so both runs had a host kill
+  move, the action-relay drop caught it by the KillMove* prefix (ShortB and ShortD this time, against the reds' StabUpFace and
+  KillMoveD), there was no early puppet death and no stand-up, and the body went down. Those are v5's two claims, held on db0e19a5.
+  Round two (7d0d4d7e) covers the paths these runs did not take (the clock's clear where the body is seen alive; the event relay's
+  mouth and the other name families). The re-stage continues with x-warm-exit v2, swap v20, death-reentry v5 and scene-guest v3;
+  then 7d0d4d7e's re-stage with v5 twice, once both reviews answer.
