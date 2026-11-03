@@ -375,7 +375,8 @@ class FakeState:
                 if not ref.isDead:
                     return {"ok": False, "formId": fid, "error": "not dead"}
                 ref.isDead, ref.healthPercentage = False, 1.0
-                return {"ok": True, "formId": fid, "spawn": None, "isDead": False}
+                # the real gamemode's reply names its shape (respawnFated, or inPlace); the fake models neither path's engine effect
+                return {"ok": True, "formId": fid, "shape": "inPlace" if payload.get("inPlace") else "respawnFated", "isDead": False}
             return {"ok": False, "error": f"unknown command {kind!r}"}
         return {"ok": False, "error": f"unknown rpc {name!r}"}
 

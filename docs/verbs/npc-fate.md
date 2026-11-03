@@ -656,7 +656,7 @@ whatever spawnDelay says, so upstream's two integration tests that killed
 the mudcrab 0xDC558 with spawnDelay 0 and waited a millisecond
 (test_isdead, test_partial_location_save) moved to npcRespawnHours 0.0001
 in their settings and a wait spanning one sweep; a gamemode wanting an
-instant respawn calls the console's Resurrect or the lab's respawn-ref. Owed: the JSON round-trip T0 and MayDie against a master flag, the
+instant respawn calls the console's Resurrect or the lab's respawn-ref (without inPlace the fated, teleporting shape since 2026-11-03; with inPlace the Resurrect-like one). Owed: the JSON round-trip T0 and MayDie against a master flag, the
 restart scenario as b-npc-fate (rule 13, after x-npc-death holds), the
 cleared hours (the quests verb), kNeverResets zones (libespm reads no ECZN:
 every cell resets). The lab's grammar (numidium, lab main 80c350dd):
@@ -732,7 +732,7 @@ in the scenario's server block, for the sweep's own read.
   KillSilent and Resurrect stand as the ledger has them (docs/NATIVES.md:
   201-202, :223; headshot.md:151 has the server's Actor.Kill at R0). The lab
   gamemode gains two labCommands for probes, kill-ref {formId, killerProfileId}
-  and respawn-ref {formId} (lab/gamemode/gamemode.js:421-431's shape), the
+  and respawn-ref {formId} (lab/gamemode/gamemode.js's respawn-ref: since 2026-11-03 the fate's own RespawnFated through the server's respawnFated property, the sweep's wire with tTeleport; inPlace stands him where he fell), the
   server's own kill (ConsoleCommands.cpp:255-268's ExecuteKill) by id; the
   scenario's kills are the person's (a bow), the probes' these.
 - Settings: `npcFate` (the kill switch), per server, beside npcEnabled

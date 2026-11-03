@@ -614,6 +614,9 @@ command["respawn-ref"] = (payload) => {
       mp.set(formId, "respawnFated", true);
       return { ok: true, formId, shape: "respawnFated", isDead: Boolean(mp.get(formId, "isDead")) };
     } catch (e) {
+      // only the missing property falls back (an older image); a throw inside the lever itself (its refusal of a player's
+      // actor or of a false write, a failure inside RespawnFated) surfaces as the command's error
+      if (!/doesn't exist/.test(String(e))) throw e;
       const spawn = mp.get(formId, "spawnPoint");
       if (spawn) mp.set(formId, "locationalData", spawn);
       mp.set(formId, "isDead", false);
