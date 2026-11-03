@@ -154,10 +154,13 @@ seat's AI on at the end), on 46's stage after the playtest. The server accepts t
 destination is adjacent and hosted by another player, writes the record,
 sends that player an ActorHandoff, then flips the word both ways through
 UpdateHoster (MpObjectReference.cpp:746-770); the new host's game promotes
-at the word, the old host's demotes, the gate drops its stale reports. An
-actor passed inside ACTOR_TENURE_MS 10_000 (UNMEASURED) is not passed again
-(its simulator stands in the follow table, (a)'s mechanism; TES3MP's shape,
-tes3mp.md:85). Row: imposed.
+at the word, the old host's demotes, the gate drops its stale reports. The
+tenure (ACTOR_TENURE_MS 10_000, UNMEASURED, never built) is retired in favour
+of D9's settle (2026-11-03): the new host's report back into the cell the
+actor came from inside handoffPassSettleMs is a stale copy's sample, and the
+passing report reaches the new host reliably ahead of the word (TES3MP's
+shape, tes3mp.md:85, read as a fencing token rather than a lease). Row:
+imposed.
 
 (e) A refused actor is not reported every tick. R0 for the log, R1 for the
 report. Stump's 751 refusals in five minutes are one warn line per sample
@@ -267,17 +270,19 @@ each imposition's target is explicit.
 ## Suppress (engine's own behavior blocked on non-hosts)
 
 - What is suppressed: a pass inside CANDIDATE_DWELL_MS and a reach-only
-  lapse inside GRACE_REACH_MS (the flicker); a second pass of one actor
-  inside ACTOR_TENURE_MS; a non-simulator's report (ActorUpdatableBy through
+  lapse inside GRACE_REACH_MS (the flicker); the new host's report back into
+  the cell its actor came from inside the settle window (D9's settle, the
+  tenure's replacement); a non-simulator's report (ActorUpdatableBy through
   simulator_of) and its per-tick log line (e); a hosted cell change at any
   distance (MovementValidation.cpp:115-120 bounded to adjacency or a door);
   the freeze of a loaded, unreached cell (its actors follow); a second
   engine running a resident whose record sits indoors (g). How: the Rust
   table's verdicts (Server), the core's gate, PuppetService at the word.
-- Release condition: a grant to anyone ends a follow and a tenure; a
-  release, a Gone or an unload ends the follower's standing; the knobs are
-  server settings (handoffGraceReachMs, handoffCandidateDwellMs,
-  handoffActorTenureMs), 0 reproducing today's rule.
+- Release condition: a grant to anyone ends a follow; a pass's settle ends
+  with its window (pruned at the tick); a release, a Gone or an unload ends
+  the follower's standing; the knobs are server settings
+  (handoffGraceReachMs, handoffCandidateDwellMs, handoffPassSettleMs), 0
+  reproducing the rule without them.
 - Side effects: two. H6 CONFIRMED: the follow held from an interior outside
   every grid, the record going home under its follower's report
   (x-handoff-door 025527, 054447), the pin holding where the grid drops him.
@@ -761,8 +766,17 @@ itself, then at 5 s the door walk's line, one more "now simulates 1348a in cell 
 the street's seat running him loaded within 150 units of the record, the inn's seat with no 3D of him and its copy out of the inn;
 at 65 s the counts again and nobody's copy in the inn. The mutation run is the fix's parent 35509f7a (leg A), and the by-path
 probe x-handoff-door-hosts-swap plays leg B's roles on the parent (a run stops at its first red). HYPOTHESIS until those runs:
-the mechanism above (every stamp fits it), whether 1 s covers the promote on the lab's LAN, and that the street seat's copy stands
-indoors at the promote (the precondition, claimed).
+the mechanism above (every stamp fits it), and that the street seat's copy stands indoors at the promote (the precondition,
+claimed). What the two halves carry (20:13 PST 2026-11-02, the settle branch's fresh review): the playtest's first bounce came about 8 s after
+the promote, outside any 1 s window, so the reliable copy of the passing report ahead of the word carries the playtest's case
+alone; the settle window catches the in-flight stale sample and the race the ordering cannot close (remoteServer.ts overwrites
+the model's movement with any movement, so an older unreliable sample landing in the word's frame still gives the promote the
+pre-door point; rare on a LAN, HYPOTHESIS). The window is the server setting handoffPassSettleMs (0 off, the mutation run's switch;
+unset PASS_SETTLE_MS 1 s); the pass row remembers the cell the actor came from, so only a report back into it is stale and a move
+onward is judged as any other; the table prunes passes at the tick and the Stale line is one per actor per 10 s. The tenure row
+(ACTOR_TENURE_MS, handoffActorTenureMs) is retired in the settle's favour: one damper, one name. If a fixed window proves blunt the
+next shape is ADR-063's "never by a timer": end the settle at the new host's first report from inside the passed-into cell, which
+a stale copy never sends (a fencing token, not a lease).
 Known limit (19:24 PST 2026-11-02): the door's pre-check reads Stale as a refusal, so a host's engine that turns an actor around
 inside one second of a pass waits at the door until the window passes (its package retries the door as Embry's did,
 playtest 37); a real turnaround that fast is the ping-pong's own shape, and the window is the cost of telling them apart.
