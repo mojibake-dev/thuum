@@ -7458,3 +7458,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   shooting a bucket with an arrow, or using fireball both count.": the case is any impulse on physics objects from a distance (a
   spell's explosion, an arrow on a bucket, a shout), every prop the same way on both screens and at the same rest; reworded in
   prop-physics.md (b-prop-impulse: an arrow on a bucket, a Fireball at a pile, Hailstone optional).
+- 15:07 PST 2026-11-03 (23:07Z 11-03) (thuum-cf): The exclusive hold's server half BUILT: fork m3-turbo3-sys2-container a9d1468b (off m3-adr065-system1
+  436ce96b; m4-container-exclusive c2617764 merged at 1f3bd25e, then the one model): the switch deleted; a second seat's activation
+  refused "E_CONTAINER_BUSY: <seat> activates <ref> held by <holder>; refused" with the notification "<name> is searching this" (or
+  "Someone is using this"); the close sends the record's inventory to every listener from SetOpen's shut branch (the one place every
+  shut passes: the holder's close, its destroy or disable, a reloot, a script; the shut line extended, "shut with 0 occupant" intact;
+  guarded by baseContainerAdded so a script's shut of an untouched chest blanks nothing); a non-occupant's move refused
+  "E_CONTAINER_OCCUPANT: <seat> doesn't occupy <ref>; the move refused, the mover resynced" (a warn and a resync, no throw); the live
+  redraw to other occupants deleted; five T0 cases. Pushed server-only, pipeline 5130; the fresh review runs beside it (decision 8).
+  Two claims go vacuous and will be rewritten in their own commits at the merge: c-dungeon-enemies.yaml:264 and
+  b-npc-body-release.yaml:115 count "players in the container now" == 0, a line that no longer exists (the replacement: no
+  E_CONTAINER_BUSY). The client half (a dead body activation-blocked like a chest, D-C2 A) is being written on
+  m3-turbo3-sys2-container-client. Eli's two physics acceptance cases are in prop-physics.md (41c2b062).
