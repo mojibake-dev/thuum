@@ -306,7 +306,8 @@ class M0VocabularyTests(unittest.TestCase):
                           "isDead": False, "healthPercentage": 1.0},
                 # a corpse at rest (npc-fate "The body's rest", ADR-067), and one from a server without the property
                 0x85549: {"found": True, "actorId": 0x85549, "x": 1.0, "y": 2.0, "z": 3.0, "cell": "3c:Skyrim.esm",
-                          "isDead": True, "healthPercentage": 0.0, "bodyAtRest": True, "bodyRestAt": 4567},
+                          "isDead": True, "healthPercentage": 0.0, "bodyAtRest": True, "bodyRestAt": 4567,
+                          "changeFormFnv": 0x90b876a, "changeFormAt": 4600},
                 0x8554A: {"found": True, "actorId": 0x8554A, "x": 1.0, "y": 2.0, "z": 3.0, "cell": "3c:Skyrim.esm",
                           "isDead": True, "bodyAtRest": None, "bodyRestAt": None}}
         srv.ref = lambda actor_id: refs.get(actor_id, {"found": False})
@@ -316,7 +317,8 @@ class M0VocabularyTests(unittest.TestCase):
                      'server.host(0x1234).hosted == false', 'server.host(0x1234).client == ""',
                      "server.ref(0x85547).x == 10", 'server.ref(0x85547).cell == "3c:Skyrim.esm"', "server.ref(0x85547).isDead == false",
                      "server.ref(0x85549).bodyAtRest == true", "server.ref(0x85549).bodyRestAt == 4567",
-                     "server.ref(0x85549).bodyRestAt > 0"):
+                     "server.ref(0x85549).bodyRestAt > 0", "server.ref(0x85549).changeFormFnv == 0x90b876a",
+                     "server.ref(0x85549).changeFormAt > 0"):
             with self.subTest(expr=expr):
                 self.assertTrue(ev.evaluate(expr))
         with self.assertRaises(AssertionData):

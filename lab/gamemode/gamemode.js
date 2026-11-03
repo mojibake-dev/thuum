@@ -10,7 +10,8 @@
 //              {kind: "time"}: the server's game clock now
 //              {kind: "spell", formId}: a spell's effects and their MGEFs as the server resolves them
 //              {kind: "cellHost", cell}: who hosts the cell on the server (docs/verbs/cell-host.md)
-//              {kind: "ref", actorId}: a reference's record by form id (a hosted NPC's position and health; a prop's position, its actor fields null)
+//              {kind: "ref", actorId}: a reference's record by form id (a hosted NPC's position and health; a prop's position, its actor fields null;
+//                                       changeFormFnv and changeFormAt, the owner's latest change form's hash and arrival, 0 without one)
 //              {kind: "follow", actorId}: whether a game follows that actor out of its hosted cells (npc-handoff)
 //              {kind: "fate", actorId}: the server's roll for a game-file actor (npc-fate, ADR-046)
 //              {kind: "stream", profileId}: a player's stream counters by message type (npc-stream slice 4)
@@ -278,6 +279,24 @@ const state = {
         bodyRestAt = null;
       }
     }
+    // the actor's change-form record as the server keeps it (mp.get's changeFormRecord, thuum
+    // docs/verbs/change-form.md, ADR-065 system 1): changeFormFnv the record's FNV-1a 32 and changeFormAt the
+    // wall-clock ms of the host's report; 0 and 0 without a record, from a server without the property and
+    // for a plain reference, so a claim reads a record's arrival as a change from 0
+    let changeFormFnv = 0;
+    let changeFormAt = 0;
+    if (type !== "MpObjectReference") {
+      try {
+        const record = mp.get(actorId, "changeFormRecord");
+        if (record && typeof record === "object") {
+          changeFormFnv = Number(record.fnv1a) >>> 0;
+          changeFormAt = Number(record.at) || 0;
+        }
+      } catch (e) {
+        changeFormFnv = 0;
+        changeFormAt = 0;
+      }
+    }
     // the reference's items as the server records them, a chest's or a body's as an actor's
     // (lab-api's server.inventory(<ref>), the two-seat container claims of the root-cause plan's W4);
     // null where the record holds none or the API refuses the read
@@ -304,6 +323,8 @@ const state = {
       inventory,
       bodyAtRest,
       bodyRestAt,
+      changeFormFnv,
+      changeFormAt,
     };
   },
 

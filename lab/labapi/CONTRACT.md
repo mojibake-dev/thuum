@@ -143,7 +143,7 @@ client whose player's actorId (the `actor` kind's) is the holder, "" when none.
 Request: `{"payload": {"kind": "ref", "actorId": <int>}}`. Answer: `{"found":
 true, "actorId", "x", "y", "z", "rot", "cell", "isDead", "healthPercentage",
 "magickaPercentage", "staminaPercentage", "worn", "inventory", "bodyAtRest",
-"bodyRestAt"}`, an actor's
+"bodyRestAt", "changeFormFnv", "changeFormAt"}`, an actor's
 record by form id (a hosted NPC), the `actor` kind's fields without the
 appearance verdicts, or `{"found": false, "actorId"}` for a form the server
 holds no position for.
@@ -154,6 +154,10 @@ server's monotonic ms clock when that was set (0 while not); `null` from a
 server without the property and for a plain reference. Scenarios read
 `server.ref(<id>).bodyAtRest == true` after a kill and compare `server.ref(<id>).x`
 with both seats' `npc_state(<id>).x` once it is.
+`changeFormFnv` and `changeFormAt` are the owner's latest change-form record of the actor as the server
+keeps it (`mp.get(id, "changeFormRecord")`, docs/verbs/change-form.md, ADR-065): the record's FNV-1a 32 and the
+server's ms clock when it was recorded (0 without one; `null` from a server without the property). A scenario claims
+`server.ref(<id>).changeFormFnv != 0` after the owner's body came to rest.
 `worn` is the record's equipment (`mp.get(id, "equipment")`, read inside a try)
 as a seat's npc-state counts it: the ARMO and WEAP form ids marked worn in a
 slot or either hand, one per form, sorted, typed through the server's espm, so

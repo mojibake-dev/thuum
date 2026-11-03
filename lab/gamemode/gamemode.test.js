@@ -422,6 +422,31 @@ test("respawn-ref surfaces the lever's own refusal instead of falling back (a pl
   assert.deepStrictEqual(mp.get(0xff000001, "locationalData").pos, [1, 2, 3]);
 });
 
+test("labState ref reads the owner's change-form record as its hash and arrival, 0 and 0 without one", () => {
+  // thuum docs/verbs/change-form.md (ADR-065 system 1): the server's changeFormRecord property carries the
+  // record's FNV-1a 32 and the wall-clock ms of the host's report; a claim reads both against 0
+  global.mp = fakeMp();
+  mp.set(0xff000a03, "locationalData", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [9050, 550, 0], rot: [0, 0, 0] });
+  mp.set(0xff000a03, "changeFormRecord", { fnv1a: 0x8a36eb8e, at: 1762200000123, epoch: 2, flags: 0x04000427, formType: 1, version: 78, sender: 0xff000001, bodyLength: 8, remapRows: 1 });
+  mp.set(0xff000a04, "locationalData", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [0, 0, 0], rot: [0, 0, 0] });
+  mp.set(0x3975b, "locationalData", { cellOrWorldDesc: "3c:Skyrim.esm", pos: [1, 1, 1], rot: [0, 0, 0] });
+  mp.set(0x3975b, "type", "MpObjectReference");
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  const recorded = mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0xff000a03 });
+  assert.deepStrictEqual([recorded.changeFormFnv, recorded.changeFormAt], [0x8a36eb8e, 1762200000123]);
+  const none = mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0xff000a04 });
+  assert.deepStrictEqual([none.changeFormFnv, none.changeFormAt], [0, 0]);
+  // a plain reference is never asked (the actor properties throw for it)
+  const prop = mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0x3975b });
+  assert.deepStrictEqual([prop.found, prop.changeFormFnv, prop.changeFormAt], [true, 0, 0]);
+  // a server without the property answers 0 and 0, not an error
+  const get = mp.get;
+  mp.get = (id, k) => { if (k === "changeFormRecord") throw new Error("Property 'changeFormRecord' doesn't exist"); return get(id, k); };
+  const bare = mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0xff000a03 });
+  assert.deepStrictEqual([bare.found, bare.changeFormFnv, bare.changeFormAt], [true, 0, 0]);
+});
+
 test("labState ref reads the record's worn armor and weapons, as a seat's npc-state counts them", () => {
   // npc-stream slice 3: a hosted actor's equipment follows its host's engine, and a claim compares the record's
   // hands with both seats' npc-state worn lists; the record marks ammo and a torch worn too, which those lists omit

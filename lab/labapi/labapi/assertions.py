@@ -38,6 +38,9 @@ the lab can grep (E_ASSERT_*).
   server.ref(<id>).bodyAtRest | .bodyRestAt          the corpse's rest (npc-fate, ADR-067): whether the
                                                      body is at rest, and the server's ms clock when it
                                                      was set (0 while not)
+  server.ref(<id>).changeFormFnv | .changeFormAt     the owner's latest change-form record of the actor
+                                                     (change-form, ADR-065): its FNV-1a 32 and the server's
+                                                     ms clock when it was recorded (0 without one)
   snapshot("<name>").<field>                         a server fact a `server: snapshot {name, of}` step
                                                      kept earlier in the run (the freeze's evidence)
   <client>.state.gameHour | .gameDay | .gameMonth | .gameYear | .gameDaysPassed | .timeScale
@@ -833,6 +836,10 @@ class RefView:
     # monotonic ms clock when it was set (0 while not); None from a server without the property
     bodyAtRest: bool | None = None
     bodyRestAt: int | None = None
+    # the owner's latest change-form record (docs/verbs/change-form.md, ADR-065): its FNV-1a 32 and the
+    # server's ms clock when it was recorded (0 without one); None from a server without the property
+    changeFormFnv: int | None = None
+    changeFormAt: int | None = None
 
 
 @dataclass(frozen=True)
@@ -1256,7 +1263,9 @@ class _ServerRef:
                            staminaPercentage=_opt_float(d.get("staminaPercentage")),
                            worn=tuple(sorted(int(w) for w in d["worn"])) if isinstance(d.get("worn"), list) else None,
                            bodyAtRest=_opt_bool(d.get("bodyAtRest")),
-                           bodyRestAt=_opt_int(d.get("bodyRestAt")))
+                           bodyRestAt=_opt_int(d.get("bodyRestAt")),
+                           changeFormFnv=_opt_int(d.get("changeFormFnv")),
+                           changeFormAt=_opt_int(d.get("changeFormAt")))
         except (KeyError, TypeError, ValueError) as e:
             raise AssertionData(f"{actor_id:#x}'s record lacks {e}") from e
 
@@ -2013,7 +2022,7 @@ _ATTRS = {
     SpellView: {"magnitude", "overTime", "conditional", "effects"},
     HostView: {"hosted", "client", "epoch", "actorId"},
     RefView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "worn",
-              "bodyAtRest", "bodyRestAt"},
+              "bodyAtRest", "bodyRestAt", "changeFormFnv", "changeFormAt"},
     FigureSpellsView: {"count", "extra", "base"},
     FollowView: {"following", "client", "cell", "actorId"},
     FateView: {"fated", "baseId", "level", "raceId", "worn"},
