@@ -521,11 +521,14 @@ Two props the engine owns differently from clutter, written so the row kind "pro
   1. A body dragged by one player is seen pulled on the other player's screen and lies at the same rest afterwards (the (a) and (b)
      halves above, b-corpse-drag): the dragger's seat is the body's owner for the drag (the toucher's rule), the other follows its
      stream, and the rest after the release is the record's.
-  2. Hailstone (the spell b-hailstone casts) cast from down the road at a cart of cabbages: every cabbage flies the same way on both
-     screens and comes to rest at the same place (b-cabbage-hailstone), each prop's owner the simulating seat with the others following
-     its stream; the caster is far (the spell's reach, not the contact's), so the claim is an impulse touch from the release. Playtest
-     41's cabbage read below (E_PROP_REACH from the contact stand-in's 256 against the shout's 735 to 1400 units; E_PROP_STEP on the
-     host against the record that never moved) is the red this case turns green.
+  2. Any impulse on physics objects from a distance (Eli's correction, verbatim: "just an example of a spell that moves physics
+     objects. shooting a bucket with an arrow, or using fireball both count."): a spell's explosion (Fireball, Hailstone) at a cart of
+     cabbages or a pile, an arrow hitting a bucket, a shout, and the like: every prop flies the same way on both screens and comes to
+     rest at the same place, each prop's owner the simulating seat with the others following its stream; the actor is far (the
+     projectile's or the explosion's reach, not the contact's), so the claim is an impulse touch from the release or the hit. The
+     scenario's legs: an arrow on a bucket, a Fireball at a pile, Hailstone optional (b-prop-impulse). Playtest 41's cabbage read
+     below (E_PROP_REACH from the contact stand-in's 256 against the shout's 735 to 1400 units; E_PROP_STEP on the host against the
+     record that never moved) is the red this case turns green.
 - Not slice three's: traps' bodies (M4's dungeon work, with the MSTT admission ADR-058's note defers there), horses (mount.md).
 
 ## The physics stage's first reads (19:30 PDT 2026-10-30; m3-prop-physics 3586f2db on the merged base, LABAPI 4021)

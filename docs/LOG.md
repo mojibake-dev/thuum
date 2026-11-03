@@ -7454,3 +7454,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   on the other's screen and lies at the same rest (b-corpse-drag); Hailstone from down the road at a cart of cabbages, every cabbage
   flying the same way on both screens and resting at the same place (b-cabbage-hailstone), playtest 41's cabbage read (E_PROP_REACH,
   E_PROP_STEP against the record that never moved) the red it turns green. numidium writes both scenarios when the arm's branch exists.
+- 15:02 PST 2026-11-03 (23:02Z 11-03) (thuum-cf): Eli's correction on acceptance case 2, verbatim: "just an example of a spell that moves physics objects.
+  shooting a bucket with an arrow, or using fireball both count.": the case is any impulse on physics objects from a distance (a
+  spell's explosion, an arrow on a bucket, a shout), every prop the same way on both screens and at the same rest; reworded in
+  prop-physics.md (b-prop-impulse: an arrow on a bucket, a Fireball at a pile, Hailstone optional).
