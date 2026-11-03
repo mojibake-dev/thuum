@@ -4429,8 +4429,11 @@ Consequences.
 Risks. R1: four more bytes at most per report (postcard's varint, usually one or two) against a 500 ms cadence; negligible. R2: an
 ack that never comes (a crash mid-transfer): the timeout commit, sized by the scenario. R3: the old owner's engine keeps moving
 its copy until the word lands; its reports are StaleEpoch and dropped, and the copy's demote is the client's as today (ADR-063
-decision 3). R4, HYPOTHESIS: a seat can read its own pause and load state (Skyrim Platform's menu events and the load's block
-are known to the lab as E_RUN_PAUSED and the login's 4 to 5 s no-op window); the first probe reads them before decision 6 is built.
+decision 3). R4, HYPOTHESIS: a seat can read its own pause and load state. The surfaces exist in Skyrim Platform as the fork
+ships it (skyrim-platform/src/platform_se/codegen/convert-files/skyrimPlatform.ts: the menuOpen and menuClose events with the
+menu's name, Utility.isInMenuMode, the loadGame event, the cellFullyLoaded event; the lab already knows the pause as E_RUN_PAUSED
+and the login's 4 to 5 s no-op window); whether every pausing menu passes through menuOpen, and where the load block begins and
+ends against loadGame and cellFullyLoaded, is what the first probe reads before decision 6 is built.
 R5: the keyframe, the word and the ack ride one reliable ordered channel; the T2 session proves the order before any lab run.
 
 Alternatives. Keep the timers: ten rounds say why not. Per-cell epochs only: fails at a pass. A position judgment on the server
