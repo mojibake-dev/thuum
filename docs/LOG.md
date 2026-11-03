@@ -5673,3 +5673,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   line names both rules, the bridge's and FOLLOW_SETTLE_MS's docs). Lesson: a fresh seat's engine has no model of an interior's
   resident; the bounce's precondition is a seat that loaded the interior earlier in the session, so a two-seat premise must build
   it in rather than assume the playtest's history.
+- 21:56 PST 2026-11-02 (05:56Z 11-03) (thuum-cf): CORRECTION of the 21:38 lesson: 052100's two games were relaunched fresh for
+  that run (numidium's result.json read) and c2 went straight to the street, so a seat that had loaded the interior earlier is NOT
+  the bounce's precondition; the 051454-versus-052100 difference (c2 house/c1 street at 19.94 with no bounce and no pass; c1
+  house/c2 street at 19.49 with the bounce) is unexplained, orientation or hour. Door v8 d474f718 after numidium's review of v7
+  (leg A ready, its red run started on the parent): leg A's street seat parks at lab-spawn before the restart so leg B's street
+  seat lands alone (a restart keeps the seats' places and `consider` hands a cell to a strictly nearer ring alone), the hour
+  bounded above at each premise's end (< 7.8, < 21.8), the clock at 6.0, the header's cause corrected and the mutation's proof
+  named (the counts block at 5 s). Settle: the texts-only round f609a339 GREEN on 4828, the tested merge head for the door greens
+  and the settle-0 run. Props: 9a2a2491 GREEN on 4824 but FIX FIRST (D2: the old host's cell unloading mid-flight drops the prop's
+  3D before any final sample, the row stayed live naming it, nobody streamed; a grab carried through a door held 120 s); round
+  five 3fa107c6 (server-only, 4824's dist stands): Props::unloaded returns the unloading player's rows in the cell with a word
+  each from OnCellLoaded's unload branch, host_changed changes no row (a past-cap grab waits for the tick's word), the rules and
+  PropTest cases. Probe v7 (leg 2 claims the touch-0 grants unchanged and the host's wake and rest lines risen against snapshots;
+  the seats' owner lines counted: scenario.py refuses a snapshot of a seat fact). Docs: prop-physics A7, havok-props's rule cites
+  at the current lines (85ef28e0, f0282e1b), npc-handoff's T3 text at v8 with the correction.

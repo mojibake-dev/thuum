@@ -756,14 +756,17 @@ stays Refuse; the door's pre-check treats Stale as a refusal; a real return afte
 window. No wire change (no epoch travels; numidium's epoch shape is the alternative if the window proves too blunt). T0:
 cells.rs `a_passed_actors_report_back_within_the_settle_window_is_a_stale_copys_sample` and the cross test's teleport moved past
 the window; CellHostTest's door case reads the report's reliable send ahead of the word, the stale drop and the exit after the
-window. T3: b-npc-handoff-door-hosts v7 (thuum 1c8f3455, 2026-11-03). v6's two red runs on the fix's parent 35509f7a settled the
+window. T3: b-npc-handoff-door-hosts v8 (thuum d474f718, 2026-11-03; v7 1c8f3455). v6's two red runs on the fix's parent 35509f7a settled the
 shape (numidium's reads): leg A 20261103-051454 was red at its premise with fresh seats and NO pass logged at Hod's house door, while
 the swap probe 20261103-052100 REPRODUCED playtest 41's bounce at the house door ("ff000000 passes 1348a into cell 9731 (D9)" at
 05:22:17.325, "ff000001 passes 1348a into cell 133c7 (D9)" 56 ms later, the pair every 14 s as he retried his door), the street
-seat's game having been inside the house in the run before. The bounce's precondition is a street seat whose engine holds a model of
-the resident indoors (it loaded the interior earlier in the session; playtest 41's street seat had been in the inn), and the house
-door reproduces it at any exit hour; 56 ms sits inside the 1 s settle as well as being the placement's case. v7 builds the
-precondition in and claims the door it tests. Leg A, the house door at 08:00 (the sawmill package ends his night at home; the clock
+seat's game relaunched fresh for the run like the other's (numidium's result.json read): so the difference between the two runs is
+UNEXPLAINED (the seats' orientation, or the hour, 19.94 against 19.49), the house door reproduces the bug at any exit hour, and 56 ms
+sits inside the 1 s settle as well as being the placement's case. v7 and v8 keep the street seat's visit of the interior as a CLAIMED
+premise (its copy of him indoors with no 3D at the exit is playtest 41's shape and the bounce's mechanism, not a proven cause) and
+claim the door each leg tests; v8 (d474f718) parks leg A's street seat at lab-spawn through the restart so leg B's street seat lands
+alone (a restart keeps the seats' places), bounds the hour above at each premise's end (a late clock would put the exit before the
+baselines), starts the clock at 6.0 and names the mutation's proof: the counts block at 5 s going red. Leg A, the house door at 08:00 (the sawmill package ends his night at home; the clock
 starts at 6.5 so the visit finds him home and the exit comes about two real minutes after the house's seat hosts him; c2 the
 street's seat, c1 the house's, 052100's orientation): his record in 0x133c7; the street's seat teleports to the house door's
 landing (-506, -177, 0), is granted the house, sees him with 3D (following false), teleports to the street, the house unhosts
@@ -778,7 +781,7 @@ copy in the house. Leg B, the inn door at 22:00, playtest 41's own, the roles sw
 into the unhosted inn under its follow (claimed), then the same visit shape on the inn (the grant ends the follow, claimed), the inn's
 seat enters, and at 22:00 the fallback sandbox near his editor location walks him out by 0x13419 (the door 13419 line, "passes 1348a
 into cell 133c6" as the bounce line, the hour past 21.9). The exterior cell claim of v5 and v6 is dropped (the record outdoors and
-the 150-unit bound carry it). The by-path probe x-handoff-door-hosts-swap v5 plays leg A with the roles swapped on the parent (a run
+the 150-unit bound carry it). The by-path probe x-handoff-door-hosts-swap v6 plays leg A with the roles swapped on the parent (a run
 stops at its first red, so the scenario's second leg never reaches the parent); a third run at handoffPassSettleMs 0 reads the
 reliable placement alone. HYPOTHESIS until those runs:
 the mechanism above (every stamp fits it), and that the street seat's copy stands indoors at the promote (the precondition,
