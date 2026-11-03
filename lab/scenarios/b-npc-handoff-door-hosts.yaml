@@ -1,4 +1,15 @@
-# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v16 2026-11-03 after 085226 (the swap probe v12 on
+# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v17 2026-11-03 after ADR-064's fresh review of v16
+# said BLOCKER on leg A's shape, three ways: a hosted cell never passes to a nearer seat in steady state (wire-rules cells.rs's
+# consider: only inside the 5 s cold start; a host loses a cell by becoming ineligible, then the grace passes it), so v16's swap
+# never happened; `approach {cell: record}` goes to the seat's own engine copy (runner.py reads the seat's npc-state), which by the
+# leg's premise was the stale one; and the "stale copy indoors" was neither indoors (the visitor's own report carried him through
+# the door to its far side) nor frozen (puppetService releases an unloaded puppet after 4 s, D11, and the schedule walks it). v17
+# takes the review's deterministic shape: at 2.x every engine keeps him at his bed, the server moves the RECORD to the street
+# seat's feet (the console table's MoveTo through labCommand), the seat's promotion meets its copy at the bed, and the hold's line
+# naming the bed and the street is the stale case's witness; the parent's red is the stale copy's report into 133c7. No visitor
+# indoors, so no fight and no no-combat claim in leg A; leg B keeps v16's and its exit until carries the fight as its own red
+# ("hostility: 1348a hit ff00000[01]" == 0). The exit-hour claims are gone from leg A (the walk home is the sleep package's, waited
+# on the street door's line). v16 2026-11-03 after 085226 (the swap probe v12 on
 # round two) and 084329 (the settle-0 read) both stopped at the exit's until: Hod never walked out in 400 s because his COMBAT TARGET
 # had become the visiting player inside his house (c2's console in 085226: "target 0 package 734cd" at the grant, then "target
 # ff000001 package 734cd gaze 1348a" 23 s later; 070357's "Hod attacked the visiting player" reproduced), and combat holds him
@@ -109,138 +120,88 @@ server:
   snapshot: clean
   netem: null
   npcEnabled: true
-  gameHour: 17.0
+  gameHour: 2.0
 timeout_s: 3000
 steps:
   - c1: connect
   - c2: connect
   - wait: 10
-  # leg A (v15): the stale copy MADE on purpose, then the promotion that meets it. His clean-world record stands in his house
-  # (unhosted, so frozen) before any seat hosts it; c1 takes the street first (9712 and 9731 hosted) so the door walk below has a
-  # taker. No hour claim anywhere in this leg: the walk-out is his day package's (0x734cd, live on a fresh host at 17.x: 084006
-  # walked him out 21 s after the grant), waited on its own lines.
+  # leg A (v17): P8's condition MADE server-side, at an hour when every engine keeps him home. His clean-world record stands in
+  # his house (unhosted, so frozen); the clock is 2.x (DefaultSleepEditorLoc24x8 0x1b210, 00:00 to 08:00: every engine's copy of
+  # him is at his bed, loaded or not); c1 takes the street (9712 and 9731 hosted, the house unhosted) and its own engine's copy of
+  # him reads indoors with no 3D (claimed: the stale copy's place). Then the server moves the RECORD to c1's feet (the console
+  # table's MoveTo through the gamemode's labCommand: the actor's record teleported to the caller, ConsoleCommands.cpp
+  # ExecuteMoveTo; the server's own move, no seat's report), so the record enters a cell c1 hosts and c1 is promoted while its
+  # engine's copy stands in 133c7: P8's condition, made. On the parent the promoted seat's first report comes from the copy at the
+  # bed before the gate's move lands ("(passes|follows|moves) 1348a into cell 133c7", the bounce, the record yanked home); on the fix
+  # head the hold places the copy at the record first and its line names both places ("the engine at (...) in 133c7, the record at
+  # (...) in 3c"), the stale case's witness, claimed. Then his sleep package walks him home by the street door 0x13423 under c1's
+  # follow (D6; the door line "door 13423: ... walks it through to 133c7"), the record back in the house: recorded and claimed, no
+  # visitor indoors, so no fight. No hour claim but the premise's.
   - assert:
       - server.ref(0x1348a).cell == "133c7:Skyrim.esm"
+      - server.time().hour < 7.5
   - c1: teleport {cell: "3c:Skyrim.esm", x: 21995, y: -44935, z: -128, rot: [0, 0, 180]}
   - wait: 15
+  - c1: npc-state {formId: 0x1348a}
   - assert:
       - server.host(0x9712).client == "c1"
       - server.host(0x9731).client == "c1"
-  # A1, the visit: c2 (fresh from the spawn) enters by the landing and is granted the house; the engine spawns him home (084006),
-  # so the hold places nothing and its line is RECORDED here (the agree-case); across the grant no pass, follow or move of him
-  # into an exterior cell and none back into the interior; the door line and the settle drop's line counted beside them
+      - server.host(0x133c7).hosted == false
+      # the stale copy's place: c1's engine has him at his bed, unloaded
+      - c1.npc_state(0x1348a).cell == 0x133c7
+      - c1.npc_state(0x1348a).is3DLoaded == false
+  # the baselines: no move of him into the house or an exterior cell yet, the door and settle lines, c1's place
   - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 97"}
   - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 133c7"}
-  - server: log-count {pattern: "door 13407: 1348a.s host .* walks it through to 3c"}
+  - server: log-count {pattern: "door 13423: 1348a.s host .* walks it through to 133c7"}
   - server: log-count {pattern: "report of 1348a into cell 133c7 within the settle window"}
-  - server: snapshot {name: out_visit_a, of: 'server.log_count("(passes|follows|moves) 1348a into cell 97")'}
-  - server: snapshot {name: back_visit_a, of: 'server.log_count("(passes|follows|moves) 1348a into cell 133c7")'}
-  - c2: teleport {cell: "133c7:Skyrim.esm", x: -506, y: -177, z: 0, rot: [0, 0, 0]}
-  - wait: 5
-  - c2: move {dy: 150, duration_s: 2}
-  - until: {within: 60, expect: [server.host(0x133c7).client == "c2"]}
+  - server: snapshot {name: back_a1, of: 'server.log_count("(passes|follows|moves) 1348a into cell 133c7")'}
+  - server: snapshot {name: door_a0, of: 'server.log_count("door 13423: 1348a.s host .* walks it through to 133c7")'}
+  - server: snapshot {name: c1pos, of: "server.actor(c1)"}
+  # the move: the record to c1's feet; c1 is promoted (the word) with its copy at the bed
+  - c1: server-console {name: MoveTo, args: [0x1348a, 0x14]}
   - wait: 8
-  - c2: npc-state {formId: 0x1348a}
-  - c2: log-count {pattern: "hold 1348a: placed at the record"}
-  - c2: log-count {pattern: "hold 1348a: not placed"}
-  - c2: log-count {pattern: "promote gate 1348a"}
-  - server: log-count {pattern: "door 13407: 1348a.s host .* walks it through to 3c"}
-  - server: log-count {pattern: "report of 1348a into cell 133c7 within the settle window"}
-  - c2: log-count {pattern: "target ff000001 package"}
-  - c2: screenshot
-  - assert:
-      - server.host(0x133c7).client == "c2"
-      - server.ref(0x1348a).cell == "133c7:Skyrim.esm"
-      - c2.npc_state(0x1348a).is3DLoaded == true
-      - c2.npc_state(0x1348a).aiEnabled == true
-      # the premise: no fight with the visitor (085226 and 084329: combat held him inside for 400 s), the cause unread
-      - c2.npc_state(0x1348a).inCombat == false
-      - c2.npc_state(0x1348a).combatTarget == 0
-      - 'c2.log_count("target ff000001 package") == 0'
-      - 'server.log_count("(passes|follows|moves) 1348a into cell 97") == snapshot("out_visit_a")'
-      - 'server.log_count("(passes|follows|moves) 1348a into cell 133c7") == snapshot("back_visit_a")'
-  # A2, the walk-out under c2's engine: 0x734cd takes him out by 13407 (the door line), the walk is a D9 pass to c1 at the
-  # street (c1 "now simulates ... from the passing report"); across the pass no pass, follow or move of him back into 133c7,
-  # the record outdoors, c1 running him with 3D; c2 stays INSIDE, so from here its engine's copy of him is the stale one (an
-  # interior lists no exterior neighbours: the relay never reaches it, and the copy stands where the engine left it)
-  - server: log-count {pattern: "now simulates 1348a in cell 97"}
-  - server: snapshot {name: sim_a0, of: 'server.log_count("now simulates 1348a in cell 97")'}
-  - server: snapshot {name: door_a0, of: 'server.log_count("door 13407: 1348a.s host .* walks it through to 3c")'}
-  - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 133c7"}
-  - server: snapshot {name: back_pass_a, of: 'server.log_count("(passes|follows|moves) 1348a into cell 133c7")'}
-  # still no fight right before the walk-out is waited for (a fight that starts inside the until shows in c2's console)
-  - wait: 10
-  - c2: npc-state {formId: 0x1348a}
-  - c2: log-count {pattern: "target ff000001 package"}
-  - assert:
-      - c2.npc_state(0x1348a).inCombat == false
-      - c2.npc_state(0x1348a).combatTarget == 0
-      - 'c2.log_count("target ff000001 package") == 0'
-  - until: {within: 180, expect: ['server.log_count("door 13407: 1348a.s host .* walks it through to 3c") > snapshot("door_a0")']}
-  - until: {within: 30, expect: ['server.log_count("now simulates 1348a in cell 97") > snapshot("sim_a0")']}
-  - wait: 5
   - c1: npc-state {formId: 0x1348a}
-  - c2: npc-state {formId: 0x1348a}
   - c1: log-count {pattern: "hold 1348a: placed at the record"}
+  - c1: log-count {pattern: "hold 1348a: placed at the record after [0-9]+ ms .*the engine at .* in 133c7, the record at .* in 3c"}
   - c1: log-count {pattern: "hold 1348a: not placed"}
+  - c1: log-count {pattern: "hold 1348a: asked the move"}
+  - c1: log-count {pattern: "hold 1348a: re-asked the move"}
+  - c1: log-count {pattern: "promote gate 1348a"}
+  - c1: log-count {pattern: "moved 1348a into"}
   - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 97"}
   - server: log-count {pattern: "report of 1348a into cell 133c7 within the settle window"}
   - c1: screenshot
   - assert:
-      - 'server.log_count("(passes|follows|moves) 1348a into cell 133c7") == snapshot("back_pass_a")'
+      # the record outdoors at c1's feet and no report yanked it home
       - server.ref(0x1348a).cell == "3c:Skyrim.esm"
+      - 'abs(server.ref(0x1348a).x - snapshot("c1pos").x) < 300'
+      - 'abs(server.ref(0x1348a).y - snapshot("c1pos").y) < 300'
+      - 'server.log_count("(passes|follows|moves) 1348a into cell 133c7") == snapshot("back_a1")'
+      # the stale case met and cured: the hold's line names the bed and the street; nothing timed out
+      - 'c1.log_count("hold 1348a: placed at the record after [0-9]+ ms .*the engine at .* in 133c7, the record at .* in 3c") >= 1'
+      - 'c1.log_count("hold 1348a: not placed") == 0'
+      # c1 runs him outdoors, its copy within 150 of the record both ways
       - c1.npc_state(0x1348a).is3DLoaded == true
       - c1.npc_state(0x1348a).aiEnabled == true
-      - server.host(0x133c7).client == "c2"
-      # the stale copy, claimed: c2's engine still has him in the house
-      - c2.npc_state(0x1348a).cell == 0x133c7
-      - c2.npc_state(0x1348a).aiEnabled == false
-  # A3, the divergence grows: c1 runs him toward the mill for 30 s (his record moves off the door), c2's copy stays indoors
-  - wait: 30
-  - server: snapshot {name: rec_a3, of: "server.ref(0x1348a)"}
-  - c2: npc-state {formId: 0x1348a}
-  - assert:
-      - server.ref(0x1348a).cell == "3c:Skyrim.esm"
-      - c2.npc_state(0x1348a).cell == 0x133c7
-  # A4, the promotion that meets the stale copy: c2 approaches the record outdoors (150 units), the record's cell swaps to the
-  # strictly nearer seat and c2 is promoted while its engine's copy stands in 133c7 (P8's condition, made): the hold places the
-  # copy at the record before any report (its line, CLAIMED; "not placed" absent), no pass, follow or move of him into 133c7
-  # across the swap (the stale copy's report would say so: the parent's red), the record outdoors and within 2000 of its
-  # pre-swap place (a jump to the house door would be farther), c2 running him with 3D, c1's copy a puppet
-  - server: log-count {pattern: "ff000001 hosts cell 97"}
-  - server: snapshot {name: hosts_a, of: 'server.log_count("ff000001 hosts cell 97")'}
-  - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 97"}
-  - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 133c7"}
-  - server: log-count {pattern: "door 13407: 1348a.s host .* walks it through to 3c"}
-  - server: log-count {pattern: "report of 1348a into cell 133c7 within the settle window"}
-  - server: snapshot {name: out_swap_a, of: 'server.log_count("(passes|follows|moves) 1348a into cell 97")'}
-  - server: snapshot {name: back_swap_a, of: 'server.log_count("(passes|follows|moves) 1348a into cell 133c7")'}
-  - c2: approach {formId: 0x1348a, distance: 150, cell: record}
-  - until: {within: 60, expect: ['server.log_count("ff000001 hosts cell 97") > snapshot("hosts_a")']}
+      - c1.npc_state(0x1348a).cell != 0x133c7
+      - 'c1.npc_state(0x1348a).x - server.ref(0x1348a).x < 150'
+      - 'server.ref(0x1348a).x - c1.npc_state(0x1348a).x < 150'
+      - 'c1.npc_state(0x1348a).y - server.ref(0x1348a).y < 150'
+      - 'server.ref(0x1348a).y - c1.npc_state(0x1348a).y < 150'
+  # the walk home: his sleep package takes him back in by the street door under c1's follow (D6), the record follows him home
+  - until: {within: 240, expect: ['server.log_count("door 13423: 1348a.s host .* walks it through to 133c7") > snapshot("door_a0")']}
   - wait: 8
   - c1: npc-state {formId: 0x1348a}
-  - c2: npc-state {formId: 0x1348a}
-  - c2: log-count {pattern: "hold 1348a: placed at the record"}
-  - c2: log-count {pattern: "hold 1348a: not placed"}
-  - c2: log-count {pattern: "promote gate 1348a"}
-  - c1: log-count {pattern: "demote gate 1348a"}
+  - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 133c7"}
   - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 97"}
-  - server: log-count {pattern: "door 13407: 1348a.s host .* walks it through to 3c"}
-  - server: log-count {pattern: "report of 1348a into cell 133c7 within the settle window"}
-  - c2: screenshot
   - c1: screenshot
   - assert:
-      - 'server.log_count("ff000001 hosts cell 97") > snapshot("hosts_a")'
-      - 'c2.log_count("hold 1348a: placed at the record") >= 1'
-      - 'c2.log_count("hold 1348a: not placed") == 0'
-      - 'server.log_count("(passes|follows|moves) 1348a into cell 133c7") == snapshot("back_swap_a")'
-      - server.ref(0x1348a).cell == "3c:Skyrim.esm"
-      - 'abs(server.ref(0x1348a).x - snapshot("rec_a3").x) < 2000'
-      - 'abs(server.ref(0x1348a).y - snapshot("rec_a3").y) < 2000'
-      - c2.npc_state(0x1348a).is3DLoaded == true
-      - c2.npc_state(0x1348a).aiEnabled == true
-      - c2.npc_state(0x1348a).cell != 0x133c7
-      - c1.npc_state(0x1348a).aiEnabled == false
+      - server.ref(0x1348a).cell == "133c7:Skyrim.esm"
+      - server.follow(0x1348a).following == true
+      - server.follow(0x1348a).client == "c1"
+      - c1.npc_state(0x1348a).cell == 0x133c7
   # leg B: the roles swapped at the inn's door on a restarted clock (the restart forgets the hosts and the follows; the
   # server's log and its counts stand, and so do the world and the seats' places: so leg A's street seat parks at lab-spawn
   # first, 27 cells from Riverwood's squares, and comes back only to enter the inn, b-npc-handoff-night's shape)
@@ -347,7 +308,7 @@ steps:
   # the exit: his package takes him out by 13419 (the server's "door 13419: ... walks it through to 3c" line); the interior
   # host's report from the street passes him to the street's host (D9, "now simulates 1348a in cell 97xx"); the wait is on
   # that pass line, not on the cell
-  - until: {within: 600, expect: ['server.log_count("now simulates 1348a in cell 97") > snapshot("street_b")']}
+  - until: {within: 600, expect: ['server.log_count("now simulates 1348a in cell 97") > snapshot("street_b")', 'server.log_count("hostility: 1348a hit ff00000[01]") == 0']}
   - wait: 5
   # the counts first (each server.log_count re-reads the whole log) with the hour (the pass was his package's exit), then the
   # two seats read back to back with the street's seat last, then the engine and position claims with no log count among them.
