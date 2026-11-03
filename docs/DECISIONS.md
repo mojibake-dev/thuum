@@ -4035,7 +4035,7 @@ two-seat scenario of the collision itself (the gate audit's case 2, both players
 rows today). H3: an engine path no channel covers (the AI's night lock reached no native) shows up as a desync in play; the fix
 is a channel, a row in ADR-062's table, never a name.
 
-Outcomes under decision 4 (18:36 PST 2026-11-02):
+Outcome notes under decision 4 (PROPOSED by thuum-cf, added after Eli's acceptance; an accepted ADR's text changes by Eli's word or a dated amendment marked PROPOSED, so these stand as notes until Eli's word; written 18:36 PST 2026-11-02):
 - The hand-off's settle is the first arbitration row written after the retirements: npc-handoff D9's settle (fork
   m3-handoff-settle 019921fb; docs/verbs/npc-handoff.md "D9's settle"): the server imposes the passing report on the new owner
   ahead of the ownership word, and a report from the new owner that moves the actor back out of the cell within PASS_SETTLE_MS

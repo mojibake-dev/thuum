@@ -5572,3 +5572,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   claimant's own Havok still moves the copy (ADR-063 decision 3). The lab staged union-srv-3 35509f7a on the union's dist
   (clean-m1-next 19:40) for the door scenario's red run and waits on the reviews. Eli's decision owed: D-S1 and D-S2 in
   docs/private/decisions-after-slice-1b.md (a guest running world objects' lifecycle handlers against ADR-063 decision 3).
+- 20:10 PST 2026-11-02 (thuum-cf): the props arbitration's review round (numidium's fresh review of aafb26ba: FIX FIRST): fork m4-prop-arbitration
+  9fc30e95, pipeline 4799: every rest a word (the host's own too), Capped and RestRefused as words, every refusal answered with the
+  current word, the grab's clock, the late subscriber's word, the held prop's awake stream and the lost hold's release, claim
+  refusals counted, SCHEMA_VERSION 33, the difftest session's return words declared; x-prop-arbitration v2 by path (the return
+  line's real pattern, server baselines, movement claims, the blast's either-or). The ADR-063 outcome notes I added after Eli's
+  acceptance are marked PROPOSED (numidium's flag: an accepted ADR's text changes by Eli's word). The door scenario v3 abb4d8bc;
+  the settle head 9606963e reviewed OK for its first lab run, its three should-fixes next.

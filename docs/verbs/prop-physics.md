@@ -55,18 +55,30 @@ The rule (R0: the server decides, the word is the decision; R2 for the transform
   presence test go (ownerOf reads the word and hostsCell, nothing else).
 - A2. A grab beats a touch; nothing beats a grab. A live grabbed row answers every other seat's claim Held (as today). A grab claim
   on a live, ungrabbed row another seat owns is granted (the grabber's engine has the body in hand; a Keyframed copy cannot be
-  grabbed, so the case is a race at rest).
+  grabbed, so the case is a race at rest). A grab on a row the holder already owns restarts the cap's clock; the cap itself ends
+  by a word: the holder's first sample past PROP_GRAB_MAX_MS is refused (E_PROP_GRAB_CAP) and the prop is the host's again at a
+  new epoch (the review of 20:10 PST 2026-11-02).
 - A3. A non-owner's contact never takes a moving prop. A contact, drop or impulse claim on a row another seat streams awake (its last
   accepted sample younger than PROP_MOVING_MS, 1000 ms, UNMEASURED) is refused E_PROP_MOVING, logged and counted; the claimant's copy
   stays on the stream. A resting row (the owner's asleep sample) or a stalled one (older than PROP_MOVING_MS) is anyone's to claim.
-- A4. Ownership returns to the host only at rest on the owner's screen, by the owner's own final sample, and the return is a word.
-  At an accepted asleep sample from an owner that is not the cell's host the row sleeps and the server sends PropOwner {refr,
-  player 0, epoch + 1} to every listener. PROP_LEASE_MS and PROP_SILENCE_MS retire. A departure returns the player's live rows to the
-  host with a word each. The 120 s grab cap stays as the one timer, answered at the next claim or sample.
-- A5. A refused sample is answered. E_PROP_NOT_OWNER sends the sender the current word (the live owner or 0, the epoch), once per
-  prop per second, so a divergent mirror heals instead of streaming into refusals.
+- A4. Ownership returns to the host only at rest on the owner's screen, by the owner's own final sample, and every return is a
+  word. At an accepted asleep sample of an ungrabbed row, the host's own included, the row sleeps and the server sends PropOwner
+  {refr, player 0, epoch + 1} to every listener, so no seat ever keeps an older word (the review of 20:10 PST 2026-11-02: without the host's
+  own word a seat that walked away and came back after a host change streamed into refusals an answer at the same epoch could not
+  heal). A refused final sample (over the step budget) takes the rest and returns the prop the same way, the position standing.
+  PROP_LEASE_MS and PROP_SILENCE_MS retire. A departure returns the player's live rows to the host with a word each. The 120 s grab
+  cap stays as the one timer, ended by a word (A2).
+- A5. Every refusal is answered. E_PROP_NOT_OWNER, E_PROP_HELD and E_PROP_MOVING send the sender the current word (the live owner
+  or 0, the epoch), once per prop per second, so a divergent mirror heals instead of streaming into refusals and the loser of a
+  double grab hears who holds the prop; since every return advances the epoch, the answer is always newer than a stale mirror.
+  Claim refusals count in the stream counters. A late subscriber hears the word whenever the prop ever had one (player 0 for a
+  resting prop).
 - A6. The hand-over of a MOVING prop happens by a grab alone (A2, A3), so no velocity travels; a resting prop's hand-over starts at
-  rest. The first bump on a Keyframed copy is still swallowed until the grant lands (the known limit since slice one).
+  rest. The first bump on a Keyframed copy is still swallowed until the grant lands (the known limit since slice one). A held prop
+  never rests on the wire: the holder's seat streams an awake sample at least every HOLD_SAMPLE_MS (500) while still, so the
+  followers' copies stay Keyframed in the hand's place (D73 would otherwise rest them Dynamic and drop them) and the server's row
+  stays awake and grabbed; a hand that loses a double grab (the answer word names another seat while this seat holds) lets go,
+  Keyframed, so no two hands move one prop (ADR-063 decision 3).
 - A7. Known limit: a stream that stops without an asleep sample (a crash mid-flight ends in the departure's word; a client bug does
   not) re-syncs at the next touch (A3's stalled case); a tick sweep is the next step if the lab shows stalls.
 
@@ -89,11 +101,15 @@ break-3 state), pipeline 4780 GREEN at 03:36Z 2026-11-03 (server, client, wire-t
 TransformVerdict::Returned(epoch), `gone` returning the rows for their words, PROP_LEASE_MS and PROP_SILENCE_MS gone, nine
 tests), the bridge (codes 3 and 4, PropReturn, prop_moving_ms), wire-validate (PropOwner.player 0 admitted; fixture
 60-PropOwner-2), the schema's and the message headers' text, PartOne::SendPropOwnerWord (the grant's, the rest's, the departure's
-and the NotOwner answer's one sender), ActionListener's E_PROP_MOVING and the Returned branch ("prop X rests on Y's screen: the
+and the NotOwner answer's one sender), ActionListener's E_PROP_MOVING and the Returned branch ("prop X rests on Y's screen at (x, y, z): the
 host's again at epoch N"), PropTest's five cases rewritten to the rule, propService.ts (Owner without a lease; ownerOf by the
 word; the two mirror writes and the presence set removed; the contact claim held while another seat's awake stream is live
-here). Not yet: the probe x-prop-arbitration (the five legs), its scenario, the engine model docs/engine/havok-props.md (W1
-system 3), the numbers (PROP_MOVING_MS UNMEASURED).
+here). The review round (20:10 PST 2026-11-02, numidium's fresh review of aafb26ba, FIX FIRST; fork 9fc30e95, pipeline 4799): the rows above as
+amended (every rest a word, the cap and the refused rest as words, every refusal answered, the late subscriber's word, the held
+stream and the lost hold, the grab's clock), SCHEMA_VERSION 33 for the player-0 word, the difftest session's two return words
+declared, the probe's v2 (the return line's real pattern, server baselines, movement claimed on the grab and the blast, the blast's
+either-or under E20). Open: PROP_MOVING_MS UNMEASURED; the stalled stream (A7) in no probe; E10, E31, E14 and E15 of
+docs/engine/havok-props.md unread; the scenario b-prop-arbitration after the probe's read.
 
 ## Rung
 
