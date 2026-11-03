@@ -5864,3 +5864,17 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   heads under test (df3b8819 and 7aac21d4 are ancestors of badca627 and 0b61fc80, neither in parity), so both run, appended to
   their chains; x-prop-static needs propStatics in the stage's server settings. Lesson: `set -e` is not honored in the Bash
   tool's shell (a failing lint step was skipped over and the commit went out; re-run by hand, green); chains are explicit && now.
+- 00:26 PST 2026-11-03 (08:26Z 11-03) (numidium): slice 1b GREEN, x-script-natives v7 on m4-scripts-work 19bdfc3c (the census
+  names 32 selves a row), 20261103-081915-x-script-natives: every claim, the guest's "on others" == 0 beside the named row's
+  absence included, and both seats' console logs kept for the host's numbers. m3-promote-record 0b61fc80 (fix round two) OK FOR
+  ITS FIRST LAB RUN by its fresh review, with five items before merge: the hold timed from the word, not the ask (a slow landing
+  or a move that never took lets the stale reports out after both settle windows, and the next owner's hold then imposes the
+  stale record), the hold moving corpses (no isDead guard, against D78 C), two moves per cross-cell promotion, deaths, shots and
+  casts dropped during a hold, and the CreateActor test admitting non-actors (`=== false` is isMine's own); the branch lacks
+  12f199e6, so D2's crash is reachable on it. The door chain stages on 0b61fc80 with door v14 (58f2c3a6) and the settle-0 read
+  (162e943b, v14 with handoffPassSettleMs 0); the swap probe v12 and x-handoff-hide follow on the same build as their fresh
+  reviews clear; x-npc-death-reentry (R4) goes to playtest 41's break-3 build (client 12f199e6, server union-srv-3 35509f7a),
+  since this head's hold moves bodies. Playtest 41's Play lines on main 71f14350 (12 BROKEN, perks VERIFIED IN PLAY, weather
+  MECHANISM ONLY in Eli's own hedge). Eli asked whether we are obtaining the engine models: two of five docs, non-owning-seat.md
+  (2 of 12 rows CONFIRMED, 7 in part, R2 to R5 unrun) and havok-props.md (17 of 38); thuum-cf's re-analyst drafts of containers,
+  the progression UI and the night lock begun at 08:20Z (REA down this session, CommonLib then pyghidra).
