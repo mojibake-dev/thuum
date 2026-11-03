@@ -1,0 +1,3 @@
+# Frida lab scripts are dense by convention (lab/frida/*.js); the post-edit hook runs prettier --write on *.js and would rewrite
+# them whole (serialize-on-demand-actor.js went from 27 KB to 36 KB on 2026-11-03). Prettier skips what is listed here.
+lab/frida/*.js

@@ -6558,3 +6558,22 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   reads that key, a ci-run thuum builds it when numidium wants it. The actor-mode serialize script is being written by the
   re-analyst (a second script, the REFR one at its budget) for a promoted, loaded actor at its kLifeState mark, serialize only, no
   compare; its fresh review follows; the lab is booked by r3's stage and gate until about 16:30Z.
+- 06:16 PST 2026-11-03 (14:16Z 11-03) (thuum-cf): lab/frida/serialize-on-demand-actor.js written by the re-analyst (27,166 bytes, 398 lines; node
+  --check clean, no em dashes; unrun; its fresh review running). The REFR skeleton kept verbatim (20.7 KB on its own), so the script is
+  over the 20 KiB guidance by 6.7 KB; the mitigation is the pitfalls note's: `wait: 15` after the frida step and the ready stamp read
+  before the kill. What differs from the REFR script: ACHR 0x3E only; the player refused by form id 0x14 and by the PlayerCharacter
+  singleton (403521); NO slot 0xF2 pre-call, with 37622 Actor::MovetoLow hooked as a witness row (the first run proves the recipe never
+  calls it); the vtable read proves 0x0D = 19527, 0x0E = 37649, 0xF2 = 37622 as premises; farGeometry (AIProcess::high +0x10,
+  HighProcessData +0x468) printed before and after 0x0E; Actor's runtime offsets CommonLib's plus 8 for 1.6.1170 (Actor.h:712); the
+  body sectioned by the engine's own writers (19528, 39429, 38987, 39009, 39023 hooked on the serializing thread, the buffer position
+  bounding each region), decoded as far as the budget allows (level, boolBits, the 56-byte fixed block, the 18-byte ActorState with
+  lifeState, the four Modifiers; the rest raw with offsets); a deflated record (length2 nonzero, 35932 under the setting byte, id
+  380705, HYPOTHESIS) reported with deflated true and the plain body read from the buffer before the pack, never inflated by the
+  script (36080's signature is not in the note); the compare optional: "no stash row expected: a promoted reference never stashes"
+  when the entry carries kPromoted (D7). LAB_PARAMS: FORM (required), MODE (check or serialize), FLAG (default 0x400 kLifeState,
+  Actor.h:234), RUNS (default 1; refused triggers do not consume one). Predicted for the bandit 0x39fe4: entry 0x9a040022, flags2
+  0x8a040022 (bit 28 dropped, Actor's 0x7A returns 0), kind 6, record type 1, lifeState 1 or 2 by which kLifeState mark fires first.
+  The probe sketch (x-serialize-on-demand-actor, c1 alone, after the gate frees the lab): check mode first (the sixteen premise rows,
+  the info row), then serialize with RUNS 2 (kDying and kDead), then coc riverwood and pcb expecting no stash row for 0x39fe4. A
+  .prettierignore at the root now keeps the post-edit hook's prettier off lab/frida/*.js (the first write came back 36 KB and 1,030
+  lines; the dense form was reinstalled by cp).
