@@ -4491,3 +4491,16 @@ Consequences.
 - ADR-065's materialize-first stays the direction for the state channel; it is no longer the deliverable for deaths today.
 - The physics system (system 3) gains bodies: its owner, rest and placement rules are written once for props and bodies.
 - Containers' rows in STATE.md carry open and close as their sync points.
+
+Amended 14:27 PST 2026-11-03 by Eli, verbatim via numidium, after playtest 43: "i say wrap the exclusive container hold, and yes. all
+subsequent work should go into that, scripting, and physics objects (im upset they mostly worked and now dont work at all.)", then "you
+can do those changes in turbo mode, in that do probes and RE as needed, but we dont need to do ALL the ceremony before launching a
+playtest."
+6. Containers are held exclusively: one seat opens a container at a time, and another seat's open is refused while it is held; with
+   decision 1 (the contents sync at open and close), no two seats ever see one container's contents change under them.
+7. The work order: the exclusive container hold, then scripting and quests (ADR-062's flip, D-F1 C, the acting-player scope, the
+   condition-read variables), then physics objects (props, which mostly worked before and now do not, and the bodies of decision 4).
+   Playtest 43's scene and rumor voice failures are scripting's, not NPC sync's.
+8. These three run in turbo mode: probes and reverse engineering as each change needs them, and a playtest launches without the full
+   ceremony (no requirement that every item carry a green two-seat run first, no full gate before a playtest); merges to parity keep
+   their gates.
