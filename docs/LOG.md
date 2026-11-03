@@ -5911,3 +5911,44 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (both seats fresh), so the leg needs a rewrite that makes it (thuum-cf's v15). Reviews: the swap probe v12 READY; props v12
   and x-prop-static FIX FIRST (legs 5 and 6 repeat the short walk, leg 1's walk ends at c1; two claims that cannot fail);
   x-npc-death-reentry v2 by thuum-cf's reviewer.
+- 01:01 PST 2026-11-03 (09:01Z 11-03) (thuum-cf): the merge shape. numidium's fresh review of r3 5e7330d9 said OK FOR ITS FIRST LAB RUN with seven
+  items for the round-three code (a demote's deferred death run on the tick thread, the create word's dead flag, the load block,
+  two movers on the create path, P8's timing, the deferred death's position, Map.set over a live hold), and its merge read found r3
+  carrying the union, union-srv-3, the settle window and the container default (45 commits over parity), which ADR-064's freeze and
+  ADR-063's D4 B forbid; its call: a system-1 branch off parity by cherry-pick -x, nothing rewritten. Built as m3-system1: the five
+  promote commits apply on parity with one adjacency conflict (formView's R1 lines after the hide block, dropped there since parity
+  has no recordCellSeen) and one import (PuppetService for the flip's reconcile), nothing else of the union needed (bf1c88db); the
+  settle's half (a) extracted alone from 019921fb, which carries both halves (e1420d29: the passing report's bytes to the new host
+  reliably before the word, without the Stale verdict, the window and its tests); numidium's four additions by -x (the scene stop
+  5e402af7, deaths2 ce7ddd65, the follow vouch 19c68d2d and its test fa50c5b5; the two puppetService ones pure-addition adjacency);
+  the pass's send-order CellHostTest case inside the cross-cell pass test (9dc156f5); round four for the r3 items (88b07f57: a
+  release's deferred reports on the next update and a demote dropping them with a line; the word's isDead for the hold and the
+  gate; three asks a second apart, about 5 s, for the load block; one mover with the gate deferring to a hold; a re-sent word
+  merging into a live hold; a missing form waited for). m3-promote-record stays at 0b61fc80 and r3's chain is dropped; the merge
+  candidate is m3-system1. Door v14's run on round two, 084006: RED on leg A's exit-hour claim alone (17.96 against >= 18.9); the
+  four bounce claims held and the D9 pass at the house door was clean (the door line, "passes 1348a into cell 9731", c2 "now
+  simulates ... from the passing report", c2's hold "placed at the record after 46 ms" outdoors, no re-entry): the first pass on a
+  fix head without a ping-pong. numidium's read of c2's console: no "moved 1348a into 133c7" and no create-word hold before the
+  visit's grant, so the engine spawned him HOME at the house's load and the stale case was never made; 0x734cd ran on both seats
+  from their grants (a fresh host at 17.x), so the house door's exit hour is the package's; the two seats' copies wore different
+  right-hand weapons at their grants (1397e against 13790; the late fate or redress rolling per seat, a system-1 (c) row,
+  HYPOTHESIS). The settle-0 read 084329: RED at the exit's until, no walk-out in 400 s after c1's double promotion (P4's shape a
+  second time); c1-console.log was not collected. Door v15 (main b6e25119, 139 steps): leg A redesigned as the stale copy MADE on
+  purpose (c1 takes the street; c2's visit with recorded hold lines and v14's no-bounce claims; c2 stays inside while 0x734cd walks
+  him out by 13407 and the walk passes him to c1, an until on the door line and one on "now simulates"; c2's indoor copy CLAIMED
+  stale while c1 runs the record toward the mill for 30 s; c2's approach to the record, the cell swap to the nearer seat, and the
+  promotion block's claims: the hold's placement line, "not placed" absent, no pass, follow or move into 133c7 across the swap, the
+  record in 3c within 2000 of its pre-swap place, c2 running him with 3D, c1's copy a puppet); no hour claim in leg A; leg B
+  unchanged (a fresh seat's engine spawns him at his editor location, so leg B's grant meets a stale copy by itself, HYPOTHESIS);
+  the swap probe v13 (c5cb8943) is leg A with the seats swapped by substitution; both with the fresh reviewer. Probe reviews:
+  x-npc-death-reentry (mine, FIX FIRST) applied as v2 ddccb8be (leg A recorded, a watcher leg, a relaunched-host leg, the body's
+  place and no-resurrection claims; it runs on playtest 41's break-3 build, not on a head whose hold moves copies); x-handoff-hide
+  (mine, FIX FIRST: a snapshot with no log-count step before it stopped every run) applied as v2 6f7d2025 (the release mechanism
+  claimed, the show measured, the lines recorded; "Disable holds a puppet-flagged actor" stays HYPOTHESIS until a ghost premise, the
+  verb doc's :683 split and then reworded so it promises no run on the system-1 merge); numidium's: swap v12 READY, props v12 FIX
+  FIRST (applied as v13 cd12357d: legs 5 and 6 at 2.2 s, leg 1 at 1.9 s with c2 re-placed before leg 2), x-prop-static FIX FIRST
+  (applied as v2 30e583f5: the two unfalsifiable claims replaced by codes that print, the boot line claimed, c2's own touch leg, the
+  F13 wheel HYPOTHESIS). Engine models: docs/engine/progression-ui.md (037f5761; 29 rows, 10 confirmed by scenario facts; the
+  arming predicate 41565 against the stored threshold the server rewrites) and docs/engine/ai-world-state.md (6bd043a0; 23 rows,
+  none fully confirmed; the night lock a package procedure on the Sleep template through SetLocked 12401 and 19512; the esm's pair
+  lock against locks.md's per-REFR seed) filed from the re-analyst agents; containers.md in progress. Slice 1b: 788f18a4 pushed.
