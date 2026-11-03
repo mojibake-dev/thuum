@@ -1,4 +1,5 @@
-# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v9 2026-11-03 after v7's leg A on the parent,
+# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v9 2026-11-03, its header amended with the
+# swap probe's run 060106 (header only, no step or claim changed); v9 after v7's leg A on the parent,
 # 20261103-055217 (union-srv-3 35509f7a), red at the exit until with NO door walk (step 24's door-13407 count 0) and the bounce
 # at a GRANT instead: 05:53:42.417 c1 granted 133c7 at epoch 2, 05:53:42.597 "ff000000 passes 1348a into cell 9732, which
 # another game hosts (D9)" (c1's FIRST report as the house's new host put Hod outdoors), 05:53:42.633 "ff000001 passes 1348a
@@ -6,7 +7,10 @@
 # (HYPOTHESIS): the promote at the grant placed c1's copy at the LAST RELAYED SAMPLE (the outdoor one from c2's follow at
 # 05:53:05.698 during its visit, when Hod stepped out and back in: "follows 1348a into cell 9713 (D6)", "may not move 1348a to
 # cell 133c7", "moves 1348a into cell 133c7, which it hosts"), not at the record (indoors since 05:53:06.767): the stale
-# placement's mechanism at a grant rather than a D9 pass. The settle's half (b) would protect that false exit (c2's report back
+# placement's mechanism at a grant rather than a D9 pass. The swap probe v5 (20261103-060106, roles swapped: c1 the visit, c2
+# the house's seat) showed the same at ITS grant: 06:02:29.120 c2 granted 133c7 at epoch 2, 06:02:29.158 "ff000001 passes
+# 1348a into cell 9732, which another game hosts (D9)" 38 ms after it, 06:02:29.205 "ff000000 passes 1348a into cell 133c7
+# (D9)" 47 ms later: two for two at the grant, in both orientations, plus 052100's door-walk bounce. The settle's half (b) would protect that false exit (c2's report back
 # came 36 ms after it, inside the window), so the record must be imposed at EVERY promotion (a grant, a pass, a host's return)
 # with the record's position sent reliably with or before the hoster word: ADR-064 system 1's model (a reference's life on a
 # non-owning seat), which comes before more settle code. So v9 claims no pass, follow or move of him into an exterior cell
