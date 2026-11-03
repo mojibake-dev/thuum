@@ -6216,3 +6216,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   Frida reads named: the gate's lifecycle traffic per handle kind on a guest's interior entry (SendEvent, the OnInit dispatcher,
   the attach sink), and the per-object record under a console save on the host (Object::Save, Variable::Save, SaveHandle), the
   specification our serializer must match. Round eight's head is 817f78d0 (a twice-defined test case removed; no code change).
+- 03:50 PST 2026-11-03 (11:50Z 11-03) (thuum-cf): numidium's fresh review of round eight (817f78d0): FIX FIRST, five points. (1) three new T0 cases red
+  on CI (4952): the quit and walk-off cases because Leave destroys the player's actor and Arrive recreates it with a login
+  generation starting at 0 and bumped to 1, the same as the old stamp's (in production spawn.ts keeps the actor, but any
+  destroy-and-recreate path brings an old witness back), and the reliable-report case because a fall report with no height
+  samples is refused (E_DEATH_UNCHECKED); (2) two rules with no T0 that can fail (the stamp's kPendingDeathMs allowance on either
+  side; the grace check itself); (3) 4b half fixed: deaths by the server's word (TickDeaths, the console's kill, kill-ref) are never
+  host-reported, so their stamp rode one unreliable zero; (4) the live word released any hold where it should turn a dead hold back
+  into a placing one (a teleporting respawn lands frames later behind the ragdoll's removal); (5) the guard's line no longer named
+  every refusal. Round nine (f1c954d7): the login generation is a process-wide serial set at every SetUserActor; the window and
+  grace T0s (a stamp two seconds before a death past the grace stands, four seconds before does not; a live sample inside the
+  grace is in flight although the stamp is the witness's); the hosted state's alive-to-dead flip reliable (fellDead beside
+  stoodUp, a line); HostService.reviveHold for the live word; MpActor::DeadStampGap names the gap in the guard's line (no dead
+  sample yet; another host's; this host's earlier login; N ms before the death past the window); the fall report's height samples
+  in its T0; 21 cases in ActorDeathTest. The evidence stage waits on round nine's green; the lab reads the transplant meanwhile
+  (change-forms.md D3: c1's own record of a locked room door in the Sleeping Giant written into c2's changes map before c2 enters).
