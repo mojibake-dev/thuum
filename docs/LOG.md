@@ -7224,3 +7224,24 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   Overdraw40, Marksman 60), test 2 Prisoner on c2 (49989; none), the Riverwood guard camp at 18.75, npcEnabled, bars full, no god
   mode; the hold to 22:55Z; the recorder on (results/playtest-42/, 300 s cycles; it wanted docs/private/playtest-m2-<n>.md, so a
   link stands in, the name check to fix later).
+- 12:40 PST 2026-11-03 (20:40Z 11-03) (thuum-cf): Turbo 3 on system 1 (playtest 42 on the staged r3 df9e1009; numidium's findings and pulled console lines, my diagnosis): F1 "a
+  duplicate embry" and F2 "duplicate hod" are the orphan-copy class (playtest 37's finding 38, playtest 40's F2 Hilde's ghost): a
+  sighter's own engine copy standing where the record is not. F1: after the 20:15:26Z server restart the record stood at the inn's porch,
+  c2's gate pulled its copy there, the record then went inside under c1 and c2's view was unsubscribed when the record left its grid, so
+  the copy froze as a puppet at the porch with collision (Hod walked into it) and only PartOne's once-a-minute "own copy hidden"
+  snippet (ObjectReference.Disable) acted on it, three times, never holding (c2's roster kept sighting it every 10 s), as playtest 40
+  already found; the client-side hide a020511c never shipped on r3 (66dcb8fc dropped its formView caller in the parity re-cut, round
+  five 4ccb4259 removed the inert remainder). F2: c2's engine walked Hod through door 13424 at 20:21:06 right after c2's demote (its
+  teleport into the inn), the server dropped c2's sighting of him inside ("the cell is another game's"), no D9 pass printed, the record
+  stayed at the porch (labState: 3c, 23251, -44488, -8.3), c2's copy froze inside at the door marker beside a second mesh (the ghost's
+  node unread). Fix: fork branch turbo3-sys1-f1 at 1ff454bd (server-only, PartOne::OnActorSighting): the sighter's copy is MOVED to the
+  record (cell and position) through a TESModPlatform.moveRefrToPosition snippet, the record's cell-or-world form typed as both the Cell
+  and the WorldSpace argument so no null travels, at both branches (the record hosted by another game; the copy in another game's cell
+  while the record stands elsewhere), once a minute per sighter and actor; HYPOTHESIS until the push that a move into an unloaded interior
+  lands for an NPC copy; its fresh review and the fork's compile run, then numidium's turbo-srv on Eli's go. F3 (the death heard on the
+  watcher's late load), F4 (a body slid 1,700 units down Bleak Falls' slope after the watcher's bind kill) and F6 (E_ACTIVATE_REACH from
+  1661 units: the reach measured from the record while the player stood at the slid copy) are one class, a watcher's copy loaded alive at
+  its own save's spot, moved to the record and killed there (D1, D5); the fix shape is ADR-065 decision 4, materialize first (slice 5:
+  the dead record applied at the 3D load through LoadGame, which 164416 and 193005 showed lays the body with no kill and no fall), gated
+  on the cross-seat run, now the critical path; no per-case patch. F5 is system 2 (logged, frozen); F7 is a profile's perk pick refused
+  every 5 s (setup noise). Also seen: Hod's dialogue failed on his own host seat (the claim released at no Dialogue Menu within 10 s).
