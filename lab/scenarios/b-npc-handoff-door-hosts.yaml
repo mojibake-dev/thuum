@@ -1,12 +1,19 @@
-# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v12 2026-11-03, the author's call on the fresh
-# review of the fix 82bd282b: the claim across each grant is now that NO PASS, FOLLOW OR MOVE OF HIM BACK INTO THE INTERIOR was
-# logged (a baseline right before the teleport in, equal after the grant), in place of v9's claim of no exit into an exterior cell.
-# The reason: with a working fix the placed copy is home and his day package (HodSawmillSandbox8x11 0x734cd, unconditioned) may
-# walk him OUT legitimately at the grant, which an exit claim would read as the bounce, while refusing 0x734cd in the premise would
-# refuse the stale-copy condition itself (the record home while the engine runs his day package, the parent's red). A walk and a
-# jump differ in what follows: a legitimate exit stays out, the stale copy's false exit comes back within a second (055217's "passes
-# 1348a into cell 133c7" 36 ms after the pass out; 070357's "moves 1348a into cell 133c7" after the refused report back), so the
-# re-entry line is the bounce's signature at the grant and the exit count is recorded for the reader. v11 after numidium's quick
+# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v13 2026-11-03 after ADR-064's fresh review of v12
+# (FIX FIRST, applied as written): across each grant BOTH claims stand, v9's no pass, follow or move of him into an exterior cell
+# and v12's no pass, follow or move of him BACK into the interior (baselines right before the teleport in, equal after the grant),
+# and the door line is RECORDED at each grant. v12 had dropped the exit claim for the re-entry claim so a legitimate walk out by his
+# day package would not read as the bounce; the review showed the tolerance does not exist (the same block claims the record's cell
+# and the interior seat's 3D, so any exit before his hour is red in v9 and v12 alike) and that the exit line is the only witness
+# where the fix head fails: it carries the settle, which drops the report back as a stale copy's sample for 1 s (no "into cell"
+# line), and with the hold the seat promoted by that pass places its copy at the stale record outdoors, so no report back ever
+# comes. What tells a walk from a jump is the door line: a walk logs "door 13407: 1348a's host ... walks it through to 3c" first, a
+# jump logs none (055217 and 060106: no door line before their grant exits). If a working fix shows 0x734cd (HodSawmillSandbox8x11,
+# 08:00 for 660 min; its conditions unread, P7 read 0x1e604's and 0x734ce's) walking him out once placed home, that is P4 refuted
+# and a premise finding for leg A, not the bounce. The bounce's signature at a grant: the exit 180 ms after the word (055217), the
+# return within about a second (36 ms by a pass back in 055217; 1.0 s by the follow's stale rule in 065955, "moves 1348a into cell
+# 133c7" after the refused report back; 070357 the same shape, the record home again at its red assert). The parent's red for the
+# exit claim at this block is 065955 and 070357; the re-entry claim's red there is predicted from their result.json (a count of 1
+# against 0), not run, so a parent run under v13 is the mutation's proof if the chain has the slot. v11 after numidium's quick
 # review of v10 (READY FOR THE RED RUN, three fixes before the greens): 17:00 to 19:00 lies inside the CONDITIONED sawmill window (08:00 for
 # 660 min), so if a seat meets the mill's condition the sawmill package outranks the fallback and walks him out at a grant or before
 # 19:00, a red with a working fix that would read as the grant bounce unless the door line were checked; so each premise block
@@ -34,8 +41,9 @@
 # the other side's indoor copy passes him back; the settle's half (b) would protect such a false exit, so the record must be
 # imposed at EVERY promotion (a grant, a pass, a host's return) with its position sent reliably with or before the hoster word.
 # Each leg claims, across EACH grant (the street seat's visit and the interior seat's entry), that no pass, follow or move of him
-# back into the interior was logged (a baseline right before the teleport in, equal after the grant; the exits into an exterior
-# cell are counted for the reader), so the case goes red where it happens and a fix is tested at the grant too. v8 parked leg A's street seat at lab-spawn through the restart (a restart
+# into an exterior cell and none back into the interior was logged (baselines right before the teleport in, equal after the
+# grant; the door line is counted for the reader, a walk's witness), so the case goes red where it happens and a fix is tested
+# at the grant too. v8 parked leg A's street seat at lab-spawn through the restart (a restart
 # keeps the seats' places) and bounded the hour above; v7 made the house door leg A after 051454 (no bounce, no pass, fresh
 # seats, hour 19.94) and 052100; the difference between those two runs is unexplained (orientation or hour). The exterior cell
 # claim of v5 and v6 is gone (the record outdoors and the 150-unit bound carry it).
@@ -57,9 +65,9 @@
 # 0x9712 at (23320, -44530, -8), its landing inside 0x133c6 at (-250, -360, 0) facing north; 0x13419 is the inn-side door he
 # leaves by, its landing on the street at (23260, -44476, -8). The street's seat at (21995, -44935) hosts 0x9712 and 0x9731 by
 # its grid (051454, 052100, 055217: all held).
-# Per leg: the premise in order (his record in the interior; the street seat's visit, its grant with no exit logged across it,
+# Per leg: the premise in order (his record in the interior; the street seat's visit, its grant with no exit and no re-entry logged across it (the door line counted),
 # his 3D on it, its exit and the interior unhosted; the street seat hosting 9712 and 9731 with its copy of him indoors and no
-# 3D; the interior seat's entry, its grant with no exit logged across it, his 3D and AI on it; the hour inside its bounds), the
+# 3D; the interior seat's entry, its grant with no exit and no re-entry logged across it (the door line counted), his 3D and AI on it; the hour inside its bounds), the
 # counts read against baselines snapshotted then (the door line first), the exit waited on the pass line itself, then at 5 s the
 # counts first with the hour (the door walk's line beyond its baseline, one more "now simulates 1348a in cell 97xx" than the
 # baseline, no pass, follow or move of him back into the interior beyond the baseline), then the two seats read back to back
@@ -67,7 +75,7 @@
 # street's seat running him loaded within 150 units of the record both ways, the interior's seat with no 3D of him and its copy
 # out of the interior); at 65 s the counts again and nobody's copy in the interior. Informational: "moved 1348a into 3c (the
 # engine had it in <interior>", formView's line at the promotion. Mutation: leg A on the parent; the swap probe
-# x-handoff-door-hosts-swap v9 plays the house door with the roles swapped on the parent (a run stops at its first red, so the
+# x-handoff-door-hosts-swap v11 plays the house door with the roles swapped on the parent (a run stops at its first red, so the
 # scenario's second leg never reaches the parent). Its own commit (rule 13); ADR-064's fresh review before the gate plays it.
 id: b-npc-handoff-door-hosts
 milestone: M3
@@ -89,10 +97,13 @@ steps:
   # the premise, claimed: the street's seat visits the interior first (it hosts it, so Hod's AI may step while it looks), sees
   # him with 3D, then leaves for the street; the interior unhosts behind it, and its engine's copy of him reads indoors with no
   # 3D (playtest 41's shape, the bounce's mechanism, whatever its cause). Across the visit's grant no pass, follow or move of
-  # him BACK into the interior (the stale copy's false exit comes back within a second: 070357's "moves 1348a into cell 133c7"
-  # after the refused report back; a legitimate exit by his day package stays out; the exits are counted for the reader)
+  # him into an exterior cell (055217's and 060106's grant promotions put him outdoors from a stale placement) and none BACK
+  # into the interior (the stale copy's false exit comes back: 36 ms by a pass back in 055217, 1.0 s by the follow's stale rule
+  # in 065955); the door line counted beside them (a walk logs it first, a jump logs none)
   - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 97"}
   - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 133c7"}
+  - server: log-count {pattern: "door 13407: 1348a.s host .* walks it through to 3c"}
+  - server: snapshot {name: out_visit_a, of: 'server.log_count("(passes|follows|moves) 1348a into cell 97")'}
   - server: snapshot {name: back_visit_a, of: 'server.log_count("(passes|follows|moves) 1348a into cell 133c7")'}
   - c2: teleport {cell: "133c7:Skyrim.esm", x: -506, y: -177, z: 0, rot: [0, 0, 0]}
   - wait: 5
@@ -100,12 +111,14 @@ steps:
   - until: {within: 60, expect: [server.host(0x133c7).client == "c2"]}
   - wait: 8
   - c2: npc-state {formId: 0x1348a}
+  - server: log-count {pattern: "door 13407: 1348a.s host .* walks it through to 3c"}
   - assert:
       - server.ref(0x1348a).cell == "133c7:Skyrim.esm"
       - c2.npc_state(0x1348a).is3DLoaded == true
       - c2.npc_state(0x1348a).package != 0x1e604
       - c2.npc_state(0x1348a).package != 0x734ce
       - server.follow(0x1348a).following == false
+      - 'server.log_count("(passes|follows|moves) 1348a into cell 97") == snapshot("out_visit_a")'
       - 'server.log_count("(passes|follows|moves) 1348a into cell 133c7") == snapshot("back_visit_a")'
   - c2: teleport {cell: "3c:Skyrim.esm", x: 21995, y: -44935, z: -128, rot: [0, 0, 180]}
   - until: {within: 60, expect: [server.host(0x133c7).hosted == false]}
@@ -120,12 +133,15 @@ steps:
       - server.time().hour >= 17
   # the interior's seat enters by the same landing, is granted the interior and runs him: his 3D and AI there on neither
   # sawmill package (the conditioned ones would walk him out early), the street seat's copy still indoors with no 3D; across
-  # its grant no pass, follow or move of him back into the interior (055217: the new host's first report put him outdoors 180 ms
-  # after the grant and the other side's copy passed him back 36 ms later, the bounce's mechanism at a grant; a legitimate exit
-  # stays out and is counted); the hour still short of his exit (a late clock would put the exit before the baselines and the
-  # fix's run red at the exit until)
+  # its grant no pass, follow or move of him into an exterior cell and none back into the interior (055217: the new host's first
+  # report put him outdoors 180 ms after the grant and the other side's copy passed him back 36 ms later, the bounce's mechanism
+  # at a grant; on the fix head the settle drops that report back and the hold would place the next copy at the stale record, so
+  # the exit line is the witness there), the door line counted beside them; the hour still short of his exit (a late clock would
+  # put the exit before the baselines and the fix's run red at the exit until)
   - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 97"}
   - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 133c7"}
+  - server: log-count {pattern: "door 13407: 1348a.s host .* walks it through to 3c"}
+  - server: snapshot {name: out_grant_a, of: 'server.log_count("(passes|follows|moves) 1348a into cell 97")'}
   - server: snapshot {name: back_grant_a, of: 'server.log_count("(passes|follows|moves) 1348a into cell 133c7")'}
   - c1: teleport {cell: "133c7:Skyrim.esm", x: -506, y: -177, z: 0, rot: [0, 0, 0]}
   - wait: 5
@@ -135,7 +151,9 @@ steps:
   - c2: npc-state {formId: 0x1348a}
   - c1: npc-state {formId: 0x1348a}
   - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 97"}
+  - server: log-count {pattern: "door 13407: 1348a.s host .* walks it through to 3c"}
   - assert:
+      - 'server.log_count("(passes|follows|moves) 1348a into cell 97") == snapshot("out_grant_a")'
       - 'server.log_count("(passes|follows|moves) 1348a into cell 133c7") == snapshot("back_grant_a")'
       - server.ref(0x1348a).cell == "133c7:Skyrim.esm"
       - c1.npc_state(0x1348a).is3DLoaded == true
@@ -223,10 +241,13 @@ steps:
   # the premise, claimed: the street's seat visits the interior first (it hosts it, so Hod's AI may step while it looks), sees
   # him with 3D, then leaves for the street; the interior unhosts behind it, and its engine's copy of him reads indoors with no
   # 3D (playtest 41's shape, the bounce's mechanism, whatever its cause). Across the visit's grant no pass, follow or move of
-  # him BACK into the interior (the stale copy's false exit comes back within a second: 070357's "moves 1348a into cell 133c7"
-  # after the refused report back; a legitimate exit by his day package stays out; the exits are counted for the reader)
+  # him into an exterior cell (055217's and 060106's grant promotions put him outdoors from a stale placement) and none BACK
+  # into the interior (the stale copy's false exit comes back: 36 ms by a pass back in 055217, 1.0 s by the follow's stale rule
+  # in 065955); the door line counted beside them (a walk logs it first, a jump logs none)
   - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 97"}
   - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 133c6"}
+  - server: log-count {pattern: "door 13419: 1348a.s host .* walks it through to 3c"}
+  - server: snapshot {name: out_visit_b, of: 'server.log_count("(passes|follows|moves) 1348a into cell 97")'}
   - server: snapshot {name: back_visit_b, of: 'server.log_count("(passes|follows|moves) 1348a into cell 133c6")'}
   - c1: teleport {cell: "133c6:Skyrim.esm", x: -250, y: -360, z: 0, rot: [0, 0, 0]}
   - wait: 5
@@ -234,12 +255,14 @@ steps:
   - until: {within: 60, expect: [server.host(0x133c6).client == "c1"]}
   - wait: 8
   - c1: npc-state {formId: 0x1348a}
+  - server: log-count {pattern: "door 13419: 1348a.s host .* walks it through to 3c"}
   - assert:
       - server.ref(0x1348a).cell == "133c6:Skyrim.esm"
       - c1.npc_state(0x1348a).is3DLoaded == true
       - c1.npc_state(0x1348a).package != 0x1e604
       - c1.npc_state(0x1348a).package != 0x734ce
       - server.follow(0x1348a).following == false
+      - 'server.log_count("(passes|follows|moves) 1348a into cell 97") == snapshot("out_visit_b")'
       - 'server.log_count("(passes|follows|moves) 1348a into cell 133c6") == snapshot("back_visit_b")'
   - c1: teleport {cell: "3c:Skyrim.esm", x: 21995, y: -44935, z: -128, rot: [0, 0, 180]}
   - until: {within: 60, expect: [server.host(0x133c6).hosted == false]}
@@ -254,12 +277,15 @@ steps:
       - server.time().hour >= 20
   # the interior's seat enters by the same landing, is granted the interior and runs him: his 3D and AI there on neither
   # sawmill package (the conditioned ones would walk him out early), the street seat's copy still indoors with no 3D; across
-  # its grant no pass, follow or move of him back into the interior (055217: the new host's first report put him outdoors 180 ms
-  # after the grant and the other side's copy passed him back 36 ms later, the bounce's mechanism at a grant; a legitimate exit
-  # stays out and is counted); the hour still short of his exit (a late clock would put the exit before the baselines and the
-  # fix's run red at the exit until)
+  # its grant no pass, follow or move of him into an exterior cell and none back into the interior (055217: the new host's first
+  # report put him outdoors 180 ms after the grant and the other side's copy passed him back 36 ms later, the bounce's mechanism
+  # at a grant; on the fix head the settle drops that report back and the hold would place the next copy at the stale record, so
+  # the exit line is the witness there), the door line counted beside them; the hour still short of his exit (a late clock would
+  # put the exit before the baselines and the fix's run red at the exit until)
   - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 97"}
   - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 133c6"}
+  - server: log-count {pattern: "door 13419: 1348a.s host .* walks it through to 3c"}
+  - server: snapshot {name: out_grant_b, of: 'server.log_count("(passes|follows|moves) 1348a into cell 97")'}
   - server: snapshot {name: back_grant_b, of: 'server.log_count("(passes|follows|moves) 1348a into cell 133c6")'}
   - c2: teleport {cell: "133c6:Skyrim.esm", x: -250, y: -360, z: 0, rot: [0, 0, 0]}
   - wait: 5
@@ -269,7 +295,9 @@ steps:
   - c1: npc-state {formId: 0x1348a}
   - c2: npc-state {formId: 0x1348a}
   - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 97"}
+  - server: log-count {pattern: "door 13419: 1348a.s host .* walks it through to 3c"}
   - assert:
+      - 'server.log_count("(passes|follows|moves) 1348a into cell 97") == snapshot("out_grant_b")'
       - 'server.log_count("(passes|follows|moves) 1348a into cell 133c6") == snapshot("back_grant_b")'
       - server.ref(0x1348a).cell == "133c6:Skyrim.esm"
       - c2.npc_state(0x1348a).is3DLoaded == true
