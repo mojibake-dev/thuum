@@ -166,7 +166,7 @@ first run) and the joint merge sweep (scratchpad merge-m2-god.sh).
 - [x] native hook + T1: none (Debug.SetGodMode by snippet)
 - [x] TS handler: none (the client already routes tgm and tim)
 - [x] T2 green
-- [x] T3 scenario green: b-god (thuum 189171e, awaiting Eli's review)
+- [ ] T3 scenario green: b-god (thuum 189171e, awaiting Eli's review) (UNTICKED 19:02 PST 2026-11-02: 3 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
       green in 20261011-033002 and -033326; HYPOTHESIS left: the game's own
       console text, the engine's TIM at no health, and the game keeping
       neither flag in a save (playtest thirteen's god mode; a restart

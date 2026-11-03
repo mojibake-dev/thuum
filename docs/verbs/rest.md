@@ -315,7 +315,7 @@ stand point was) and neither a blocker, both owed a fix in a later train:
 - [x] T2 green (2026-10-04, image m1-rest): the rest session diverges as
       declared (the wire grants the rest after the fight window; a rest
       inside it is refused on both), the eight others unchanged
-- [x] T3 scenario green: a-rest, run 20261004-094211 on 1.7.104 and run
+- [ ] T3 scenario green: a-rest, run 20261004-094211 on 1.7.104 and run (UNTICKED 19:02 PST 2026-11-02: 3 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
       20261004-094636 on 1.6.1170. The exploratory run 20261004-093837 drove
       the real menu: T opened "Wait how long?" at 1 hour, Enter accepted,
       and the server logged "Rest: user 2 actor ff000000 waited 1 h,

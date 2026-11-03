@@ -202,7 +202,7 @@ close through the verbs that carry the appearance since:
       natives, upstream's); the 1.7.104 crash is ADR-025's retired version
 - [x] TS handler (upstream's)
 - [x] T2 green (the character-creation and racemenu difftest sessions)
-- [x] T3 scenario green, no HYPOTHESIS tags on 1.6.1170 (m0-appearance:
+- [ ] T3 scenario green, no HYPOTHESIS tags on 1.6.1170 (m0-appearance: (UNTICKED 19:02 PST 2026-11-02: 3 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
       run 20261007-005616 and the 2026-10-08 merge sweep's 20261008-093401;
       also green on 1.7.104, run 20261006-072027; a-character-creation and
       a-racemenu carry the race menu's result)

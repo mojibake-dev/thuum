@@ -141,7 +141,7 @@ rotation 0.
   for two weapons
 - [x] server logic + T0
 - [x] T2 green
-- [x] T3 scenario green on the fix and red without it (the scenario
+- [ ] T3 scenario green on the fix and red without it (the scenario (UNTICKED 19:02 PST 2026-11-02: 3 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
   approved by Eli, 2026-10-05); the tags left are on the parts of the engine model
   the bound does not lean on (bash, bare hands, other races, mounts, the
   cone), which the 256 of slack covers

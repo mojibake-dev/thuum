@@ -177,7 +177,7 @@ hook's event send hops to the JS thread.
 - [x] T2 green (ticked 20:09 PDT 2026-10-29: P3 6901781c's T2 GREEN at 03:08Z, numidium, its own difftest job 14395; the prop-physics
       session identical to legacy with its 14 declared divergences, the kept server log without an E_PROP line; the union P3-win
       e65a345b's T2 is the last before the stage)
-- [x] T3 scenario green (b-prop-push GREEN at the gate 20261101-032302 on 6414dcd2; x-prop-push v16 GREEN 20261101-014442 on 71092a64 with the restart leg; pass v13 and
+- [ ] T3 scenario green (b-prop-push GREEN at the gate 20261101-032302 on 6414dcd2; x-prop-push v16 GREEN 20261101-014442 on 71092a64 with the restart leg; pass v13 and (UNTICKED 19:02 PST 2026-11-02: 30 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
       grab v9 green on 37e960eb, rerun on 71092a64 at the stage; b-prop-push on thuum main d140ff89, its first run at the train's gate)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green (ADR-033)

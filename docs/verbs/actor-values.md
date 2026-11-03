@@ -277,7 +277,7 @@ build: 29 of 29 green (runs 20261008-132148 to -150004).
 - [x] the record reaches the game: applied on the next update (51c995b8;
       x-av2-probe 20261008-110553 read CarryWeight 400 and One-Handed 45
       in c1's game after the server set them)
-- [x] T3 scenario green, no HYPOTHESIS tags: a-actor-values (thuum
+- [ ] T3 scenario green, no HYPOTHESIS tags: a-actor-values (thuum (UNTICKED 19:02 PST 2026-11-02: 1 open engine claim line over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
       207a762) green in run 20261008-111013 for the bases, the server's
       sets and Mod, and the record across a restart and a relaunch. The
       record's skill progress and level now apply without an error through

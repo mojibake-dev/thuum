@@ -423,7 +423,7 @@ arrow spent). Two findings:
       identical up to their declarations, the marksman session with its
       ten (the ArrowShot relay, the hit with the arrow's damage, the second
       hit and the unheld bow's shot refused)
-- [x] T3 scenario green, no HYPOTHESIS tags: b-marksman (thuum 773716b,
+- [ ] T3 scenario green, no HYPOTHESIS tags: b-marksman (thuum 773716b, (UNTICKED 19:02 PST 2026-11-02: 9 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
       awaiting Eli's review) green twice on fork 7be31a9d (runs
       20261010-084704 and -084949); the two engine HYPOTHESIS tags cleared
       (a figure's arrow deals nothing in the observer's game, x-b-marksman

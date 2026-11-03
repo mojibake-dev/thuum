@@ -198,7 +198,7 @@ Rate limit / bounds: one report per wall per player; a budget of 2 then 1 a seco
 - [x] native hook + T1 (none: Skyrim Platform's sendPapyrusEvent hook, an existing API, filtered in native to the game-file range and the exact event OnTrigger)
 - [x] TS handler (wordWallService.ts on OnTrigger, c31208c0; the server's TeachWord snippet lands through the shouts path; tsc green)
 - [ ] T2 green
-- [x] T3 scenario green, no HYPOTHESIS tags (x-word-wall 20261101-153103 green by path; b-word-wall promoted main 92c03ed9; the gate is the pair's full sweep)
+- [ ] T3 scenario green, no HYPOTHESIS tags (x-word-wall 20261101-153103 green by path; b-word-wall promoted main 92c03ed9; the gate is the pair's full sweep) (UNTICKED 19:02 PST 2026-11-02: 3 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [x] ledger and suppression registry updated (NATIVES.md: Game.TeachWord, Game.UnlockWord, Game.IsWordUnlocked, Actor.AddShout implemented, R0, verb word-wall)

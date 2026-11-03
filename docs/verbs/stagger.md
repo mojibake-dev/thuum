@@ -355,7 +355,7 @@ promoted.
       callNative fallback for an unbound global)
 - [x] T2 green on the final commit (f321a52f, 2026-10-11, the relay
       declared to both games)
-- [x] T3 scenario green: b-stagger (thuum 7431108, awaiting Eli's review)
+- [ ] T3 scenario green: b-stagger (thuum 7431108, awaiting Eli's review) (UNTICKED 19:02 PST 2026-11-02: 8 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
       green twice; HYPOTHESIS left: which stagger the figure plays with its
       staggerMagnitude and staggerDirection unset (playtest fourteen's
       eye), a timed bash's large recoil (not told apart), and the bash's

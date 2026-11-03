@@ -278,7 +278,7 @@ effect rule's MAX_EFFECTS (32) and MAX_DURATION_S.
 - [x] T2 green: the full T2 at the merge (8eb4e78e, 2026-10-13 17:19: all
       25 sessions identical, shouts' three declarations of the spell
       stagger committed first)
-- [x] T3 scenario green: b-self-cast (thuum c260ff3, awaiting Eli's
+- [ ] T3 scenario green: b-self-cast (thuum c260ff3, awaiting Eli's (UNTICKED 19:02 PST 2026-11-02: 8 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
       review) green twice by path (20261013-232251, -232603) and in the
       merge's gate (20261014-003546); HYPOTHESIS left: the engine's own end of
       Invisibility and Etherealize at the caster's attack or cast, an

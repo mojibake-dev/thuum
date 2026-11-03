@@ -201,7 +201,7 @@ probe reads the cadence); OnHit's own budget.
       parity-legacy, second-hand's twelve declared divergences holding
       (the second proc's Health change declared by shape, since a
       concentration proc's claim counts the time since the last report)
-- [x] T3 scenario green: b-second-hand 20261018-111322 on train-24
+- [ ] T3 scenario green: b-second-hand 20261018-111322 on train-24 (UNTICKED 19:02 PST 2026-11-02: 2 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
       14d70eb1 (Crackle's bolt and its proc's 150 ms ticks claimed, c2 down
       5 % of 1000 Health, its game agreeing within 0.2 %), in the merge
       gate 20261018-112123-merge-m2-train-24 (23 of 23). HYPOTHESIS left: a

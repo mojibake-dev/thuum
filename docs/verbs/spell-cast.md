@@ -480,7 +480,7 @@ health message. A second red within two sweeps makes it a bug.
       the caster's)
 - [x] T2 green (2026-10-10 on fork 98c7a478: all 18 sessions identical up
       to their declarations, spell-cast's ten)
-- [x] T3 scenario green, no HYPOTHESIS tags: b-spell (thuum 9ed66b8,
+- [ ] T3 scenario green, no HYPOTHESIS tags: b-spell (thuum 9ed66b8, (UNTICKED 19:02 PST 2026-11-02: 34 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
       awaiting Eli's review) green twice (runs 20261010-121505 and
       -121750)
 - [x] ledger and suppression registry updated: no native added; no

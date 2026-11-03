@@ -326,7 +326,7 @@ on parity 35acc275 plus these five; its merge sweep started 2026-10-10
 - [x] TS handler: none
 - [x] T2 green (2026-10-10 22:42 on f828279f, every session identical up
       to its declarations, blocking's from the formula)
-- [x] T3 scenario green: b-block (thuum 5eebce8, awaiting Eli's review)
+- [ ] T3 scenario green: b-block (thuum 5eebce8, awaiting Eli's review) (UNTICKED 19:02 PST 2026-11-02: 3 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
       green twice; HYPOTHESIS left: an arrow counts as blocked by any raised
       shield in the cone, where the engine wants a strike on the shield's
       body (ArrowProjectile::AddImpact, ID 43710), which the server cannot

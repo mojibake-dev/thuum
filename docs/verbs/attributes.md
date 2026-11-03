@@ -178,6 +178,6 @@ and the crop's window is at most 2 s.
 - [x] engine surface cited (none new)
 - [x] server logic + T0
 - [x] T2 green (m1-attributes, 2026-10-02)
-- [x] T3 scenario green, no HYPOTHESIS tags (run 20261002-222409; the
+- [ ] T3 scenario green, no HYPOTHESIS tags (run 20261002-222409; the (UNTICKED 19:02 PST 2026-11-02: 1 open engine claim line over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
   scenario revision it ran approved by Eli, 2026-10-05)
 - [x] on fork parity (875c4778, 2026-10-02)

@@ -350,7 +350,7 @@ m4-turbo2-wall-range, the tests carrying the camp's two casts), deployed under t
 - [x] native hook + T1 (none needed)
 - [x] TS handler (fork m3-spell-placed-client bb7cc946: createActorMessage.ts widened, formView.ts ownPlacedCopyStands); shape A: spellPlacedService.ts and the two message types, m3-wall-pose 866ff864 (tsc green)
 - [x] T2 green (shape C's T0 green on 3k d7548ccf and on 3o-win ee44f7d1 and its T2 with the union 0e23c820; shape A's T0 the pipeline 4188 of e713862c, its T2 green beside the wall's gate, numidium's verb-merge 2026-10-31 12:51Z)
-- [x] T3 scenario green, no HYPOTHESIS tags (b-spell-placed-wall v4, thuum main 9e012045, GREEN at the wall's gate: run 20261031-122522 on e713862c, 71 steps, 05:31 PDT 2026-10-31; the walk read c2 at -113.8 and c1 at 132 from its start; the shape A section's HYPOTHESIS tags all read; un-pended in lab/gate.yaml)
+- [ ] T3 scenario green, no HYPOTHESIS tags (b-spell-placed-wall v4, thuum main 9e012045, GREEN at the wall's gate: run 20261031-122522 on e713862c, 71 steps, 05:31 PDT 2026-10-31; the walk read c2 at -113.8 and c1 at 132 from its start; the shape A section's HYPOTHESIS tags all read; un-pended in lab/gate.yaml) (UNTICKED 19:02 PST 2026-11-02: 9 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated

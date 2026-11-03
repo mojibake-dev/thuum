@@ -114,7 +114,7 @@ Until one of them is green, the verb stays on fork branch m1-damage-flags.
 
 - [x] server logic + T0
 - [x] T2 green
-- [x] T3 scenario green (run 20261003-224045); the power attack misses at
+- [ ] T3 scenario green (run 20261003-224045); the power attack misses at (UNTICKED 19:02 PST 2026-11-02: 1 open engine claim line over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
   188 units where a plain swing lands (exploratory run 20261003-223313),
   HYPOTHESIS that power attacks use the pick only, without the eye cast;
   measured with M2's hit registration, with melee reach's other open

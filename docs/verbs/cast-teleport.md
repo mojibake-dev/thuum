@@ -298,7 +298,7 @@ by x-double-arrow2 20261012-071438) and poison's OnEquip log (b3682b71).
       FridaHooks.cpp (no T1: it is the client's event filter)
 - [x] TS handler: none new (the console routes addspell)
 - [x] T2 green (ef3fb03c, ten declared divergences)
-- [x] T3 scenario green, no HYPOTHESIS tags (b-teleport, thuum 52d6195,
+- [ ] T3 scenario green, no HYPOTHESIS tags (b-teleport, thuum 52d6195, (UNTICKED 19:02 PST 2026-11-02: 3 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
       awaiting Eli's review, green twice); the reach from playtest
       fourteen's farthest cast and the dash's look (T4) are playtest
       fourteen's

@@ -422,7 +422,7 @@ snippets).
 - [x] TS handler (shoutService, the voice slot in sync/equipment.ts,
       hitService's held hits)
 - [x] T2 green (3f9e4bc8, 18 declared divergences)
-- [x] T3 scenario green: b-shout (thuum db6ed77, awaiting Eli's review)
+- [ ] T3 scenario green: b-shout (thuum db6ed77, awaiting Eli's review) (UNTICKED 19:02 PST 2026-11-02: 14 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
       green twice; HYPOTHESIS left: the push of Unrelenting Force on another
       player (a later slice), the cause of callNative's spell (a fallback
       now); Whirlwind Sprint's three words fit the burst

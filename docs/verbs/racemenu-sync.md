@@ -754,7 +754,7 @@ above keep a hostile preset from carrying anything but a look.
 - [x] T2 green (2026-10-07, `just test-proto m1-racemenu`: the smoke,
       attributes across a restart, and all 14 difftest sessions, racemenu
       among them, legacy against wire identical)
-- [x] T3 scenario green, no HYPOTHESIS tags (a-racemenu, d61647d, green in
+- [ ] T3 scenario green, no HYPOTHESIS tags (a-racemenu, d61647d, green in (UNTICKED 19:02 PST 2026-11-02: 8 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
       runs 20261007-033048, -033403, -033726 and -035046; approved by Eli,
       its body-morph addition 952a8e4 too on 2026-10-08; T4 playtest eight
       passed, the cap stays 192 KiB)

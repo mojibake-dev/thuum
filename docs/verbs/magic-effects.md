@@ -481,7 +481,7 @@ ARTO: a client native if a playtest wants it), the sweep.
       58cbf09d)
 - [x] T2 green (2026-10-10 on fork m2-god 6252f251, every session identical
       up to its declarations)
-- [x] T3 scenario green: b-potion (thuum bc796d5) green in 20261011-015942
+- [ ] T3 scenario green: b-potion (thuum bc796d5) green in 20261011-015942 (UNTICKED 19:02 PST 2026-11-02: 10 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
       and -030531, b-magic-restart (ec9dac2) in -030835 and -031834, both
       awaiting Eli's review; HYPOTHESIS left: the hit shader on a figure
       (playtest thirteen's potions), and the poison's hand and count (the

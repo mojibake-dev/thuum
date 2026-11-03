@@ -115,7 +115,7 @@ Rate limit / bounds: the reach above; rate unchanged.
 - [x] reach value sourced (Ghidra) and confirmed in the lab
 - [x] server logic + T0
 - [x] T2 green
-- [x] T3 scenario green, no HYPOTHESIS tags on the values the bound uses
+- [ ] T3 scenario green, no HYPOTHESIS tags on the values the bound uses (UNTICKED 19:02 PST 2026-11-02: 2 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
   (the scenario approved by Eli, 2026-10-05)
 - [x] on fork parity (b095fca6, 2026-10-03)
 

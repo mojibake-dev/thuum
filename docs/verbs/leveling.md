@@ -321,7 +321,7 @@ them (its two lines of the night are Sneak's at 20:27): the engine's rise for a 
 - [x] native hook + T1 (fork m5-leveling, 2026-10-31: Skyrim Platform's UseSkill replacement at 40488, game/Offsets.h and FridaHooks.cpp, the skillUse event; T1 is the client build)
 - [x] TS handler (skillUseService.ts: a second's uses summed per skill into SkillUse 63; the engine's own write stays, nothing under the zeroed mults)
 - [ ] T2 green
-- [x] T3 scenario green (p-level-up v3, main e4647c46, GREEN standalone 20261031-152612 on m5-leveling b6748da0: 168 of 168 batched swings landed, One-handed 20 to 27, the character's level 2 at skill 25, the relaunch and the restart keeping both, c2's record untouched; 08:35 PDT 2026-10-31; the gate runs it again), HYPOTHESIS tags read as noted beside each
+- [ ] T3 scenario green (p-level-up v3, main e4647c46, GREEN standalone 20261031-152612 on m5-leveling b6748da0: 168 of 168 batched swings landed, One-handed 20 to 27, the character's level 2 at skill 25, the relaunch and the restart keeping both, c2's record untouched; 08:35 PDT 2026-10-31; the gate runs it again), HYPOTHESIS tags read as noted beside each (UNTICKED 19:02 PST 2026-11-02: 5 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated

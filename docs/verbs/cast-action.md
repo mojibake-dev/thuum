@@ -629,7 +629,7 @@ and 8 a second only ever stops a flood.
 - [x] native hook + T1 (0d69f6fe; the probes 055039, 055907, 060152, 060444)
 - [x] TS handler (3f8d8f77)
 - [x] T2 green (26 sessions with cast-action among them, difftest job 6654 at e75ee5c8, the gate of 2026-10-15 01:30)
-- [x] T3 scenario green, no HYPOTHESIS tags (b-spell, b-cast-rhythm and b-cast-both-hands green in the second gate, run set 20261015-194205, 8 of 8, on abe44a55; the first merge's b-spell 065943 and gate 083019 before nineteen reopened it)
+- [ ] T3 scenario green, no HYPOTHESIS tags (b-spell, b-cast-rhythm and b-cast-both-hands green in the second gate, run set 20261015-194205, 8 of 8, on abe44a55; the first merge's b-spell 065943 and gate 083019 before nineteen reopened it) (UNTICKED 19:02 PST 2026-11-02: 4 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
 - [x] parity scenario green, or its later list reviewed with it (ADR-031): p-spell-bolt 5bf1d51 green by id (20261015-080752), its later list reviewed in docs/private/reviews-pending.md
 - [x] ledger and suppression registry updated (no Papyrus native; the suppression is the relay filter, named under Suppress)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033): the rhythm and both-hands rows green; interrupted casts, both seats at each other and a spawn mid-cast open; the checklist's items each have a scenario but the breath's (x-tgm-breath4 stays a probe)

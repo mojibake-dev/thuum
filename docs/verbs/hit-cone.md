@@ -133,7 +133,7 @@ IronSword and swings with attackStart.
 - [x] server logic + T0 (cargo; ctest on the fork's CI)
 - [x] T2 green (2026-10-04, image a08ee1f2): the melee-cone session diverges
       as declared, the six others unchanged
-- [x] T3 scenario green: a-melee-cone, run 20261004-055345 (the swings at 0
+- [ ] T3 scenario green: a-melee-cone, run 20261004-055345 (the swings at 0 (UNTICKED 19:02 PST 2026-11-02: 1 open engine claim line over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
       and 30 degrees landed; with the cone widened by a console, the swings at
       180 and 135 were refused). a-melee-reach, a-damage-flags and
       smoke-two-players stayed green on the same image (runs

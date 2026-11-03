@@ -179,7 +179,7 @@ ticking it, so there is nothing to save, and decision 3 costs nothing.
   follows.
 - **The engine's clock step, read in Ghidra on 1.7.104.**
   ghidra/notes/calendar-1-7-104.md has the ids, the trimmed code and a
-  Frida plan, and keeps its static findings tagged HYPOTHESIS.
+  Frida plan, and keeps its static findings as hypotheses until a trace.
   - What this verb relies on is CONFIRMED in the lab (a-time, run
     20261004-035822-a-time). Both clients read GameDaysPassed as the day
     count set through SetGameDaysPassed plus GameHour / 24 (24.68319 at
@@ -411,7 +411,7 @@ T2: green on the same image, 2026-10-04:
 - [x] message + validator (same commit, f280d576)
 - [x] TS handler (TimeService)
 - [x] T2 green (2026-10-04)
-- [x] T3 scenario green (run 20261004-035822-a-time); no HYPOTHESIS tag
+- [ ] T3 scenario green (run 20261004-035822-a-time); no HYPOTHESIS tag (UNTICKED 19:02 PST 2026-11-02: 1 open engine claim line over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
       left on what the verb does
 - [x] ledger updated (GetCurrentGameTime, WaitGameTime)
 - [x] on parity 4257036e (2026-10-04), after a regression sweep on m1-time:

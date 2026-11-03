@@ -265,7 +265,7 @@ an engine move, so its speed may need its own allowance: to measure).
 - [x] TS handler: skymp5-client's hit-time dispel of a figure's spell is
       gone (4e8aa04c)
 - [x] T2 green: the full T2 at the merge (verb-merge m2-push, 2026-10-14)
-- [x] T3 scenario green, no HYPOTHESIS tags: b-push (thuum 5b1e0d2) green
+- [ ] T3 scenario green, no HYPOTHESIS tags: b-push (thuum 5b1e0d2) green (UNTICKED 19:02 PST 2026-11-02: 5 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
       twice by path (20261014-155052, -155344) and in the merge's gate
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031):
       p-shout-uf3 is owed. Its references are r-shout-uf3-a2 and -b2

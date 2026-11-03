@@ -84,7 +84,7 @@ unchecked (the next movement verb).
 - [x] engine surface (none new)
 - [x] server logic + T0
 - [x] T2 green
-- [x] T3 scenario green, no HYPOTHESIS tags (scenario d7758c5 approved by
+- [ ] T3 scenario green, no HYPOTHESIS tags (scenario d7758c5 approved by (UNTICKED 19:02 PST 2026-11-02: 2 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
   Eli with the commits through 9e87c65, confirmed 2026-10-04)
 - [x] on fork parity (7ca272e2, 2026-10-02)
 

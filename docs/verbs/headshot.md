@@ -247,7 +247,7 @@ Doc written 2026-10-10, before any code.
 - [ ] native hook + T1
 - [ ] TS handler
 - [ ] T2 green
-- [x] T3 scenario green: b-headshot 20261018-192338 on train-26's stage (the
+- [ ] T3 scenario green: b-headshot 20261018-192338 on train-26's stage (the (UNTICKED 19:02 PST 2026-11-02: 10 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
       kill on the server from the claimed bow hit, a helmet and a low skill
       refusing it); HYPOTHESIS tags left: the first candidate confirmed,
       the figure-cast caveat moot for this mod
