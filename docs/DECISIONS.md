@@ -4460,3 +4460,34 @@ R5: the keyframe, the word and the ack ride one reliable ordered channel; the T2
 
 Alternatives. Keep the timers: ten rounds say why not. Per-cell epochs only: fails at a pass. A position judgment on the server
 (compare the report with the record): ADR-063 decision 4 forbids it, and it is what the bounce was.
+
+## ADR-067: Eli's executive decisions after playtest 42: no live container view, replayed deaths allowed, corpses are physics objects, the stray copy moved
+
+Status: ACCEPTED 12:46 PST 2026-11-03 by Eli, verbatim via numidium: "fuck it. executive decisions. - fuck live updates of containers. -
+replayed deaths are fine as long as all deaths are accoutned for - every corpse accounted for where it lands, - corpses count as physics
+objects. - go with your fix on just moving an NPC". Made after playtest 42 (system 1 on m3-system1-r3 df9e1009) showed F1 to F7
+(docs/LOG.md, 2026-11-03), and after Eli's "we should be implementing the real fix every time" on the same afternoon.
+
+Decision.
+1. Containers: no live update of an open container menu. A container's contents sync when it is opened and when it is closed; a change
+   another seat makes while the menu is open shows at the next open. System 2's open-menu redraw (three designs, none held) is dropped,
+   not solved, and no verb doc may require it.
+2. Deaths: a death that replays at a load (a watcher's engine copy killed at its load, the death's own events and sound playing) is
+   acceptable, provided every death is accounted for: an NPC dead on one seat is dead on every seat and on the server, none is missing
+   and none rises again. The bind kill may stay; its loss of a body is the bug, not its sound.
+3. Corpses: every corpse exists on every seat, at the place it lands. A missing corpse on a watcher (F4, 29613) or one lying elsewhere
+   (F6, 29602 1,700 units down the slope) is a defect.
+4. Corpses are physics objects (this supersedes "bodies are not props until M4", Eli 2026-10-30). The prop rule of ADR-063 decision 2
+   applies to a body: one mover simulates the ragdoll (the engine that owns the actor at its death), the at-rest pose is the mover's
+   own final sample, every other seat places its corpse at that sample, and the server's record, the loot reach and any later
+   check measure from it.
+5. The stray copy is moved, not hidden: the server tells a seat whose own copy of an NPC stands where the record does not (F1's porch
+   Embry, F2's Hod) to move that copy to the record's cell and position (turbo3-sys1-f1), replacing the once-a-minute Disable snippet
+   that did not hold. The second mesh beside F2's frozen Hod is a separate defect, read later.
+
+Consequences.
+- System 1's acceptance (playtest 42's items, the two-seat scenario) claims deaths accounted for and corpses where they land on both
+  seats, not the absence of a death's sound.
+- ADR-065's materialize-first stays the direction for the state channel; it is no longer the deliverable for deaths today.
+- The physics system (system 3) gains bodies: its owner, rest and placement rules are written once for props and bodies.
+- Containers' rows in STATE.md carry open and close as their sync points.
