@@ -2041,6 +2041,12 @@ and about 120 below the eye (about 13 counts a degree on this seat; the rune pro
   turns a dead hold back into a placing hold, and a respawn that teleports gives the revived hold the teleport's place as its record
   ahead of the standalone live word. Named for its own round: the server still accepts a dead record's movement and actions. The lab
   read is numidium's evidence stage on e23bd229 (door v21, swap v19, death-reentry v5, death-freeze v3, scene-guest v2.1).
+  HYPOTHESIS (the fresh review of x-essential-bind v1 and x-respawn-teleport-hold v2, 2026-11-03, a static read of
+  ActionListener.cpp's stamping and standing branches): an actor whose ENGINE refuses the death (an essential base, set by the game
+  files or by a typed setessential on the host's seat) answers a server kill with bleedout, so the host's zero sample stamps the body
+  as host-sampled dead and its recovery sample stands the record up ("resurrection by its host's engine"): the engine's rule wins over
+  the server's kill, which is R2's shape. x-essential-bind v2 records the server's two lines after the dead hold's release (stands
+  nothing, resurrection) without claiming either; its run turns this row into a fact or a correction.
 - Where the fixes stand (14:44 PST 2026-11-02): F5 MERGED with wall-range (fork parity 4fdb2d31, 21:12Z); F9 MERGED as the R0 train
   m4-turbo2-r0-train (parity 188a8dea, 22:42Z, with skill books; T0 13 of 13, T2 green); F3 and F4 ride the client train
   m4-turbo2-train 11e6b00e (with prop-statics and the settle head), arm two's build, its gate after the arm (Eli's turbo order). The
