@@ -1991,6 +1991,20 @@ class CellHostSteps(RunTests):
         copies = [" ".join(c[2]) for c in pve.calls if c[0] == "exec" and c[1] == 901]
         self.assertTrue(any("lab-console-logs.txt" in c and "logcount-003-console.log" in c for c in copies), copies)
 
+    def test_a_snapshot_keeps_a_seats_count_as_the_board_holds_it(self):
+        """a seat's fact as a baseline: the log-count step sets the board's count, and the snapshot keeps that read"""
+        import asyncio
+
+        from labapi.runner import RunRecord
+        from labapi.scenario import Scenario, Step
+
+        self._log_count_on_a_managed_seat({"platform": "a moved line\n", "console": "moved twice\nmoved\n"})
+        rec = RunRecord("x", Scenario(id="x", clients=["c1"]), self.tmp, "now")
+        step = Step(kind="server", action="snapshot", args={"name": "seen", "of": 'c1.log_count("moved")'})
+        ok, note = asyncio.run(self.services.runner._snapshot(rec, 4, step))
+        self.assertTrue(ok, note)
+        self.assertEqual(rec.snapshots["seen"], 3)
+
     def test_a_log_count_without_a_console_log_counts_the_platform_log(self):
         """a driver from before the tee writes no console log: that copy reads nothing, and the count is the first log's"""
         pve, note = self._log_count_on_a_managed_seat({"platform": "a moved line\nanother\n"})

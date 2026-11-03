@@ -498,8 +498,12 @@ def parse_step(raw: Any, clients: list[str]) -> Step:
             name, of = args.get("name"), args.get("of")
             if not isinstance(name, str) or not _SNAPSHOT_NAME.fullmatch(name):
                 raise ValueError(f"snapshot takes a name (letters, digits, _ and -), got {name!r}")
-            if not isinstance(of, str) or not of.strip().startswith("server."):
-                raise ValueError(f"snapshot reads a server fact (of: \"server....\"), got {of!r}")
+            # a server fact, or a scenario seat's as the board holds it (the step before reads it: a seat's
+            # log-count or npc-state), so a leg can claim a seat's count against its own baseline (the props
+            # probe's owner lines, 2026-11-03)
+            seats = tuple(f"{c}." for c in clients)
+            if not isinstance(of, str) or not (of.strip().startswith("server.") or of.strip().startswith(seats)):
+                raise ValueError(f"snapshot reads a server fact or a seat's (of: \"server....\" or \"c1....\"), got {of!r}")
         if action == "log-count":
             # the run's server log, its lines matching the regex, for server.log_count("<pattern>")
             args = _log_count_args(args)

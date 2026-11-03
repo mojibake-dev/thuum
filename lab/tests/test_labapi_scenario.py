@@ -86,8 +86,11 @@ class ScenarioTests(unittest.TestCase):
         self.assertEqual((sc.steps[0].kind, sc.steps[0].action, sc.steps[0].args),
                          ("server", "snapshot", {"name": "predator", "of": "server.ref(0x85547)"}))
         self.assertIsNone(load_scenario("id: t\nclients: []\n").server.npcEnabled)
+        seat = load_scenario("id: t\nclients: [c1]\nsteps:\n  - server: snapshot {name: n, of: 'c1.log_count(\"moved\")'}\n")
+        self.assertEqual(seat.steps[0].args["of"], 'c1.log_count("moved")')  # a seat's fact, as the board holds it
         for bad in ("server: {npcEnabled: yes please}",
-                    "steps:\n  - server: snapshot {name: predator, of: \"c1.state.x\"}",
+                    "steps:\n  - server: snapshot {name: predator, of: \"c3.state.x\"}",
+                    "steps:\n  - server: snapshot {name: predator, of: \"1 + 1\"}",
                     "steps:\n  - server: snapshot {name: 9lives, of: \"server.ref(1)\"}",
                     "steps:\n  - server: snapshot {of: \"server.ref(1)\"}"):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
