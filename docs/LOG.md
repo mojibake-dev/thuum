@@ -5439,3 +5439,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
 - 17:12 PST 2026-11-02 ADR-062 slice 1 designed in docs/verbs/papyrus-events.md (the gate's new rule in OnSendEventEnter with the actor case, the client's
   lift by hosted cell, what retires, the hooks whose verbs exist, the tests; BUILD PENDING on m4-scripts-work after the arm); the
   re-analyst reads the natives' Papyrus entries into docs/research/adr062/papyrus-native-entries.md.
+
+- 17:22 PST 2026-11-02 the restart desync read and fixed (Eli: "also npcs were desynced when it came back"): the follow into a cell nobody hosts was
+  vouched by the sender's client-reported loaded set alone, incomplete after a reconnect (c1 lacked 9731 for 57 s, every walk refused);
+  fork m3-follow-vouch 19c68d2d (server only, Rust: the reach vouches too), probe x-host-restart-follow by path; cell-host.md's section.
+  Alvor's door: no XLOC (the server seeds locks from XLOC when there is one), the host's AI locked it; locks.md's engine-made lock row and
+  ADR-062's Lock hook at the engine level.

@@ -3914,7 +3914,7 @@ The census (scripts naming the native, vanilla / mods; the full table with examp
 | Actor.AddSpell / RemoveSpell / AddPerk / RemovePerk / AddShout | 131 / 106 / 82 / 76 / 48 / 22 / 22 / 5 / 6 / 5 | the known set, perks, shouts | spell-cast's known set, perks, shouts | hook on the player alone: the server's natives (R0) answer the script's grant |
 | ObjectReference.Activate | 377 / 159 | the activation chain | ADR-059 decision 2's relay and the linked-activation report | covered: the host's engine activates, the report stands |
 | PlayAnimation / PlayAnimationAndWait / SendAnimationEvent / SetAnimationVariable* | 264 / 100 / 138 / 44 / 5 / 2 / 35 / 13 | a world object's animation | ADR-059 decision 3's ObjectAnimation relay | covered (the sendAnimationEvent hook); the variables ride the same relay |
-| Lock / SetLockLevel | 121 / 62 / 24 / 14 | a lock | locks | hook: the host's lock change is the locks verb's report |
+| Lock / SetLockLevel | 121 / 62 / 24 / 14 | a lock | locks | hook at the ENGINE level (the reference's lock set, which the AI's night lock-up and a script's Lock both reach; playtest 41's Alvor door, locked on the host alone): the host's lock change is the locks verb's report |
 | SetOpen | 77 / 33 | a door's or container's open state | containers (isOpen), doors | hook: recorded and relayed as isOpen |
 | SetDestroyed / DamageObject / ClearDestruction | 20 / 11 / 32 / 15 / 12 / 7 | a destructible's stage | none (the cobwebs are the engine's own destruction) | NEW (small): the destruction stage recorded and relayed |
 | BlockActivation | 127 / 62 | nothing shared (the engine's own gate) | ADR-059's lift | no hook (host-local) |

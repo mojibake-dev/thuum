@@ -278,6 +278,21 @@ the console log when a landing is slow.
   teleport is its feet) and the report, the server's unlock and the watcher's applied line are the claims; if not, the pick is Eli's
   at turbo 2 and the scenario claims the key, console and sync legs (rule 8, no v8 without a new reading).
 
+### The host's engine-made lock (17:22 PST 2026-11-02; playtest 41, Eli: "alvor and sigrids house is locked for rotfern and not locked for prisoner. no one has interacted with the door.")
+
+Alvor and Sigrid's door is 0x13420 (XTEL into RiverwoodAlvorsHouse 0x133c8) and carries no XLOC in Skyrim.esm, so the server holds
+no lock on it (MpObjectReference::GetLock seeds a reference's lock from its XLOC when locksEnabled and the change form holds
+none, a door's as a chest's; no XLOC, no lock, no line). The lock on the host's screen is the HOST's engine locking the house by the
+residents' AI (vanilla's night lock-up, the owners' package, an engine call through the reference's lock set, no Papyrus); the
+guest's residents are puppets with the AI off, so its door never locks. The gap: a lock the host's engine makes is never observed,
+recorded or relayed. Shape (ADR-062's Lock row): the server's record stays the lock's one home, seeded from XLOC as today, every
+change through it: the pick and the key as today, the console as today, and new, the host's engine-made lock reported from an
+ENGINE-level hook on the reference's lock set (the AI's call and a script's Lock both reach it), recorded R2 (declared unvalidated)
+and relayed as the "lock" property every seat applies. Scenario b-locks-door after its probe: two seats in Riverwood at 21:00 game
+time with c1 hosting; within 5 s of the host's lock the guest's door state equals the host's, the record's lock line in the server
+log, the guest's key through the server as b-locks. Eli's key test tonight means something on a server-known lock alone (a
+dungeon's XLOC, the lab's commanded chest).
+
 ## Status
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared (the reference trace owed)

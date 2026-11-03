@@ -777,6 +777,21 @@ D24-D, and the fast exit makes the count moot on a seat.
   second and third. All three need a stage change, so they wait for Eli's
   look at 39 to 44.
 
+### The follow's vouch (17:22 PST 2026-11-02; playtest 41's break, Eli: "also npcs were desynced when it came back"; fork m3-follow-vouch 19c68d2d)
+
+After the break's server restart with both games running (01:07:59Z), c1 re-reported its loaded set as 9772, 9771, 9770, 976f,
+976e and 9732, without Riverwood's other half 9731, and for 57 s every walk of its hosted NPCs into 9731 was refused ("ff000000 may
+not move 35534 to cell 9731 (it simulates the actor nowhere it may take it: not its cell, not a cell it hosts, not a follow it can
+vouch for)", 01:09:00 and :22; c2's 13483 and 13484 into 9712 at 01:09:52 and 01:10:05 the same) while the host's engine walked
+on: the records stood and the guest's puppets froze or snapped. The rule (wire-rules cells.rs judge, the None arm) vouched a
+follow into a cell nobody hosts by the sender's client-REPORTED loaded set alone; the report after a reconnect is the client's
+remembered set, incomplete. Now the sender vouches by its loaded report OR by its reach (the server's own 3x3 around the player,
+PartOne's reach_ranked at every square change): the engine loads at least that grid, so a neighbour in reach is loaded whatever
+the report says. A cell neither reported nor in reach is still nobody's to vouch for; a door is a follow as before. T0: cells.rs
+a_neighbour_within_reach_is_vouched_for_without_a_loaded_report. Probe x-host-restart-follow by path (b-npc-handoff-restart's
+frame, a restart with both games running, no "may not move" in the new log within 90 s, both seats' npc-state of Hilde and Sven
+recorded). An R0 (T0 and T2) into the next server train after the arm.
+
 ## Client
 
 - SP binding: none new (cellFullyLoaded, Cell.isAttached, getParentCell,
