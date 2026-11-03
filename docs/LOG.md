@@ -6814,3 +6814,33 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   not hold: npc-state every 0.5 s from the kill move's event (lab-api's wait takes fractions) with isInKillMove, isBleedingOut,
   bIsSynced and the puppet flag added to the driver, and the knock state (ActorState's knockState, Actor::IsInRagdollState) as a
   platform native or a Frida read, plus hooks on KillActorHandler, Actor::Kill, KillImpl and the Resurrect native on c2.
+- 08:03 PST 2026-11-03 (16:03Z 11-03) (thuum-cf): the re-analyst's (c) read is in the serialize note (206 lines, 78 ids by addr.py's reverse pass,
+  the headers for every slot and member; 13 HYPOTHESIS, the chains CONFIRMED-STATIC). (1) The mid-game apply path exists and tests no
+  3D: 35569 (mgr, form, buf) refuses under kLoading, needs an entry with a record of the matching type, sets the suppress bit, decodes
+  (36080 frees the record), runs the initial data (35716/35717), calls slot 0x0F and queues the BGSLoadFormData on the manager's
+  pending array (+0x318) without FinishLoadGame; 35568 wraps it with a stack buffer (promotion 15330 uses it on a live form, the
+  batch 15328 then runs the finish pass 35567 bare); 35567 is where InitLoadGame, the queued sub-buffers' flush and FinishLoadGame
+  happen (callers: the cell's 3D build 18978 under the suppress bit, 15328, the full load 35600, 35940, the unread 13430). The engine
+  rarely applies to a loaded actor only because both stashes run on unloading references. Signatures for the probe: 35568
+  uint8(mgr, form), 35567 void(mgr, 0), 19378 uint8(mgr, clear). (2) Kind 6: 34 fixed bytes (cell, position, angle, editor cell,
+  two u16 grid), then under kHavokMoved a varint length and 19534's block (a flags byte, a varint body count, pitch and roll for an
+  actor, per body except the root its position and quaternion in game units, a per-body flag byte when anim-targeted bodies were
+  seen, velocities for active bodies); the reader 35717 sets position and angle and warps the 3D, 35587 queues the blob (kind 2,
+  by form id) at +0x208, the finish pass's flush hands it to 19535 when the reference has 3D (else parks it in an
+  ExtraSavedHavokData for the 3D init); 19535 re-counts the live bodies, sets the node dynamic for a dead actor and keyframed for a
+  living one, and only when the counts match 19538 sets each bhkRigidBody's rotation and position (slots 0x36 and 0x35) for saved
+  positions within 4096 units of the REFR, then the velocities. (3) CONFIRMED-STATIC that the chain to the rigid bodies exists for a
+  3D-loaded reference; HYPOTHESIS that the pose shows; needs the 3D, the same body count (same base, dismemberment and
+  collision-bearing armor), the REFR position first (kind 6 does it), the actor dead (dynamic motion), the ragdoll driving rather
+  than the death animation (else the "Behavior ragdoll save/load state mismatch" log), a bhkWorld on the cell. (4) Actor::LoadGame
+  (37650; Character's 40267 an inlined copy) writes the process level through 37502, boolBits and boolFlags whole, the ActorState
+  block whole (lifeState included, so SetDontMove's 9 is replaced by the owner's), the movement controller, criticalStage, timers,
+  weight, myKiller, casters, spells, Modifiers, ActorValueStorage, addedSpells, the combat controller; FinishLoadGame adds the
+  physics block, SetLifeState(kDead) for kReanimate, ApplyPerksFromBase. For a corpse the whole record is the wanted state. (5) The
+  probe, the round trip first on one seat: the actor script's record from the copy itself written into its entry (68115 and 35509
+  as transplant-inject does), then 35568, then 35567, with 35519 (the "FORMS:" log) hooked for the engine's five verdicts; rows
+  before and after each step (lifeState, level, position, angle, the root's world translate, the live body count against the
+  record's varint, the entry, the pending count); expected 35568 returns 1, the entry's record nulled, the pending count 1 then 0,
+  no mismatch log, no visible change. Half two: the owner's kDead record on the guest's copy, the root z and headZ as the claim. A
+  crash inside 35568 means LoadGame on a loaded actor is not safe mid-game (risk 1 real). The re-analyst writes the round-trip
+  script next; the lab after the gate.

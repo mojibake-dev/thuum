@@ -694,3 +694,209 @@ The initial data of kind 6 opens with the cell and the position and carries the 
 bone transforms on the owner's engine: the owner holds the corpse's exact pose in the engine's own format. Applying that record to
 the guest's loaded copy (the live-form apply, (c)) is a candidate cure for the guest's half-up body (playtest 41's item 3, the
 death-freeze reds), beside the Frida sampler's search. HYPOTHESIS until a guest applies one.
+
+## (c) The apply to a loaded actor: LoadGame, the initial data and the Havok blob (static read)
+
+Written 16:0x UTC 2026-11-03 (the re-analyst) after runs 20261103-153648 and 153929 (the actor script on the promoted bandit 0x39fe4:
+kDying record 4,795 bytes, initial data [0, 1053] of kind 6, levelBoolBits [1053, 1061], the process block absent; kDead 4,481 bytes,
+initial data [0, 1029]). Sources and rule as above: ids by addr.py (forward and the reverse pass), slots and members by the headers,
+bodies by pyghidra on the unpacked 1.6.1170; nothing renamed. The one concrete target: the initial data's Havok blob is the owner's
+ragdoll, body by body, and the question is whether the engine's own reader puts it on a guest's 3D-loaded copy (playtest 41's item 3,
+the half-up body). Short answer first: yes, by a chain that exists in the engine for exactly this case, the finish pass's flush; what
+is unproven is the result on screen.
+
+### Id rows added for (c) (1.6.1170; RVA; how found)
+| Function (CommonLib name where it has one) | RVA | id | Found by |
+| --- | --- | --- | --- |
+| the apply's stack-buffer wrapper (mgr, form); the apply (mgr, form, BGSLoadFormBuffer*) -> bool; the finish pass (mgr, fromFullLoad); the full-load passes (unread) | 0x603700, 0x6037a0, 0x603140, 0x602d00, 0x605f90 | 35568, 35569, 35567, 35566, 35600 | change-forms.md; xrefs of 35569 and 35567 |
+| the apply's callers: the cell init's reference visitor (actors deferred), the cell init, its second apply loop; the promotion batch (promote each, then the finish pass), promote; the apply-finish-reserialize path and its caller (unread) | 0x2cc2d0, 0x2b3260, 0x603e00, 0x1fedb0, 0x1ff290, 0x620ed0, 0x621170 | 19283, 18882, 35572, 15328, 15330, 35940, 35941 | xrefs of 35569, 35568, 35567 |
+| the finish pass's other callers: the cell's 3D build (cellState 3 at its start, 4 at its end, TESObjectCELL.h:259; runs the pass under the suppress bit); two unread (0x1a5df0; the wrapper's callers 0x61f1e0, 0x61f530) | 0x2b7840, 0x1a5df0, 0x61f1e0, 0x61f530 | 18978, 13430, 35909, 35910 | xrefs of 35567 and 35568 |
+| BGSLoadGameBuffer ctor, dtor (frees the scrap data), prepare (inflate target); BGSLoadFormData ctor; the record decode (frees the record); the form from a BGSLoadFormData; the sub-buffer to load-buffer bridge; the varint read; the version-0x37 reader; the 3-byte id reader | 0x624d30, 0x624d60, 0x624f20, 0x624880, 0x628210, 0x6249a0, 0x625b80, 0x625320, 0x625400, 0x624fc0 | 35993, 35994, 35998, 35984, 36080, 35987, 36019, 36004, 36007, 36000 | callees of 35568, 35569, 36031 |
+| the initial data: reader (buf, form, flags) -> kind, its body, the fixed-part decoder, the type decision, the writer; TESObjectREFR::SetAngle and SetPosition (HYPOTHESIS names), the cell move, the cell-or-worldspace resolver, the grid cell, the ACHR registration, the actor predicate before editorLocForm, the position check, the TES cell check, the worldspace registrations | 0x60e5e0, 0x60e630, 0x60df60, 0x60dac0, 0x60e1c0, 0x2ea6a0, 0x2ea960, 0x2eb8c0, 0x21f1b0, 0x1af5c0, 0x607aa0, 0x663ea0, 0xd17350, 0x19cdf0, 0x30af40, 0x30aca0, 0x30a120 | 35716, 35717, 35714, 35708, 35715, 19786, 19790, 19799, 15903, 13641, 35607, 37301, 70171, 13308, 20542, 20541, 20526 | callees of 35569 and 35717 |
+| the Havok block writer (ref, buf), its pre-pass (ref, state), its pre-pass callback, its per-body writer, the collision-object traversal (node, state, callback); the block READER (ref, buf) and its per-body reader; the body's motion-type set, the collision object's update, the body activate; the keyframe predicate on a living actor; the character controller getter | 0x2db2c0, 0x2db1b0, 0x2dbc00, 0x2dbce0, 0xe87df0, 0x2db450, 0x2dbfc0, 0xe92b20, 0xea59b0, 0xe93140, 0x674f50, 0x6628f0 | 19534, 19533, 19536, 19537, 77883, 19535, 19538, 78077, 78384, 78088, 37484, 37258 | callees of 35715, 19534, 19535; xrefs of 19535 |
+| the queued sub-buffers at the manager's +0x208: the enqueue (mgr, kind, buf, id), the queue read (queue, kind, buf, id), the flush of all three kinds, the flush of one kind, the per-entry handler (kind*, form, subBuffer), the sub-buffer alloc, the hash insert; the ExtraSavedHavokData setter and its applier (from the 3D init, two call sites), the ExtraSavedAnimation setter, the animation reader, the character-controller reader, the discard | 0x6053f0, 0x625ef0, 0x626020, 0x6261b0, 0x6264e0, 0x626760, 0x626250, 0x16aa00, 0x16ab60, 0x625800, 0x2e8140, 0x16a7d0, 0x2f5fe0, 0x715f90, 0x5b4050 | 35587, 36023, 36024, 36026, 36031, 36032, 36027, 11977, 11979, 36014, 19742, 11973, 20099, 40045, 34201 | callees of 35717, 35567, 36031; xrefs of 19535 and 11979 |
+| Actor::LoadGame, Character::LoadGame (slot 0x0F of 207886 at +0x78; an inlined copy sharing 37650's tail), Actor::FinishLoadGame, the ActorState reader, the Modifiers reader, the ActorValueStorage reader, AIProcess::LoadGame, its finish, the set-process-level, the target-level chooser, the cached-values invalidation; the penetration util getter (middleHigh +0x258, MiddleHighProcessData.h:184) and its bhk setup; the per-graph callbacks; IsInRagdollState (Ghidra's name) | 0x686de0, 0x727d50, 0x687a80, 0x6ced00, 0x6cffc0, 0x6d1200, 0x6e67c0, 0x6e97b0, 0x6760d0, 0x676370, 0x67fac0, 0x70f6d0, 0xe98d40, 0x541590, 0x54e2b0, 0x54e400, 0x66afa0 | 37650, 40267, 37652, 38988, 39010, 39024, 39430, 39432, 37502, 37503, 37592, 39859, 78210, 32710, 32956, 32963, 37364 | read_bytes on 207886 + 0x78 (CONFIRMED-STATIC); callees of 37650, 37652, 19535 |
+| the suppress-bit helper (mgr, clear) -> was-clear; the "FORMS:" log; the unload queue; the cell detach; the quit predicate; ProcessLists' queued move | 0x2cfe60, 0x601770, 0x63b120, 0x2ba0b0, 0x648cb0, 0x76e5c0 | 19378, 35519, 36459, 19032, 36600, 41343 | callees of 35569, 35567, 37652 |
+
+### Q1. The engine's own paths that apply a record to a form, and which of them reach a loaded actor
+**35569, the apply** (mgr, form, buf) -> bool (HYPOTHESIS, decompile): refuses under kLoading (bit 1 of +0x340 must be CLEAR, the full load
+uses 35566 instead); reads the entry (35503); no entry or a null record returns 0; compares the record's save type (35929 on byte 0)
+with the form's formType and on a mismatch logs "(Load Error) Form '%s' (%08X) was saved with form type %s, but currently has form type
+%s. Its loading will be skipped." and erases the entry (35510); else sets TLS +0x670 bit 0 (the suppress bit, old value kept), decodes
+the record into the buffer (36080: version to +0x4B, length1 and length2 by the size code, a raw body copied into scrap memory at +0x08
+or inflated by 35933 into length2 bytes, then the record FREED and the entry's pointer nulled), writes the entry back (35509, now with a
+null record), sets buf +0x38 = form and +0x40 = the entry's flags, sets formFlags bit 21 (kStillLoading, TESForm.h:89), runs the initial
+data (35716: the kind from 35708 on the entry's flags, then 35717), calls slot 0x0F LoadGame, copies the BGSLoadFormData (0x28 bytes) onto
+the manager's pending array (+0x318, count at +0x328) for the finish pass, registers kinds 5 and 6 in the reference maps (35908 on +0xC8
+or 35903 on +0xF8, and 35636 for kind 6; the log "FORMS: No Worldspace or Cell could not be found while loading reference '%s' (%08X)"),
+restores the suppress bit through 19378 and returns 1. It never calls FinishLoadGame itself and never tests the 3D.
+
+**35568, the wrapper** (mgr, form): a stack BGSLoadFormBuffer (35993, 35984, VTABLE_BGSLoadFormBuffer), 35569, ScrapHeap::Deallocate of
+the decoded data, 35994. Its callers: **15330 promote** (the note's Q6: a stored record applied to the now-live form unless
+kRefOriginalPersistent), 35909 and 35910 (unread), and 35940 (apply, finish pass, then serialize the form again into a save-side
+context; its caller 35941 unread). **35569's own callers**: 19283, the cell init's per-reference visitor (a non-actor gets InitItemImpl
+then 35569 with the init's shared buffer, kStillLoading cleared on refusal; an ACTOR is pushed to a scrap array instead), 18882 the cell
+init (two direct calls) and 35572 (its second loop): so at a cell's init the actors are applied after the other references, in the same
+init, before any 3D exists (change-forms.md D1 to D3 ran this path).
+
+**35567, the finish pass** (mgr, fromFullLoad) (HYPOTHESIS, decompile): under a global spinlock, sets kInitingForms (+0x340 bit 3);
+first loop over the pending array: the form from each BGSLoadFormData (35987), its AsReference1 (slot 0x2C, TESForm.h:166) collected and
+ref-counted, the data copied into a stack buffer, slot 0x10 InitLoadGame; then **36024(mgr + 0x208): the flush of the three queued
+sub-buffer kinds** (Q2); then, unless quitting (36600), the second loop: slot 0x11 FinishLoadGame on every form not kDeleted, and for a
+BGSLoadFormData whose flags carry kCellChanged (bit 4, BGSLoadFormData.h:19) the re-mark with 8 (35507), the forced re-stash (35570),
+the cell detach (19032) and the unload queue (36459); kStillLoading cleared on every form; the array emptied; kInitingForms cleared. It
+does NOT touch the suppress bit: 18978 (the cell's 3D build) sets it around the call, 15328 (the promotion batch) calls it bare after
+promoting each alias reference, the full load (35600) and 35940 call it too, 13430 is unread. So the cell-init path's drain of +0x318,
+the note's open read, is 18978: the cell builds its 3D, then InitLoadGame, the flush, FinishLoadGame run for everything the init applied.
+
+**Does the engine ever apply a record to a LOADED actor outside a game load?** The path is promotion: 15330 on a loaded alias reference
+whose entry holds a record runs 35568, and 15328 then runs 35567; nothing in 35568, 35569, 35717 or 36031 refuses a form with 3D (35717
+warps the 3D, 36031 feeds the 3D). In practice the entry of a loaded actor holds a record only after a stash, and both stashes (the cell
+unload's 35570, the demotion's 37501 behind its IsPersistent and cell gates) run on a reference that is unloading, so the loaded case is
+reachable by the engine but rare; our injection makes it the normal case. Requirements, from the code: kLoading and kSaving clear (35569
+refuses the first; the second changes nothing here but the note's invariant stands), an entry with a record (35509 writes it), the record's
+type equal to the form's, the thread the engine uses for the callers above (the main thread: promotion and cell init run there,
+HYPOTHESIS), the version 0x4E, and the form-id map for any type-0 id in the body (Q2 of the REFR read). Signatures for the probe:
+35568 [uint8(pointer mgr, pointer form)], 35567 [void(pointer mgr, uint8 fromFullLoad = 0)], 19378 [uint8(pointer mgr, uint8 clear)]:
+clear = 0 SETS the suppress bit, 1 CLEARS it, the return is 1 when it was clear before (so the engine's restore is 19378(mgr, wasClear)).
+
+### Q2. The initial data of kind 6 for an actor, the Havok block's framing and layout, and the reader side
+The writer (35715, the note's Q1): kind 6 is 34 fixed bytes: the save parent cell as a 3-byte id (35719; run 153648 read it direct,
+0x4371de), the location (REFR +0x54, three floats), the angle (+0x48, three floats), the editor location's cell id (3 bytes) and two
+u16 grid coordinates (13678); then, because the flags carried kHavokMoved (bit 2), a varint length and the Havok block from 19534
+(run 153648: 1053 = 34 + 2 + 1017; 153929: 1029 = 34 + 2 + 993: the two-byte varint, then the block). The block (19534 with the
+pre-pass 19533, the traversal 77883 over the 3D's collision objects, the per-body writer 19537; HYPOTHESIS, decompile):
+
+```
+u8      flags       19533: bit 0 when there are bodies and none is anim-targeted, bit 2 when some are (then a flag byte per body),
+                    bit 4 when the actor has a character controller (37258)
+varint  count       the number of bhkRigidBody collision objects the traversal met (two counters summed)
+f32 x2  pitchAngle, rollAngle   only with bit 4: bhkCharacterController +0x24C, +0x250 (bhkCharacterController.h:128-129)
+per body, in traversal order:
+  [unless it is the root's collision object]  f32 x3 position, f32 x4 rotation quaternion:
+        a body whose collision object carries kAnimTargeted (1 << 10, bhkNiCollisionObject.h:26) writes the node's LOCAL translate
+        (NiAVObject +0x48 local, NiTransform translate +0x24) and an identity quaternion; any other body writes the rigid body's
+        position (slot 0x33) and rotation (slot 0x34, bhkRigidBody.h:42) in game units (times 69.99125)
+  [with flags bit 2]  u8 bodyFlags: bit 0 the body is active (hkpEntity through 0xb2e550), bit 1 its motion type is keyframed
+        (hkpMotion::type at motion +0x10, hkpMotion.h:18; the entity's motion at +0x150, hkpEntity.h:99) and not flag bit 9,
+        bit 2 the collision object is not anim-targeted
+  [when active]  f32 x3 linear velocity (motion +0xE0), f32 x3 angular velocity (motion +0xF0), game units
+```
+The reader side, in order. 35717 (the body of 35716) for kinds 4 and 6: decodes the fixed part (35714), resolves the cell or worldspace
+(14617 then 15903, the exterior cell by grid 13641), and unless the reference is the player under +0x340 bit 6 or the position fails
+70171 or (kind 4 only) the cell differs for a non-persistent reference: SetAngle (19786) and SetPosition (19790), then slot 0x3F
+Update3DPosition(warp = 1) (Actor.h:282), so a LOADED reference's root IS moved; kPromoted in the flags runs 19669 and makes the form
+persistent (19597) when it is not; cell changes go through 19799 with the logs "has been moved from its saved cell", "Trying to load
+non-persistent reference ... into unloaded cell"; a reference with 3D in a cell that fails the TES check (13308) loses its 3D under its
+own lock (slot 0x6C Set3D(nullptr, false), TESObjectREFR.h:304); for an ACHR, 35607 registers it and kind 6 sets editorLocForm
+(+0x138) when 37301 is false; finally, flags bit 2 (kHavokMoved) runs 35587(mgr, 2, buf): 36023 reads the varint length, allocates a
+sub-buffer [u8 version][varint length][the bytes] (36032) and inserts it in the manager's queue for kind 2 keyed by the form id
+(the three per-kind maps at +0x208 + 8 + kind * 0x30). NOTHING is applied to the bodies at LoadGame time. The three kinds, from 36031's
+own messages: 0 the animation data, 1 the character controller, 2 the Havok data.
+
+The consumer is the finish pass. 35567 calls 36024(mgr + 0x208), which calls 36026 for kinds 0, 1 and 2; 36026 walks the kind's map and
+hands every pending entry to 36031(kind, form, subBuffer); 36031: for a reference WITHOUT 3D, kind 0 becomes an ExtraSavedAnimation
+on the extra list (11973; an actor's is discarded), kind 1 is discarded (34201), kind 2 becomes an **ExtraSavedHavokData** (11977,
+ExtraSavedHavokData.h:17, type 0x3C) to wait for the 3D; for a reference WITH 3D it builds a stack BGSLoadFormBuffer from the sub-buffer
+(36019) and runs the kind's reader: 20099 for the animation, 40045 on the actor's process for the character controller (the logs "with
+queued char controller is not a reference", "is not a mobile object", "does not have one to load"), and for kind 2 **19535(ref, buf)**,
+the Havok reader; a stored ExtraSavedHavokData is applied later by 11979 (from 19742, the 3D init, two call sites; unread) through
+36014, which is the same 19535. So the order at a cell's init is: records applied (blobs queued), the cell's 3D built, the finish pass:
+InitLoadGame, the flush (19535 puts the saved bodies on the fresh 3D), FinishLoadGame (the physics setup), and that is how a save's
+corpse lies where it fell.
+
+**19535, the Havok reader** (ref, buf) (HYPOTHESIS, decompile): no 3D -> the log "Cannot load Havok data for reference %s %08X because it
+has no 3D." and return; reads the flags byte and the count; runs the pre-pass 19533 on the LIVE 3D (its counts and flags); sets the
+whole node's motion type (NiAVObject::SetMotionType, NiAVObject.h:133) to kKeyframed (4) for a living actor (not dead by IsDead(0),
+slot 0x99, Actor.h:345; lifeState not kDying, not kUnconcious; 37484 false) and to kDynamic (1) otherwise (hkpMotion.h:28-33); a
+dismembered limb's node gets kDynamic; with flags bit 4 reads pitchAngle and rollAngle into the character controller; calls slot 0xAE
+UpdateNoAI (Actor.h:372, the 3D position update) and NiAVObject::Update; then, ONLY IF the saved count equals the live count, traverses
+the live collision objects with 19538, which per bhkRigidBody: takes the saved position and quaternion (or, for the root body, the REFR's
+position and angle: flag bit 1 of the state), reads the per-body flag byte when flags bit 2 is set (bit 1 sets that body keyframed through
+78077; a mismatch between the saved and the live kAnimTargeted bit is counted and ends in the log "Behavior ragdoll save/load state
+mismatch. Actor %s %08X pose may be incorrect."), and for a non-anim-targeted body whose saved position lies within 4096 units of the
+REFR's position calls **bhkRigidBody::SetRotation (slot 0x36) and SetPosition (slot 0x35)** (bhkRigidBody.h:43-44; the position scaled by
+0.0142875) then the collision object's slot 0x2B; an anim-targeted body gets the node's local translate and rotation written instead;
+active bodies' velocities are collected and applied after (bhkRigidBody::SetLinearVelocity, SetAngularVelocity, 78088). A count
+mismatch logs "Havok data bone count differs on reference %s %08X. Original count: %i, Current count: %i. This should only happen with
+art changes." and applies nothing to the bodies (the sub-buffer is its own, so the record is unharmed). Then NiAVObject::Update and
+three passes over the actor's animation graphs (IAnimationGraphManagerHolder at +0x38, TESObjectREFR.h:112) with 32710, 32956 and, for
+a dead actor, a third callback (per-graph ragdoll calls, unread).
+
+### Q3. Would the owner's blob move the guest's bones, and what the engine needs first
+CONFIRMED-STATIC: the chain 35568 -> 35569 -> 35717 -> 35587 (the blob queued), then 35567 -> 36024 -> 36026 -> 36031 -> 19535 -> 19538 ->
+bhkRigidBody::SetRotation and SetPosition on each live rigid body exists for a reference that HAS 3D, and the same chain with
+ExtraSavedHavokData -> 11979 -> 36014 -> 19535 exists for one that gets its 3D later. HYPOTHESIS: that the resulting transforms are what the
+guest then shows. What the engine needs first, from the code: (1) the copy's 3D present (else the blob parks in an ExtraSavedHavokData
+and waits); (2) the same collision-object count as the owner's (the same base NPC and skeleton, the same dismemberment, the same armor
+set that carries collision; a difference logs and skips the bodies); (3) the REFR's position set to the owner's before the flush (the
+kind-6 initial data does it in 35717, which is why the record's own initial data must travel with the blob: a saved body farther than
+4096 units from the REFR's position is skipped); (4) the actor dead or dying, so 19535 sets the bodies dynamic (a living one is set
+keyframed and the animation keeps the pose); (5) the ragdoll driving the skeleton: 19535 writes rigid-body transforms, FinishLoadGame then
+sets the collision layer (kDeadBip 32 when IsInRagdollState, kBipedNoCC 33 when sitting or by a race flag, kBiped 8 otherwise,
+CollisionLayers.h:15-40) and the motion type (kDynamic in ragdoll state, kKeyframed otherwise), re-adds the node's bodies to the
+bhkWorld (bhkWorld slot 0x35, unnamed in CommonLib, bhkWorld.h:39) and updates the rigid constraints; if the guest's copy is still
+animation-driven (bodies anim-targeted, the half-up pose held by the death animation), the mismatch warning fires and the written body
+transforms are overridden by the animation on the next step; (6) a bhkWorld on the cell (else FinishLoadGame's physics block is skipped).
+Risk points: a blob for a different skeleton or body count (skipped, logged; harmless); a null penetration util or character controller
+(FinishLoadGame guards both); the root body excluded from the blob (it takes the REFR's position and angle); the owner's velocities
+applied to the guest's bodies (a corpse's are near zero; a dying one's are not); the kDying record (lifeState 1) versus the kDead one:
+the dead record is the one to send, both for the ActorState block and for the dynamic motion type.
+
+### Q4. Actor::LoadGame on a loaded actor, and what it would undo on a guest's puppet
+37650 (and Character's 40267, an inlined copy with a shared tail; HYPOTHESIS, decompile) writes, in order: race (+0x1F8 from the base);
+the process level through 37502 (0xFFFFFFFF destroys the process; a level creates one when missing and moves to it when it differs:
+MoveToHigh for 0); boolBits (+0xE8) whole; TESObjectREFR::LoadGame (19529); AIProcess::LoadGame (39430) when a process exists; +0x278,
++0xEC, +0x110; the live lifeState bits are put back over whatever 19529 and 39430 left (actorState1 &= 0xFE1FFFFF then |= the saved
+bits 21 to 24), 37592; +0x260 (now minus the saved age), +0x10C, +0x11C, +0x120, +0x124, +0x174, +0x178, +0xF0, +0x118, +0x264; weight
+(a change removes all parts of both bipeds through slot 0x7E before setting it); myKiller (+0x108); **the ActorState block (38988),
+whole, lifeState included**; +0x1F0; the casters' presence byte and blocks; selectedSpells (+0x1C8) and selectedPower (+0x1E8); the four
+Modifiers (39010); ActorValueStorage (39024); addedSpells appended to +0x190; criticalStage (+0xF0) zeroed when IsDead(0) is false; the
+movement byte: 0 with a controller and race flag bit 7 destroys and recreates the controller (slot 0x109 CreateMovementController,
+Actor.h:463), 1 loads the controller (its slot 0x13) and calls its slot 0x11 with the fly-state bits; boolFlags (+0x204) whole; the
+combat controller created (0xE0 bytes) and loaded when the byte says so; 38744 (the +0x188 pairs); +0x184; boolBits bit 3 cleared when
+slot 0x4A GetCurrentScene is null; +0x114, exclusiveBranch, +0x27B bit 0 by version. 37652 FinishLoadGame then adds the process re-level
+(the move slot for a 3D-less actor), SetLifeState(kDead) for kReanimate, the physics block of Q3, BSFaceGen paused for the dead,
+ApplyPerksFromBase (slot 0x101), UpdateAwakeSound, the casters' finish, and under kLoading clear with no loadedData clears the attack
+state bits. For a guest's puppet copy (AI off, SetDontMove) the writes that undo the puppet state (HYPOTHESIS; the hold is lifeState 9
+per the memory note skyrim-setdontmove-lifestate, Actor::Move zeroing the controller's velocity while it reads 9): the ActorState block
+replaces lifeState 9 with the owner's (2 for a corpse, which is the state wanted; 0 for a living subject, which releases the hold);
+boolBits and boolFlags whole (any AI or process gate the gamemode set there, unread); 37502 to level 0 (the AI promoted; on a copy
+already at 0 nothing moves); the movement controller rebuilt; the Modifiers and ActorValueStorage (health damage) replacing the
+puppet's. The apply scope for a corpse is therefore the whole record with nothing to restore; for a living puppet, lifeState 9 and the
+gamemode's hold flags would have to be re-asserted after FinishLoadGame, which is the (c) question for live actors and not this read's.
+
+### Q5. The minimal Frida read that proves (c) on the lab
+Two halves, the round trip first because it exercises every engine call with bytes the engine itself made from the same copy and
+predicts NO change. Half one, one seat: a dead NPC loaded (an own kill, or the bandit after a kill), the actor script's recipe in
+serialize mode produces {flags2, record} on the owner; the probe script (a third script, to write) then, on PlayerCharacter::Update's
+return (the actor script's trigger, so the main thread): premises as the actor script's plus Get3D2 non-null (slot 0x70,
+TESObjectREFR.h:308), the cell's +0x44 state printed, the entry present with a null record (else refuse: never free an engine record),
+the record's type 1 and version 0x4E, the record's kHavokMoved in flags2 iff its initial data holds a block (the reader runs 35587 on the
+flag alone), the pending count u32(mgr + 0x328) printed (0 expected); then: allocate the record on the engine heap (transplant-inject's
+68115), 35509 the Value {flags2, 0, record}; 35568(mgr, form) -> expect 1 (the rows: the return, the entry after, which must now hold a
+null record, the pending count, 1 expected); 35567(mgr, 0) (optionally 19378(mgr, 0) before and 19378(mgr, 1) after when it returned 1;
+the engine's promotion batch runs it bare); hook 35519 (the "FORMS:" log) for the whole probe and print its format string: the five
+messages of Q2 are the engine's own verdicts (count mismatch, state mismatch, no 3D, type mismatch, not a reference). Rows before and
+after each step: lifeState (actor +0xC8 bits 21 to 24), the process level, position (+0x54, three floats), angle (+0x48), the 3D root's
+world translate (Get3D2 +0x7C + 0x24, NiAVObject.h:158, NiTransform.h:26), the live body count from 19533 on a scratch 0x30 state (its
++4 and +8 summed) against the record's varint, the entry's flags and record, the pending count; headZ from lab-api's npc-state beside the
+trace. Expected in half one: 35568 returns 1, the entry's record nulled and its flags equal to flags2 or flags2 plus the bits FinishLoadGame
+marked, the pending count 1 then 0, no mismatch log, position and root z unchanged within float noise, lifeState 2 before and after.
+Half two, the cross-seat apply: the owner's kDead record (HEX, FLAGS, SUM as transplant-inject takes them) on the guest's loaded copy,
+same probe; the claim is the root z and headZ moving toward the owner's and no mismatch log. What a crash means: inside 35568, LoadGame on
+a loaded actor is not safe mid-game (risk 1 is real: 37502, the biped rebuild, the controller rebuild); inside 35567, FinishLoadGame's
+physics block on a copy whose bhkWorld or ragdoll state differs from a load's. What a no-op means: 35568 returned 0 (the entry, the type,
+kLoading); 1 with no pose change and a count-mismatch log (the skeletons differ, the same base NPC must be used); 1 with the state
+mismatch log and no change (the copy is animation-driven, the bodies anim-targeted: the applied transforms were overridden, and the cure
+needs the ragdoll active on the guest first); 1, no log, no change (the pending count stayed 0: the data was not pushed, or 35567 did not
+run its flush: the +0x328 rows decide). The half to try first is the round trip, on c2 against its own copy if a dead copy exists there,
+else on c1 against an own kill.
+
+### What (c) settles and what stays open
+- CONFIRMED-STATIC: the apply chain and the Havok chain exist for a reference with 3D, as functions and vtable slots; the flush point is
+  the finish pass; the finish pass is what the cell's 3D build, the promotion batch and the full load run.
+- HYPOTHESIS until a run: every body above (36080's layout, 35569's gates, 35717's 3D handling, 19535's rules, 37650's writes), the thread,
+  the pose on screen, and whether the guest's half-up copy is ragdoll-driven or animation-driven at the moment of the apply.
+- Open: 35566 (the full load's LoadGame pass), 35909, 35910, 35941, 13430 (the finish pass's and the wrapper's other callers), 19742
+  (the 3D init that applies a stored ExtraSavedHavokData), the three per-graph callbacks, 19536 (the pre-pass callback's counting rule).
