@@ -7538,3 +7538,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   its full build. F10's evidence is lost (numidium: the check ran without the recorder and the stage's server recreate took the
   23:30 to 23:38Z lines); it stays the F1-class reading, HYPOTHESIS; playtest 44 records from the start (numidium's standing rule).
   The stage of 2225c932 is past its server step, into the dist.
+- 15:49 PST 2026-11-03 (23:49Z 11-03) (thuum-cf): The scripts arm's first code map (an agent, read-only; docs/private/scripts-arm-scope.md's new section): the
+  voice relay records nothing and relays unreliable to the actor's listeners present at the line, so playtest 43's F9 line spoken
+  before the guest arrived was lost by design (B1; D-F1 C does not change it); the host's scene silence after the guest's local stop
+  has a host-side cause, INFERRED the acting-player scope (the phases measured against the host's own player); and the watcher's
+  "refused" is NOT the info's conditions on its own quest state by the static read (a given info makes the picker skip the condition
+  walk), so numidium's reading is one HYPOTHESIS beside the previous line not ended, the dialogue state word, and the audibility
+  gate's "no current scene" term once the guest stops its scene; a Frida read on SayTopic's stage decides. D-F1 C's build order with
+  files (server T0 first: the running-state record, the own-start refusal deleted, the journal's questRuns migration; the wire's word
+  u8 on QuestStage with its validator; the client's start and stop reports and applies; the globals stream last). The first probe's
+  frame is x-scene-guest v3's with the relay counts and two guest distances.
