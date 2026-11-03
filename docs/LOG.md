@@ -6387,3 +6387,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   HYPOTHESIS-incomplete without slot 0xF2 so the first run is type 0x3D only, a fault converted not prevented, citations); every
   one of its nineteen ids resolves by addr.py to the RVA declared; the re-analyst applies them as written. Lab step note: wait 15 s
   after the frida step before the lock (a 21 KB script goes ready late).
+- 05:05 PST 2026-11-03 (13:05Z 11-03) (thuum-cf; numidium's stage report 05:01 PST): the evidence stage on e23bd229 is done (STAGE EXIT 0).
+  death-reentry v5 GREEN (124654): D4's fix held in play, the relaunched host kept Hilde dead, no resurrection, the bind line present,
+  the hold's release line claimed. death-freeze v3 GREEN (125136): the body falls and lies still on the guest's screen (playtest 41
+  item 5). door v21 RED (123800) and swap v19 RED (124242) by the same two scenario readings at the same step on c1 and c2 (the gate's
+  "moved to the record below" line cannot print when the hold's ask lands within a frame; the seat's npc_state in the assert is its
+  last read, 16 s stale): door v22 is drafted under fresh review, swap v20 takes the same two changes. scene-guest v2.1 RED (125517)
+  at its premise: step 21's until on c1's "questStop quest 954d9" never held in 240 s (38 polls, 0), nothing after it read; its
+  logs are being read (did the scene start on c1, run longer, or never start). So two of system 1's five items have GREEN two-seat
+  evidence on e23bd229 and three are probe readings to redo. m3-system1-r3 e4397635 (round eleven) is PUSHED now that the stage is
+  done, its fresh review and pipeline waiter running; it stages with door v22, swap v20 and x-respawn-teleport-hold once each is
+  reviewed and deployed. The lab is free: census v3 (about 12 min), then serialize-on-demand once its fixes land.
