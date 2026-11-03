@@ -5445,3 +5445,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   fork m3-follow-vouch 19c68d2d (server only, Rust: the reach vouches too), probe x-host-restart-follow by path; cell-host.md's section.
   Alvor's door: no XLOC (the server seeds locks from XLOC when there is one), the host's AI locked it; locks.md's engine-made lock row and
   ADR-062's Lock hook at the engine level.
+
+- 17:33 PST 2026-11-02 the evening's late heads: ADR-062 slice 1a BUILT on fork m4-scripts-work d8fc5fa2 (platform: the hosted cell's world scripts
+  and a simulated actor's run, the layer's host names no longer consulted; client: the activation lift follows the hosting on activators
+  and movable statics, the host's own press on a lifted object sends no Activate); a full client build. The spike wall's cause was the
+  lab's lever activationUnblockedBases, written only by the trap scenarios' relaunch and never laid for play (traps.md). The guest's
+  frozen spider: a puppet killed in its ambush idle; the bundle head m4-turbo2-chest 77b7e485 pushes a killed puppet with no fall to
+  ragdoll (npc-fate.md). The restart desync's fix m3-follow-vouch fa50c5b5 (the CellHostTest expectation moved to the new rule). The
+  bandit's dress stays unread (platform log lines no copy reached). Probes by path for after the arm: x-reanimate-claim, x-prop-blast,
+  x-host-restart-follow, x-npc-death-ambush, x-fate-dress-bleak.

@@ -2010,6 +2010,23 @@ and about 120 below the eye (about 13 counts a degree on this seat; the rune pro
   m4-turbo2-train 1a1f304b (with prop-statics and the settle head), arm two's build, its gate after the arm (Eli's turbo order). The
   reanimate's grace and the never-moved body are read by Eli's eyes in arm two (docs/private/playtest-turbo-2.md, items 1 and 2).
 
+### Playtest 41's deaths, late (17:33 PST 2026-11-02)
+
+- The guest's frozen spider (Eli: "on prisoners screen instead of ragdolling it froze"): the host killed MS13FrostbiteSpiderREF
+  0x3a1e1 at 00:46:16Z while it hung in its ambush furniture (its masterAmbushScript never ran on the host, the name parked;
+  ADR-062 runs it); on the guest the puppet died by the server's word inside the furniture's idle, no fall, the deaths2 flag keep
+  ticking a graph that never left the idle. Fix on the bundle head m4-turbo2-chest 77b7e485 (TS): a killed puppet that has not
+  dropped 16 units within 300 ms gets the engine's zero-force push (finding 71's cure), "body <id>: no fall N units after the
+  kill, pushed to ragdoll". HYPOTHESIS until x-npc-death-ambush (by path: c1 hosts the Temple and kill-refs the spider in its
+  perch, c2's npc-state z under the perch within 4 s).
+- The naked headless bandit (Eli: "rotfern just killed a naked headless bandit in bleakfalls"): c1's console at the Temple's load
+  (00:34:41Z) queued "late fate ... engine re-roll or redress" for 39fe4, 39fe2 and 39fe1, and c1's equipment report then read
+  "1 worn" for 39fe1 against the roll's five. The redress's own lines (FateApi.cpp: "rerollActor(<id>): ...", "redressed <id>
+  from the server's roll: N of M", the three warnings) are platform log lines (c1.log), which no copy reached, so whether the
+  queued redress ran is unread. Probe x-fate-dress-bleak by path (c1 enters the Temple's entrance hall in a clean world; within
+  30 s c1.log names the redress or its refusal for 39fe4; the worn read against the roll when lab-api exposes it). The gate audit's
+  class: npc-fate's scenarios read the roll, never the host's rendered actor.
+
 ## Status
 
 DRAFT 2026-10-22, the night of playtest 32, before any code and before the

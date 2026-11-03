@@ -482,6 +482,20 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   screenshot; (4) a server restart with the door open: its state after. Recorded, not claimed, except the server's
   door state. Owner: agent.
 
+### Playtest 41's spike wall: the lab's lever was never laid for play (17:33 PST 2026-11-02)
+
+Eli: "also traps dont fire. so the spike wall doesnt run." The server held the plate's own lines (567f2 "fired itself" twice,
+"animates 567f2 'Down' ... relayed to 0 game(s)" at 00:49:10Z) and nothing for the wall 54b15; c1's console the plate's two "Sent a
+trigger's own activation" and its Down report, no OnActivate for the wall. Cause: the engine's activation processing on the plate
+and the wall was lifted by the CLIENT setting activationUnblockedBases, which only the trap scenarios ever wrote (b-object-anim,
+b-bleak-traps and b-puzzle-relay's relaunch step: "1a4bb c6440 21513 3e726 aa8ce b7db4 173fc 2079f"); no layer, deploy file or
+playtest setup laid it, and both seats' skymp5-client-settings.txt carried no such key, so a blocked plate's script fired but its
+default processing (the activation parents) never activated the wall. The gates were green on their own premise: the gate audit's
+class (numidium's audit, ADR-062's baseline row). The pillars worked because a press on a blocked activator still reaches its own
+script. Resolution: ADR-062 slice 1a (fork m4-scripts-work d8fc5fa2) lifts the engine's activation on activators and movable statics
+in a cell this game HOSTS, following the hosting at every grant and release, and the list retires; tonight's stopgap is the same
+key laid by a relaunch on both seats, at Eli's word. The b-* scenarios drop their relaunch writes when slice 1 stages.
+
 ## Status
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared (the reference trace owed)
