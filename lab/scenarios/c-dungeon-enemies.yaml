@@ -1,4 +1,8 @@
-# c-dungeon-enemies (M3's exit, docs/PLAN.md's M3 section "Exit"; drafted 2026-10-29 from the grammar and
+# c-dungeon-enemies v2 (thuum-cf, 2026-11-03; ADR-067 decision 6, the exclusive container hold on fork m3-turbo3-sys2-container):
+# the release's-effect claim is rewritten: the server no longer logs "N players in the container now" (one occupant at most), so the
+# claim that the second looter joins a FREE body reads the hold's refusal instead: no E_CONTAINER_BUSY for 39fe4 (the first looter's
+# close released the body before the second's E). Nothing else changed. v1 (M3's exit, docs/PLAN.md's M3 section "Exit"; drafted
+# 2026-10-29 from the grammar and
 # the proven scenarios' idioms, no run yet): bandits fight both players under one host, a hit from either
 # seat moves the one record, the guest's kill is a death on every screen and the body is one container for
 # both. The frame is x-dead-placed-loot's: Bleak Falls Temple's first hall, cell 0x371de, c1 at
@@ -260,8 +264,8 @@ steps:
   - assert:
       - 'c1.state.menuOpen("ContainerMenu") == true'
       - 'c1.log_count("onOpenContainerMesage - waiting for .ContainerMenu open. .a corpse. to be true") >= 1'
-      # the release's effect: c2 is out of the set when c1 joins, so the server never counts two
-      - 'server.log_count("ProcessActivate 39fe4 - [0-9]+ players in the container now") == 0'
+      # the release's effect: c2 is out of the set when c1 joins, so c1's activation is not refused (ADR-067 decision 6: the hold)
+      - 'server.log_count("E_CONTAINER_BUSY: ff[0-9a-f]+ activates 39fe4") == 0'
   - c1: close-menu {name: ContainerMenu}
   - wait: 3
   - c1: dump-state
