@@ -2497,6 +2497,14 @@ Decisions.
    the server writes the record, sends the new host its keyframe and flips
    the word both ways through UpdateHoster; an actor passed inside
    ACTOR_TENURE_MS (UNMEASURED) is not passed again. Second slice.
+   Note (PROPOSED by thuum-cf at 2026-11-03T04:49Z, for Eli's word; an accepted ADR's
+   text changes by Eli's word or a dated amendment marked PROPOSED): the
+   tenure (ACTOR_TENURE_MS, handoffActorTenureMs) is retired in D9's
+   settle's favour, one damper with one name: the new host's report back
+   into the cell the actor came from inside handoffPassSettleMs (1 s unset,
+   0 off, bounded to 60 s) is a stale copy's sample, dropped (verdict Stale);
+   a move onward is judged as any other (npc-handoff.md's D9 settle
+   paragraphs, fork m3-handoff-settle, playtest 41's ping-pong).
 5. (e, no D-number) A refusal is logged once a minute per actor and counted; the client's
    report list drops an actor in a cell it neither hosts nor loads.
 6. D10 (f) The cold start. In a table with no host anywhere, a grant waits one

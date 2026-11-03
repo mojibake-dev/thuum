@@ -70,7 +70,8 @@ The rule (R0: the server decides, the word is the decision; R2 for the transform
   cap stays as the one timer, ended by a word (A2).
 - A5. Every refusal is answered. E_PROP_NOT_OWNER, E_PROP_HELD and E_PROP_MOVING send the sender the current word (the live owner
   or 0, the epoch), once per prop per second, so a divergent mirror heals instead of streaming into refusals and the loser of a
-  double grab hears who holds the prop; since every return advances the epoch, the answer is always newer than a stale mirror.
+  double grab hears who holds the prop; since every return advances the epoch, the answer is never older than a mirror's word,
+  and the client applies an equal epoch again (the answer heals a seat that applied the standing word wrongly; round three).
   Claim refusals count in the stream counters. A late subscriber hears the word whenever the prop ever had one (player 0 for a
   resting prop).
 - A6. The hand-over of a MOVING prop happens by a grab alone (A2, A3), so no velocity travels; a resting prop's hand-over starts at
@@ -79,17 +80,22 @@ The rule (R0: the server decides, the word is the decision; R2 for the transform
   followers' copies stay Keyframed in the hand's place (D73 would otherwise rest them Dynamic and drop them) and the server's row
   stays awake and grabbed; a hand that loses a double grab (the answer word names another seat while this seat holds) lets go,
   Keyframed, so no two hands move one prop (ADR-063 decision 3).
-- A7. Known limit: a stream that stops without an asleep sample (a crash mid-flight ends in the departure's word; a client bug does
-  not) re-syncs at the next touch (A3's stalled case); a tick sweep is the next step if the lab shows stalls.
+- A7. A stream that stops without an asleep sample (a final sample lost on the unreliable channel, a client that stopped; a crash
+  mid-flight ends in the departure's word) is a stalled row: anyone's to claim (A3), and the host's own sample of it past
+  PROP_MOVING_MS takes it over at a new epoch with the word (TakenOver, player 0; a non-host's sample never does, and the
+  takeover's step budget is the first sample's), so no prop is left that nobody may move. The grab's cap ends by the table's tick
+  (once a second from PartOne::Tick) with the word, whether or not the holder samples again; a departure words every row the seat
+  still owned, a capped grab included (the review of 2026-11-03, round three).
 
 Wire: PropOwner.player 0 gains the meaning "the cell's host" (wire-validate admits 0 for PropOwner alone, the contract line and the
 fixtures with it, same commit); E_PROP_MOVING is a new refusal code (a log line, no message). Server: props.rs's claim and transform
-carry the rule, `gone` returns rows, the C++ handlers send the words (the grant's, the rest's, the departure's) and answer NotOwner.
-Client: ownerOf by the word; onOwner stores any newer epoch, player 0 included; the mirror's two writes removed; the contact claim
+carry the rule, `gone` and `tick` return rows, the C++ handlers send the words (the grant's, the rest's, the cap's from the tick, the
+takeover's, the departure's) and answer NotOwner; a late subscriber's word names the host's own live row as player 0. Client:
+ownerOf by the word; onOwner stores any epoch not below the known one, player 0 included; the mirror's two writes removed; the contact claim
 skipped while another seat's awake stream is live here (STREAM_LIVE_MS; the server refuses it anyway); grab, release and drop claims
 and the asleep send unchanged. Tests: props.rs (the moving refusal, the grab over a touch, the rest's return and word, the departure's
-words, the stalled claim, the host's own rest sends no word), PropTest.cpp (the word at rest to both seats with player 0, the moving
-refusal, NotOwner answered), wire-validate's PropOwner case (0 admitted). Two seats: x-prop-arbitration by path (lab-spawn, c1 hosts
+words, the stalled claim, the host's own rest sends no word, the host's takeover and the tick's cap), PropTest.cpp (the word at rest
+to both seats with player 0, the moving refusal, NotOwner answered, the takeover's word), wire-validate's PropOwner case (0 admitted). Two seats: x-prop-arbitration by path (lab-spawn, c1 hosts
 and drops the ingot as b-prop-push does; c2 walks into it at rest: granted, streams, rests, the word returns it; c1 kicks it and c2
 steps into the flight: E_PROP_MOVING, no grant during the flight; at rest c2 grabs: granted, c1's walk-in Held; the release rests
 and the word returns it), then b-prop-arbitration in its own commit; the blast leg from x-prop-blast after. Stale text fixed with

@@ -68,7 +68,7 @@ The parity scenario (ADR-031) is c-riverwood's handoff leg (cell-host.md:
 ## Authority
 
 Rung: R0 for who simulates an actor (the cell's host, a follow, a per-actor
-pass, the roster's placement), for the dwell and tenure that damp a pass,
+pass, the roster's placement), for the dwell and the settle that damp a pass,
 and for the keyframe the server sends; R1 for the host's cell-change report
 (the sender simulates the actor, the destination adjacent or a door's, the
 sender's game loads it) and for a sighting; R2 for the actor's cell and
@@ -345,7 +345,7 @@ and accepted (r-cell-leave 083700).
     `simulator_of(actor, cell)`; the three knobs, UNMEASURED; `consider`
     arms the reach-only grace apart; `candidate` takes the dwell and, in an
     empty table, the nearest player (f); `tick` emits Unhosted { cell, was,
-    still_loaded }; a grant clears follows and tenures. T0 beside the seven.
+    still_loaded }; a grant clears follows and passes. T0 beside the seven.
   - PartOne::MayMoveActor (:1606-1626) becomes the thin call; ActionListener
     ::OnUpdateMovement (:173-214) handles the four verdicts: Accept as
     today; Follow records it, pins the actor's subscription to the sender
@@ -363,7 +363,7 @@ and accepted (r-cell-leave 083700).
     into follows, logged. OnActorSighting (:1485-1553) keeps its gate
     (:1536-1541), moves a record out of a cell nobody hosts as today, and
     counts the roster's arrivals per reporter (g, H9).
-- DB fields / migration: none; follows, tenures and the keyframe's three
+- DB fields / migration: none; follows, passes and the keyframe's three
   fields are memory by design (npc-stream.md:496-500); b-npc-handoff's
   restart step proves what persists (rule 6).
 - Restart behavior: every cell unhosted, every follow forgotten; the split
@@ -404,8 +404,9 @@ and accepted (r-cell-leave 083700).
   answers the follower
   while unhosted and the host once granted; a grant, the follower's unload
   and Gone each end the follow; Pass { to } into another host's adjacent
-  cell, Accept for the new simulator inside ACTOR_TENURE_MS, Pass back
-  after; GRACE_REACH_MS for a reach-only lapse, GRACE_MS for an unload; no
+  cell, Stale for the new simulator's report back into the cell the actor
+  came from inside PASS_SETTLE_MS (dropped, no refusal), Pass back after;
+  GRACE_REACH_MS for a reach-only lapse, GRACE_MS for an unload; no
   candidate under the dwell; the nearest player in an empty table (f).
   wire-validate: check_handoff (a NaN, an out-of-world point, epoch 0, idx
   u32::MAX refused; a full keyframe accepted) and the proptest. C++,
