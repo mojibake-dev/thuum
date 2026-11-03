@@ -1,4 +1,21 @@
-# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v21 2026-11-03. Under ADR-064 decision 4 as amended
+# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v22 13:00Z 2026-11-03, thuum-cf, after the run
+# 20261103-123800's read on m3-system1-r2 e23bd229: RED at step 42 by two readings, not one fault. (1) The claimed witness of the
+# stale case, the gate's "moved to the record below" line, is no deterministic witness on this head: the hold asks the move on its
+# second check (+21 ms in 123800) and the engine lands the copy within a frame, so a view update after it reads "not moved here (the
+# same cell)" and only one before it would read "moved to the record below"; the line that witnesses the stale copy on either order
+# is the hold's own ask, "hold 1348a: asked the move at +21 ms, the engine at (-506, -177, -0) in 133c7", which printed. v22 claims
+# that line above its own baseline read before the MoveTo (a seat's count has no baseline across the restart) and keeps the gate's
+# line recorded. (2) c1.npc_state in an assert is the value of the LAST npc-state step (labapi assertions.py, NpcStateView), and v21
+# read it 16 s before the assert (ten log-counts (eight of c1's, two of the server's) and a screenshot between), while server.ref is
+# live; in those 16 s Hod walked home under c1's ACCEPTED reports (the server's "moves 1348a into cell 9731, which it hosts" at
+# 12:42:06, the record 1240 short of door 13423 at the assert), so the 150-unit bars compared a stale sample with a live record. v22
+# reads npc-state right before the assert, as leg B already does. The 150-unit bars, the "placed ... asked [1-9]" claim, the "not
+# placed" claim and every other bar stand as in v21; nothing is relaxed. Also from the run: the teleport flag's swallow of the first
+# report prints no line on this path (MovementValidation's snapBack returns false silently, correcting v18's "one MovementValidation
+# warn line on every head" below), so no claim names it; and c1's log-counts have no baseline, so the earlier session's hold (the
+# settle phase's promotion, "placed ... never asked") counts in "placed at the record" too, which the >= 1 claims admit. A rewritten
+# claim: fresh review under ADR-064 rule A before any run.
+# v21 2026-11-03. Under ADR-064 decision 4 as amended
 # (Eli, 2026-11-03: rules A to C): v21 is the reviewer's own fix applied as written, so no new review is due (rule A); its premise facts
 # are docs/engine/non-owning-seat.md's rows P9 (a seat's engine places a resident by its own save at any hour; 101556), P10 (a host's
 # sighting moves the record to the cell it hosts; 101556) and P11 (a visitor indoors draws the resident into combat; 085226, 070357),
@@ -182,8 +199,9 @@ steps:
   # ExecuteMoveTo; the server's own move, no seat's report), so the record enters a cell c1 hosts and c1 is promoted while its
   # engine's copy stands in 133c7: P8's condition, made. On the parent the promoted seat's first report comes from the copy at the
   # bed before the gate's move lands ("(passes|follows|moves) 1348a into cell 133c7", the bounce, the record yanked home); on the fix
-  # head the hold places the copy at the record first and its line names both places ("the engine at (...) in 133c7, the record at
-  # (...) in 3c"), the stale case's witness, claimed. Then his sleep package walks him home by the street door 0x13423 under c1's
+  # head the hold asks the move while the engine's copy stands at the bed (its ask line "asked the move at ..., the engine at (...)
+  # in 133c7", the stale case's witness, claimed) and places the copy at the record (its placed line, claimed); the gate's "moved
+  # to the record below" line is recorded only (v22). Then his sleep package walks him home by the street door 0x13423 under c1's
   # follow (D6; the door line "door 13423: ... walks it through to 133c7"), the record back in the house: recorded and claimed, no
   # visitor indoors, so no fight. No hour claim but the premise's.
   - assert:
@@ -234,12 +252,16 @@ steps:
   - server: log-count {pattern: "report of 1348a into cell 133c7 within the settle window"}
   - server: snapshot {name: back_a1, of: 'server.log_count("(passes|follows|moves) 1348a into cell 133c7")'}
   - server: snapshot {name: door_a0, of: 'server.log_count("door 13423: 1348a.s host .* walks it through to 133c7")'}
+  # v22: c1's own count of the stale-copy ask line before the MoveTo (a seat's log has no baseline across the restart; the settle
+  # phase's promotion placed him "never asked", so this reads 0, and the claim below is above it either way)
+  - c1: log-count {pattern: "hold 1348a: asked the move at .* in 133c7"}
+  - server: snapshot {name: ask_a0, of: 'c1.log_count("hold 1348a: asked the move at .* in 133c7")'}
   # the move: the record to c1's feet; c1 is promoted (the word) with its copy at the bed
   - c1: server-console {name: MoveTo, args: [0x1348a, 0x14]}
   - wait: 10
-  - c1: npc-state {formId: 0x1348a}
   - c1: log-count {pattern: "hold 1348a: placed at the record"}
   - c1: log-count {pattern: "hold 1348a: asked the move"}
+  - c1: log-count {pattern: "hold 1348a: asked the move at .* in 133c7"}
   - c1: log-count {pattern: "hold 1348a: re-asked the move"}
   - c1: log-count {pattern: "hold 1348a: placed at the record after [0-9]+ ms .asked [1-9]"}
   - c1: log-count {pattern: "hold 1348a: not placed"}
@@ -249,15 +271,19 @@ steps:
   - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 97"}
   - server: log-count {pattern: "report of 1348a into cell 133c7 within the settle window"}
   - c1: screenshot
+  # the read right before the assert: c1.npc_state in an assert is the last npc-state step's value (v22; 123800 compared a 16 s
+  # old sample with the live record while he walked home)
+  - c1: npc-state {formId: 0x1348a}
   - assert:
       # the record outdoors near the street spot (absolute units; his first steps home admitted) and no report yanked it home
       - server.ref(0x1348a).cell == "3c:Skyrim.esm"
       - 'abs(server.ref(0x1348a).x - 21995) < 2000'
       - 'abs(server.ref(0x1348a).y + 44935) < 2500'
       - 'server.log_count("(passes|follows|moves) 1348a into cell 133c7") == snapshot("back_a1")'
-      # the stale case met: the gate's line at the create-word promotion names the bed and the street; cured: the hold placed
+      # the stale case met: the hold's ask at the create-word promotion names the engine's copy in the bed's cell (v22; the gate's
+      # "moved to the record below" line cannot print when the ask lands within a frame, recorded above); cured: the hold placed
       # the copy, having asked at least once (the copy stood away), and nothing timed out
-      - 'c1.log_count("promote gate 1348a: the engine at .* in 133c7, the record at .* in 3c; moved to the record below") >= 1'
+      - 'c1.log_count("hold 1348a: asked the move at .* in 133c7") > snapshot("ask_a0")'
       - 'c1.log_count("hold 1348a: placed at the record") >= 1'
       - 'c1.log_count("hold 1348a: placed at the record after [0-9]+ ms .asked [1-9]") >= 1'
       - 'c1.log_count("hold 1348a: not placed") == 0'
