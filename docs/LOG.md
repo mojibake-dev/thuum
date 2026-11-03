@@ -6294,3 +6294,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   sends, matching WIRE.md (main 44b4c51b): unreliable except three samples reliable (the keyframe after a grant, a stand-up, the
   alive-to-dead flip); the two stale HostSampledDeadBy comments name DeadStampGap. tsc and fork-lint clean, the pipeline pending,
   no wire shape changed. Named for its own round, not this one: the server accepts a dead record's movement and actions.
+- 04:29 PST 2026-11-03 (12:29Z 11-03) (thuum-cf): ADR-066 PROPOSED (the FNV read's item 4, ADR-065's amendment D): the hand-off is a two-phase
+  protocol with one owner epoch per piece (actor, prop, open container), up at every change of simulator and carried by every word
+  (ActorOwner replaces the isHostedByOther property) and every R2 report; the server judges a report by its epoch first (Current,
+  StaleEpoch, FutureEpoch, NotOwner, NotYetActive, EchoOfSelf, each a counter), never by its position; the new owner applies the
+  record and acks (OwnerAck), the commit admits its reports and stales the old owner's, a timeout commits anyway; eligibility is a
+  lease on the seat (paused, loading or silent seats get no grant; a dying actor stays with its owner until the death report); the
+  settle window, the first-report swallow, the hold's timers as admission and the cold start's provisional grants retire in exposure
+  order. Staging call, sent to numidium: built after system 1's candidate merges or fails on its evidence; m3-system1-r3 carries
+  review fixes only; no hold-timing round after r3. Cited: fnv-coop's ownership service and Skyrim Together's PR #906 (the research
+  doc's paths), Chubby's sequencers (Burrows 2006), Kleppmann's fencing tokens (2016), Gray and Cheriton's leases (1989).

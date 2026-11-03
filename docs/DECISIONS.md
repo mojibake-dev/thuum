@@ -4324,3 +4324,114 @@ read for design only, rule 7) adds or sharpens these:
   every cell load. Every engine change made for the network and not for the world (a hold, AI off, a parked copy) is ledgered and
   undone before a save, and the observer drops the marks the ledger explains. A record naming a created (0xFF) form goes through
   the server's id map.
+
+
+## ADR-066: The hand-off is a two-phase protocol: one owner epoch per piece of the world, stamped on every word and every report, and the new owner is passive until it has applied the record and acked
+
+Status: PROPOSED 04:29 PST 2026-11-03 (12:29Z 11-03) by thuum-cf, as ADR-065's amendment D names it ("ADR-063's protocol and thuum-cf's to
+write"), from Eli's lead on the Fallout multiplayer projects (docs/research/fnv-multiplayer-2026-11-03.md, item 4) and from system
+1's ten review rounds on the merge candidate m3-system1-r2 (e23bd229). Build order: nothing here moves until that candidate merges
+or fails on numidium's evidence stage; m3-system1-r3 carries review fixes only, and no hold-timing round follows it. Nothing here
+reaches a seat before its T0 and T2, and its first lab read keeps b-npc-handoff-door-hosts green unweakened (ADR-064, rule 13).
+
+Context. What exists. The cell rules already fence grants with an epoch: one counter per cell, up at every grant and kept while the
+cell is unhosted, so a grant or a report from an older epoch is dropped (skymp-wire/crates/wire-rules/src/cells.rs:11-13; HostGrant
+and HostRelease carry it to the client, wire-schema skymp.rs:1505-1532). Props have one too, per prop, up at every claim granted
+(PropOwner, skymp.rs:1793-1826). But an actor changes hands without its cell (a D9 pass, a follow, a claim, a lease's end) and none
+of those carries an epoch; the per-actor word is a property message, isHostedByOther true or false with no number
+(MpObjectReference::UpdateHoster, MpObjectReference.cpp:987-1012); and the R2 reports carry none by decision ("No epoch: the
+server's host table already refuses a sender that is not the actor's host", HostedActorState, skymp.rs:1649-1651). So the server
+judges a report by WHO sends it now, never by WHICH grant it was made under, and a report made under the old grant that arrives
+after the new one is indistinguishable from a fresh one.
+
+The bug class. m3-system1-r2's rounds one to ten cured one race by timing. The new owner's first report lands before the record is
+applied on its seat, so the stale copy's position reads as a pass (docs/engine/non-owning-seat.md P1, P2, P8; ADR-063's outcome
+note); the old owner's late report lands after the pass (FOLLOW_SETTLE_MS, cells.rs:33-39; the teleport flag's swallow of the
+first report after a server move). Each cure is a timer or a position judgment: the hold's five asks 1.5 s apart and its 2 s
+release, the dead hold's 8 s and 120 s, the settle's 1 s, the cold start's 5 s, the dead-sample stamp's 3 s window. A timer judges
+by the clock what the protocol should know by state, and every number is UNMEASURED or measured once.
+
+Prior art. fnv-coop's ownership service runs the transfer at epoch e+1 while the old owner keeps publishing at e; the new owner
+applies the last state and acks; the host commits e+1, and only then does the new owner's AI run; every update is judged NotOwner,
+StaleEpoch, FutureEpoch, NotYetActive or EchoOfSelf (fnv-coop ownership.h:11-14, :153-162; 1.5 s of hysteresis and a 25 % margin,
+:59-63). Its stated source is Skyrim Together's PR #906, NPCs duplicated by "owners applying stale assignment state"
+(https://github.com/tiltedphoques/TiltedEvolution/pull/906), and its fuzzer's "stale position after a host load"
+(docs/FULL-SYNC-PLAN.md:242); NV:MP met the order from the other side, not waiting "for new owner's of references to sync in the
+data needed" (its 5.57 note). The epoch is a fencing token: foundational, Chubby's lock sequencers (Burrows, "The Chubby lock
+service for loosely-coupled distributed systems", OSDI 2006); accessible, Kleppmann, "How to do distributed locking" (2016,
+https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html), the fencing-token section. The eligibility rule is a
+lease (Gray and Cheriton, "Leases: an efficient fault-tolerant mechanism for distributed file cache consistency", SOSP 1989); the
+two phases are the HLA's divestiture then acquisition that ADR-063 cites. The Fallout 4 projects give the release triggers: a game's
+NPCs handed over after 5 s in a pausing menu and a dying NPC kept up to 15 s for its death report (F4Multiplayer
+docs/DESIGN.md:299, :307-309, :383); an election that "kept churning a dead client", seven hand-offs to a seat that was loading
+(FO4_Wrld CHANGELOG.md:1987-1991). Read for design only; no code copied (rule 7).
+
+Decision (proposed).
+1. One epoch per owned piece, not per cell. Every piece ADR-063 decision 1 names (an actor, a prop, a container while open) keeps
+   an owner epoch with its record: a u32 counter, up by one at every change of its simulator (a cell grant or release for each
+   actor of the cell, a D9 pass or follow, a claim and its end, a lease's end, a prop claim, a container's open and close). The
+   cell's epoch stays as the grant's own fencing token (idempotency per cell and epoch); the piece's epoch is what words and
+   reports carry, because an actor changes hands without its cell. Rejected: the cell's epoch for its actors (fails at a pass) and
+   a per-actor epoch alone (loses the grant's idempotency).
+2. Every word carries its epoch. The per-actor word becomes a message, ActorOwner {idx, player (0 for nobody), epoch}, PropOwner's
+   shape, reliable to every listener with a user; the client derives isHostedByOther from it (player equals my form id) and the
+   property is no longer sent. The record's keyframe stays ahead of the word (m3-promote-record, ADR-063's outcome note).
+3. Every R2 report about an owned piece states the epoch of the word it was made under: the hosted state, the movement, animation,
+   action and equipment streams for a hosted actor, the actor's speech, the host's death report, the prop stream, and any R2 row
+   WIRE.md adds for a piece with an owner. The exact list is fixed at the build, each field with its validator and fixture in the
+   same commit (rule 4); the codec is postcard, so the field is required and SCHEMA_VERSION moves once.
+4. The server judges every report by its epoch first, then by its owner table, never by its position (ADR-063 decision 4):
+   - Current: the piece's epoch, from its owner, after the commit: applied, as today;
+   - StaleEpoch: below the piece's epoch: dropped and counted, per piece and per sender; never read as a pass or a move;
+   - FutureEpoch: above it: dropped and counted (a replay or a client fault);
+   - NotOwner: the current epoch from a seat that is not the owner: dropped and counted (today's refusal, named);
+   - NotYetActive: the new owner's report before its ack: dropped and counted (the hold, made a state the server reads);
+   - EchoOfSelf: the owner's first report after the keyframe restating the record within the wire's quantization: dropped silently.
+   Each count is a labState counter beside ADR-050 decision 5's stream counters and a debug line naming the piece, the sender and
+   both epochs. The settle window (FOLLOW_SETTLE_MS) and the first-report swallow after a server move retire with this.
+5. Two phases. Transfer: the server bumps the piece's epoch to e+1, sends the keyframe then the word to the new owner and the word to
+   the others; the old owner's reports at e stay Current until the commit, so nothing freezes during the hand-off (fnv-coop's "the
+   old owner keeps publishing at e"). Ack: the new owner applies the record (an actor's copy moved to it, a dead record's body dead
+   here, a prop's copy Keyframed at it) and sends OwnerAck {idx, epoch}, reliable. Commit: at the ack the server marks the piece
+   active at e+1; from then the new owner's reports are Current and the old owner's e are StaleEpoch. The client keeps the hold as
+   its APPLY (the move, re-asked as today), but the server's admission is the ack, not the placement. No ack within OWNER_ACK_MS
+   (the first number the hold's 6 s plus 2 s, UNMEASURED; the door scenario sizes it): the server commits anyway and counts
+   AckTimeout, so a slow seat never freezes a piece. Rejected: a re-grant on timeout (churn, FO4_Wrld's election) and a freeze
+   until the ack (a stuck seat freezes the world).
+6. Eligibility is a lease on the seat. A seat whose game is paused (a pausing menu), loading (the login's and a transition's load
+   block) or silent (no movement report for SILENT_MS, the first number 3 s, UNMEASURED) is not eligible for a grant, and its
+   moving pieces are handed on by decision 5 after the grace; the seat states its pause and load in its own stream (a flag the
+   validator bounds), and the server infers silence itself. A dying actor stays with its owner until the death is reported or the
+   pending death's window passes (BeginPendingDeath's kPendingDeathMs, ADR-050 decision 2), so a hand-off never races a death.
+7. Retirements, in exposure order, each its own commit with the scenario it covered kept green unweakened: the settle window and the
+   first-report swallow (decision 4); the hold's timers as the server's admission (decision 5; the client's move stays); the cold
+   start's provisional grants (a nearer seat's arrival is a transfer like any other); the dead-sample stamp's part in the
+   resurrection-by-fresh-host case (a fresh owner's first live sample is NotYetActive until it acks the dead record applied, the
+   body dead here), the stamp staying for a stand-up inside one owner's tenure.
+8. The ledger (ADR-065 decision 8, amendment F): the hold's move, AI off and a parked copy are engine changes made for the network;
+   the client ledgers them and undoes them before a save, and ADR-065's observer drops the marks the ledger and the apply scope
+   explain (amendment A's echoes).
+
+Consequences.
+- Wire: a new S2C ActorOwner, a new C2S OwnerAck, an epoch field on the R2 rows of decision 3, one SCHEMA_VERSION bump; each with
+  its validator, fixtures and C++ struct in one commit (rule 4); E_VAL_RANGE for an epoch of 0.
+- Server: one owner table per piece in wire-rules (an owners module fed by cells.rs's decisions, the follows, the claims and the
+  prop claims), the six judgments as one function with a T0 per judgment and the timeout commit; ActionListener consults it ahead
+  of ActorUpdatableBy; the counters in labState. All new server code is Rust (ADR-010), the C++ a caller.
+- Client: hostService's hold becomes the ack's sender (apply, then ack); isMine derives from ActorOwner; the ledger.
+- Tests: T0 as above plus CellHostTest's order (keyframe, word, ack, commit; a stale report after the commit dropped; the old
+  owner's report before the commit applied); T2, a difftest session with a hand-off, an ack and a stale report; T3,
+  b-npc-handoff-door-hosts kept unweakened and one new two-seat scenario written fresh from fnv-coop's premise (the host walks
+  away mid-fight: the dying NPC stays with it until the death report, the rest pass at the grace, no duplicate and no stand-up).
+- Docs: cell-host.md, npc-handoff.md, npc-fate.md and prop-physics.md name the epoch in their Ownership sections; WIRE.md's rows;
+  STATE.md's rows for the owner epochs.
+
+Risks. R1: four more bytes at most per report (postcard's varint, usually one or two) against a 500 ms cadence; negligible. R2: an
+ack that never comes (a crash mid-transfer): the timeout commit, sized by the scenario. R3: the old owner's engine keeps moving
+its copy until the word lands; its reports are StaleEpoch and dropped, and the copy's demote is the client's as today (ADR-063
+decision 3). R4, HYPOTHESIS: a seat can read its own pause and load state (Skyrim Platform's menu events and the load's block
+are known to the lab as E_RUN_PAUSED and the login's 4 to 5 s no-op window); the first probe reads them before decision 6 is built.
+R5: the keyframe, the word and the ack ride one reliable ordered channel; the T2 session proves the order before any lab run.
+
+Alternatives. Keep the timers: ten rounds say why not. Per-cell epochs only: fails at a pass. A position judgment on the server
+(compare the report with the record): ADR-063 decision 4 forbids it, and it is what the bounce was.
