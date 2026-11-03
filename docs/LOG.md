@@ -5454,3 +5454,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   ragdoll (npc-fate.md). The restart desync's fix m3-follow-vouch fa50c5b5 (the CellHostTest expectation moved to the new rule). The
   bandit's dress stays unread (platform log lines no copy reached). Probes by path for after the arm: x-reanimate-claim, x-prop-blast,
   x-host-restart-follow, x-npc-death-ambush, x-fate-dress-bleak.
+
+- 17:37 PST 2026-11-02 the re-analyst's table for ADR-062 (docs/research/adr062/papyrus-native-entries.md, 23 rows, every entry with an RVA and an Address
+  Library id, HYPOTHESIS until traced): eight natives (AddItem, RemoveItem, Enable, Disable, Delete's tail, MoveTo, DamageObject, Resurrect)
+  queue a functor through SkyrimVM::QueuePostRenderCall (53955), so the engine call sits in the functor; Enable/EnableNoWait, Disable/
+  DisableNoWait and Kill/KillSilent share one body each; PlaceAtMe and PlaceActorAtMe bottom out in TESDataHandler::
+  CreateReferenceAtLocation (13723); SetOpen toggles a door through ActivateRef (19796) with a null activator; Kill queues a
+  TaskQueueInterface task, the link to KillImpl unread; Quest.SetStage is a Papyrus wrapper on SetCurrentStageID (56684); the fork's
+  Hooks.cpp BindNativeMethod recorder already captures every native's callback at bind time, so slice 1b resolves each hook by class and
+  name at runtime and asserts it against the id.
