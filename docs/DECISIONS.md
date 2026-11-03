@@ -4477,7 +4477,7 @@ Decision.
    and none rises again. The bind kill may stay; its loss of a body is the bug, not its sound.
 3. Corpses: every corpse exists on every seat, at the place it lands. A missing corpse on a watcher (F4, 29613) or one lying elsewhere
    (F6, 29602 1,700 units down the slope) is a defect.
-4. Corpses are physics objects (this supersedes "bodies are not props until M4", Eli 2026-10-30). The prop rule of ADR-063 decision 2
+4. Corpses are physics objects (this supersedes "bodies are not props until M4", Eli 2026-10-30). The prop rule of ADR-063 decision 1
    applies to a body: one mover simulates the ragdoll (the engine that owns the actor at its death), the at-rest pose is the mover's
    own final sample, every other seat places its corpse at that sample, and the server's record, the loot reach and any later
    check measure from it.
