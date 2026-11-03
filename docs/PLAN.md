@@ -1274,6 +1274,17 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   with the base (the console's SetAV snapped back at the next use before); the R0 path when numidium has a slot. Queued behind: perks
   afd12dae (x-perk-pick), physics f923e0a7 (x-prop-launch v2), dedupe d0085bb0, containers ae2cbfd6, talk guard 7be4eb41, each with a
   parity re-merge before its gate. Sunday's lay: the four switches OFF by layer-render, Survival off (D72).
+- STATE 16:43 PST 2026-11-02 (turbo 2's arm two, the evening): shared containers are NOT DONE again (ADR-061's outcome, Eli: "ok corpse fix
+  works worse than before" and the standing rule "we already said we dont want the whole menu to open and close out from under a
+  guy"): the live view's three in-place redraws left stale rows (37, 40, 41) and the reopen ping-ponged between two occupants; live
+  multi-party sync is BACKLOG with its Frida plan (ContainerMenu::ProcessMessage), exclusive access is a server switch
+  (containerSharing, shared by default, Eli: "we're not even live"); the client keeps the record by base counts under an open menu
+  (the own echo draws nothing) and never reopens. Eli's A for reanimation (ADR-060): a commanded NPC is its commander's game's
+  for the effect's life, BUILT on fork m4-reanimate-claim 9cc3c94c (the cells rule's Commanded claim, the host snippet retired),
+  its probe x-reanimate-claim after the arm. Perk points are a picks counter (m5-perk-points 10687731); the cabbage blast's two
+  halves (m4-prop-blast 8d94232c server, the client half in the chest bundle); the server-only train for the break
+  m4-turbo2-union-srv and the client bundle m4-turbo2-chest 10ade7c4. The broken figure on c1 (Prisoner's look on the player's
+  base, 00:15:36Z) is an open read, not tonight's heads.
 - STATE 2026-11-02 14:05 PST (turbo 2's arm one, Eli's close at 12:32 PST, and the day's queue): wall-range MERGED (parity 4b6f5fa3: F1's band, F5's
   reanimation end, the container drop); the R0 train m4-turbo2-r0-train 6d7fcc84 (F9 restart-dead c3eb2550 plus skill books 38659a3e,
   GREEN at T3 as x-skill-book 212928, b-skill-book promoted) in numidium's one T2; the big client train m4-turbo2-train (the deaths head
@@ -1391,12 +1402,14 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   if it becomes too much of a bugbear it goes to the backlog. M3 closes its bodies row at "within a stride".
 - Containers and loot (from M2, Eli 2026-10-09: "looting and containers is
   way more a dungeon thing than a combat thing"): several players in one
-  container, its changes sent to every viewer (the server keeps one
-  occupant and sends a container's changes to nobody else today), corpse
-  loot (no path exists), the open animation and sound for observers, a
-  distance check on PutItem and TakeItem, the reloot timer that each
-  restart pushes later, a container saved open coming back open with
-  nobody in it (survey notes in M2's chart).
+  container with its changes LIVE on every open menu is NOT DONE (ADR-061,
+  2026-11-02: the server sends every occupant the record, but no redraw of
+  the engine's open ContainerMenu has held and a reopen is forbidden by
+  Eli's rule; backlog with the Frida plan on ContainerMenu::ProcessMessage;
+  the exclusive switch containerSharing exists, shared by default); corpse
+  loot, the open animation and sound for observers, the distance check on
+  PutItem and TakeItem, the reloot timer and the saved-open container are
+  DONE (containers' rest ae2cbfd6, 2026-10-31).
 - Word walls teach through the server's shout record (Eli, 2026-10-12,
   playtest fourteen: "leave it in dungeons"): a wall's word goes into the
   record the console and logins use (docs/verbs/shouts.md).
