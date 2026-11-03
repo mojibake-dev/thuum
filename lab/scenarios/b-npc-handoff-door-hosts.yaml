@@ -1,3 +1,12 @@
+# b-npc-handoff-door-hosts v23 (06:36 PST 2026-11-03, thuum-cf): one premise step added in leg B, no claim changed (ADR-064 rule A: a premise
+# change leaving every claim, no new review due). After the street seat's exit from the inn, an until waits (10 s) for 0x9731's host
+# to be c1 again before the wait and the assert. The cause, read from 134832 (v22's leg B red at step 82): the exit is a WARM re-attach
+# of Riverwood's exterior from the engine's cell buffer, which fires no cellFullyLoaded, so the client re-reported only its own cell
+# (9712) and 0x9731 stayed unhosted for the run; the two earlier runs where this assert held were cold exits from lab-spawn (27
+# events). Fixed in cell-host's client on m3-system1-r3 31167a9b (a detached cell read once a second for ten minutes and re-reported
+# when attached again); this until makes a late poll its own red. The second red of that assert, c1's copy of Hod 3D-loaded 21 s
+# after the exit with puppet flags, is UNREAD (HYPOTHESIS H1: the exit-tick demote's puppet natives keep the copy in high process;
+# H2: the interior buffer keeps the inn's 3D); x-warm-exit v1 records the Dynamic read, and the claim stays as written until it says.
 # b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v22 13:00Z 2026-11-03, thuum-cf, after the run
 # 20261103-123800's read on m3-system1-r2 e23bd229: RED at step 42 by two readings, not one fault. (1) The claimed witness of the
 # stale case, the gate's "moved to the record below" line, is no deterministic witness on this head: the hold asks the move on its
@@ -356,6 +365,10 @@ steps:
       - 'server.log_count("(passes|follows|moves) 1348a into cell 133c6") == snapshot("back_visit_b")'
   - c1: teleport {cell: "3c:Skyrim.esm", x: 21995, y: -44935, z: -128, rot: [0, 0, 180]}
   - until: {within: 60, expect: [server.host(0x133c6).hosted == false]}
+  # v23: the street seat's exit is a WARM re-attach of the exterior (the engine's cell buffer fires no cellFullyLoaded; 134832 left
+  # 0x9731 unhosted for the run while the fix's parent re-reported the own cell alone); the fix on m3-system1-r3 31167a9b re-reports
+  # a re-attached cell within a second, so the host is waited for here and a late poll reads as its own red
+  - until: {within: 10, expect: [server.host(0x9731).client == "c1"]}
   - wait: 15
   - c1: npc-state {formId: 0x1348a}
   - assert:
