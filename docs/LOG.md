@@ -6869,3 +6869,20 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   ..." (truncated at 128 chars, the match in the first 41), lowercase hex, the class name surviving the bundle; no other line carries
   "state 1348a:"; the assert reads the last log-count step's count; the 30 s refresh prints no state line and cannot re-grant 133c6.
   Also: the memory note on snapshot grammar was stale (a seat's `of:` accepted since 2026-11-03); corrected.
+- 08:11 PST 2026-11-03 (16:11Z 11-03) (thuum-cf): my fresh review of the freeze fix (b8d82f05..db0e19a5): NOTES ONLY, GO. Its reads: replayActions is
+  the only path for a relayed ACTION's event (the carried lastAction included; the entry branch takes hand casts and attack names
+  only); the hosted actor's own engine gets no replay; KillActor, Decapitate and pairedStop are handler names the graph emits, never
+  actions, so dropping KillMove* leaves no known killer event in the replay; onResurrected's clear is read by the not-mine dead
+  branch alone, so the second kill's first pass stamps anew and releases 4 s later; a failing resurrect restarts the clock every 2 s
+  (harmless, the safer side under a live record); the lab line stable and in the console tee; tsc clean; no wire change. Notes for
+  after the merge: (1) the puppet graph's second mouth, the EVENT relay (formView applies relayed events to any non-hosted actor with
+  3D; the native blank covers 0xff000000+ only), can still carry a kill move to a puppet by three paths the read did not meet (a
+  creature puppet; a humanoid kill-move event the host's engine sends outside the PerformAction entry; the guest's own kill move on a
+  puppet it hits, whose victim half would kill the copy at its tag with no word): the figures' rule widened, a sendAnimationEvent hook
+  on the game-file range with isPuppet read inside it, with its own read in x-npc-death-guest's frame, the next train; (2) two unread
+  names before any widening of the match: the exe's "pa_KillingBlow" and the IDLE records' ENAMs; (3) the comment's stronger fact: the
+  copy died with the deferred kill armed, so startDeferredKill did not hold against the kill move's route (KillActorHandler to
+  Actor::Kill to KillImpl), which is why the graph's door is the puppet's real guard; (4) killMoveSaid is a static Set, once per puppet
+  per process, so a probe claims the line >= 1 for the first kill only (death-freeze v5 may record it, its own commit). Playtest 42's
+  checklist gains a line: a kill move shows only on the killer's screen; the other screen's victim stands through it until the word,
+  then drops with the engine's full death (ADR-050 decision 2's shape, the figures' precedent).
