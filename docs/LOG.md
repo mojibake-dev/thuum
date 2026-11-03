@@ -7000,3 +7000,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   death-reentry v5 (163554, its fourth green), scene-guest v3 (164106, its third). apply-on-demand.js 8fc23fc3 is deployed and the
   round trip (x-apply-roundtrip, solo c1, the dead bandit's own kDead record through 35568 and 35567) is running. Then the df9e1009
   re-stage (death-freeze v5 e77a1806 twice, the regression set), then the gate on Eli's D-P13 answer.
+- 08:50 PST 2026-11-03 (16:50Z 11-03) (thuum-cf; numidium's run 20261103-164416): the ROUND TRIP is GREEN (x-apply-roundtrip, c1 solo,
+  apply-on-demand.js 8fc23fc3) and risk 1 is answered: not a crash, a 3D reload. The kDying mark was refused by "actor dead" as
+  designed; at kDead, deferred 16 ms to the main thread, all 23 premises held (slots 0x0E 40266 and 0x0F 40267, the 3D present,
+  pending 0, the entry 0x9a040427 with a null record); the record 4,468 bytes (type 1, size code 1, version 78, written flags
+  0x8a040427, kind 6, the Havok block count 19 against 19 live bodies, the framing equal to 35715's); "step: apply 35568" then
+  applyReturn 1, the root NULL, pending 1, the entry nulled; "step: finish 35567" then pending 0, the root still null; the Havok flush
+  (havokRead at +14 ms on the physics thread 4560, outside the window) found 0 bodies, 0 SetPosition, 0 SetRotation, no park; 10 s
+  later npc-state read is3DLoaded true and isDead true at (-3693.8, 854.3, 609.1), the head 15 above the root, the screenshot a body
+  lying on the temple floor. So Actor::LoadGame through 35568 releases a loaded actor's 3D and the engine rebuilds it from the applied
+  state; the record's pose is not used on this path, since the flush ran while the 3D was gone; acceptable for a corpse arriving, a
+  visible pop for a live actor. change-forms.md C4 (numidium, main 0bad389f); the serialize note's run section flips 35568's
+  acceptance, the pending counts and the 3D reload to CONFIRMED. The next read (the re-analyst, static): why the blob was handed to
+  19535 against a form with no 3D instead of being parked, what released the 3D and when the rebuild ran, and whether a park (11977
+  by the script before 35567) or a re-apply (19535 after the root returns) carries the owner's pose, the route for the cross-seat
+  apply and item 3. df9e1009's re-stage runs (death-freeze v5 twice, then the regression set).

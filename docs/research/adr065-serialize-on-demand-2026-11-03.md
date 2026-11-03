@@ -900,3 +900,33 @@ else on c1 against an own kill.
   the pose on screen, and whether the guest's half-up copy is ragdoll-driven or animation-driven at the moment of the apply.
 - Open: 35566 (the full load's LoadGame pass), 35909, 35910, 35941, 13430 (the finish pass's and the wrapper's other callers), 19742
   (the 3D init that applies a stored ExtraSavedHavokData), the three per-graph callbacks, 19536 (the pre-pass callback's counting rule).
+
+## Run 20261103-164416: the round trip on the lab (16:50Z 11-03, numidium's run, thuum-cf's read of the rows)
+
+apply-on-demand.js 8fc23fc3 in roundtrip mode on c1 alone, the promoted bandit 0x39fe4 killed by npc-kill. The kDying mark (lifeState 1)
+was refused by the "actor dead" premise as designed; the kDead mark came on thread 4560, was deferred 16 ms to the main thread 10844
+through PlayerCharacter::Update, and all 23 premises held (slots 0x0E 40266 and 0x0F 40267, the 3D present, the pending array empty, the
+entry 0x9a040427 with a null record). Before: lifeState 2, level 0, the root 0x246411df830 at (-3690.0, 854.8, 606.0), 19533's pre-pass
+19 live bodies (flags 0x14; a 18, b 1). The record: 4,468 bytes, type 1, size code 1, version 78, length1 4462, raw; written flags
+0x8a040427; kind 6; the initial data 1029 bytes with the Havok block at 36 (length 993, flags 0x14, count 19, pitch -0.87, roll
+0.044), its framing equal to 35715's own length. "step: apply 35568": applyReturn 1; after the apply the root is NULL, the pending array
+holds 1, the entry's record is nulled and its flags read 0x8a040427. "step: finish 35567": the pending array 0, the root still NULL.
+Witnesses: havokRead for 0x39fe4 at +14 ms on thread 4560 (the physics thread, outside the run window), havokReadDone with 0 bodies, 0
+SetPosition, 0 SetRotation; no flush kind row and no ExtraSavedHavokData park for the form; the FORMS log printed nothing. Ten seconds
+later lab-api read the copy is3DLoaded true and isDead true at (-3693.8, 854.3, 609.1), the head 15 units above the root, the screenshot
+a body lying on the temple floor. So, by this run:
+
+- CONFIRMED: 35568 accepts a loaded, dead Character mid-game and returns 1; the pending array reads 1 after it and 0 after 35567; the
+  entry's record is nulled by the engine's decode; the recipe's record round-trips through the engine's own apply (risk 1 is not a
+  crash);
+- CONFIRMED: the apply RELEASES the loaded actor's 3D (the root NULL right after 35568) and the engine rebuilds it from the applied
+  state within 10 s, the body lying at the record's position in the engine's own death pose;
+- CONFIRMED: the Havok blob was handed to 19535 on the physics thread 14 ms after the finish against a form with no 3D, which counted 0
+  bodies and set nothing, and no park into an ExtraSavedHavokData followed: the record's pose is dropped on this path;
+- HYPOTHESIS: what released the 3D (Actor::LoadGame's biped rebuild, 37502's MoveToHigh, or the movement controller reload) and when
+  the rebuild ran; why the flush tested the 3D present yet 19535 found no bodies; whether a park (11977 by the script before 35567) or
+  a re-apply (19535 after the root returns) would carry the owner's pose. The next static read takes these.
+
+What it means for ADR-065: the pipeline is the engine's at both ends for a loaded actor too (observe, serialize, apply, rebuild); a corpse
+arriving by the apply lies at the record's position in the engine's own pose, acceptable for a corpse, a visible pop for a live actor.
+For item 3's pose (the guest's body in the owner's pose) the blob must be parked or re-applied after the rebuild: the next read.
