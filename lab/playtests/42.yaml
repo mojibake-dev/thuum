@@ -27,7 +27,8 @@ camp:
 seats:
   - profile: 1
     name: "test 1"
-    perks: []   # F7 (playtest 42): Overdraw40 given directly ran against the perks R0 switch, E_PERK_POINTS and a state resend every 5 s
+    perks: [0x7934b]   # Overdraw40, as 37 to 41: the headshot rule needs it (CIF's condition, Overdraw60's HasPerk Overdraw40 and
+    # Archery 60, docs/verbs/headshot.md:35-68). Removing it for F7's E_PERK_POINTS line broke headshots in playtest 43 (Eli); the line is kept
     spells: []
     globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]   # Survival off (Eli, 2026-10-31); playtest 42's lay missed it
     values:

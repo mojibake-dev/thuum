@@ -1,0 +1,43 @@
+# Playtest 43 (numidium, 2026-11-03): the NPC fix (ADR-067 decision 5, playtest 42's F1 and F2) on the staged r3 with the server
+# swapped to fork m3-turbo3-sys1-f1 c1600f98 (server-only: a watcher's stray copy of an NPC MOVED to the record by
+# TESModPlatform.moveRefrToPosition, replacing the Disable snippet that never reached the copy). The client and dist are r3 df9e1009's
+# (SkyrimPlatformImpl a82f61d945dd1524). Survival off on both records (the profile's globals), no perk given directly (F7). The camp is
+# Riverwood's guard camp just before 19:00; the restart for item 1 is numidium's, on Eli's word.
+id: 43
+build: "fork m3-system1-r3 df9e1009 staged, server skymp-server:m3-turbo3-sys1-f1-c1600f98 (the NPC move), dist client-build of df9e1009 (SkyrimPlatformImpl a82f61d945dd1524, js 4a47aa5ab9cf41b4), lab-api pipeline 4992, thuum main 93699f36 or later"
+world: playtest-m3-39-paused-20261031T014638Z   # 39's end, as 41 began
+hold:
+  minutes: 240
+  reason: "playtest 43: the NPC move fix (F1, F2)"
+server:
+  npcEnabled: true
+  gameHour: 18.75
+  locks: false
+  weatherSync: false
+  perks: true
+  leveling: true
+camp:
+  teleports:
+    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [19087, -47480, -128], rot: [0, 0, 90]}
+    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [19237, -47380, -128], rot: [0, 0, 270]}
+seats:
+  - profile: 1
+    name: "test 1"
+    perks: [0x7934b]   # Overdraw40, as 37 to 41: the headshot rule needs it (CIF's condition, Overdraw60's HasPerk Overdraw40 and
+    # Archery 60, docs/verbs/headshot.md:35-68). Removing it for F7's E_PERK_POINTS line broke headshots in playtest 43 (Eli); the line is kept
+    spells: []
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]   # Survival off (Eli, 2026-10-31); playtest 42's lay missed it
+    values:
+      Marksman: 60
+    percentages: {health: 1, magicka: 1, stamina: 1}
+  - profile: 2
+    name: "test 2"
+    perks: []   # none
+    spells: []
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]
+    percentages: {health: 1, magicka: 1, stamina: 1}
+streams:
+  test1: 48989
+  test2: 49989
+after:
+  readback: percentages
