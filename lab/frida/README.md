@@ -442,3 +442,32 @@ TURN_SIGN) that ramps lockAngle with the pick snapped: HYPOTHESIS that the menu'
   process id, the module base and each hook's resolved address with its first eight bytes; every hook counts every call before
   its filter; kernel32!Sleep is counted as a call the process makes constantly; a liveness row every ten seconds carries the
   counts. 1.6.1170 only.
+
+- container-menu.js: the open ContainerMenu's own path on both seats
+  (docs/engine/containers.md section 4, read R1 with R4's counters; rows
+  E6, E8 to E11, E13, E14, E16, E19 to E24, E26, E27, E32). Hooks
+  ContainerMenu::ProcessMessage (51126: the message's type, type 8's
+  inventoryRef and updateObj against the 405962 and 403520 statics, the
+  dirty set's size, the ItemList's row count and unk50), the rebuild
+  (UpdateItemList 51144, full or incremental, and the dirty pass 51146;
+  each row's objDesc, object and first extra list at the leave, printed
+  when it changed), SendInventoryUpdateMessage (52849: owner, object,
+  caller, UI's counters, the take-all byte 406594 and how many messages
+  it posted), UIMessageQueue::AddMessage (13631), the message-data
+  factory (35855, 52803), RemoveItem and AddObjectToContainer for
+  TESObjectREFR and Actor (19689, 37797, 19708, 37525) with the
+  InventoryChanges remove and add under them (16059, 16053) for the
+  chest (CHEST, default 0x371e9), the menu's target, the player and the
+  figures, ItemList::Update_Impl (51031), GetSelectedItem (51017),
+  FxDelegate::Callback (82641: the menu's Flash callbacks and their
+  arguments) and UI::ProcessMessages (82082: every row names the pass it
+  ran in). The ready row carries the pid, each hook's address with its
+  live first bytes against Ghidra's image, the vtable slots against the
+  hooks (Skyrim Souls RE's slot 04 reads as its own) and a self-test of
+  403520 as the player's handle; a liveness row every 10 s carries every
+  hook's count before its filter and a kernel32 Sleep pulse; caps per
+  hook and in all, and a byte budget, keep the .log small. Arm on both
+  seats after the connects, `wait: 15` before the moves
+  (x-shared-chest-phantom's frame). Ids by `just addr`, each equal to
+  the doc's RVA; argument layouts beyond CommonLib's from Ghidra
+  (2026-11-03), HYPOTHESIS. Written 2026-11-03; never run. 1.6.1170 only.
