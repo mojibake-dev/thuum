@@ -6886,3 +6886,22 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   per process, so a probe claims the line >= 1 for the first kill only (death-freeze v5 may record it, its own commit). Playtest 42's
   checklist gains a line: a kill move shows only on the killer's screen; the other screen's victim stands through it until the word,
   then drops with the engine's full death (ADR-050 decision 2's shape, the figures' precedent).
+- 08:15 PST 2026-11-03 (16:15Z 11-03) (thuum-cf): lab/frida/apply-on-demand.js written by the re-analyst from the note's (c) section (36,827 bytes,
+  448 lines; node --check clean; no em dashes; unrun; 4 KB over the 32 KiB target, the header prescribing wait 15). Two modes:
+  roundtrip (default; the copy's own kDead record by the actor script's recipe, written into the form's changes-map entry as the
+  inject does, then 35568 (mgr, form) and 35567 (mgr, 0), the engine's "FORMS:" verdict log hooked as formsLog rows and 19535/19538
+  as witnesses, snapshots before, after the apply and after the finish: lifeState, process level, farGeometry, position, angle, the
+  root's world translate, the head node's world z by the "NPC Head [Head]" walk, the entry's flags and record, the pending count,
+  the live body count from 19533) and apply (the owner's record from LAB_PARAMS RECORD with FLAGS and an optional SUM; refused unless
+  type 1, the engine's version, size code under 3, the framing 2 + 2n + length1, raw, the sum, and the record's Havok body count
+  equal to the live count, each overridable only by FORCE). LAB_PARAMS: FORM (required), MODE, TRIGGER (mark: the kLifeState mark
+  armed and run at PlayerCharacter::Update's return; now: after the attach), FLAG (0x400; the kDying mark refused by the "actor dead"
+  premise), RECORD, FLAGS, SUM, FORCE, SUPPRESS (19378 around 35567; default bare as the promotion batch runs it), RUNS. 23 premises:
+  the actor script's plus slot 0x0F is Actor::LoadGame 37650 or Character's 40267, the 3D present, the actor dead (lifeState 2), the
+  pending array empty, the entry present with a null record. Safety: one engine-state write (35509); the record pointer the engine's
+  from the moment 35568 is entered and never freed by the script after; a refusal by 35568 restores the entry and frees the record.
+  HYPOTHESIS until the first run: that 35568 accepts a loaded actor mid-game and returns 1, the pending count 1 then 0, the flush
+  reaching the form with kind 2 and 19535 running (SetPosition and SetRotation once per non-root body), the Havok block's framing,
+  19533's layout, the head-node walk, no visible change after the round trip; for the apply half, that the owner's pose lands rather
+  than being overridden by the copy's animation (the "Behavior ragdoll save/load state mismatch" log is the tell). Its fresh review
+  runs before numidium's solo-c1 round trip (the lab is free; a crash inside 35568 shows risk 1 real behind a rollback).
