@@ -770,8 +770,17 @@ the passing report at a D9 pass alone, not at a grant; half (b) would PROTECT th
 false exit (the report back came 36 ms after the pass out, inside the window), leaving him outdoors though he never walked. So the
 record must be imposed at EVERY promotion (a grant, a D9 pass, a host's return), its position sent reliably with or before the hoster
 word and the promote reading it rather than the last sample: ADR-064 system 1's model (a reference's life on a non-owning seat,
-promote and demote), whose promote rows numidium writes from 052100, 055217 and playtest 41 before more settle code; the settle's
-merge waits on that order. The scenario claims it since v9 (thuum 02420ca6): no pass, follow or move of him into an exterior cell
+promote and demote), whose promote rows numidium wrote from 052100, 055217 and 060106 (docs/engine/non-owning-seat.md); the settle's
+merge waits on that order. The instrumented runs 065955 and 070357 (R1's lines on the parent, fork m3-promote-record d66de5fd)
+read the mechanism: the word flips the seat live and its movement reports begin at once from the engine's own position (Hod's
+day copy at the mill, 5200 units from his house: no walk in 286 ms), 88 ms after the view's gate decided to move the copy and about
+a second before the move landed (c2's clock 2.07 s behind the server's that run), so the record follows the stale copy and the
+other side's indoor copy passes him back where another seat hosts the cell (P8; the last relayed sample, P2a, is refuted). The fix
+(the branch's second commit): the word's FLIP to mine holds the actor's stream and places the copy at the record on the next update
+before the stream resumes (remoteServer and HostService), the view's gate may move at every promotion, and the server sends each
+actor's record as a movement message reliably ahead of every hoster word at a grant, a claim, a release and a lease's end
+(PartOne::SendActorKeyframe; the pass keeps sending the passing report); CellHostTest reads a grant's keyframe ahead of its word.
+The settle's window stays as the safety net it was meant to be. The scenario claims it since v9 (thuum 02420ca6): no pass, follow or move of him into an exterior cell
 across EACH grant (the street seat's visit's and the interior seat's), a baseline right before the teleport in and equal after the
 grant, so the case goes red where it happens and a fix is tested at the grant too. T3: b-npc-handoff-door-hosts v11 (thuum fe2d0eff,
 2026-11-03; v10 6cfc1c4c, v9 02420ca6, v8 d474f718, v7 1c8f3455). v6's two red runs on the fix's parent 35509f7a settled the

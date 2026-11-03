@@ -5765,3 +5765,17 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   finding (the settle is not the fix; the promotion's stale copy is the cause; the fix places the copy at the record at every
   promotion and holds the actor's reports until applied, fork m3-promote-record). Deferred until the door fix merges: the
   b-npc-handoff-cross claim restore and ADR-047 D9's retirement note.
+- 23:17 PST 2026-11-02 (07:17Z 11-03) (thuum-cf): the instrumented runs (door v11 065955 and the swap probe v9 070357 on the
+  parent with d66de5fd's client, numidium's read) settled the mechanism: at the visit's grant the gate line read the engine's copy
+  at the MILL (0x71dfc, 19277 -44313) against the record at home and decided to move it; 88 ms later the server logged the first
+  report at the mill ("follows 1348a into cell 9713"), about a second before the move landed (c2's clock 2.07 s behind the
+  server's). My reading, agreed: 5200 units in 286 ms is no walk, so the first report goes out from the engine's day copy before
+  the placement, the stale-copy source is the seat's own engine (P2a refuted, P8 on main de19efa4), the 17:00 to 19:00 premise is
+  the right one for the parent's red (the night would show nothing), and the fix is the client's ORDER. Built on m3-promote-record
+  as its second commit: the word's flip holds the actor's stream and places the copy at the record on the next update before the
+  stream resumes (remoteServer, HostService.holdUntilPlaced/placed), formView's gate resets its one-shot at every promotion,
+  PartOne::SendActorKeyframe sends the record ahead of every hoster word (a grant's actors, a claim, a release, a lease's end;
+  CellHostTest reads the order). Props round eight 4147fb3d (texts; a PropTest square change drives the reach exit); probe v11
+  (the host inside bbb1, leg 5 pinned on the prop and player, leg 6 against the second ingot's record with the load line
+  recorded). Slice 1b: 0ea79994 OK to stage, staging now with x-script-natives v6 (the "on others" claim). Hod attacked the
+  visiting player in 070357 (HYPOTHESIS: the redress 1.4 s before, or trespass).

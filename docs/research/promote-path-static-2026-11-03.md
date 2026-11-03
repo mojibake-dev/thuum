@@ -69,3 +69,12 @@ was outdoors.
   where the mechanism acts (the interior seat's copy in the interior before its grant).
 - The order of the hosted word against the CreateActor's movement at a subscription is on the same reliable channel; a run with
   both stamps (the console's "moved" line and the server's grant line) settles whether the one-shot fired before the grant.
+
+## After the instrumented runs (065955, 070357; 2026-11-03)
+
+R1's lines refuted G1's reading of the stale sample's source for the first promotion and confirmed the ORDER as the gap: the gate
+decided to move the copy ("moved to the record below") 88 ms before the server logged the first report at the engine's position, and
+the move landed about a second later. The fix on m3-promote-record (after d66de5fd): the client holds a promoted actor's stream until
+its copy is placed at the record (remoteServer's word handler on the flip, HostService.holdUntilPlaced / placed), the view's one-shot
+resets at every promotion, and the server sends the actor's record keyframe ahead of every hoster word (SendActorKeyframe at a grant,
+a claim, a release and a lease end). G1 and G2 above stand as the code's gaps; the order was the third.
