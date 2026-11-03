@@ -6714,3 +6714,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   UNMEASURED; the lab line means "attached before any event", a cold reload's early attach would print it too (HYPOTHESIS), the
   recorded cell events tell them apart. Clean by its read: the server re-runs the election on the re-report, cancels silently inside
   the grace, grants E+1 after it; no double report; the reload pairs persisted; rules 4 and 12; no em dashes.
+- 07:02 PST 2026-11-03 (15:02Z 11-03) (thuum-cf): the actor script's per-frame hook review (the change since fd4e60fb): NOTES ONLY. Its reads:
+  the premise's two RVAs and the note's Q7 rows all resolve by addr.py (40266 0x727d40 Character::SaveGame, Character.h:31; 40538 the
+  player's; 40447 PlayerCharacter::Update's slot 0xAD; 37348 Actor's and Character's; the three vtables); the player refused three
+  times over; the no-pending path a counter and a null check; Frida never lets a JS throw out of onLeave reach the native frame and
+  native faults are converted by exceptions steal; re-entrancy closed (pending nulled before act, busy, the arming after the
+  runPending call); the thread check live against Main.threadID (a null Main gives -1, a 0 matches no thread, the pending waits);
+  the writer hooks fire inside the script's own 0x0E call by Frida's default traps. Five notes, applied as written before the rerun:
+  AddChange a true fallback behind PlayerCharacter::Update by 250 ms (so deferredVia is the script's choice, not the engine's coin
+  toss); the hook's thread on every liveness row against the ready row's mainThread; the IsPersistent gate tagged HYPOTHESIS (the
+  decompile's, 144049 showed MovetoLow from 37501 and no stash, not which predicate); no string built on the hot AddChange path; a
+  trigger dropped while a pending is armed or the recipe busy gets a mark row with its reason (RUNS 2's kDead mark cannot vanish
+  silently).
