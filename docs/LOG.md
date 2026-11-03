@@ -5844,3 +5844,23 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   lab/tools/probe-runs.py; it would refuse prop-physics.md:321's x-prop-static and npc-handoff.md:683's x-handoff-hide today).
   Slice 1b restaged on 19bdfc3c (the census names 32 selves a row) with x-script-natives v7 at 08:07Z; m3-promote-record
   0b61fc80 (fix round two, green on 4873) under its fresh review; door v12 (main a3cd74b5) under thuum-cf's fresh reviewer.
+- 00:17 PST 2026-11-03 (08:17Z 11-03) (thuum-cf): ADR-064's fresh reviewer (an agent on a3cd74b5) said FIX FIRST on door v12: the tolerance
+  I bought by dropping the exit claim did not exist (the same block claims the record's cell and the interior seat's 3D, so any
+  0x734cd exit before his hour is red in v9 and v12 alike), and the exit claim was the one witness where the fix head fails (it
+  carries the settle, which drops the report back as a stale copy's sample for 1 s with no "into cell" line, and the hold places
+  the next promoted copy at the stale record outdoors, so no return ever comes); the walk/jump discriminator is the door line (a
+  walk logs it first; 055217's and 060106's jumps logged none). v13 (main 1939d97c) applied it as written: both claims at each
+  grant, the door line recorded before each grant's snapshots and assert; the nits (065955 owns the quoted "moves" line, 070357
+  the same shape; 0x734cd's conditions unread, P7 read 0x1e604's and 0x734ce's; the header's two stale lines). The re-check of
+  v13 said READY FOR THE GREENS with two optional nits, carried by v14 (main 55b888f7, 134 steps, no claim changed): the settle
+  drop's line recorded beside the door count (a swallowed return's witness on the fix head) and the mutation sentence (the claim
+  set's red on the parent stands by 065955, whose failing claim is the exit claim verbatim). scenario-lint green through uv. The
+  swap probe v12 (by path, 26839811, 64 steps) matches; npc-handoff.md and non-owning-seat.md's thaw condition name v14
+  (0aad5621). Props (numidium's read of 075626 on badca627): leg 1's premise failed, not its rule; c2's 1.5 s walk covered 116
+  of 136.7 units and stopped 20 short, the contact watcher heard the ground alone (layer 17, motion 5), so no claim and nothing
+  streamed; two Frida watchers a seat are settled. My call: probe v12 (86f27610) holds W 2.2 s, and the contact watcher's
+  motion-type field is the read of whether the guest's copy registers a proxy contact, in the same run. The verb-merge rule on
+  main 74b89ad6 (a verb doc's unrun by-path probe refuses the merge) names x-prop-static and x-handoff-hide: both codes are in the
+  heads under test (df3b8819 and 7aac21d4 are ancestors of badca627 and 0b61fc80, neither in parity), so both run, appended to
+  their chains; x-prop-static needs propStatics in the stage's server settings. Lesson: `set -e` is not honored in the Bash
+  tool's shell (a failing lint step was skipped over and the commit went out; re-run by hand, green); chains are explicit && now.
