@@ -5410,3 +5410,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (m4-container-exclusive 8e7d6e56, the switch kept); the break's refs are the server-only train m4-turbo2-union-srv f9a0792e (union +
   perk counter 10687731 + prop budget 8d94232c + the switch) and the client bundle m4-turbo2-chest 10ade7c4 (no reopen, the blast's
   client half). Open read for the break's logs: a naked headless bandit on c1 in Bleak Falls (the fate's pin after the 3D, "late fate").
+
+- 16:53 PST 2026-11-02 Bleak Falls' MS13 read (Eli's walk: the spider froze, Arvel never fell and carries no claw, the draugr wait to be hit; the pillars
+  and Embershard's bridge worked): the esm's VMADs name six scripts the layer's host row lacked (MS13WebDestructibleSCRIPT on Arvel's web
+  0x1fc43, MS13TriggerArvelRunSceneScript on 0x38098 with defaultActivateSelf, masterAmbushScript on the spider 0x3a1e1 and the
+  LvlDraugrAmbush bases, HallofStoriesKeyholeScript on the keyhole 0x4e2b9, HallofStoriesDiskScript on the rings); the tsv row carries
+  them for numidium's layer-stage after the arm. The claw is MS13's GoldenClaw alias (ALCO 0x39647 created in the Arvel alias), not Arvel's
+  record (one item, 0x12eb7): the server needs the alias-created-item rule (q-golden-claw's slice in PLAN). The draugr read is (a): the
+  ambush script, not a figure the AI ignores.

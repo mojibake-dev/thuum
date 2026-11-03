@@ -1478,7 +1478,25 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   animation, not the menu. One scene runner per scene; other players are
   spectators (STR's experience with NPC attention shifting is the warning).
 - Exit: `q-golden-claw` (two players complete Bleak Falls Barrow and The
-  Golden Claw with shared world progression and a restart), then `q-main`
+  Golden Claw with shared world progression and a restart), then `q-main`.
+  Playtest 41's walk (2026-11-02, Eli: "the giant frostbte spider froze", "arvel
+  the swift was suppose to fall out of the webs and didnt", "he also doesnt have
+  the claw in his inventory???", "drauger dont attack until atacked"; the pillar
+  puzzle and Embershard's bridge worked) names the slice: (1) the layer's
+  Skyrim.esm host row gains MS13's own scripts, read from the esm's VMADs on
+  2026-11-02 (MS13WebDestructibleSCRIPT, MS13TriggerArvelRunSceneScript,
+  defaultActivateSelf, masterAmbushScript for the spider's drop and the alcove
+  draugr's wake, HallofStoriesKeyholeScript, HallofStoriesDiskScript; the tsv row
+  carries them, a layer-stage lays them); (2) a server rule for a quest alias's
+  created object (MS13's GoldenClaw alias, ALCO 0x39647 created in the Arvel
+  alias; Arvel's own record holds no claw): at a shared quest's start the server
+  adds each alias's created item to that actor's record (R0, esm-driven, one rule
+  for every quest's created items); (3) the known limit that the keyhole's script
+  judges the ACTIVATOR's inventory on the host's engine, so a guest's relayed
+  activation is read on its figure; (4) the scenario q-golden-claw walks the
+  sequence on two seats: the spider drops, the web cut frees Arvel and his scene
+  runs, his body holds the claw, the rings and the keyhole open the door with
+  the animation on the guest, the word wall teaches.
   from a post-Helgen start.
 
 ### M7: The long tail
