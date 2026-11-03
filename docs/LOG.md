@@ -6398,3 +6398,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   evidence on e23bd229 and three are probe readings to redo. m3-system1-r3 e4397635 (round eleven) is PUSHED now that the stage is
   done, its fresh review and pipeline waiter running; it stages with door v22, swap v20 and x-respawn-teleport-hold once each is
   reviewed and deployed. The lab is free: census v3 (about 12 min), then serialize-on-demand once its fixes land.
+- 05:10 PST 2026-11-03 (13:10Z 11-03) (numidium): census v3 GREEN (20261103-130223), its claim an assert step read and held (Sven
+  dead). change-census.js v3 hooked BGSSaveLoadGame's AddChange (35576) and RemoveChange (35581) directly, and its ready row walked the
+  slot bodies' tail jumps (14607 and 14608 into 35576, 14609 into 35581; change-forms.md A2 CONFIRMED as structure). The run made
+  37,296 marks and 743 removes with no foreign type byte. The forced entry's marks were kPromoted on ACHR and REFR from one caller
+  (A4). TESNPC is now counted once (24 kFactions). The typed lock of 0x1cbb0 ran ("Unlocked Wooden Door" at the unlock), but its
+  mark's whole row is absent: the key's first 8 calls went to the AI's locks (inconclusive). Before it, the evidence stage on
+  e23bd229 (05:01): death-reentry v5 and death-freeze v3 GREEN, door v21, swap v19 and scene-guest v2.1 red (two door readings to
+  rewrite, v22 and v20; scene-guest at its premise); r3 e4397635 under two fresh reviews.
