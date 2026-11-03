@@ -6521,3 +6521,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   if 6 is green). No push to m3-system1-r3 until the probes end. The gate and the merge wait for both reviews' GO on
   e23bd229..5e0e975b: mine is GO (e4397635 reviewed fresh NOTES ONLY, nothing applied; b64d1bad reviewed fresh NOTES ONLY, applied
   as written in 5e0e975b, no further review under rule A; 24 ActorDeathTest cases green); numidium's reviewer still reads.
+- 05:41 PST 2026-11-03 (13:41Z 11-03) (thuum-cf): numidium's fresh review of r3 (e23bd229..5e0e975b): the fork clean and green, GO (the clears
+  correct; each T0 fails without its fix, traced by deletion; the lever's only reference its registration, reached through
+  ScampServer::Set over the UI port's RPC, rule 12 held; 566 cases; a note: a placed corpse the lever stands up keeps placedDead,
+  so its next death never schedules a return). Both GOs stand; the gate waits on the stage's probes. BUT the lab-tests job on thuum
+  MAIN had been red since 615ec438 (pipelines 4985 and 4993: "respawn-ref puts a dead game-file actor up at its spawn point, or in
+  place", actual true expected false): the gamemode test's fake never modeled the respawnFated lever, so the fated branch returned
+  with the body still dead, and the failed lint stage skipped the gate stage (labapi-image and scenario-gate never ran; LABAPI 4992,
+  before the break, carried the stage). Fixed at 32eb322e: the fake's set models the lever (a true write stands a dead non-player
+  actor at its spawn point; a false write and a player's actor throw the lever's texts; a legacy fake throws "Property 'respawnFated'
+  doesn't exist"), the gamemode's fallback matches that full text (GetFormAt's "Form with id ... doesn't exist" no longer falls back,
+  numidium's catch), and the test gains the fated shape, the legacy fallback and the refusal (26 node tests and the lab unit tests
+  green locally); the pipeline is watched. Lesson: a reply shape change in the gamemode needs its fake's model in the same commit.
