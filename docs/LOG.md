@@ -6982,3 +6982,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   victim half on that host; dragon kill grabs carry no pa_ event, their victim's event name unread (HYPOTHESIS); and the hook's silent
   blank wants one logLab per actor as a witness. death-freeze v5 is e77a1806; the df9e1009 re-stage (v5 twice, then the regression
   set) follows 5052's green and the current re-stage's end.
+- 08:37 PST 2026-11-03 (16:37Z 11-03) (thuum-cf): apply-on-demand.js FINAL for the round trip (thuum main 1d3eb730, file sha1 8fc23fc3, 38,110
+  bytes, node --check clean): the review's two blocking items and seven notes applied as written (a pre-pass fault refused before any
+  write; step rows before 35568 and 35567 that survive a death; the entry Value's +4 read and written back; a dangling pointer after a
+  1 nulled and said; the suppress bit restored after a throw inside 35567; the vtable-derived first-bytes reads guarded; the pitch and
+  roll read bounded; writeByteArray on the documented input; the operator's kDead record and writtenFlags for the apply half). The
+  round trip (x-apply-roundtrip, solo c1, the promoted bandit 0x39fe4, the copy's own kDead record through 35568 and 35567) is
+  numidium's on the free lab after a deploy-srv; the reading rule as logged above.
