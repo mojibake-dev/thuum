@@ -635,10 +635,20 @@ def _server_spec(server: dict[str, Any]) -> ServerSpec:
                       handoffPassSettleMs=settle)
 
 
+# every top-level key load_scenario reads. Any other key was dropped without a word before 2026-11-03: a top-level `asserts:`
+# block in x-change-census v2 (20261103-111808) and x-transplant-capture v1 (20261103-114726) was never evaluated, and both runs
+# went green with their claims unread
+SCENARIO_KEYS = frozenset({"id", "milestone", "game", "solo", "client", "clients", "server", "timeout_s", "steps", "artifacts", "parity"})
+
+
 def load_scenario(text: str) -> Scenario:
     data = yaml.safe_load(quote_flow_steps(text))
     if not isinstance(data, dict):
         raise ValueError("scenario must be a mapping")
+    unknown = sorted(str(k) for k in data if str(k) not in SCENARIO_KEYS)
+    if unknown:
+        raise ValueError(f"unknown top-level key(s) {', '.join(unknown)}: a claim is an `- assert:` step, and a scenario's keys are "
+                         f"{', '.join(sorted(SCENARIO_KEYS))}")
     clients = [str(c) for c in data.get("clients", [])]
     steps = [parse_step(s, clients) for s in data.get("steps", [])]
     artifacts = [str(a) for a in data.get("artifacts", [])]

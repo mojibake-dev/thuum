@@ -44,6 +44,15 @@ class ScenarioTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             load_scenario("id: t\nclients: [c1]\nsteps:\n  - server: explode\n")
 
+    def test_rejects_an_unknown_top_level_key(self):
+        # a top-level asserts block was dropped unread (x-change-census v2, x-transplant-capture v1, 2026-11-03)
+        from labapi.scenario import load_scenario
+
+        with self.assertRaises(ValueError) as caught:
+            load_scenario("id: t\nclients: [c1]\nsteps:\n  - c1: connect\nasserts:\n  - c1.npc_state(0x14).isDead == true\n")
+        self.assertIn("asserts", str(caught.exception))
+        load_scenario("id: t\nclients: [c1]\nsteps:\n  - c1: connect\n  - assert:\n      - c1.npc_state(0x14).isDead == false\n")
+
     def test_refs_near_is_a_client_verb_with_its_args(self):
         from labapi.scenario import load_scenario
 
