@@ -17,6 +17,73 @@ simulates it, the server records where it is, every other seat shows the stream.
 Eli: "the canon perfection of multiplayer phys objects is gmod"). Today every such reference is Keyframed on arrival and moves on
 one screen alone (skymp5-client/src/extensions/objectReferenceEx.ts, view/spawnProcess.ts).
 
+## Ownership (ADR-063: ownership, not permission; written 18:52 PST 2026-11-02, before any code moves again)
+
+Owner: the cell's host by default; whoever touches a prop owns it while it moves; a grabber owns it until its release. Ownership
+passes by the server's PropOwner word alone: a grant at a claim the rule admits, the return to the host at the owner's own asleep
+sample, the departure's return. No seat infers ownership from a timer, a silence or who it can see.
+Channel: PropTransform (the owner's samples, the asleep one reliable) and PropOwner (the server's word, player 0 the host default);
+the claim PropClaim with its touch kind. No new message.
+Content-specific code: none. The movable-static list (prop-statics) names what is a prop, not who may touch it.
+Two seats: b-prop-arbitration (from x-prop-arbitration by path), the touches from both seats, a carry handed over, a blast beside a
+prop the other seat streams.
+
+### The arbitration rule (18:52 PST 2026-11-02; ADR-063 decision 4's row for props, after playtest 41's close)
+
+Eli at the close: "item physics sync is more broken than it was when we STARTED testing". The server since break 3 granted 13 of 13
+claims and refused a blasted prop's owner while it still flew (E_PROP_NOT_OWNER at 02:19:26Z and 02:19:49Z with no claim between).
+ADR-063 retired the owner checks (E_PROP_CELL, E_PROP_REACH) and never wrote the arbitration they stood in for. A read agent mapped
+every ownership transition on 35509f7a (the break-3 server; the client bundle 12f199e6 beside it); the two failure families:
+
+1. Newest touch wins over a moving prop. wire-rules props.rs:204-236: any live, ungrabbed row is overwritten by any other player's
+   claim, whatever the touch kind and whether the prop moves (pinned by props.rs:353-365 and PropTest.cpp:257-265); the client claims
+   every contact with a prop it does not simulate, a prop flying into a standing player included (propService.ts:812-836), two
+   seats trading a flying prop once per 2 s each; the hand-over drops the motion (the claimant's copy goes Dynamic at zero velocity,
+   propService.ts:546-556; "with the last streamed velocity" has no code).
+2. Ownership returns to the host by timers nobody hears. The server's lapses send no word: the 3 s silence of accepted samples
+   (props.rs:166; samples lost, refused TooFast, over the edge budget or paused in a menu all count as silence), the 3 s lease after
+   an asleep sample (:163-165, :292), the 120 s grab cap, the host's takeover, the departure. The client mirrors a lease of its own
+   from its asleep send and never clears it on its later awake sends (propService.ts:656-661, 641-650), so the owner demotes itself
+   at the old deadline while its body moves (C1: nobody streams), a held body's asleep sample lapses the grabber on every seat while
+   the server names it (C2), a relayed takeover sample re-arms the old toucher (C3: two simulators), a word naming a player this seat
+   cannot see falls back to the host (C4), and the mirrors' skews leave gaps (C6). E_PROP_NOT_OWNER never reaches a client.
+
+The rule (R0: the server decides, the word is the decision; R2 for the transform as before):
+
+- A1. One owner, by the word alone. A seat simulates a prop while the server's last PropOwner word names it, or while the word names
+  nobody (player 0, the host default) and the seat hosts the prop's cell. The client's lease mirror, its silence test and its
+  presence test go (ownerOf reads the word and hostsCell, nothing else).
+- A2. A grab beats a touch; nothing beats a grab. A live grabbed row answers every other seat's claim Held (as today). A grab claim
+  on a live, ungrabbed row another seat owns is granted (the grabber's engine has the body in hand; a Keyframed copy cannot be
+  grabbed, so the case is a race at rest).
+- A3. A non-owner's contact never takes a moving prop. A contact, drop or impulse claim on a row another seat streams awake (its last
+  accepted sample younger than PROP_MOVING_MS, 1000 ms, UNMEASURED) is refused E_PROP_MOVING, logged and counted; the claimant's copy
+  stays on the stream. A resting row (the owner's asleep sample) or a stalled one (older than PROP_MOVING_MS) is anyone's to claim.
+- A4. Ownership returns to the host only at rest on the owner's screen, by the owner's own final sample, and the return is a word.
+  At an accepted asleep sample from an owner that is not the cell's host the row sleeps and the server sends PropOwner {refr,
+  player 0, epoch + 1} to every listener. PROP_LEASE_MS and PROP_SILENCE_MS retire. A departure returns the player's live rows to the
+  host with a word each. The 120 s grab cap stays as the one timer, answered at the next claim or sample.
+- A5. A refused sample is answered. E_PROP_NOT_OWNER sends the sender the current word (the live owner or 0, the epoch), once per
+  prop per second, so a divergent mirror heals instead of streaming into refusals.
+- A6. The hand-over of a MOVING prop happens by a grab alone (A2, A3), so no velocity travels; a resting prop's hand-over starts at
+  rest. The first bump on a Keyframed copy is still swallowed until the grant lands (the known limit since slice one).
+- A7. Known limit: a stream that stops without an asleep sample (a crash mid-flight ends in the departure's word; a client bug does
+  not) re-syncs at the next touch (A3's stalled case); a tick sweep is the next step if the lab shows stalls.
+
+Wire: PropOwner.player 0 gains the meaning "the cell's host" (wire-validate admits 0 for PropOwner alone, the contract line and the
+fixtures with it, same commit); E_PROP_MOVING is a new refusal code (a log line, no message). Server: props.rs's claim and transform
+carry the rule, `gone` returns rows, the C++ handlers send the words (the grant's, the rest's, the departure's) and answer NotOwner.
+Client: ownerOf by the word; onOwner stores any newer epoch, player 0 included; the mirror's two writes removed; the contact claim
+skipped while another seat's awake stream is live here (STREAM_LIVE_MS; the server refuses it anyway); grab, release and drop claims
+and the asleep send unchanged. Tests: props.rs (the moving refusal, the grab over a touch, the rest's return and word, the departure's
+words, the stalled claim, the host's own rest sends no word), PropTest.cpp (the word at rest to both seats with player 0, the moving
+refusal, NotOwner answered), wire-validate's PropOwner case (0 admitted). Two seats: x-prop-arbitration by path (lab-spawn, c1 hosts
+and drops the ingot as b-prop-push does; c2 walks into it at rest: granted, streams, rests, the word returns it; c1 kicks it and c2
+steps into the flight: E_PROP_MOVING, no grant during the flight; at rest c2 grabs: granted, c1's walk-in Held; the release rests
+and the word returns it), then b-prop-arbitration in its own commit; the blast leg from x-prop-blast after. Stale text fixed with
+the build: skymp.rs:1816, PropClaimMessage.h:10, propClaimMessage.ts:8 and props.rs:201 (the cell refusal), skymp.rs:1833,
+PropOwnerMessage.h:8-10 and propOwnerMessage.ts:4-6 (the velocity), PropTest.cpp:371's title, the reach row below (:268).
+
 ## Rung
 
 Rung: R2 for the transform (the simulating seat's Havok, the server records), R0 for the claim (the server decides who simulates).
