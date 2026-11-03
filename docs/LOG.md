@@ -6231,3 +6231,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   sample yet; another host's; this host's earlier login; N ms before the death past the window); the fall report's height samples
   in its T0; 21 cases in ActorDeathTest. The evidence stage waits on round nine's green; the lab reads the transplant meanwhile
   (change-forms.md D3: c1's own record of a locked room door in the Sleeping Giant written into c2's changes map before c2 enters).
+- 04:02 PST 2026-11-03 (12:02Z 11-03) (thuum-cf): round nine f1c954d7 GREEN on 4957 (client and server; the T0 suite with the 21 ActorDeathTest cases);
+  the superseded 817f78d0's 4952 was red on the three cases round nine fixed, as numidium's review read. The merge candidate's
+  stage follows numidium's fresh review of f1c954d7 and the Formatting check, with door v21, swap v19, death-reentry v5,
+  death-freeze v3 and scene-guest v2.1.
