@@ -412,7 +412,10 @@ Registry, train-42 (20:54 PDT), the deaths: on the server, the player path's
 25 s wall respawn never touches a game-file actor (RespawnWithDelay's branch
 schedules the fated respawn instead), and the server's number floors at one
 point for an essential base, or a protected one not under a player's hand
-(MayDie). On every seat, a dead body is never activation-blocked (the rule
+(MayDie). On every seat, a dead body is never activation-blocked past the ragdoll's settle (the one named exception: deaths2, fork
+ce7ddd65, on the system-1 merge branch, keeps a body that died while flagged a puppet in the puppet state for ragdollSettleMs 4 s, so
+on a non-host seat a fresh body cannot be looted for about 4 s, until "body <id>: released from the puppet state after the ragdoll";
+numidium's review of m3-system1 on 2026-11-03, item 4), and from that release the rule holds in full (the rule
 since 2026-10-28, playtest 37's findings 58 and 62; train-42 blocked a
 game-file body at the death and puppetService 32dffbda kept the block
 through a dead promote, on the assumption that the server's OpenContainer
