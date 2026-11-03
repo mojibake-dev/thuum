@@ -5779,3 +5779,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (the host inside bbb1, leg 5 pinned on the prop and player, leg 6 against the second ingot's record with the load line
   recorded). Slice 1b: 0ea79994 OK to stage, staging now with x-script-natives v6 (the "on others" claim). Hod attacked the
   visiting player in 070357 (HYPOTHESIS: the redress 1.4 s before, or trespass).
+- 23:31 PST 2026-11-02 (07:31Z 11-03) (thuum-cf): the promote fix m3-promote-record 82bd282b GREEN on 4867 (client and server;
+  CellHostTest's grant case: the frozen wolf's record keyframe reaches the new host before its hoster word), handed to numidium
+  for its fresh review and the door chain on the fix head (v11's two legs, the swap probe v9, the settle-0 run). Eli's four
+  decisions recorded by numidium (main 56602099): ADR-064 ACCEPTED with the W4 refinement (from a scenario's first green or gate
+  entry), D-S1 A and D-S2 A (lifecycle handlers run on a non-owner, their state-changing natives filtered at the entry and
+  counted; the open set measured on a guest first), ADR-063's outcome notes corrected by D4 B (the settle is not the fix, stays a
+  branch; the fix is the promotion's placement with the reports held). Props: round eight 4147fb3d red on its own test (a
+  3840-unit movement report, over movement.rs's 2048-unit burst, dropped E_MOVE_SPEED; RefreshReach reads the position before
+  SetPos), 7c4b1ed1 red at compile time (a stray call to the removed Move helper), badca627 the head with the test on the
+  load-report path and the last three texts; 41300469 stays the stage head (numidium's check: behaviour unchanged since). Slice 1b
+  0ea79994 GREEN on 4861, staged with x-script-natives v6.
