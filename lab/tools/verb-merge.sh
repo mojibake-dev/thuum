@@ -26,6 +26,8 @@
 #      the client (PROMOTE=1 forces it, PROMOTE=0 skips it);
 #   6. a dated entry appended to docs/LOG.md with the run ids, to finish by hand
 #      with the merge commit (the submodule bump, PLAN's state lines).
+# Before step 1, the verb docs naming the scenarios are read for a probe promised
+# by path that no lab run played, and the merge refuses one (ADR-064).
 # Never force-pushes, never rebases, never switches the shared checkouts.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
@@ -39,6 +41,11 @@ if ! git -C "$fork" merge-base --is-ancestor origin/parity "$sha"; then
 fi
 if [ "$(git -C "$fork" rev-parse origin/parity)" = "$sha" ]; then
   echo "== origin/$branch is parity already; nothing to merge" >&2; exit 2
+fi
+# ADR-064: the verb docs naming these scenarios may not promise a probe by path that no lab run played (the runtime
+# check written "by path" and never run was playtest 41's pattern; lab/tools/probe-runs.py)
+if [ "$#" -gt 0 ]; then
+  python3 lab/tools/probe-runs.py "$@" || { echo "== a verb doc names an unrun probe: run it, or reword its line; parity not moved" >&2; exit 2; }
 fi
 
 echo "== 1. deploy-srv $(date +%H:%M:%S)"
