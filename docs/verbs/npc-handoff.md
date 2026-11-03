@@ -788,15 +788,19 @@ the game the word names ahead of every hoster word, a grant's, a claim's, a rele
 and a swap's keyframe ahead of its word. Kept with its risk named: the gate's one-shot reset at every promotion (P2b) would
 teleport the copy across the door at every pass if the ping-pong is not cured, which R1's lines would show.
 The settle's window stays as the safety net it was meant to be. The scenario claims it since v9 (thuum 02420ca6) across EACH grant
-(the street seat's visit's and the interior seat's), a baseline right before the teleport in and equal after the grant, so the case
-goes red where it happens and a fix is tested at the grant too; v9 to v11 claimed no pass, follow or move of him into an exterior
-cell there, and v12 (thuum a3cd74b5, the author's call on numidium's review of 82bd282b) claims no pass, follow or move of him BACK
-into the interior instead and records the exits: with a working fix the placed copy is home and his unconditioned day package
-0x734cd may walk him out at the grant legitimately, which the exit claim would read as the bounce, while refusing that package in the
-premise would refuse the stale-copy condition itself (the record home while the engine runs the day package, the parent's red); a
-walk stays out, the stale copy's false exit comes back within a second (055217's pass back 36 ms after the pass out, 070357's move
-back after the refused report), so the re-entry line is the bounce's signature at the grant. T3: b-npc-handoff-door-hosts v12
-(thuum a3cd74b5, 2026-11-03, its fresh review pending; v11 fe2d0eff, v10 6cfc1c4c, v9 02420ca6, v8 d474f718, v7 1c8f3455). v6's two red runs on the fix's parent 35509f7a settled the
+(the street seat's visit's and the interior seat's), baselines right before the teleport in and equal after the grant, so the case
+goes red where it happens and a fix is tested at the grant too: no pass, follow or move of him into an exterior cell (v9), and since
+v13 none BACK into the interior either, with the door line counted beside them. v12 (thuum a3cd74b5, the author's call on numidium's
+review of 82bd282b) had swapped the exit claim for the re-entry claim so a legitimate walk out by his day package 0x734cd would not
+read as the bounce; ADR-064's fresh review of v12 (FIX FIRST) showed the tolerance does not exist (the same block claims the record's
+cell and the interior seat's 3D, so any exit before his hour is red in v9 and v12 alike) and that the exit line is the only witness
+where the fix head fails (it carries the settle, which drops the report back as a stale copy's sample for 1 s with no "into cell"
+line, and the hold places the next promoted copy at the stale record outdoors, so no report back ever comes); what tells a walk
+from a jump is the door line (a walk logs "door 13407: 1348a's host ... walks it through to 3c" first; 055217's and 060106's jumps
+logged none), and a walk out once placed home would be P4 refuted and a premise finding for leg A, not the bounce. The bounce's
+return: 36 ms by a pass back (055217), 1.0 s by the follow's stale rule (065955's "moves 1348a into cell 133c7" after the refused
+report back; 070357 the same shape). T3: b-npc-handoff-door-hosts v13 (thuum 1939d97c, 2026-11-03, the review's finding applied as
+written, its re-check pending; v12 a3cd74b5, v11 fe2d0eff, v10 6cfc1c4c, v9 02420ca6, v8 d474f718, v7 1c8f3455). v6's two red runs on the fix's parent 35509f7a settled the
 shape (numidium's reads): leg A 20261103-051454 was red at its premise with fresh seats and NO pass logged at Hod's house door, while
 the swap probe 20261103-052100 REPRODUCED playtest 41's bounce at the house door ("ff000000 passes 1348a into cell 9731 (D9)" at
 05:22:17.325, "ff000001 passes 1348a into cell 133c7 (D9)" 56 ms later, the pair every 14 s as he retried his door), the street
@@ -812,11 +816,11 @@ double-promote the other reading, both HYPOTHESIS; the clock starts at 17.0: the
 or 17.69 after a 124 s rollback, the interior seat's premise ends 17.56 to 18.06, the exit comes 169 to 259 s after the baselines
 and the 400 s until ends 141 to 231 s past 19:00, numidium's fit of four runs; c2 the street's seat, c1 the house's, 052100's
 orientation): his record in 0x133c7; the street's seat teleports to the house door's landing (-506, -177, 0), is granted the house
-with no pass, follow or move of him back into the house across the grant (v12's claim; v9's no-exit claim read 055217's and 060106's
-grant promotions, and would have read a legitimate walk out as well), sees him with 3D on neither sawmill package (v11: 17:00 to 19:00 lies inside the sawmill window, and a seat meeting the mill's
+with no pass, follow or move of him into an exterior cell or back into the house across the grant (v9's and v13's claims; 055217's
+and 060106's grant promotions put him out; the door line counted tells a walk from a jump), sees him with 3D on neither sawmill package (v11: 17:00 to 19:00 lies inside the sawmill window, and a seat meeting the mill's
 condition would walk him out early, a red with a working fix that would read as the grant bounce), teleports to the street, the
 house unhosts behind it, and its copy of him is claimed indoors with no 3D beside its hosting of 0x9712 and 0x9731 and the hour
-past 17; the house's seat enters by the same landing, is granted the house with the same no-re-entry claim across its grant, the exits counted, his 3D
+past 17; the house's seat enters by the same landing, is granted the house with the same two claims across its grant, the door line counted, his 3D
 and AI there on neither sawmill package, the street seat's copy still indoors, the hour between 17 and 18.9; the baselines (the
 door line first); the exit waited on the pass line itself; at 5 s the counts with the hour past 18.9 (the door 13407 line beyond
 its baseline, one more "now simulates 1348a in cell 97xx", no "passes 1348a into cell 133c7" and no pass, follow or move of him
@@ -831,7 +835,7 @@ world, c1 lands on the street alone, hosts 9712 and 9731 (claimed) and the until
 (the grant ends the follow, claimed), c2 enters from lab-spawn, and at 22:00 the fallback sandbox near his editor location walks
 him out by 0x13419 (the door 13419 line, "passes 1348a into cell 133c6" as the bounce line, the hour between 20 and 21.8 at the
 premise's end and past 21.9 at the exit). The exterior cell claim of v5 and v6 is dropped (the record outdoors and
-the 150-unit bound carry it). The by-path probe x-handoff-door-hosts-swap v10 (v12's grant claims) plays leg A with the roles swapped on the parent (a run
+the 150-unit bound carry it). The by-path probe x-handoff-door-hosts-swap v11 (v13's grant claims) plays leg A with the roles swapped on the parent (a run
 stops at its first red, so the scenario's second leg never reaches the parent); a third run at handoffPassSettleMs 0 reads the
 reliable placement alone. HYPOTHESIS until those runs:
 the mechanism above (every stamp fits it), and that the street seat's copy stands indoors at the promote (the precondition,
