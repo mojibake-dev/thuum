@@ -758,7 +758,10 @@ Known limit (19:24 PST 2026-11-02): the door's pre-check reads Stale as a refusa
 inside one second of a pass waits at the door until the window passes (its package retries the door as Embry's did,
 playtest 37); a real turnaround that fast is the ping-pong's own shape, and the window is the cost of telling them apart.
 The fix's T0 reds (pipelines 4768, 4773) were the two CellHostTest cases that walked an actor straight back through the
-door inside the window; both now read the settle (the stale leg refused, the return after the window), head 9606963e.
+door inside the window; both now read the settle (the stale leg refused, the return after the window), head 9606963e; its
+pipeline 4778 died in an unrelated reloot case's SIGABRT (a runner flake: the same head's rerun 4782 is GREEN at 03:40Z, the whole
+suite, wire-test, wire-fuzz, difftest-build, rust-image). The head waits for the gate: the door scenario's red run on 35509f7a
+first, then its green runs on this head (numidium's order of the night).
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared (2026-10-22 draft; the decisions as ADR-047 PROPOSED 2026-10-23, D6 to D11)
 - [x] engine surface cited or delegated (the cell getters through Skyrim Platform and libespm's CELL and record flags; moveRefrToPosition the player's own cross-cell call; no new native)

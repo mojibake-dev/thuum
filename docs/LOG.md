@@ -5554,3 +5554,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   MovableStatic blocked when not hosted; cause 3 exempt from MayDie and the body distance; the ActorDeath contract text, WIRE.md,
   npc-fate.md's Authority row and NATIVES.md's 24 rows. Stale tags settled by an agent (bce99a91: npc-fate H-54f and the loader
   row, weather:88, spell-cast:1032, shouts:180, from their runs).
+- 19:40 PST 2026-11-02 (thuum-cf): m3-handoff-settle 9606963e GREEN on pipeline 4782 (the rerun of 4778's SIGABRT head; the abort was
+  the runner's). Handed to numidium's gate behind b-npc-handoff-door-hosts v2's red run on 35509f7a. docs/engine/havok-props.md on
+  main (a587a782, an agent's write: 38 claims, 17 CONFIRMED, 21 HYPOTHESIS; the rule rests on E10, E31, E14 and E15, unread); two
+  prop-physics.md tags settled from their runs (d505f2e5).
