@@ -74,7 +74,8 @@ promotion makes: in 055217's shape it would drop the report back into 133c7 and 
 - R4 (D1): x-npc-death-reentry by path (c1 kills a resident, leaves until the cell is nobody's, returns), with 59af5508's trace of
   the body's animation events around the silent bind kill.
 - R5 (D2): a run in which the redress meets an actor with no 3D, its "late fate for <id>: its 3D is not loaded, the redress waits for
-  the load" line and no crash.
+  the load" line and no crash. Read on the break-3 build (12f199e6) as 20261103-091943: the line 13 times on c1 after its departure
+  from Riverwood, no crash; to read again on m3-system1 (a3f236d1 is the same patch).
 - R6 (the fix, 0b61fc80): at each promotion of 1348a on the new owner's seat, the hold's line, "hold 1348a: placed at the record
   after N ms, the engine at (x, y, z) in <cell>, the record at (x, y, z) in <cell>; released", with the engine's position within
   64 units of the record's in the record's cell, and the server's first "passes|follows|moves 1348a" after it timed after the
@@ -89,6 +90,8 @@ promotion makes: in 055217's shape it would drop the report back into 133c7 and 
 ## 5. Thaw condition
 
 Every player-visible row above CONFIRMED on the viewpoints it names by a run or trace id (R1 to R5), and the door scenario's claims
-across each grant (b-npc-handoff-door-hosts v14, thuum main 55b888f7: no pass, follow or move of him into an exterior cell, v9's claim,
-and none back into the interior, v12's, with the door line counted beside them) red on the parent 35509f7a and green twice on a head
-that imposes the record at every promotion. Until then nothing in this system merges: m3-handoff-settle stays a branch.
+across each grant (b-npc-handoff-door-hosts at its current version, v17 on thuum main 04338dbd: the stale copy made on purpose, no
+pass, follow or move of him across the promotion, the hold's line naming both places, with the door line counted beside them) red on
+the merge branch's parent, parity 6d7fcc84, and green twice on m3-system1 (the promote fix cherry-picked onto parity, ADR-064's
+freeze), and R5's guard read on that head too (run 20261103-091943 read it on the break-3 build). Until then nothing in this system
+merges: m3-handoff-settle stays a branch, and the settle window is not in m3-system1.
