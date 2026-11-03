@@ -37,7 +37,8 @@ steps:
       - c2.quest(0x1ea4f).stageDone(10) == false
       - 'c1.log_count("the server shares .* mode all") >= 1'
       - 'c2.log_count("the server shares .* mode all") >= 1'
-      - 'server.log_count("QuestStage: actor ff[0-9a-f]+ sent .* mode all") >= 0'
+      # the sending seat's stage reaches the server in mode all: a claim, not a read (the gate audit, 2026-11-02)
+      - 'server.log_count("QuestStage: actor ff[0-9a-f]+ sent .* mode all") >= 1'
   # an undeclared quest's stage is the world's in mode all
   # v3: the game's own console (setstage, 22151 over the setter): the driver's Papyrus Quest.Start then SetCurrentStageID answered
   # false to both on MS13Intro in 131512 (started false, ok false; no setter, no stage event, nothing to report)
@@ -54,8 +55,8 @@ steps:
       - c2.quest(0x1ea4f).stage() == 10
       - 'c2.log_count("the world.s stage 10 of quest 1ea4f set") >= 1'
       - 'server.log_count("E_QUEST_UNLISTED") == 0'
-      # recorded: the fragment's skip on the applying seat (m3-quest-fragment, when it rides the build)
-      - 'c2.log_count("fragment of 1ea4f stage 10 skipped") >= 0'
+      # the fragment's skip on the applying seat (m3-quest-fragment) is read by its own scenario when it rides a
+      # build; the literal >= 0 read is gone (the gate audit, 2026-11-02)
   # a denied quest stays each seat's own
   - c1: console {text: "setstage 4e50d 10"}
   - wait: 5
