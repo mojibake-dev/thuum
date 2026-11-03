@@ -6682,3 +6682,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   numidium's rerun (check with FLAG 0xffffffff and RUNS 8, then serialize with FLAG 0x400 and RUNS 2; expected: the slot premise
   passing, deferredVia PlayerCharacter::Update with deferredMs under about 50, the serialize row's level 0, lifeState against live,
   and length2).
+- 06:53 PST 2026-11-03 (14:53Z 11-03) (thuum-cf): x-warm-exit v1's fresh review, FIX FIRST on one item, applied as written: v2 (sha1 702a3e9e, 48
+  steps). The item: Hod's inn package HodSleepingGiant19x3 0x35696 runs 19:00 for 180 min (PSDT by esm.py) and DefaultSleepEditorLoc22x7
+  0x1cb15 walks him home at 22:00; at 20.5 the boundary was 270 s away for a run whose seat reset alone takes 35 s (relaunch) to 192 s
+  (rollback), so the frame starts at 19.0, the mill walk gets the scenario's own 300 s, and the clock is claimed short of 22 at the end.
+  Also applied: the sighting race guard before the 133c6 until (an until of 90 s on the record in 3c; the clean record may read 133c6
+  before c1's sighting moves it to the copy at the mill, P9 and P10); the fix's line claimed above a baseline read before the exit (a
+  seat's console tee is truncated per game process, so the count is safe within a session but not bound to the exit without the
+  baseline); the premise claims in their own block; an eighth read past 25 s; the reads about 3.5 s apart (each driver step costs
+  its 250 ms poll). The reviewer's reads: the own-cell fallback never re-reports 9712 from indoors (the parent cell is 133c6 there),
+  the grace releases both cells with no candidate, the exit's first poll re-reports within a second and the grant comes at the kept
+  epoch plus one, the cell-events steps record isAttached samples every 250 ms per seen cell even when no event fires (the answer
+  lands in the step's json), and npc-state answers aiEnabled, activationBlocked, cell and is3DLoaded. r3's stage set from my side:
+  door v23 (main 5976e426, file c9bed211), x-warm-exit v2 702a3e9e, swap v20 75bd28b9, with numidium's death-reentry v5, death-freeze
+  v4 96ae3e4c and scene-guest v3 4ffaf665; the fork head b8d82f05 (its pipeline watched). The actor script's premise fix is on main
+  a12c3069 (sha1 f28d6ab9), its per-frame hook under fresh review before the rerun.
