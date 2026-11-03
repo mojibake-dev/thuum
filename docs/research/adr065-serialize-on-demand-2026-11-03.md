@@ -1168,7 +1168,7 @@ except the plugins' distributed forms. Read (v2.2, 192013 the bandit, 192345 Sve
 at every mark (the clone is not written as a base; the loader rebuilds it from the two templates); kind 3 is 0; and the type-0 ids are the
 SAME five spells in both records, all in the AI PROCESS block, none in the inventory: 0xFE014817 (three times), 0xFE014819, 0xFE01480B at
 kDying and 0x2B005373 at kDead (Sven's kDead record: 3,420 bytes, FNV-1a 0x7dd12708, flags 0xaa000427, raw; 152 ids, 103 type 1, 48 nulls,
-1 type 0, encoded 00 29 5a at record offset 2097, the one patch site). The indices are session-local by direct proof: 0xFE014817 is index
+1 type 0, encoded 00 29 5a at record offset 2097, index 0x295a = 10586, the one patch site). The indices are session-local by direct proof: 0xFE014817 is index
 10582 in the bandit's session and 10583 in Sven's. So no subject on this load order has an all-type-1 record, the inventory's drop rule
 (paragraph 3 of the static read) covers neither, and the AI process block's reader of those spell ids is the safety read before any
 cross-seat apply (queued; the paragraphs below when they land). Sven's dead body in 192345 lay at (20954.6, -45804.7), head
@@ -1176,7 +1176,7 @@ cross-seat apply (queued; the paragraphs below when they land). Sven's dead body
 something.
 
 **The receiver's half of the re-encode (the REMAP step, apply-on-demand.js v2.3, to write and review).** A LAB_PARAM string of rows
-`offset:formId:index` (Sven: `2097:0x2B005373:10585`), applied to the RECORD bytes after the record parses and the SUM over the sender's
+`offset:formId:index` (Sven: `2097:0x2B005373:10586`), applied to the RECORD bytes after the record parses and the SUM over the sender's
 bytes is verified, before 35568. Per row: the three bytes at the offset must decode to type 0 with exactly the row's index, else the run
 refuses (a wrong offset never patches); LookupByID(formId) on the receiver (14617) must be non-null, its form type recorded (a null refuses:
 the encoder would mint an index for a form this seat lacks and the reader would resolve it to null later); the receiver's encoding comes
