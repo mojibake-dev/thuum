@@ -6701,3 +6701,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   stage: the fork head b8d82f05, door v23 (main 5976e426, file c9bed211), swap v20 (75bd28b9), x-warm-exit v2 (702a3e9e), death-reentry
   v5, death-freeze v4 (96ae3e4c), scene-guest v3 (4ffaf665); main at ebdb52e5 for the deploy-srv. The branch is held through the stage
   and the gate. Still running: the fresh review of the actor script's per-frame hook (before its rerun, after the gate).
+- 06:56 PST 2026-11-03 (14:56Z 11-03) (numidium's launch): r3's second STAGE is launched on m3-system1-r3 b8d82f05 (LABAPI 4992, deploy-srv from
+  main ebdb52e5), six probes in order: door v23 (c9bed211), x-warm-exit v2 (702a3e9e), swap v20 (75bd28b9), death-reentry v5
+  (20a6c65d), death-freeze v4 (96ae3e4c), scene-guest v3 (4ffaf665). The branch is held; numidium's fresh review of the warm-exit
+  diff (5e0e975b..b8d82f05) is reading; the gate follows its GO and the stage's reads, then the merge and playtest 42 (the evening
+  slot if the morning is gone).
