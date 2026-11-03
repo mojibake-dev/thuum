@@ -796,7 +796,10 @@ and both places; a DEAD word makes a dead hold that never moves a body and relea
 the 3D load, a 120 s cap); the view's gate defers to a standing hold (one mover); a demote releases the hold and drops its deferred
 reports with a line; a live word turns a dead hold back into a placing hold, and a respawn that teleports gives the revived hold
 the TELEPORT's place as its record ahead of the standalone live word (round ten), so it never asks the corpse's place over the
-spawn point. Kept with its risk named: the gate's one-shot reset at every promotion (P2b) would
+spawn point. Known and left (both fresh reviews of round ten, 2026-11-03, "narrow"): a PLACING hold at a teleporting respawn keeps
+its pre-death record, because the revive returns on a live hold; a copy still alive when the teleport lands would be asked to the
+stale place. Not patched: ADR-066 retires the hold's judgments whole (the ack replaces the placement as the server's admission).
+Kept with its risk named: the gate's one-shot reset at every promotion (P2b) would
 teleport the copy across the door at every pass if the ping-pong is not cured, which R1's lines would show.
 The settle's window stays as the safety net it was meant to be. The scenario claims it since v9 (thuum 4bb5d18c) across EACH grant
 (the street seat's visit's and the interior seat's), baselines right before the teleport in and equal after the grant, so the case

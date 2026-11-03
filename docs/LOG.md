@@ -6304,3 +6304,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   order. Staging call, sent to numidium: built after system 1's candidate merges or fails on its evidence; m3-system1-r3 carries
   review fixes only; no hold-timing round after r3. Cited: fnv-coop's ownership service and Skyrim Together's PR #906 (the research
   doc's paths), Chubby's sequencers (Burrows 2006), Kleppmann's fencing tokens (2016), Gray and Cheriton's leases (1989).
+- 04:36 PST 2026-11-03 (12:36Z 11-03) (thuum-cf): round ten e23bd229 GREEN on 4968 (all six jobs; ctest 13 of 13, 22 ActorDeathTest cases).
+  Two fresh reviews of it (mine and numidium's), both FIX FIRST on the same one item: pendingDeathSinceMs was never cleared, so a
+  later life's death that bypassed BeginPendingDeath anchored its window at the earlier life's start and the window refused nothing
+  (the floored zero stamp 20 s old would stand the body at the loading-frame live sample). Round eleven is committed LOCALLY on
+  m3-system1-r3 (cut from e23bd229, not pushed while numidium's stage reads e23bd229): Respawn and RespawnFated zero the start and
+  clear the pending flag with its worldState entry (a SetIsDead death left it armed and BeginPendingDeath refused for good), two T0s
+  (the stale start across lives; the flag), the round-ten case's margin widened (start 8.0 s back, stamp 7.6 s back: the old rule
+  refuses by 600 ms, the new accepts by 3.4 s), NowMs(), the header comment, the redundant guard. Both reviews named one narrow
+  residual, a placing hold's record at a teleporting respawn, recorded in npc-handoff.md and left to ADR-066. Nothing tests the
+  tTeleport revive yet and no stage probe respawns onto a dead hold: a probe for r3's stage. The decision memo for Eli is
+  docs/private/decisions-after-fnv-read.md (D-F1 the quest's owner, A/B/C with C recommended; D-F2 ADR-066, A recommended).
