@@ -5828,3 +5828,19 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   beside the named row's absence, so the bound biting reads as a red, and lists both console logs in its artifacts; pipeline
   running. The third lab read and D-S1's measurement recorded in papyrus-events.md and ADR-063 decision 3's amendment (73f9794c).
   Lesson: a cap that hides data needs a claim that says when it bit.
+- 00:10 PST 2026-11-03 (08:10Z 11-03) (numidium): props staged on badca627 (9a2a2491's dist, gitlab 17277) with
+  x-prop-arbitration v11: RED at leg 1's claim block, 20261103-075626-x-prop-arbitration, on the leg's premise, so the
+  arbitration rule was never exercised. c2 toggled walk and held W 1.5 s from 136.7 to 20.3 units of the resting ingot (16.5 in
+  x-y); no claim followed (0 "claim .. touch 0" on c2, 0 "claims prop .. by touch 0: granted" on the server) and the ingot stood
+  unmoved on both seats; c2's prop-contact.js recorded two ContactPointAdded on the player proxy, both ref 0x0, layer 17
+  (kGround, CommonLibSSE-NG CollisionLayers.h:24) and motion 5 (kFixed, hkpMotion.h:26-35): the ground, never the ingot. The
+  lab's only contact fact is a running player's (push v11 025647); a walk over a resting ingot, and whether a non-owner's copy
+  registers a proxy contact at all, are unread; the leg is thuum-cf's to rewrite with a fresh reviewer. The run settles the
+  two-watcher question: c1 prop-grab with prop-sleep, c2 prop-grab with prop-contact, all four traces beating to the end.
+  badca627 does not merge on this run. Tooling on main: scenario-lint in CI (c90f8f2d, green on 4877 with its self-tests: a
+  count claimed >= 0 cannot fail, a relaunch key the deploy lacks is a premise play never has, a ticked verb's Two seats
+  scenario must claim and act on every seat; the three activationUnblockedBases scenarios and the ten docs ticked before the Two
+  seats line baselined) and verb-merge's refusal of a verb doc that promises a probe by path no lab run played (74b89ad6,
+  lab/tools/probe-runs.py; it would refuse prop-physics.md:321's x-prop-static and npc-handoff.md:683's x-handoff-hide today).
+  Slice 1b restaged on 19bdfc3c (the census names 32 selves a row) with x-script-natives v7 at 08:07Z; m3-promote-record
+  0b61fc80 (fix round two, green on 4873) under its fresh review; door v12 (main a3cd74b5) under thuum-cf's fresh reviewer.
