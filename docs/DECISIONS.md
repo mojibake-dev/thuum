@@ -4018,7 +4018,11 @@ Decision.
    OnUnload), because the engine fires them before a host is known; their consequences through the state-changing natives are
    filtered at the entry (counted "(not hosted)", never reported), and the natives ADR-062 has not hooked are the open set,
    closed native by native as slice 2 lands. The exception's size is measured on a guest (x-script-natives with its second
-   seat) before slice 2 starts.
+   seat) before slice 2 starts. Measured 07:32Z 2026-11-03 (run 20261103-073235, c2 as guest in c1's 0x9732 for about five minutes,
+   slice 1b's 24 hooks alone): 83 filtered calls over 8 natives, all within about 90 s of the arrival (RemoveItem 48, MoveTo 16,
+   PlaceAtMe 8, DisableNoWait 5, Disable 2, EnableNoWait 2, Lock 1, SetLockLevel 1); the natives with no cell to gate on ran live
+   (Quest.Start 401 and Quest.Stop 403 on 0x30002859, GlobalVariable.SetValue 118, ReferenceAlias.ForceRefTo 57, SetCurrentStageID
+   11 at load). The open set is at least this; the rows are in docs/verbs/papyrus-events.md.
 4. The server records, relays and arbitrates the hand-offs. It validates consistency only: two owners colliding, item
    conservation, bounds that would break the world for the others (the wire's shapes and caps). It does not check the owner's
    engine against the record's idea of where the owner stands or what it may touch. R2 is the default rung for new state; R0

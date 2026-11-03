@@ -296,8 +296,29 @@ a script calls Quest.Start about 1.3 times a second on every seat, D-S1's data p
 cannot stand it down); the run's driver logs name it already ("questStart quest 30002859 (and 13 more in the last 10 s)" on both
 seats), a quest of load-order index 0x30, finding 77's shape (Reading List's RL_DetectionQuest starting every half second,
 LOG.md's 10-29 entry); the self-naming census row ("Quest.Start on 30002859 N", the platform's commit after 15e01a0e, at most
-eight selves a row a window) confirms it from the native's side, and whether any such start reaches the server as a report is the
+eight selves a row a window, 32 since 19bdfc3c) confirms it from the native's side, and whether any such start reaches the server as a report is the
 next read (the census counts attempts, not effects).
+
+The third lab read (two seats, probe x-script-natives v6 as run 20261103-073235 on 0ea79994's stage, numidium's read): 9 of 10
+claims held (both seats read stage 10 of 0x10d3bb done; c2's "Quest.SetCurrentStageID (platform)" 2 lines and no "on 10d3bb" row;
+SetOpen (platform) on both seats; Quest.Start on a real self on both; no server refusal but E_QUEST_OWN_START). The one red was the
+census's cap, not a leak: c2's "Quest.SetCurrentStageID on others" 1 line (2 calls) in the guest's first window after its load,
+eight named selves (2002b6e, 25185, 25231, 25251, 2830f690, 4b2d9, 703ecf2, c18e1) filling the row three minutes before the relay,
+so 10d3bb at load could be ruled neither in nor out; the claim did its job. At the relay c2.log holds "fragment of 10d3bb stage 10
+entry 0 skipped: the stage is the world's, applied from the relay; 0 mark(s) left for the pair" and then the platform's apply, and
+no guest row for 10d3bb in any window after it: H-1b1's positive evidence again. The fix: m4-scripts-work 19bdfc3c names up to 32
+selves a row a window (a rare row names every self, since selves never exceed calls; a hot row's tail stays under "on others"), and
+probe v7 keeps the "on others" == 0 claim beside the named row's absence, so the bound biting reads as a red and never as a pass,
+and lists c1-console.log in its artifacts for the host's numbers. D-S1's measurement from the same run (ADR-063 decision 3's
+amendment: the exception's size on a guest before slice 2; c2 as guest in c1's 0x9732 for about five minutes, ten census windows),
+counting slice 1b's 24 hooks alone, so the open set is at least this: filtered "(not hosted)" 83 calls over 8 natives, all within
+about 90 s of the arrival (RemoveItem 48, MoveTo 16, PlaceAtMe 8, DisableNoWait 5, Disable 2, EnableNoWait 2, Lock 1, SetLockLevel
+1); live on the guest, the global natives the cell gate cannot filter: Quest.Start 401 and Quest.Stop 403 on 0x30002859 (about 1.3 a
+second, every window; Stop's rest 9 one-offs and "others" 109 in one window), GlobalVariable.SetValue 62 named (fe000a0f 49 over 9
+windows, fe01481e to fe01482e one-offs) and "others" 56 in one window beside the platform's 25 (timeService), ReferenceAlias.ForceRefTo
+57 (2e00ce06 56 in one window, 2002b6e 1), SetCurrentStageID 11 at load; the platform's own: SetOpen 12037 in ten windows (about 40 a
+second, H-1b4's family), PlaceAtMe 2, Enable 2, Activate 2, Resurrect 2, Lock 4, Disable 1, Delete 1. The host's census numbers are
+the claims' line counts alone (c1-console.log was not in v6's artifacts; v7 lists it).
 
 ## Status
 
