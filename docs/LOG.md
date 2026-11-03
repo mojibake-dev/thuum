@@ -7056,3 +7056,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   from Set3D on the main thread), the lock-wrapped Set3D in ExtraDataList::LoadGame's leveled case as the releaser on this seat, the
   load buffer's size at +0x20, 19742's apply on the task thread with the extra still listed at 19535's entry, and the central
   question, whether the rebuilt 3D takes the record's block or the live pose. Its fresh review runs; the lab after the merge.
+- 09:40 PST 2026-11-03 (17:40Z 11-03) (numidium): r3 df9e1009 (rounds six to eleven, the warm-exit fix and the half-up-body fix's two
+  rounds) GREEN on every probe of its set, both fresh reviews GO.
+  - death-freeze v5 twice (20261103-170955, -171447), its mechanism claims held: the host's kill move dropped on the puppet, no
+    resurrection, the body down on the guest. Playtest 41's item 5 fixed on two seats.
+  - x-warm-exit v2 (171859), swap v20 (172250) and scene-guest v3 (173234) GREEN.
+  - death-reentry v5 red on its body bound (172752: 281 units at a reload), then GREEN on its cold rerun with the same drift split
+    over x and y (about 278), so it passes marginally: the bound wants a reload's measure (D-P14 to Eli).
+  - The round trip of the mid-game apply (x-apply-roundtrip, c1 solo) GREEN: no crash. The leveled actor's 3D was released and rebuilt,
+    and the pose's source is undecided (change-forms.md C4, corrected by thuum-cf's pose read).
+  - The gate waits for Eli's D-P13 (door leg B's claim after a warm exit).
+  - Earlier, c2 went silent during a stage's client copy (heartbeat 86 s stale); a snapshot rollback brought it back.
