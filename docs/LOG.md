@@ -7470,3 +7470,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   b-npc-body-release.yaml:115 count "players in the container now" == 0, a line that no longer exists (the replacement: no
   E_CONTAINER_BUSY). The client half (a dead body activation-blocked like a chest, D-C2 A) is being written on
   m3-turbo3-sys2-container-client. Eli's two physics acceptance cases are in prop-physics.md (41c2b062).
+- 15:17 PST 2026-11-03 (23:17Z 11-03) (thuum-cf): The hold's client half BUILT (D-C2 A): a dead body activation-blocked like a chest, as a reconciler state in
+  puppetService (blockDeadBody on the death's start, the server's death word and the bind kill; markLifted and standsAgain around the
+  native lifts of PuppetApi's Promote dead branch and the dead release, the re-block two tick counts later; never 0x14 or a figure),
+  so a body's loot opens only on the server's OpenContainer; the handler already admitted a dead NPC_ and gains the HYPOTHESIS (the
+  engine's activate(player, true) on a blocked dead actor opens the loot menu) and a lab line; tsc clean; no counted line changed.
+  The agent's three premise corrections, from the source: a game-file NPC bound as itself never gets dealWithRef, its block state is
+  the native demote's and the native promote lifts it (dead branch included); formView's dead check never fires for the host's own
+  engine-killed actor, so the kill-time block had to be a reconciler state; the pre-c1de7167 re-block sat in the promote's own tick
+  and the gameThrQ Promote undid it (finding 58's "never opened a blocked body" read so). Merged into m3-turbo3-sys2-container 4fb20983,
+  pipeline 5132 (server and Windows client); 5130 builds the server half alone for the chest legs on the slice's dist. Probe
+  x-container-hold v1's corpse-leg header now names both dists (sha1 d925582f). Both halves' fresh reviews running beside.
