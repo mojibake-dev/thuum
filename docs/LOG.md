@@ -6995,3 +6995,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   npc-handoff's, npc-fate's, cell-host's and npc-puppet's scenarios, and watch), the door scenario by Eli's D-P13 (v24's draft
   20acc874 for A, v23 as it stands otherwise); then the merge and playtest 42 in the evening slot. The round trip
   (apply-on-demand.js 8fc23fc3) runs on the lab when numidium fits it in.
+- 08:44 PST 2026-11-03 (16:44Z 11-03) (numidium's report): the db0e19a5 re-stage is done, six of six GREEN: death-freeze v4 twice (161847, 162349,
+  both with the drop line and no resurrection), x-warm-exit v2 (162731: the warm-exit fix held a second time), swap v20 (163112),
+  death-reentry v5 (163554, its fourth green), scene-guest v3 (164106, its third). apply-on-demand.js 8fc23fc3 is deployed and the
+  round trip (x-apply-roundtrip, solo c1, the dead bandit's own kDead record through 35568 and 35567) is running. Then the df9e1009
+  re-stage (death-freeze v5 e77a1806 twice, the regression set), then the gate on Eli's D-P13 answer.
