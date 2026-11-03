@@ -6004,3 +6004,21 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   code out, the inert fields out, five asks every 1.5 s to about 6 s with the release two seconds after the last, a dead word
   ending a live hold unmoved, noteMovedLocal gone, the deferred death re-reading the word, the gate's dead read lazy; the body
   rule's exception named in npc-fate.md (e42c0aef). m3-system1 (9a1deb7a) stays as it is, superseded.
+- 02:00 PST 2026-11-03 (10:00Z 11-03) (numidium): history REWRITTEN on Eli's order ("rewrite history. get rid of it.") to remove
+  the gusto.com work address from commit metadata, the project's one exception to its no-force-push rule. git filter-repo with a
+  one-line mailmap to the mojibake.dev address, on exactly the affected commits: the fork's 69 and their 961 descendants (192
+  branches; a whole-repo run would have re-created upstream's history and stripped its 1921 GPG signatures, so --refs named the
+  affected branches with the 2 boundary parents excluded; main untouched at f926944b, parity 6d7fcc84 -> 188a8dea), and thuum's
+  40 plus every commit pinning a moved fork commit, 1953 in all (47 branches; the skymp gitlinks remapped through the fork's
+  commit-map; main 2e6a5489 -> 4176fc37). Leased force pushes, GitLab's with ci.skip; the fork's GitHub Actions paused and
+  restored (enabled, all); GitLab's force-push protection lifted for parity and main and restored. Verified from fresh mirror
+  clones of all four remotes: 0 work-address identities on any ref, every ref equal to the rewrite, every tip's tree unchanged
+  but thuum's pin, every pin on a rewritten fork branch. Then 67a996a5 (scenario headers, comments only) and dace1998 remapped
+  3858 cited shas in 152 tracked files (whole hex tokens that are an unambiguous prefix of a rewritten commit, length kept; none
+  after 0x); memory remapped too. Backups and the map: ~/Code/mojibake/.history-backup-20261103 (local; sha-map.tsv). New
+  pipelines 4923 (m3-system1-r2, now 4ccb4259) and 4924 (parity); other branches' first stages need their own. Residue outside
+  our reach: GitHub keeps old commits reachable by sha until it collects them (GitHub Support purges cached views and the fork
+  network's objects); GitLab may keep old commits under internal refs until its repository cleanup takes the commit-map. Also
+  tonight: T2 green on m3-system1 34a92ed6's image (round five is client-only); R4 v2 red only on exact position claims (R5's
+  guard 13 lines, no crash; no same-session replay); upstream skyrim-multiplayer/skymp has 3 commits past our main mirror (10-05
+  fixes) and dependency bumps, nothing in our areas.
