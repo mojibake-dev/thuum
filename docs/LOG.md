@@ -7151,3 +7151,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   step's shape for apply-on-demand.js v2.3 (the receiver re-encodes each census row's full form id through the engine's own 35928 and
   patches the three bytes before 35568, with the decode and lookup checks and a remap row); the process block's spell-id reader queued as
   the safety read; numidium's cross-seat draft moves to 192345's kDead record with REMAP.
+- 11:32 PST 2026-11-03 (19:32Z 11-03) (thuum-cf): Eli's word through numidium, verbatim "fine go with those decisions": D-P13 A (door leg B's not-simulating witness), D-P14 A (the
+  reload bound 512 an axis, leg A 256), ADR-065 A (the save is the state: the direction accepted; the receiver's live apply gated on the
+  cross-seat run, nothing reaches a seat before its row is CONFIRMED), D-F2 A (ADR-066 owner epochs accepted as proposed), D-F1 C (quest
+  state R0 on the server; a stage write a request relayed to every seat; one seat streams the globals table and the condition-read
+  variables). numidium writes the three status lines in DECISIONS.md. Landed here: b-npc-handoff-door-hosts v24 committed alone
+  (d649e51c; load_scenario 128 steps, 90 expressions; the header names the two rewritten claims and D-P13), x-npc-death-reentry v6 by
+  path (sha1 33e98734, v5 kept beside as -v5.yaml). Next: deploy-srv and the r3 gate on df9e1009 (numidium, after the Sven round trip
+  clears the lab); the ADR-065 build opens for thuum-cf: STATE.md and the fork's observe-and-serialize half, scoped after the process
+  reader's read and apply-on-demand.js v2.3 (REMAP) land.
