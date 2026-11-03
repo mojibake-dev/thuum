@@ -1,11 +1,17 @@
-# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v10 2026-11-03 after numidium's fresh review of
-# v8 and v9: no build has ever shown the 08:00 exit (055217 logged no door walk for 400 s up to about 9.3 h, the hosts running Hod
-# on DefaultEatEditorLoc6x1 0x1e618), and docs/engine/non-owning-seat.md P7 says why: his sawmill packages HodSawmillSawLog8x11
+# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v11 2026-11-03 after numidium's quick review of
+# v10 (READY FOR THE RED RUN, three fixes before the greens): 17:00 to 19:00 lies inside the CONDITIONED sawmill window (08:00 for
+# 660 min), so if a seat meets the mill's condition the sawmill package outranks the fallback and walks him out at a grant or before
+# 19:00, a red with a working fix that would read as the grant bounce unless the door line were checked; so each premise block
+# claims his package is neither sawmill package (0x1e604, 0x734ce) on the seat running him; the clock's numbers corrected (four runs
+# fit hour = start + elapsed/180: the seats come online at 17.19 after a 35 s relaunch or 17.69 after a 124 s rollback, the
+# interior seat's premise ends 17.56 to 18.06, the exit comes 169 to 259 s after the baselines and the 400 s until ends 141 to
+# 231 s past 19:00); v10 after numidium's fresh review of v8 and v9: no build has ever shown the 08:00 exit (055217 logged no door
+# walk for 400 s up to about 9.3 h, the hosts running Hod on DefaultEatEditorLoc6x1 0x1e618), and docs/engine/non-owning-seat.md
+# P7 or P4 says why, both HYPOTHESIS (P7: the conditioned packages; P4: no package after a double promote): his sawmill packages HodSawmillSawLog8x11
 # 0x1e604 and HodSawmillLoadLog8x11 0x734ce are CONDITIONED (kGetVMScriptVariable on 0x71dfc's ::ResourceState_var, 2 and 0),
 # so the 08:00 exit rests on the simulating seat's VM holding the mill script's state, while the inn package 0x35696 has no
 # condition. Leg A's exit is therefore 19:00, the house-door walk toward the inn that reproduced the bounce in 052100: the clock
-# starts at 17.0 (the seats land near 17.3 to 17.7, the visit and the grant end near 18.3 to 18.7, his exit comes 54 to 198 s
-# later), the hour is claimed between 17 and 18.9 at the premise's end and past 18.9 at the exit. Leg B's opening waits for his
+# starts at 17.0 (the numbers above), the hour is claimed between 17 and 18.9 at the premise's end and past 18.9 at the exit. Leg B's opening waits for his
 # record in the inn (he walks there after leg A's exit, so at the restart he is in the inn or on his way under the street host's
 # follow), within 200 s, and claims the follow's end at the visit's grant. The park is 27 cells from Riverwood's squares (not
 # five). The proof is named right: on the parent the "now simulates" claim HOLDS at 5 s (he retries the door every 14.6 s), the
@@ -86,6 +92,8 @@ steps:
   - assert:
       - server.ref(0x1348a).cell == "133c7:Skyrim.esm"
       - c2.npc_state(0x1348a).is3DLoaded == true
+      - c2.npc_state(0x1348a).package != 0x1e604
+      - c2.npc_state(0x1348a).package != 0x734ce
       - server.follow(0x1348a).following == false
       - 'server.log_count("(passes|follows|moves) 1348a into cell 97") == snapshot("out_visit_a")'
   - c2: teleport {cell: "3c:Skyrim.esm", x: 21995, y: -44935, z: -128, rot: [0, 0, 180]}
@@ -99,10 +107,11 @@ steps:
       - c2.npc_state(0x1348a).is3DLoaded == false
       - c2.npc_state(0x1348a).cell == 0x133c7
       - server.time().hour >= 17
-  # the interior's seat enters by the same landing, is granted the interior and runs him: his 3D and AI there, the street
-  # seat's copy still indoors with no 3D; across its grant no pass, follow or move of him into an exterior cell (055217: the
-  # new host's first report put him outdoors 180 ms after the grant, the bounce's mechanism at a grant); the hour still short
-  # of his exit (a late clock would put the exit before the baselines and the fix's run red at the exit until)
+  # the interior's seat enters by the same landing, is granted the interior and runs him: his 3D and AI there on neither
+  # sawmill package (the conditioned ones would walk him out early), the street seat's copy still indoors with no 3D; across
+  # its grant no pass, follow or move of him into an exterior cell (055217: the new host's first report put him outdoors 180 ms
+  # after the grant, the bounce's mechanism at a grant); the hour still short of his exit (a late clock would put the exit
+  # before the baselines and the fix's run red at the exit until)
   - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 97"}
   - server: snapshot {name: out_grant_a, of: 'server.log_count("(passes|follows|moves) 1348a into cell 97")'}
   - c1: teleport {cell: "133c7:Skyrim.esm", x: -506, y: -177, z: 0, rot: [0, 0, 0]}
@@ -117,6 +126,8 @@ steps:
       - server.ref(0x1348a).cell == "133c7:Skyrim.esm"
       - c1.npc_state(0x1348a).is3DLoaded == true
       - c1.npc_state(0x1348a).aiEnabled == true
+      - c1.npc_state(0x1348a).package != 0x1e604
+      - c1.npc_state(0x1348a).package != 0x734ce
       - c2.npc_state(0x1348a).is3DLoaded == false
       - c2.npc_state(0x1348a).cell == 0x133c7
       - server.time().hour >= 17
@@ -210,6 +221,8 @@ steps:
   - assert:
       - server.ref(0x1348a).cell == "133c6:Skyrim.esm"
       - c1.npc_state(0x1348a).is3DLoaded == true
+      - c1.npc_state(0x1348a).package != 0x1e604
+      - c1.npc_state(0x1348a).package != 0x734ce
       - server.follow(0x1348a).following == false
       - 'server.log_count("(passes|follows|moves) 1348a into cell 97") == snapshot("out_visit_b")'
   - c1: teleport {cell: "3c:Skyrim.esm", x: 21995, y: -44935, z: -128, rot: [0, 0, 180]}
@@ -223,10 +236,11 @@ steps:
       - c1.npc_state(0x1348a).is3DLoaded == false
       - c1.npc_state(0x1348a).cell == 0x133c6
       - server.time().hour >= 20
-  # the interior's seat enters by the same landing, is granted the interior and runs him: his 3D and AI there, the street
-  # seat's copy still indoors with no 3D; across its grant no pass, follow or move of him into an exterior cell (055217: the
-  # new host's first report put him outdoors 180 ms after the grant, the bounce's mechanism at a grant); the hour still short
-  # of his exit (a late clock would put the exit before the baselines and the fix's run red at the exit until)
+  # the interior's seat enters by the same landing, is granted the interior and runs him: his 3D and AI there on neither
+  # sawmill package (the conditioned ones would walk him out early), the street seat's copy still indoors with no 3D; across
+  # its grant no pass, follow or move of him into an exterior cell (055217: the new host's first report put him outdoors 180 ms
+  # after the grant, the bounce's mechanism at a grant); the hour still short of his exit (a late clock would put the exit
+  # before the baselines and the fix's run red at the exit until)
   - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 97"}
   - server: snapshot {name: out_grant_b, of: 'server.log_count("(passes|follows|moves) 1348a into cell 97")'}
   - c2: teleport {cell: "133c6:Skyrim.esm", x: -250, y: -360, z: 0, rot: [0, 0, 0]}
@@ -241,6 +255,8 @@ steps:
       - server.ref(0x1348a).cell == "133c6:Skyrim.esm"
       - c2.npc_state(0x1348a).is3DLoaded == true
       - c2.npc_state(0x1348a).aiEnabled == true
+      - c2.npc_state(0x1348a).package != 0x1e604
+      - c2.npc_state(0x1348a).package != 0x734ce
       - c1.npc_state(0x1348a).is3DLoaded == false
       - c1.npc_state(0x1348a).cell == 0x133c6
       - server.time().hour >= 20
