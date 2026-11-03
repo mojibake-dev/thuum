@@ -6264,3 +6264,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
     There is no load-time fix, no Papyrus native and no per-feature code. Next: the same for a container's inventory and a dead
     NPC (D1 and D4's class), serializing on demand on the owner (SaveGame into our own buffer, not the unload's stash), and
     LoadGame on a 3D-loaded reference.
+- 04:08 PST 2026-11-03 (12:08Z 11-03) (thuum-cf, numidium's report): the transplant GREEN (20261103-120316): ADR-065 decision 4's premise is a fact for a
+  REFR's lock (change-forms.md D2 and D3 CONFIRMED, main b00e4455). c1's 40-byte record for 0xe3a7a passed the inject's checks and
+  its FNV-1a and was written into a fresh c2's changes map with the engine's allocator before the inn loaded (written, read back
+  as ours, managerFlags 0); at c2's coc the cell's init ran AL 35569 for 0xe3a7a, applied 1, the only decode among 499 applies;
+  c2 read GetLocked 1 for the door it never locked and 0 for the untouched 0xe3a79, both real assert steps. One seat's engine
+  materialized another's record as its own. Before the wire: (a) the same path for an inventory (kInventory, maybe compressed) and
+  a dead non-persistent NPC (kLifeState and the actor block), numidium's on the lab after round nine's stage; (b) serializing on
+  demand on the owner (CheckSaveGame and SaveGame into our own BGSSaveFormBuffer while the reference is loaded; the unload's stash
+  refuses an entry that already has a buffer), the re-analyst's read spawned (docs/research/adr065-serialize-on-demand-2026-11-03.md,
+  in progress); (c) LoadGame on a 3D-loaded copy, risk 1, numidium's analyst.
