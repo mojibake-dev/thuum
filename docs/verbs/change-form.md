@@ -91,12 +91,14 @@ Nothing new: a non-owner's marks are counted, never swallowed (amendment F). The
 
 ## Message contract
 
-- C2S ChangeForm (reliable): epoch u32; formId u32 (the shared load order's id); formType u8; flags u32; version u8; body
-  bytes (cap 65536); fnv1a u32 over the body; remap: list of {offset u32, formId u32, index u32} (cap 256). The validator
-  (same commit, rule 4): formId within the load order's ranges and not a player's; version 0x4E; the body's first bytes a
-  change-form header whose type byte matches formType and whose lengths match the body; the fnv over the body equal to
-  fnv1a; every remap row's offset inside the body with its three bytes decoding to kind 0 and the row's index; the sender the
-  host of the actor's cell at `epoch` (the cells table); caps. Refusals: E_CHANGEFORM_RANGE, E_CHANGEFORM_HEADER,
+- C2S ChangeForm (reliable): epoch u32; formId u32 (the shared load order's id); formType u8; flags u32; version u8; body:
+  the WHOLE record (its header included) as a lowercase hex string on the JSON wire, two characters per byte, cap 65536 bytes
+  (131072 characters); fnv1a u32 (FNV-1a 32, basis 0x811c9dc5, prime 0x01000193) over the decoded record bytes; remap: list of
+  {offset u32 (a RECORD offset, the header's width included), formId u32, index u32} (cap 256). The validator (same commit, rule
+  4): formId within the load order's ranges and not a player's; version 0x4E; the hex even and [0-9a-f]; the decoded record's
+  header (byte 0 on) with a type byte matching formType and lengths matching the decoded size; the fnv over the decoded bytes
+  equal to fnv1a; every remap row's offset inside the decoded body with its three bytes decoding to kind 0 and the row's index;
+  the sender the host of the actor's cell at `epoch` (the cells table); caps. Refusals: E_CHANGEFORM_RANGE, E_CHANGEFORM_HEADER,
   E_CHANGEFORM_HASH, E_CHANGEFORM_REMAP, E_CHANGEFORM_OWNER, E_CHANGEFORM_EPOCH, E_CHANGEFORM_SIZE, each logged once a minute
   per sender and form.
 - S2C ChangeFormAck: formId u32; fnv1a u32 (the owner's compare baseline).
@@ -114,10 +116,16 @@ the server: nothing of the body in this slice (the sections the server validates
 
 ## Client
 
-Native (Skyrim Platform C++): the two detours (count, report), the frame-end serialize with the census and the hash, one event
-to TS per changed form (formId, formType, flags, body as hex, fnv1a, remap rows), the receive natives (REMAP through 35928; the
-mid-game apply 35509, 35568, 35567; the changes-map injection for an unloaded cell), every address proven in the ready line
-(T1). TS: changeFormService (the per-form acked hash, the send, the ack, the apply on ChangeFormApply before the view's first
+Native (Skyrim Platform C++), as built on adr065-sys1-native for the corpse trigger: two TESModPlatform Papyrus statics called
+through callNative in the update context and returning JSON strings (a Papyrus native returns no object and callNative takes no
+array): SerializeChangeForm(refr) runs the on-demand recipe with the 35928 census and returns {formId, formType, flags, version,
+bodyHex (the whole record), fnv1a, remap [{offset, formId, index}], census, thread, ...} or "" with the reason in the platform
+log; ApplyChangeForm(refr, bodyHex, flags, version, remapRows "offset:formId:index,...") runs the REMAP step through 35928 then
+35509, 35568 and 35567 and returns {applied, reason, fnvPatched, ...}; every address proven in a startup line with its first bytes
+(the slice's T1). H1, read first on the lab: the natives run on the platform's update thread, not the main thread (the scripts
+deferred to Main's); the fork's own 3D drop and rebuild runs there (rerollActor), so the premise is reported, not enforced. The
+AddChange funnel's two detours and the frame-end serialize come with the live-actor flags later; the changes-map injection for an
+unloaded cell is read 4's. TS: changeFormService (the per-form acked hash, the send, the ack, the apply on ChangeFormApply before the view's first
 update). Deleted in the same branch: formView's bind kill ("dead record ... loaded alive on a watcher's seat ... killed
 silently") and the promote gate's move (the movedInto block); hostService's dead hold, placing hold, its asks and reviveHold;
 PartOne's "own copy hidden" Disable snippet. Kept: the redress wait (the outfit flags are not in this slice), the puppet flag,
