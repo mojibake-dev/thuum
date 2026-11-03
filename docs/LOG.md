@@ -6423,3 +6423,28 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   v2 (sha1 483dec5d; the question in the position claims, the lever typed into c2's own game with isEssential as a premise claim,
   runs after the premise probe is green). The serialize script's review fixes are committed (thuum a9b95ec8, file sha1 0e56218b);
   numidium runs it check-only first. Census v3 GREEN (20261103-130223; change-forms.md A2 and A4 CONFIRMED, numidium).
+- 05:16 PST 2026-11-03 (13:16Z 11-03) (thuum-cf): door v22 COMMITTED alone (thuum 8609b4f4, file sha1 1acc441f) after its fresh review (NOTES
+  ONLY: ten log-counts not nine; "no deterministic witness" rather than "cannot print", since the hold's ask and the view's gate both
+  read the engine's cell live and only the frame order decides which prints first; v18's "one MovementValidation warn line on every
+  head" corrected, the swallow is silent; the leg-A comment names the ask line; the regex's unanchored tail left as written; the
+  latent "placed >= 1" satisfiable by the settle line noted, the "asked [1-9]" claim isolating; needs lab-api at or after 3b8273a5,
+  an ancestor of the last stage's LABAPI 4922). Swap v20 final by path (sha1 75bd28b9) after its review (NOTES ONLY: 124242's gap was
+  23.1 s, step 35's log-count alone 8.7 s; 123800's street seat was c1; the leg-A comment; the top connect order unswapped since v19,
+  no claim reads it). probe-check never looks inside a snapshot's of:, so the baseline's pairing was checked by hand (four identical
+  occurrences per file). Round eleven's fresh review (e23bd229..e4397635): NOTES ONLY (SetIsDead(true) still leaves the pending phase
+  armed on the corpse until the stand-up, harmless since TickDeaths erases on IsDead; one EndPendingDeath() helper for a later round;
+  RespawnFated's clear redundant through RebuildAndRespawn's Respawn; NoteHostSampledDead's comment lacks the anchor clause; the
+  arithmetic of both new cases traced: the stale-start case refuses by about 13 s with the fix and stands the body without it, the
+  round-ten case refused by 600 ms under the old rule and admitted by 3.4 s under the new). scene-guest v2.1's red (125517) READ: a
+  placement premise, not the build and not a host gate. c1's engine started DialogueRiverwoodIntroScene 0x954d9 at 12:56:08.5Z on
+  landing in RiverwoodLocation and the quest was still running 5 min 8 s later (no questStop on c1 in any log; no Sven or Hilde line or
+  idle beyond Hilde's tanning entry; Hilde never left 9732; the server neither relayed nor refused it, 954d9 is denied); the scene
+  0x954da's phase 1 opens only within 2400 units of Hilde (alias 1) and phase 2 within 1000 of Sven (alias 2) by the SCEN and CTDA
+  records, and c1 stood at the landing, about 3200 from Hilde's rack and 3900 from Sven, unmoved; playtest 41's host walked to the mill
+  and the quest stopped after 3 min 1 s. The guest half worked (c2's two "stopped on this seat" lines 47 ms after its quest start, its
+  questStop 0.3 s later, Sven's scene 0). v3's fix: c1 within 2400 of Hilde and 1000 of Sven (x-prop-static's (20758, -45608, -104)),
+  c2 matched, the 240 s until kept; the settling read a c1 npc-state in the window (scene 0x954da, Hilde at her rack). serialize
+  check mode GREEN (numidium, x-serialize-on-demand-check, c1 solo): every premise ok (both singletons, kLoading and kSaving clear,
+  the dry-run byte 0, clearingData's +0xDA5 zero, resetGame 0, Main.threadID 1708, REFR, slots 19527 and 19528, the entry 0x90001000
+  with a null record); at the purge the stash wrote 0xe3a7a's record byte-identical to 114726's (40 bytes, FNV-1a 0x4ebbb261), so the
+  record is deterministic across sessions for the same state (ADR-065 decision 7's premise). The serialize run follows on c1.
