@@ -4289,3 +4289,38 @@ Alternatives.
   cross-check.
 - Generate a whole save from the record and load it at every connect: part of decision 4's path at a login, but a save load per
   cell entry is too coarse.
+
+Amended 04:23 PST 2026-11-03 (numidium, still PROPOSED), on two kinds of evidence.
+
+The transplant (docs/engine/change-forms.md D1 to D3) is CONFIRMED for a REFR's lock (20261103-114726, 20261103-120316) and for a
+container's inventory (20261103-120817, 20261103-121150). In each case one seat's engine stored the record at the unload; written
+into a fresh seat's changes map before its cell loaded, it was applied by that seat's own cell init and read back, beside an
+untouched control. Decision 4's premise is a fact for those two. A dead NPC is next, needing a same-cell move: initial data 4,
+which the cell's init applies with no registration (the re-analyst).
+
+The prior art (docs/research/fnv-multiplayer-2026-11-03.md, Eli's lead: the Fallout New Vegas and Fallout 4 multiplayer projects,
+read for design only, rule 7) adds or sharpens these:
+- A. Decision 2: a mark is a candidate, not a change. The owner compares the form's serialized bytes, or their hash, with the record
+  the server last acknowledged, and equal bytes send nothing. NV:MP's resend of every synced reference is the failure this
+  prevents, and AddChange answers true on every write (change-forms.md B6). Ownership words travel in their own message and never
+  mark a form. A periodic full pass over the owner's loaded forms counts records that changed with no mark: the observe point's
+  gaps, by form type.
+- B. Risk 3 closed the lazy way. At its frame's end the owner of the world globals walks TESDataHandler's TESGlobal array
+  (CommonLib TESDataHandler.h) and reports each value that differs from the last acknowledged one (fnv-coop's technique; no setter
+  exists to hook in either engine). The clock's globals stay ADR-021's.
+- C. Decision 5 widens. Quests need an owner. That is an ADR-063 row (one story owner, or a quest that follows the seat whose
+  player drives it), proposed with thuum-cf. The script variables other seats' conditions read (TESCondition functions 629
+  GetVMQuestVariable and 630 GetVMScriptVariable, TESCondition.h:762-763, derived from the load order's CTDA records, not from a
+  list of names) stream from the owner by B's per-frame diff. The rest of a script object moves at the hand-off.
+- D. The hand-off itself is a two-phase protocol with an owner epoch on every grant and every report, the epoch-stamped transfer
+  of fnv-coop and of Skyrim Together's PR #906. A report from a past epoch is dropped and counted, and the new owner stays passive
+  until it has applied the record and acked. That is ADR-063's protocol and thuum-cf's to write; this ADR's records are what it
+  carries.
+- E. New decision 7: per-cell digests. Every few seconds each seat sends a hash of each loaded form's serialized record, per cell,
+  and the server compares the owner's with each non-owner's. A mismatch names the form and the section, so a missing channel
+  becomes a counted lab signal, not a playtest finding.
+- F. New decision 8: the engine's books stay whole. On a non-owner, passivity is a decision withheld (the AI's update, the event at
+  SendEvent), never an engine write swallowed. A seat's own saves are never an input: the server's record wins at a login and at
+  every cell load. Every engine change made for the network and not for the world (a hold, AI off, a parked copy) is ledgered and
+  undone before a save, and the observer drops the marks the ledger explains. A record naming a created (0xFF) form goes through
+  the server's id map.
