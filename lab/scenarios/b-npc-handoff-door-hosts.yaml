@@ -1,5 +1,18 @@
-# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v8 2026-11-03 after numidium's fresh review of
-# v7 1c8f3455: leg B gave the street to the wrong seat (a restart keeps the seats' places, so the street seat of leg A took 0x9712
+# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v9 2026-11-03 after v7's leg A on the parent,
+# 20261103-055217 (union-srv-3 35509f7a), red at the exit until with NO door walk (step 24's door-13407 count 0) and the bounce
+# at a GRANT instead: 05:53:42.417 c1 granted 133c7 at epoch 2, 05:53:42.597 "ff000000 passes 1348a into cell 9732, which
+# another game hosts (D9)" (c1's FIRST report as the house's new host put Hod outdoors), 05:53:42.633 "ff000001 passes 1348a
+# into cell 133c7 (D9)" (c2's indoor copy passed him back), then only his speech and state lines for 400 s. numidium's reading
+# (HYPOTHESIS): the promote at the grant placed c1's copy at the LAST RELAYED SAMPLE (the outdoor one from c2's follow at
+# 05:53:05.698 during its visit, when Hod stepped out and back in: "follows 1348a into cell 9713 (D6)", "may not move 1348a to
+# cell 133c7", "moves 1348a into cell 133c7, which it hosts"), not at the record (indoors since 05:53:06.767): the stale
+# placement's mechanism at a grant rather than a D9 pass. The settle's half (b) would protect that false exit (c2's report back
+# came 36 ms after it, inside the window), so the record must be imposed at EVERY promotion (a grant, a pass, a host's return)
+# with the record's position sent reliably with or before the hoster word: ADR-064 system 1's model (a reference's life on a
+# non-owning seat), which comes before more settle code. So v9 claims no pass, follow or move of him into an exterior cell
+# across EACH grant (the street seat's visit and the interior seat's entry: a baseline right before the teleport in, equal
+# after the grant), so this case goes red where it happens, and on a fix it tests the grant's imposition. v8 after numidium's
+# fresh review of v7 1c8f3455: leg B gave the street to the wrong seat (a restart keeps the seats' places, so the street seat of leg A took 0x9712
 # and 0x9731 again at its reconnect before the other landed on the same square at the same ring; cells.rs `consider` hands a cell
 # to a strictly nearer ring alone), so leg A's street seat now parks at lab-spawn before the restart, as b-npc-handoff-night's
 # shape does, and comes back only to enter the inn; the hour claims gained their upper bound (a late clock after a long rollback
@@ -79,7 +92,10 @@ steps:
       - server.ref(0x1348a).cell == "133c7:Skyrim.esm"
   # the premise, claimed: the street's seat visits the interior first (it hosts it, so Hod's AI may step while it looks), sees
   # him with 3D, then leaves for the street; the interior unhosts behind it, and its engine's copy of him reads indoors with no
-  # 3D (playtest 41's shape, the bounce's mechanism, whatever its cause)
+  # 3D (playtest 41's shape, the bounce's mechanism, whatever its cause). Across the visit's grant no pass, follow or move of
+  # him into an exterior cell (055217's grant promotion put him outdoors from a stale placement)
+  - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 97"}
+  - server: snapshot {name: out_visit_a, of: 'server.log_count("(passes|follows|moves) 1348a into cell 97")'}
   - c2: teleport {cell: "133c7:Skyrim.esm", x: -506, y: -177, z: 0, rot: [0, 0, 0]}
   - wait: 5
   - c2: move {dy: 150, duration_s: 2}
@@ -90,6 +106,7 @@ steps:
       - server.ref(0x1348a).cell == "133c7:Skyrim.esm"
       - c2.npc_state(0x1348a).is3DLoaded == true
       - server.follow(0x1348a).following == false
+      - 'server.log_count("(passes|follows|moves) 1348a into cell 97") == snapshot("out_visit_a")'
   - c2: teleport {cell: "3c:Skyrim.esm", x: 21995, y: -44935, z: -128, rot: [0, 0, 180]}
   - until: {within: 60, expect: [server.host(0x133c7).hosted == false]}
   - wait: 15
@@ -102,8 +119,11 @@ steps:
       - c2.npc_state(0x1348a).cell == 0x133c7
       - server.time().hour >= 6.0
   # the interior's seat enters by the same landing, is granted the interior and runs him: his 3D and AI there, the street
-  # seat's copy still indoors with no 3D; the hour still short of his exit (a late clock would put the exit before the
-  # baselines and the fix's run red at the exit until)
+  # seat's copy still indoors with no 3D; across its grant no pass, follow or move of him into an exterior cell (055217: the
+  # new host's first report put him outdoors 180 ms after the grant, the bounce's mechanism at a grant); the hour still short
+  # of his exit (a late clock would put the exit before the baselines and the fix's run red at the exit until)
+  - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 97"}
+  - server: snapshot {name: out_grant_a, of: 'server.log_count("(passes|follows|moves) 1348a into cell 97")'}
   - c1: teleport {cell: "133c7:Skyrim.esm", x: -506, y: -177, z: 0, rot: [0, 0, 0]}
   - wait: 5
   - c1: move {dy: 150, duration_s: 2}
@@ -112,6 +132,7 @@ steps:
   - c2: npc-state {formId: 0x1348a}
   - c1: npc-state {formId: 0x1348a}
   - assert:
+      - 'server.log_count("(passes|follows|moves) 1348a into cell 97") == snapshot("out_grant_a")'
       - server.ref(0x1348a).cell == "133c7:Skyrim.esm"
       - c1.npc_state(0x1348a).is3DLoaded == true
       - c1.npc_state(0x1348a).aiEnabled == true
@@ -199,7 +220,10 @@ steps:
       - server.follow(0x1348a).client == "c1"
   # the premise, claimed: the street's seat visits the interior first (it hosts it, so Hod's AI may step while it looks), sees
   # him with 3D, then leaves for the street; the interior unhosts behind it, and its engine's copy of him reads indoors with no
-  # 3D (playtest 41's shape, the bounce's mechanism, whatever its cause)
+  # 3D (playtest 41's shape, the bounce's mechanism, whatever its cause). Across the visit's grant no pass, follow or move of
+  # him into an exterior cell (055217's grant promotion put him outdoors from a stale placement)
+  - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 97"}
+  - server: snapshot {name: out_visit_b, of: 'server.log_count("(passes|follows|moves) 1348a into cell 97")'}
   - c1: teleport {cell: "133c6:Skyrim.esm", x: -250, y: -360, z: 0, rot: [0, 0, 0]}
   - wait: 5
   - c1: move {dy: 150, duration_s: 2}
@@ -210,6 +234,7 @@ steps:
       - server.ref(0x1348a).cell == "133c6:Skyrim.esm"
       - c1.npc_state(0x1348a).is3DLoaded == true
       - server.follow(0x1348a).following == false
+      - 'server.log_count("(passes|follows|moves) 1348a into cell 97") == snapshot("out_visit_b")'
   - c1: teleport {cell: "3c:Skyrim.esm", x: 21995, y: -44935, z: -128, rot: [0, 0, 180]}
   - until: {within: 60, expect: [server.host(0x133c6).hosted == false]}
   - wait: 15
@@ -222,8 +247,11 @@ steps:
       - c1.npc_state(0x1348a).cell == 0x133c6
       - server.time().hour >= 20
   # the interior's seat enters by the same landing, is granted the interior and runs him: his 3D and AI there, the street
-  # seat's copy still indoors with no 3D; the hour still short of his exit (a late clock would put the exit before the
-  # baselines and the fix's run red at the exit until)
+  # seat's copy still indoors with no 3D; across its grant no pass, follow or move of him into an exterior cell (055217: the
+  # new host's first report put him outdoors 180 ms after the grant, the bounce's mechanism at a grant); the hour still short
+  # of his exit (a late clock would put the exit before the baselines and the fix's run red at the exit until)
+  - server: log-count {pattern: "(passes|follows|moves) 1348a into cell 97"}
+  - server: snapshot {name: out_grant_b, of: 'server.log_count("(passes|follows|moves) 1348a into cell 97")'}
   - c2: teleport {cell: "133c6:Skyrim.esm", x: -250, y: -360, z: 0, rot: [0, 0, 0]}
   - wait: 5
   - c2: move {dy: 150, duration_s: 2}
@@ -232,6 +260,7 @@ steps:
   - c1: npc-state {formId: 0x1348a}
   - c2: npc-state {formId: 0x1348a}
   - assert:
+      - 'server.log_count("(passes|follows|moves) 1348a into cell 97") == snapshot("out_grant_b")'
       - server.ref(0x1348a).cell == "133c6:Skyrim.esm"
       - c2.npc_state(0x1348a).is3DLoaded == true
       - c2.npc_state(0x1348a).aiEnabled == true
