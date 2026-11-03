@@ -5809,3 +5809,22 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   second. Only the 24 hooks count, so the open set is at least this. The probe ran v6 under v5's pin (the stage reads the file
   at step 9, twenty minutes after the check); my wrapper now runs a copy frozen at the check. Props: badca627 (behaviour
   41300469's; since then comments, two verdict strings and PropTest) staging on 9a2a2491's dist (gitlab 17277) with probe v11.
+- 23:56 PST 2026-11-02 (07:56Z 11-03) (thuum-cf): the promote fix's round two m3-promote-record 0b61fc80 GREEN on 4873 (client and server):
+  numidium's FIX FIRST answered item by item. The hold keeps the record and is checked every update; it ends when the engine's copy
+  stands in the record's cell within 64 units ("hold <id>: placed at the record after N ms, the engine at ..., the record at ...;
+  released"), asks the gate's move once if nothing else places the copy, and releases on a 2 s timeout or a missing form with its
+  own line; remoteServer's flip handler holds with the record and runs reconcile(id) with no forced word on the next update, and a
+  promotion inside the create word holds the same way; the death report and the shot's and cast's origins gate on isReportable (the
+  word and the placement); FlipHostedFlags, ClaimEnded, ClaimActor and ReleaseClaim send the keyframe to the game the word names
+  (PlayerActor(SimulatorOf)) before the word, so a swap's Release carries the new host its keyframe first, with CellHostTest's swap
+  case; the keyframe's health clamped. Door scenario v12 (main a3cd74b5, the scenario alone; 114 steps): across each grant the claim
+  is no pass, follow or move of Hod BACK into the interior (the bounce's signature: 055217's pass back 36 ms after the pass out,
+  070357's move back after the refused report) and the exterior exits are recorded, because a working fix leaves him home under his
+  unconditioned day package 0x734cd, which may walk him out at the grant legitimately, and refusing that package in the premise would
+  refuse the parent's red condition; a fresh reviewer agent reads a3cd74b5 under ADR-064 (the claim change is its, before any green).
+  The swap probe v10 (by path, 96c4b806) carries the same. Slice 1b: 073235's red was the census's cap (SetCurrentStageID 11 calls
+  on 10 selves in the guest's load window, two under "on others"), so m4-scripts-work 19bdfc3c names up to 32 selves a row a window
+  (a rare row names every self; a hot row's tail stays under "on others") and probe v7 (db3524ba) keeps the "on others" == 0 claim
+  beside the named row's absence, so the bound biting reads as a red, and lists both console logs in its artifacts; pipeline
+  running. The third lab read and D-S1's measurement recorded in papyrus-events.md and ADR-063 decision 3's amendment (73f9794c).
+  Lesson: a cap that hides data needs a claim that says when it bit.
