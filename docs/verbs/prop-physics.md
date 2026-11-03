@@ -80,29 +80,36 @@ The rule (R0: the server decides, the word is the decision; R2 for the transform
   followers' copies stay Keyframed in the hand's place (D73 would otherwise rest them Dynamic and drop them) and the server's row
   stays awake and grabbed; a hand that loses a double grab (the answer word names another seat while this seat holds) lets go,
   Keyframed, so no two hands move one prop (ADR-063 decision 3).
-- A7. A stream that stops without an asleep sample (a final sample lost on the unreliable channel, a client that stopped; a crash
-  mid-flight ends in the departure's word) is a stalled row: anyone's to claim (A3), and the host's own sample of it past
-  PROP_MOVING_MS takes it over at a new epoch with the word (TakenOver, player 0; a non-host's sample never does, and the
-  takeover's step budget is the first sample's), so no prop is left that nobody may move. The grab's cap ends by the table's tick
-  (once a second from PartOne::Tick) with the word, whether or not the holder samples again; a departure words every row the seat
-  still owned, a capped grab included (the review of 2026-11-03, round three).
+- A7. Every seat's word names the seat that streams. The host's own wake of a resting prop (its engine's kick, a grab past its
+  cap it samples before the tick) is a word naming the host BY ID at a new epoch (Woken), never player 0 over a row that names
+  the host: with the default word a host change left the old host reading itself as no owner, stopping without a final sample,
+  while the new host's samples were refused and answered with the old host's name, and nobody streamed (the review of 2026-11-03,
+  round four). So a host change leaves the old host streaming until its rest, which returns the prop to the host by default, the
+  new one, with the word. No timer takes a row: a stream that stops without an asleep sample is a stalled row, anyone's to claim
+  (A3); the asleep sample is reliable, untracking sends a final sample, a crash ends in the departure's word (every row the seat
+  still owned, a capped grab included), and the grab's cap ends by the table's tick (once a second from PartOne::Tick) with the
+  word whether or not the holder samples again. Round three's takeover (the host's sample of an owner silent for PROP_MOVING_MS)
+  was a lease by another name and is gone.
 
 Wire: PropOwner.player 0 gains the meaning "the cell's host" (wire-validate admits 0 for PropOwner alone, the contract line and the
 fixtures with it, same commit); E_PROP_MOVING is a new refusal code (a log line, no message). Server: props.rs's claim and transform
 carry the rule, `gone` and `tick` return rows, the C++ handlers send the words (the grant's, the rest's, the cap's from the tick, the
-takeover's, the departure's) and answer NotOwner; a late subscriber's word names the host's own live row as player 0. Client:
+host's wake by id, the departure's) and answer NotOwner; a late subscriber's word names the live owner by id, the host's own row
+included. Client:
 ownerOf by the word; onOwner stores any epoch not below the known one, player 0 included; the mirror's two writes removed; the contact claim
 skipped while another seat's awake stream is live here (STREAM_LIVE_MS; the server refuses it anyway); grab, release and drop claims
 and the asleep send unchanged. Tests: props.rs (the moving refusal, the grab over a touch, the rest's return and word, the departure's
-words, the stalled claim, the host's own rest sends no word, the host's takeover and the tick's cap), PropTest.cpp (the word at rest
-to both seats with player 0, the moving refusal, NotOwner answered, the takeover's word), wire-validate's PropOwner case (0 admitted).
+words, the stalled claim, the host's wake by id across a host change, the tick's cap), PropTest.cpp (the word at rest to both seats
+with player 0, the moving refusal, NotOwner answered, the wake's word and the live row across the props table's grant),
+wire-validate's PropOwner case (0 admitted).
 Two seats: x-prop-arbitration v4 by path (lab-spawn, a server-placed iron ingot at the mining floor marker; leg 1 c2's contact at
 rest: granted, streams, rests, the word returns it; leg 2 c1 kicks it into c2: the contact takes nothing (the guest's own skip or
 E_PROP_MOVING) and the record moved; leg 3 c2's grab at rest over a pitch sweep: granted, the hold's samples read through the
 server's stream counters, the release's rest and word; leg 4 c2's blast at rest: the impulse grant or the host's own stream, one
 of the two; every count read against a snapshot behind its own log-count step; lab/frida/prop-grab.js armed on both seats at the
-relaunch for E13, E14 and E15; A2's Held and E31 wait for a concurrent step, a serial script cannot overlap two seats' acts), then
-b-prop-arbitration in its own commit. Stale text fixed with
+relaunch for E13, E14 and E15, prop-sleep.js on c1 and prop-contact.js on c2 as each seat's second watcher (E10, E2, E26, E27;
+whether a seat carries two is the run's first read); A2's Held and E31 wait for a concurrent step, a serial script cannot overlap
+two seats' acts), then b-prop-arbitration in its own commit. Stale text fixed with
 the build: skymp.rs:1816, PropClaimMessage.h:10, propClaimMessage.ts:8 and props.rs:201 (the cell refusal), skymp.rs:1833,
 PropOwnerMessage.h:8-10 and propOwnerMessage.ts:4-6 (the velocity), PropTest.cpp:371's title, the reach row below (:268).
 
