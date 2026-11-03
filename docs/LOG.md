@@ -5719,3 +5719,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   stale indoor copy on the street's seat is a claimed premise of the later scenarios, not 052100's proven cause; the difference
   between 051454 and 052100 is unexplained (the orientation or the hour). Reviews tonight: props round five (3fa107c6) and door
   v8/v9 FIX FIRST; the seat-fact snapshot grammar on main (5219f093).
+- 22:27 PST 2026-11-02 (06:27Z 11-03) (thuum-cf): numidium's docs/engine/non-owning-seat.md (c544f0e7) carries W1 system 1's
+  promote rows P1 to P7 (P7: Hod's sawmill packages are conditioned on the mill script's variable, so the 08:00 exit is
+  unreliable); my static read of the promote path is docs/research/promote-path-static-2026-11-03.md (the grant, claim, release
+  and lease end send no position, the pass alone does; the view's placement at the flip is gated on a cell mismatch and one-shot
+  per record cell). Door v10 6cfc1c4c: leg A's exit at 19:00 by the unconditioned inn package from a 17.0 start, leg B's opening
+  on his record in the inn, the proof named right; swap probe v8. Props: round five's review (F1: the unload treated as a moment)
+  answered by round six 3eaf26e6 (the unload a state, Away until the seat's load report; pipeline pending) and probe v9 with leg
+  5's cell unload; A7 and the model doc's nits. The promote fix starts instrument-first (numidium's W1 order): fork
+  m3-promote-record d66de5fd, cut from the settle head, R1's lines at every promote and demote (the placement's source, the
+  engine's cell and position, the record's cell and position; formView's gate line and puppetService's placement line), a client
+  build alone; numidium stages it with the parent's server for door v10's leg A and the swap probe, the engine rows go CONFIRMED
+  from that run, then the imposition commits (the record sent reliably before every UpdateHoster, the view's placement
+  unconditional at a promote) follow on the branch.
