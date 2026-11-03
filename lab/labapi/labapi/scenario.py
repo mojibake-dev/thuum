@@ -74,6 +74,10 @@ class ServerSpec(BaseModel):
     # master's GMST iHoursToRespawnCell, 240 in Skyrim.esm 1.6.1170), so a death's respawn falls inside a run after
     # a restart to a later hour; None keeps the file's
     npcRespawnHours: float | None = None
+    # the run's own hand-off settle window in ms (m3-handoff-settle's handoffPassSettleMs server setting, 0 off):
+    # a run at 0 tests the reliable placement alone, the fix's first half (the settle review, 2026-11-02); None
+    # keeps the file's, and the server's own default, 1000 ms
+    handoffPassSettleMs: int | None = None
 
 
 class Step(BaseModel):
@@ -566,15 +570,19 @@ def _server_spec(server: dict[str, Any]) -> ServerSpec:
     if respawn is not None and (isinstance(respawn, bool) or not isinstance(respawn, (int, float)) or not 0 < respawn <= 720):
         raise ValueError(f"server.npcRespawnHours is a number of game hours above 0 and up to 720, got {respawn!r}")
     respawn = float(respawn) if respawn is not None else None
+    settle = server.get("handoffPassSettleMs")
+    if settle is not None and (isinstance(settle, bool) or not isinstance(settle, int) or not 0 <= settle <= 60000):
+        raise ValueError(f"server.handoffPassSettleMs is a whole number of ms from 0 (off) to 60000, got {settle!r}")
     world = server.get("world")
     if world is None:
         return ServerSpec(snapshot=str(server.get("snapshot", "clean")), netem=netem, npcEnabled=npc, gameHour=hour,
-                          npcRespawnHours=respawn)
+                          npcRespawnHours=respawn, handoffPassSettleMs=settle)
     if "snapshot" in server:
         raise ValueError("server takes a snapshot or a world, not both")
     if not isinstance(world, str) or not _WORLD_NAME.fullmatch(world):
         raise ValueError(f"server.world names a directory under lab/fixtures/worlds, got {world!r}")
-    return ServerSpec(world=world, netem=netem, npcEnabled=npc, gameHour=hour, npcRespawnHours=respawn)
+    return ServerSpec(world=world, netem=netem, npcEnabled=npc, gameHour=hour, npcRespawnHours=respawn,
+                      handoffPassSettleMs=settle)
 
 
 def load_scenario(text: str) -> Scenario:

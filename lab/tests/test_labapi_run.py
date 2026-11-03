@@ -2006,6 +2006,15 @@ class CellHostSteps(RunTests):
         self.assertEqual(laid["npcRespawnHours"], 1.0)
         self.assertEqual(laid["npcEnabled"], False, "the version's file kept beside the knob")
 
+    def test_a_runs_handoff_settle_reaches_the_server_through_the_overlay(self):
+        """m3-handoff-settle's window as the run's own: 0 turns the settle off, the reliable placement alone."""
+        files = self._settings_files()
+        run_id, body = self._run("id: t-settle\nclients: [c1]\nserver: {handoffPassSettleMs: 0}\nsteps:\n  - c1: connect\n")
+        self.assertEqual(body["verdict"], "green", body)
+        laid = json.loads((self.tmp / "server-settings-run.json").read_text())
+        self.assertEqual(laid["handoffPassSettleMs"], 0)
+        self.assertEqual(laid["npcEnabled"], False, "the version's file kept beside the knob")
+
     def test_a_runs_game_hour_starts_the_servers_clock_through_the_overlay(self):
         files = self._settings_files()
         run_id, body = self._run("id: t-hour\nclients: [c1]\nserver: {gameHour: 7.9}\nsteps:\n  - c1: connect\n")

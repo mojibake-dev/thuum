@@ -412,6 +412,17 @@ class NpcKillStep(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 load_scenario(f"id: x-r\nclients: [c1]\nserver: {{npcRespawnHours: {bad}}}\nsteps:\n  - wait: 1\n")
 
+    def test_a_server_block_may_set_the_runs_handoff_settle(self):
+        # m3-handoff-settle's window as the run's own (0 off: the reliable placement tested alone)
+        from labapi.scenario import load_scenario
+
+        s = load_scenario("id: x-s\nclients: [c1]\nserver: {handoffPassSettleMs: 0}\nsteps:\n  - wait: 1\n")
+        self.assertEqual(s.server.handoffPassSettleMs, 0)
+        self.assertIsNone(load_scenario("id: x-s\nclients: [c1]\nsteps:\n  - wait: 1\n").server.handoffPassSettleMs)
+        for bad in ("-1", "true", "60001", "1.5", "'one'"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(f"id: x-s\nclients: [c1]\nserver: {{handoffPassSettleMs: {bad}}}\nsteps:\n  - wait: 1\n")
+
     def test_kill_ref_and_respawn_ref_take_a_form_id(self):
         # a game-file actor killed by the server (its killer a client of the scenario) or put up again at once
         from labapi.scenario import load_scenario

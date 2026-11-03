@@ -453,7 +453,8 @@ class Runner:
         npc = rec.scenario.server.npcEnabled
         hour = hour_override if hour_override is not None else rec.scenario.server.gameHour
         respawn = rec.scenario.server.npcRespawnHours
-        if settings and (npc is not None or hour is not None or respawn is not None):
+        settle = rec.scenario.server.handoffPassSettleMs
+        if settings and (npc is not None or hour is not None or respawn is not None or settle is not None):
             # ADR-035 point 9: the run's own npcEnabled (and its game hour) over the version's
             # file, laid beside the world for this run alone, so no second file is kept in step
             try:
@@ -464,6 +465,8 @@ class Runner:
                 d["npcEnabled"] = npc
             if respawn is not None:
                 d["npcRespawnHours"] = respawn
+            if settle is not None:
+                d["handoffPassSettleMs"] = settle
             if hour is not None:
                 # the clock is a pure function of the wall clock and the time block (wire-rules
                 # clock.rs): it reads start.hour at the epoch, so the run's start is the epoch
