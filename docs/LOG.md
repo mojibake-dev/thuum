@@ -6756,3 +6756,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   12 s after, every 100 ms: the copy's ragdoll state, motion type, the 3D root's world z, headZ, the AI process level, and any
   SetPosition or puppet move landing after the release line). r3 cannot merge on this evidence (door v23 is in the gate; the freeze
   is item 3 of playtest 42); playtest 42 moves to ADR-053's evening slot, numidium tells Eli.
+- 07:43 PST 2026-11-03 (15:43Z 11-03) (thuum-cf; numidium's runs 153648 and 153929): the actor-mode serialize script WORKS: on the promoted
+  bandit 0x39fe4 the kLifeState marks came off the main thread (6852, then 6620), were deferred through PlayerCharacter::Update in 1
+  and 17 ms, and every premise held, slot 0x0E as 40266 included; at kDying the record is ACHR, size code 1, version 78, length1 4789,
+  raw, 4,795 bytes, FNV-1a 0x73ded23b, the initial data [0, 1053] (kind 6: the cell 0x4371de direct, the position, the Havok blob),
+  levelBoolBits [1053, 1061], the process block absent at level 0; at kDead 4,481 bytes, 0x2f0621cd, the initial data [0, 1029];
+  header flags 0x8a040426 and 0x8a040427 (kAnimation dropped), recordFreed, bufferDestroyed and entryUntouched true both times;
+  MovetoLow ran at the exit outside the recipe and no stash formed (D7, the third time). change-forms.md C6 (numidium). ADR-065's
+  sending half is proven for a REFR and for a Character; the note's new run section flips Q7, the deferral trigger and the
+  save-shaped record to CONFIRMED. The initial data's Havok blob is the owner's corpse pose in the engine's own format, so the
+  live-form apply of the owner's actor record on the guest ((c)) is a candidate cure for the guest's half-up body (playtest 41's
+  item 3), HYPOTHESIS until a guest applies one; the re-analyst takes (c)'s static read with that target.

@@ -668,3 +668,29 @@ high process) and the lifeState byte of the ActorState block against the live in
    loaded.
 4. The unload filter: 19230 hooked to log IsPersistent per reference at a `pcb` (D7's promoted actor logs 1 and never reaches 35570).
 5. The deferred demotion: 15331 hooked at the quest's finish for a promoted actor, reading RemoveChange(kPromoted) and the stash.
+
+## Runs 20261103-153648 and 153929: the actor class on the lab (15:43Z 11-03, numidium's runs, thuum-cf's read)
+
+serialize-on-demand-actor.js on c1 alone, the promoted bandit MS13BanditCampfire01 0x39fe4 killed by npc-kill: the check run (FLAG
+0xffffffff, RUNS 8) and the serialize run (FLAG 0x400, RUNS 2, DEFER true), both green on their kill asserts. The kLifeState marks
+came off the main thread (6852, then 6620), were deferred through PlayerCharacter::Update's return in 1 and 17 ms, and every premise
+held, slot 0x0E as 40266 included. At kDying (lifeState 1): type ACHR, size code 1, version 78, length1 4789, raw (deflateSetting 0),
+4,795 bytes, FNV-1a 0x73ded23b, the initial data [0, 1053], levelBoolBits [1053, 1061], the process block absent at level 0. At kDead
+(lifeState 2): 4,481 bytes, FNV-1a 0x2f0621cd, the initial data [0, 1029]. Header flags 0x8a040426 and 0x8a040427 (kAnimation dropped,
+Actor's 0x7A returning 0), kind 6 (the cell 0x4371de direct, then the position, then the Havok blob). recordFreed, bufferDestroyed and
+entryUntouched true both times. The engine's own MovetoLow ran at the player's exit outside the recipe (caller 0x675fb7) and no stash
+formed (D7, the third time). Recorded by numidium as change-forms.md C6. So, by these runs:
+
+- CONFIRMED: Q7, a Character's slot 0x0E is 40266 and the recipe serializes a Character through it with no pre-call; the record is
+  save-shaped (level 0, the process block absent) as Q4 predicted;
+- CONFIRMED: a kill's kLifeState marks fire off the main thread, and PlayerCharacter::Update's return is a main-thread trigger a
+  frame or two after the mark (the deferral 1 and 17 ms);
+- CONFIRMED: the five block writers bound the sections under 40266 (the marks gave the region table);
+- CONFIRMED: a promoted actor never stashes at the unload (D7), with MovetoLow still running for it at the exit;
+- HYPOTHESIS still: the deflate setting's meaning (0 here, the record raw); 37501's IsPersistent gate as the predicate that skipped
+  the stash; the inverse (c), LoadGame on a 3D-loaded copy.
+
+The initial data of kind 6 opens with the cell and the position and carries the Havok blob, which for a dead actor is the ragdoll's
+bone transforms on the owner's engine: the owner holds the corpse's exact pose in the engine's own format. Applying that record to
+the guest's loaded copy (the live-form apply, (c)) is a candidate cure for the guest's half-up body (playtest 41's item 3, the
+death-freeze reds), beside the Frida sampler's search. HYPOTHESIS until a guest applies one.

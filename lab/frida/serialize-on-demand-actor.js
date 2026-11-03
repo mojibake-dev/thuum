@@ -1,4 +1,6 @@
 // serialize-on-demand-actor.js (thuum, the re-analyst 2026-11-03; docs/research/adr065-serialize-on-demand-2026-11-03.md, "The actor
+// Runs 20261103-153648 (check) and 153929 (serialize, RUNS 2): GREEN on the promoted bandit 0x39fe4 through Character's slot 0x0E
+// 40266, deferred through PlayerCharacter::Update in 1 and 17 ms; 4,795 and 4,481 bytes at kDying and kDead, the entry untouched.
 // class", Q7): serialize-on-demand.js's recipe (GREEN, run 20261103-131511) for a LOADED actor FORM (ACHR 0x3E only). At AddChange's
 // inner (AL 35576) marking FORM with FLAG (default kLifeState: a kill): 36035, 36037, slot 0x0D (19527, no Actor or Character override),
 // 35715, slot 0x0E (37649 Actor::SaveGame on VTABLE_Actor; every NPC is a Character whose slot 0x0E is 40266, an inlined copy of the
