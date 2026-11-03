@@ -763,7 +763,10 @@ passes 1348a into cell 9732, which another game hosts (D9)", c1's FIRST report a
 Reading (HYPOTHESIS): the promote at the grant placed c1's copy at the LAST RELAYED SAMPLE (c2's follow of 05:53:05.698 during its
 visit, when he stepped out and back in: "follows 1348a into cell 9713 (D6)", "may not move 1348a to cell 133c7", "moves 1348a into
 cell 133c7, which it hosts"), not at the record (indoors since 05:53:06.767): the stale placement's mechanism at a grant rather than
-a D9 pass. For the fix's scope: half (a) imposes the passing report at a D9 pass alone, not at a grant; half (b) would PROTECT this
+a D9 pass. The swap probe v5 (20261103-060106, the roles swapped: c1 the visit, c2 the house's seat) showed the same at its grant,
+06:02:29.120 the grant, .158 "ff000001 passes 1348a into cell 9732 (D9)" 38 ms after it, .205 "ff000000 passes 1348a into cell
+133c7 (D9)": two for two at the grant, in both orientations, beside 052100's door-walk bounce. For the fix's scope: half (a) imposes
+the passing report at a D9 pass alone, not at a grant; half (b) would PROTECT this
 false exit (the report back came 36 ms after the pass out, inside the window), leaving him outdoors though he never walked. So the
 record must be imposed at EVERY promotion (a grant, a D9 pass, a host's return), its position sent reliably with or before the hoster
 word and the promote reading it rather than the last sample: ADR-064 system 1's model (a reference's life on a non-owning seat,

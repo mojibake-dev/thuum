@@ -5698,3 +5698,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   sent reliably with or before the hoster word (ADR-064 system 1's model first; numidium writes its promote rows from 052100,
   055217 and playtest 41; the settle's merge waits). v9 02420ca6 claims no pass, follow or move of him into an exterior cell
   across each grant (the visit's and the interior seat's); swap probe v7 the same. npc-handoff.md carries the run and the reading.
+- 22:10 PST 2026-11-02 (06:10Z 11-03) (thuum-cf): the swap probe v5 on the parent (20261103-060106, roles swapped) RED with the
+  same GRANT-promotion bounce: c2 granted 133c7 at 06:02:29.120, its first report "passes 1348a into cell 9732 (D9)" 38 ms after,
+  c1's indoor copy "passes 1348a into cell 133c7 (D9)" 47 ms later; two for two at the grant in both orientations, beside 052100's
+  door-walk bounce. numidium writes W1 system 1's doc (a reference's life on a non-owning seat) promote rows from the three runs
+  with the trace plan (where the promote reads its position: `last` against the record); the fix then imposes the record at every
+  promotion; the settle's greens are held and the parent stage stays up. Door v9's header and npc-handoff.md carry 060106. I am
+  reading the promote path's code (the client's placement at the hoster word, the server's grant and return sends against the
+  pass's reliable placement) for the doc's static column, as a research note beside numidium's rows.
