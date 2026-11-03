@@ -5617,3 +5617,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   timeout_s, leg B's premise only "not the inn"; one leg template writes both legs. Probes by path: x-prop-arbitration v3 (every
   snapshot of a count behind its log-count step, the stream counters for the no-refusal and hold claims, the blast's either-or
   against snapshots), x-handoff-door-hosts-swap v4 (v6's leg B on a clean world).
+- 21:10 PST 2026-11-02 (05:10Z 11-03) (thuum-cf): settle m3-handoff-settle dd611afc GREEN on 4810 (five jobs; 4803's wolf case
+  answered) and reviewed OK for its first lab run; its round three afdb587d pushed on the review's five (the follow's rule back to
+  x-handoff-door 013234's any-direction form, Follow.from serving the deepening pass alone; PASS_SETTLE_MAX_MS 60 s in wire-rules
+  with set_pass_settle_ms clamping and returning the window set, tested; the Stale texts and the two test comments; the
+  margin-then-pass test beside the margin test; npc-handoff.md's two wanderer rows 21bd38b1). Slice 1b's first lab read recorded
+  in papyrus-events.md (bea7d3bd; run 20261103-045048: 24 of 24 hooked, every offset equal to the table's RVA so the entries are
+  CONFIRMED by a run id, the first flush, no live SetValue line; the per-row census unread, the service's summary trailing the
+  platform's flush by up to 30 s) and x-script-natives v2 by path (every seat claim behind its own log-count step, a 120 s census
+  wait, the platform's flush and the service's summary claimed apart, the guest leg: no live row for cell 9732 on c2 and its
+  not-hosted tallies). The grab read the Havok model listed as never run is written, lab/frida/prop-grab.js (ee260d76):
+  StartGrabObject 40552 and DestroyMouseSprings 40557 by CommonLib's RELOCATION_IDs (EndGrabObject is inline), the player's grab
+  fields at the newer runtime-data layout (each header comment plus 8; HYPOTHESIS until a grab reads sanely), a 250 ms hold
+  timeline per seat; x-prop-arbitration v4 arms it on both seats through the relaunch steps' frida (E13, E14, E15; E31 and A2's
+  Held wait for a concurrent step, a serial script cannot overlap two seats' acts). The verb docs and the model doc describe
+  door-hosts v6 and x-prop-arbitration v4 (a89ac7bb). Props 14ad24e3 still on 4811 (the client build).
