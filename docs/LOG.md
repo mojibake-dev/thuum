@@ -5579,3 +5579,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   line's real pattern, server baselines, movement claims, the blast's either-or). The ADR-063 outcome notes I added after Eli's
   acceptance are marked PROPOSED (numidium's flag: an accepted ADR's text changes by Eli's word). The door scenario v3 abb4d8bc;
   the settle head 9606963e reviewed OK for its first lab run, its three should-fixes next.
+- 20:21 PST 2026-11-02 (thuum-cf): the review rounds of the night: m3-handoff-settle 9713d92a (pipeline 4803; the window a server setting, the pass
+  row's origin, the tick's pruning, the Stale line's rate limit, the door test's exit direction; 728c634d was a red of my own); ADR-062
+  slice 1b round three d3d28dd8 (pipeline 4805; latent notes with tokens and ages, only the 24 rows' keys from the resolved function,
+  the probe a plain read, the essential case's hit); the props arbitration's round 9fc30e95 (pipeline 4799); b-npc-handoff-door-hosts
+  v4 974a9484 (the 5 s reads ordered, the door line's per-leg baseline, the parent's predicted reds) and x-handoff-door-hosts-swap v2
+  by path from its leg B. numidium's parent read of v3 is running; its stamps go into v4's header.
