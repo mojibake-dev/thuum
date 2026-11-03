@@ -1,5 +1,10 @@
-# b-container-rest (thuum-magnus, drafted HH:MM PDT 2026-10-31 from x-container-rest 69f2ad68; docs/verbs/containers.md, M4's row;
-# fork m4-containers-rest): the rest of the container row on two seats. The frame is x-shared-chest's (c1 hosts Bleak Falls Temple
+# b-container-rest v2 (thuum-cf, 2026-11-03; ADR-067 decisions 1 and 6, Eli's word: one occupant per container, no live view; fork
+# m3-turbo3-sys2-container): claim 2 is rewritten from the shared view (two occupants, D52) to the hold: c2's activation while c1 is in
+# the chest is REFUSED (the server's E_CONTAINER_BUSY line once, c2's ContainerMenu closed, c1's open), c1 closes (the first shut), c2
+# opens alone and its take from afar is refused as before; claim 3's and 4's shut counts and claim 5's lid counts move by the one
+# extra open and shut this adds (c2 hears four opens: claims 1, 2, 4 and 5). No other claim changed; the reach, the disconnect, the
+# saved-open restart and the lids stand as v1 wrote them. v1 (thuum-magnus, drafted 2026-10-31 from x-container-rest 69f2ad68;
+# docs/verbs/containers.md, M4's row; fork m4-containers-rest): the rest of the container row on two seats. The frame is x-shared-chest's (c1 hosts Bleak Falls Temple
 # 0x371de, c2 beside), the subject the bandit camp's chest TreasBanditChest 0x371e9 at (-3420, 732, 575) (lab/esm.py cellrefs), a
 # CONT with a lid. The server's lines: "[verb:containers] 371e9 open with N occupant(s)" and "371e9 shut with 0 occupant(s)" at
 # SetOpen, "<player> released from 371e9 by its disconnect", "371e9 saved open came back shut at load", "E_CONTAINER_REACH: <player>
@@ -10,9 +15,11 @@
 # Claims (the verb doc's Tests), each with what it proves:
 # 1. c1 opens: its ContainerMenu, the server's "open with 1 occupant", no reach refusal, c2's "lid Open played" once within 3 s: the
 #    open is the server's state and the watcher's engine plays it (R0 the state, the lid native from the property).
-# 2. c2 opens too: two occupants (D52), no "doesn't occupy" line; c2 moved 100 units off with its menu open takes all (R, DIK 19): the
-#    take is refused from beyond the reach (E_CONTAINER_REACH), the chest's items stay (c1's open menu in the screenshot, recorded).
-# 3. Both close: the server's "shut with 0 occupant" and c2's "lid Close played" within 3 s: the lid follows the last occupant out.
+# 2. c2's E while c1 is in the chest is refused (ADR-067 decision 6): "E_CONTAINER_BUSY: <c2> activates 371e9 held by <c1>; refused"
+#    once, c2's ContainerMenu closed, c1's still open, no "doesn't occupy" line; c1 closes ("shut with 0 occupant" once), c2 opens
+#    alone ("open with 1 occupant" a second time); c2 moved 100 units off with its menu open takes all (R, DIK 19): the take is
+#    refused from beyond the reach (E_CONTAINER_REACH), the chest's items stay.
+# 3. c2 closes: the server's second "shut with 0 occupant" and c2's "lid Close played" within 3 s: the lid follows the occupant out.
 # 4. c1 opens and relaunches with its menu open: the disconnect releases it ("released from 371e9 by its disconnect"), the chest shuts,
 #    c2's lid Close line again within 5 s.
 # 5. c1 back and the chest open again, the server restarted (5 s after the open, past the save tick): "saved open came back shut at
@@ -71,11 +78,28 @@ steps:
       - 'server.log_count("371e9 open with 1 occupant") == 1'
       - 'server.log_count("E_ACTIVATE_REACH") == 0'
       - 'c2.log_count("container 371e9 lid Open played") == 1'
-  # 2. the second occupant, then the move and the take from afar
+  # 2. the hold: c2's activation refused while c1 is in the chest; c1 closes; c2 opens alone; then the move and the take from afar
   - c2: activate {refId: 0x371e9}
   - wait: 3
+  - c2: dump-state
+  - c1: dump-state
+  - c2: screenshot
+  - assert:
+      - 'server.log_count("E_CONTAINER_BUSY: ff[0-9a-f]+ activates 371e9 held by ff[0-9a-f]+; refused") == 1'
+      - 'c2.state.menuOpen("ContainerMenu") == false'
+      - 'c1.state.menuOpen("ContainerMenu") == true'
+      - 'server.log_count("371e9 open with 1 occupant") == 1'
+      - 'server.log_count("doesn.t occupy") == 0'
+  - c1: close-menu {name: ContainerMenu}
+  - wait: 3
+  - assert:
+      - 'server.log_count("371e9 shut with 0 occupant") == 1'
+  - c2: activate {refId: 0x371e9}
+  - wait: 3
+  - c2: dump-state
   - assert:
       - 'c2.state.menuOpen("ContainerMenu") == true'
+      - 'server.log_count("371e9 open with 1 occupant") == 2'
       - 'server.log_count("doesn.t occupy") == 0'
   - c2: teleport {cell: "371de:Skyrim.esm", x: -4200, y: 850, z: 650, rot: [0, 0, 90]}
   - wait: 2
@@ -86,16 +110,14 @@ steps:
   - c2: dump-state
   - assert:
       - 'server.log_count("E_CONTAINER_REACH: ff[0-9a-f]+ takes 371e9") >= 1'
-  # 3. both close: the lid follows the last occupant out
+  # 3. c2 closes: the lid follows the occupant out
   - c2: close-menu {name: ContainerMenu}
-  - wait: 2
-  - c1: close-menu {name: ContainerMenu}
   - wait: 3
   - c2: log-count {pattern: "container 371e9 lid Close played"}
   - c2: screenshot
   - assert:
-      - 'server.log_count("371e9 shut with 0 occupant") >= 1'
-      - 'c2.log_count("container 371e9 lid Close played") >= 1'
+      - 'server.log_count("371e9 shut with 0 occupant") >= 2'
+      - 'c2.log_count("container 371e9 lid Close played") >= 2'
   # 4. the host's disconnect with its menu open releases it; the watcher's lid shuts again
   - c1: teleport {cell: "371de:Skyrim.esm", x: -3509.0, y: 745.5, z: 575, rot: [0, 0, 98.6]}
   - wait: 2
@@ -103,15 +125,15 @@ steps:
   - wait: 3
   - assert:
       - 'c1.state.menuOpen("ContainerMenu") == true'
-      - 'server.log_count("371e9 open with 1 occupant") == 2'
+      - 'server.log_count("371e9 open with 1 occupant") == 3'
   - c1: relaunch {until: gone}
   - until: {within: 15, every: 1, expect: ['server.log_count("released from 371e9 by its disconnect") >= 1']}
   - wait: 5
   - c2: log-count {pattern: "container 371e9 lid Close played"}
   - c2: screenshot
   - assert:
-      - 'server.log_count("371e9 shut with 0 occupant") >= 2'
-      - 'c2.log_count("container 371e9 lid Close played") >= 2'
+      - 'server.log_count("371e9 shut with 0 occupant") >= 3'
+      - 'c2.log_count("container 371e9 lid Close played") >= 3'
   # 5. the restart with the chest open
   - c1: connect
   - wait: 10
@@ -141,10 +163,11 @@ steps:
   - c2: screenshot
   - assert:
       - 'server.log_count("371e9 saved open came back shut at load") == 1'
-      # no new lid Open on either seat at the reconnect: c2 heard three opens (claims 1, 4 and 5's; claim 2's second occupant joins an
-      # open chest, so isOpen does not change and the watcher plays nothing, x-container-rest v4 195055) and c1 one since its relaunch
-      # (claim 5's own: the opener's game runs the apply too); one more would be the saved-open chest playing at creation
-      - 'c2.log_count("container 371e9 lid Open played") == 3'
+      # no new lid Open on either seat at the reconnect: c2 heard four opens (claims 1, 2, 4 and 5's: under the hold claim 2's c2 opens a
+      # shut chest after c1's close, so isOpen changes and its own game plays the line, the opener's game running the apply too; under
+      # v1's shared view the second occupant joined an open chest and played nothing, x-container-rest v4 195055) and c1 one since its
+      # relaunch (claim 5's own); one more would be the saved-open chest playing at creation
+      - 'c2.log_count("container 371e9 lid Open played") == 4'
       - 'c1.log_count("container 371e9 lid Open played") == 1'
   - c1: dump-state
   - c2: dump-state
