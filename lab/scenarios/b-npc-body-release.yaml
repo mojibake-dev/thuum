@@ -1,4 +1,7 @@
-# b-npc-body-release (thuum-magnus, 2026-10-25; claims amended for memo D52 on 2026-10-30, its own commit, rule 13):
+# b-npc-body-release v3 (thuum-cf, 2026-11-03; ADR-067 decision 6, the exclusive container hold on fork m3-turbo3-sys2-container):
+# the release's-effect claim is rewritten: the server no longer logs "N players in the container now" (one occupant at most), so the
+# claim that c2 joins a FREE body reads the hold's refusal instead: no E_CONTAINER_BUSY for 39fe4 (c1's close released the body before
+# c2's E). Nothing else changed. v2 (thuum-magnus, 2026-10-25; claims amended for memo D52 on 2026-10-30, its own commit, rule 13):
 # a body's occupancy is released by its looter's closing activation, and the next player at the body is
 # admitted at once. Playtest 34, section 5 (Eli): "the non-host can't interact with the body" and "rotfern
 # couldn't take armor, test 2 could". The server's lines then: a body is a container with ONE occupant within
@@ -111,8 +114,8 @@ steps:
   - assert:
       - 'c2.state.menuOpen("ContainerMenu") == true'
       - 'c2.log_count("body 39fe4: the ContainerMenu is open") >= 1'
-      # the release's effect: c1 is out of the set when c2 joins, so the server never counts two
-      - 'server.log_count("ProcessActivate 39fe4 - [0-9]+ players in the container now") == 0'
+      # the release's effect: c1 is out of the set when c2 joins, so c2's activation is not refused (ADR-067 decision 6: the hold)
+      - 'server.log_count("E_CONTAINER_BUSY: ff[0-9a-f]+ activates 39fe4") == 0'
   - c2: close-menu {name: ContainerMenu}
   - wait: 3
   - c2: dump-state
