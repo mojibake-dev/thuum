@@ -7437,3 +7437,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   in its own commit (W4, Eli's word above). Also: b-prop-push GREEN on today's build (20261103-223344, the NPC move server over r3's
   dist), and none of turbo 2's five prop branches (m4-prop-arbitration, m4-prop-blast, m4-prop-blast-client, m4-turbo2-union,
   m4-turbo2-train) is in r3, so playtest 41's prop regression is not in this build; props in play are unread on it.
+- 15:00 PST 2026-11-03 (23:00Z 11-03) (thuum-cf): The corpse slice BUILT GREEN (fork pipeline 5123, m3-adr065-system1 436ce96b, server and Windows client);
+  numidium runs T2 on m3-adr065-system1-436ce96b then the stage with x-corpse-record v2 (LABAPI 5124). Eli, verbatim via numidium:
+  "sure that saves where the body falls, but will prisoner see rotfern drag sven by his leg": no, not in this build, and one-shot by
+  construction on both ends (the owner stops sampling an at-rest body until the engine's dead flag clears; the server refuses every
+  later sample E_BODY_AT_REST until a later claim), so a drag moves the body on the dragger's engine alone and the watcher's copy never
+  moves. Written into prop-physics.md's slice three as the physics-objects arm's first acceptance case after the slice: (a) the
+  re-rest (the owner re-opens the settle on a move beyond 2 units, the record re-serialized at the new rest, the server accepting the
+  owner's re-open, the watcher re-applying: the body jumps to where the drag left it), then (b) the live pull (the grab claims the
+  body as a prop, the dragger streams the record's Havok block at a few Hz, the watcher applies each; read 2 gates the live apply).
+  Eli on the hold's scope, verbatim: "m4-container-exclusive works for me." (D-C1 to D-C5 as recommended, the b-container-rest
+  rewrite included). b-prop-push GREEN on today's build (numidium, 223344): the prop regression Eli saw is not that scenario's.

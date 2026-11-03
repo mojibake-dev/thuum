@@ -499,6 +499,21 @@ Two props the engine owns differently from clutter, written so the row kind "pro
   root with the constraints following (HYPOTHESIS to trace before the build: a dead ragdoll on 1.6.1170 keyframes bone by bone).
   It shares its stream with corpse dragging and is built with it in M4; by Eli's clause it goes to the backlog if it becomes too
   much of a bugbear. M3's bodies row closes at "within a stride".
+- The first acceptance case after the corpse slice (ADR-067 decisions 3 and 4 by ADR-065's path, m3-adr065-system1; Eli,
+  2026-11-03, verbatim: "sure that saves where the body falls, but will prisoner see rotfern drag sven by his leg"): DRAG A CORPSE,
+  THE WATCHER SEES IT PULLED. Today's slice is one-shot by construction on both ends: the owner stops sampling a dead body at its
+  rest (sendInputsService's bodies map, atRest) until the engine's own dead flag clears, and the server refuses every later sample
+  E_BODY_AT_REST until a later claim (MpActor.h's rest comment), so a drag moves the body on the dragger's engine alone and the
+  watcher's copy never moves, not even at the drag's end. The case in two halves, the cheap one first: (a) the re-rest: the owner
+  keeps watching an at-rest body and a move beyond kBodyRestUnits re-opens its settle (a new window, the record re-serialized and
+  sent at the new rest), the server accepting the OWNER's re-open from at-rest (the mover's claim, ADR-063 decision 1) and the
+  watcher re-applying the record, so the body jumps to where the drag left it; (b) the live pull: the grab claims the body as a prop
+  (the toucher's rule), the dragger streams the record's Havok block (the ragdoll's bodies; run 210713 applied a record's pose
+  cross-seat within 5 units) at a few Hz while held, the watcher applying each through ApplyChangeForm on its live-or-dead copy
+  (the live apply read 2 gates), the release closing with (a)'s rest. Both share the stream with the held object above and are the
+  physics-objects arm's first items after the slice (ADR-067 decision 7's third place); the stage's probe may add a drag leg as a
+  reading only (the owner's grab on its own ragdoll, the watcher's copy unmoved, the E_BODY_AT_REST count), since the code already
+  says what it will show.
 - Not slice three's: traps' bodies (M4's dungeon work, with the MSTT admission ADR-058's note defers there), horses (mount.md).
 
 ## The physics stage's first reads (19:30 PDT 2026-10-30; m3-prop-physics 3586f2db on the merged base, LABAPI 4021)
