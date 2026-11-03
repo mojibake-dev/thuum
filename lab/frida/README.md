@@ -330,6 +330,18 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   seat sees motion type 4 and no impulse. Struct offsets are read from the
   CommonLibSSE-NG headers named in the header. Run on both seats through
   x-prop-push.
+- prop-grab.js: the player's grab of a prop (docs/engine/havok-props.md rows
+  E13, E14, E15, E31; docs/verbs/prop-physics.md A2, A6). Hooks
+  PlayerCharacter::StartGrabObject (40552; the grab fields before and after,
+  the grabbed reference by LookupReferenceByHandle) and DestroyMouseSprings
+  (40557, the release; EndGrabObject is inline in CommonLibSSE-NG), and
+  polls the player's grabbedObject, grabObjectWeight and grabType every
+  250 ms (the runtime data at the newer layout's 0x3E0 start, so each
+  header comment plus 8), emitting on change. Expected: the grabber's seat
+  shows the call, a handle and a weight held until the release; the other
+  seat shows no call and handle 0 throughout, and a second hand on the same
+  body shows a call with the handle still 0 or no call. Written 2026-11-03
+  for x-prop-arbitration leg 3 on both seats; never run.
 - prop-launch.js: prop-contact.js plus the body's motion at each contact and before and after every impulse push (the hkpEntity's
   embedded motion: type, position, linear velocity and its length, angular speed, inverse mass; offsets from hkpEntity.h, hkpMotion.h,
   hkMotionState.h, hkTransform.h), for D73's open item: a resting Dynamic basket thrown out of reach by a standing capsule contact (push
