@@ -1,4 +1,12 @@
-# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v20 2026-11-03 after v19's red run on break 3
+# b-npc-handoff-door-hosts (M3, docs/verbs/npc-handoff.md, ADR-047 D9's settle; v21 2026-11-03 after ADR-064's fresh review of v20
+# (FIX FIRST, one race): the settle phase's until on the record home could hold at its first poll, before the roster's sighting (the
+# client reports unknown high-process actors every 2 s and the server moves the record once the reporter hosts the sighted cell) had
+# taken the record out, and then the premise would have read c1's copy outdoors again. v21 waits for the record to LEAVE first (an
+# until on the record in 3c within 90 s, 101556's shape: the lab's rollback snapshot holds him at the mill from 17.x), snapshots the
+# street door's line, waits for the record home (300 s), and claims the walk: the door line above its snapshot and c1's copy in 133c7.
+# The header's package name corrected from the run: at 02:26 the engine ran 0x1cb15 (DefaultSleepEditorLoc22x7, 22:00 for 420 min),
+# not the esm's 0x1b210 (DefaultSleepEditorLoc24x8, 00:00 to 08:00); both sleep at his bed, so the walk home is the same bet. v20
+# 2026-11-03 after v19's red run on break 3
 # (20261103-101556, RED at leg A's premise: c1's engine had Hod OUTDOORS with 3D at 02:00; the server's sighting path took the record
 # out, "ff000000 sights 1348a at (19179, -44737, -24) in 3c, cell 9713; the record stood in 133c7", then "moves 1348a into cell
 # 9732, which it hosts", before any MoveTo). The hour does not place him: the seat's SAVE does (its rollback snapshot holds him where
@@ -162,8 +170,9 @@ steps:
   - c2: connect
   - wait: 10
   # leg A (v17): P8's condition MADE server-side, at an hour when every engine keeps him home. His clean-world record stands in
-  # his house (unhosted, so frozen); the clock is 2.x (DefaultSleepEditorLoc24x8 0x1b210, 00:00 to 08:00: every engine's copy of
-  # him is at his bed, loaded or not); c1 takes the street (9712 and 9731 hosted, the house unhosted) and its own engine's copy of
+  # his house (unhosted, so frozen); the clock is 2.x (his sleep package, 0x1cb15 DefaultSleepEditorLoc22x7 by 101556's read, 22:00 for
+  # 420 min; the esm's 0x1b210 DefaultSleepEditorLoc24x8 is the 00:00 to 08:00 one; both sleep at his bed, so every engine's copy of
+  # him settles there); c1 takes the street (9712 and 9731 hosted, the house unhosted) and its own engine's copy of
   # him reads indoors with no 3D (claimed: the stale copy's place). Then the server moves the RECORD to c1's feet (the console
   # table's MoveTo through the gamemode's labCommand: the actor's record teleported to the caller, ConsoleCommands.cpp
   # ExecuteMoveTo; the server's own move, no seat's report), so the record enters a cell c1 hosts and c1 is promoted while its
@@ -185,11 +194,18 @@ steps:
   # the settle phase (v20): the seat's save holds him where he stood at 17.x (the mill), so c1's engine spawns him there and his
   # sleep package walks him home by the street door under c1's follow; the record follows him in (the sighting path may have taken
   # it out first, 101556). Recorded: the street door's line; claimed: the record back home within 300 s
+  # first the sighting's effect: the record out (101556: the save's copy at the mill, sighted, "moves 1348a into cell 9732"); then
+  # the walk home, claimed by the door line above its snapshot and c1's copy in the house
+  - until: {within: 90, expect: [server.ref(0x1348a).cell == "3c:Skyrim.esm"]}
   - server: log-count {pattern: "door 13423: 1348a.s host .* walks it through to 133c7"}
+  - server: snapshot {name: door_settle_a, of: 'server.log_count("door 13423: 1348a.s host .* walks it through to 133c7")'}
   - until: {within: 300, expect: [server.ref(0x1348a).cell == "133c7:Skyrim.esm"]}
   - wait: 8
   - c1: npc-state {formId: 0x1348a}
   - server: log-count {pattern: "door 13423: 1348a.s host .* walks it through to 133c7"}
+  - assert:
+      - 'server.log_count("door 13423: 1348a.s host .* walks it through to 133c7") > snapshot("door_settle_a")'
+      - c1.npc_state(0x1348a).cell == 0x133c7
   # the restart at the same hour forgets the hosts and the follows and keeps the world and the seats' places; the client
   # processes keep their engines, so c1's copy stays at his bed, now inside an interior c1 does not load
   - server: restart {gameHour: 2.0}
