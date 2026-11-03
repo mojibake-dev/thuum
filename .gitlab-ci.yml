@@ -48,6 +48,8 @@ docs-lint:
           sys.exit(1)
       print("no em dash")
       PY
+    # a T3 box may not be ticked over an open engine claim (ADR-064 decision 1; lab/tools/verb-lint.py)
+    - python3 lab/tools/verb-lint.py docs/verbs
     - just --list
 
 # Lab tooling unit tests (addr.py, later ledger.py and lab-api). The fixture
