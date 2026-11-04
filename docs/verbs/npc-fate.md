@@ -2259,6 +2259,98 @@ re-analyst names +070DB20 in 1.6.1170 and its null (the equip path's model read 
 an unloaded actor on the lab confirms; the platform's own guard (RedressOnGameThread refusing an actor whose Is3DLoaded is
 false, logging "redressActor(<id>): no 3D, deferred") is the second half, a platform build.
 
+## Playtest 44's three NPC regressions, read before built (2026-11-03 night; Eli: "fix the regressions first"; three read-only code maps)
+
+### 1c. The body's inventory is the server's record (the longbow take, the arrows)
+
+Facts (canon-3; the fork's lines): the server ALREADY rolls a game-file NPC's inventory into its record: MpObjectReference.cpp
+EnsureBaseContainerAdded (:2519-2588) reads CNTO through the template chain (GetInventoryObjects :2477-2497), rolls each LVLI
+in AddContainerObject (:2499-2517) with LeveledListUtils::EvaluateListRecurse at the fate's level (:2541-2543, else level 1), the
+outfit once into worn (:2560-2576); triggered at Init (MpActor.cpp:2511-2519), RollFateIfUnrolled (:2239-2265) and the respawn
+(:2704-2726). What reaches the seats is less: FateOf (PartOne.cpp:84-97) carries refrId, pick, level and WORN alone, no inventory
+rows (ActorFateMessage.h:21-42; skymp.rs ActorFateEntry); the platform's three detours (Offsets.h:153-160: 14752, 16155, 16128;
+FateHooks.cpp ContainerAddReplacement :373-434) pin WEAP rows only, by design (":357-359 rows that are not weapons stay the
+engine's"), and the late path RedressOnGameThread (FateApi.cpp:81-127) strips the outfit only. An interior placement is fated
+late by construction (ADR-049 Consequences), so 39fe2's host kept its engine's own container roll (the Long Bow and its arrows),
+the loot window listed that copy's inventory (containersService.ts:19-73 sends TakeItem after the engine moved the item; the
+body's activation sends the "inventory" property then OpenContainer, MpObjectReference.cpp:2073-2077, :2430-2445, but the menu
+lists the engine copy), and the server's RemoveItems threw "Source inventory doesn't have enough" (Inventory.cpp:131-135, caught
+by ScampServer.cpp Tick :709-710, no E_ code). OnUpdateEquipment (ActionListener.cpp:1659-2065) drops a worn item the record
+lacks (:1835-1843, :2052-2065) EXCEPT a hosted actor's WEAP, which it ADDS to the record with E_EQUIP_UNKNOWN_WEAPON (:1829-1833,
+:1966-1978): the record following the engine, R2 where the law says R0. libespm reads LVLI/LVLN/LVLO (LeveledListBase.h:8-45;
+COCT unread; chanceNone globals read as 100, LeveledListUtils.cpp:35; the roll's level is the fate's, HYPOTHESIS
+re-npc-roll.md:136-137). A refusal's resync exists: ResyncAfterRefusedMove (:854-872).
+
+Rung R0 (the law: the server owns state, inventory transfer is R0; rule 5: a client's report is validated or recorded as
+unvalidated, never silently). Design, the smallest: (1) no new roll, EnsureBaseContainerAdded is it and MpChangeForm.inv
+(MpChangeForms.h:118) is the record, no migration; (2) FateOf adds the non-worn inventory rows to ActorFateMessage::Fate and
+ActorFateEntry gains `inv: Vec<{base_id, count}, cap::FATE_INV>` (check_fates refuses a 0 id or count), fixtures and the C++
+struct in one commit with the SCHEMA_VERSION bump (rule 4); (3) setActorFate and Fates::Fate carry inv, ContainerAddReplacement
+drops every engine pick for a fated owner and writes inv (the arming at :396-425 exists), RedressOnGameThread also strips the
+ExtraLeveledItem rows and re-adds inv (HYPOTHESIS until the probe); (4) OnUpdateEquipment's hosted-WEAP branch becomes a plain
+drop (E_EQUIP_UNKNOWN_WEAPON refuses, nothing added); (5) meanwhile TakeItem checks GetItemCount >= count before the event and
+refuses E_TAKE_NOT_IN_RECORD with ResyncAfterRefusedMove, no throw; PutItem's twin E_PUT_NOT_HELD. T0: NpcFateTest beside :383
+(a refused take, no throw, both resync messages), :947-949 inverted (the engine's axe is NOT added), :187 asserts inv rows in the
+fate and after a respawn; PartOne_ActivateTest :791-799 from THROWS to NOTHROW plus the resync; wire-validate tests beside :2719,
+fixtures 51-ActorFate regenerated; TemplateInventoryTest unchanged as the guard. Probe (by path after the build): x-fate-inventory,
+a late joiner at Bleak Falls kills a bandit and loots it: the take of the record's item granted, E_TAKE_NOT_IN_RECORD 0,
+E_EQUIP_UNKNOWN_WEAPON 0, the host's npc-state worn equal to the fate's, on canon-3 the same run reads the leak's lines. Built off
+`canon` (2136311f) as m3-canon-fate-inv; the arrows regression ("re-equip her bow or her arrows don't work") rides it: a looted
+stack the record lacked resynced the quiver the same way.
+
+### 1d. The guest's copy of a fighting NPC stood elsewhere (39fe1)
+
+Facts (canon-3): the host samples every hosted actor's reference transform each 130 ms (sendInputsService.ts:114-118, :164-241,
+:244-252; movementGet.ts:34-110, so a lunge's root motion is in it; combat changes nothing in the sampler); the server takes an
+in-cell hosted move with no E_ code (ActionListener.cpp OnUpdateMovement :271-489, MayMoveActor PartOne.cpp:2645-2661,
+MovementValidation.cpp:118-128) and relays it to every listener but the sender; the six hits passed melee_within_reach on the two
+RECORDS (:6082-6101), so the host's samples landed on the record during the fight. On the guest the puppet's step is replaced
+(PuppetHooks.cpp:214-267: Move(delta, zero) plus locomotion channels from the last sample, stale after 400 ms, Puppets.h:37);
+formView.ts:905-976 applies the record on each numMovementChanges change or every 2 s through movementApply.ts:14-129 and translateTo
+(:451-596: the follow glide x 1.15, deadband 8/4, setPosition only beyond 1024 units or a vouched jump); nothing re-pulls a puppet
+whose samples stop, and these early returns freeze it: dead (:558), Variable10 under -999 (:567, set by a relayed "Ragdoll",
+animation.ts:186-198, reset only at GetUpBegin :215-222), isKnockedDown (10 s), isStaleAfterPop (600 ms); a record whose cell
+differs from the player's applies nothing (:217-228) and a record cell change destroys the view (:189-199). "pinned 39fe1 to
+1bcd8" is the leveled-roll detour pinning the LVLN pick to NPC_ 0x1bcd8 (FateHooks.cpp:119), not a position. A puppet with no form
+on the guest (the view destroyed and demoteOnLoss, puppetService.ts:452-454, or the 2 s poll demoting an undescribed high-process
+actor :336-362) is AI off and frozen where the engine had it: the Frodnar class (LOG 11-03). Nothing in this path changed between
+the 11-02 builds and canon-3 but the bodies' and hold rounds. Hypotheses, ranked: H1 c1 held no live form for 39fe1 (an orphan
+puppet; confirm: c1's npc-state constant while server.ref moves, no "settle 39fe1" line); H2 the fate re-roll's Set3D(nullptr)
+then Load3D left a ghost mesh where the reference stood (confirm: refs-near within 64 of server.ref each second while the screenshot
+shows the body elsewhere; "rerolled 39fe1" in c1's platform log; 1e's bug on a living actor); H3 the reference follows but the
+Havok capsule does not (confirm: a Frida read of the charController against the reference; the arrows pass); H4 a relayed Ragdoll
+set Variable10 with no GetUpBegin (confirm: "Ragdoll" for 39fe1 in c1's animation lines before the fight); H5 the relay never
+reached c1 (confirm: no UpdateMovement for its idx in c1's pcap while HostedActorState lines appear). Probe x-npc-fight-place (by
+path): the host fights a Bleak Falls bandit while the guest reads the puppet against the record each second; the claim is the
+distance under 128 at every read, the hypotheses' witnesses recorded.
+
+### 1e. The fate re-roll's half-built 3D (the naked, headless khajiit; the host's own live 39fe1)
+
+Facts (canon-3): rerollActor (FateApi.cpp:130-203) on the game-thread task: the clone test extraList.HasType(kLeveledCreature)
+(:156, else RedressOnGameThread :160), the pick compare (:172-183, equal = redress alone), else reroll(actor, -1) (:185-186,
+Offsets::Fate::ActorReroll 37323, Offsets.h:249), then `if (had3D && !Is3DLoaded) actor->Load3D(false)` (:194-196). NO IsDead
+test, NO ResetInventory, NO DoReset3D or Update3DModel, NO AddWornOutfit on the re-roll branch. The engine's own caller of 37323
+pairs it with ResetInventory and the trace shows the equipper after (re-npc-roll.md:494; npc-fate.md:1506-1516); nothing in the
+platform touches head parts (CommonLibSSE-NG: TESNPC::headParts/numHeadParts TESNPC.h:285-286, faceNPC :275, Actor::DoReset3D
+Actor.h:520, Update3DModel :633 through AIProcess::Update3DModel AIProcess.h:191 which needs currentProcess, RESET_3D_FLAGS
+kModel/kSkin/kHead/kFace MiddleHighProcessData.h:39-50). The client's lateFate (actorFateService.ts:91-116) guards on is3DLoaded
+alone (:101): no dead, puppet or host test, and `applied` is empty after a relaunch, so every fated neighbour the save loaded is
+re-rolled or redressed, corpses included (rotfern's 19:22 lines). The record's pick does not change between sessions
+(RollFateIfUnrolled refuses fromSave/IsDead/rolled, PartOne.cpp:2238-2265): "pick 37c06 against the fate's 9a549" is the engine's
+own fresh roll at the relaunch's load before the fate arrived (ADR-049 measured). x-fate-dress-bleak v1 never ran; x-npc-late-3d
+(GREEN 231926) proved Load3D(false) as a non-null pointer, never by its content; lab facts at hand: npc-state is3DLoaded, raceId,
+worn (no head-part fact). Hypotheses, ranked: H1 Load3D(false) builds the base model alone and skips the biped pass that builds
+skin (the tail), the facegen head and the wear (confirm: after a relaunch beside a killed and a living fated bandit, the
+"rerolled" line, npc-state worn.length 0 or 1 against the fate's N, the screenshot headless; fix: after reroll(),
+ResetInventory(false) then DoReset3D(false) instead of Load3D, the code's own Disable/Enable as fallback :192-193); H2 a stale
+race's skin (confirm: npc-state raceId after the re-roll differs from the fate NPC_'s race; fix: SwitchRace then DoReset3D(true));
+H3 a corpse has no process for the pass (confirm: H1's fix heals the living case and not the dead; fix: rerollActor refuses
+IsDead() with a line, the body keeps the engine's roll); H4 the redress-alone branch strips a loaded corpse (against it: 29602
+took it and only the khajiit broke). Order: the IsDead refusal first (one line, no RE), then H1's two calls behind the probe.
+Probe x-fate-dress-bleak v2 (by path): c1 hosts the Temple, kills one campfire bandit, relaunches and comes back: the living
+bandit's and the corpse's npc-state (worn against the fate's count, raceId, is3DLoaded), the platform's "rerolled" and
+"redressed" lines, screenshots; on canon-3 it reads the bug, on the fix branch it claims the wear.
+
 ## Status
 
 DRAFT 2026-10-22, the night of playtest 32, before any code and before the

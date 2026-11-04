@@ -186,7 +186,14 @@ Papyrus native TESModPlatform.ApplyChangeFormResult(refr) hands over once ("" wh
 marks a queued record (queuedAt, queuedWhen), polls the answer each update, hands it to onApplyResult (the lab lines unchanged), gives
 up after 15 s without one (a reference-less record too), and neither retries, re-attempts from the kill's call nor drops a record in
 flight; the watcherApplyOff switch is false there and stays as the emergency lever. Reviewed GO by a fresh agent (ADR-064 rule A)
-for the solo probe, its three findings applied as written in 1e489b6c. HYPOTHESIS until x-corpse-record v3 (by path, sha1 3430e911: "answered on the main thread" at least once on the
+for the solo probe, its three findings applied as written in 1e489b6c. FALSIFIED at 20261104-043219 (x-corpse-record v3 on
+1e489b6c's dist, 6 of 23 green): SKSE's task interface runs its tasks on a POOL, not the main thread: "answered on another thread
+(thread 10536 main 10376, queued from 10540)" with the answering thread varying (10536, 10528, 10572, 10540), "answered on the main
+thread" 0, no hang, no give-up; so TickHandler's tick never was on the main thread either, and the queue's shape stays while its
+drain moves to the engine's own per-frame function on Main.threadID (read 7). The same run, unchanged by the build: every Sven apply
+refused at "actor dead (lifeState 2) (1)" (read 5's dying copy, attempts 1 to 5 at each arrival), c2's "resurrect 13491 (puppet
+true) queued" (the resurrect hold 025979b6 was never on the canon), the owner's abs(c1.x - record.x) < 32 failed. Until read 7 the
+watcher apply stays off on the canon. Was: HYPOTHESIS until x-corpse-record v3 (by path, sha1 3430e911: "answered on the main thread" at least once on the
 watcher, "another thread" never, the install line on both seats, no give-up) runs alone against canon-3 with this branch's dist and
 lays the body. In the same corpse-load frame on a seat the fate's engine re-roll of a DEAD body (rerollActor on a leveled pick that
 changed) left the khajiit 0x29613 naked and headless on rotfern's 19:22 relaunch (playtest 44 item 2c; numidium's read of c1's log:
@@ -227,6 +234,13 @@ Four reads on the lab, each a Frida run on the existing scripts before the recei
    main thread's id on the lab, on a dead copy first (apply-on-demand.js's premise), then read 5's completed dying copy. Until it
    runs there the watcher apply stays off (m3-canon-3-apply-off). BUILT on m3-canon-3-apply-main faff697c plus 1e489b6c (the SKSE
    task, the result native, the poll; see the Client section); the read is x-corpse-record v3's thread claims.
+7. The main loop's own hook (after read 6's FALSIFIED): the thread that owns Main (Main.threadID, where the Frida recipes ran
+   the apply from the death-path hook and worked) is reached by no queue we have (SKSE's AddTask is a pool; gameThrQ is the OnUpdate
+   thread), so the drain is a detour on the engine's per-frame function on that thread (Main::Update or its equivalent).
+   CommonLibSSE-NG's Main.h declares no Update and this NG has no BSTaskPool header, so by rule 1 the re-analyst names it from
+   Ghidra on 1.6.1170 with its Address Library id cross-checked by `just addr`, its prologue bytes and call shape, where skse64 really
+   drains its queue, and the detour's hazards (reentrancy, locks, Papyrus); the result's `thread` field against Main.threadID is the
+   claim, as read 6's was. The seats roll back to the canon's dist meanwhile (numidium).
 
 ## Status
 

@@ -7983,3 +7983,23 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   `canon` branch builds no server image by the fork's m<digit>- rule, which is fine: images come from the fix branches). Consequence
   for (2): m4-scripts-flip 8896ef0c sits on r2's line, so the scripting arm is re-cut onto `canon` (a merge of the flip's lanes onto
   2136311f, reviewed again) when its turn comes; the r2 and f2 heads and their dists are history, not bases.
+- 20:43 PST 2026-11-03 (04:43Z 11-04) (thuum-cf): 1a RED, the probe doing its job: x-corpse-record v3 (3430e911) on
+  m3-canon-3-apply-main 1e489b6c's dist (both seats retaken 04:31Z), run 20261104-043219, 6 of 23: "apply deferral at install: SKSE
+  task interface present", then every apply "answered on another thread (thread 10536 main 10376, queued from 10540)" with the
+  answering thread varying (10536, 10528, 10572, 10540), "answered on the main thread" 0, no hang, no give-up. SKSE's
+  TaskInterface::AddTask runs its tasks on a POOL, not on the thread Main.threadID names (the thread that owns Main, where the Frida
+  recipes ran the apply from the death-path hook and worked), so TickHandler's tick never was on the main thread either and my
+  "the fork's own idiom" was a wrong inference from it; CommonLibSSE-NG's Main.h declares no Update and this NG has no BSTaskPool
+  header, so the drain's hook point is rule 1 RE work: the re-analyst is on it against sky-re's Ghidra (the engine's per-frame
+  function on that thread, its Address Library id cross-checked with just addr, prologue, call shape, where skse64 drains, the
+  hazards) as change-form.md's Dynamic read 7; read 6 marked FALSIFIED; the queue's shape (the result native, the poll) stays and
+  only the drain moves; no new head before the read; the apply stays off on the canon and numidium rolls the seats back to the
+  canon's dist. Unchanged by the build in the same run: every Sven apply refused at "actor dead (lifeState 2) (1)" (read 5), c2's
+  "resurrect 13491 (puppet true) queued" (025979b6 never on the canon), the owner's 32-unit claim red. The three read-only maps
+  landed (1c the body's inventory as the record, 1d the guest's puppet out of place, 1e the re-roll's half-built 3D) and are
+  written as designs into npc-fate.md's new section "Playtest 44's three NPC regressions, read before built": 1c's smallest R0
+  design (inv rows in the fate, the detour and the redress writing them, the hosted-WEAP branch a plain drop, TakeItem's
+  E_TAKE_NOT_IN_RECORD with the resync instead of the throw; the T0 list), 1d's five ranked hypotheses with their witnesses and the
+  probe x-npc-fight-place, 1e's four hypotheses (Load3D(false) alone skips the biped pass; a stale race; a corpse has no process;
+  the redress-alone strip) with the fix order (the IsDead refusal first, then ResetInventory and DoReset3D behind the probe
+  x-fate-dress-bleak v2). Builds next, off `canon`, 1c first.
