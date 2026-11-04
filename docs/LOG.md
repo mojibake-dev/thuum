@@ -8461,3 +8461,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   Temple entrance at noon, the standing base checked, the hold 240 min, the recorder into results/playtest-45/. The build under
   test is frozen until Eli ends 45; the re-analyst's read of 202729's ragdoll crash lands into the LOG and npc-fate.md meanwhile,
   no deploy behind it.
+- 13:03 PST 2026-11-04 (21:03Z 11-04) (thuum-cf): live in playtest 45 (Eli saw it in rotfern's console): c1's platform log has "on('update'): Expected
+  'objectTypeInfo' to not to be nullptr" from 12:40:23.760 PST, tens a second (CallNative.cpp:141: a native returned a live object
+  whose declared class the VM holds no type for), c2 none. Facts (numidium): the rate 45 to 47 a second at 12:40:24 and 22 to 24
+  from 12:50 to 12:55; the lines before the first are c1's promotions of 105a24 (LvlAmbientCreatures) and 29613 (LvlBanditMissile),
+  both EXTERIOR Tamriel actors, rotfern having stepped out; rotfern's relaunch at 12:55:44 shows none so far; no lab run of the day
+  on this platform (dress v8, oracle v5, inventory, arrows: Temple actors only) has the line on either seat; the platform's catch
+  logs e.what() alone, no stack. Read from the code: the 500 ms hosted-state poll and the 2 s puppet poll are too slow, a live actor
+  never reaches the per-frame scene check, so the handler is sendInputsService's hosted loop (per target at 130 ms: movement,
+  animation, appearance, equipment, values; getMovement's getCombatTarget, getWorldSpace or getParentCell, getFurnitureReference;
+  sendEquipment's getEquippedObject, getEquippedSpell, getEquippedShout). getWorldSpace fits the timing (null for every Temple actor,
+  non-null for the exterior ones) but Prisoner's own outdoor sample never threw, so the native is UNNAMED. The loop has no
+  try/catch per target: a throw aborts the remaining targets for that frame and recurs next frame (the rate may be the frame rate),
+  and the hosted actors after the throwing one get no movement, animation or equipment on c2 while it holds (the check for Eli's
+  screen). Fix path after 45, nothing on a seat now: the throw names the class, native and form (CallNative.cpp:141); the loop
+  catches per target; the cause once named. The re-analyst's read of the ragdoll crash still runs.
