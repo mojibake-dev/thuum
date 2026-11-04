@@ -2529,6 +2529,18 @@ known limit for playtest 45 and FIXED on m3-canon-4-followups: rerollActor's dec
 reloaded), run by rerollActor's task and by resurrectActor's task right after Actor::Resurrect ("resurrected <id> (... dressed from
 the fate true)"). Dress v7 for that head: after a respawn the stand-up's line >= 1 plus the re-roll or redress-alone line >= 1,
 then the worn and race equalities.
+H1 BUILT (01:04 PST 2026-11-04, 09:04Z 11-04; Eli via numidium, verbatim: "fix the living case before 45"; m3-canon-4-followups c4539d22, the head for
+playtest 45): after the engine's re-roll (37323) of a LIVING loaded copy toward the fate's pick, RerollOnGameThread runs the engine's
+own rebuild instead of Load3D(false): ResetInventory(false) (TESObjectREFR.h:338, Actor's override A/Actor.h:335; its init rolls
+through the detours, the fate's worn), RedressOnGameThread (the record's dress and rows), then Actor::DoReset3D(false) (A/Actor.h:520),
+which flags the process's model, skin, head and face passes (RESET_3D_FLAGS, MiddleHighProcessData.h:39-50) for the next update; the
+race is the resolver's own SwitchRace (re-npc-roll.md section 1, step 6). The line: "rerolled <id> through the engine from pick A
+toward the fate's B (3D loaded true before; the inventory reset, the record dressed, the 3D reset for the process's rebuild)".
+HYPOTHESIS until x-fate-dress-bleak v7 (by path, 900d548e: both seats in the Temple, three kill-and-respawn rounds at npcRollLevel
+25 each claiming the copy alive with its 3D, the stand-up's dress line, worn == the fate's worn and raceId == the fate's race; the
+engine re-roll at least once after the third; leg F the host's own late-load swap through a relaunch; screenshots from both seats
+at every read) reads the swapped living copy dressed with a head. The lab driver's npc-state carries faceNode (NetImmerse.HasNode
+"BSFaceGenNiNodeSkinned", thuum main), recorded in v7 and claimed in v8 once the rebuilt driver is on the seats.
 
 ## Status
 

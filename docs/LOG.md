@@ -8245,3 +8245,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   drops its held record when it simulates the body ("the record dropped, this seat simulates the body"), its body within a unit of
   the record, no freeze, c2 applied twice: the owner's case by design; v6's claim change (the drop accepted as the owner's case) is
   Eli's W4. Recommendation sent: lay canon-4 7b6fc953 for 45 when oracle v3 is green, with the two known limits in the checklist.
+- 01:04 PST 2026-11-04 (09:04Z 11-04) (thuum-cf): Eli, verbatim via numidium: "fix the living case before 45". The living re-roll is in 45's build: fork
+  m3-canon-4-followups c4539d22 (canon-4 7b6fc953 plus the merge review's two fixes 44d7536b, the stand-up running the whole re-roll
+  decision a3d0a25e, and H1 c4539d22: a living loaded copy re-rolled toward the fate's pick gets ResetInventory, the record's dress and
+  rows, then DoReset3D so the process rebuilds model, skin, head and face), its full pipeline running. Probes by path: x-fate-dress-
+  bleak v7 900d548e (the living case forced at npcRollLevel 25, three respawn rounds each claiming worn == the fate's and raceId == the
+  fate's, the stand-up's dress line, the re-roll at least once after the third; leg F the host's late-load swap; both seats' screens),
+  x-corpse-record v6 8f22e960 (the owner's record drop accepted at leg R, Eli's W4), oracle v3 3ce3a89b unchanged. The lab driver's
+  npc-state gains faceNode (NetImmerse.HasNode "BSFaceGenNiNodeSkinned", the half-built head's witness; recorded in v7, claimed in v8
+  once the driver is on the seats). 45 goes on c4539d22 when dress v7, oracle v3 and corpse v6 are green; canon fast-forwards to it.
