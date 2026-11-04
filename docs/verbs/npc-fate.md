@@ -2354,7 +2354,9 @@ refusal works as designed; the boots and the dagger moved). Behind the red:
   a Frida script on 16128 (ContainerAdd), 16129 (InitLeveledItems), 16155 and 14752 with owner 39fe2, logging the ordinal, each
   pick's form id and count, the caller's return address and the thread, from the cell's load to the first npc-state, and the
   owner's InventoryChanges entryList dumped after the load. Until that read, the cure in kind is the record applied at every load
-  (RedressOnGameThread's reconcile called at the actor's 3D load for every fate, early or late: one path), HELD BACK by the crash.
+  (RedressOnGameThread's reconcile at the actor's load for every fate, early or late: one path), held back by the crash until its
+  fix (802842d9) and BUILT in b763f766 (actorFateService pends a fate whose reference the engine does not hold yet; rerollActor at
+  the load; a dead copy reconciled only): the probe's rerun on canon-4's pair reads the copy equal to the record at the load.
 - CRASH, HOLD on 1c's dist: c1 crashed three times in a row on 18531 at 06:12:38Z, 06:13:00Z and 06:13:23Z (c1-crash-2026-11-03-
   22-12-38/-22-13-00/-22-13-23.log, copied into 061637's and 062409's artifacts), each about 14 s after a launch inside the
   playtest-relaunch hold, at the login's late fates in Bleak Falls: the platform logs pid1724, pid3888 and pid2060 each end
@@ -2478,6 +2480,14 @@ m3-canon-fate-inv (with 1c and the crash fix): actorFateService.lateFate holds a
 the re-roll or redress on the living copy, the record's last word; FateApi's rerollActor and redressActor refuse a dead actor; and
 deathService queues one stand-up per actor (RESURRECT_INFLIGHT_MS 2000, the mark cleared when the word and the engine agree). Probe
 v6 (fc546670, server.npcRollLevel 25 so the lists have six picks) reads the swap on the canon (the bug's witness) and on this dist.
+REWORKED (23:54 PST 2026-11-03, 07:54Z 11-04; b763f766, in canon-4 7b6fc953): the order is fixed where it happens. resurrectActor's task runs
+RedressOnGameThread right after Actor::Resurrect(true, true), in the same task, so the stood-up copy wears the fate over the
+engine's reset ("resurrected <id> (... redressed from the fate true)"); the late fate's rerollActor then handles a pick swap on the
+living copy. A dead copy is neither re-rolled nor redressed (its look is the record's, ADR-065) but its inventory IS reconciled to
+the record in rerollActor and redressActor alike ("the copy is dead here, a corpse keeps its look (no re-roll, no redress); its
+inventory reconciled to the record"), 1c's loot on corpses. The JS dead-wait of 552e8dc1 is gone; instead a fate for a reference
+the engine does not hold yet waits in pending for its load ("late fate for <id>: not in the engine yet, the redress waits for its
+load"), so every loaded copy passes rerollActor once, early or late: one path. The in-flight guard stays.
 
 ## Status
 
