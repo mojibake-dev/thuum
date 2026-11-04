@@ -7653,3 +7653,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   skipped (ADR-062 decision 1)". The stage-1 probe x-bleak-scripts v1 by path (sha1 42ac4e80, 87 steps, 19 claims: the hooks' lines on
   both seats, the host's lift, the plate without the lever, the spider room on two seats, Arvel's web recorded, the Hall of Stories'
   rings and keyhole recorded) from esm.py's positions; the lab lane's patch and the three scenario drafts ready for stage day.
+- 17:11 PST 2026-11-03 (01:11Z 11-04) (thuum-cf): The settle-apply fix BUILT: fork m3-turbo3-sys2-container-f2 444fc8bf (TS, off the dist's 7845bb22): a watcher's
+  record for a live death waits for PuppetService's release of the body from the puppet state (the ragdoll's 4 s, surfaced as the
+  emitter event bodyReleased) and lays the record on the settled body, a 1 s backstop for a body no release reaches, the bind kill's
+  apply immediate as before; the lab line "corpse <id>: the record waits for the ragdoll's settle (... ms left), a live death here".
+  HYPOTHESIS: a settled dead ragdoll takes the record's block within a stride (210713's 5 units against 005702's 44). For numidium's
+  turbo-client after playtest 44, then x-corpse-record v2 (legs R and B still unread tonight). Carried onto r2 75b17d47 and
+  m4-scripts-flip fb547765.
