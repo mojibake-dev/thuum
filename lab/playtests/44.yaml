@@ -9,7 +9,7 @@
 # The first lay ran 7845bb22's dist, whose dying-body apply hung Prisoner's game twice (17:06, 17:12): off the seats; the corpse
 # items stay as the baseline's reading of today's behavior (Eli: "keep corpse items"). Bleak Falls Temple's entrance, 42's spot, at noon.
 id: 44
-build: "canon-2: fork m3-canon-2 32990829 (canon-1 f9a275f4, i.e. 0c23306e plus the rune glyph at SCHEMA 34, plus the perk picks counter m5-perk-points, server-only), server skymp-server:m3-canon-2-32990829, client canon-1 f9a275f4's client-build dist, the Skyrim Souls RE layer (main 32459beb, layer-stage 12dfd76b), lab-api pipeline 5124, thuum main 80d08157 or later"
+build: "canon-3: fork m3-canon-3 9869d28c (canon-2 32990829, i.e. 0c23306e plus the rune glyph at SCHEMA 34 and the perk picks counter, plus the voice restore: the puppet's done bits set as the engine's END would at the three clears, the regression of voice v4 ed71ee67 since playtest 36), its server image and client-build dist, the Skyrim Souls RE layer (main 32459beb, layer-stage 12dfd76b), lab-api pipeline 5124, thuum main dfaa0bd9 or later"
 world: playtest-m3-39-paused-20261031T014638Z   # 39's end, as 41 to 43 began: the temple's and the slope's bandits alive
 hold:
   minutes: 240
