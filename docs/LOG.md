@@ -8195,3 +8195,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   m3-canon-fate-inv 552e8dc1 (pipeline 5256: image m3-canon-fate-inv-552e8dc1, client-build 18588; SCHEMA 35): the crash oracle
   x-fate-login-bleak v1 first, its trace twin, then x-fate-inventory v1b and x-fate-dress-bleak v6 on the same pair; 802842d9's
   pair (18586) superseded. The lab is numidium's and on THE CANON for dress v6's bug witness meanwhile.
+- 23:53 PST 2026-11-03 (07:53Z 11-04) (thuum-cf): Eli, verbatim via numidium: "go with the 2am version, ping me when ready": playtest 45 at 02:00 PST
+  with BOTH fixes in the canon. canon-4 cut as fork m3-canon-4 7b6fc953: canon 2136311f fast-forwarded to the apply head 68173f26
+  and merged (ort, clean; fork-lint and the local bundle green) with the fate head b763f766, which reworks 1e once more: the
+  stand-up dresses the copy from the fate inside resurrectActor's task after Actor::Resurrect's inventory reset (the order fixed
+  where it happens), a dead copy is neither re-rolled nor redressed but its inventory is reconciled to the record (1c's loot on
+  corpses), and a fate for a reference the engine does not hold yet waits for its load like a late one (one path for early and
+  late; the early path's two mystery HuntingBows reconciled away). A fresh reviewer reads the merge (the apply's lay against the
+  fate's reconcile on a dead body, the codegen union). The playtest build's reads run on canon-4's own pair when its pipeline lands:
+  x-fate-login-bleak v1, x-fate-inventory v1b, x-fate-dress-bleak v6, x-corpse-record v5; four green and canon fast-forwards to
+  7b6fc953, the image becomes the canon's server. The 802842d9 oracle numidium is running attributes the use-after-free fix alone.
