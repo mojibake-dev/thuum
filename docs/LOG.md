@@ -7875,3 +7875,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   is a lab run's; numidium fixes the recorder to pull what the playtest's game writes), so b-bleak-traps on canon-3 is the read.
   Eli's queue as agreed with numidium: the apply probe, b-bleak-traps and its read, the body's inventory as the record, read 5,
   the re-roll's 3D.
+- 20:00 PST 2026-11-03 (04:00Z 11-04) (thuum-cf): the pillar regression's cause, from the record: the pillars' base
+  NorDefaultPuzzlePillar01 0xaa8ce turns through defaultPuzzlePillarScript's playAnimationAndWait (traps.md:185), and a seat's engine
+  runs an Activator's activation only when the client setting activationUnblockedBases names its base (objectReferenceEx.ts: every
+  Activator blockActivation'd otherwise; a missing key unblocks nothing); the key is a lab lever only the three trap scenarios'
+  relaunch step writes ("1a4bb c6440 21513 3e726 aa8ce b7db4 173fc 2079f"), never a layer or a deploy (traps.md:490; the spike wall
+  BROKEN in play on 11-02 for the same reason). Playtest 41 had it by hand ("with the temple traps' activationUnblockedBases in both
+  game folders", LOG 11-02 18:05); tonight's canon seats came from the stage without it, so the host's engine never ran a pillar's
+  activation (no turn on Prisoner's screen), the server relayed his Activate and rotfern's engine replayed it (her turn), and her own E
+  on a blocked pillar sent nothing. Both turns are already scenarios with the key as premise: b-object-anim (the host's turn: "object
+  animation aa8cb .* reported" on c1, "played" on c2, "aa8cb animates aa8cb") and b-puzzle-relay (the guest's turn relayed to the host,
+  "aa8cb activates 4fcdf" E_TRAP_NO_REF by design), last green 11-02 on m4-object-animation 64dbacfe, never on canon-3; they run
+  after the playtest (green = the code path intact, the playtest the no-key leg; no new probe). The fix for play is operational, no
+  code: the key in both seats' client settings, durably in the stage's client settings until the flip's hosted-cell gate retires it
+  (numidium's tooling). The guest's pattern never opening the host's door is ADR-059's open decision 2, the design at this slice, not a
+  regression. Told numidium; x-bleak-pillars not written.
