@@ -8476,3 +8476,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   and the hosted actors after the throwing one get no movement, animation or equipment on c2 while it holds (the check for Eli's
   screen). Fix path after 45, nothing on a seat now: the throw names the class, native and form (CallNative.cpp:141); the loop
   catches per target; the cause once named. The re-analyst's read of the ragdoll crash still runs.
+- 13:04 PST 2026-11-04 (21:04Z 11-04) (thuum-cf): the re-analyst's read of 202729's ragdoll crash (npc-fate.md THE RAGDOLL CRASH READ, every claim
+  HYPOTHESIS): a use-after-free of one bhkRigidBody's constraints buffer read by the engine's ragdoll rebind (78536 under 63792 and
+  63596, the animation-graph root bind after a Load3D) on thread 7380, the Papyrus VM job thread where our gameThrQ tasks run; the
+  trigger our RerollOnGameThread on 1d219: reroll's Set3D(nullptr) off the main thread DEFERS the old 3D's DetachHavok to the main
+  thread (19730 through 39033 and 36933), our Load3D then binds the new skeleton on 7380 while the main thread's drained DetachHavok
+  reads the NEW 3D and removes its collision objects, recycling the buffer. Fix in kind, after 45: the re-roll's 3D work on the main
+  thread through SKSE's task interface, the apply's own shape (2b5b33db); the Frida plan in the doc. Nothing on a seat now.

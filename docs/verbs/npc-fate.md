@@ -2659,6 +2659,37 @@ no record arrow, R2 as the engine, E_SHOT_QUIVER the witness at every hosted sho
 read: x-fate-inventory v1b again on skymp-server:m3-canon-4-hands-4c6d9f24 with the same dist and driver; on its green canon moves
 to 4c6d9f24 and 45 goes on that pair. In 45 this was item 2 on the archer's body after it has shot. Canon is 9218156a meanwhile.
 
+THE RAGDOLL CRASH READ (13:04 PST 2026-11-04, 21:04Z 11-04; the re-analyst on 202729's dump, pyghidra on the named program, REA down;
+every id by `just addr`, every claim HYPOTHESIS until the Frida read): the fault is inside 78536 (RVA 0xeb5830, a ragdoll collector
+per body: it pushes a bhkRigidBody's hkpRigidBody into an array and walks bhkRigidBody::constraints, CommonLibSSE-NG
+include/RE/B/bhkRigidBody.h:58, calling NiObject slot 02 GetRTTI on each element); the element's first qword was VTABLE_bhkRagdollConstraint
+(240598), rax its slot 0 (the deleting destructor 79248), so `call [rax+0x10]` read code bytes: the constraints buffer held a freed
+and recycled 0x20 block, a use-after-free of one body's constraint array while the body itself stayed live. The chain above it is the
+engine's animation-graph root bind after a 3D load: TESObjectREFR::Load3D 19727 -> 20103 -> 32894 -> 63357 (SetRootNodes over the
+graph manager's graphs) -> 63596 (BShkbAnimationGraph::SetRootNode) -> 63792 (rebind the ragdoll driver to the scene graph,
+hkaRagdollInstance.h:19-22) -> 78423 -> 78507 (the skeleton walk: NPC Root, COM, Pelvis, L Thigh, L Calf, L Foot) -> 78536. Thread
+7380 is a BSJobs job thread running the Papyrus VM's tasklet (frames 104651 NativeFunctionBase::Call under 53926 and 69344
+"ScrapHeap JobThread"): the platform's OnUpdate thread, where FateApi's gameThrQ tasks run, not the main thread. The trigger
+(confidence med): our own RerollOnGameThread on 1d219 (FateApi.cpp): `reroll(actor, -1)` (37323) calls Set3D(nullptr) off the main
+thread, where TESObjectREFR::Set3D (19730) asks TaskQueueInterface::ShouldUseTaskQueue (39033) and DEFERS the old 3D's DetachHavok
+as task 0x32 (36933) to the main thread instead of calling slot 65 inline; then our `actor->Load3D(false)` clones the skeleton,
+Set3D(new) and runs the root bind on 7380; meanwhile the main thread drains task 0x32 and Actor::DetachHavok (37307) reads Get3D2,
+by then the NEW skeleton, and removes its collision objects from the world (77864/77883), freeing or reallocating constraint buffers
+that the loader threads' bhkRagdollConstraint constructors recycle: our walk reads the recycled block. One hit in nine runs is the
+window's size. The dead copies' UnequipObject is not on the crash thread's stack; the init running twice is this path's own shape
+(ResetInventory's roll, then the load's). A side effect even without a crash: the deferred DetachHavok strips Havok from the NEW
+skeleton of every living clone re-rolled this way until something re-attaches it. The engine's own attach pairs 37323 with the
+inventory reset on the main thread, where Set3D detaches inline; the fix in kind is the re-roll's 3D work on the main thread through
+SKSE's task interface, the shape change-form's apply already has (2b5b33db, CONFIRMED there). The Frida read (lab/frida, to write):
+sequence hooks 37323, 19730 (with 39033's answer and whether 36933/36939 ran), 37178, 37177, 19727, 37307 (tid and Get3D2 at entry),
+36993 (the queue push, task id), 16129 (tid and caller, the two "armed" lines), 104651 (names the VM thread); chain hooks 20103,
+63357, 63596, 63792, 78536 (the body, its constraints array, and per element whether the first qword lies inside the exe image,
+printed never dereferenced); a lifetime ring of 68170 (BSTArray buffer free), 68162/68163/68165, 78066 (bhkRigidBody dtor), 79805
+and 79806/79807/79810 (bhkRagdollConstraint dtor and ctors), 77864/77883; armed from a login into the Temple whose server fate for a
+living leveled clone differs from the client's pick (dress v8's premise), no kill needed. Verdicts: 37307 on the main thread with a
+non-null Get3D2 while the VM thread sits between Set3D(new) and 63792's exit confirms the race; a VM-thread free in the ring before
+the walk is a same-thread lifetime bug; a constructor write with no free is aliasing.
+
 ## Status
 
 DRAFT 2026-10-22, the night of playtest 32, before any code and before the
