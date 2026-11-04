@@ -1362,8 +1362,11 @@ update's exactly. 25616 marks the info said-once on both BEGIN and END
 done bits' initial value on a fresh actor (if clear, the first say refuses
 and the native must set 0x180 first), the dialogue state's type field.
 
-HYPOTHESIS (the re-analyst's Ghidra read, 2026-11-03, for the scripts arm's F9 "subsequent voice lines are not shared"; the Dynamic
-read is lab/frida/say-verdict.js, attach-only on the watcher, in review): SayTopic 39162 tail-calls 39642, which refuses at one of
+CONFIRMED on the baseline (x-voice-after-inaudible v1, run 20261104-024606 GREEN on m3-canon-3 9869d28c: the watcher's say of the
+relayed line INAUDIBLE at 1600 units, then started or played at 150 units with no refusal, say-verdict.js attached): the fix is
+PuppetApi.cpp's restore of kSoundFileDone and kVoiceFileDone at every clear of a puppet line's item (the inaudible branch, the
+pre-clear of a line in flight, the promote's clear), as the engine's END would. The mechanism as read (the re-analyst's Ghidra read,
+2026-11-03, for F9 "subsequent voice lines are not shared"): SayTopic 39162 tail-calls 39642, which refuses at one of
 three gates before any item is made: B1 the dialogue state at HighProcessData's +0x3B8 with its +0xC word's bits 28 to 30 equal to 1
 or 2 (a lip load pending), B2 a valid sound handle whose duration is still 0 (the sound loading), B3 the busy test 37266,
 `(boolBits & 0x180) != 0x180 || voiceTimer > 0`; then the picker 25541 (a given info never walks conditions) and 39643 (the start:

@@ -7777,3 +7777,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   canon-1's client builds at 02:28Z to put canon-3's first (safe since 10-29's pre_build_script sweep); they are retried after the
   playtest and every Windows push is held until then (the rule in memory). numidium installs the pair, then b-headshot, x-rune-glyph
   and x-voice-after-inaudible before Eli plays.
+- 18:57 PST 2026-11-03 (02:57Z 11-04) (thuum-cf): canon-3 on both seats (numidium: server m3-canon-3-9869d28c, the dist 9869d28c, the Souls layer). The probes:
+  x-voice-after-inaudible v1 GREEN (024606): the voice regression's fix CONFIRMED (the watcher's say inaudible at 1600 units, then
+  started or played at 150 with no refusal); npc-stream.md says so. x-rune-glyph RED (025037): three of its four failures are the
+  probe's own (its log-count steps spell "launch's" where the claims read "launch.s", so lab-api finds no matching step) and the fourth
+  is no rune projectile 0x5fbbf standing on either seat with no SpellCast on the server at all: the probe's cast never fired (c1's
+  console shows "Right Spell set to Frost Rune" and nothing after), a premise fault, the glyph itself unread; being fixed. b-headshot
+  RED (025239), green on 0c23306e: the shot hit the bare head and was claimed, then "E_HEADSHOT_ARCHERY ... archery 15": the server kept
+  Marksman 15 against the scenario's client-side papyrus-av set of 60; whether canon-3's perk-points merge (the record's fields that
+  "ride no report") now keeps the bases from a client's report by design (R0, leveling owns the bases) is being read; numidium runs
+  x-headshot-server-av (the same claims with the server console's SetActorValue and AddPerk, the playtest setup's path).
