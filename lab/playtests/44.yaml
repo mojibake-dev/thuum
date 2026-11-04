@@ -1,13 +1,15 @@
 # Playtest 44 (numidium, 2026-11-03): corpses where they land (ADR-067 decisions 3 and 4, ADR-065's first slice: the owner's at-rest
 # record, ChangeForm at SCHEMA 33, applied on every other seat by the engine's own LoadGame) and the exclusive container hold
 # (decision 6: one opener at a time, "<name> is searching this", the contents sent at the close). RESTARTED 17:45 PST on one base
-# with only proven work in it (Eli: "everything that we KNOW works should be in from here on out"): fork m3-turbo3-sys2-container-f1
-# 0c23306e, its server image and its client as 2225c932's dist (SkyrimPlatformImpl f0341e3620814eeb) with cc026686's js, plus the
-# standing base (playtest_setup.STANDING_FROM): Survival off, weather synced, rotfern's headshots, Skyrim Souls RE (main 32459beb).
+# with only proven work in it (Eli: "everything that we KNOW works should be in from here on out", then "a solid baseline of
+# everything we KNOW should work or WAS previously working"): canon-1, fork m3-canon-1 f9a275f4 (0c23306e plus the observer's rune
+# glyph m2-rune-glyph, verified in play in 41, at SCHEMA 34), its own server image and dist, plus the standing base
+# (playtest_setup.STANDING_FROM: Survival off, weather synced, rotfern's headshots with Overdraw40 through the server's AddPerk since
+# 284a4d51, Skyrim Souls RE in the layer, main 32459beb).
 # The first lay ran 7845bb22's dist, whose dying-body apply hung Prisoner's game twice (17:06, 17:12): off the seats; the corpse
-# items move to playtest 45. Bleak Falls Temple's entrance, 42's spot, at noon.
+# items stay as the baseline's reading of today's behavior (Eli: "keep corpse items"). Bleak Falls Temple's entrance, 42's spot, at noon.
 id: 44
-build: "fork m3-turbo3-sys2-container-f1 0c23306e: server skymp-server:m3-turbo3-sys2-container-f1-0c23306e, client 2225c932's dist (SkyrimPlatformImpl f0341e3620814eeb) with cc026686's skymp5-client.js, the Skyrim Souls RE layer (main 32459beb), lab-api pipeline 5124, thuum main a30e2988 or later"
+build: "canon-1: fork m3-canon-1 f9a275f4 (0c23306e plus m2-rune-glyph, SCHEMA 34), server skymp-server:m3-canon-1-f9a275f4 and its client-build dist, the Skyrim Souls RE layer (main 32459beb, layer-stage 12dfd76b), lab-api pipeline 5124, thuum main 284a4d51 or later"
 world: playtest-m3-39-paused-20261031T014638Z   # 39's end, as 41 to 43 began: the temple's and the slope's bandits alive
 hold:
   minutes: 240
