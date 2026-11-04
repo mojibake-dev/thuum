@@ -8490,3 +8490,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   hooks by just addr, the window per re-roll, the collector's element dump, DetachHavok's race flag, the lifetime ring, Main's
   thread from 403449) with its README entry. The read after 45: oracle v5 and dress v9 on cc5c82b6's dist with the hands image
   and the driver, plus the trace on the re-rolling seat; then the pair for 46. Nothing on a seat while 45 runs.
+- 13:13 PST 2026-11-04 (21:13Z 11-04) (thuum-cf): x-fate-login-bleak-trace v4 by path, sha1 b5451921: v3 with reroll-main-trace.js attached between
+  c1's relaunch and its connect (refs 39fe1, 39fe2, 39fe4, 1d219) and one claim added, "rerolled .* on thread" at least once
+  (cc5c82b6's witness); the set after 45 on cc5c82b6's dist with the hands image and the driver: oracle v5, dress v9, this v4. 45
+  so far (numidium): items 1 to 4 passed on both seats, 39fe2 respawned at 13:04:16 with the same pick. Eli's two observations for
+  after: snow inside Bleak Falls Temple (the weather release imposed on a show-sky interior, CELL flags 0x0083, HYPOTHESIS) and
+  iron arrows outside the door on rotfern's screen alone (a hosted NPC's own engine projectiles, unsynced).
