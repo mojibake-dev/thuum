@@ -8338,3 +8338,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   it, then the passes; its pipeline running) and c2's crash applying the corpse record of a re-rolled copy (the third kill of 39fe4,
   0x184FBF on a null, the record 199 bytes longer with 0 remap rows after the base swap; the re-analyst reading; the serializer's
   fix next). Corpse v6 on cb944530 playing. 45 waits on both (npc-fate.md 1e, THE HEAD HOLDS).
+- 10:53 PST 2026-11-04 (18:53Z 11-04) (thuum-cf): corpse v6 on cb944530 RED 20261104-184710 on one claim, no crash: the record's x 45.5 units from the
+  snapshot's after the restart (the 32-unit bound of Eli's W4; 0x13491 not among either seat's re-rolled ids, so not the branch's;
+  3bd97f7c's and 9f2757a3's runs held it). numidium's read: the body's settle varying past the bound, unconfirmed until a cold rerun,
+  the claim kept; it reruns on the crash fix's head. The 2c17bc85 lay starts.
