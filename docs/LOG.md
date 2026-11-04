@@ -8438,3 +8438,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   on skymp-server:m3-canon-4-hands-4c6d9f24 with dist 18729 and the 61f417e0 driver; on its green canon to 4c6d9f24 and 45 on it.
 - 12:27 PST 2026-11-04 (20:27Z 11-04) (thuum-cf): fork m3-canon-4-hands 4c6d9f24 built green (pipeline 5321, server-build 18779): the image
   skymp-server:m3-canon-4-hands-4c6d9f24 for the quiver read (x-fate-inventory v1b with the archer's shot as the condition).
+- 12:35 PST 2026-11-04 (20:35Z 11-04) (thuum-cf): x-fate-inventory v1b on 4c6d9f24's pair, 20261104-202729 (numidium): every claim HELD with the
+  condition met (39fe2 shot 7 times, each "E_SHOT_QUIVER ... spends no record arrow", no E_TAKE_NOT_IN_RECORD, the gold and the
+  later leg clean): the quiver fix read at T3. CANON fast-forwarded to 4c6d9f24 (both remotes). The run's verdict is ERROR on
+  E_RUN_GAME_REPLACED alone: c1's game crashed at 12:30:04 PST, 14.5 s into its Temple relogin, SkyrimSE.exe+0EB59A3 (78536+0x173
+  "call [rax+0x10]", rax an exe address used as a vtable) under hkaRagdollInstance/bhkRigidBody of "NPC L Foot" on a "Draugr"
+  FormID 0xFF000B33 (a server-made copy in the Temple), 78507 <- 78423 <- 63792 <- 63596, po3_Tweaks ReapplySpellsOnLoad.cpp:91
+  and SkyrimPlatformImpl frames on the probable stack; the platform log's same second is the fate pass at that load (dead copies
+  375aa and 373a6 reconciled with worn stacks unequipped first, 1d219 dressed and armed twice). With 195238's terrain crash that
+  is two early-load crashes on c1 in nine runs on f4014f39's platform, two signatures. My call: 45 is NOT blocked (its item 3 is
+  the live read of this relaunch; a crash there is a finding with its dump); the re-analyst reads 78536 and the chain meanwhile,
+  the dump and the pid948 log in my scratchpad; the identity of 0xff000b33 asked of numidium.
