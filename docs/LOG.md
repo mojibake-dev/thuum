@@ -7927,3 +7927,26 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   probe Eli named (an arrow on a bucket, a Fireball at a pile, both seats' views); (b) ADR-063 decision 4's one decided change,
   f67fb0f8's retirement of E_PROP_CELL and E_PROP_REACH, as its own head off canon-3 with its own two-seat probe at a cell edge. Both
   probes drafted by path tonight; nothing on a seat.
+- 20:23 PST 2026-11-03 (04:23Z 11-04) (numidium): playtest 44, the BASELINE, ended at Eli's word ("end 44, go with the impulse probe. fix the regressions
+  first"), 19:06 to 20:23 PST on canon-3 (fork m3-canon-3 9869d28c: 0c23306e, the rune glyph, the perk picks counter, the voice
+  restore; the Souls layer; every switch on; the standing four proven by playtest-ready). World saved as
+  playtest-44-baseline-end-20261104T042307Z (15,029 records); the recorder's logs in results/playtest-44; the checklist with every
+  note in docs/private/playtest-44.md. VERIFIED IN PLAY: the standing four (survival off, weather synced, a headshot on bandit
+  29602 "ClaimHeadshot ... archery 60" then "headshot: ff000000 kills 29602", no menu pauses); the rune glyph (Frost Rune cast and
+  its hit on the other seat); the exclusive hold on the chest both ways, its lockpick ("ff000001 picks 371e9 open"), the hold on a
+  body both ways; progression (Prisoner level 2 by PvP, rotfern level 2 by five skill books, a perk each) kept across a server
+  restart and both relaunches ("not taken (level 1 against the record's 2 ...)" then "level 2"); no frozen duplicate NPC; Embry's
+  and Hod's dialogue; the pillar puzzle end to end on the host's faces and Arvel's scene with its quest stages relayed, once the
+  seats had activationUnblockedBases (laid live 20:01, in the stage's client template 6ddf8ae2). Live changes: the server restart
+  for 2c (19:14) froze rotfern inside ApplyChangeForm on her own DEAD copy (0x29602, the call off the main thread), so the watcher
+  apply went OFF on both seats at 19:22 (turbo-client m3-canon-3-apply-off 2136311f). Findings, Eli's restore list: the apply's
+  freeze (H1; the main-thread apply built, m3-canon-3-apply-main 1e489b6c, dist 18459, x-corpse-record v3 3430e911 next); the
+  pillars' remaining jank (a starting face differs between seats, one pillar never turns, the guest's own turn only on the host's
+  screen); the longbow (a take refused "Source inventory doesn't have enough 0x3b562", the loot showing the host engine's own roll,
+  the equip reverted) with rotfern's arrows likely the same; the guest's copy of a fighting NPC out of place (39fe1 landing six hits
+  on rotfern while her arrows found nothing until the host walked it to her); the slow guest open of a body (about 2 s of retries);
+  props at the mill ("physics props do not work": claims granted, the second seat's E_PROP_CELL at a cell edge). Known broken,
+  read: the late-arrival bodies at their spawn spots (the bind kill's copies stay kDying, the record refused), the fate re-roll's
+  half-built 3D (the khajiit naked and headless, a corpse's and a living NPC's), the Golden Claw never in Arvel's record, the
+  cobwebs' flutter (never on any build). Next by Eli's order: the regressions, then the scripting arm, then physics from the
+  impulse probe.
