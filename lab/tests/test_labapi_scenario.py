@@ -435,6 +435,18 @@ class NpcKillStep(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 load_scenario(f"id: x-s\nclients: [c1]\nserver: {{handoffPassSettleMs: {bad}}}\nsteps:\n  - wait: 1\n")
 
+    def test_a_server_block_may_set_the_runs_npc_roll_level(self):
+        # the npcRollLevel server setting as the run's own: a number fixes every leveled roll's level, or the rule's word
+        from labapi.scenario import load_scenario
+
+        s = load_scenario("id: x-l\nclients: [c1]\nserver: {npcRollLevel: 25}\nsteps:\n  - wait: 1\n")
+        self.assertEqual(s.server.npcRollLevel, 25)
+        self.assertEqual(load_scenario("id: x-l\nclients: [c1]\nserver: {npcRollLevel: loader}\nsteps:\n  - wait: 1\n").server.npcRollLevel, "loader")
+        self.assertIsNone(load_scenario("id: x-l\nclients: [c1]\nsteps:\n  - wait: 1\n").server.npcRollLevel)
+        for bad in ("0", "256", "true", "1.5", "'highest'"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(f"id: x-l\nclients: [c1]\nserver: {{npcRollLevel: {bad}}}\nsteps:\n  - wait: 1\n")
+
     def test_kill_ref_and_respawn_ref_take_a_form_id(self):
         # a game-file actor killed by the server (its killer a client of the scenario) or put up again at once
         from labapi.scenario import load_scenario

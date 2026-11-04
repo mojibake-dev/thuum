@@ -2188,6 +2188,15 @@ class CellHostSteps(RunTests):
         self.assertEqual(laid["handoffPassSettleMs"], 0)
         self.assertEqual(laid["npcEnabled"], False, "the version's file kept beside the knob")
 
+    def test_a_runs_npc_roll_level_reaches_the_server_through_the_overlay(self):
+        """x-fate-dress-bleak v6: the Temple's leveled lists rolled at 25 for everyone, so a respawn can swap its pick."""
+        files = self._settings_files()
+        run_id, body = self._run("id: t-roll\nclients: [c1]\nserver: {npcRollLevel: 25}\nsteps:\n  - c1: connect\n")
+        self.assertEqual(body["verdict"], "green", body)
+        laid = json.loads((self.tmp / "server-settings-run.json").read_text())
+        self.assertEqual(laid["npcRollLevel"], 25)
+        self.assertEqual(laid["npcEnabled"], False, "the version's file kept beside the knob")
+
     def test_a_runs_game_hour_starts_the_servers_clock_through_the_overlay(self):
         files = self._settings_files()
         run_id, body = self._run("id: t-hour\nclients: [c1]\nserver: {gameHour: 7.9}\nsteps:\n  - c1: connect\n")
