@@ -8307,3 +8307,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   loads the engine's own attach re-roll before the fates, so every leveled actor's pick differs from the server's): the living
   re-roll is every Temple login's, 44's 39fe1 included, and 45 exercises 9f2757a3's rebuild block constantly; the oracle reruns on it
   with each copy's "3D loaded X after; reloaded Y, the model passes run Z" line as the witness. Corpse v6 playing on 3bd97f7c.
+- 02:59 PST 2026-11-04 (10:59Z 11-04) (thuum-cf): oracle v4 by path (c3ae52e3; numidium: "claim it rather than read it"): after each of the three logins
+  c1 reads 39fe1, the login's own living re-roll (44's bandit), and claims it alive, its model loaded, the facegen head node present,
+  wearing the fate's worn and of the fate's race; the read 25 s after the host grant; v3's claims untouched. Runs on 9f2757a3's pair
+  in v3's slot beside dress v8 bf1c8f36.
