@@ -7745,3 +7745,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the ammo alone, INFERRED); the hold's resyncs fired zero times in 44. numidium greps 44's logs; a hit on (1) puts its fix on canon-4
   (server-only). Builds: the flip's heads 015fb570 (5176) and fb547765 (5173) green; canon-1 (5186), canon-2 (5191) and canon-3 (5194)
   building.
+- 18:15 PST 2026-11-03 (02:15Z 11-04) (thuum-cf): The arrows greps (numidium): "Source inventory doesn't have enough" never appears in 42's, 43's or 44's server
+  logs, so the worn-flagged take is not evidenced; one E_SHOT_ORIGIN of rotfern's in 43 (two seconds after a server-side camp
+  teleport), the refused-shot drift once; the seats' console tees from 42 to 44 are gone with the rollbacks (fixed on main:
+  playtest-record keeps each seat's console tee, its last 60,000 lines). No server fix until a grep hits; 44's recorder holds the
+  lines for the next occurrence, with Eli asked what came just before each time.
