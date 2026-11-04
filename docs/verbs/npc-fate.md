@@ -2541,6 +2541,21 @@ HYPOTHESIS until x-fate-dress-bleak v7 (by path, 900d548e: both seats in the Tem
 engine re-roll at least once after the third; leg F the host's own late-load swap through a relaunch; screenshots from both seats
 at every read) reads the swapped living copy dressed with a head. The lab driver's npc-state carries faceNode (NetImmerse.HasNode
 "BSFaceGenNiNodeSkinned", thuum main), recorded in v7 and claimed in v8 once the rebuilt driver is on the seats.
+CRASH ON c4539d22 (02:20 PST 2026-11-04, 10:20Z 11-04; x-fate-dress-bleak v8 bf1c8f36, run 20261104-100832, numidium's read): both seats crashed at the
+Temple's login before any claim, the same equip-queue chain as 1c's three (11696 under EquipObject 38894 under the flush 39814 under
+the actor-update job 41381, a BSJobs::JobThread; c1 02:10:12 PST reading 0xFFFFFFFFFFFFFFFF, c2 02:10:56; the draugr 383ec, an
+Ancient Nord Sword 0x2c66f on the stack), within a second of "rerollActor(383ec): not a leveled clone, redress instead", "inventory
+of 383ec reconciled to the record: 1 row(s) and 2 worn, 0 removed, 0 added, 3 kept", "redressed 383ec ... the dress unqueued", on a
+copy the detours had dressed and armed at its init 3.07 s before ("1 of the server's weapons and 1 inventory row(s) written"). The
+same sequence passed in 092107 with no weapon row ("0 row(s) and 2 worn, 2 kept") and the oracle's logins at party-mean passed
+(092409: 22 swaps, 19 redresses on c1). With nothing removed by the reconcile, the freeing step is the redress itself on an already
+dressed living copy: Actor::RemoveOutfitItems (the engine's own removal of the tagged worn entries, their lists freed and re-equips
+queued), AddWornTagged's re-add and AddWornOutfit, for nothing; b763f766's "every loaded copy passes rerollActor once" made that the
+common case at a cell's load. FIXED (the next head on m3-canon-4-followups): RedressOnGameThread compares the copy's worn set
+(GetInventory's worn entries) with the fate's worn first; equal, no strip, no re-add, no dress, the inventory reconciled alone (a
+no-op when it matches, as 100832's was); a real difference keeps the full redress: the engine's dresser's own idempotence (a tagged
+entry skipped, re-npc-roll.md 8.2) by the record. HYPOTHESIS until v8 reads the Temple's load with no crash on both seats; the
+equip-queue trace (lab/frida/equip-queue-trace.js) on 100832's pair would name the freed list's remover.
 
 ## Status
 

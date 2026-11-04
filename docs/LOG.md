@@ -8268,3 +8268,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (thuum 2cb385d1: the read in npc-state after is3DLoaded, the view taking it, None on an old driver; 1061 lab-api tests OK), relays
   the dist with the new driver bundle and reruns v8. Lesson: a new lab fact is read end to end (the step's answer, the view, one
   run) before a probe claims it.
+- 02:20 PST 2026-11-04 (10:20Z 11-04) (thuum-cf): x-fate-dress-bleak v8 rerun on c4539d22 RED 20261104-100832: both seats CRASHED at the Temple's
+  login, the equip-queue chain again (11696 under EquipObject under the flush 39814), within a second of a redress of 383ec the
+  detours had dressed at its init 3 s before, its reconcile "0 removed, 0 added" (numidium's read; npc-fate.md 1e CRASH ON c4539d22).
+  The freeing step is the redress itself on an already dressed living copy (RemoveOutfitItems, the re-add, AddWornOutfit), made the
+  common case at a cell's load by b763f766's rerollActor at every load. Fixed on m3-canon-4-followups: the redress compares the copy's
+  worn set with the fate's first and does nothing but the inventory's reconcile when they match. 45 waits on it (a crash path in the
+  build); the new head's full pipeline running, then dress v8, oracle v3 and corpse v6 on its pair. The earlier two reads on
+  c4539d22 stand (oracle v3 092409, corpse v6 092901).
