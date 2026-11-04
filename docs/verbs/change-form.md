@@ -265,6 +265,15 @@ Four reads on the lab, each a Frida run on the existing scripts before the recei
    or 2 ms). BUILT, the cheap half first: m3-canon-3-apply-main f77fbd00 queues the apply through AddUITask (one call changed, the
    queued line names the queue), HYPOTHESIS until x-corpse-record v3's "answered on the main thread" reads equal ids; the fallback is
    the detour as specified (orig then a bounded drain after the frame, a once-only "frame thread N main N" line).
+   CONFIRMED on f77fbd00 (x-corpse-record v3 20261104-053639, SkyrimPlatformImpl 1200b5d4b9246ebf): "ApplyChangeForm 0x13491 queued
+   to the main thread's UI task queue ... from thread 10568" then "answered on the main thread (thread 10472 main 10472, queued from
+   10568)", ten of ten answers on the main thread, none on another, no give-up, no hang. The detour stays unbuilt. The run was red on
+   the dying copy alone (read 5: "actor dead (lifeState 2)" refused ten times, "resurrect 13491" once, the watcher's copy 46 units
+   off) and stopped at leg A, so leg R, the owner's apply on its own DEAD copy at the reconnect (playtest 44's freeze), is still
+   unread: x-corpse-record v4 (by path, sha1 133e4808) records leg A's dying copy and claims the apply RETURNING on both seats through
+   the restart and the late arrival (an answer either way, on the main thread, never a give-up, both seats answering the lab). The
+   owner's own body against the record (46 units in 043219 and 053639) is a finding of its own, recorded there: the rest's record
+   against the body's later settle.
 
 ## Status
 

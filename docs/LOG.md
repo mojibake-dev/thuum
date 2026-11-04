@@ -8091,3 +8091,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   numidium's slip (turbo-dist refused during the rune run's collection), ignored; f77fbd00 laid (SkyrimPlatformImpl 1200b5d4b9246ebf),
   x-corpse-record v3 runs on it. 1c: pipeline 5236's server half green (T0 with the review's assertions, the contract test on the
   regenerated fixtures), the Windows dist building (job 18531).
+- 21:43 PST 2026-11-03 (05:43Z 11-04) (thuum-cf): 1a's THREAD cure CONFIRMED on m3-canon-3-apply-main f77fbd00 (x-corpse-record v3
+  3430e911, run 20261104-053639 on its dist, SkyrimPlatformImpl 1200b5d4b9246ebf): every apply "answered on the main thread (thread
+  10472 main 10472, queued from 10568)" through SKSE's UI task queue, ten of ten, none on another thread, no give-up, no hang; the
+  Main::Update detour stays unbuilt. The run was red (5 of 23) on the dying copy alone, read 5's: "actor dead (lifeState 2)" refused
+  ten times, "resurrect 13491" once, the watcher's copy at (20683, -45997) against the record's (20637, -46038); it stopped at leg A,
+  so leg R, the owner's apply on its own DEAD copy at the reconnect (44's freeze of rotfern), is unread. x-corpse-record v4 (by path,
+  sha1 133e4808) at numidium's ask: leg A records the dying copy's refusal, the resurrect and the positions and claims the premises,
+  the record and the thread; legs R and B claim the apply RETURNING on both seats (an "applied" or "not applied" line, "answered on
+  the main thread", never "another thread", never "no answer"), the record surviving the restart, both seats answering the lab after
+  each apply; the owner's own body 46 units from the record (043219 and 053639 alike) recorded as its own finding. It runs on
+  f77fbd00 after the canon's W4 reruns and dress v4. change-form.md's read 7 carries the CONFIRMED.
