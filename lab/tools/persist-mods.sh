@@ -99,6 +99,9 @@
 #   mods/<mod>/<path inside Data>   every file, as the game's Data folder takes it
 #   mods/SHA256SUMS                 "<hash>  <mod>/<path>", what a clone fetches
 #   mods/plugins.txt                the plugins to enable, in load order
+#   mods/PREVIOUS.sums              the SHA256SUMS this render replaced (a render of the same paths
+#                                   keeps the one before): what add-mods.ps1 deletes by hash when a
+#                                   clone has no record of its own last lay (C:\sky-lab\mods.sums)
 #   mods/game-ini.tsv               the game's own ini keys every seat sets (lab/layer/game-ini.tsv)
 #   mods/papyrus-admitted/Platform/papyrus-scripts.txt
 #                                   ADR-044: "<plugin>: <script class> ..." per admitted plugin
@@ -434,6 +437,10 @@ while IFS= read -r m; do
     || { echo "could not pull $m off $dst:$persist/esm (lab/.cache/game)" >&2; exit 2; }
 done < <(python3 "$root/lab/tools/plugin-patch.py" --needs "$root/lab/layer/plugin-patches.tsv" "$stage/tree" "$order_tsv")
 python3 "$root/lab/tools/plugin-patch.py" "$root/lab/layer/plugin-patches.tsv" "$stage/tree" "$order_tsv" "$game_cache"
+# The lab's settings in laid mods' ini files (lab/layer/ini-patches.tsv, lab/tools/ini-patch.py):
+# the mod's file stays the mod's, the manifest holds the deltas (Skyrim Souls RE: its Engine Fixes
+# warning box off, the console left paused). Idempotent, before SHA256SUMS like the plugin patches.
+python3 "$root/lab/tools/ini-patch.py" "$root/lab/layer/ini-patches.tsv" "$stage/tree"
 # The game's own ini keys every seat gets (lab/layer/game-ini.tsv): at the tree's root beside plugins.txt, read by
 # add-mods.ps1 and the friend installer, not a Data file and not in SHA256SUMS.
 cp "$root/lab/layer/game-ini.tsv" "$stage/tree/game-ini.tsv"
@@ -498,7 +505,7 @@ while IFS=$'\t' read -r plugin source _; do
 done < <(grep -v '^#' "$root/lab/layer/papyrus-admitted.tsv" | tail -n +2)
 mkdir -p "$stage/tree/papyrus-admitted/Platform"
 python3 "$root/lab/tools/papyrus-map.py" "$stage/tree" "$root/lab/layer/papyrus-admitted.tsv" "$order_tsv" "$game_cache" "$stage/tree/papyrus-admitted/Platform/papyrus-scripts.txt"
-(cd "$stage/tree" && find . -type f ! -name SHA256SUMS ! -name plugins.txt ! -name game-ini.tsv | sed 's|^\./||' | LC_ALL=C sort \
+(cd "$stage/tree" && find . -type f ! -name SHA256SUMS ! -name plugins.txt ! -name PREVIOUS.sums ! -name game-ini.tsv | sed 's|^\./||' | LC_ALL=C sort \
   | while IFS= read -r f; do shasum -a 256 "$f"; done > SHA256SUMS)
 echo "mod layer: $(wc -l < "$stage/tree/SHA256SUMS" | tr -d ' ') files, $(du -sh "$stage/tree" | cut -f1)"
 if [ -n "${PERSIST_LOCAL:-}" ]; then
@@ -509,6 +516,18 @@ if [ -n "${PERSIST_LOCAL:-}" ]; then
 fi
 
 ssh -o BatchMode=yes "$dst" "install -d -m 2775 -g sky '$persist/mods'"
+# PREVIOUS.sums, the manifest this render replaces: add-mods.ps1 deletes, by hash, a file an earlier render laid
+# and this one drops, against the clone's own record of its last lay and, for a clone laid before that record
+# existed, this file (D37's DeathDropOverhaul.dll, 2026-10-27). A render of the same paths keeps the one before.
+paths() { cut -c67- | LC_ALL=C sort; }
+host_sums=$(ssh -o BatchMode=yes "$dst" "cat '$persist/mods/SHA256SUMS' 2>/dev/null" || true)
+if [ -n "$host_sums" ] && [ "$(printf '%s\n' "$host_sums" | paths)" != "$(paths < "$stage/tree/SHA256SUMS")" ]; then
+  previous=$host_sums
+else
+  previous=$(ssh -o BatchMode=yes "$dst" "cat '$persist/mods/PREVIOUS.sums' 2>/dev/null" || true)
+fi
+[ -z "$previous" ] || printf '%s\n' "$previous" > "$stage/tree/PREVIOUS.sums"
+echo "PREVIOUS.sums: $([ -n "$previous" ] && printf '%s\n' "$previous" | wc -l | tr -d ' ' || echo 0) lines"
 # -rlt, not -a: the host's own modes, and group sky from the setgid directory
 # (the Mac's rsync is openrsync, without --chmod or --no-group)
 rsync -rlt --delete "$stage/tree/" "$dst:$persist/mods/"

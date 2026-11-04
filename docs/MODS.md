@@ -486,18 +486,29 @@ of 210 on 2026-10-18, and their decisions on the dependency gaps; the plan is
 docs/research/mod-layer-plan.md). Built by apocrypha on branch
 `apocrypha/layer-essentials`; `just layer-stage apocrypha/layer-essentials` stages it.
 
-**What it is.** 97 mods copied from Fenestrate, 5 fetched from Nexus (Cloaks of Skyrim and
+**What it is.** 97 mods copied from Fenestrate, 6 fetched from Nexus (Cloaks of Skyrim and
 Winter Is Coming from decision 4, Realistic Aspen Trees after playtest 26, the Survival
-collection's two non-HDT warmth patches after playtest 27, all below), on top of the layer's
+collection's two non-HDT warmth patches after playtest 27, Skyrim Souls RE for the pausing on
+2026-10-28, all below), on top of the layer's
 existing eight (RaceCompatibility, rotfern, RaceMenu, CBBE, Lost Grimoire, Apocalypse, Headshot
 Kills with CIF 2.0.7, AI Pathing Freeze Fix): 90 plugins in the clients' order (81 served, 9
-client-only at the tail), 45 of them light; 28 mod folders scoped `@1.6.1170` (every SKSE DLL
-mod: all of them loaded on Fenestrate's 1.6.1170 under SKSE 2.2.6, none has run on 1.7.104).
-111 mod folders and the Papyrus map's, 5,754 files once the install-order rule (below) has
-dropped the six replaced copies, 4.1 GB on disk (the DLL mods' .pdb files kept: Crash Logger
-with PDB support is in the set and reads them). add-mods.ps1 adds and replaces files, never
-removes one: a render that drops a file (FSMP's DLL and configs on 2026-10-20) relies on the
-clone being laid from a base without it, which the stage's snapshot discipline gives.
+client-only at the tail), 45 of them light; the SKSE DLL mods scoped `@1.6.1170` (all of them loaded on Fenestrate's
+1.6.1170 under SKSE 2.2.6 or, Skyrim Souls RE, carry a build for it; none has run on 1.7.104), with Death Drop Overhaul
+out and Skyrim Souls RE in. The folder, file and size counts are the render's own (persist-mods prints them; the two
+layers' branches counted from different bases, 111 and 112 mod folders and the Papyrus map's, 5,754 and 5,773 files, so
+the next render's line is the one to quote). The DLL mods' .pdb files are kept: Crash Logger with PDB support is in the
+set and reads them. add-mods.ps1 adds and replaces files, and since 2026-10-27 removes, by hash, what an earlier render
+laid and this one drops: against the clone's own record of its last lay (C:\sky-lab\mods.sums) and the render's
+PREVIOUS.sums (persist-mods: the manifest it replaced, for a clone laid before the record existed), the way a mod manager
+purges what it deployed. A file at that path with another hash stays and is counted. Before that, a dropped file stayed
+on any clone whose base carried it (FSMP's DLL came off on 2026-10-20 only because its base lacked it), so a promoted mod
+could never leave.
+
+**Out by Eli's letters.** Death Drop Overhaul 1.2.4 (D37 B, 2026-10-27 00:00 PDT, "recommended on
+both"): it drops a dead actor's held shield as a world reference on each client that the server
+never records (x-body-loot 20261026-231653 on 50b's stage), outside the one-authority rule, and it
+is one of the two Loading Menu holders at quit (D24). Its row stays in essentials.tsv as `out`
+until M4's dropped-items row makes a dropped item the server's.
 
 **Where it lives.** One row per mod folder in `lab/layer/essentials.tsv`, read by
 lab/tools/persist-mods.sh after its hand-written blocks:
@@ -664,6 +675,11 @@ included. Nothing happens at runtime.
   the spell itself, so the patch's second ability applies: a plugin without the record gets Skyrim.esm's
   copy injected into its SPEL group (read from lab/.cache/game, the host's master copy, decompressed;
   the header's count up by one) and then the magnitude; the guard confirms nothing later carries it.
+  Since 2026-10-30 the copy travels without its text fields: Skyrim.esm is localized (its FULL and DESC
+  are string ids into its strings files) and USSEP is not, so the first render carried the spell's name as
+  a two-byte garbage string; the injection now drops FULL and DESC when the source and target differ in
+  the localized flag (the ability's name is never shown; the effect's name is the MGEF's). USSEP becomes
+  21,106,757 B with that render.
   USSEP's size and CRC32 move with its three patches (slot 1's mod-lock entry: 21,106,651 B CRC32
   86A15BD3 before; 21,106,777 B CRC32 7CA7F25F after, SHA-256 01064760..., the two 25-byte ability
   blocks gone and the 176-byte spell record added), the Twin Souls fix's CRC32 with the shout rows (its
@@ -711,6 +727,49 @@ appeared in a connected game (numidium, x-survival-unblock3 20261020-024406), so
 from the first tick is enough. The file is regenerated at every build and listed in SHA256SUMS like every layer file.
 `lab/tests/test_papyrus_map.py` checks the rows and the VMAD reader's layouts.
 
+**Survival Mode's needs do not kill, except cold (Eli, 2026-10-28: "it doesnt seem to kill them
+like it should to starve them"; read from the Creation's plugin and script, not from memory).**
+ccQDRSSE001-SurvivalMode.esl's need stages are spells of penalties and nothing else: Hunger stages 2
+to 5 lower Block, Sneak and weapon speed (stage 0 raises stamina regen), Exhaustion stages 2 to 5
+lower magicka and stamina regeneration and disease resistance; no hunger or exhaustion effect
+touches Health, and the plugin's only Health damage is Survival_FreezingWaterDamage (5 per second
+while swimming in freezing water) beside the cold need's max-health penalty
+(Survival_AttributePenaltyHealth). Starving to death is another needs mod's rule (iNeed, SunHelm,
+Frostfall), not this Creation's. Cold is the one need that kills: the cold quest's script
+Survival_NeedCold calls `PlayerRef.Kill()` in `CheckIfMaxCold` when the cold value reaches
+Survival_ColdNeedMaxValue (1000); the layer's copy of that script is Supernatural Survival Tweaks',
+which adds only an undead exemption. So the kill is a Papyrus path on the player: its script is on
+ADR-044's admitted list and its ticks run (the needs rising to their caps in playtest 35 is that
+chain working), and whether SkyMP's server honours a client-side `Kill()` of the player is the
+server's question, not the layer's. The numbers for a checklist row, from the plugin's globals:
+hunger rises Survival_HungerNeedRate 7.5 every 0.25 game hours (30 a game hour, stages at 80, 160,
+340, 520, 770, cap 1000: fed to the cap in about 33 game hours), exhaustion 9 every 0.5 game hours
+(18 a game hour, cap 960), cold by real-time and game-time ticks toward 1000 in cold weather only.
+Playtest 36's seats at hunger 30 and exhaustion 18 after four idle real hours are exactly one game
+hour of ticks: the needs follow the game clock, and the lab's game clock barely moved.
+
+**How Survival Mode starts, from its compiled scripts (thuum-cf's relaunch question, 2026-10-28;
+the Creation's archive pulled off sky-c1 into lab/.cache/game, its scripts disassembled):** only
+SurvivalModeMainQuest is start-game-enabled. Its Survival_MainScript arms a 5 s RegisterForSingleUpdate
+at OnInit and, every tick of OnUpdate, (1) shows Survival_StartPrompt once if Survival_PlayerHasBeenPrompted
+(05:8DF) is 0 and the mode can be enabled ("yes" sets Survival_ModeToggle 05:828 to 1), (2) computes
+ModeCanBeEnabled() = MQ101.IsCompleted() OR (Game.IsFightingControlsEnabled() AND NOT
+PlayerRef.IsInInterior()) and writes it to Survival_ModeCanBeEnabled (05:A0F), (3) calls
+StartSurvivalMode() when 828 == 1 AND that holds AND Survival_ModeEnabled (05:826) != 1, or
+StopSurvivalMode() when 828 != 1 AND 826 == 1. Both operands are globals read cold each tick; 826 is
+the mod's own running-state global, written 1 by StartSurvivalMode and 0 by StopSurvivalMode and
+mirrored into Update.esm's Survival_ModeEnabledShared (01:00314A) for the engine's settings menu.
+StartSurvivalMode starts the three need quests (Survival_NeedBase.StartNeed: Start(), the stage
+values, one OnUpdateGameTime() at once, then RegisterForSingleUpdateGameTime at the need's
+interval), adds the perks and sets 826. The player alias's OnPlayerLoadGame re-arms the timer and
+runs version updates; it starts nothing. Two consequences for a connected game, where every launch
+is a fresh game: a restored 826 = 1 tells the poll the mode already runs and the needs never start
+(the bare relaunches of 2026-10-28, needs flat for thirty minutes while GameDaysPassed ran), and the
+mode cannot start indoors unless MQ101 is completed (those seats stood in Embershard Mine). Rule for
+the player-globals verb: a global a script writes as its own running state (05:826, 01:00314A, and
+the derived 05:A0F) is never restored; the switch a player sets (828) and the player's data (the
+needs, 8DF, 8E0 to 8E2) are, and the mod's own poll then enables within 5 s wherever it may.
+
 **RaceMenu's menu under the layer (2026-10-20, the a-rotfern CTD and a-racemenu's hair swap):**
 SkyUI_SE.bsa carries `interface/racesex_menu.swf` too, the one file the two archives share, and in
 the layer SkyUI_SE.esp is client-only at the tail (slot 82) after RaceMenu.esp (23), so among
@@ -728,6 +787,47 @@ RaceMenu.bsa by lab/tools/bsa-extract.py (a stdlib BSA reader with its own LZ4 f
 order. Rule learned: when two archives carry the same path and the plugins' order cannot be the
 installer's, lay the winner's copy loose. HYPOTHESIS until `RaceMap::CreateDefaultMap` appears in
 a layer seat's skee64.log and a-rotfern and a-racemenu are green.
+
+**Skyrim Souls RE, the pausing (Eli, 2026-10-27, memo D46: "pausing, inventory, and containers
+shouldn't pause the game. it should be transparent. rn it feels unnatural in multiplayer. the player
+who opens their inventory, everything freezes for"; D50 puts it in the turbo build):** the row
+`skyrim-souls-re-3.2.0@1.6.1170` lays Skyrim Souls RE - Unpaused Menus 3.2.0 (Nexus 27859 file
+810395, by Vermunds and Fudgyduff; source github.com/Vermunds/SkyrimSoulsRE, GPL-3.0), an SKSE DLL
+with no plugin and no slot, so the load order and both settings files are untouched. The current
+release ships one build per runtime and the DLL's own SKSE version data says which: file 810395
+names 1.6.1170 and 1.6.1179, file 810396 names 1.7.104. The layer lays the 1.6.1170 build, the
+players' version, like every DLL mod; the 1.7.104 build is fetched and recorded in the archive table
+and goes on when the 1.7.104 set takes its first DLL (its Address Library coverage to be checked
+first). What the archive holds, plain Data layout taken whole: the DLL, its ini and pdb, the
+combat-alert overlay swf, its English strings, and seven vanilla script patches based on USSEP
+(loose .pex, so they shadow USSEP's archive copies; the Papyrus block leaves them inert connected,
+as it does USSEP's). Needs: SKSE64 and Address Library, both in place; SSE Engine Fixes is
+recommended by the page "with the Memory Manager Patch and Global Time Fix features enabled. This is
+technically not needed for the mod to run, but is highly recommended if you want to avoid certain
+issues", and the layer does not carry it: Engine Fixes 7.0.20 needs its game-root preloader on
+1.6.1170 (the row sse-engine-fixes is `out` for that reason) and has no build for 1.7.104 at all
+(7.0.21 beta is for 1.7.99 only). So the first stage measures Souls on its own; if menu crashes
+appear, Engine Fixes part 1 becomes a layer row and the preloader a lab tooling question for
+numidium. Its in-game config menu needs SKSE Menu Framework (in the layer) and ImGui Icons (not);
+the ini is the configuration, which is what the layer uses.
+
+The menu choices, `lab/layer/ini-patches.tsv` over the mod's own ini (lab/tools/ini-patch.py; the
+file stays the mod's, the manifest holds the deltas): every menu the mod covers stays unpaused as
+shipped (Inventory, Container, Barter, Gift, Favorites, Magic, Tween, Stats, LevelUp, Training,
+Journal, Map, Book, Lockpicking, SleepWait, Tutorial, MessageBox, Custom), with movement in menus on,
+no slow motion, the combat-alert overlay on, auto-close at 400 units; one delta,
+`bHideEngineFixesWarning = true`, the start-up message box the mod shows without Engine Fixes, which
+every seat would have to click away and the smoke would read as E_RUN_PAUSED. The console stays
+unpaused as shipped (Eli, 2026-11-02, mid Turbo 2: "nothing should pause"); the lab's scenario steps
+type console commands against a paused world, so a lab run sets `bConsole = false` for itself in the
+stopped game's ini through the relaunch step's ini lever (numidium's), not through the layer, which is
+the players' build (the layer carried `bConsole = false` from 2026-10-28 to 2026-11-02). Two facts for the lab's rules: DialogueMenu is not a Souls menu
+because vanilla Skyrim never pauses dialogue, so "dialogue unpaused" needs no setting (if a lab
+dialogue path pauses, that is SkyMP's own menu, a MessageBoxMenu or CustomMenu, both unpaused here);
+and with MessageBoxMenu unpaused, docs/LAB.md's rule "a seat whose dump-state shows MessageBoxMenu
+open is paused" no longer holds under the layer, the box is open and the world runs. Also for mod
+authors' scripts: the mod makes `Utility.IsInMenuMode()` true while an unpaused menu is open and
+`Utility.Wait()` no longer waits for menus. HYPOTHESIS until the layer's smoke and Eli's play.
 
 **Realistic Aspen Trees (playtest 26; Eli: "the trees looked fucked up and were missing
 textures"):** Eli's ticked Simply Bigger Trees file is "Simply Bigger Trees SE (Realistic
