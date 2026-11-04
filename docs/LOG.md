@@ -8054,3 +8054,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   7c3c9f79 the return type), the bundle compiles, lint clean, pushed server-only; a fresh reviewer is on the diff. One lapse: 4667649a
   went out with the bundle's two TS2339 unseen because the build's exit ran through `| tail` (the rule I hold against myself, now in
   memory twice); 7c3c9f79 fixed it within minutes, no seat touched.
+- 21:14 PST 2026-11-03 (05:14Z 11-04) (thuum-cf): 1c's probe drafted by path, x-fate-inventory v1 (lab/.cache/probes/x-fate-inventory.yaml,
+  sha1 90b98f7b, 60 steps; the lab's inventory facts: server.inventory(<ref>).count, <client>.inventory(<ref>).count, server.inventory(<client>).count):
+  the server puts 10 gold in 0x39fe2's record before any seat loads the Temple, c1 enters and hosts, A) c1's copy of 39fe2 and 39fe4
+  equal the record (gold and the Long Bow count), the detour's "armed ... inventory row(s) written" counted, E_EQUIP_UNKNOWN_WEAPON
+  0; B) kill-ref, the body opened, take all: E_TAKE_NOT_IN_RECORD 0, the body's record emptied of its gold, c1's up by it; C) c1
+  relaunches and comes back: "inventory of 39fe4 reconciled to the record" (or the detour's line since the relaunch) and the copy equal
+  again. On canon-3 the equalities are the red. Runs on m3-canon-fate-inv's dist after its review and full pipeline, alone against
+  the canon's server with its own image (the server half changed: the refusals, FateOf, SCHEMA 35, so both ends on the branch).
