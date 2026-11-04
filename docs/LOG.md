@@ -8535,3 +8535,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   turns one pillar; a console {match} step catches its "played" line; a node-pos driver step reads a named node of the pillar's
   mesh on both seats before and after, recorded in v1, claimed in v2), then turbo at the pillars with Eli. The compile fix's
   pipeline 5334 is green; 8926d2c8's 5335 builds; numidium's arming for the re-roll reads stands.
+- 13:36 PST 2026-11-04 (21:36Z 11-04) (thuum-cf): x-puzzle-guest-view v1 by path, sha1 37bc3797: the guest's own pillar turn read on the guest's
+  VIEW. The pillar base is ACTI 0xaa8ce NorDefaultPuzzlePillar01, model Clutter\Ruins\Pillar\RuinsPuzzlePillar01.nif (esm.py id on
+  sky-srv); the mesh, extracted from /srv/persist/game/1.6.1170/depot_489831/Data/Skyrim - Meshes0.bsa with lab/tools/bsa-extract.py
+  and read by its NIF string table: BSFadeNode RuinsPuzzlePillar01, NiNode "Pillar01" under a NiTransformController (the rotating
+  node), BSTriShape Pillar01:6, the behavior RuinsPuzzlePillar01.hkx. numidium's node-rotation step (thuum 1a3bbf54) reads any
+  reference's named nodes' world and local Euler, so the probe records Pillar01 on both seats at the baseline, after the guest's own
+  E-key turn (hold-key 18, the player's path; b-puzzle-relay turns by Papyrus Activate and claims the "played" line alone), after
+  the host's turn and after a second guest turn, with console {match} catching the services' lines; claims are b-puzzle-relay's
+  relay lines; v2 claims the view. Runs after the three re-roll reads on 8926d2c8's lay; then turbo at the pillars with Eli.
