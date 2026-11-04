@@ -8407,3 +8407,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   client's applyHands already relays a wornLeft torch. Probes by path: x-fate-login-bleak v5 bff9863c (header only, no claim
   changed) and x-fate-dress-bleak v9 e28faba7 (v8 plus c2.npc_state(0x39fe4).worn == c1.npc_state(0x39fe4).worn at each read);
   both on skymp-server:m3-canon-4-hands-9218156a with dist 18729 and the driver's bundle, after f4014f39's chain.
+- 11:53 PST 2026-11-04 (19:53Z 11-04) (thuum-cf): f4014f39's chain done (numidium): corpse v6 GREEN 193246, x-corpse-arrows v2 GREEN 194019 (the
+  condition met), dress v8 GREEN 194400 (five reads whole on both seats, c2 re-rolled twice and applied three records, no crash),
+  oracle v4 194942 RED on 39fe1's worn alone with the old driver (the head true, 3D loaded, no crash: the torch measurement, fixed
+  on the hands head on both sides). Arrows v3 d4742fd1 playing as the second sample; then 5314's image, f4014f39's dist again for
+  the 61f417e0 driver bundle, new snapshots, oracle v5 and dress v9. The canon fast-forward: to f4014f39 on v3's green, then to
+  9218156a on its two reads.

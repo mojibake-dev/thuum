@@ -2639,6 +2639,9 @@ R2 like the engine's own weapon; T0 in CellHostTest's hosted-equipment case (the
 once; the next report without it drops it from the hands, keeps it in the inventory, keeps the roll's armor). Reads: oracle v5
 bff9863c (no claim changed) and dress v9 e28faba7 (plus c2's copy wearing what c1's does at every read) on the hands image with
 f4014f39's dist and the driver's bundle.
+Dress v8 on f4014f39 GREEN (20261104-194400, numidium): five reads whole on both seats, c2 re-rolled twice and applied three
+records, no crash; oracle v4 on f4014f39 (194942) red on 39fe1's worn alone with the old driver, the head true: the hands head's
+two reads are the measurement's.
 
 ## Status
 
