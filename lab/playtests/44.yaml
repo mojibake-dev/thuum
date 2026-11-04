@@ -16,7 +16,7 @@ server:
   npcEnabled: true
   gameHour: 12.0
   locks: false
-  weatherSync: false
+  weatherSync: true   # on (Eli, playtest 44: "it's snowing on rotfern's screen"); 40 to 43 ran it off by turbo 2's every-switch-off shape
   perks: true
   leveling: true
 camp:
