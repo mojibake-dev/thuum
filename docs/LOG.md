@@ -8515,3 +8515,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   that Prisoner's screen lacks (a hosted NPC's own projectiles, unrelayed). Eli next: "turbo mode to close out the pillars, then
   move onto the next builds. scripting then physics." The 46 candidate cc5c82b6 (the re-roll's 3D work on the main thread, for
   202729's ragdoll crash) reads first while the pillar fix is found: oracle v5, dress v9, x-fate-login-bleak-trace v4.
+- 13:26 PST 2026-11-04 (21:26Z 11-04) (thuum-cf): the review of cc5c82b6 (a fresh read-only agent, ADR-064 rule A) landed nine findings; the first
+  was 5330's C3861 (fixed 4d699db8); the rest applied as written on fork m3-canon-4-reroll-main 8926d2c8: the UI task catches and says
+  a throw (SKSE's drain has no net), no task interface REFUSES the work (never the VM thread), a body the resurrect left dead keeps
+  its block (ADR-067 decision 6: an unblocked body under the puppet service's dead mark would open the engine's loot menu), the
+  thread witness on the redressed and resurrected lines too, the helpers in the file's namespace ahead of every use, Main.h:87;
+  puppetService's reconcile stands aside for a resurrect's in-flight window (its AI and block writes now land on the main thread,
+  unordered against the tick, so the two writers no longer serialize: finding 4's lazy fix); the header's and the services'
+  comments say the main thread. fork-lint green, the client build queued behind 4d699db8's on the one runner.
