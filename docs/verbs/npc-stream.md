@@ -1362,6 +1362,22 @@ update's exactly. 25616 marks the info said-once on both BEGIN and END
 done bits' initial value on a fresh actor (if clear, the first say refuses
 and the native must set 0x180 first), the dialogue state's type field.
 
+HYPOTHESIS (the re-analyst's Ghidra read, 2026-11-03, for the scripts arm's F9 "subsequent voice lines are not shared"; the Dynamic
+read is lab/frida/say-verdict.js, attach-only on the watcher, in review): SayTopic 39162 tail-calls 39642, which refuses at one of
+three gates before any item is made: B1 the dialogue state at HighProcessData's +0x3B8 with its +0xC word's bits 28 to 30 equal to 1
+or 2 (a lip load pending), B2 a valid sound handle whose duration is still 0 (the sound loading), B3 the busy test 37266,
+`(boolBits & 0x180) != 0x180 || voiceTimer > 0`; then the picker 25541 (a given info never walks conditions) and 39643 (the start:
+with a current response, 39772 for a voice file, 39771 for a sound descriptor; no response marks nothing, B4). The mechanism that
+would turn one lost line into every later line refused: 39772 clears kVoiceFileDone right after calling SpeakSoundFunction 37542,
+which sets voiceTimer to -1 at its entry and returns at its audibility gate (no 3D, or no current scene and not talking to the
+player and farther than the output model's max distance from the AUDIO LISTENER's position on any axis; 67710 is the listener, the
+max BGSSoundOutput's attenuation) before the state byte; the puppet detour's END pair runs only for a state of 1 to 3 or a timer
+above 0, so nothing restores the bits, and PuppetApi's inaudible branch clears the item (39334) but not the bits: every later say on
+that puppet refuses at B3 with the bits missing 0x100 and the timer -1. The fix, if the read confirms it: the inaudible branch
+restores the done bits (and the timer) as the engine's END would, or the fork's say sets 0x180 before 39162 as the open question
+above already suggested for a fresh actor. Falsified by a refused row whose busy gate passed with a response present and the state
+byte at 3, or by the bits carrying 0x180 on the first say after an inaudible row.
+
 ### The voice slice as built (2026-10-26 05:33 PDT, fork branch m3-npc-voice 614eadbe off e2ea071a, its own worktree; CI next)
 
 On the host, a Skyrim Platform sink on TESTopicInfoEvent (the struct in

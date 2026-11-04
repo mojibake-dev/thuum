@@ -7555,3 +7555,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   stage's head m3-turbo3-sys2-container-r2 4465679b (the client follow-ups, the rune glyph at SCHEMA 34 and the F1 fix). fork-lint
   clean on both. Lesson for the memory: a branch cut from a stage's base carries no later live fix; check the turbo fixes' ancestry
   before pinning.
+- 16:15 PST 2026-11-03 (00:15Z 11-04) (thuum-cf): The re-analyst's read of the watcher's "refused" say (F9's "subsequent voice lines are not shared"): SayTopic
+  39162 tail-calls 39642, three gates before any item (the dialogue state's lip-pending bits, a loading sound handle, the busy test
+  37266 on the done bits 0x180 and the voice timer), a given info never walking conditions (25541 calls DialogueItem's ctor directly;
+  the walk 25544 is null-info only), and the mechanism HYPOTHESIS: an inaudible start (39772 clears kVoiceFileDone after 37542 returns
+  at its audibility gate with the timer at -1) leaves the bits clear with nothing restoring them, so every later say refuses at the
+  busy test; the correction that 67710 is the audio listener's position, the max distance the output model's attenuation. Written
+  into npc-stream.md after the done-bits open question with the fix shape (restore the bits as the engine's END would). The Dynamic
+  read is lab/frida/say-verdict.js (sha1 67719e81, 470 lines, attach-only on the watcher, sixteen hooks with their first bytes, one
+  row per say with the gate inputs, a summary per verdict and branch), in its fresh review; uncommitted until it passes. The arm's
+  day-1 read pairs it with x-scene-relay v1 on c2.
