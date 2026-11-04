@@ -8496,3 +8496,22 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   so far (numidium): items 1 to 4 passed on both seats, 39fe2 respawned at 13:04:16 with the same pick. Eli's two observations for
   after: snow inside Bleak Falls Temple (the weather release imposed on a show-sky interior, CELL flags 0x0083, HYPOTHESIS) and
   iron arrows outside the door on rotfern's screen alone (a hosted NPC's own engine projectiles, unsynced).
+- 13:17 PST 2026-11-04 (21:17Z 11-04) (numidium): playtest 45 on the canon at 4c6d9f24 (server m3-canon-4-hands-4c6d9f24, f4014f39's dist client-build
+  18729, the lights driver 61f417e0): seats ready 12:39 PST with the standing base checked, ended 13:15 on Eli's word; recorded
+  at results/playtest-45/ (6 cycles), the world saved as playtest-pt45-end-20261104T211618Z. Items, in Eli's words where quoted:
+  1 corpses PASS, VERIFIED IN PLAY ("everything in item 1 is looking good"; after c2's relaunch at 12:44:42 and a server restart
+  at 12:47:26 with the world saved first, "prisoner looking good after restart"; 0 refused applies, the arrows removal twice on
+  each seat in play); 2 loot PASS (Prisoner looted a bow, no refused take; rotfern's own re-equip not tested, "not the context");
+  3 Temple logins PASS (both seats relaunched at 12:55 and 12:56, "nobody frozen or crashed"); 4 naked and headless PASS (the
+  older corpses, the living bandit "looks good on both seats", the archer 39fe2 respawned through labCommand respawn-ref at
+  13:04:16 "looked good"); 5 pillars BROKEN in part: the host's turns good, the guest's own turn plays only on the host's screen
+  as in 44, the gate's pattern right (the state relayed, the guest's animation missing; the lab's pillar probes passed, so they
+  claim no guest-own view); 6 the 44 baseline PASS for lockpick, rune and Riverwood, physics props still absent (not in this
+  build); 7 and 8 PASS ("7 and 8 looked good"). Findings: c1's host-only "on('update'): Expected 'objectTypeInfo' to not to be
+  nullptr" from 12:40:23, about 47 a second with six hosted living actors and 23 with three, after c1 promoted two exterior actors
+  (105a24 LvlAmbientCreatures, 29613 LvlBanditMissile): sendInputsService's hosted loop by thuum-cf's read; c1's lab driver
+  stopped stepping at 12:44:50 (reset by the 12:55 relaunch, no recurrence after); snow inside Bleak Falls Temple, where the
+  server releases its weather at each login while the cell's DATA flags (0x0083) show the sky; iron arrows outside the door
+  that Prisoner's screen lacks (a hosted NPC's own projectiles, unrelayed). Eli next: "turbo mode to close out the pillars, then
+  move onto the next builds. scripting then physics." The 46 candidate cc5c82b6 (the re-roll's 3D work on the main thread, for
+  202729's ragdoll crash) reads first while the pillar fix is found: oracle v5, dress v9, x-fate-login-bleak-trace v4.
