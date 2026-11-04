@@ -8630,3 +8630,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   host first-in and never relaunched during the pillars. Fix in kind offered (client, about an hour): at a grant the new host
   re-syncs each pillar's graph to its script's initial side (the StartState0N the hook saw from the local script at the cell
   load); the structural fix is decision 5's state feed. numidium bisects f4014f39, 7c79fc3e, fffd8a66 with an inheritance leg.
+- 15:19 PST 2026-11-04 (23:19Z 11-04) (thuum-cf): 46 proceeds on the first-in protocol (numidium: the Temple's host first-in, never relaunched during
+  the pillars; the bisect reads each candidate's host epoch beside its result). traps.md "The next build: the hand-off" drafted: the
+  client's graph re-sync to the script's initial side at a grant, decision 5's activation count fed to the new host (mod 3 for a
+  pillar), the record's replay moved to the server as an ObjectAnimation to non-host loaders (CreateActor without lastAnimation);
+  the read x-puzzle-handoff. fffd8a66 built green (5363).

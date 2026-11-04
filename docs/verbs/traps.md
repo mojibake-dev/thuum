@@ -584,3 +584,33 @@ the graph may refuse, the trigger then plays from Side0N: the expected word, not
 sits on the host's initial side at a load, not Side01; the wording above and in the code follows. F6: the record path's id is
 the remote one. F7: the record path says "replayed", so b-puzzle-relay's " played" claim never counts a host's refused replays.
 
+### The next build: the hand-off (15:19 PST 2026-11-04, 23:19Z 11-04; DRAFT, no code)
+
+Playtest 46's second lay (fffd8a66, c1 inheriting the Temple at epoch 3 after c2's relaunch) showed F3 live: a seat's pillar graphs
+move while it is a guest (the record's replay at its load, every live relay after), its scripts stay on their initial sides (OnCellLoad
+runs everywhere, OnActivate on the host alone), and when it inherits the cell its scripts' first Trigger0I has no transition:
+PlayAnimationAndWait never returns, busy for good, every pillar dead for every seat. Tonight's protocol: the Temple's host first-in
+and never relaunched during the pillars. The build after decision 5, two halves, both needed (a feed alone advances a graph that was
+never where the script thinks it is):
+
+1. The client's re-sync at a grant (hostService's cellHostChanged {hosted: true}): for every puzzle pillar of the cell this seat has
+   seen events for (a reference whose Trigger0N or StartState0N passed the hook), the graph is put back on the script's initial side
+   (the StartState0N the hook saw from the local script at the cell load, stored per reference; initial side 01 has no jump event and
+   takes the round Trigger02, a wait for Turned02, Trigger03), with plain playAnimation calls, never marked self-played, so the new
+   host REPORTS them and every guest and the record follow. Cost: the pillar snaps to its initial side on the new host's screen and
+   its guests' within a turn or two; a press inside that round (about five seconds) finds the script's trigger refused mid-turn and
+   sticks it, the same shape, so the client holds E on a pillar until its round ends (blockActivation for the round, or the E
+   dropped with a console word).
+2. The server's state feed (decision 5): the reference's activation count since the cell's record began (scriptedActivations on the
+   change form: a migration, rule 6, and a restart-persistence scenario), fed to the new host at the grant as that many relayed
+   activations spaced by the script's busy window; a pillar needs the count mod 3 (its graph is a three-cycle) and the client knows
+   it is a pillar by the StartState0N or Trigger0N it saw, so the feed is short; the lever's own count stays on its host's script as
+   today (its check reads the pillars' states at the pull). The new host's script then equals the record and its graph, reset
+   first, follows it turn by turn, relayed to the guests.
+3. The record's replay to guests becomes the server's business: CreateActor drops lastAnimation (a contract narrowing, its fixture),
+   and the server sends a non-host loader the reference's last event as the ObjectAnimation message after ApplyHostDecisions, so
+   the host never replays and a guest's view comes through the one path with the jump (the review's F1).
+
+Reads: x-puzzle-handoff (c2 hosts first, c1 loads as a guest, c2 relaunches, c1 inherits: c1's own E turns aa8cb, the server's
+animates, the guest's view by node-rotation); the restart-persistence scenario for the count; b-puzzle-relay as the regression.
+
