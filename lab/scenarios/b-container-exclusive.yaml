@@ -1,0 +1,140 @@
+# b-container-exclusive (thuum-cf, drafted 2026-11-03 from x-container-hold v1; docs/verbs/containers.md's hold paragraph, ADR-067
+# decisions 1 and 6; fork m3-turbo3-sys2-container): one seat holds a container at a time, a chest's or a corpse's. Frame:
+# b-container-rest's (c1 hosts Bleak Falls Temple's exterior 0x371de, c2 beside; TreasBanditChest 0x371e9 unlocked and given ten gold
+# through the server's console) plus b-body-loot's bandit 0x39fe4 in the same cell. Claims, each with what it proves:
+# 1. c1 opens the chest and c2's E is refused: the server's "E_CONTAINER_BUSY: <c2> activates 371e9 held by <c1>; refused" once, no
+#    OpenContainer handler line on c2, c2's ContainerMenu closed, c1's open (the hold refuses the second seat and the first's view is
+#    untouched: decision 6).
+# 2. c1 closes ("371e9 shut with 0 occupant" once) and c2's E now opens ("open with 1 occupant" a second time); c2 closes (the second
+#    shut): the holder's close frees the container.
+# 3. The corpse: c1 kills 0x39fe4 (the server's kill) and opens its loot through the server ("39fe4 open with 1 occupant"); c2's E is
+#    refused ("E_CONTAINER_BUSY: <c2> activates 39fe4"), c2's ContainerMenu stays closed (a dead body is activation-blocked like a
+#    chest, the scope's D-C2 A: its loot opens only on the server's word), c1's stays open, no "doesn't occupy" line; both close;
+#    then c2 opens the body itself (the watcher's open of a blocked released body whose AI the handler switches on, the client
+#    review's note 5): c2's menu open within 5 s, "39fe4 open with 1 occupant" a second time, the refusal count unchanged; c2 closes.
+# Recorded, not claimed: both seats' screenshots at each step (the notification on c2), both dumps. Lines are regexes with dots for
+# quotes and parentheses. Assertions are evaluated by lab-api only (ADR-009). Promoted from x-container-hold v2's GREEN run
+# 20261104-003449 (101 steps, 0 failed, the server m3-turbo3-sys2-container-f1-0c23306e with 2225c932's client and cc026686's js): the
+# watcher's open of the blocked body took ten attempts over 2.2 s (E25's refusals after the AI switch), hence the 5 s wait. Its own
+# commit (rule 13). Red on the parity server until the hold merges (fork m3-turbo3-sys2-container).
+id: b-container-exclusive
+milestone: M4
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c1: server-console {name: AddItem, args: [0x371e9, 0xf, 10]}
+  - c1: server-console {name: Unlock, args: [0x371e9]}
+  - wait: 2
+  - c1: teleport {cell: "371de:Skyrim.esm", x: -4200, y: 850, z: 650, rot: [0, 0, 90]}
+  - wait: 20
+  - c2: teleport {cell: "371de:Skyrim.esm", x: -4100, y: 850, z: 650, rot: [0, 0, 90]}
+  - wait: 20
+  - assert:
+      - server.host(0x371de).client == "c1"
+  # the chest's spots (b-container-rest's numbers: 90 and 110 units from 0x371e9, facing it)
+  - c1: teleport {cell: "371de:Skyrim.esm", x: -3509.0, y: 745.5, z: 575, rot: [0, 0, 98.6]}
+  - c2: teleport {cell: "371de:Skyrim.esm", x: -3528.4, y: 750.8, z: 575, rot: [0, 0, 99.8]}
+  - wait: 3
+  # leg 1: c1 opens, c2 is refused
+  - c1: activate {refId: 0x371e9}
+  - wait: 3
+  - c1: dump-state
+  - assert:
+      - 'c1.state.menuOpen("ContainerMenu") == true'
+      - 'server.log_count("371e9 open with 1 occupant") == 1'
+  - c2: activate {refId: 0x371e9}
+  - wait: 3
+  - c2: dump-state
+  - c1: dump-state
+  - c2: screenshot
+  - c1: screenshot
+  - c2: log-count {pattern: "onOpenContainerMesage"}
+  - server: log-count {pattern: "E_CONTAINER_BUSY: ff[0-9a-f]+ activates 371e9 held by ff[0-9a-f]+; refused"}
+  - server: log-count {pattern: "doesn.t occupy"}
+  - assert:
+      - 'server.log_count("E_CONTAINER_BUSY: ff[0-9a-f]+ activates 371e9 held by ff[0-9a-f]+; refused") == 1'
+      - 'c2.state.menuOpen("ContainerMenu") == false'
+      - 'c1.state.menuOpen("ContainerMenu") == true'
+      - 'c2.log_count("onOpenContainerMesage") == 0'
+      - 'server.log_count("371e9 open with 1 occupant") == 1'
+  # leg 2: c1 closes, c2 opens
+  - c1: close-menu {name: ContainerMenu}
+  - wait: 3
+  - assert:
+      - 'server.log_count("371e9 shut with 0 occupant") == 1'
+  - c2: activate {refId: 0x371e9}
+  - wait: 3
+  - c2: dump-state
+  - c2: screenshot
+  - assert:
+      - 'c2.state.menuOpen("ContainerMenu") == true'
+      - 'server.log_count("371e9 open with 1 occupant") == 2'
+      - 'server.log_count("E_CONTAINER_BUSY: ff[0-9a-f]+ activates 371e9 held by ff[0-9a-f]+; refused") == 1'
+  - c2: close-menu {name: ContainerMenu}
+  - wait: 3
+  - assert:
+      - 'server.log_count("371e9 shut with 0 occupant") == 2'
+  # leg 3: the corpse; the kill is the server's, the host's view kills the body within its re-apply
+  - c1: kill-ref {formId: 0x39fe4, killer: c1}
+  - until: {within: 10, expect: [server.ref(0x39fe4).isDead == true]}
+  - wait: 5
+  - c1: approach {formId: 0x39fe4, distance: 60, cell: "371de:Skyrim.esm"}
+  - c2: approach {formId: 0x39fe4, distance: 90, cell: "371de:Skyrim.esm"}
+  - wait: 3
+  - c1: activate {refId: 0x39fe4}
+  - wait: 4
+  - c1: dump-state
+  - assert:
+      - 'c1.state.menuOpen("ContainerMenu") == true'
+      - 'server.log_count("39fe4 open with 1 occupant") == 1'
+  - c2: activate {refId: 0x39fe4}
+  - wait: 4
+  - c2: dump-state
+  - c2: screenshot
+  - c1: screenshot
+  - server: log-count {pattern: "E_CONTAINER_BUSY: ff[0-9a-f]+ activates 39fe4 held by ff[0-9a-f]+; refused"}
+  - server: log-count {pattern: "doesn.t occupy"}
+  - c2: log-count {pattern: "onOpenContainerMesage"}
+  - assert:
+      - 'server.log_count("E_CONTAINER_BUSY: ff[0-9a-f]+ activates 39fe4 held by ff[0-9a-f]+; refused") == 1'
+      - 'server.log_count("39fe4 open with 1 occupant") == 1'
+      - 'c2.state.menuOpen("ContainerMenu") == false'
+      - 'c1.state.menuOpen("ContainerMenu") == true'
+      - 'server.log_count("doesn.t occupy") == 0'
+  - c2: close-menu {name: ContainerMenu}
+  - c1: close-menu {name: ContainerMenu}
+  - wait: 3
+  - server: log-count {pattern: "39fe4 shut with 0 occupant"}
+  - assert:
+      - 'server.log_count("39fe4 shut with 0 occupant") >= 1'
+  # the watcher's own open of the body after the host's close (a blocked released body, its AI switched on by the handler)
+  - c2: activate {refId: 0x39fe4}
+  - wait: 5
+  - c2: dump-state
+  - c2: screenshot
+  - c2: log-count {pattern: "body 39fe4: the ContainerMenu is open"}
+  - c2: log-count {pattern: "activate returned true"}
+  - server: log-count {pattern: "39fe4 open with 1 occupant"}
+  - assert:
+      - 'c2.state.menuOpen("ContainerMenu") == true'
+      - 'server.log_count("39fe4 open with 1 occupant") == 2'
+      - 'server.log_count("E_CONTAINER_BUSY: ff[0-9a-f]+ activates 39fe4 held by ff[0-9a-f]+; refused") == 1'
+  - c2: close-menu {name: ContainerMenu}
+  - wait: 3
+  - assert:
+      - 'server.log_count("39fe4 shut with 0 occupant") >= 2'
+  - c1: dump-state
+  - c2: dump-state
+artifacts: [server.log, c1.log, c2.log, screenshots]
