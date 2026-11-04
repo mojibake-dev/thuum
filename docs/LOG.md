@@ -8295,3 +8295,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
 - 02:41 PST 2026-11-04 (10:41Z 11-04) (thuum-cf): pipeline 5284 (m3-canon-4-followups 3bd97f7c) GREEN: server-build 18673, client-build 18674. 45's pair is
   18674's dist with skymp-server:m3-canon-4-followups-c4539d22 (the server unchanged since c4539d22); numidium lays it gated with new
   snapshots and runs dress v8, oracle v3 and corpse v6; three green and canon fast-forwards to 3bd97f7c.
+- 02:54 PST 2026-11-04 (10:54Z 11-04) (thuum-cf): dress v8 on 3bd97f7c (run 20261104-104705, numidium): the Temple's login at roll 25 survived on both
+  seats, the first sample since the fix (the idempotent redress holds), the baseline whole with faceNode true on both; D1 red a new
+  way: the respawned re-rolled living copy alive, dressed and the right race but is3DLoaded false on both seats, invisible (c2's
+  screenshot 026): DoReset3D on a just stood-up copy drops the model and the process never rebuilds it. Fixed on
+  m3-canon-4-followups: after DoReset3D the model is asked back through Actor::Load3D and Actor::Update3DModel runs the flagged
+  passes at once (npc-fate.md 1e, READ ON 3bd97f7c). 45 waits on it (item 4 is a respawn read on both screens); oracle v3 and corpse
+  v6 run on 3bd97f7c's pair meanwhile.

@@ -2556,6 +2556,19 @@ common case at a cell's load. FIXED (the next head on m3-canon-4-followups): Red
 no-op when it matches, as 100832's was); a real difference keeps the full redress: the engine's dresser's own idempotence (a tagged
 entry skipped, re-npc-roll.md 8.2) by the record. HYPOTHESIS until v8 reads the Temple's load with no crash on both seats; the
 equip-queue trace (lab/frida/equip-queue-trace.js) on 100832's pair would name the freed list's remover.
+READ ON 3bd97f7c (02:54 PST 2026-11-04, 10:54Z 11-04; dress v8 bf1c8f36, run 20261104-104705, 18674's dist with c4539d22's image, numidium): the
+Temple's login at roll 25 SURVIVED on both seats, the first such sample (the three runs before crashed a seat each): the idempotent
+redress holds, CONFIRMED there (one sample). The baseline held whole, faceNode TRUE on both seats. D1 red a new way: after the kill
+and the fated respawn both seats' copies of 39fe4 read alive, AI on, worn [80148, 111524, 455576, 455579] equal to the fate's, race
+79686 the fate's, but is3DLoaded FALSE and so faceNode false, on c1 and c2, 25 s after the stand-up; c2's screenshot 026 shows the
+campfire with no bandit: a respawned re-rolled living copy INVISIBLE. Both logs at 02:49:44: the dead copy's reconcile, the init
+dress, "pinned 39fe4 to 39d21", "rerolled 39fe4 through the engine from pick 39d11 toward the fate's 39d21 (3D loaded true before;
+the inventory reset, the record dressed, the 3D reset for the process's rebuild)", "resurrected 39fe4 (... dressed from the fate
+true)". So H1's DoReset3D on a copy that had just stood up drops the model and the process's rebuild never comes for it. FIXED
+(the next head): after DoReset3D the model is asked back through the reference's own loader (Actor::Load3D, A/Actor.h:315, the call
+x-npc-late-3d 231926 read non-null) now that the inventory and the dress are the record's, and Actor::Update3DModel (A/Actor.h:633,
+AIProcess::Update3DModel, which wants the process) runs the flagged skin, head and face passes at once; the line says "reloaded
+true, the model passes run true". HYPOTHESIS until v8 reads is3DLoaded and faceNode true after a respawn on both seats.
 
 ## Status
 
