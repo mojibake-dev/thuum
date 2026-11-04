@@ -7722,3 +7722,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   reanimate (F17, its replacement unmerged), the arm-one prop model (the "mostly works"). Missing but never verified in play, for
   later by Eli's order: follow-vouch, reanimate-claim, the deaths-client and settle fixes, the five prop branches, the ADR-062 slices,
   trap-hit, mod-lock. The flip head fb547765's build (5173) green; 8896ef0c's running.
+- 18:06 PST 2026-11-03 (02:06Z 11-04) (thuum-cf): Eli's correction, verbatim via numidium: "Voice lines after the first one. this WAS historically working for
+  everything but scripted scenes." Dated and fixed: the inaudible verdict (voice v4 ed71ee67, 2026-10-26) clears a puppet's item
+  through the engine's ClearGreetTopic but never restores the done bits the engine's END would set (39772 clears kVoiceFileDone after
+  SpeakSoundFunction returns at its audibility gate; the END pair runs only for a state 1 to 3 or a timer above 0), so after one
+  inaudible line every later say on that puppet fails the busy test 37266 and answers "refused": one line heard, the rest never (F9).
+  It bites when the first relayed line is inaudible on the watcher (too far or no 3D), hence scenes first and non-scene lines whenever
+  the watcher stood far for the first bark. The restore: PuppetApi.cpp sets kSoundFileDone and kVoiceFileDone at the three clears (the
+  inaudible branch, the pre-clear of a line in flight, the promote's clear); fork m3-canon-3 9869d28c = canon-2 plus this, pushed with
+  the Windows job; HYPOTHESIS until the probe x-voice-after-inaudible v1 (by path, sha1 caacf88a: round 1 the watcher 1600 units away,
+  its say inaudible; round 2 at 150, the relayed line must play) reads green with say-verdict.js on c2. canon-2's server-build runs
+  (5191); canon-1's client-build (5186) still building. numidium: the baseline's server is canon-2's, canon-1's dist, 44.yaml now
+  locks on and every switch on (dfaa0bd9); the traps and the host-snippet reanimate stay known-broken readings.
