@@ -12,5 +12,6 @@
     "mode": "follow",
     "followMargin": 1.15,
     "leadSeconds": 0.15
-  }
+  },
+  "activationUnblockedBases": "1a4bb c6440 21513 3e726 aa8ce b7db4 173fc 2079f"
 }
