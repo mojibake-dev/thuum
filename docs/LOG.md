@@ -8311,3 +8311,6 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   c1 reads 39fe1, the login's own living re-roll (44's bandit), and claims it alive, its model loaded, the facegen head node present,
   wearing the fate's worn and of the fate's race; the read 25 s after the host grant; v3's claims untouched. Runs on 9f2757a3's pair
   in v3's slot beside dress v8 bf1c8f36.
+- 03:04 PST 2026-11-04 (11:04Z 11-04) (thuum-cf): pipeline 5288 (m3-canon-4-followups 9f2757a3) GREEN: server-build 18681, client-build 18682. The pair
+  for the last reads is 18682's dist with c4539d22's image; numidium's wrapper lays it after 3bd97f7c's corpse run and runs dress v8
+  and oracle v4 (corpse v6 too if that run hit the re-roll branch); green, and canon fast-forwards to 9f2757a3.
