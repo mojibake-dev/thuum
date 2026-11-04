@@ -8324,3 +8324,5 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   kSkin, kHead, kFace) and Actor::Update3DModel at once; the fallback the engine's Disable and Enable. Eli's choice through numidium:
   wait about an hour for the read, or lay 9f2757a3 with the headless re-roll as a known limit; my word is to wait (item 4 is this
   read). Oracle v4 and corpse v6 play on 9f2757a3 meanwhile.
+- 03:36 PST 2026-11-04 (11:36Z 11-04) (thuum-cf): pipeline 5294 (m3-canon-4-followups cb944530) GREEN: server-build 18695, client-build 18696; cb944530's
+  pair is 18696's dist with c4539d22's image, dress v8 its one read, pending Eli's word (wait for the head, or lay 9f2757a3 now).
