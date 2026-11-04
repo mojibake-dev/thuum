@@ -8558,3 +8558,6 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   undefined[], so the fault line's target.toString narrowed to never; the client's TypeScript is type-checked by the Windows build
   alone); fixed 7c79fc3e (the id read past the type), its build queued. The objtype head for the pair after the re-roll reads is
   7c79fc3e.
+- 13:54 PST 2026-11-04 (21:54Z 11-04) (thuum-cf): m3-canon-4-objtype 7c79fc3e built green (pipeline 5343, client-build and server-build): the dist for
+  the pair after the re-roll reads (the named native, the per-target catch), its read the regression set plus one hosted login
+  outdoors.
