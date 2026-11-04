@@ -2372,6 +2372,10 @@ race's skin (confirm: npc-state raceId after the re-roll differs from the fate N
 H3 a corpse has no process for the pass (confirm: H1's fix heals the living case and not the dead; fix: rerollActor refuses
 IsDead() with a line, the body keeps the engine's roll); H4 the redress-alone branch strips a loaded corpse (against it: 29602
 took it and only the khajiit broke). Order: the IsDead refusal first (one line, no RE), then H1's two calls behind the probe.
+A fact from change-form's read 5 that touches this bug's neighbour: PuppetApi's Promote returns on IsDead (true for kDying as for
+kDead) before EnableAI(true), so a puppet released at its death keeps its AI off for good and never completes its death (the engine
+ticks fDyingTimer inside the AI update alone); the change-form apply now completes a kDying copy itself (88497c54). Whether the
+re-roll's Load3D on such a copy differs from one on a kDead copy is a read for x-fate-dress-bleak v4's corpse leg.
 Probe x-fate-dress-bleak v2 (by path): c1 hosts the Temple, kills one campfire bandit, relaunches and comes back: the living
 bandit's and the corpse's npc-state (worn against the fate's count, raceId, is3DLoaded), the platform's "rerolled" and
 "redressed" lines, screenshots; on canon-3 it reads the bug, on the fix branch it claims the wear.

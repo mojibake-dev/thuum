@@ -8109,3 +8109,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   reruns, dress v4 and x-corpse-record v4 on f77fbd00. A green there makes 1c the first fix proven alone against the canon: `canon`
   fast-forwards to 7cd63e69 (the apply head f77fbd00, also off 2136311f, then merges into the line rather than rebasing: no rebase of
   anything pushed).
+- 22:02 PST 2026-11-03 (06:02Z 11-04) (thuum-cf): read 5 answered (the re-analyst): the engine flips kDying to kDead in
+  Actor::KillImmediate (CommonLib Actor.h:610, Address Library 37735) from the high process's AI update when fDyingTimer (2.0 s,
+  HighProcessData's dyingTimer set by KillImpl) runs out; the update needs kProcessMe, which the puppet's Demote clears, and the fork's
+  release at death (Promote) returns on IsDead, true for kDying, before EnableAI(true): a copy killed by the server's word, or a loaded
+  copy the bind kill ends, sits in kDying with a timer nobody ticks, which is why the apply's dead-only premise refused every record on
+  them (053639's ten refusals). The doc's 0x6e3310 was the demotion helper, not the flip; corrected. BUILT 88497c54 on
+  m3-canon-3-apply-main (off canon): inside the apply's main-thread UI task a kDying actor's death is completed through the engine's own
+  KillImmediate (SetLifeState(kDead), the death event, sounds and combat ended, Havok untouched, no death items) with one line, then the
+  premise and the lay; pushed with the client build on for x-corpse-record v4 (133e4808: leg A records the lay now, legs R and B claim
+  the returns). The Frida read and the falsifiers are in change-form.md's read 5. npc-fate.md's 1e notes Promote's early return (a
+  released dying puppet keeps its AI off for good).

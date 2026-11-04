@@ -227,6 +227,27 @@ Four reads on the lab, each a Frida run on the existing scripts before the recei
    the fork's completion of the death on a settled dying copy (KillImmediate through a native, or the process level moved) before
    the dead-only apply. Until then a live death on the watcher applies no record and the body lies where the watcher's own ragdoll
    left it.
+   READ (2026-11-03 night, the re-analyst against sky-re's Ghidra; HYPOTHESIS by decompile unless a header says so): the flip from
+   kDying to kDead is Actor::SetLifeState(kDead) (Actor.h:621; Address Library 37612) inside Actor::KillImmediate (Actor.h:610;
+   37735), which play reaches from the high process's AI update (39637): `if (lifeState == kDying) dyingTimer -= dt; if (!high ||
+   dyingTimer == FLT_MAX || dyingTimer <= 0) KillImmediate`, dyingTimer being HighProcessData.h:289 (+0x32C), set by KillImpl (37896)
+   to max(fDyingTimer, the death action's length) and 0 when the ragdoll is instant (the GMST fDyingTimer 2.0, CONFIRMED-STATIC); no
+   ragdoll-rest, graph or animation-event test. The chain (ProcessLists' high AI job 41369 with kProcessMe set, Actor::UpdateAI 37347
+   returning when `boolBits & kProcessMe == 0`, the dead branch since IsDead is true for kDying, the level dispatch 39108, then 39637)
+   runs on the AI job thread; an actor whose kProcessMe is clear never passes it. The fork's puppet Demote clears exactly that bit
+   (Actor.cpp:230-238), and the release at death (puppetService.ts:272 setPuppet(false) to PuppetApi's Promote) returns on IsDead,
+   true for kDying, before EnableAI(true), so the AI is never back on a dying copy: a 2 s timer nobody ticks. The doc's 0x6e3310 is
+   39368, the demotion helper the process-level moves call after KillImmediate (its clock test guards DetachHavok when a live ragdoll
+   is found); it never flips the life state. Dead at creation is a different path: InitItemImpl (19507) sets kDead directly on
+   kStartsDead (TESObjectREFR.h:177) and a save restores the life state in its ActorState block; the runtime kill (KillImpl) is the
+   one that parks at kDying. BUILT 88497c54 on m3-canon-3-apply-main: inside the apply's UI task, on the main thread, a kDying actor's
+   death is completed through Actor::KillImmediate (SetLifeState(kDead), the death event, sounds and combat ended, Havok untouched, no
+   death items; a no-op for an essential under its global) with one line, "completed <id>'s dying death before the apply: lifeState 1
+   -> 2 (read 5)", then the premise and the apply follow; Promote's dead branch stays (no AI on a corpse). The Frida read if the lay
+   still fails: hook 37347, 39637, 37735 and 37612 on the copy's id, log boolBits bit 1, the life state, dyingTimer, fadeState,
+   cellState, the thread; the current build shows 37347 entering and returning with the bit clear and 39637 never; the fixed build
+   one KillImmediate on Main.threadID and kDead the next frame. Falsifiers: 39637 entered with the bit set and the timer falling
+   while the state stays 1; KillImmediate called and the state still 1 (the essential path); the copy reaching kDead on its own.
 6. The apply on the main thread (H1's cure, playtest 44's two freezes): the REMAP apply queued from the native to where the
    engine runs its own rebuild (Main's thread, where the fork defers the scripts and rerollActor's drop and rebuild run) and
    answered at the next update instead of returning in the caller's thread; the candidate queue is the task interface CommonLibSSE-NG
