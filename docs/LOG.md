@@ -8381,3 +8381,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   as it stands (approach to 150 in the record's frame, the host's npc-ai lever off so he stands, then per shot approach, look-at
   head to head, draw-weapon, wait 3, hold-key 199 1500, wait 2; four shots, then kill-ref); claims as they were. numidium runs it
   as the control on 2c17bc85, then lays f4014f39 for the reads.
+- 11:34 PST 2026-11-04 (19:34Z 11-04) (thuum-cf): x-corpse-arrows v2 control on 2c17bc85 RED on the premise again (20261104-192221, hits 0). The
+  cause read from the run, not the HUD: the server logs every shot (OnPlayerBowShot - ff000000 shot 1397d from 3b562, power 0.8x,
+  aim 0.000), four of four holds fired in 191715 and two of four in 192221 (the per-shot approach and draw toggled the bow); the
+  quiver count under god mode is no shot counter. Every shot's aim was 0.000: look-at's setAngle pitch is not taken by the
+  first-person view (its note reads pitch 0 back), and from the landing (c1 z 582.7, 39fe4 at 573, head node 681.5, 158 units head
+  to head) a level shot passes over him (055-c1.png: the crosshair at the far label past him). v3 by path, sha1 d4742fd1: both
+  seats get the bow; c1 holds him (npc-ai off, asserted); then c1 and c2 each one approach to 150, one draw, four shots under a
+  mouse pitch sweep (dy 80 with wake 400, then 60 a step, a dump after each pitch recording the crosshair, hold 1500, wait 3); the
+  server's shot lines claimed two a seat beside the hit. c2 shoots so the applying seat's copy holds its own arrows, c1 so the
+  record carries them. The lab is held for f4014f39's lay (playtest-relaunch hold to 22:28Z).
