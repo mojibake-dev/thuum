@@ -1,0 +1,46 @@
+# Playtest 44 (numidium, 2026-11-03): corpses where they land (ADR-067 decisions 3 and 4, ADR-065's first slice: the owner's at-rest
+# record, ChangeForm at SCHEMA 33, applied on every other seat by the engine's own LoadGame) and the exclusive container hold
+# (decision 6: one opener at a time, "<name> is searching this", the contents sent at the close). The client and dist are
+# m3-turbo3-sys2-container 2225c932's, staged 15:50 to 16:13 PST (SkyrimPlatformImpl f0341e3620814eeb, js 5fefba9e6d3239f7); the
+# server is fork m3-turbo3-sys2-container-f1 68da0cdb (2225c932 plus playtest 43's NPC move c1600f98, server-only, pipeline 5145),
+# so 43's fix stays live. Bleak Falls Temple's entrance, 42's spot (F3 to F6 happened there), at noon for the slope outside. Survival
+# off on both records, Overdraw40 kept on test 1 for headshots.
+id: 44
+build: "fork m3-turbo3-sys2-container 2225c932 staged (client), server skymp-server:m3-turbo3-sys2-container-f1-68da0cdb (2225c932 plus the NPC move c1600f98), dist client-build of 2225c932 (SkyrimPlatformImpl f0341e3620814eeb, js 5fefba9e6d3239f7), lab-api pipeline 5124, thuum main 1373671e or later"
+world: playtest-m3-39-paused-20261031T014638Z   # 39's end, as 41 to 43 began: the temple's and the slope's bandits alive
+hold:
+  minutes: 240
+  reason: "playtest 44: corpses where they land and the exclusive container hold"
+server:
+  npcEnabled: true
+  gameHour: 12.0
+  locks: false
+  weatherSync: false
+  perks: true
+  leveling: true
+camp:
+  teleports:   # Bleak Falls Temple 0x371de, inside its entrance, as playtest 42 at 20:30Z; the campfire pair 0x39fe4 and 0x39fe2 and
+    # the bandit chest 0x371e9 stand about 3,500 units east (esm.py cellrefs)
+    - {kind: teleport, profileId: 1, cell: "371de:Skyrim.esm", pos: [-7329, 979, 573], rot: [0, 0, 90]}
+    - {kind: teleport, profileId: 2, cell: "371de:Skyrim.esm", pos: [-7229, 979, 573], rot: [0, 0, 90]}
+seats:
+  - profile: 1
+    name: "test 1"
+    perks: [0x7934b]   # Overdraw40, as 37 to 43: the headshot rule needs it (CIF's condition, Overdraw60's HasPerk Overdraw40 and
+    # Archery 60, docs/verbs/headshot.md:35-68); F7's E_PERK_POINTS line is accepted
+    spells: []
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]   # Survival off (Eli, 2026-10-31)
+    values:
+      Marksman: 60
+    percentages: {health: 1, magicka: 1, stamina: 1}
+  - profile: 2
+    name: "test 2"
+    perks: []   # none
+    spells: []
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]
+    percentages: {health: 1, magicka: 1, stamina: 1}
+streams:
+  test1: 48989
+  test2: 49989
+after:
+  readback: percentages
