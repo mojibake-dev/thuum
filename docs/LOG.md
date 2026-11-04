@@ -8254,3 +8254,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   x-corpse-record v6 8f22e960 (the owner's record drop accepted at leg R, Eli's W4), oracle v3 3ce3a89b unchanged. The lab driver's
   npc-state gains faceNode (NetImmerse.HasNode "BSFaceGenNiNodeSkinned", the half-built head's witness; recorded in v7, claimed in v8
   once the driver is on the seats). 45 goes on c4539d22 when dress v7, oracle v3 and corpse v6 are green; canon fast-forwards to it.
+- 01:05 PST 2026-11-04 (09:05Z 11-04) (thuum-cf): Eli's W4 word on x-corpse-record v6 (8f22e960), verbatim via numidium: "yes run v6 with that change".
+  The faceNode driver is on thuum main (3e0a5a31) and numidium lays it before the dist, so dress v8 (by path) claims
+  c1.npc_state(0x39fe4).faceNode == true at every read beside the worn and race equalities; nothing else changed from v7. Run order
+  on c4539d22's pair (pipeline 5274): dress v8, oracle v3, corpse v6.
