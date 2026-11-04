@@ -8360,3 +8360,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   places and the fix's line recorded; lab/frida/arrows-apply-trace.js armed on c2 before the shots (35568, 12095, 37178, 11577,
   12329, 12782 by `just addr`; a null extra at the loader is the fault). Reads on f4014f39's pair: corpse v6, x-corpse-arrows,
   dress v8.
+- 11:13 PST 2026-11-04 (19:13Z 11-04) (thuum-cf): oracle v4 on 2c17bc85 RED 20261104-190713 on 39fe1's worn alone, no crash, the head true, the reorder
+  taken (5 of 6 worn against 4 of 5 before): the missing item is Torch01 0x1d4ec, the host's AI's light recorded as worn (R2) and
+  so in fate.worn, not lit again 25 s after the re-roll. Not the dress; the claim's contract (npc-fate.md READ ON 2c17bc85): the
+  fix in kind is FateOf's worn as armor and weapons alone with the driver's npc-state.worn leaving lights out, after the arrows
+  reads. Dress v8 on 2c17bc85 playing, then the arrows control and f4014f39's reads.

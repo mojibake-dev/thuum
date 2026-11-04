@@ -2610,6 +2610,14 @@ waits on both (Eli's D79 A).
   own arrows, which the leveled-creature block's Set3D(nullptr) removes earlier in the same apply (change-form.md READ 8); FIXED
   f4014f39 on the applying seat (the copy's own attached arrows removed before the lay). The re-roll's only part: the extra list
   reordered, and the arrows there because the missile bandit shot at roll 25.
+READ ON 2c17bc85 (11:13 PST 2026-11-04, 19:13Z 11-04; oracle v4, run 20261104-190713, numidium): the reorder took ("redressed 39fe1 ... 6 of 6
+tagged ... 3D loaded TRUE" then "rerolled 39fe1 ... the model reloaded true, the record dressed on it, the skin, head and face
+passes run true"), the head holds, and the worn is 5 of 6: the missing 0x1d4ec is Torch01 (LIGH), the torch c1's engine AI lit at
+the first load, reported in its equipment, recorded by the server (R2, the host's hands) and so listed in fate.worn; after the
+re-roll the AI has not lit it again 25 s later. The dress is whole; the claim's contract is the fault: fate.worn mixes what the fate
+DRESSES (armor and the worn weapon, the detours') with the host's AI's holdings. The fix in kind (after the arrows reads, one change
+per read): FateOf's worn carries ARMO and WEAP alone (a LIGH stays out) and the driver's npc-state.worn leaves lights out the same
+way, both sides of the equality the dress; a server change plus a driver line with a T0. Written locally, unpushed.
 
 ## Status
 
