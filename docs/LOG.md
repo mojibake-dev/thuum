@@ -8326,3 +8326,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   read). Oracle v4 and corpse v6 play on 9f2757a3 meanwhile.
 - 03:36 PST 2026-11-04 (11:36Z 11-04) (thuum-cf): pipeline 5294 (m3-canon-4-followups cb944530) GREEN: server-build 18695, client-build 18696; cb944530's
   pair is 18696's dist with c4539d22's image, dress v8 its one read, pending Eli's word (wait for the head, or lay 9f2757a3 now).
+- 10:28 PST 2026-11-04 (18:28Z 11-04) (thuum-cf): Eli's word on D79 (via numidium): A, wait for the head fix, verbatim "keep cooking to next playtest".
+  cb944530's three reads run on its pair (18696's dist, c4539d22's image): dress v8, oracle v4, corpse v6, all back by the gate
+  (oracle v4 on 9f2757a3 RED 112340: after login 1, 39fe1 alive and loaded but faceNode false and its worn not the fate's, no crash;
+  corpse v6 on 9f2757a3 GREEN 112642 with 17 re-roll lines). The login's re-rolled copy wearing other than the fate's roll is a
+  new read for cb944530's logs (the redress after ResetInventory against the biped's own equip at the reload). The fast-forward
+  waits for three greens; 45 is the next playtest's.
