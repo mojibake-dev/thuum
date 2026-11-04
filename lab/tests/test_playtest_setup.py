@@ -203,6 +203,33 @@ class PlaytestProfile(unittest.TestCase):
         with self.assertRaises(ProfileError):
             seat_client(9)
 
+    def test_a_seats_perks_go_through_the_servers_add_perk_under_the_switch(self):
+        # playtest 44 (2026-11-03): the driver's Papyrus addPerk was refused by the server every 5 s (E_PERK_POINTS at
+        # level 1) and the resent state stripped Overdraw40, so headshots failed "occasionally"; the record path spends
+        # no points and PerkState restores it at every login
+        from playtest_setup import PLAYER, perk_commands, perks_switch_on
+
+        cmds = perk_commands(1, [0x7934B, 0x58F61])
+        self.assertEqual([c[1] for c in cmds], [
+            {"kind": "console", "profileId": 1, "name": "AddPerk", "args": [PLAYER, 0x7934B]},
+            {"kind": "console", "profileId": 1, "name": "AddPerk", "args": [PLAYER, 0x58F61]},
+        ])
+        self.assertTrue(perks_switch_on('{"perks": true}', '{"perks": false}'))
+        self.assertFalse(perks_switch_on('{"locks": true}', '{"perks": false}'))
+        self.assertTrue(perks_switch_on(None, '{"perks": true}'))
+        self.assertFalse(perks_switch_on("not json", "also not"))
+
+    def test_a_refused_standing_perk_is_a_ready_failure(self):
+        from playtest_setup import perk_refusals
+
+        log = ("[2026-11-04 01:04:27.100] [warning] [verb:perks] E_PERK_POINTS: ff000000 picks 7934b at level 1 with 0 perk(s); refused, its state resent\n"
+               "[2026-11-04 01:04:32.100] [info] [verb:perks] state ff000000: 0 perk(s)\n"
+               "[2026-11-04 01:04:33.000] [warning] [verb:perks] E_PERK_POINTS: ff000001 picks 58f61 at level 1 with 0 perk(s); refused, its state resent\n")
+        self.assertEqual(len(perk_refusals(log, [0x7934B])), 1)
+        self.assertEqual(len(perk_refusals(log, [0x7934B, 0x58F61])), 2)
+        self.assertEqual(perk_refusals(log, [0x1234]), [])
+        self.assertEqual(perk_refusals("", [0x7934B]), [])
+
     def test_the_camp_is_playtest_start_s_own_two_teleports(self):
         from playtest_setup import camp_teleports
 

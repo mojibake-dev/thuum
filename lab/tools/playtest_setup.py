@@ -304,11 +304,77 @@ def seat_client(prof: int, root: Path = ROOT) -> str:
     raise ProfileError(f"no client plays profile {prof}")
 
 
+def perk_commands(prof: int, ids: list[int]) -> list[tuple[str, dict[str, Any]]]:
+    """A seat's perks as the server's own AddPerk (ConsoleCommands.cpp: AddPerkByServer plus SendPerkState, no points
+    spent; docs/verbs/perks.md:134-138): the perk lives in the record, PerkState restores it at every login and
+    relaunch, and nothing on the seat removes it. The driver's Papyrus addPerk was the lever before the server owned
+    perks: under `perks` on, the seat reported it as a pick every 5 s, the server refused it for want of points at
+    level 1 (E_PERK_POINTS, "its state resent") and the resent state stripped it again, so CIF's HasPerk Overdraw40 was
+    false for part of every cycle and rotfern's headshots failed "occasionally" (playtest 44, 2026-11-03; F7 before it)."""
+    return [(f"AddPerk {i:#x}", {"kind": "console", "profileId": prof, "name": "AddPerk", "args": [PLAYER, i]}) for i in ids]
+
+
+def perks_switch_on(overlay_text_now: str | None, deployed_text: str) -> bool:
+    """Whether the server owns perks on this run: the running overlay's `perks` when it reads, else the deployed
+    settings' (lab/deploy/sky-srv/server-settings.json carries perks: true since 2026-10-31)."""
+    for text in (overlay_text_now, deployed_text):
+        if not text:
+            continue
+        try:
+            d = json.loads(text)
+        except ValueError:
+            continue
+        if isinstance(d, dict) and "perks" in d:
+            return bool(d["perks"])
+    return False
+
+
+def perk_refusals(server_log: str, perks: list[int]) -> list[str]:
+    """The server's E_PERK_POINTS lines that name one of the seats' standing perks: the lever loop's signature
+    ("[verb:perks] E_PERK_POINTS: ff000000 picks 7934b at level 1 with 0 perk(s); refused, its state resent").
+    Any such line after the relaunch means a seat still adds the perk by its own engine and the server strips it."""
+    want = {f"{i:x}" for i in perks}
+    out = []
+    for line in server_log.splitlines():
+        m = re.search(r"E_PERK_POINTS: ([0-9a-f]+) picks ([0-9a-f]+)", line)
+        if m and m.group(2).lower() in want:
+            out.append(line.strip())
+    return out
+
+
+def _perks_on() -> bool:
+    try:
+        overlay = _srv(f"cat {OVERLAY}")
+    except Exception:
+        overlay = None
+    deployed = (ROOT / "lab" / "deploy" / "sky-srv" / "server-settings.json").read_text()
+    return perks_switch_on(overlay, deployed)
+
+
 def _perks(rep: Report, prof: int, ids: list[int]) -> None:
-    """A seat's perks: the player's game's own (no server path until M5), so they go to its lab-driver, which keeps
-    them through every load, and lab-api sends them again to a relaunched game (POST /clients/<c>/perks)."""
+    """A seat's perks. Under the server's `perks` switch: the server's AddPerk per perk (the record path, perk_commands)
+    and the driver's keep cleared, so no seat re-adds a perk by its own engine; without the switch: the player's game's
+    own through its lab-driver, which keeps them through every load and lab-api sends again to a relaunched game
+    (POST /clients/<c>/perks)."""
     client = seat_client(prof)
     want = ", ".join(f"{i:#x}" for i in ids)
+    if _perks_on():
+        bad = []
+        for label, payload in perk_commands(prof, ids):
+            try:
+                r = command(payload)
+            except Exception as e:  # an HTTP refusal: the line says which
+                bad.append(f"{label}: {e}")
+                continue
+            if not r.get("ok"):
+                bad.append(f"{label}: {r}")
+        try:
+            _http("POST", f"/clients/{client}/perks", {"ids": []})  # the driver's keep cleared: the record owns them now
+            cleared = "driver keep cleared"
+        except Exception as e:
+            cleared = f"driver keep not cleared ({e})"
+        (rep.ok if not bad else rep.fail)(f"profile {prof} perks {want} through the server's AddPerk (the record path, {cleared})" + (f": {'; '.join(bad)}" if bad else ""))
+        return
     try:
         ans = _http("POST", f"/clients/{client}/perks", {"ids": ids})
     except Exception as e:  # an HTTP refusal or a game that did not answer: the line says which
@@ -421,6 +487,10 @@ def ready(n: int) -> int:
     p = load_profile(n)
     rep = Report()
     print(f"== playtest {n}: both games relaunched under the streams {time.strftime('%H:%M:%S')}", flush=True)
+    try:
+        since = _srv("date -u +%Y-%m-%dT%H:%M:%SZ").strip()
+    except Exception:
+        since = None
     procs = [subprocess.Popen([str(ROOT / "lab/tools/playtest-relaunch.sh"), c], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True) for c in ("c1", "c2")]
     for c, pr in zip(("c1", "c2"), procs):
         out = (pr.communicate()[0] or "").strip().splitlines()
@@ -449,8 +519,8 @@ def ready(n: int) -> int:
         for it in seat.get("items") or []:
             got = _count(prof, it["id"])
             (rep.ok if got >= it.get("count", 1) else rep.fail)(f"profile {prof} carries {got} of {it['id']:#x}")
-        if seat.get("perks"):
-            _perks(rep, prof, seat["perks"])  # the relaunched game's, read back from its driver
+        if seat.get("perks") and not _perks_on():
+            _perks(rep, prof, seat["perks"])  # the relaunched game's, read back from its driver (the record path needs no re-send: PerkState at login)
         if seat.get("percentages") and (p.get("after") or {}).get("readback") == "percentages":
             want_bars = {k: float(v) for k, v in seat["percentages"].items()}
             a = state({"kind": "actor", "profileId": prof})
@@ -474,6 +544,19 @@ def ready(n: int) -> int:
     for seat in p["seats"]:
         if seat.get("by_hand"):
             rep.note(f"profile {seat['profile']} by hand: {seat['by_hand']}")
+    # the lever loop cannot come back silently: no E_PERK_POINTS for a seat's perk since the relaunch (the server's own
+    # log; a seat still adding the perk by its engine would show here within 5 s of its login)
+    perks = sorted({i for seat in p["seats"] for i in (seat.get("perks") or [])})
+    if perks and since:
+        time.sleep(8)
+        try:
+            log = _srv(f"docker logs --since {since} lab-skymp-server-1 2>&1 | grep E_PERK_POINTS || true")
+        except Exception as e:
+            log = None
+            rep.fail(f"perk refusals: the server log did not read ({e})")
+        if log is not None:
+            bad = perk_refusals(log, perks)
+            (rep.ok if not bad else rep.fail)(f"perk refusals since the relaunch for {', '.join(f'{i:#x}' for i in perks)}: {len(bad)}" + (f" ({bad[0][:160]})" if bad else ""))
     if n >= STANDING_FROM:
         _standing_ready(rep, p)
     print(f"== seats {'ready' if not rep.bad else 'NOT ready'} {time.strftime('%H:%M:%S')}: {'all ok' if not rep.bad else str(len(rep.bad)) + ' failed'}", flush=True)
