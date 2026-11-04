@@ -8075,3 +8075,19 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   living actor's transient disarm at a late reconcile recorded as a Dynamic HYPOTHESIS. Pushed server-only, then the full pipeline
   5236 started by hand (both halves: the server image with the refusals and SCHEMA 35, the Windows dist). The probe x-fate-inventory
   v1 (90b98f7b) runs on that image and dist alone after the canon queue. npc-fate.md's 1c section carries the BUILT paragraph.
+- 21:39 PST 2026-11-03 (05:39Z 11-04) (thuum-cf): Eli's W4 word "Yes, both" (via numidium): b-object-anim v2 b5efb0cf and b-puzzle-relay
+  v3 49e1a9ca on main, each alone, numidium reruns both after deploy-srv. The canon reruns: x-fate-dress-bleak v3 (be9f3177) GREEN
+  051219 but with no re-roll ("the loaded clone is the fate's pick" twice: the first visit's detour pinned the fate's pick into the
+  save, so a relaunch alone loads the same pick; 44's bug came with a pick swap), so v4 (sha1 2bc0eb42) forces the mismatch with the
+  fated respawn lever (respawn-ref on a killed actor: "stands again at its placement, rolled anew", the fate sent again): D) the
+  living case, kill-ref then respawn-ref 39fe4 with c1 standing by (44's 39fe1 path); E) the corpse case, kill-ref 39fe2, c1's
+  relaunch with the dead clone in its save, respawn-ref while away, c1 back (the khajiit's path); each leg reads which path ran and
+  claims the dressed copy by the lab's own equality (c1.npc_state(<id>).worn == server.fate(<id>).worn, the raceId), red there being
+  the naked bug. x-rune-glyph v3 (d76b3d43) RED 051601 on one claim: the observer's "rune cap: ended the figure ... earlier rune" at
+  0 after the second cast while both casts sent and both decals placed; that is the platform's own line (MagicApi.cpp:188, the
+  per-figure armed-rune table) and the same run shows the observer holding no rune object to cap, so the observer keeps two glyphs
+  where the caster keeps one: a real finding against the glyph's contract ("a second cast ends the first"), the claim stands, on the
+  rune glyph's list (item 5 is VERIFIED IN PLAY; this is the second cast). 1a: the first run tonight (051908) ran on the canon by
+  numidium's slip (turbo-dist refused during the rune run's collection), ignored; f77fbd00 laid (SkyrimPlatformImpl 1200b5d4b9246ebf),
+  x-corpse-record v3 runs on it. 1c: pipeline 5236's server half green (T0 with the review's assertions, the contract test on the
+  regenerated fixtures), the Windows dist building (job 18531).
