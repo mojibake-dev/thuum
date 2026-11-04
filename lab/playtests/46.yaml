@@ -1,0 +1,43 @@
+# Playtest 46 (numidium, 2026-11-04 ~14:45 PST): TURBO on the pillars (Eli after 45: "turbo mode to close out the pillars, then
+# move onto the next builds. scripting then physics."). 45's item 5: the guest's own pillar turn played only on the host's screen.
+# The cause (thuum-cf from the pillar's Behavior00): the graph turns on Trigger0N from Side0N alone; the host's script jumps it to
+# its side at the load with StartState0N, which the relay never carried, so a guest pillar off Side01 dropped every relayed turn.
+# The fix, client script alone: fork m3-canon-4-pillar-side 843fed95 by turbo-client over 7c79fc3e's dist. 39's end world (the
+# pillars unsolved), both seats in the puzzle room at x-puzzle-guest-view's standable spots.
+id: 46
+build: "turbo: fork m3-canon-4-pillar-side 843fed95 (the relayed pillar turn plays after its side's StartState, the host's StartState relayed; objectAnimationService.ts and remoteServer.ts) by turbo-client over fork m3-canon-4-objtype 7c79fc3e's dist (canon 8926d2c8 with the objectTypeInfo throw named), server skymp-server:m3-canon-4-hands-4c6d9f24, the lab driver of thuum 254ed4d1"
+world: playtest-m3-39-paused-20261031T014638Z   # 39's end, as 41 to 44 began: the temple's and the slope's bandits alive
+hold:
+  minutes: 120
+  reason: "playtest 46: turbo on the pillars"
+server:
+  npcEnabled: true
+  gameHour: 12.0
+  locks: true   # every switch on, as the 44 baseline
+  weatherSync: true
+  perks: true
+  leveling: true
+camp:
+  teleports:   # the puzzle room, x-puzzle-guest-view's spots (both landed in 20261104-220217)
+    - {kind: teleport, profileId: 1, cell: "371de:Skyrim.esm", pos: [5300, -1200, -768], rot: [0, 0, 90]}
+    - {kind: teleport, profileId: 2, cell: "371de:Skyrim.esm", pos: [5520, -896, -768], rot: [0, 0, 90]}
+seats:
+  - profile: 1
+    name: "test 1"
+    perks: [0x7934b]   # Overdraw40 through the server's AddPerk (284a4d51): the headshot rule's condition
+    spells: []
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]   # Survival off
+    values:
+      Marksman: 60
+    percentages: {health: 1, magicka: 1, stamina: 1}
+  - profile: 2
+    name: "test 2"
+    perks: []
+    spells: []
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]
+    percentages: {health: 1, magicka: 1, stamina: 1}
+streams:
+  test1: 48989
+  test2: 49989
+after:
+  readback: percentages
