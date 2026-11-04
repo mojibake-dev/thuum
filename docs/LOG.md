@@ -7699,3 +7699,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   SCHEMA_VERSION 34 (the one conflict), cargo test and clippy 1.99 clean, fork-lint clean; pipeline 5186. The ancestry audit of every
   verified-in-play item since playtest 36 against 0c23306e (and of anything in it the records mark retired) runs as an agent's read
   for Eli's decision. The corpse items stay in playtest 44 as a baseline reading of today's behavior (Eli).
+- 17:56 PST 2026-11-03 (01:56Z 11-04) (thuum-cf): The headshot cause (an agent's map, confirmed in playtest 44's own server log): the playtest setup gave rotfern
+  Overdraw40 through the driver's Papyrus addPerk (re-added every 2 s), perkService reported it as a pick every 5 s, the server refused
+  it for want of points at level 1 ("E_PERK_POINTS: ff000000 picks 7934b at level 1 with 0 perk(s); refused, its state resent", 140
+  lines in the first lay) and the resent PerkState stripped it, so CIF's HasPerk Overdraw40 was false for part of every 5 s cycle:
+  headshots failed "occasionally" (F7's "Overdraw40 removed for F7 broke headshots" was the same loop); 44's two arrow kills landed
+  1.5 s and 0.2 s after a refusal (INFERRED inside the stripped window). b-headshot gives the perk by the server console's AddPerk (the
+  record path), so a green b-headshot proves the wire and the server, not rotfern's setup. Fix, the setup's (thuum 284a4d51): under
+  the perks switch a seat's perks go through the server's AddPerk and the driver's keep is cleared; ready() fails on any E_PERK_POINTS
+  naming a seat's perk since the relaunch; 16 tests green; headshot.md carries the rule (the perk is the record's, R0). Second-order
+  candidates once this is proven: the bandits' server-rolled head gear (E_HEADSHOT_HELMET would say so) and rotfern's base Marksman
+  under 60 after relaunches (the first ClaimHeadshot line's archery field). The same 5 s resend is the one periodic change on
+  rotfern's engine in the session, so the arrows regression's read weighs it first (a RemovePerk on an equipped bow's perk).

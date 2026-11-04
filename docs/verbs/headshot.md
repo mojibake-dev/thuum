@@ -36,6 +36,11 @@ it records unvalidated (R2): the perk the mod's rule also wants, Overdraw40
 (Skyrim.esm 0x7934B: the rule names Overdraw60 0x7934D, whose own
 conditions CIF checks, Engine surface), since perks are not server state
 until M5. At most one headshot per claimed shot.
+Under the server's perks switch (the deploy since 2026-10-31) Overdraw40 is the RECORD's (R0, perks.md): a seat that adds it by its
+own engine is refused E_PERK_POINTS every 5 s and the resent PerkState strips it, so CIF's HasPerk condition is false for part of
+every cycle and the headshot fails "occasionally" (playtest 44, 2026-11-03; F7 before it). The lab's playtest setup gives the perk
+through the server console's AddPerk (thuum 284a4d51) and ready() fails on any E_PERK_POINTS naming a seat's perk after the relaunch;
+b-headshot always used the console path, which is why it stayed green while rotfern's setup did not.
 Rate limit / bounds: one per claimed shot; the report's budget is OnHit's.
 
 ## Engine surface
