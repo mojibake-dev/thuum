@@ -8276,3 +8276,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   worn set with the fate's first and does nothing but the inventory's reconcile when they match. 45 waits on it (a crash path in the
   build); the new head's full pipeline running, then dress v8, oracle v3 and corpse v6 on its pair. The earlier two reads on
   c4539d22 stand (oracle v3 092409, corpse v6 092901).
+- 02:24 PST 2026-11-04 (10:24Z 11-04) (thuum-cf): the cold v8 rerun on c4539d22 (20261104-101823, numidium): c1 crashed three times at the Temple's
+  login at roll 25, every one the equip-queue chain, each on a draugr with a Honed weapon (380b3 and 800a6 the Honed Ancient Nord
+  Battleaxe 0x5bf12, 380b9 the Honed Ancient Nord Sword 0x5bf14): the worn weapon's list is what the queue holds. 83f5ff1a's skip
+  compared the whole worn set, which a weapon the AI has not drawn yet would break; 3bd97f7c compares the outfit alone (weapons left
+  out on both sides), the head for 45 now, FateApi.cpp the only file since c4539d22 (the server image stays c4539d22's). The living
+  case's first positive witness, on c2's copy of 39fe4 after c1 fell (c2 the host): alive, 3D loaded, faceNode TRUE, worn [80144,
+  80273, 111522] equal to the fate's, race 79686 the fate's (H1 holds there; the read on c1's own copy waits for a run that survives
+  the load).
