@@ -1,4 +1,17 @@
-# b-headshot (docs/verbs/headshot.md; Eli 2026-10-12: "for headshots i think
+# b-headshot v2 (thuum-cf, 2026-11-03; the canon baseline after playtest 44's first lay): the shooter's Archery and its Overdraw40
+# perk are set through the server's console table (server-console SetActorValue and AddPerk, the R0 shape of the playtest setup:
+# its SetAV since thuum 17b59fea, its AddPerk since 284a4d51; the fork's ConsoleCommands maps SetAV and SetActorValue to one entry)
+# instead of v1's labCommand papyrus-av and the seat's typed addperk. Both paths run the server's own Actor.SetActorValue
+# (lab/gamemode's papyrus-av calls it; the console entry calls it too, docs/verbs/actor-values.md), so the change is one shape for
+# the scenario and the playtest, not a different authority. What v1 met on canon-3 (m3-canon-3 9869d28c, 20261104-025239):
+# "ClaimHeadshot ... archery 15" and E_HEADSHOT_ARCHERY after c1's transport drop and second login (02:53:31 and 02:53:32) between
+# the set (about 02:53:23, after c1's first login) and the shot (02:54:16); the same v1 steps were green at 20261104-015705 on
+# 0c23306e with no relogin, and the console steps below were green at 20261104-025617 on canon-3 (numidium's variant
+# x-headshot-server-av df43251b: "archery 60", the kill "with fe01e801 on a claimed bow hit", the helmet and the Archery 40 legs at
+# 0.82 health). What the relogin did to the set (c1's first actor-values report came at 02:53:36, after the second login) is a
+# leveling HYPOTHESIS in docs/verbs/leveling.md's Known limits, not this scenario's claim; v2 is as exposed to a mid-run relogin as
+# v1. No claim changed.
+# v1 (docs/verbs/headshot.md; Eli 2026-10-12: "for headshots i think
 # it's ok to trust the client a little"): Headshot Kills - CIF works between
 # players. c1 at base Archery 60 with Overdraw40 (Skyrim.esm PERK 0x7934B,
 # the CIF rule's condition read through its named perk; headshot.md), a
@@ -30,8 +43,8 @@ steps:
   - c1: connect
   - c2: connect
   - wait: 10
-  - c1: papyrus-av {how: set, name: Marksman, value: 60}
-  - c1: console {text: "player.addperk 7934b"}
+  - c1: server-console {name: SetActorValue, args: [0x14, "Marksman", 60]}
+  - c1: server-console {name: AddPerk, args: [0x14, 0x7934b]}
   - c1: give {item: "0x3b562", count: 1}
   - c1: give {item: "0x1397d", count: 40}
   - c1: console {text: "player.equipitem 3b562"}
@@ -71,7 +84,7 @@ steps:
       - server.actor(c2).healthPercentage < 1
   - c2: console {text: "player.unequipitem 12e4d"}
   - c2: set-percentages {health: 1}
-  - c1: papyrus-av {how: set, name: Marksman, value: 40}
+  - c1: server-console {name: SetActorValue, args: [0x14, "Marksman", 40]}
   - wait: 3
   - c1: look {pitch: 0, heading: 180}
   - c1: hold-key {code: 199, ms: 1500}
