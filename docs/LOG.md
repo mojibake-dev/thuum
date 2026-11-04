@@ -7575,3 +7575,17 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   turbo-client-builds it onto both clones and reruns. The contract wording fixed here (change-form.md, WIRE.md). Open: c2's
   "resurrect 13491 (puppet true) queued" around the kill's landing, the probe's no-resurrect claim; being read from the run's c2.log.
   The hold's probe x-container-hold v2 runs next (002233).
+- 16:29 PST 2026-11-03 (00:29Z 11-04) (thuum-cf): x-container-hold v2's first run (20261104-002233) on the stage: the CHEST LEGS HELD on two seats (c1 hosts the
+  cell and opens, c2's E refused "E_CONTAINER_BUSY: ff000001 activates 371e9 held by ff000000; refused" with its menu shut and no
+  handler line, "shut with 0 occupant(s); inventory sent to 34 listener(s)", c2 opens second, shut again): the exclusive hold is
+  MECHANISM-PROVEN on the chest; RED at the corpse leg only because the open and shut lines printed for baseType CONT alone, so the
+  body's open (which the server did perform for c1) never logged and the claim could not hold; fixed server-only at
+  m3-turbo3-sys2-container-f1 0c23306e (the lines under the CONT-or-corpse condition), numidium turbo-srvs it and reruns. The corpse
+  run's stray "resurrect 13491 (puppet true) queued" on c2: the puppet died from the server's zero health before the death word (its
+  "activation blocked (its death started here)" at 00:21:09.661 precedes the word's line at 00:21:10.692), the dead check stood it up,
+  the word killed it again: a half-second stand-up on every watcher's kill, against ADR-067 decision 2's "none rises again"; a client
+  rule holding the resurrect while the server's health is zero or within a short grace of the engine's death is being written on the
+  f1 branch (TS, turbo-client). cc026686's js is on both clones and in both snapshots (numidium); x-corpse-record v2's rerun started
+  00:28Z. The scripts arm's day-1 branch exists: m4-scripts-flip f0fa23c1 (m4-scripts-work 06cbc2d8 merged onto r2 4465679b; the
+  HookID enum and ActorDeathTest.cpp conflicts resolved keeping both sides, 33 cases, braces balanced; fork-lint clean) plus the
+  formType fix, pushed for its full build overnight.
