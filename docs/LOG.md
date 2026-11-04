@@ -8544,3 +8544,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   E-key turn (hold-key 18, the player's path; b-puzzle-relay turns by Papyrus Activate and claims the "played" line alone), after
   the host's turn and after a second guest turn, with console {match} catching the services' lines; claims are b-puzzle-relay's
   relay lines; v2 claims the view. Runs after the three re-roll reads on 8926d2c8's lay; then turbo at the pillars with Eli.
+- 13:39 PST 2026-11-04 (21:39Z 11-04) (thuum-cf): 45's per-frame objectTypeInfo throw, the fix path built as fork m3-canon-4-objtype 8c3a0254 off
+  8926d2c8 (two files): CallNative's throw names the declared class of the native's return and the handle's resolved form type, so
+  the next occurrence names its native; sendInputsService's hosted loop catches per target (said once in ten seconds per target),
+  so one native's throw no longer silences the targets after it (45: the hosted actors sampled after the throwing one got no
+  movement, animation or equipment from rotfern while it held) nor recurs every frame on the same target with its send stamp
+  unwritten. fork-lint green; its client build queues behind 8926d2c8's. A candidate for the pair after the re-roll reads; its own
+  read is the regression set plus any hosted login outdoors (the throw began when rotfern hosted exterior actors).
