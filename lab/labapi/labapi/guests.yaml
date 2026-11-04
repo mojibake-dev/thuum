@@ -56,6 +56,9 @@ items:
   "Skyrim.esm:IngotIron": 0x0005ACE4
   "Skyrim.esm:LeatherStrips": 0x000800E4
   "Skyrim.esm:IronDagger": 0x0001397E
+  # read from the lab's Skyrim.esm by editor id (lab/esm.py find WEAP LongBow on sky-srv, 2026-11-03): the bandits' bow,
+  # whose count x-fate-inventory claims against the server's record (the loot and the arrows, playtest 44)
+  "Skyrim.esm:LongBow": 0x0003B562
   # read from the lab's Skyrim.esm by editor id (record scan on sky-srv,
   # 2026-10-07): the clock global and two weathers, for a look judged under
   # the same light (docs/verbs/racemenu-sync.md, rotfern's shine)
