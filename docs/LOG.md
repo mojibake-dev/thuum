@@ -7625,3 +7625,17 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   b-container-exclusive v1 committed alone from the green run (80 steps, 26 claims); containers.md's hold paragraph marks the
   activate-on-a-blocked-body reading CONFIRMED, IsDead-at-kDying still HYPOTHESIS. Playtest 44 follows the corpse rerun on 7845bb22's
   dist.
+- 17:03 PST 2026-11-03 (01:03Z 11-04) (thuum-cf): x-corpse-record v2 on the 7845bb22 dist (run 20261104-005702, 0c23306e's server): 17 of 18. The slice works in
+  play: the record flows (changeFormFnv 21910774, one send acked), the watcher lays it ("corpse 13491 applied from the record: fnv
+  14e54f6, 2 rows remapped; patched fnv a98da230, at its arrival, 33 ms"), no stand-up (the resurrect hold), no "not applied", the
+  owner within a unit of the record. The one miss: c2's copy 44 units from the record on y 25 s after the death, the HYPOTHESIS's risk
+  made small: the dying copy took the record a second after the death while its own ragdoll still ran and the live ragdoll carried the
+  laid pose down the slope before its 4 s settle. Fix, js only, for the next head: a live death on the watcher applies the record at the
+  ragdoll's settle (PuppetService's "released from the puppet state after the ragdoll's 4.0 s" moment), the bind kill's apply staying
+  immediate (a body dead at its creation has no running ragdoll); HYPOTHESIS a settled dead ragdoll takes the block within a stride
+  (210713: 5 units). Being written on m3-turbo3-sys2-container-f2 off 7845bb22. Legs R and B have still not run (every run stopped at
+  leg A). Playtest 44 sets up on the 7845bb22 dist and 0c23306e's server with the 44-unit drift declared (numidium, for Eli at about
+  17:15 PST). The flip's client lane landed (1fdc321b, merged as m4-scripts-flip fe39dab2): the activation lever deleted; the puzzle
+  lever 0xb7db4 is a FURN the lift does not cover, its script's fire on a blocked reference a HYPOTHESIS the stage reads. The lab lane's
+  patch verified in a worktree (both test files OK; the emptied lint baseline flags the three scenarios' writes, so their commits go
+  first on stage day). A scratch copy of lab/.cache (27 GB) filled the disk for a minute; removed (16 GB freed), never again.
