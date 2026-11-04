@@ -1,4 +1,9 @@
-# b-object-anim v2 (thuum-cf, 2026-11-03 night; Eli's W4 word via numidium, "Yes, both"): leg A's 'server.log_count("E_TRAP_") == 0'
+# b-object-anim v3 (thuum-cf, 2026-11-03 night; the same correction Eli approved, one id short: v2's run 20261104-055038 on THE CANON
+# read a fourth by-design refusal, "E_TRAP_NO_REF: ff000000 reports 38098 activating 380b9, no such reference", the plate's link to a
+# fourth ambush draugr (LvlDraugrAmbushMelee1HHelmetMale at (8033, -5040)); every other claim held. The subtraction now names the
+# plate's whole link block, the ambush draugr placed as one run of ids 380b0 to 380bf (380b3, 380b4, 380b5 and 380b9 seen), so the
+# claim reads E_TRAP_ less the NO_REF lines for 38098's draugr links == 0; any other refusal, NO_REF included, still counts.
+# v2 (thuum-cf, 2026-11-03 night; Eli's W4 word via numidium, "Yes, both"): leg A's 'server.log_count("E_TRAP_") == 0'
 # read 4 on THE CANON (20261104-044647, the other five claims held): all four lines were "E_TRAP_NO_REF: ff000000 reports 38098
 # activating 380b[345], no such reference", the plate's links to the ambush draugr, references the server never loads (the
 # informational branch of OnLinkedActivation, the same by-design refusal as the pillars' XMarker 0x4fcdf in b-puzzle-relay). The claim
@@ -56,7 +61,7 @@ steps:
       - 'server.log_count("E_OBJANIM_") == 0'
       # v2 (W4, Eli): the plate's links to the ambush draugr 380b3, 380b4 and 380b5 are references the server never loads, refused
       # E_TRAP_NO_REF by design (OnLinkedActivation's marker branch); every other E_TRAP_ code and any other NO_REF stays at zero
-      - 'server.log_count("E_TRAP_") - server.log_count("E_TRAP_NO_REF: .* activating 380b[345], no such reference") == 0'
+      - 'server.log_count("E_TRAP_") - server.log_count("E_TRAP_NO_REF: .* reports 38098 activating 380b[0-9a-f], no such reference") == 0'
   # the host off the plate, the wall resets; B. the guest onto it: the host's engine fires for the figure, the guest's engine
   # runs no script of its own under the gate. (v3 carried decision 4's trap-hit trace here; read 20261102-051618: fourteen
   # Actor::DamageActor calls on the figure, none through RestoreActorValue, the figure's health kept by the platform's cut.)
