@@ -626,3 +626,32 @@ The guest's replay carries the jump again; the host never replays (the deferred 
 (the record through the server) stay as the structural shape for other scripted objects. Read: x-puzzle-handoff v1 by path
 (sha1 c0ca8641); a fresh review runs on the commit.
 
+### The dropped Trigger02 (15:44 PST 2026-11-04, 23:44Z 11-04; playtest 46 on fffd8a66 with a first-in host)
+
+Eli: "on EITHER seat, if i turn a pillar to whale, that pillar doesnt rotate on the other screen until i rotate it OFF of whale,
+then the other screen will rotate 2 times to catch up." The server's log since 23:35Z shows the host reporting Trigger01 and
+Trigger03 and never Trigger02 (activations with no "animates" at 23:36:10.966 and kin); 45's server log has the same shape for all
+three pillars (aa8cb 3 Trigger01 and 2 Trigger03, aa8cc 2 and 2, aa8cd 3 and 2, a cycle needing a Trigger02 between), and so has
+the green b-puzzle-relay run 045100 (no Trigger02 anywhere). The server refuses nothing (every refusal logs an E_OBJANIM line; the
+per-reference window is eight a second), so the host's client never sent it: objectAnimationService dropped a noted event whose
+engine flag said it had not taken (ctx.animationSucceeded, NotifyAnimationGraph's return value through FridaHooks
+OnSendAnimationEventLeave), and the whale turn's Trigger02 comes back false while the pillar visibly turns (HYPOTHESIS on the
+why: Behavior00's Turn02 a different transition kind than Turn01 and Turn03, Havok's handleEvent answering false for it). So since
+the relay began a guest sat one side behind the host until the cycle passed it (44's "resumed syncing once the rotation passed the
+one it was desynced ON"); with the side jump the catch-up became the visible double turn. FIX fork m3-canon-4-pillar-flag 83a40da3
+(fffd8a66 plus 22 lines, the lay for 46's turbo on Eli's word): a pillar's Trigger0N is reported whatever the flag says (the
+script sends a Trigger only when it turns), every other event keeps the flag, the line "object animation <id> <event> reported (the
+graph's flag said refused)" when it lied; the same condition rides m3-canon-4-pillar-side from beffa74d.
+
+THE HAND-OFF'S REVIEW (15:44 PST): a fresh agent on 30839d4b found a blocker and seven more, applied as written in d1f23444 (on
+m3-canon-4-noderot bb559685): F1 the grant's listener called natives inside a message handler (hostService's own rule: the
+platform's gameThrQ is the update's, a native there throws and skips the listeners after it, changeFormService's among them), now
+once('update'); F2 the activation block protects nothing (the Creation Kit's BlockActivation withholds default processing alone,
+OnActivate still reaches the script), so the reset is one turn at most (StartState03 then Trigger03 for Side01, a jump otherwise)
+with no block, a press inside that turn the known limit and the cell's scripts held through the gate its next shape; F3 the
+script's side is its LAST side-naming act, not the first StartState seen (a seat that hosted, turned and walked out keeps its
+Papyrus state); F4 the probe's step C passed on the feed alone, so x-puzzle-handoff v2 (sha1 93adae62) counts past the feed and
+claims the feed itself; F5 a catch says a failure and the feed stops when the seat no longer hosts the cell; F6 no self-played
+marks in the re-sync; F7 a record naming no side is said, the base decides a pillar when readable, the record keyed by the local
+id; F8 an unused import. Still ahead of its first lab run.
+

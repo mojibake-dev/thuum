@@ -8643,3 +8643,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   a report and an animates). A fresh review runs on the commit; the builds queued. Not 46's unless Eli wants hand-offs tonight.
 - 15:34 PST 2026-11-04 (23:34Z 11-04) (thuum-cf): the hand-off commit 30839d4b built green (pipeline 5369, client and server builds); its review runs,
   its read x-puzzle-handoff c0ca8641 waits for the lab after 46; 68093a7d (the node-rotation head with it) builds.
+- 15:44 PST 2026-11-04 (23:44Z 11-04) (thuum-cf): 46 on fffd8a66 with a first-in host: one clean bug (Eli: a whale turn shows on the other screen
+  only at the next turn, then twice). The host never reports Trigger02, in 46, 45 and the green b-puzzle-relay run alike: the
+  service dropped events whose engine flag read false, and the whale turn's flag lies while the pillar turns (traps.md "The
+  dropped Trigger02"). FIX fork m3-canon-4-pillar-flag 83a40da3 (fffd8a66 plus the condition alone, for 46's turbo on Eli's
+  word): a pillar's Trigger0N reported whatever the flag says. The hand-off's review (a blocker: natives in a message handler;
+  BlockActivation stops no OnActivate; the script's side is its last act; the probe passed on the feed; a catch; no marks) applied
+  in d1f23444 (noderot bb559685), x-puzzle-handoff v2 by path sha1 93adae62; builds queued.
