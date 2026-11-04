@@ -247,7 +247,9 @@ def create_app(services: Services) -> FastAPI:
         text = (await scenario.read()).decode("utf-8", errors="replace")
         try:
             sc = load_scenario(text)
-        except (ValueError, ValidationError, KeyError) as e:
+        except (ValueError, ValidationError, KeyError, yaml.YAMLError) as e:
+            # a file that is no YAML at all (x-fate-login-bleak-trace v4: a \d inside a double-quoted claim) is the
+            # poster's to fix, so it says why with a 400 as a bad step does, never a 500 lab-run cannot read
             raise HTTPException(400, f"E_SCENARIO: {e}") from e
         version = game or sc.game
         if version is not None and version not in s.game_versions():

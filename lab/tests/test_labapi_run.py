@@ -432,6 +432,15 @@ artifacts: [trace]
         self.assertEqual(r.status_code, 400)
         self.assertIn("E_SCENARIO", r.text)
 
+    def test_scenario_that_is_no_yaml_is_400(self):
+        """x-fate-login-bleak-trace v4 (2026-11-04): a \\d inside a double-quoted claim is no YAML; the run endpoint answered
+        500 and lab-run read nothing; it says E_SCENARIO with the scanner's words instead."""
+        body = b"id: t\nclients: [c1]\nsteps:\n  - c1: connect\n  - assert:\n      - \"c1.log_count('on thread (\\d+)') >= 1\"\n"
+        r = self.client.post("/lab/run", files={"scenario": ("s.yaml", body, "text/yaml")})
+        self.assertEqual(r.status_code, 400)
+        self.assertIn("E_SCENARIO", r.text)
+        self.assertIn("double-quoted", r.text)
+
     def test_status_and_step_endpoints(self):
         body = self.client.get("/lab/status").json()
         for key in ("run", "guests", "heartbeats_s_ago", "netem", "memory"):
