@@ -8190,3 +8190,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   use-after-free (npc-fate.md 1c, THE READ) is a must on m3-canon-fate-inv before any other claim of that branch, its oracle three
   logins into Bleak Falls on the branch's pair without a crash (x-fate-login-bleak v1 09633967), the Frida trace of the queue flush
   beside it where cheap (x-fate-login-bleak-trace v1 d3bef3ab, lab/frida/equip-queue-trace.js).
+- 23:47 PST 2026-11-03 (07:47Z 11-04) (thuum-cf): both heads green. m3-canon-3-apply-main 68173f26 (pipeline 5257, server-only: image
+  m3-canon-3-apply-main-68173f26, the js 2b5b33db's client-build 18576): x-corpse-record v5 reruns on it, then canon fast-forwards.
+  m3-canon-fate-inv 552e8dc1 (pipeline 5256: image m3-canon-fate-inv-552e8dc1, client-build 18588; SCHEMA 35): the crash oracle
+  x-fate-login-bleak v1 first, its trace twin, then x-fate-inventory v1b and x-fate-dress-bleak v6 on the same pair; 802842d9's
+  pair (18586) superseded. The lab is numidium's and on THE CANON for dress v6's bug witness meanwhile.
