@@ -7965,3 +7965,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the y -45056 edge while the mill's yard lies south of it, so a seat in the yard touching them is "not in the prop's cell" on canon-3.
   Next in my lane: (1c)'s code map by a fresh agent (where a game-file NPC's inventory record comes from, the host engine's roll, the
   take and equip paths, the fate's dressing), then its design in the verb doc and the build off canon-3; (1d)'s read after.
+- 20:30 PST 2026-11-03 (04:30Z 11-04) (thuum-cf): Eli's two calls (via numidium, verbatim). W4 on b-puzzle-relay v2 766e74a0: "yes
+  run with that change", so leg C reads as leg A does (the E_TRAP_NO_REF count less the 4fcdf lines == 0); numidium deploys and runs
+  it after 1a. And "under header #1 there, is there room to fit the fix for the weird naked with no head bug?": yes, regression 1e,
+  the fate re-roll's half-built 3D on a corpse (rotfern's khajiit 29613 after her relaunch) and on a living NPC (the host's own 39fe1
+  on Prisoner's screen). Three read-only maps are running in my lane now, one agent each: 1c the body's inventory as the record, 1d
+  the guest's puppet out of place in combat, 1e rerollActor's drop and rebuild on a loaded actor (the head parts and the outfit after
+  a pick swap, dead or alive) with x-fate-dress-bleak's shape for its probe. 1a: the apply-main dist is going onto both seats
+  (numidium), then the snapshots and x-corpse-record v3.
