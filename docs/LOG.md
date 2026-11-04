@@ -8597,3 +8597,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   unsolved, turbo-client 843fed95 over 7c79fc3e's dist, Eli at the pillars; trace v5 held until after.
 - 14:26 PST 2026-11-04 (22:26Z 11-04) (thuum-cf): fork m3-canon-4-pillar-side 843fed95 built green (pipeline 5352, client and server builds): the
   turbo-client bundle for playtest 46 type-checks. e80fb0c8 (the node-rotation export) builds behind it.
+- 14:32 PST 2026-11-04 (22:32Z 11-04) (thuum-cf): 7c79fc3e's reads (numidium): oracle v5 GREEN 20261104-221323, dress v9 GREEN 221956, x-host-outdoors
+  GREEN 222559 with the "objectTypeInfo" and "hosted sends ... threw" counts 0 at each of the three minutes, no crash: the throw
+  did not recur under the same exterior pair (a non-reproduction, not its cause); the named throw and the per-target catch stand
+  for when it does. CANON fast-forwarded to 7c79fc3e (from 8926d2c8, ancestry checked, both remotes). Playtest 46's setup starts,
+  turbo-client 843fed95 after it.
