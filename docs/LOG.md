@@ -8612,3 +8612,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the record's replay plain as before; the host's seat relaunched to clear the stuck script; numidium turbo-clients it. The limit
   that stands: a guest's replay lands on the record's side only when the plain trigger matches its default side, until the host's
   script state is fed from the record (ADR-059 decision 5), the next build. traps.md "The pillar's side" carries it.
+- 15:05 PST 2026-11-04 (23:05Z 11-04) (thuum-cf): the pillar diff's review (ADR-064 rule A) landed seven findings, applied as written: fork
+  m3-canon-4-pillar-side fffd8a66 (the record's replay waits one interval and skips a seat that hosts the cell, the self-played
+  marks consume on hit over 3 s with a "dropped as self-played" trace, the record path says "replayed" with the remote id, the
+  wording the reference's initial side since every seat's script jumps to it at OnCellLoad), carried onto m3-canon-4-noderot
+  34d85b9f; traps.md "The pillar's side" carries the findings (F2's lesson: a TypeScript playAnimation runs under Override, so
+  the marks never guarded a re-entry, only hid genuine reports; F1's next build: the record as an ObjectAnimation to non-host
+  loaders, CreateActor without lastAnimation). ae010d0a's build was green; fffd8a66 builds; the lay for 46 is fffd8a66 by
+  turbo-client, numidium holding on this word.

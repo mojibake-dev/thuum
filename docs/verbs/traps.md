@@ -565,3 +565,22 @@ host's seat relaunched to clear the stuck script). The guest's replay at a load 
 when the plain trigger matches its default side: the limit stands until the host's script state is fed from the record (decision
 5's activation counts, or the script's own state property through script-variables), the next build.
 
+THE REVIEW (15:05 PST 2026-11-04, 23:05Z 11-04; a fresh read-only agent on 7c79fc3e..ae010d0a, ADR-064 rule A): seven findings, applied as
+written in fork m3-canon-4-pillar-side fffd8a66 (carried onto m3-canon-4-noderot 34d85b9f). F1 (medium, new with 843fed95): the record's
+lastAnimation can now be the host's reported StartState0M, and the plain replay at a CreateActor still ran on the host, after its
+script's own jump (the first attempt at onceLoad is refused before the graph exists, the taken one comes 2 s later); a stale M
+would have moved the host's graph off its script: now the replay waits one interval and skips a seat that hosts the cell
+(HostService.hostsCell), logging "not replayed: hosted here"; a grant slower than the interval still lets a host replay once, the
+limit until the server sends the record to non-host loaders alone (CreateActor without lastAnimation, the ObjectAnimation message
+for both the relay and the record; the next build). F2 (medium, pre-existing): a TypeScript playAnimation runs under
+CallNativeApi's Override, which the animation hooks return early under, so no replay ever re-entered the hook; the self-played
+marks only hid GENUINE reports for 20 s, the host's first turn within 20 s of a pillar's CreateActor among them (44's and 45's
+teleport-then-turn shape; b-puzzle-relay's 48 s gap is why it stayed green): the marks now consume on their hit over 3 s, and a
+"dropped as self-played" trace says whether a re-entry ever happens (zero lines with a record present means the marks can go).
+F3 (low, pre-existing): a hand-off's new host plays a relay in flight as a guest and its script and graph differ after a turn;
+decision 5's state feed is the fix. F4 (HYPOTHESIS): "after StartState0N refused" on a guest already on Side0N is a self-transition
+the graph may refuse, the trigger then plays from Side0N: the expected word, not a fault. F5: every seat's script runs OnCellLoad
+(a lifecycle event passes the gate everywhere, ADR-062 decision 1) and jumps its graph to the reference's INITIAL side, so a guest
+sits on the host's initial side at a load, not Side01; the wording above and in the code follows. F6: the record path's id is
+the remote one. F7: the record path says "replayed", so b-puzzle-relay's " played" claim never counts a host's refused replays.
+
