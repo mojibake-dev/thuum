@@ -8576,3 +8576,6 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   d8ac27b8: the claim is the thread line's presence ("on thread [0-9]+ main [0-9]+" at least once), the equality read by hand as
   oracle v5's was; a "main-thread yes" word on the witness line is the mechanical claim's next step, a one-line platform change for
   the next head. x-puzzle-guest-view v1 started 22:02:16Z.
+- 14:04 PST 2026-11-04 (22:04Z 11-04) (thuum-cf): CANON fast-forwarded to 8926d2c8 (from 4c6d9f24, ancestry checked, both remotes): the fate's engine
+  work on Main's thread, proven by oracle v5 214933 and dress v9 215555 with the thread witness on every line; the trace probe v5
+  stays the mechanism's Frida read (the deferred DetachHavok against the bind), not the fix's gate.
