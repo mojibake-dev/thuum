@@ -2691,6 +2691,11 @@ and 79806/79807/79810 (bhkRagdollConstraint dtor and ctors), 77864/77883; armed 
 living leveled clone differs from the client's pick (dress v8's premise), no kill needed. Verdicts: 37307 on the main thread with a
 non-null Get3D2 while the VM thread sits between Set3D(new) and 63792's exit confirms the race; a VM-thread free in the ring before
 the walk is a same-thread lifetime bug; a constructor write with no free is aliasing.
+THE FIX'S FIRST READ (13:57 PST 2026-11-04, 21:57Z 11-04): fork m3-canon-4-reroll-main 8926d2c8 (the review of cc5c82b6 applied; its dist with
+the hands image 4c6d9f24 and the 1a3bbf54 driver): oracle v5 GREEN 20261104-214933, all eight engine re-rolls of the login (e9986,
+1d219, 380bb, 380b9, 380b8, 380b7, 39fe1, 8009e) and every redress "on thread 5760 main 5760": the fate's engine work runs on Main's
+thread, no crash. Dress v9 and trace v4 (the Frida read of the drain against the bind) follow; the crash's own window closes with
+them.
 
 ## Status
 

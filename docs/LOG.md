@@ -8566,3 +8566,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   of hosting with 29613 one cell east and 105a24 one cell south-east as 45 had them; the premise claimed (29613 live on c1, a puppet
   on c2), both seats answering at the end, the "objectTypeInfo" and "hosted sends ... threw" counts recorded each minute, never
   claimed. The set for 7c79fc3e's pair: oracle v5, dress v9, then this, after the current lay's reads and the pillar probe.
+- 13:57 PST 2026-11-04 (21:57Z 11-04) (thuum-cf): 8926d2c8's lay (numidium): oracle v5 GREEN 20261104-214933, every one of the login's eight engine
+  re-rolls and every redress "on thread 5760 main 5760" (the fate's engine work on Main's thread, the witness equal), no crash;
+  dress v9 playing, then trace v4, then x-puzzle-guest-view; 7c79fc3e's pair queued behind with oracle v5, dress v9 and
+  x-host-outdoors. 1d219, the ambush draugr of 202729's crash, re-rolled on Main's thread this time.
