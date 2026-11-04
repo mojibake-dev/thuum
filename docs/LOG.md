@@ -8391,3 +8391,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   mouse pitch sweep (dy 80 with wake 400, then 60 a step, a dump after each pitch recording the crosshair, hold 1500, wait 3); the
   server's shot lines claimed two a seat beside the hit. c2 shoots so the applying seat's copy holds its own arrows, c1 so the
   record carries them. The lab is held for f4014f39's lay (playtest-relaunch hold to 22:28Z).
+- 11:46 PST 2026-11-04 (19:46Z 11-04) (thuum-cf): f4014f39 laid; corpse v6 GREEN 20261104-193246 (leg R within 12 and 15 units: 184710's 45.5 was
+  variance, no W4 on the bound) and x-corpse-arrows v2 GREEN 20261104-194019 WITH THE CONDITION MET (c1's level shot hit this time;
+  the record 4934 bytes with arrows; c2.log's "the copy's own attached arrows removed before the lay" then the lay on main 6912; no
+  crash file). The trace (c2, arrows-apply-trace.js) read the chain inside the apply: 12095 LoadGame, getByType 0x2d found, Set3D
+  null, RemoveByType 0x98 at Set3D+0x11d, the 0x98 loader 12782 entered with a NON-null extra, clean; no fault. change-form.md READ
+  8 CONFIRMED AT T3 on the fix's side (the null unobserved, no control). Dress v8 playing, then oracle v4, then arrows v3 as a
+  second sample; the canon fast-forward to f4014f39 on those.

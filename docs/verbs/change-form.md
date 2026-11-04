@@ -318,7 +318,7 @@ Four reads on the lab, each a Frida run on the existing scripts before the recei
    39fe4's third kill, "ApplyChangeForm 0x39fe4: 4840 bytes fnv 0xcbc30c3d flags 0x8a040427 remap rows 0 -> 35568" then
    SkyrimSE.exe+0x184FBF `mov edx, [r13+0x20]` with r13 null, no stack; the first two records of the same actor (4606 and 4641
    bytes, the second with one remap row) had applied). The re-analyst's static read (HYPOTHESIS until a Frida read of 11577 and
-   12782 under an apply): the site is Address Library 12782 (RVA 0x184f40, unnamed in CommonLib), the loader of ExtraAttachedArrows3D
+   12782 under an apply; read in 194019, CONFIRMED below): the site is Address Library 12782 (RVA 0x184f40, unnamed in CommonLib), the loader of ExtraAttachedArrows3D
    (E/ExtraAttachedArrows3D.h:20-34; the record's extra block 0x98, E/ExtraDataTypes.h:326), faulting at +0x7F on data.size (+0x20)
    of a null extra; reached as 35568 -> Actor::LoadGame 37650 -> TESObjectREFR::LoadGame 19529 -> ExtraDataList::LoadGame 12095
    (0x170380), case 0x98. 12095's prologue marks every extra type ALREADY in the copy's list whose mask (the table at 0x141fd3db0:
@@ -346,6 +346,17 @@ Four reads on the lab, each a Frida run on the existing scripts before the recei
    body carries arrows on both seats (the owner shoots the bandit with a bow, the watcher's copy shows the arrows, then the relay);
    the falsifier is 12782 reached with null while no 11577(0x98) fired during the apply, or the third record lacking a 0x98 block
    after its 0x2D block.
+   CONFIRMED AT T3 (11:46 PST 2026-11-04, 19:46Z 11-04; x-corpse-arrows v2 20261104-194019 on f4014f39, numidium's run, the trace mine):
+   the condition forced and met (c1's arrow in 39fe4's body on both seats, the record 4934 bytes with its arrows block, c2's copy
+   with its own arrows), c2.log "0x39fe4: the copy's own attached arrows removed before the lay (the record's come with it)" then
+   "applied (35568 1, pending 1 then 0, root false then false, lifeState 2 then 1) thread 6912 main 6912", no crash file, every
+   claim held. lab/frida/arrows-apply-trace.js on c2 read the chain inside the apply on the main thread (seq 891 to 928): 35568
+   entered from SkyrimPlatformImpl.dll, 12095 ExtraDataList::LoadGame entered, getByType 0x2d found (the leveled-creature block),
+   Actor::Set3D(39fe4, null), inside it RemoveByType 11577 of 0x98 at Set3D+0x11d, then the 0x98 loader 12782 entered with a
+   NON-null extra and left clean; no fault line. The copy's own removal before the lay is CommonLib's list walk
+   (src/RE/E/ExtraDataList.cpp:122, not the engine's 11577), so it is the log line's witness, not the trace's. The null itself was
+   not observed (no control run on 2c17bc85: the read's chain plus 183635's dump carry it); corpse v6 on the same head GREEN
+   193246 (leg R within 12 and 15 units; 184710's 45.5 was variance).
 
 ## Status
 
