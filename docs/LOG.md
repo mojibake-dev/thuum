@@ -8219,3 +8219,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   reconcile both impose a watcher's corpse inventory with no declared order (the apply wins on a late joiner; fix: rerollActor after
   the lay, reconcile-only on a corpse; the owner declared: the container's contents are the server's), and a held change-form record
   is never dropped at a respawn (fix: RespawnFated drops it). 7b6fc953 stays the playtest build.
+- 00:09 PST 2026-11-04 (08:09Z 11-04) (thuum-cf): canon-4's pipeline 5263 (m3-canon-4 7b6fc953) GREEN on every job (server-build 18609, client-build
+  18610, wire-test, wire-fuzz, difftest-build, rust-image): the playtest build's pair is image m3-canon-4-7b6fc953 with 18610's dist.
+  numidium runs its four reads (x-fate-login-bleak v2 8d211440, x-fate-inventory v1b dae397e3, x-fate-dress-bleak v6 fc546670,
+  x-corpse-record v5 42d3e70e); four green and canon fast-forwards to 7b6fc953. The merge review's two follow-ups are built on
+  m3-canon-4-followups 44d7536b (rerollActor after a body's lay, reconcile-only on a corpse; RespawnFated drops the held record, with
+  a ChangeFormTest case), pushed server-only for T0, the bundle built here; for the round after 45.
