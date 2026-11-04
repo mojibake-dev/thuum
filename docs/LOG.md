@@ -8225,3 +8225,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   x-corpse-record v5 42d3e70e); four green and canon fast-forwards to 7b6fc953. The merge review's two follow-ups are built on
   m3-canon-4-followups 44d7536b (rerollActor after a body's lay, reconcile-only on a corpse; RespawnFated drops the held record, with
   a ChangeFormTest case), pushed server-only for T0, the bundle built here; for the round after 45.
+- 00:37 PST 2026-11-04 (08:37Z 11-04) (thuum-cf): canon-4's first two reads (numidium): x-fate-inventory v1b dae397e3 GREEN 20261104-082511 (1c: the
+  put kept across the roll, the copy equal to the record at the load, the take-all granted); x-fate-login-bleak v2 8d211440 RED
+  20261104-081818 at login 3 alone, NO CRASH in three logins (the use-after-free fix holds on canon-4), logins 1 and 2 holding every
+  claim (the host grant in 3.0 and 2.0 s, both bandits alive and loaded, both reconcile lines). Login 3's red is the seat's death,
+  not the build: god mode is the session's (PartOne.cpp SetGodMode(false) at the disconnect, god-mode.md) and TGM a toggle, so each
+  relaunched seat loaded into the Temple unprotected until its TGM step about 20 s later; the bandits whittled c1 from 100 to 7
+  percent across logins 1 and 2 (the hits for 0 damage under god mode, real damage outside it) and killed it at 08:22:22, 11 s
+  before login 3's TGM ("39fe4 hits ff000000 with 12eb7 for 12.99: health 0.0114 -> 0"); the server respawned it at lab-spawn after
+  25 s, so the until on the Temple's host could never hold. v3 of the oracle (and of the trace twin): a health base of 100000 on the
+  record once (SetActorValue 0x14 Health, within BASE_MAX) and TGM right after each connect; claims unchanged. For playtest 45's
+  item 3: a seat that relaunches inside a hostile cell loads in unprotected, the game's own rule; relaunch where nothing is alive
+  nearby or accept the fight.
