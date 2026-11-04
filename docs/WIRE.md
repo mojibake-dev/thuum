@@ -803,7 +803,8 @@ Since fork adr065-sys1-wire 36efff6d (15:0x PST 2026-11-03, SCHEMA_VERSION 33; 3
 three share TrapHit's t 72 and wire id 80, because the wire's numbers are positional (the wire id is t plus 8, the variant index,
 pinned by wire-schema's tests), so the second of the two branches to land on parity renumbers; the schema number is distinct so no
 two builds at 31 disagree on what a 72 means. ChangeForm (id 80, MsgType 72), client to server, reliable: `{ epoch: u32 (the
-cell's host epoch the sender holds, ADR-066's stamp), formId: u32 (a game-file actor's, never 0 or a player's), formType: u8,
+cell's host epoch the sender holds, ADR-066's stamp), formId: u32 (a game-file actor's, never 0 or a player's), formType: u8 (the
+record's save-type index, 0 REFR and 1 ACHR, the header byte's low six bits; not the engine's form type),
 flags: u32 (the record header's flags as CheckSaveGame kept them), version: u8 (0x4E, 1.6.1170's 35740), body: String (the WHOLE
 packed record, header included, as lowercase hex, two characters a byte, at most 131072 characters for 65536 bytes), fnv1a: u32
 (FNV-1a 32, basis 0x811c9dc5, prime 0x01000193, over the decoded bytes), remap: [{ offset: u32 (a RECORD offset), formId: u32,

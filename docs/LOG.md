@@ -7565,3 +7565,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   read is lab/frida/say-verdict.js (sha1 67719e81, 470 lines, attach-only on the watcher, sixteen hooks with their first bytes, one
   row per say with the gate inputs, a summary per verdict and branch), in its fresh review; uncommitted until it passes. The arm's
   day-1 read pairs it with x-scene-relay v1 on c2.
+- 16:26 PST 2026-11-03 (00:26Z 11-04) (thuum-cf): x-corpse-record v2's first run on the stage (20261104-001821, the server m3-turbo3-sys2-container-f1-68da0cdb,
+  the client 2225c932) RED at leg A: every ChangeForm send was refused E_CHANGEFORM_HEADER (the server's reject line rate-limited to its
+  first; c1's three sends of 13491 at 3651 bytes, fnv f591f83b, epoch 1, given up after three tries; a lab-spawn body 86111 the same
+  from both seats). numidium's static read, confirmed in the code: the client sent the native's formType (the engine's form type, 0x3E
+  for an ACHR) where the wire's formType is the RECORD's save-type index (1, the header byte's low six bits the validator compares
+  against); the T2's fake client and the fixtures send the index, so only a live seat showed it. Fix, TS only: parseRecord takes the
+  native's recordType (fork m3-turbo3-sys2-container-f1 cc026686, off tonight's server head; cherry-picked onto r2); numidium
+  turbo-client-builds it onto both clones and reruns. The contract wording fixed here (change-form.md, WIRE.md). Open: c2's
+  "resurrect 13491 (puppet true) queued" around the kill's landing, the probe's no-resurrect claim; being read from the run's c2.log.
+  The hold's probe x-container-hold v2 runs next (002233).

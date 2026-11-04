@@ -95,7 +95,9 @@ Nothing new: a non-owner's marks are counted, never swallowed (amendment F). The
 
 ## Message contract
 
-- C2S ChangeForm (reliable): epoch u32; formId u32 (the shared load order's id); formType u8; flags u32; version u8; body:
+- C2S ChangeForm (reliable): epoch u32; formId u32 (the shared load order's id); formType u8 (the RECORD's save-type index, 0 REFR
+  and 1 ACHR, the header byte's low six bits: the native's recordType, never the engine's form type 0x3E it also answers;
+  x-corpse-record v2 001821 refused every send E_CHANGEFORM_HEADER on that confusion); flags u32; version u8; body:
   the WHOLE record (its header included) as a lowercase hex string on the JSON wire, two characters per byte, cap 65536 bytes
   (131072 characters); fnv1a u32 (FNV-1a 32, basis 0x811c9dc5, prime 0x01000193) over the decoded record bytes; remap: list of
   {offset u32 (a RECORD offset, the header's width included), formId u32, index u32} (cap 256). An owner whose remap list is
