@@ -8314,3 +8314,6 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
 - 03:04 PST 2026-11-04 (11:04Z 11-04) (thuum-cf): pipeline 5288 (m3-canon-4-followups 9f2757a3) GREEN: server-build 18681, client-build 18682. The pair
   for the last reads is 18682's dist with c4539d22's image; numidium's wrapper lays it after 3bd97f7c's corpse run and runs dress v8
   and oracle v4 (corpse v6 too if that run hit the re-roll branch); green, and canon fast-forwards to 9f2757a3.
+- 03:05 PST 2026-11-04 (11:05Z 11-04) (thuum-cf): corpse v6 on 3bd97f7c GREEN 20261104-105709 (no new crash), its logs with 17 "rerolled ... through
+  the engine" lines (10 on c1, 7 on c2), so by numidium's gate it reruns on 9f2757a3 beside dress v8 and oracle v4; 18682's dist is
+  being laid (11:04Z). The GitHub mirror rejected a push again ("commit_refs_rules", GitHub's side); a retry loop lands it.
