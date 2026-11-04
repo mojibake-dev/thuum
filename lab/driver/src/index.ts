@@ -2670,8 +2670,10 @@ function run(step: Step, player: Actor): unknown {
         // what this game rolled for it (npc-fate, ADR-046): its race (a leveled pick's clone carries the pick's)
         // and the form ids it wears, one per form across the 32 slots and the two hands' weapon or armor (the
         // server's fate counts the weapon, x-npc-fate-outfit 20261024-061219; a shield is in a slot and the left
-        // hand, so a set; a hand's spell or torch is no part of the outfit). Form types from skyrim-platform's
-        // FormType: Armor 26, Weapon 41
+        // hand, so a set; a hand's spell is no part of it). A light in a hand counts too: the host's AI lighting a
+        // torch is an equip every seat shows (Eli's W4 word 2026-11-04: lights count in worn, a puppet's hands
+        // equal the host's; oracle v4 190713 failed on a Torch01 this read could not see). Form types from
+        // skyrim-platform's FormType (Definitions.txt): Armor 26, Light 31, Weapon 41
         raceId: npc.getRace()?.getFormID() ?? 0,
         worn: Array.from(
           new Set([
@@ -2679,7 +2681,7 @@ function run(step: Step, player: Actor): unknown {
             ...[0, 1].map((hand) => {
               const held = npc.getEquippedObject(hand);
               const type = held ? held.getType() : 0;
-              return held && (type === 41 || type === 26) ? held.getFormID() : 0;
+              return held && (type === 41 || type === 26 || type === 31) ? held.getFormID() : 0;
             }),
           ])
         )
