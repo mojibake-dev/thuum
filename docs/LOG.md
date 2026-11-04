@@ -8436,3 +8436,5 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   than the hands rule. FIXED fork m3-canon-4-hands 4c6d9f24 (server-only): a hosted shot spends no record arrow, E_SHOT_QUIVER at
   every hosted shot, NpcCastTest's hosted shot keeps the quiver; fork-lint green, pipeline building. One read: x-fate-inventory v1b
   on skymp-server:m3-canon-4-hands-4c6d9f24 with dist 18729 and the 61f417e0 driver; on its green canon to 4c6d9f24 and 45 on it.
+- 12:27 PST 2026-11-04 (20:27Z 11-04) (thuum-cf): fork m3-canon-4-hands 4c6d9f24 built green (pipeline 5321, server-build 18779): the image
+  skymp-server:m3-canon-4-hands-4c6d9f24 for the quiver read (x-fate-inventory v1b with the archer's shot as the condition).
