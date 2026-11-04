@@ -8415,3 +8415,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   9218156a on its two reads.
 - 11:58 PST 2026-11-04 (19:58Z 11-04) (thuum-cf): fork m3-canon-4-hands 9218156a built green (pipeline 5314, server-build 18761): the image
   skymp-server:m3-canon-4-hands-9218156a, paired with f4014f39's dist 18729 and the 61f417e0 driver bundle for oracle v5 and dress v9.
+- 11:59 PST 2026-11-04 (19:59Z 11-04) (thuum-cf): x-corpse-arrows v3 on f4014f39, 20261104-195238 (numidium): verdict ERROR on E_RUN_GAME_REPLACED
+  alone, every claim held on the relaunched game: 8 OnPlayerBowShot lines from both seats, four hits on 39fe4 (three c1's, one c2's),
+  c2's "the copy's own attached arrows removed before the lay" once and the apply once, no crash after; the fix holds a second time
+  with both seats shooting. c1's first game crashed 14 s after a fresh login at lab-spawn (c1-crash-2026-11-04-11-53-13: a null
+  TESObjectLAND under BGSQueuedTerrainUpgrade on a JobThread, SkyrimSoulsRE MapMenuEx.cpp:391 at frame 4, no npc-fate or
+  change-form frame): the standing base's watch item (Souls or the terrain loader at a fresh login), not this head's. CANON
+  fast-forwarded to f4014f39 (from 2136311f, ancestry checked, both remotes verified): the arrows fix, the dress order, the head's
+  reload, the idempotent redress, the apply on the main thread and 1c's inventory are the canon now. Next: the hands pair's reads,
+  then canon to 9218156a.
