@@ -1864,14 +1864,20 @@ function run(step: Step, player: Actor): unknown {
       // list of names; a name the graph lacks reads false or 0. For
       // docs/verbs/spell-cast.md: which variables say a hand is casting
       // (IsCastingLeft, IsCastingRight, IsCastingDual are the names to try).
+      // {formId} reads any loaded reference's own graph the same way (the
+      // getters are ObjectReference's): a puzzle pillar's state as each
+      // seat's engine holds it (playtest 45's item 5), no array argument.
+      const id = num(a.formId);
+      const ref: ObjectReference | null = id ? ObjectReference.from(Game.getFormEx(id)) : player;
+      if (!ref) return { error: `no reference ${id}` };
       const names = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
       const bools: Record<string, boolean> = {};
-      for (const n of names(a.bools)) bools[n] = player.getAnimationVariableBool(n);
+      for (const n of names(a.bools)) bools[n] = ref.getAnimationVariableBool(n);
       const floats: Record<string, number> = {};
-      for (const n of names(a.floats)) floats[n] = player.getAnimationVariableFloat(n);
+      for (const n of names(a.floats)) floats[n] = ref.getAnimationVariableFloat(n);
       const ints: Record<string, number> = {};
-      for (const n of names(a.ints)) ints[n] = player.getAnimationVariableInt(n);
-      return { t: Date.now(), bools, floats, ints };
+      for (const n of names(a.ints)) ints[n] = ref.getAnimationVariableInt(n);
+      return { t: Date.now(), formId: ref.getFormID(), loaded: ref.is3DLoaded(), bools, floats, ints };
     }
     case "advance-skill": {
       // thuum docs/verbs/actor-values.md: skill experience as play earns it
@@ -2126,13 +2132,22 @@ function run(step: Step, player: Actor): unknown {
       const read = nodes.map((node) => {
         const world = [0, 0, 0];
         const local = [0, 0, 0];
-        const worldOk = NetImmerse.getNodeWorldRotationEuler(target, node, world, false);
-        const localOk = NetImmerse.getNodeLocalRotationEuler(target, node, local, false);
+        // an out-array argument can throw in the platform's argument casts (x-puzzle-guest-view 20261104-220217:
+        // "JsObjectToNativeObject - Invalid _skyrimPlatform_indexInPool"): the read says so and the step answers
+        const euler = (fn: () => boolean) => {
+          try {
+            return { ok: fn(), error: null as string | null };
+          } catch (e) {
+            return { ok: false, error: String(e) };
+          }
+        };
+        const w = euler(() => NetImmerse.getNodeWorldRotationEuler(target, node, world, false));
+        const l = euler(() => NetImmerse.getNodeLocalRotationEuler(target, node, local, false));
         return {
           node,
           has: NetImmerse.hasNode(target, node, false),
-          world: { ok: worldOk, value: world, filled: world.some((v) => v !== 0) },
-          local: { ok: localOk, value: local, filled: local.some((v) => v !== 0) },
+          world: { ok: w.ok, error: w.error, value: world, filled: world.some((v) => v !== 0) },
+          local: { ok: l.ok, error: l.error, value: local, filled: local.some((v) => v !== 0) },
           toward: [
             NetImmerse.getRelativeNodePositionX(target, node, toward, false),
             NetImmerse.getRelativeNodePositionY(target, node, toward, false),
