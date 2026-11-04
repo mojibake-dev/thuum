@@ -638,6 +638,9 @@ function describe(actor: Actor) {
     name: actor.getDisplayName(),
     race: race ? race.getName() : "",
     raceId: race ? race.getFormID() : 0,  // lab-api compares raceId (the server's appearance record carries ids)
+    // the facegen head's node, absent on a half-built 3D (docs/verbs/npc-fate.md 1e, the naked and headless re-roll):
+    // SKSE's NetImmerse.HasNode on the actor's loaded model
+    faceNode: NetImmerse.hasNode(actor, "BSFaceGenNiNodeSkinned", false),
     sex: base ? base.getSex() : -1,
     isDead: actor.isDead(),
     healthPercentage: actor.getActorValuePercentage("health"),
