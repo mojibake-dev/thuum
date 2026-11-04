@@ -2625,6 +2625,20 @@ ARMO and WEAP by the espm's record type (an id the files lack, or a server witho
 other worn types rows; the ring test's worn sum follows; a T0 puts Torch01 in the campfire bandit's hand and reads it as a row of 1
 and no worn entry while the bow stays worn. The driver's npc-state.worn already lists armor and weapons alone (slots plus hands typed
 41 and 26), so no driver line is needed; the two sides measure the dress. W4 with 45's decision; built only on Eli's word.
+ELI'S WORD (11:52 PST 2026-11-04, 19:52Z 11-04, via numidium; the opposite of the fate-worn branch, which stays unpushed): "if the host's AI is
+broadcast then that should go [to every seat]: their dress AND inventory should just be the same, equips should be the same, and if
+the AI lights the torch then that's a puppeteering action"; asked whether lights count in worn and the puppet's hands must equal the
+host's: "yes". So the contract: a hosted actor's HANDS are its host's engine's live state (R2 as reported: a weapon or a light the AI
+took up, its ammo), relayed to every puppet (slice 3's UpdateEquipment; applyHands puts the wornLeft entry, a torch included, in the
+puppet's left hand) and listed in fate.worn for a late joiner; its DRESS is the server's roll (R0), the armor the fate dresses every
+copy from. Two halves: the lab driver's npc-state.worn counts a hand's light (thuum 61f417e0, numidium) so the measurement sees a
+torch; and the server's hosted report keeps only a worn ARMOR entry the report lacks (fork m3-canon-4-hands 9218156a, server-only,
+off f4014f39): the old rule kept every non-weapon worn entry, so a torch the AI put away stayed worn in the record (190713: Torch01
+in fate.worn 25 s after the re-roll while the host's actor held nothing), and a light the record's inventory lacks is now recorded
+R2 like the engine's own weapon; T0 in CellHostTest's hosted-equipment case (the torch enters the hands and the inventory, relays
+once; the next report without it drops it from the hands, keeps it in the inventory, keeps the roll's armor). Reads: oracle v5
+bff9863c (no claim changed) and dress v9 e28faba7 (plus c2's copy wearing what c1's does at every read) on the hands image with
+f4014f39's dist and the driver's bundle.
 
 ## Status
 

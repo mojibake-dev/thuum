@@ -8398,3 +8398,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   null, RemoveByType 0x98 at Set3D+0x11d, the 0x98 loader 12782 entered with a NON-null extra, clean; no fault. change-form.md READ
   8 CONFIRMED AT T3 on the fix's side (the null unobserved, no control). Dress v8 playing, then oracle v4, then arrows v3 as a
   second sample; the canon fast-forward to f4014f39 on those.
+- 11:52 PST 2026-11-04 (19:52Z 11-04) (thuum-cf): Eli's W4 word on the torch (via numidium): the host's AI's actions are broadcast, dress, inventory
+  and equips the same on every seat, a lit torch a puppeteering action; lights count in worn and the puppet's hands equal the
+  host's. The fate-worn branch (865c7046) is superseded, unpushed. numidium's driver half: npc-state.worn counts a hand's light
+  (thuum 61f417e0, the next dist). My server half: fork m3-canon-4-hands 9218156a off f4014f39, server-only: the hosted report
+  keeps only a worn ARMOR entry the report lacks (the dress is the roll); a weapon, a light or ammo follows the host's report; a
+  light the record's inventory lacks is recorded R2 like the engine's weapon; CellHostTest's torch case; fork-lint green. The
+  client's applyHands already relays a wornLeft torch. Probes by path: x-fate-login-bleak v5 bff9863c (header only, no claim
+  changed) and x-fate-dress-bleak v9 e28faba7 (v8 plus c2.npc_state(0x39fe4).worn == c1.npc_state(0x39fe4).worn at each read);
+  both on skymp-server:m3-canon-4-hands-9218156a with dist 18729 and the driver's bundle, after f4014f39's chain.
