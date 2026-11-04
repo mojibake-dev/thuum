@@ -2,11 +2,13 @@
 # probe. fix the regressions first", then "go with the 2am version"). The build is canon-4: fork `canon` (2136311f, 44's build)
 # with m3-canon-3-apply-main 68173f26 (the record laid on the game's main thread, a dying copy's death completed before and after
 # the lay: corpses where they land, no freeze) and m3-canon-fate-inv 552e8dc1 (the reconcile's use-after-free fixed, a body's
-# inventory as the server's record, the redress after the stand-up, SCHEMA 35) merged; its own server image and dist. The standing
+# inventory as the server's record, the redress after the stand-up, SCHEMA 35) merged, then tonight's follow-ups to f4014f39
+# (a re-rolled living bandit whole again, Eli's "fix the living case before 45"; two crashes found and fixed on the way) and
+# the host's hands as the record's (9218156a, Eli's W4 word on the torch; 4c6d9f24, an archer's arrows kept); its own server image and dist. The standing
 # base (playtest_setup.STANDING_FROM) and activationUnblockedBases (the client template) as in 44. 44's world and spot again, so each
 # restored item is read where 44 broke it: Bleak Falls Temple's entrance at noon.
 id: 45
-build: "canon-4: fork m3-canon-4 7b6fc953 (canon 2136311f fast-forwarded to m3-canon-3-apply-main 68173f26, merged with m3-canon-fate-inv b763f766; the merge review GO), server skymp-server:m3-canon-4-7b6fc953, client-build 18610 (SCHEMA 35), the Skyrim Souls RE layer (main 32459beb), lab-api with server.npcRollLevel (39e455e5), thuum main 89c92431 or later"
+build: "the canon at 4c6d9f24: fork m3-canon-4-hands 4c6d9f24 (canon f4014f39 = canon-4 7b6fc953 with tonight's follow-ups: the redress left alone on a dressed copy 83f5ff1a and 3bd97f7c, the re-rolled copy rebuilt whole 9f2757a3, cb944530 and 2c17bc85, a copy's own arrows removed before a record's lay f4014f39; then the host's hands as the record's 9218156a, Eli's W4 word on the torch, and an NPC's shot spending no record arrow 4c6d9f24). Green on the lab: x-corpse-record v6 20261104-193246, x-corpse-arrows v2 194019 and v3 195238, x-fate-dress-bleak v8 194400 on f4014f39; x-fate-login-bleak v5 200613, x-fate-dress-bleak v9 201238 on 9218156a; x-fate-inventory v1b 20261104-202729 (every claim held; the run errored on a load crash of c1's, the watch item) on this pair. Server skymp-server:m3-canon-4-hands-4c6d9f24, client-build 18729 (SCHEMA 35, SkyrimPlatformImpl 0d2df6fcbab0ac29), the lab driver of thuum 61f417e0 (lights in a hand counted), the Skyrim Souls RE layer (main 32459beb), lab-api with npc-state's faceNode (2cb385d1), thuum main 61f417e0 or later"
 world: playtest-m3-39-paused-20261031T014638Z   # 39's end, as 41 to 44 began: the temple's and the slope's bandits alive
 hold:
   minutes: 240
