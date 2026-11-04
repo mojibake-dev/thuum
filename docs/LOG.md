@@ -8602,3 +8602,5 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   did not recur under the same exterior pair (a non-reproduction, not its cause); the named throw and the per-target catch stand
   for when it does. CANON fast-forwarded to 7c79fc3e (from 8926d2c8, ancestry checked, both remotes). Playtest 46's setup starts,
   turbo-client 843fed95 after it.
+- 14:36 PST 2026-11-04 (22:36Z 11-04) (thuum-cf): fork m3-canon-4-noderot e80fb0c8 built green (pipeline 5355): the dist with the node-rotation
+  export on top of the pillar fix, for x-puzzle-guest-view v2 and trace v5 after playtest 46.
