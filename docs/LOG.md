@@ -8570,3 +8570,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   re-rolls and every redress "on thread 5760 main 5760" (the fate's engine work on Main's thread, the witness equal), no crash;
   dress v9 playing, then trace v4, then x-puzzle-guest-view; 7c79fc3e's pair queued behind with oracle v5, dress v9 and
   x-host-outdoors. 1d219, the ambush draugr of 202729's crash, re-rolled on Main's thread this time.
+- 14:04 PST 2026-11-04 (22:04Z 11-04) (thuum-cf): 8926d2c8's lay: dress v9 GREEN 20261104-215555, no crash (with oracle v5 214933 the re-roll head's
+  two reads are green). x-fate-login-bleak-trace v4 never ran: lab-api's YAML scanner refused the witness claim's backslashes (the
+  backreference's \d and \1 in a double-quoted scalar; the 500 instead of a 400 is lab-api's gap, numidium's). v5 by path, sha1
+  d8ac27b8: the claim is the thread line's presence ("on thread [0-9]+ main [0-9]+" at least once), the equality read by hand as
+  oracle v5's was; a "main-thread yes" word on the witness line is the mechanical claim's next step, a one-line platform change for
+  the next head. x-puzzle-guest-view v1 started 22:02:16Z.
