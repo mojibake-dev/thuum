@@ -1,0 +1,44 @@
+# Playtest 45 (numidium, 2026-11-04 ~02:00 PST): the canon after the 44 baseline's restore list (Eli: "end 44, go with the impulse
+# probe. fix the regressions first", then "go with the 2am version"). The build is canon-4: fork `canon` (2136311f, 44's build)
+# with m3-canon-3-apply-main 68173f26 (the record laid on the game's main thread, a dying copy's death completed before and after
+# the lay: corpses where they land, no freeze) and m3-canon-fate-inv 552e8dc1 (the reconcile's use-after-free fixed, a body's
+# inventory as the server's record, the redress after the stand-up, SCHEMA 35) merged; its own server image and dist. The standing
+# base (playtest_setup.STANDING_FROM) and activationUnblockedBases (the client template) as in 44. 44's world and spot again, so each
+# restored item is read where 44 broke it: Bleak Falls Temple's entrance at noon.
+id: 45
+build: "canon-4: fork canon at the merge of 68173f26 and 552e8dc1 (sha, server image and dist filled at the lay), the Skyrim Souls RE layer (main 32459beb), lab-api with server.npcRollLevel (39e455e5), thuum main 39e455e5 or later"
+world: playtest-m3-39-paused-20261031T014638Z   # 39's end, as 41 to 44 began: the temple's and the slope's bandits alive
+hold:
+  minutes: 240
+  reason: "playtest 45: the canon with 44's restore list"
+server:
+  npcEnabled: true
+  gameHour: 12.0
+  locks: true   # every switch on, as the 44 baseline
+  weatherSync: true
+  perks: true
+  leveling: true
+camp:
+  teleports:   # Bleak Falls Temple 0x371de, inside its entrance, 44's spot
+    - {kind: teleport, profileId: 1, cell: "371de:Skyrim.esm", pos: [-7329, 979, 573], rot: [0, 0, 90]}
+    - {kind: teleport, profileId: 2, cell: "371de:Skyrim.esm", pos: [-7229, 979, 573], rot: [0, 0, 90]}
+seats:
+  - profile: 1
+    name: "test 1"
+    perks: [0x7934b]   # Overdraw40 through the server's AddPerk (284a4d51): the headshot rule's condition
+    spells: []
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]   # Survival off
+    values:
+      Marksman: 60
+    percentages: {health: 1, magicka: 1, stamina: 1}
+  - profile: 2
+    name: "test 2"
+    perks: []
+    spells: []
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]
+    percentages: {health: 1, magicka: 1, stamina: 1}
+streams:
+  test1: 48989
+  test2: 49989
+after:
+  readback: percentages
