@@ -8650,3 +8650,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   word): a pillar's Trigger0N reported whatever the flag says. The hand-off's review (a blocker: natives in a message handler;
   BlockActivation stops no OnActivate; the script's side is its last act; the probe passed on the feed; a catch; no marks) applied
   in d1f23444 (noderot bb559685), x-puzzle-handoff v2 by path sha1 93adae62; builds queued.
+- 15:58 PST 2026-11-04 (23:58Z 11-04) (numidium): playtest 46, turbo on the pillars (Eli after 45), ended 15:58 on Eli's word: "if this would be fixed by
+  scripting, fuck it lets go to scripting." Recorded at results/playtest-46/ (8 cycles), the world saved as
+  playtest-pt46-end-20261104T235813Z. The lays, by turbo-client over 7c79fc3e's dist on skymp-server:m3-canon-4-hands-4c6d9f24:
+  843fed95 (the guest's side sync; its replay stuck the host's pillar scripts, every E arriving and no "animates"), fffd8a66
+  (the hotfix and the review's findings: the host's graph its script's alone), 83a40da3 (Trigger02 reported whatever the
+  engine's flag says). Read in play: with a fresh world and a FIRST-IN host the side sync works (host and guest turns on both
+  screens, the gate opens); the whale turn (Trigger02) is never reported by the host, even with 83a40da3 (0 Trigger02 among 7
+  reports after the 23:53Z restore), so the other screen misses it and catches up twice on the next turn; a host whose cell
+  was inherited from a seat that loaded it as a guest (23:09Z, epoch 3), or a fresh host reloading against a record that holds
+  a session's turns (23:50Z, epoch 2), turns nothing at all until a world restore. Root cause by thuum-cf's reads: a pillar's
+  state lives only in the host's Papyrus script, never fed from the record (ADR-059 decision 5), so the scripting arm
+  (ADR-062's flip) comes next with the pillars as one of its first cases; the hand-off re-sync (d1f23444, reviewed) waits for
+  it. Process lessons, now code: `just playtest-go <n>` (f736fd95) lays the build first, relaunches both seats only together
+  and proves each interior camp cell's host a fresh grant from the server's cell-host lines; the standing base answers
+  Survival's prompt (8DF), whose box froze rotfern's game; a relaunch outside the ready step let Prisoner's survival come back.
