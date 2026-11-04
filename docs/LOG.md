@@ -7604,3 +7604,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   58 s) and both clean-m1-next snapshots were retaken with it (c2 16:27:46, c1 16:28:21); x-corpse-record v2 rerun 002847 running.
   Profile 44 committed (6c648836): Bleak Falls Temple's entrance at noon, 42's spot. Also: c2's first client-dist attempt failed in all
   three stage tries today and its second always landed (a lab flake to read).
+- 16:37 PST 2026-11-03 (00:37Z 11-04) (thuum-cf): x-corpse-record v2's rerun (002847, 68da0cdb's server, cc026686's js): the RECORD FLOWS (changeFormFnv
+  1026142256 with bodyAtRest, c1's one send acked) and the watcher's apply was refused five times at its premise "actor dead
+  (lifeState 2)": the puppet's own engine started the death (the host's damage before the word, the kill move blanked) and an AI-off
+  puppet never completes kDying to kDead (the step is the actor's process's). Fix, native: the apply accepts a dying copy, the record's
+  actor block carrying the owner's kDead (HYPOTHESIS until a green run: the dying ragdoll is live while the Havok block lands);
+  fork m3-turbo3-sys2-container-f1 7845bb22 (pipeline 5158 with the Windows job), which also carries the resurrect hold (025979b6: the
+  watcher's dead check waits for the death word while the server's health is zero or within 3 s of the engine's death, the line
+  "resurrect held for <id>"; the counted "resurrect <id> (puppet true) queued" kept), the formType fix and the corpse log line; r2 and
+  m4-scripts-flip carry the same. x-container-hold v2's rerun (003449) runs on 0c23306e's server. say-verdict.js committed (sha1
+  a710d784, 485 lines) after its fresh review GO with notes N1 to N5, N7, N9, N10 applied (the hookBytes read before the attaches, the
+  null-topic replay branch, the TTL guard, the summary keyed by the branch label); the decompiles confirm the gate order (the lip
+  entry, the loading sound, the busy test on the done bits and the timer, then the picker that skips conditions with a given info).
