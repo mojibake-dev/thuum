@@ -8561,3 +8561,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
 - 13:54 PST 2026-11-04 (21:54Z 11-04) (thuum-cf): m3-canon-4-objtype 7c79fc3e built green (pipeline 5343, client-build and server-build): the dist for
   the pair after the re-roll reads (the named native, the per-target catch), its read the regression set plus one hosted login
   outdoors.
+- 13:56 PST 2026-11-04 (21:56Z 11-04) (thuum-cf): x-host-outdoors v1 by path, sha1 5181d14e, the objtype head's outdoor read: c1 at the Temple's
+  exterior landing (door 0x37603 to 0x15da5 in Tamriel, (-2966, -43331, 6141) rot 104.6 by esm.py door), c2 beside it, three minutes
+  of hosting with 29613 one cell east and 105a24 one cell south-east as 45 had them; the premise claimed (29613 live on c1, a puppet
+  on c2), both seats answering at the end, the "objectTypeInfo" and "hosted sends ... threw" counts recorded each minute, never
+  claimed. The set for 7c79fc3e's pair: oracle v5, dress v9, then this, after the current lay's reads and the pillar probe.
