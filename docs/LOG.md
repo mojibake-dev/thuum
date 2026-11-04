@@ -8413,3 +8413,5 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   on the hands head on both sides). Arrows v3 d4742fd1 playing as the second sample; then 5314's image, f4014f39's dist again for
   the 61f417e0 driver bundle, new snapshots, oracle v5 and dress v9. The canon fast-forward: to f4014f39 on v3's green, then to
   9218156a on its two reads.
+- 11:58 PST 2026-11-04 (19:58Z 11-04) (thuum-cf): fork m3-canon-4-hands 9218156a built green (pipeline 5314, server-build 18761): the image
+  skymp-server:m3-canon-4-hands-9218156a, paired with f4014f39's dist 18729 and the 61f417e0 driver bundle for oracle v5 and dress v9.
