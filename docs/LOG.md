@@ -7734,3 +7734,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   its say inaudible; round 2 at 150, the relayed line must play) reads green with say-verdict.js on c2. canon-2's server-build runs
   (5191); canon-1's client-build (5186) still building. numidium: the baseline's server is canon-2's, canon-1's dist, 44.yaml now
   locks on and every switch on (dfaa0bd9); the traps and the host-snippet reanimate stay known-broken readings.
+- 18:13 PST 2026-11-03 (02:13Z 11-04) (thuum-cf): The arrows regression's static read (an agent): nothing in 188a8dea..0c23306e touched a player's own inventory
+  send or apply; three pre-existing mechanisms can unequip the quiver, ranked: (1) a take of the equipped ammo type carries worn:true
+  (the client's diff), OnTakeItem keeps the extra data where OnPutItem clears it, the container's plain entry fails EqualExceptCount and
+  Inventory::RemoveItems throws "Source inventory doesn't have enough <ammo>" (no E_ code), TakeItem's catch resyncs the taker without
+  the arrows and the menu-close apply removes them from her stack (INFERRED unequipping): fix one line in OnTakeItem (clear worn) plus
+  a T0; (2) the shot race's re-added arrow (addItemEx +1 un-equips the ammo, finding 68; the hands pass is a no-op for a player's record):
+  fix the spend without SendInventoryUpdate or the crossbow's block; (3) the login and relaunch restore's double applyPcInv around the
+  base reset (finding 68's original symptom). The perk resend loop explains the headshot flicker, not the bow (perk-list virtuals leave
+  the ammo alone, INFERRED); the hold's resyncs fired zero times in 44. numidium greps 44's logs; a hit on (1) puts its fix on canon-4
+  (server-only). Builds: the flip's heads 015fb570 (5176) and fb547765 (5173) green; canon-1 (5186), canon-2 (5191) and canon-3 (5194)
+  building.
