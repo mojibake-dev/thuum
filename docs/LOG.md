@@ -7589,3 +7589,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   00:28Z. The scripts arm's day-1 branch exists: m4-scripts-flip f0fa23c1 (m4-scripts-work 06cbc2d8 merged onto r2 4465679b; the
   HookID enum and ActorDeathTest.cpp conflicts resolved keeping both sides, 33 cases, braces balanced; fork-lint clean) plus the
   formType fix, pushed for its full build overnight.
+- 16:32 PST 2026-11-03 (00:32Z 11-04) (numidium): the m3-turbo3-sys2-container 2225c932 stage finished by hand and both of its probes read. Step 8 had failed on
+  c2's guest agent: client-snapshot took c2's clean-m1-next (16:00:37, the shutdown and snapshot tasks OK), then the agent never
+  answered after the start (E_PVE_AGENT, the retry's quiesce "QEMU guest agent is not running") while the game ran. A lab-api rollback
+  to that new snapshot brought the agent back in 18.7 s with SkyrimPlatformImpl f0341e3620814eeb read back in both game folders; c1
+  snapshotted at 16:13:50; the hold released. The server then went to m3-turbo3-sys2-container-f1-68da0cdb (turbo.log 00:14:52Z,
+  2225c932 plus F1's move c1600f98) so the probes read playtest 44's build. x-corpse-record v2 RED (001821, thuum-cf's entry above:
+  E_CHANGEFORM_HEADER, the message's formType). x-container-hold v2 RED at its corpse leg only (002233): the chest legs held (c1 hosts,
+  371e9 "open with 1 occupant", "E_CONTAINER_BUSY: ff000001 activates 371e9 held by ff000000; refused" with c2's menu shut, "shut with
+  0 occupant(s); inventory sent to 34 listener(s)", c2 opens second, shut again); step 52's server.log_count("39fe4 open with 1
+  occupant") was 0 although c1's menu opened through the server's corpse path ("the server's open on a blocked body", 00:24:57), because
+  MpObjectReference logs "open with" and "shut with" for a CONT base alone: thuum-cf's 0c23306e prints them for a corpse too
+  (server-only; its image pending). cc026686's js (the formType fix) went onto both clones by turbo-client (16:26:30, both back online in
+  58 s) and both clean-m1-next snapshots were retaken with it (c2 16:27:46, c1 16:28:21); x-corpse-record v2 rerun 002847 running.
+  Profile 44 committed (6c648836): Bleak Falls Temple's entrance at noon, 42's spot. Also: c2's first client-dist attempt failed in all
+  three stage tries today and its second always landed (a lab flake to read).
