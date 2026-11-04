@@ -7973,3 +7973,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the guest's puppet out of place in combat, 1e rerollActor's drop and rebuild on a loaded actor (the head parts and the outfit after
   a pick swap, dead or alive) with x-fate-dress-bleak's shape for its probe. 1a: the apply-main dist is going onto both seats
   (numidium), then the snapshots and x-corpse-record v3.
+- 20:35 PST 2026-11-03 (04:35Z 11-04) (thuum-cf): Eli's rule (via numidium, verbatim): "remember. we're calling what we have the cannon
+  build so far. anything you build next is built on top of this." The canon build is what 44 played: fork m3-canon-3 9869d28c with the
+  apply-off switch 2136311f on top (the tip), server image m3-canon-3-9869d28c, canon-3's dist plus 2136311f's js, the Souls layer,
+  every switch on, the standing four, activationUnblockedBases in the client template. The fork now carries the named line: branch
+  `canon` at 2136311f (pushed with CLIENT_BUILD_WINDOWS=0, ls-remote verified), to be fast-forwarded only by a fix proven alone against
+  it; every branch for 1a to 1e, the flip and the physics arm is cut from `canon` (m3-canon-3-apply-main 1e489b6c already is), and no
+  head off parity, r2 or an older canon again. A canon push always skips the Windows job (the fix's own pipeline built the dist; a
+  `canon` branch builds no server image by the fork's m<digit>- rule, which is fine: images come from the fix branches). Consequence
+  for (2): m4-scripts-flip 8896ef0c sits on r2's line, so the scripting arm is re-cut onto `canon` (a merge of the flip's lanes onto
+  2136311f, reviewed again) when its turn comes; the r2 and f2 heads and their dists are history, not bases.
