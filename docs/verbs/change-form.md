@@ -143,6 +143,18 @@ silently") and the promote gate's move (the movedInto block); hostService's dead
 PartOne's "own copy hidden" Disable snippet. Kept: the redress wait (the outfit flags are not in this slice), the puppet flag,
 the players' own R1 movement and death word.
 
+FALSIFIED, playtest 44 (2026-11-03 evening, the 7845bb22 dist): the apply's premise widened to a DYING copy (lifeState 1, fork
+7845bb22, after x-corpse-record v2 002847's five refusals at lifeState 1) HANGS the watcher: c2 froze twice inside the engine's apply,
+the platform log ending at "ApplyChangeForm 0x39fe2 ... -> 35568" (17:06:19 and 17:12:56; bandit 39fe2 killed by rotfern's arrows,
+lifeState 1, the call on thread 8868 against main 12188; results/20261104-005702-x-corpse-record/c2-*). This is H1's thread risk made
+real for a copy whose ragdoll still runs: the apply from the platform's thread does not return. The premise is dead-only again
+(reverted on every future head: f2 1c38dc49, r2 4a9de849, m4-scripts-flip 978fee25; the canon client is 0c23306e's, no hang in 002847
+or 003449). The watcher's live-death case stays as before the slice until its death completes: a puppet whose own engine started the
+death sits in kDying with its AI off, and 002847 read it still kDying 10 s after the puppet release (AI true in the handler's attempts),
+so the completion is read 5 of the Dynamic plan (why an AI-on released copy never reaches kDead; the dying-to-dead step 0x6e3310 tests
+the 3D's rest against the process clock; KillImmediate 37735 is the engine's own completion the process-level moves call, the
+candidate for the fork to call on a settled dying copy), never a wider premise.
+
 ## Tests
 
 - T0: the validator's refusals (every code), the store and its migration, the restart persistence.
@@ -164,6 +176,12 @@ Four reads on the lab, each a Frida run on the existing scripts before the recei
 4. An ACHR record injected into the changes map before the cell loads is applied at the cell's init (D3 CONFIRMED for a REFR;
    the actor case): transplant-inject.js admitting an ACHR with kMoved and kPromoted, REMAP, and the 35569 and 36080 hooks
    reporting the actor's life state, position and 3D after the init.
+5. The watcher's dying copy (playtest 44): why a puppet whose own engine started the death stays kDying after its puppet release
+   with the AI back on (the completion 0x6e3310 and its test of the 3D's rest against the process clock; the process-level moves
+   that call KillImmediate 37735 on a kDying actor), read on the watcher with a Frida script on 0x6e3310, 37735 and the moves; then
+   the fork's completion of the death on a settled dying copy (KillImmediate through a native, or the process level moved) before
+   the dead-only apply. Until then a live death on the watcher applies no record and the body lies where the watcher's own ragdoll
+   left it.
 
 ## Status
 
