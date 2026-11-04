@@ -7950,3 +7950,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   half-built 3D (the khajiit naked and headless, a corpse's and a living NPC's), the Golden Claw never in Arvel's record, the
   cobwebs' flutter (never on any build). Next by Eli's order: the regressions, then the scripting arm, then physics from the
   impulse probe.
+- 20:26 PST 2026-11-03 (04:26Z 11-04) (thuum-cf): playtest 44 ENDED (numidium: the world playtest-44-baseline-end-20261104T042307Z;
+  Eli: "end 44, go with the impulse probe. fix the regressions first"; the order in numidium's memory thuum-post-44-priorities: (1)
+  the regressions, a) the apply's main-thread fix by x-corpse-record v3 on 18459's dist, b) the pillars' three pieces by b-object-anim
+  then b-puzzle-relay v2 (its leg C claim waits for Eli's W4 word), c) the body's inventory as the record, d) the guest's copy of a
+  fighting NPC out of place, with rune v2 and b-headshot v2's deploy alongside; (2) the scripting arm; (3) physics from the impulse
+  probe, then the corpse pieces). Option (b)'s head (f67fb0f8 alone) is not built: Eli chose (a). The impulse probe is drafted by path:
+  x-prop-blast v2 (lab/.cache/probes/x-prop-blast.yaml, sha1 3736b892): canon-3's prop base read under three distant impulses at the
+  mill, both seats' views each time: A) v1's Unrelenting Force at the cabbages, B) a Fireball (SPEL 0x1c789, the esm) at the same
+  cluster with a 2000 ms hold, C) an iron arrow from a Long Bow at the yard's bucket 0x12df7 ((21851, -45763, -51), the esm); the
+  claims are the premises alone (the host, the casts and the shot firing, no E_PROP_STEP), the base's behavior recorded (grants by
+  kind, each seat's refs-near before and after, the server's record positions, screenshots, both consoles). The esm also places the
+  playtest's E_PROP_CELL: the kettle 0x19073 (21288, -44964) and the bucket 0x19074 (21268, -44878) stand in the exterior cell north of
+  the y -45056 edge while the mill's yard lies south of it, so a seat in the yard touching them is "not in the prop's cell" on canon-3.
+  Next in my lane: (1c)'s code map by a fresh agent (where a game-file NPC's inventory record comes from, the host engine's roll, the
+  take and equip paths, the fate's dressing), then its design in the verb doc and the build off canon-3; (1d)'s read after.
