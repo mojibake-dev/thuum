@@ -8551,3 +8551,6 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   movement, animation or equipment from rotfern while it held) nor recurs every frame on the same target with its send stamp
   unwritten. fork-lint green; its client build queues behind 8926d2c8's. A candidate for the pair after the re-roll reads; its own
   read is the regression set plus any hosted login outdoors (the throw began when rotfern hosted exterior actors).
+- 13:39 PST 2026-11-04 (21:39Z 11-04) (thuum-cf): fork m3-canon-4-reroll-main 8926d2c8 built green (pipeline 5335: client-build 18822, server-build
+  18821): its dist is the re-roll reads' (oracle v5, dress v9, trace v4) with the hands image and the 61f417e0 driver, then
+  x-puzzle-guest-view; numidium's arming stands. m3-canon-4-objtype 8c3a0254 builds behind it as the next candidate.
