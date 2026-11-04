@@ -5,7 +5,7 @@
 # The fix, client script alone: fork m3-canon-4-pillar-side 843fed95 by turbo-client over 7c79fc3e's dist. 39's end world (the
 # pillars unsolved), both seats in the puzzle room at x-puzzle-guest-view's standable spots.
 id: 46
-build: "turbo: fork m3-canon-4-pillar-side 843fed95 (the relayed pillar turn plays after its side's StartState, the host's StartState relayed; objectAnimationService.ts and remoteServer.ts) by turbo-client over fork m3-canon-4-objtype 7c79fc3e's dist (canon 8926d2c8 with the objectTypeInfo throw named), server skymp-server:m3-canon-4-hands-4c6d9f24, the lab driver of thuum 254ed4d1"
+build: "turbo: fork m3-canon-4-pillar-side fffd8a66 (843fed95 with its hotfix and the review's findings: the relayed pillar turn plays after its side's StartState, the host's StartState relayed; objectAnimationService.ts and remoteServer.ts) by turbo-client over fork m3-canon-4-objtype 7c79fc3e's dist (canon 8926d2c8 with the objectTypeInfo throw named), server skymp-server:m3-canon-4-hands-4c6d9f24, the lab driver of thuum 254ed4d1"
 world: playtest-m3-39-paused-20261031T014638Z   # 39's end, as 41 to 44 began: the temple's and the slope's bandits alive
 hold:
   minutes: 120
