@@ -7750,3 +7750,24 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   teleport), the refused-shot drift once; the seats' console tees from 42 to 44 are gone with the rollbacks (fixed on main:
   playtest-record keeps each seat's console tee, its last 60,000 lines). No server fix until a grep hits; 44's recorder holds the
   lines for the next occurrence, with Eli asked what came just before each time.
+- 18:15 PST 2026-11-03 (02:15Z 11-04) (numidium): playtest 44's first lay (17:04 to 17:18 PST) on the 7845bb22 dist and 0c23306e's server ended in two freezes
+  of Prisoner, one cause: the dying-copy apply. c2's platform log stopped mid-call both times, "ApplyChangeForm 0x39fe2 ... -> 35568"
+  at 17:06:19 and 17:12:56 (bandit 39fe2 killed by rotfern's arrows, lifeState 1, the call off the main thread), evidence in
+  results/20261104-005702-x-corpse-record/c2-*; the world saved as playtest-44-end-evidence-20261104T011842Z. Eli's calls, verbatim:
+  "every test should have - no survival - weather synced - rotfern has headshots - no-pause on menus", "stop juggling a million things
+  that are at various stages of completion. get back to a cannon working thing", "everything that we KNOW works should be in from here
+  on out", "keep corpse items. i want a solid baseline of everything we KNOW should work or WAS previously working, off which to work".
+  Done since: the standing base in the tool (a30e2988: playtest_setup lays the four into every profile from 44 and refuses one that
+  turns them off; playtest-ready proves them on the relaunched seats); Skyrim Souls RE merged into main (32459beb, T0 1054 OK) and
+  staged from main (layer-stage 12dfd76b: smoke-two-players 015404 green, b-headshot 015705 green); weatherSync and locks on in 44
+  (every switch on); thuum-cf's headshot cause and fix (284a4d51: the setup's driver addPerk loop drew E_PERK_POINTS every 5 s and the
+  resent state stripped Overdraw40, so CIF's condition failed part of every cycle; perks now go through the server's AddPerk, and ready()
+  fails on any E_PERK_POINTS since the relaunch); the recorder keeps the seats' console tees (e08ada52). The ancestry audit (thuum-cf):
+  everything verified in play since 36 is in 0c23306e except the rune glyph (m2-rune-glyph) and the perk picks counter (m5-perk-points);
+  the voice regression (an NPC's later lines refused after one inaudible start) dated to voice v4 ed71ee67, 10-26. The baseline head is
+  canon-3, fork m3-canon-3 9869d28c (0c23306e, the rune glyph at SCHEMA 34, the perk counter, the voice restore), its Windows build
+  pending; then its install, b-headshot, x-rune-glyph (e4bdd74b) and x-voice-after-inaudible (caacf88a), then playtest 44 again. Out by
+  design: 41's big train, the dying-copy apply, the trap lever, the reanimate's replacement. The arrows' re-equip (Eli, "used to work"):
+  thuum-cf's three mechanisms; the take's worn flag read 0 times in 42 to 44, one refused shot in 43 (E_SHOT_ORIGIN right after a
+  camp teleport), the relaunch restore unread until the console tees are kept. Lab notes: c2's first install attempt failed on every
+  install today and its second always landed; a rollback revived c2's agent twice.
