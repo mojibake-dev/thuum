@@ -7691,3 +7691,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   headshot's cause is next before anything else lands.
 - 17:35 PST 2026-11-03 (01:35Z 11-04) (thuum-cf): The reverted heads' shas as pushed (the revert commits were amended before the push): f2 4a900440, r2 c37f99b7,
   m4-scripts-flip 8896ef0c; the earlier citations corrected. Their builds run; none goes to a seat until proven against the canon.
+- 17:47 PST 2026-11-03 (01:47Z 11-04) (thuum-cf): Eli's baseline order, verbatim via numidium: "keep corpse items. i want a solid baseline of everything we KNOW
+  should work or WAS previously working, off which to work. we've gotten WAY too off track." numidium's ancestry of the base 0c23306e:
+  parity 188a8dea and r3 df9e1009 in; m4-turbo2-train 11e6b00e missing (eight non-merge commits; 41 played it with props worse than at
+  the start and decision 1 retired its live redraw, so it stays out), 6fdd3d69 missing, m2-rune-glyph dd5aa100 missing though VERIFIED
+  IN PLAY in 41. canon-1 cut and pushed with the Windows job: fork m3-canon-1 f9a275f4 = 0c23306e plus m2-rune-glyph, nothing else,
+  SCHEMA_VERSION 34 (the one conflict), cargo test and clippy 1.99 clean, fork-lint clean; pipeline 5186. The ancestry audit of every
+  verified-in-play item since playtest 36 against 0c23306e (and of anything in it the records mark retired) runs as an agent's read
+  for Eli's decision. The corpse items stay in playtest 44 as a baseline reading of today's behavior (Eli).
