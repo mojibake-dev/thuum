@@ -527,3 +527,10 @@ key laid by a relaunch on both seats, at Eli's word. The b-* scenarios drop thei
 Play: BROKEN, playtest 41 (2026-11-02, LOG 16:53, 17:33): the spike wall never fired in play (its activationUnblockedBases key
 was laid by the trap scenarios' relaunch alone, never for play); the Hall of Stories pillars and Embershard's bridge worked; the
 traps stopgap laid at break 3, unread in play.
+
+Play: playtest 44 (2026-11-03 night, canon-3 9869d28c): the pillars did nothing on the host's own screen and the guest's E sent
+nothing until the key was laid live on both seats at 20:01 PST (the same lever, never laid for play before; now in
+lab/deploy/sky-client/skymp5-client-settings.txt for every stage, thuum 6ddf8ae2); with it the puzzle opened the gate end to end on
+the host's faces (VERIFIED IN PLAY), with three pieces left: a pillar's starting face differing between the seats, one pillar never
+turning, and the guest's own turn showing on the host's screen only (b-puzzle-relay v2's new claim; the last green run had the
+guest's "played" line for her own turns).
