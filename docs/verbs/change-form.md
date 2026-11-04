@@ -148,7 +148,7 @@ FALSIFIED, playtest 44 (2026-11-03 evening, the 7845bb22 dist): the apply's prem
 the platform log ending at "ApplyChangeForm 0x39fe2 ... -> 35568" (17:06:19 and 17:12:56; bandit 39fe2 killed by rotfern's arrows,
 lifeState 1, the call on thread 8868 against main 12188; results/20261104-005702-x-corpse-record/c2-*). This is H1's thread risk made
 real for a copy whose ragdoll still runs: the apply from the platform's thread does not return. The premise is dead-only again
-(reverted on every future head: f2 1c38dc49, r2 4a9de849, m4-scripts-flip 978fee25; the canon client is 0c23306e's, no hang in 002847
+(reverted on every future head: f2 4a900440, r2 c37f99b7, m4-scripts-flip 8896ef0c; the canon client is 0c23306e's, no hang in 002847
 or 003449). The watcher's live-death case stays as before the slice until its death completes: a puppet whose own engine started the
 death sits in kDying with its AI off, and 002847 read it still kDying 10 s after the puppet release (AI true in the handler's attempts),
 so the completion is read 5 of the Dynamic plan (why an AI-on released copy never reaches kDead; the dying-to-dead step 0x6e3310 tests
