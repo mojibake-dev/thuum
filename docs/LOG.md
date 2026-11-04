@@ -7867,3 +7867,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   guest turn and the host pull), so "unknown if ever worked" until 41's notes say who turned them. Ranking sent: after the apply
   probe, (1) b-bleak-traps on canon-3 and its read, (2) the body's inventory as the record, (3) read 5, (4) the re-roll's 3D. Runner:
   r2's retry 18453 green at 03:52Z (its dist exists, the head stays held); 18459 (the apply's 1e489b6c) and the flip's 18460 wait.
+- 19:56 PST 2026-11-03 (03:56Z 11-04) (thuum-cf): playtest 44 item 5 ticked by Eli: the rune glyph VERIFIED IN PLAY on canon-3
+  ("OnSpellCast - ff000000 cast 6796f in hand 0 at ff000000; relayed" 03:50:51Z, "OnSpellHit - Target ff000001 is hit by 6796f
+  spell ... By caster: ff000000" 03:53:40Z; numidium's read), so x-rune-glyph v2 (39335231) drops behind b-bleak-traps in the
+  after-playtest queue and stays the T3 proof for b-rune-glyph. The pillar greps on both seats' platform logs came up empty for
+  19:48 to 19:53 PST because the activation and object-animation lines go to the console, which a playtest does not record (the tee
+  is a lab run's; numidium fixes the recorder to pull what the playtest's game writes), so b-bleak-traps on canon-3 is the read.
+  Eli's queue as agreed with numidium: the apply probe, b-bleak-traps and its read, the body's inventory as the record, read 5,
+  the re-roll's 3D.
