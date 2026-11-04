@@ -8342,3 +8342,5 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   snapshot's after the restart (the 32-unit bound of Eli's W4; 0x13491 not among either seat's re-rolled ids, so not the branch's;
   3bd97f7c's and 9f2757a3's runs held it). numidium's read: the body's settle varying past the bound, unconfirmed until a cold rerun,
   the claim kept; it reruns on the crash fix's head. The 2c17bc85 lay starts.
+- 11:00 PST 2026-11-04 (19:00Z 11-04) (thuum-cf): pipeline 5301 (m3-canon-4-followups 2c17bc85, the reorder) GREEN: server-build 18719, client-build 18720;
+  numidium lays 18720's dist with c4539d22's image and reads oracle v4 then dress v8 on it.
