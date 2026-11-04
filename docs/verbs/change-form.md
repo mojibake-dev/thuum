@@ -314,6 +314,39 @@ Four reads on the lab, each a Frida run on the existing scripts before the recei
    the main thread, the owner's own reconnect apply included: playtest 44's freeze is gone. The run's one red was the server's
    death line counted twice across the restart (the load re-ran the death's bookkeeping; reworded on the server, npc-fate.md).
 
+   READ 8 (11:04 PST 2026-11-04, 19:04Z 11-04; x-fate-dress-bleak v8 20261104-183635 on cb944530: c2 crashed at 10:40:56 PST applying the record of
+   39fe4's third kill, "ApplyChangeForm 0x39fe4: 4840 bytes fnv 0xcbc30c3d flags 0x8a040427 remap rows 0 -> 35568" then
+   SkyrimSE.exe+0x184FBF `mov edx, [r13+0x20]` with r13 null, no stack; the first two records of the same actor (4606 and 4641
+   bytes, the second with one remap row) had applied). The re-analyst's static read (HYPOTHESIS until a Frida read of 11577 and
+   12782 under an apply): the site is Address Library 12782 (RVA 0x184f40, unnamed in CommonLib), the loader of ExtraAttachedArrows3D
+   (E/ExtraAttachedArrows3D.h:20-34; the record's extra block 0x98, E/ExtraDataTypes.h:326), faulting at +0x7F on data.size (+0x20)
+   of a null extra; reached as 35568 -> Actor::LoadGame 37650 -> TESObjectREFR::LoadGame 19529 -> ExtraDataList::LoadGame 12095
+   (0x170380), case 0x98. 12095's prologue marks every extra type ALREADY in the copy's list whose mask (the table at 0x141fd3db0:
+   [0x98] 0x80000000, [0x2D] 0x40000) meets the record's flags; a marked type is fetched with GetByType 12329 (null once the extra
+   left the chain), an unmarked one allocated and added (12315). Case 0x2D (kLeveledCreature, E/ExtraDataTypes.h:219) calls 12358 ->
+   vfunc 0x6C Set3D(nullptr) whenever BGSSaveLoadGame.flags kLoading (BGSSaveLoadGame.h:61) is clear, which this apply's premise
+   asserts; Actor::Set3D 37178 with a model present runs RemoveByType 11577 on 0x98 (and 0xB5). So the copy's own attached
+   arrows, marked at the prologue, were gone when block 0x98 came: GetByType null, 12782(null), the N > 0 branch. The third record
+   alone carried a 0x98 block with N > 0 (4840 less 4641 = 199 bytes against 2 + 3 x 61 for three arrows; four more kind-1 ids in
+   the census), and the copy alone had its own arrows then (the missile bandit's shots at roll 25). The re-roll only reordered the
+   extra list (20231 removes, 14374 re-adds ExtraLeveledCreature at the tail); block 0x2D writes originalBase and templateBase
+   through 36048 -> SetNumericID 35928 (both game-file ids after a second swap: 37323 restores the placed base before 20231 and
+   14374 re-adds it) and the clone's TESNPC::SaveGame inline, never the clone's own id (the loader rebuilds a fresh clone, 14375,
+   and swaps it in); the two kind-2 ids of every record are elsewhere (UNKNOWN) and no writer bypasses 35928 in that block: the
+   created-form remap this session first proposed is withdrawn. The reference's form flag bit 18 is set by 19584 (ref, bool), whose
+   callers are the heading-target set (11676) and the projectile family (AddImpact inside 44203): a "targeted or impacted" mark of
+   the projectile kill, never serialized (TESForm::LoadGame 14613 applies the mask 0x912860 alone), no branch on it.
+   BUILT f4014f39 on m3-canon-4-followups (the re-analyst's rank one): before the lay, the copy's own attached arrows are removed
+   (ExtraDataList::RemoveByType kAttachedArrows3D, E/ExtraDataList.h:179), so block 0x98 takes the loader's allocate-and-add path
+   and the finish pass (37652 -> 12783 -> 12791) re-attaches the record's arrows by bone or drops an entry whose lookup (15879)
+   fails; the copy's own arrows vanish, replaced by the record's (the record is the body's state, ADR-065); "<id>: the copy's own
+   attached arrows removed before the lay" when it did. Ranked below it: the owner stripping the block (the blocks carry no
+   length), the remap (0 rows, irrelevant), refusing re-rolled actors (the wrong target). Dynamic plan: 11577 (list, type 0x98,
+   the backtrace) inside the apply window, 12329 returning null for 0x98, 12782's argument, 37178 with a null 3D, on a kill whose
+   body carries arrows on both seats (the owner shoots the bandit with a bow, the watcher's copy shows the arrows, then the relay);
+   the falsifier is 12782 reached with null while no 11577(0x98) fired during the apply, or the third record lacking a 0x98 block
+   after its 0x2D block.
+
 ## Status
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared

@@ -2606,6 +2606,10 @@ flags 0x70409 against 0x30409 before (bit 18, Actor's kLeveledActor by A/Actor.h
 through a writer the census does not hook, so the remap misses it and c2's loader dereferences a form it lacks. The re-analyst
 reads 0x184FBF, the loader's block and what 37323's second swap leaves in the record; the fix is the serializer's. Playtest 45
 waits on both (Eli's D79 A).
+  READ (19:04Z 11-04): not the re-roll's record and not a created form; the record's attached-arrows block (0x98) against the copy's
+  own arrows, which the leveled-creature block's Set3D(nullptr) removes earlier in the same apply (change-form.md READ 8); FIXED
+  f4014f39 on the applying seat (the copy's own attached arrows removed before the lay). The re-roll's only part: the extra list
+  reordered, and the arrows there because the missile bandit shot at roll 25.
 
 ## Status
 

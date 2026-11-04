@@ -8344,3 +8344,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the claim kept; it reruns on the crash fix's head. The 2c17bc85 lay starts.
 - 11:00 PST 2026-11-04 (19:00Z 11-04) (thuum-cf): pipeline 5301 (m3-canon-4-followups 2c17bc85, the reorder) GREEN: server-build 18719, client-build 18720;
   numidium lays 18720's dist with c4539d22's image and reads oracle v4 then dress v8 on it.
+- 11:04 PST 2026-11-04 (19:04Z 11-04) (thuum-cf): the re-analyst's read of 183635's crash (change-form.md READ 8): the engine's loader of the record's
+  attached-arrows block (ExtraAttachedArrows3D 0x98, Address Library 12782) read a null because the copy's own arrows extra, marked
+  at ExtraDataList::LoadGame's start, had been removed by the leveled-creature block's Set3D(nullptr) earlier in the same apply
+  (kLoading clear, our premise); the third record alone carried three arrows (the missile bandit's shots at roll 25) and the copy
+  alone had arrows then. Not the re-roll's record, no created-form id in it (the kind-2 remap I proposed is withdrawn); the form
+  flag bit 18 is the projectile family's "targeted" mark, never serialized. FIXED f4014f39 on m3-canon-4-followups: the applying
+  seat removes the copy's own attached arrows before the lay (ExtraDataList::RemoveByType), the record's arrows re-attached by the
+  finish pass; its full pipeline running. The head for 45 is now 2c17bc85 (the dress order) plus f4014f39; reads: corpse v6 and
+  dress v8 (its arrows condition the probe cannot force; the Frida read of 11577 and 12782 under an apply is the confirmation).
