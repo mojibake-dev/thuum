@@ -8292,3 +8292,6 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   lines kept), so a relaunch or a crash in 45 keeps its session. 45's chain: pipeline 5284's client-build 18674 (3bd97f7c) behind
   18669 on the one Windows runner, then the dist on both seats with skymp-server:m3-canon-4-followups-c4539d22, new snapshots, dress
   v8, oracle v3, corpse v6; three green and canon fast-forwards to 3bd97f7c, then 45's setup (about 04:15 PST).
+- 02:41 PST 2026-11-04 (10:41Z 11-04) (thuum-cf): pipeline 5284 (m3-canon-4-followups 3bd97f7c) GREEN: server-build 18673, client-build 18674. 45's pair is
+  18674's dist with skymp-server:m3-canon-4-followups-c4539d22 (the server unchanged since c4539d22); numidium lays it gated with new
+  snapshots and runs dress v8, oracle v3 and corpse v6; three green and canon fast-forwards to 3bd97f7c.
