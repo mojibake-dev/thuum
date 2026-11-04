@@ -2400,6 +2400,29 @@ refusal works as designed; the boots and the dagger moved). Behind the red:
   the arrows: FINDING 2 (a)'s missing bow is not the roll's code on the new flow; the probe's rerun on this branch's dist (the
   record read at the load) decides whether the lab's old flow (Init's level-0 roll and the reset) or the server's state made it.
 
+### canon-4's merge review (00:05 PST 2026-11-04, 08:05Z 11-04; a fresh read-only agent on fork m3-canon-4 7b6fc953)
+
+GO. The diff against canon 2136311f is exactly the apply head 68173f26 plus the fate head b763f766 (34 files; every one-side file
+byte-identical to its branch); MpActor.cpp's hunks are disjoint (ScheduleFateRespawn against CanRollFate, RollFateIfUnrolled, Init,
+DropItem); skyrimPlatform.ts is byte-identical to the converter's output over the merged Definitions.txt and FunctionsDump.txt;
+setActorFate and armActorFate carry four arguments end to end (Definitions.txt:1806/1808, clientListener.ts:213/215, FateApi.cpp:52-72);
+ApplyChangeFormResult is a Papyrus native through callNative; the hook sets are disjoint (ChangeForm's 35928 against the fate's three
+detours). Two follow-ups, neither a blocker, both for the round after playtest 45:
+- Finding 1 (medium): two imposers of a watcher's corpse inventory with no declared order. The change-form record carries the
+  inventory (kInventory, change-forms.md B1), so the apply lays the owner's at-rest inventory and the fate's reconcile lays the
+  server's rows; neither re-runs after the other, and in the common late-joiner order (HYPOTHESIS: fates ahead of the attach, the
+  detours and rerollActor at cellAttach, the bind kill at the 3D load, the apply as the kill lands) the apply runs second and wins,
+  leaving the engine's copy with the owner's engine state at its rest (less its combat consumption, death items and later loot) rather
+  than the server's record. Bounded today: the loot window lays the server's list as a diff (formView.ts) and every take is checked
+  on the server (TakeItem). Fix: after the apply lays (changeFormService.ts, `rec.laid = true`) call rerollActor(formId), which on a
+  dead copy is reconcile-only, so the record's inventory is the last word; the owner declared here: the body's container contents
+  are the server's (R0), the body's look and pose the owner's record (ADR-065).
+- Finding 2 (low, pre-existing with the apply head alone): the one-resurrect-in-flight mark precedes onStoodUp, so repeated asks
+  within 2 s no longer drop a record that arrives meanwhile, and the server never clears a held change-form record at a respawn
+  (MpActor.cpp serves whatever is held); the apply's dead premise refuses the bad order. Fix: drop the held record in RespawnFated.
+- Note (HYPOTHESIS): the two writers are serialized only by the main thread parking while gameThrQ drains on the OnUpdate thread
+  (main.cpp:131; ChangeForm.cpp); the apply's "answered on the main thread" line is the read.
+
 ### 1d. The guest's copy of a fighting NPC stood elsewhere (39fe1)
 
 Facts (canon-3): the host samples every hosted actor's reference transform each 130 ms (sendInputsService.ts:114-118, :164-241,

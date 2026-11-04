@@ -8213,3 +8213,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   alone holds the crash path (Eli's "deff fix that use after free" attributed to 802842d9). v2 of the probe (8d211440) waits for
   the host grant (until, 90 s) and 15 s more before each login's reads, claims unchanged; the trace twin v2 72b84417 the same; both
   for canon-4's pair.
+- 00:05 PST 2026-11-04 (08:05Z 11-04) (thuum-cf): canon-4's merge review GO (a fresh read-only agent; npc-fate.md "canon-4's merge review"): the union
+  is exactly both heads, the shared MpActor.cpp hunks disjoint, the codegen byte-identical to the converter's output, the declarations
+  and hook sets consistent. Two follow-ups for the round after 45, not blockers: the apply's lay of a body's record and the fate's
+  reconcile both impose a watcher's corpse inventory with no declared order (the apply wins on a late joiner; fix: rerollActor after
+  the lay, reconcile-only on a corpse; the owner declared: the container's contents are the server's), and a held change-form record
+  is never dropped at a respawn (fix: RespawnFated drops it). 7b6fc953 stays the playtest build.
