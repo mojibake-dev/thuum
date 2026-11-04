@@ -7671,3 +7671,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   is ADR-062 decision 1's "guests run none"; no scenario depends on the old path. The review verified the live set's recycled-pointer
   hole closed by construction (a mark cannot outlive its functor), the guard semantics (the entries fire inside Call's body where the
   listener guard is clear), and every type and idiom against the headers.
+- 17:31 PST 2026-11-03 (01:31Z 11-04) (thuum-cf): The flip's branch at its stage-1 candidate: m4-scripts-flip 015fb570 (the review's N1 guard cf7f9be8 merged: the
+  Call bracket records the entry stack pointer per level and pops stale levels at the next enter, so a throw through a hooked Call
+  strands no raise), pipeline 5176 (server and Windows client). Earlier heads' builds: 5162 (8f3c76fe) and 5161 (r2 d9c49f7e) green;
+  5169 and 5173 running for the superseded heads. Stage day's inputs are all placed: the probes x-bleak-scripts v1 (42ac4e80) and
+  x-scene-relay v2 (6b22808d), the three scenario drafts and the tools patch in their order, the docs on main.
