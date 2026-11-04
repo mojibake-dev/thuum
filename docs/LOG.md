@@ -8120,3 +8120,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   premise and the lay; pushed with the client build on for x-corpse-record v4 (133e4808: leg A records the lay now, legs R and B claim
   the returns). The Frida read and the falsifiers are in change-form.md's read 5. npc-fate.md's 1e notes Promote's early return (a
   released dying puppet keeps its AI off for good).
+- 22:07 PST 2026-11-03 (06:07Z 11-04) (thuum-cf): canon reads (numidium). b-puzzle-relay v3 GREEN 055450 (the relay both ways and the
+  door under Eli's correction). b-object-anim v2 RED 055038 on the same claim one id short: a fourth ambush draugr 380b9 at (8033,
+  -5040); v3 on main 3dd5be6f (alone, within Eli's "Yes, both" as numidium says) names the plate 38098's whole draugr link block
+  380b[0-9a-f]. x-fate-dress-bleak v4 (2bc0eb42) RED 060002 at leg D: the respawn rolled the same pick ("the loaded clone is the
+  fate's pick" twice), the copy alive and 3D loaded, raceId 79686 on both, and the worn equality FALSE: c1 wore the first visit's
+  dressing [80145, 455576, 455579, 455582] against the server's fresh outfit roll, so a respawned living copy is not dressed to its
+  new fate even with the same pick (a finding of its own in npc-fate.md's 1e; HYPOTHESIS: the stand-up's inventory reset lands after
+  the late redress and undoes it); leg E never ran. v5 (sha1 91a85648) records that equality with the "resurrect" and "redressed"
+  counts, runs leg D twice for a pick swap's odds, and reaches leg E. 1c's probe runs on the lab now (5236's image and 18531's dist),
+  then x-corpse-record v4 on 88497c54's dist when its job lands.

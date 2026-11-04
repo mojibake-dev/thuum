@@ -2376,6 +2376,14 @@ A fact from change-form's read 5 that touches this bug's neighbour: PuppetApi's 
 kDead) before EnableAI(true), so a puppet released at its death keeps its AI off for good and never completes its death (the engine
 ticks fDyingTimer inside the AI update alone); the change-form apply now completes a kDying copy itself (88497c54). Whether the
 re-roll's Load3D on such a copy differs from one on a kDead copy is a read for x-fate-dress-bleak v4's corpse leg.
+FINDING (x-fate-dress-bleak v4, 20261104-060002 on THE CANON): a respawned LIVING copy is not dressed to its new fate even when the
+respawn rolled the same pick: after kill-ref and respawn-ref 39fe4 ("stands again at its placement, rolled anew"), the copy alive
+with its 3D, raceId equal, the redress-alone path ran ("the loaded clone is the fate's pick" twice), and c1.npc_state(0x39fe4).worn
+was the FIRST visit's dressing [80145, 455576, 455579, 455582] against the server's fresh outfit roll. HYPOTHESIS: the copy's
+stand-up (deathService's resurrect, whose inventory reset re-equips the engine's own outfit) lands after the late redress and undoes
+it; v5 (sha1 91a85648) records the "resurrect 39fe4" and "redressed 39fe4" counts for the order, runs leg D twice for a pick swap's
+odds, and reaches leg E. The fix shape, if the order confirms it: the redress queued behind the resurrect's inventory reset (or the
+resurrect told not to reset the inventory a fate dresses), one with 1c's reconcile.
 Probe x-fate-dress-bleak v2 (by path): c1 hosts the Temple, kills one campfire bandit, relaunches and comes back: the living
 bandit's and the corpse's npc-state (worn against the fate's count, raceId, is3DLoaded), the platform's "rerolled" and
 "redressed" lines, screenshots; on canon-3 it reads the bug, on the fix branch it claims the wear.
