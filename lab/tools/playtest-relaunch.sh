@@ -22,13 +22,16 @@ spl='C:\Users\lab\Documents\My Games\Skyrim Special Edition\SKSE\skyrim-platform
 hold() { curl -fsS -m 15 -X POST "$api/hold" -H 'content-type: application/json' -d "{\"minutes\": 180, \"reason\": \"$1\"}" >/dev/null 2>&1 || true; }
 enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
 keep() {  # the logs of the session the stop ends, off the clone, copied first as playtest-record.sh does (the game holds them open)
-  local stamp kind src copy name tmp
+  local stamp kind src copy name tmp ps
   stamp=$(date -u +%Y%m%dT%H%M%SZ); tmp=$(mktemp)
   ssh -o BatchMode=yes -J "$jump" "$srv" 'sudo mkdir -p /srv/lab/results/relaunch-logs && sudo chown eli:eli /srv/lab/results/relaunch-logs' 2>/dev/null \
     || { echo "could not reach the results site: $client's logs not kept" >&2; rm -f "$tmp"; return 0; }
   for spec in "platform|'$spl'" "driver|(Join-Path (Get-Content -LiteralPath 'C:\\sky-lab\\game-dir.txt' -Raw).Trim() 'Data\\Platform\\Logs\\lab-driver-logs.txt')"; do
     kind=${spec%%|*}; src=${spec#*|}; name=$stamp-$client-$kind.log; copy="C:\\sky-lab\\relaunch-$name"
-    ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 60 -- powershell -NoProfile -Command \"Copy-Item -LiteralPath $src -Destination '$copy' -Force\"" >/dev/null 2>&1 || true
+    # copied, then cut to its first 2,000 and last 8,000 lines when longer, so one file-read through the guest agent
+    # stays far under the answer size that killed sky-c1's agent once (~5.6 MB; playtest 45's c1 log ran to 25k error lines)
+    ps="Copy-Item -LiteralPath $src -Destination '$copy' -Force; \$t = Get-Content -LiteralPath '$copy'; if (\$t.Count -gt 10000) { \$n = \$t.Count; Set-Content -LiteralPath '$copy' -Value (\$t[0..1999] + ('... ' + (\$n - 10000) + ' lines left out by the relaunch keep ...') + \$t[-8000..-1]) }"
+    ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$ps")" >/dev/null 2>&1 || true
     ssh -o BatchMode=yes "$jump" "pvesh get /nodes/core/qemu/$vmid/agent/file-read --file '$copy' --output-format json" 2>/dev/null \
       | python3 -c 'import json,sys; sys.stdout.write(json.load(sys.stdin).get("content",""))' > "$tmp" 2>/dev/null || true
     if [ -s "$tmp" ] && ssh -o BatchMode=yes -J "$jump" "$srv" "cat > /srv/lab/results/relaunch-logs/$name" < "$tmp"; then
