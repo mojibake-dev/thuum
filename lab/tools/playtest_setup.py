@@ -602,10 +602,17 @@ def _standing_ready(rep: Report, p: dict[str, Any]) -> None:
     souls = ("Get-ChildItem 'C:\\sky-lab\\games' -Filter '*.txt' | ForEach-Object { $g = (Get-Content $_.FullName -Raw).Trim(); "
              "$_.BaseName + '=' + (Test-Path (Join-Path $g '" + SOULS_DLL + "')) }")
     for client, vmid in sorted(_clients().items()):
+        # the game folder the seat launches (lab-api's /game, ADR-025): the layer carries Souls RE for 1.6.1170 alone, so
+        # a 1.7.104 folder without it is no finding (playtest 44: "1.6.1170=True, 1.7.104=False" on both seats)
+        try:
+            version = str(_http("GET", f"/game?client={client}").get("version") or "")
+        except Exception:
+            version = ""
         r = _guest_exec(vmid, souls)
         rows = [x.strip() for x in (r.get("out-data") or "").splitlines() if x.strip()]
-        good = bool(rows) and all(x.endswith("=True") for x in rows)
-        (rep.ok if good else rep.fail)(f"no-pause menus: {SOULS_DLL} on {client}: {', '.join(rows) or str(r.get('err-data', 'no answer'))[:120]}")
+        played = [x for x in rows if x.split("=", 1)[0] == version]
+        good = len(played) == 1 and played[0].endswith("=True")
+        (rep.ok if good else rep.fail)(f"no-pause menus: {SOULS_DLL} on {client}'s {version or 'unknown'} game: {', '.join(rows) or str(r.get('err-data', 'no answer'))[:120]}")
 
 
 def switched(overlay_text_now: str, key: str, on: bool) -> str:
