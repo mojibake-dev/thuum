@@ -452,7 +452,7 @@ cell's host and only between references the game files link (XAPR or XLKR of the
   once each (0x39fdd, 0x3720f, 0x2ad49, 0x2ad43), all four relayed through the links the server read from the script's
   properties; the door marker is never named on the failure path (so no E_TRAP_NO_REF, and the marker-caster path waits for a
   solved pull). No E_TRAP_ or E_ACTIVATE_REACH line in the run. Scenario b-bleak-traps (main 9053286c) claims A, B, D and E.
-- Platform, ADR-059 decision 1 (- Platform, ADR-059 decision 1 (fork m4-world-scripts-host b69bf508 off m4-traps 7ab2d1c7, 06:07 PST 2026-11-01; a Windows build): Skyrim
+- Platform, ADR-059 decision 1 (SUPERSEDED by ADR-062's flip on m4-scripts-flip, 2026-11-04: the host-scoped rows are deleted, the host runs every world script of its hosted cells by rule; the paragraph stays as history) (fork m4-world-scripts-host b69bf508 off m4-traps 7ab2d1c7, 06:07 PST 2026-11-01; a Windows build): Skyrim
   Platform's LoadAdmittedScripts reads a second row kind, "<plugin> host: <class> ...", into a host-scoped set; OnSendEventEnter reads
   the event's reference's parent cell and AdmittedByChain passes a host-scoped name only when that cell is in the hosted set;
   TESModPlatform.SetCellHosted(cellFormId, hosted) fills the set and skymp5-client's hostService calls it (callNative, on the next

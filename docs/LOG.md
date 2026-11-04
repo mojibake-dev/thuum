@@ -7660,3 +7660,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   HYPOTHESIS: a settled dead ragdoll takes the record's block within a stride (210713's 5 units against 005702's 44). For numidium's
   turbo-client after playtest 44, then x-corpse-record v2 (legs R and B still unread tonight). Carried onto r2 75b17d47 and
   m4-scripts-flip fb547765.
+- 17:28 PST 2026-11-03 (01:28Z 11-04) (thuum-cf): The flip's native lane's fresh review: GO, four notes. N1 taken before the stage (a throw through the hooked
+  Call would leave a stale raise on its thread: the entry stack pointer recorded per level, stale levels popped at the next enter; the
+  author applies it as written). N2, the cost: Gum's bracket plus the handler's lookups on every native call in the game, 0.2 to 0.5 us
+  a call by the reviewer's estimate, a tax inside Papyrus's own budget rather than frame time and the house idiom of the 24 entries; a
+  dedicated raw listener is the fix if a stage reads a Papyrus slowdown. N3, the docs lane, done here: papyrus-events.md's slice-1a
+  paragraph (the host rows deleted, the lever deleted, the FURN puzzle lever's HYPOTHESIS) and its Known-limit paragraph replaced by
+  shape B with H-L1 to H-L3 and the settling trace; traps.md's ADR-059 decision 1 paragraph marked SUPERSEDED. N4, a behavior change
+  the stage reads: a guest's actor-attached ambush script (the spider's) no longer gets its lifecycle events through a host row, which
+  is ADR-062 decision 1's "guests run none"; no scenario depends on the old path. The review verified the live set's recycled-pointer
+  hole closed by construction (a mark cannot outlive its functor), the guard semantics (the entries fire inside Call's body where the
+  listener guard is clear), and every type and idiom against the headers.

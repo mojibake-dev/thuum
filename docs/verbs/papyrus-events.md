@@ -204,11 +204,16 @@ the caller a script frame, not the engine's own call) and gets its docs/NATIVES.
 
 Built in slice 1a (f08abd57): FridaHooks.cpp OnSendEventEnter reads the self's cell for actors as for references, passes a world
 object's event in a hosted cell (its lifecycle events anywhere) and a simulated actor's (Hosted and not a puppet) wherever it
-stands, consults the layer's host names no more (their lifecycle rule stays for an older papyrus-scripts.txt); objectReferenceEx
+stands, consults the layer's host names no more (the host rows and their lifecycle rule are deleted on m4-scripts-flip, 2026-11-04:
+an older layer's "<plugin> host:" row is skipped and counted at the load, "N host-scoped row(s) skipped (ADR-062 decision 1)");
+objectReferenceEx
 lifts the engine's activation on activators and movable statics in a hosted cell (doors, containers, furniture and items keep the
 server's flows), HostService walks the cell's references by kind (Cell.getNumRefs, getNthRef) at every grant and release, and
-ActivationService sends no Activate for the player's own press on a lifted object. The lab's lever activationUnblockedBases stays
-readable until slice 3's scenarios drop their relaunch writes. HYPOTHESIS H1a: Cell.getNumRefs and getNthRef enumerate an exterior
+ActivationService sends no Activate for the player's own press on a lifted object. The lab's lever activationUnblockedBases is
+DELETED on m4-scripts-flip (1fdc321b, 2026-11-04): the lift decides, no list of bases; the three scenarios' relaunch writes go with
+the stage's lab lane. One base the lever named is a FURN the lift does not cover, the puzzle lever 0xb7db4 (LeverPushAnimatingNoPlayer),
+blocked on every seat now; its script's OnActivate on a blocked reference is HYPOTHESIS until b-bleak-traps leg E and b-puzzle-relay
+leg C read it on the flip's stage. HYPOTHESIS H1a: Cell.getNumRefs and getNthRef enumerate an exterior
 cell's activators on a loaded cell (Papyrus's own, UESP "Cell Script"); H1b: a blocked activator's own press reaches its script
 (playtest 41's pillars say yes) and a lifted one's default processing fires its activation parents once per press (the spike wall).
 
@@ -242,9 +247,24 @@ backstop), only the 24 rows' keys with a non-null self are noted, and the key is
 through a subclass resolves to the parent's row); the self probe is a plain read of the form type again (a virtual call through a
 wrong but readable pointer would run another class's slot under the mutex, which SEH cannot catch), accepting every placed kind,
 REFR through PlacedHazard and an Explosion; the essential case's cause-4 report carries a noted hit so only MayDie refuses it.
-Known limit: a note carries no call id, so a script calling the same native on the same self inside the window takes the platform's
-note and the platform's call goes out live (the counts right, the attribution swapped once); Lock and Kill are direct-path rows,
-unaffected. HYPOTHESIS rows: H-1b1 (rewritten) the latent note's self is the pointer the native receives (CallNative's rawSelf is the
+The (row, self) notes and their known limit (a note carried no call id, so a script's call on the same self inside the 15 s window
+took the platform's note) are RETIRED on m4-scripts-flip (the native lane 1761585e, 2026-11-04; fresh review GO): one Gum hook on
+BSScript::NativeFunctionBase::Call (CommonLibSSE-NG NativeFunctionBase.h:47, slot 0x0F; Offsets.h:130 RELOCATION_ID(97923, 104651),
+RVA 0x143dc00 by just addr) early-outs unless `this` is one of the 24 bound IFunction pointers, reads the Stack's callback (Stack.h:83,
++0x90) and stackID (:80, +0x80), and if the callback is a live VmCallback (a set VmCall::Run notes BEFORE DispatchMethodCall2 and
+forgets on a refused dispatch; VmCallback's operator() forgets before onResult, its destructor as the backstop) raises PlatformCall's
+depth for the call's extent, so the entry hooks see Active() on the VM's own thread exactly as the direct path does. Ready lines:
+"native dispatch hook on NativeFunctionBase::Call at +143dc00 (Address Library 104651)", a raise line per platform-dispatched latent
+call ("dispatched by the platform on stack N", the first three then every thousandth). Cost: every native call in the game pays Gum's
+bracket and the handler's lookup before the pointer compare, the house idiom of the 24 entries (the review's estimate 0.2 to 0.5 us a
+call, a Papyrus-budget tax, not frame time); a dedicated raw listener is the fix if a stage reads a Papyrus slowdown. HYPOTHESIS
+H-L1: the Stack the VM hands Call for a platform-dispatched latent call holds our IStackCallbackFunctor unwrapped at +0x90 (falsified
+by a platform call tallied live with no raise line); H-L2: the native's body runs within Call's extent on the same thread (statically
+yes, NativeFunction.h:81; falsified by an entry hit whose thread differs from its Call hit); H-L3: Stack's +0x80 and +0x90 hold on
+1.6.1170 (falsified by a raise line's stack id disagreeing with the entry's, or a garbage callback pointer). A throw through a hooked
+Call would leave a stale level on its thread; the review's guard (the entry stack pointer per level, stale levels popped at the next
+enter) is applied before the stage. The settling trace: Frida on 104651 (this, +0x80, +0x90, the thread) beside the 24 entries and
+DispatchMethodCall2 on a guest applying a relayed stage, x-script-natives v7's frame. HYPOTHESIS rows: H-1b1 (rewritten) the latent note's self is the pointer the native receives (CallNative's rawSelf is the
 TESForm the VM hands the native; a mismatch shows as a latent row counted live on a guest at a relayed apply, where only the
 platform could have called it); H-1b2 every SpSnippet runs through callNative, so one of the two marks covers it; H-1b3 the self
 probe tells a wrong row (a register holding another form of the right kind passes it). The guests' lifecycle handlers (finding 9)
