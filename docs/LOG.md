@@ -7639,3 +7639,17 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   lever 0xb7db4 is a FURN the lift does not cover, its script's fire on a blocked reference a HYPOTHESIS the stage reads. The lab lane's
   patch verified in a worktree (both test files OK; the emptied lint baseline flags the three scenarios' writes, so their commits go
   first on stage day). A scratch copy of lab/.cache (27 GB) filled the disk for a minute; removed (16 GB freed), never again.
+- 17:09 PST 2026-11-03 (01:09Z 11-04) (thuum-cf): The flip's day-1 branch is whole for its build: m4-scripts-flip 2ec9fe6b (m4-scripts-work's slices 1a and 1b
+  merged onto r2 4465679b with the two conflicts resolved; the client lane 1fdc321b, the activation lever deleted; the native lane
+  1761585e, shape B: one Gum hook on NativeFunctionBase::Call 104651 (RVA 0x143dc00 by just addr) that raises PlatformCall's depth for a
+  bound entry whose Stack carries a live VmCallback, the callback noted before the dispatch and forgotten at the result or the
+  destructor, the (row, self) notes and their 15 s expiry gone; g_hostAdmittedScripts and its rows deleted, an older layer's host row
+  skipped and counted; AdmittedByChain's lifecycle host branch gone; H-L1 to H-L3 HYPOTHESIS: the Stack's callback is our functor
+  unwrapped, the body runs within Call's extent on the same thread, Stack's +0x80 and +0x90 hold on 1.6.1170), pipeline 5169 (server and
+  Windows client; the platform compiles only there), its fresh review beside (the author's own caveat to weigh: the hook runs on every
+  native call in the game through FridaHookHandler's generic listener before its pointer compare). Ready-log lines: "24 of 24 native
+  entries hooked (ADR-062 slice 1b)" unchanged, then "native dispatch hook on NativeFunctionBase::Call at +143dc00 (Address Library
+  104651)", a raise line per platform-dispatched latent call (the first three, then every thousandth), the loader's "N host-scoped row(s)
+  skipped (ADR-062 decision 1)". The stage-1 probe x-bleak-scripts v1 by path (sha1 42ac4e80, 87 steps, 19 claims: the hooks' lines on
+  both seats, the host's lift, the plate without the lever, the spider room on two seats, Arvel's web recorded, the Hall of Stories'
+  rings and keyhole recorded) from esm.py's positions; the lab lane's patch and the three scenario drafts ready for stage day.
