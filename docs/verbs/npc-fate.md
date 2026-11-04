@@ -2588,6 +2588,24 @@ reload the skin, head and face passes are flagged on the process (AIProcess::Set
 RESET_3D_FLAGS kSkin, kHead, kFace, M/MiddleHighProcessData.h:39-50) and Actor::Update3DModel runs them at once; the line ends
 "the skin, head and face passes run true". HYPOTHESIS until v8 reads faceNode true after a respawn on both seats; the fallback is
 the engine's full reload of the reference (TESObjectREFR::Disable then Enable), the modder's refresh for a changed appearance.
+THE HEAD HOLDS (10:49 PST 2026-11-04, 18:49Z 11-04; cb944530, 18696's dist with c4539d22's image, numidium's reads): dress v8 20261104-183635, after
+D1's and D2's respawn re-rolls ("rerolled 39fe4 ... from pick 1bcd8 toward the fate's 39d11 ... reloaded true, the skin, head and
+face passes run true"), faceNode TRUE on both seats, worn equal to the fate's, race the fate's, 3D loaded (steps 23/24, 40/41, c1's
+57 after D3); oracle v4 20261104-184338, after login 1's re-roll of 39fe1 (39d01 toward 1bcd8) faceNode TRUE, alive, 3D loaded: H1
+CONFIRMED in substance on both paths. Two reds remain, both mine: (1) ORDER (184338): 39fe1's worn after the login's re-roll was not
+the fate's ([80145, 80264, 455576, 455582], four of the five, the cuirass missing): the redress ran while the model was gone ("3D
+loaded FALSE" in its line) and the reload's biped init 28 ms later wore its own set; a respawn's re-roll with the same order stuck
+by timing. FIXED 2c17bc85 (the head): the model back first (Load3D), then the record's dress and rows on the loaded model, then the
+skin, head and face passes; DoReset3D dropped. HYPOTHESIS until oracle v4 reads the fate's worn beside faceNode true. (2) THE
+CORPSE RECORD OF A RE-ROLLED COPY (183635, step 58): c2 CRASHED at 10:40:56 PST applying the record of 39fe4's third kill
+("ApplyChangeForm 0x39fe4: 4840 bytes fnv 0xcbc30c3d flags 0x8a040427 remap rows 0 -> 35568", then SkyrimSE.exe+0x184FBF `mov edx,
+[r13+0x20]` with r13 null, no stack), where the first two kills' records (4606 and 4641 bytes, the second with 1 remap row) applied;
+between kills 2 and 3 the copy had been re-rolled through the engine on both seats, and c1's serialize read the reference's form
+flags 0x70409 against 0x30409 before (bit 18, Actor's kLeveledActor by A/Actor.h:238, HYPOTHESIS for the enum) with 160 census ids
+(type0 54) against 149 (47) and 0 remap rows. HYPOTHESIS: after the second base swap the record carries an id of c1's runtime clone
+through a writer the census does not hook, so the remap misses it and c2's loader dereferences a form it lacks. The re-analyst
+reads 0x184FBF, the loader's block and what 37323's second swap leaves in the record; the fix is the serializer's. Playtest 45
+waits on both (Eli's D79 A).
 
 ## Status
 

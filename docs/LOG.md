@@ -8332,3 +8332,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   corpse v6 on 9f2757a3 GREEN 112642 with 17 re-roll lines). The login's re-rolled copy wearing other than the fate's roll is a
   new read for cb944530's logs (the redress after ResetInventory against the biped's own equip at the reload). The fast-forward
   waits for three greens; 45 is the next playtest's.
+- 10:49 PST 2026-11-04 (18:49Z 11-04) (thuum-cf): cb944530's reads (numidium): dress v8 20261104-183635 and oracle v4 184338: THE HEAD HOLDS (faceNode true
+  on both seats after a respawn's and a login's re-roll, H1 confirmed in substance), no login crash; two reds, both mine: the login
+  re-roll's worn not the fate's (the redress ran while the model was gone; fixed 2c17bc85, the model back first, then the dress on
+  it, then the passes; its pipeline running) and c2's crash applying the corpse record of a re-rolled copy (the third kill of 39fe4,
+  0x184FBF on a null, the record 199 bytes longer with 0 remap rows after the base swap; the re-analyst reading; the serializer's
+  fix next). Corpse v6 on cb944530 playing. 45 waits on both (npc-fate.md 1e, THE HEAD HOLDS).
