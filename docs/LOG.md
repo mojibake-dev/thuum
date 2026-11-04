@@ -7616,3 +7616,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   a710d784, 485 lines) after its fresh review GO with notes N1 to N5, N7, N9, N10 applied (the hookBytes read before the attaches, the
   null-topic replay branch, the TTL guard, the summary keyed by the branch label); the decompiles confirm the gate order (the lip
   entry, the loading sound, the busy test on the done bits and the timer, then the picker that skips conditions with a given info).
+- 16:40 PST 2026-11-03 (00:40Z 11-04) (thuum-cf): x-container-hold v2's rerun 20261104-003449 on m3-turbo3-sys2-container-f1-0c23306e GREEN, 101 of 101: the
+  exclusive hold PROVEN on two seats for the chest and the corpse (c1's open, c2 refused E_CONTAINER_BUSY with its menu shut, c1's
+  close, c2's open; the body the same), and D-C2 A CONFIRMED on the watcher: c2's own E on the blocked released body opened through the
+  server's word after nine refusals over 2.2 s following the handler's AI switch (E25's shape; the tenth attempt returned true, the
+  menu opened, the closing activation went out). Leg 4: c1's close-menu after a 100-unit teleport still sent the closing activation and
+  c2's E then opened unrefused, so no stale hold. The body's change-form record flowed on this run as well (4785 bytes, fnv f295ef0d).
+  b-container-exclusive v1 committed alone from the green run (80 steps, 26 claims); containers.md's hold paragraph marks the
+  activate-on-a-blocked-body reading CONFIRMED, IsDead-at-kDying still HYPOTHESIS. Playtest 44 follows the corpse rerun on 7845bb22's
+  dist.

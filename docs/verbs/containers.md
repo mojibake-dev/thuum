@@ -69,9 +69,11 @@ ADR-061 decision 3 is deleted). Not persisted: a hold is runtime state like a ce
 The corpse (D-C2 A, the client half 75167c3d): a dead body is activation-blocked like a chest, a reconciler state in puppetService
 (laid at the death's start, the server's death word and the bind kill; re-laid two ticks after the native lifts of the promote's
 dead branch and the dead release; lifted when the body stands), so its loot opens only on the server's OpenContainer.
-HYPOTHESIS (x-container-hold v2 reads both): the engine's activate(player, true) on a blocked dead actor opens the loot menu, on the
-host's engine-killed body (AI on) and on a watcher's released body (AI switched on by the handler); Papyrus IsDead() is already true
-at kDying (else a poll pass between the death's start and kDead would lift the block for up to one poll). Known gaps for the next
+CONFIRMED (x-container-hold v2, run 20261104-003449, GREEN 101 of 101): the engine's activate(player, true) on a blocked dead actor
+opens the loot menu, on the host's engine-killed body (AI on, at once) and on a watcher's released body (the handler's AI switch,
+then nine refusals over 2.2 s before the tenth attempt opened: E25's shape, the retry does the work). Still HYPOTHESIS: Papyrus
+IsDead() is already true at kDying (else a poll pass between the death's start and kDead would lift the block for up to one poll;
+the r2 follow-up holds the block through the ragdoll settle window regardless). Known gaps for the next
 stage (the client review's notes): a body whose cell is re-entered respawns alive and unblocked while the mark would skip the
 re-block (the marks must clear at the detach); the host's AI-on open has no retry where the released body's path has one.
 
@@ -212,7 +214,7 @@ re-block (the marks must clear at the detach); the host's AI-on open has no retr
 - [x] native hook + T1 (none)
 - [x] TS handler (fork m4-containers-rest: the lid's Open and Close on the isOpen change)
 - [ ] T2 green
-- [ ] T3 scenario green, no HYPOTHESIS tags (x-container-rest v4 20261031-195055 on 44d4c225: every leg green, the one red a count's
+- [ ] T3 scenario green, no HYPOTHESIS tags (b-container-exclusive promoted from x-container-hold v2's green 003449; the merge's gate plays it) (x-container-rest v4 20261031-195055 on 44d4c225: every leg green, the one red a count's
       premise, v5 7fbc6645 corrected; b-container-rest on thuum main 872e75e6, its first run at the train's gate)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
