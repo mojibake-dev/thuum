@@ -8588,3 +8588,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the record's replay through the same path; the guest's played line says taken or refused. docs/verbs/traps.md "The pillar's
   side". Build running; turbo-client to the seats for Eli's T4 at the pillars, then x-puzzle-guest-view v2 (a platform export for
   the node's rotation, since the shape sits on its node's origin and positions will not move).
+- 14:15 PST 2026-11-04 (22:15Z 11-04) (thuum-cf): the pillar view's platform half BUILT: fork m3-canon-4-noderot e80fb0c8 stacked on 843fed95,
+  sp.pollNodeRotation(refrId, nodeNames) and sp.nodeRotation(refrId) (a loaded reference's named nodes' world and local Euler, read
+  on the game thread as the gaze is; "" for the root), registered in PuppetApi, typed in Definitions.txt (skyrimPlatform.ts
+  regenerated) and clientListener.ts; fork-lint green, the build queued. numidium's node-rotation step moves onto it (a poll then a
+  deferred answer); x-puzzle-guest-view v2 claims Pillar01's local Z stepping by about 2.094 rad per turn, equal on both seats
+  after the guest's own E. Playtest 46 (numidium, thuum 688fc7fe): after the objtype reads, 39's end world with the pillars
+  unsolved, turbo-client 843fed95 over 7c79fc3e's dist, Eli at the pillars; trace v5 held until after.
