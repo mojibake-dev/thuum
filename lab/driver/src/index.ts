@@ -2114,7 +2114,12 @@ function run(step: Step, player: Actor): unknown {
       // head's magic node by default) by the scalar GetRelativeNodePosition,
       // which turns with the head whatever the arrays do. {nodes}: the head
       // and the neck by default. The actor's heading and AI bit ride along.
-      const target = a.player === true ? player : namedNpc(a);
+      // A {formId} that is no actor reads any loaded reference the same way
+      // (an activator's animated node: a puzzle pillar's turn as each seat's
+      // own engine shows it, playtest 45's item 5), its AI bit null.
+      const id = num(a.formId);
+      const target: ObjectReference | null =
+        a.player === true ? player : namedNpc(a) ?? (id ? ObjectReference.from(Game.getFormEx(id)) : null);
       if (!target) return { error: "no placed npc and no {formId}" };
       const nodes = Array.isArray(a.nodes) ? (a.nodes as unknown[]).map(String) : ["NPC Head [Head]", "NPC Neck [Neck]"];
       const toward = String(a.toward || "NPC Head MagicNode [Hmag]");
@@ -2138,7 +2143,8 @@ function run(step: Step, player: Actor): unknown {
       return {
         formId: target.getFormID(),
         angleZ: target.getAngleZ(),
-        aiEnabled: target.isAIEnabled(),
+        aiEnabled: Actor.from(target)?.isAIEnabled() ?? null,
+        loaded: target.is3DLoaded(),
         toward,
         towardHas: NetImmerse.hasNode(target, toward, false),
         nodes: read,
