@@ -1,4 +1,9 @@
-# b-puzzle-relay v2 (thuum-cf, 2026-11-03 night, for the canon-3 read after playtest 44; Eli, with the activation key laid live:
+# b-puzzle-relay v3 (thuum-cf, 2026-11-03 night; Eli's W4 word via numidium, "Yes, both"): leg C's 'server.log_count("aa8c3 activates")
+# >= 1' failed at 0 on THE CANON (20261104-045100) while the door opened ("3e728 activates 3b9f1" 1) and every other claim of legs A, B
+# and C held: the lever's own linked line is the FAILURE path (its four darts), absent on a solved puzzle, so the claim read the
+# header's "no dart fires" backwards. It now reads == 0, the stronger claim: a solved puzzle fires no dart, and the door's line stays
+# the success. No other claim or step changed.
+# v2 (thuum-cf, 2026-11-03 night, for the canon-3 read after playtest 44; Eli, with the activation key laid live:
 # "prisoner rotates first pillar. works great. 2nd pillar STARTED desynced ... last pillar didn't work at all. when rotfern rotates
 # one it only rotates on prisoners screen not her own"). Three changes. (a) ADDED claims, the guest's own turn shown on her own
 # screen: after leg A the host's "object animation aa8cb .* reported" and the guest's "object animation aa8cb .* played" are claimed
@@ -125,7 +130,8 @@ steps:
       # traps.md credited this scenario with the solve): the guest's pillar turn relayed to the host's engine, the
       # lever's pull, and no relay refused for a reference the server does not hold
       - 'server.log_count("3e728 activates 3b9f1") >= 1'
-      - 'server.log_count("aa8c3 activates") >= 1'
+      # v3 (W4, Eli): the lever's own linked line is the darts, the failure path; a solved puzzle fires none
+      - 'server.log_count("aa8c3 activates") == 0'
       # v2 (W4, Eli's word): the pillars' marker 0x4fcdf is E_TRAP_NO_REF by design (leg A's claim and the header), so no OTHER
       # reference the server does not hold may be refused through the run
       - 'server.log_count("E_TRAP_NO_REF") - server.log_count("activating 4fcdf, no such reference") == 0'
