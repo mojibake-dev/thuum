@@ -7771,3 +7771,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   thuum-cf's three mechanisms; the take's worn flag read 0 times in 42 to 44, one refused shot in 43 (E_SHOT_ORIGIN right after a
   camp teleport), the relaunch restore unread until the console tees are kept. Lab notes: c2's first install attempt failed on every
   install today and its second always landed; a rollback revived c2's agent twice.
+- 18:39 PST 2026-11-03 (02:39Z 11-04) (thuum-cf): canon-3 BUILT GREEN: fork m3-canon-3 9869d28c, pipeline 5194, every job (02:38Z); the baseline pair is its dist
+  and its server image m3-canon-3-9869d28c, carrying over 0c23306e the rune glyph (SCHEMA 34), the perk picks counter and the voice
+  done-bits restore, nothing else. canon-2's server (5191) green too. The one Windows runner: numidium cancelled r2's, the flip's and
+  canon-1's client builds at 02:28Z to put canon-3's first (safe since 10-29's pre_build_script sweep); they are retried after the
+  playtest and every Windows push is held until then (the rule in memory). numidium installs the pair, then b-headshot, x-rune-glyph
+  and x-voice-after-inaudible before Eli plays.
