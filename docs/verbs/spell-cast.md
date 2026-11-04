@@ -405,6 +405,20 @@ again; whether c1's figure streams at all in c2's game is still open (the
 observer casts its figure's equipped spell, remoteServer.ts:948-974, and
 the watch did not yet record hits taken).
 
+### The rune glyph's second cast on the observer (2026-11-03 night, x-rune-glyph v3 20261104-051601 on THE CANON)
+
+The glyph relay holds on the canon: the cast fires (a 2000 ms hold, the seats' Spell Cast Time Progression), the caster's "cast
+sent with its launch's surface" and the observer's "placed the caster's decal" count once per cast, no E_VAL_. The one red is the
+second cast: the observer's "rune cap: ended the figure <id>'s earlier rune" (MagicApi.cpp CapFigureRunes, the per-figure
+g_figureRunes table) never fires, and the same run's projectiles step finds no rune projectile 0x5fbbf on the observer within 1200
+units after the first cast. Read together (HYPOTHESIS until a trace): the relayed launch's rune projectile does not outlive the
+decal it places on the observer (PlaceRelayedDecal), so the handle the table keeps points at a deleted rune, the second cast's
+`older->IsDeleted()` is true, nothing is ended, and the first glyph stays: the observer sees two glyphs where the caster's engine
+keeps one (iMaxPlayerRunes). The contract ("a second cast ends the first") needs the observer to end the EARLIER GLYPH, not the
+earlier projectile: either the relayed rune projectile kept alive as the engine keeps the player's armed rune (the decal then
+dies with it), or the placed decal tracked per figure and removed when the figure's next decal lands. On the rune glyph's list
+behind the regressions (item 5 is VERIFIED IN PLAY; this is the second cast's polish). The probe's claim stands as written.
+
 ## Status
 
 Building on fork branch m2-spell, stacked on m2-marksman 7be31a9d
