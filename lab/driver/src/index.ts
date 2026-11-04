@@ -638,9 +638,6 @@ function describe(actor: Actor) {
     name: actor.getDisplayName(),
     race: race ? race.getName() : "",
     raceId: race ? race.getFormID() : 0,  // lab-api compares raceId (the server's appearance record carries ids)
-    // the facegen head's node, absent on a half-built 3D (docs/verbs/npc-fate.md 1e, the naked and headless re-roll):
-    // SKSE's NetImmerse.HasNode on the actor's loaded model
-    faceNode: NetImmerse.hasNode(actor, "BSFaceGenNiNodeSkinned", false),
     sex: base ? base.getSex() : -1,
     isDead: actor.isDead(),
     healthPercentage: actor.getActorValuePercentage("health"),
@@ -2667,6 +2664,9 @@ function run(step: Step, player: Actor): unknown {
         // whether this game holds its 3D: a lost actor with no 3D keeps its AI on, nobody's engine running it, so a
         // far seat's copy reads aiEnabled true unloaded (b-npc-handoff-night 092208); "no loaded live copy" is the claim
         is3DLoaded: npc.is3DLoaded(),
+        // the facegen head's node, absent on a half-built 3D (docs/verbs/npc-fate.md 1e, the naked and headless re-roll):
+        // SKSE's NetImmerse.HasNode on the actor's loaded model
+        faceNode: NetImmerse.hasNode(npc, "BSFaceGenNiNodeSkinned", false),
         // what this game rolled for it (npc-fate, ADR-046): its race (a leveled pick's clone carries the pick's)
         // and the form ids it wears, one per form across the 32 slots and the two hands' weapon or armor (the
         // server's fate counts the weapon, x-npc-fate-outfit 20261024-061219; a shield is in a slot and the left

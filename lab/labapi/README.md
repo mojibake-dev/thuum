@@ -87,7 +87,8 @@ clock.rs). NPC steps for docs/verbs/npc-puppet.md: `npc-state {formId}` is kept
 per seat and read as `c.npc_state(<id>).aiEnabled` (and .inCombat, .package,
 .combatTarget, .staggering, .x, .y, .z; .headX, .headY, .headZ, its head node's
 world position, so `headZ - z` tells a body lying from one upright; .scene, the
-scene that seat's game runs it in, 0 for none); `refs-near {formTypes: [43]}` then
+scene that seat's game runs it in, 0 for none; .faceNode, whether its copy holds
+the facegen head node, false on a re-roll's half-built 3D); `refs-near {formTypes: [43]}` then
 `c.refs_near().runtime_of(<base id>)` counts that base's runtime copies (ids
 from 0xff000000); a `weather {read: true}` step's sky is read as
 `c.weather().current` (the engine's current weather, a form id), `.outgoing`

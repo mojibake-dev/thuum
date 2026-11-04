@@ -15,11 +15,12 @@ the lab can grep (E_ASSERT_*).
   <client>.npc_state(<id>).aiEnabled | .inCombat | .package | .combatTarget | .staggering | .x | .y | .z
     | .isDead | .healthPercentage | .isEssential | .isProtected | .activationBlocked | .cell | .raceId | .worn
     | .gazeTarget | .gazeSlot | .emotionType | .emotionValue | .exprOverride | .exprIndex | .exprValue
-    | .headX | .headY | .headZ | .scene
+    | .headX | .headY | .headZ | .scene | .faceNode
                                                      that seat's engine state of an NPC, from its last npc-state {formId};
                                                      the gaze and face fields carry the poll before it (train 54); head*
                                                      is its head node's world position (headZ - z tells a body lying
-                                                     from one upright), scene the scene that game runs it in (0 for none)
+                                                     from one upright), scene the scene that game runs it in (0 for none),
+                                                     faceNode whether its copy holds the facegen head (npc-fate 1e)
   <client>.quest(<id>).stage() | .stageDone(<n>) | .running()
                                                      that seat's game's quest: its current stage, whether stage n is
                                                      done (n among the step's stages), whether it runs; from its last
@@ -894,6 +895,10 @@ class NpcStateView:
     # playing a scene over the host's puppets (playtest 41's DialogueRiverwoodIntroScene over Sven and Hilde,
     # x-scene-guest); None on a driver without the read or one whose read threw
     scene: int | None = None
+    # the facegen head's node on that game's copy (SKSE's NetImmerse.HasNode "BSFaceGenNiNodeSkinned"): false on the
+    # half-built 3D a re-roll left naked and headless (playtest 44's khajiit, npc-fate.md 1e, x-fate-dress-bleak v8);
+    # None on a driver without the read
+    faceNode: bool | None = None
 
 
 class QuestView:
@@ -1725,7 +1730,7 @@ class _ClientRef:
                                 exprOverride=_opt_bool(data.get("exprOverride")), exprIndex=_opt_int(data.get("exprIndex")),
                                 exprValue=_opt_float(data.get("exprValue")),
                                 headX=_opt_float(head[0]), headY=_opt_float(head[1]), headZ=_opt_float(head[2]),
-                                scene=_opt_int(data.get("scene")))
+                                scene=_opt_int(data.get("scene")), faceNode=_opt_bool(data.get("faceNode")))
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s npc-state of {int(form_id):#x} lacks {e}") from e
 
@@ -2010,7 +2015,7 @@ _ATTRS = {
     NpcStateView: {"aiEnabled", "inCombat", "package", "combatTarget", "staggering", "x", "y", "z", "isDead", "healthPercentage",
                    "isEssential", "isProtected", "activationBlocked", "cell", "is3DLoaded", "raceId", "worn",
                    "gazeTarget", "gazeSlot", "emotionType", "emotionValue", "exprOverride", "exprIndex", "exprValue",
-                   "headX", "headY", "headZ", "scene"},
+                   "headX", "headY", "headZ", "scene", "faceNode"},
     MarkerView: {"visible", "canTravel"},
     ProjectileView: {"distance"},
     PosView: {"x", "y", "z"},

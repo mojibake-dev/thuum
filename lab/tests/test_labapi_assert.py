@@ -985,6 +985,25 @@ class PuppetFactsTests(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaisesRegex(AssertionData, f"{field} was not reported"):
                 ev.evaluate(bad)
 
+    def test_a_copys_face_node(self):
+        """x-fate-dress-bleak v8: npc-state's faceNode, SKSE's NetImmerse.HasNode of the facegen head node on a seat's
+        copy, false on the half-built 3D a re-roll left naked and headless (npc-fate.md 1e). A driver without the read
+        reports none, which is missing data, not false."""
+        from labapi.assertions import AssertionData, Evaluator
+
+        class FaceViews(PuppetViews):
+            def __init__(self):
+                super().__init__()
+                # the host's copy whole, the guest's the half-built one
+                self.states["c1"][0x13483]["faceNode"] = True
+                self.states["c2"][0x13483]["faceNode"] = False
+
+        ev = Evaluator(RichServer(), FaceViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c1.npc_state(0x13483).faceNode == true"))
+        self.assertFalse(ev.evaluate("c2.npc_state(0x13483).faceNode == true"))
+        with self.assertRaisesRegex(AssertionData, "faceNode was not reported"):
+            ev.evaluate("c1.npc_state(0x13482).faceNode == true")
+
 
     def test_a_watched_actors_signed_rotation_and_where_it_stood_at_the_stop(self):
         from labapi.assertions import AssertionData, Evaluator
