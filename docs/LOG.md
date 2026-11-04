@@ -8595,3 +8595,5 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   deferred answer); x-puzzle-guest-view v2 claims Pillar01's local Z stepping by about 2.094 rad per turn, equal on both seats
   after the guest's own E. Playtest 46 (numidium, thuum 688fc7fe): after the objtype reads, 39's end world with the pillars
   unsolved, turbo-client 843fed95 over 7c79fc3e's dist, Eli at the pillars; trace v5 held until after.
+- 14:26 PST 2026-11-04 (22:26Z 11-04) (thuum-cf): fork m3-canon-4-pillar-side 843fed95 built green (pipeline 5352, client and server builds): the
+  turbo-client bundle for playtest 46 type-checks. e80fb0c8 (the node-rotation export) builds behind it.
