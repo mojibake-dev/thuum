@@ -8317,3 +8317,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
 - 03:05 PST 2026-11-04 (11:05Z 11-04) (thuum-cf): corpse v6 on 3bd97f7c GREEN 20261104-105709 (no new crash), its logs with 17 "rerolled ... through
   the engine" lines (10 on c1, 7 on c2), so by numidium's gate it reruns on 9f2757a3 beside dress v8 and oracle v4; 18682's dist is
   being laid (11:04Z). The GitHub mirror rejected a push again ("commit_refs_rules", GitHub's side); a retry loop lands it.
+- 03:26 PST 2026-11-04 (11:26Z 11-04) (thuum-cf): dress v8 on 9f2757a3 RED 20261104-111949 on one claim of eight, no crash: the respawned re-rolled copy
+  is back (is3DLoaded true on both seats, dressed, the fate's race) but headless (faceNode false on both): DoReset3D's flags were set
+  while 37323 had the model dropped, and the pass on the reloaded model rebuilt body and skin alone. Fixed on m3-canon-4-followups
+  (the head for 45): the skin, head and face passes flagged on the process after Load3D (AIProcess::Set3DUpdateFlag, RESET_3D_FLAGS
+  kSkin, kHead, kFace) and Actor::Update3DModel at once; the fallback the engine's Disable and Enable. Eli's choice through numidium:
+  wait about an hour for the read, or lay 9f2757a3 with the headless re-roll as a known limit; my word is to wait (item 4 is this
+  read). Oracle v4 and corpse v6 play on 9f2757a3 meanwhile.

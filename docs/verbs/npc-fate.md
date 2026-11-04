@@ -2578,6 +2578,16 @@ from the server's and the late fate re-rolls it on the living loaded copy. On 3b
 playtest 45 exercises 9f2757a3's rebuild block at every Temple login; so the oracle reruns on 9f2757a3 with each re-rolled copy's
 "3D loaded X after; reloaded Y, the model passes run Z" as the witness beside dress v8. This is also 44's 39fe1: the host's own
 live bandit re-rolled at the login, naked and headless under Load3D alone.
+READ ON 9f2757a3 (03:26 PST 2026-11-04, 11:26Z 11-04; dress v8 bf1c8f36, run 20261104-111949, 18682's dist with c4539d22's image, numidium): no
+crash; after the respawn's re-roll the model is BACK on both seats (is3DLoaded true, alive, worn [80265, 455576, 1071435] the
+fate's, race 79686), the new pick's facegen head is NOT (faceNode false on both, BSFaceGenNiNodeSkinned absent 25 s later; the
+screenshots show the Highwayman up and fighting): "rerolled 39fe4 through the engine from pick 1bcd8 toward the fate's 39d11 (3D
+loaded true before, true after; ... reloaded true, the model passes run true)". DoReset3D's flags were set while the model was gone
+(37323 drops it), Load3D brought the body back and the pass that ran rebuilt body and skin alone. FIXED (the next head): after the
+reload the skin, head and face passes are flagged on the process (AIProcess::Set3DUpdateFlag, A/AIProcess.h:188, with
+RESET_3D_FLAGS kSkin, kHead, kFace, M/MiddleHighProcessData.h:39-50) and Actor::Update3DModel runs them at once; the line ends
+"the skin, head and face passes run true". HYPOTHESIS until v8 reads faceNode true after a respawn on both seats; the fallback is
+the engine's full reload of the reference (TESObjectREFR::Disable then Enable), the modder's refresh for a changed appearance.
 
 ## Status
 
