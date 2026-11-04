@@ -175,16 +175,18 @@ then 2"). "The bind kill's apply stays immediate (a body dead at its creation ha
 the bind kill makes dead at load: it sits in kDying like the live death's copy, so the death's completion (read 5) is the one
 fix for both, and the apply's thread (read 6) the one fix for the freezes.
 
-BUILT for read 6 (2026-11-03 night, fork m3-canon-3-apply-main faff697c off the hotfix): ChangeForm::Apply checks the arguments,
-refuses at the queue (no reference, no SKSE task interface, an apply in flight for the form, an unread answer) and otherwise queues
+BUILT for read 6 (2026-11-03 night, fork m3-canon-3-apply-main faff697c off the hotfix, the review's three fixes 1e489b6c):
+ChangeForm::Apply checks the arguments, refuses at the queue (no reference, no SKSE task interface, an apply in flight for the form;
+a stale unread answer, whose seat record went before the poll read it, is discarded by the new queue and logged) and otherwise queues
 the engine steps to the game's main thread through SKSE::GetTaskInterface()->AddTask (the fork's TickHandler idiom; the platform's
 gameThrQ is drained inside the Papyrus OnUpdate native, so it is NOT the main thread), answering {applied false, queued true,
 formId, thread} at once; the task looks the reference up where it runs, runs ApplyImpl under the same catch, logs "ApplyChangeForm
 <id> answered on the main thread (thread N main N, queued from M)" or "another thread", and parks the JSON answer, which the new
 Papyrus native TESModPlatform.ApplyChangeFormResult(refr) hands over once ("" while pending; docs/NATIVES.md, R2). changeFormService
 marks a queued record (queuedAt, queuedWhen), polls the answer each update, hands it to onApplyResult (the lab lines unchanged), gives
-up after 15 s without one, and neither retries nor drops a record in flight; the watcherApplyOff switch is false there and stays as
-the emergency lever. HYPOTHESIS until x-corpse-record v3 (by path, sha1 3430e911: "answered on the main thread" at least once on the
+up after 15 s without one (a reference-less record too), and neither retries, re-attempts from the kill's call nor drops a record in
+flight; the watcherApplyOff switch is false there and stays as the emergency lever. Reviewed GO by a fresh agent (ADR-064 rule A)
+for the solo probe, its three findings applied as written in 1e489b6c. HYPOTHESIS until x-corpse-record v3 (by path, sha1 3430e911: "answered on the main thread" at least once on the
 watcher, "another thread" never, the install line on both seats, no give-up) runs alone against canon-3 with this branch's dist and
 lays the body. In the same corpse-load frame on a seat the fate's engine re-roll of a DEAD body (rerollActor on a leveled pick that
 changed) left the khajiit 0x29613 naked and headless on rotfern's 19:22 relaunch (playtest 44 item 2c; numidium's read of c1's log:
@@ -223,8 +225,8 @@ Four reads on the lab, each a Frida run on the existing scripts before the recei
    answered at the next update instead of returning in the caller's thread; the candidate queue is the task interface CommonLibSSE-NG
    exposes (SKSE::GetTaskInterface()->AddTask), HYPOTHESIS until the native's startup line and the answer's `thread` field read the
    main thread's id on the lab, on a dead copy first (apply-on-demand.js's premise), then read 5's completed dying copy. Until it
-   runs there the watcher apply stays off (m3-canon-3-apply-off). BUILT on m3-canon-3-apply-main faff697c (the SKSE task, the
-   result native, the poll; see the Client section); the read is x-corpse-record v3's thread claims.
+   runs there the watcher apply stays off (m3-canon-3-apply-off). BUILT on m3-canon-3-apply-main faff697c plus 1e489b6c (the SKSE
+   task, the result native, the poll; see the Client section); the read is x-corpse-record v3's thread claims.
 
 ## Status
 

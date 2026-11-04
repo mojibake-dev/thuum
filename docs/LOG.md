@@ -7835,3 +7835,22 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   khajiit 0x29613 naked and headless on rotfern's 19:22 relaunch: the fate's engine re-roll of a DEAD body (the known naked bandit,
   x-fate-dress-bleak), ranked after read 5. Ranking sent to numidium for Eli: (1) the main-thread apply probe, (2) the body's inventory
   as the record, (3) read 5, (4) the dead body's re-roll.
+- 19:50 PST 2026-11-03 (03:50Z 11-04) (thuum-cf): the main-thread apply's review (a fresh agent, ADR-064 rule A): GO for the solo
+  probe with three findings, applied as written in 1e489b6c: (1) a parked answer whose seat record went before the poll read it (a
+  re-serve with new bytes, the copy stood up, the 15 s give-up) wedged every later ApplyChangeForm for that form on "an unread answer
+  waits" until a game restart; the new queue discards a stale answer under the lock, logged, and the in-flight set alone guards; (2)
+  onKilledHere reached tryApply on a queued record and burned an attempt on the in-flight refusal, so tryApply returns on queuedAt
+  after the switch; (3) pollQueued returned on a missing reference before its timeout, never timing out nor dropping (holdMs skips
+  queued), so the timeout is tested first. The reviewer confirmed the maps under the mutex, the by-value captures, no wait anywhere, the
+  lab lines byte-identical, no new id or offset. fork-lint clean, the bundle built by sha (turbo-client-build resolves origin's head
+  first, so a pushed ref builds the remote's commit: build by sha before the push). Pushed; the runner reordered: r2's retry 18453 had
+  started (left to finish), faff697c's never-started client build 18452 cancelled as superseded, 1e489b6c's push pipeline 5210 has the
+  client build 18459 next, the flip's retry re-queued behind it as 18460 (its 18454 cancelled unstarted). Playtest 44's invincible
+  bandit resolved (numidium, Eli: "on prisoner the bandit was no head and naked, hits landed, walked bandit to rotfern, then rotferns
+  hits landed"): the guest's hit on the host's puppet DOES report (OnWeaponHit ff000000 hits 39fe1 ... 0.5648 -> 0, the death report
+  host ff000001 killer ff000000), nothing since 0c23306e touches the hit path (hitService, puppetService, arrowSyncService, PuppetHooks
+  unchanged), and "own arrow dropped" is 0 lines in rotfern's log, so her five arrows at 03:42:57 to :43:06 flew at a puppet standing
+  elsewhere than the host's fighting bandit: a guest's copy of a fighting NPC out of place (the puppet's position stream in combat),
+  for the NPC list. Second finding: the fate's re-roll and redress broke the HOST's own live copy's 3D too (naked, headless on
+  Prisoner's screen), so the khajiit's bug is a living NPC's as well as a corpse's. The arrows regression stays open with its three
+  mechanisms (the take refusal seen live on the longbow).
