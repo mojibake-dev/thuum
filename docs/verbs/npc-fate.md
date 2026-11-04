@@ -2649,6 +2649,15 @@ show the host's AI dropping the torch at each relogin and relighting it about 5 
 following); dress v9 GREEN 201238 (five reads, c2's worn equal to c1's and to the fate's each time, the head true, no crash). So
 the contract holds at T3 on both paths: the hands are the host's, the puppet's equal them, the dress the roll. The last read before
 45 is x-fate-inventory v1b on this pair (the rule changes what a body's record holds).
+THE QUIVER (12:24 PST 2026-11-04, 20:24Z 11-04): x-fate-inventory v1b on the hands pair RED 20261104-201910 on E_TAKE_NOT_IN_RECORD
+alone: the gold and the bow took clean; 39fe2 (the archer) shot once in the run and the server spent one Iron Arrow of its record
+(16 to 15) while the host's copy of the body held 16, so the take of 16 was refused ("ff000000 takes 16 of 1397d from 39fe2, whose
+record holds 15; refused, the mover resynced"). The engine spends none of an NPC's arrows (observed here on the host's own copy;
+UESP's Ammunition page: a follower given one arrow of a kind shoots it without end, the one-arrow trick); the server's hosted shot
+spent one, older than the hands rule (canon-4's 082511 had no NPC shot). FIXED fork m3-canon-4-hands 4c6d9f24: a hosted shot spends
+no record arrow, R2 as the engine, E_SHOT_QUIVER the witness at every hosted shot; NpcCastTest's hosted shot keeps the quiver. The
+read: x-fate-inventory v1b again on skymp-server:m3-canon-4-hands-4c6d9f24 with the same dist and driver; on its green canon moves
+to 4c6d9f24 and 45 goes on that pair. In 45 this was item 2 on the archer's body after it has shot. Canon is 9218156a meanwhile.
 
 ## Status
 

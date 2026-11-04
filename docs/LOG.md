@@ -8429,3 +8429,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   drops the torch at each relogin and relights it about 5 s later, the record following) and dress v9 GREEN 201238 (five reads,
   c2's worn equal to c1's and to the fate's each time, head true, no crash). numidium runs x-fate-inventory v1b dae397e3 on the
   pair as the loot regression read; on its green canon moves to 9218156a and playtest 45 goes on this pair.
+- 12:24 PST 2026-11-04 (20:24Z 11-04) (thuum-cf): canon fast-forwarded to 9218156a (the hands rule, its two reads green; ancestry checked, both
+  remotes). x-fate-inventory v1b on the hands pair RED 20261104-201910 on E_TAKE_NOT_IN_RECORD alone (numidium): the archer 39fe2
+  shot once, the server spent one record arrow (16 to 15) while the host's copy of the body held 16; the take of 16 refused. The
+  engine spends none of an NPC's arrows (the host's own copy; UESP's one-arrow follower rule), the server's hosted shot did: older
+  than the hands rule. FIXED fork m3-canon-4-hands 4c6d9f24 (server-only): a hosted shot spends no record arrow, E_SHOT_QUIVER at
+  every hosted shot, NpcCastTest's hosted shot keeps the quiver; fork-lint green, pipeline building. One read: x-fate-inventory v1b
+  on skymp-server:m3-canon-4-hands-4c6d9f24 with dist 18729 and the 61f417e0 driver; on its green canon to 4c6d9f24 and 45 on it.

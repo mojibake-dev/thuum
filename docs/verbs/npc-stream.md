@@ -2038,8 +2038,11 @@ relayed shot, a puppet's like a figure's): PlayerBowShot names its shooter
 (idx; SCHEMA_VERSION 18; the validator refuses u32::MAX; fixtures, the size
 test and the difftest session carry it), OnPlayerBowShot's hosted branch
 under the host rule (the bow against the record's hands; the quiver the
-engine's, R2: an arrow spent when the record holds one, E_SHOT_QUIVER
-recorded otherwise; the shot recorded under the actor's id; ArrowShot under
+engine's, R2: since fork m3-canon-4-hands 4c6d9f24 no record arrow is spent,
+because the engine spends none of an NPC's, E_SHOT_QUIVER recorded at every
+hosted shot; before it an arrow was spent when the record held one, which
+left a body's record one short of the host's copy, x-fate-inventory
+20261104-201910; the shot recorded under the actor's id; ArrowShot under
 its idx to every listener with a user but the sender), OnHit's shot claim
 for every shooter (a hosted arrow at its draw power, a hit with no shot
 refused), the native launch rule by what the actor is (the player's and a
