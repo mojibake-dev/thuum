@@ -9,7 +9,7 @@
 # The first lay ran 7845bb22's dist, whose dying-body apply hung Prisoner's game twice (17:06, 17:12): off the seats; the corpse
 # items stay as the baseline's reading of today's behavior (Eli: "keep corpse items"). Bleak Falls Temple's entrance, 42's spot, at noon.
 id: 44
-build: "canon-1: fork m3-canon-1 f9a275f4 (0c23306e plus m2-rune-glyph, SCHEMA 34), server skymp-server:m3-canon-1-f9a275f4 and its client-build dist, the Skyrim Souls RE layer (main 32459beb, layer-stage 12dfd76b), lab-api pipeline 5124, thuum main 284a4d51 or later"
+build: "canon-2: fork m3-canon-2 32990829 (canon-1 f9a275f4, i.e. 0c23306e plus the rune glyph at SCHEMA 34, plus the perk picks counter m5-perk-points, server-only), server skymp-server:m3-canon-2-32990829, client canon-1 f9a275f4's client-build dist, the Skyrim Souls RE layer (main 32459beb, layer-stage 12dfd76b), lab-api pipeline 5124, thuum main 80d08157 or later"
 world: playtest-m3-39-paused-20261031T014638Z   # 39's end, as 41 to 43 began: the temple's and the slope's bandits alive
 hold:
   minutes: 240
@@ -17,7 +17,7 @@ hold:
 server:
   npcEnabled: true
   gameHour: 12.0
-  locks: false
+  locks: true   # the baseline runs every switch on: 41 verified the chest 0x371e9's server-known key lock with locks on (thuum-cf's ancestry audit)
   weatherSync: true   # on (Eli, playtest 44: "it's snowing on rotfern's screen"); 40 to 43 ran it off by turbo 2's every-switch-off shape
   perks: true
   leveling: true
