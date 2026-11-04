@@ -7854,3 +7854,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   for the NPC list. Second finding: the fate's re-roll and redress broke the HOST's own live copy's 3D too (naked, headless on
   Prisoner's screen), so the khajiit's bug is a living NPC's as well as a corpse's. The arrows regression stays open with its three
   mechanisms (the take refusal seen live on the longbow).
+- 19:55 PST 2026-11-03 (03:55Z 11-04) (thuum-cf): playtest 44's pillar regression (numidium; Eli: "on pillars, prisoner is hosting?
+  rotfern cannot interact; prisoner CAN but the anim only plays for rotfern"), read from git and the code: the relay's pillar fix
+  ("the pillar that never turned", ab9b7fd8) and traps F8 (4fdb2d31) are ancestors of canon-3 9869d28c; playtest 41's union client
+  e742d086 has 25 commits canon-3 lacks, none on pillar or activation code (a020511c, 7d476479, 0387fbb9, 4227a63d the nearest); canon-3
+  adds beyond 41 only the container hold's client half (blockActivation on dead bodies, 75167c3d) and ChangeForm on that path. So the
+  open variable is the layer's papyrus lists (tonight's Souls layer-stage ran persist-mods from main 12dfd76b), and the diagnostic is
+  b-bleak-traps itself: last green 20261102-073814 on m4-object-animation 64dbacfe, never run on canon-3 nor under the Souls stage's
+  lists; it runs first after the playtest. E_TRAP_NO_REF for 4fcdf is the informational marker branch (OnLinkedActivation), not a fault.
+  Two symptoms: the guest's E never leaving her game is the regression against 41 (the scenario's claim); the host's own pillar not
+  turning on its screen was never a claim (traps.md row 31: the engine's own PlayAnimation plus the host's report; the scenario has the
+  guest turn and the host pull), so "unknown if ever worked" until 41's notes say who turned them. Ranking sent: after the apply
+  probe, (1) b-bleak-traps on canon-3 and its read, (2) the body's inventory as the record, (3) read 5, (4) the re-roll's 3D. Runner:
+  r2's retry 18453 green at 03:52Z (its dist exists, the head stays held); 18459 (the apply's 1e489b6c) and the flip's 18460 wait.
