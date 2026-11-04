@@ -8579,3 +8579,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
 - 14:04 PST 2026-11-04 (22:04Z 11-04) (thuum-cf): CANON fast-forwarded to 8926d2c8 (from 4c6d9f24, ancestry checked, both remotes): the fate's engine
   work on Main's thread, proven by oracle v5 214933 and dress v9 215555 with the thread witness on every line; the trace probe v5
   stays the mechanism's Frida read (the deferred DetachHavok against the bind), not the fix's gate.
+- 14:12 PST 2026-11-04 (22:12Z 11-04) (thuum-cf): x-puzzle-guest-view v1 220217 RED on the driver's node-rotation (NetImmerse's Euler natives take
+  float[] out-arrays the platform cannot pass; numidium guards the step). The pillar's graph read (Behavior00.hkx from
+  RuinsPuzzlePillar01.hkx's project in Skyrim - Animations.bsa): no variables, Side01/02/03, Turn0N on Trigger0N from Side0N alone,
+  StartState02/03 the jumps, Side01 the default; numidium's reading: a guest's graph on another side than the host's drops every
+  relayed Trigger until the cycle passes it (44's words exactly). FIX client script alone, fork m3-canon-4-pillar-side 843fed95 off
+  7c79fc3e: StartState* relayed and recorded; a relayed or replayed Trigger02/03 played after its StartState02/03, Trigger01 alone;
+  the record's replay through the same path; the guest's played line says taken or refused. docs/verbs/traps.md "The pillar's
+  side". Build running; turbo-client to the seats for Eli's T4 at the pillars, then x-puzzle-guest-view v2 (a platform export for
+  the node's rotation, since the shape sits on its node's origin and positions will not move).

@@ -534,3 +534,23 @@ lab/deploy/sky-client/skymp5-client-settings.txt for every stage, thuum 6ddf8ae2
 the host's faces (VERIFIED IN PLAY), with three pieces left: a pillar's starting face differing between the seats, one pillar never
 turning, and the guest's own turn showing on the host's screen only (b-puzzle-relay v2's new claim; the last green run had the
 guest's "played" line for her own turns).
+
+## The pillar's side (14:12 PST 2026-11-04, 22:12Z 11-04; playtest 45's item 5, 44's shape)
+
+The puzzle pillar (ACTI NorDefaultPuzzlePillar01, model Clutter\Ruins\Pillar\RuinsPuzzlePillar01.nif; the NiNode Pillar01 turns under
+the Havok project RuinsPuzzlePillar01.hkx, Skyrim - Animations.bsa) runs Behavior00.hkx, a state machine with no variables: Side01,
+Side02, Side03; Turn0N fires on Trigger0N from Side0N alone (the animations RuinsPillarTrigger01/02/03 on Pillar01), Turned0N at a
+turn's end, StartState02 and StartState03 jump to a side with no turn, Side01 the default. The host's defaultPuzzlePillarScript jumps
+its graph at the load (StartState0N) and sends Trigger0N by its own state; a guest's graph never got the jump (the relay carried
+Trigger*, Turned* and the trap names, no StartState*), and a late joiner's replay of the record's Trigger0N from Side01 has no
+transition, so a guest pillar whose start side is not 01 sits desynced, dropping every relayed Trigger silently until the host's
+cycle reaches Side01 (playtest 44: "2nd pillar STARTED desynced ... resumed syncing once the rotation passed the one it was desynced
+ON"; playtest 45: the guest's own turn on the host's screen alone while the gate opened on the host's state; numidium's reading of
+the graph, confirmed by its string table). FIX fork m3-canon-4-pillar-side 843fed95 (client script alone; the wire refuses an empty
+event only, the server records any): StartState* relayed and recorded like any event; a relayed or replayed Trigger02/03 played
+after the graph's own StartState02/03, Trigger01 alone (Side01 the default), remoteServer's record replay through the same path; the
+guest's "object animation <refr> <event> played" line gains "(relayed|the record, taken|refused, after StartState0N taken|refused)".
+HYPOTHESIS until Eli's T4 at the pillars (turbo) and x-puzzle-guest-view v2's node read on the guest (a platform export of a node's
+rotation, the shape sitting on its node's origin; NetImmerse's Euler natives take arrays the platform cannot pass). Known limit: a
+Trigger01 relayed to a guest still on Side02/03 is dropped until a Trigger02/03 resyncs it.
+
