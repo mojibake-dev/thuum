@@ -55,6 +55,9 @@ BARS = ("health", "magicka", "stamina")
 # the four on the relaunched seats. The menus' no-pause is the Skyrim Souls RE layer (lab/layer, merged into main 32459beb).
 STANDING_FROM = 44
 SURVIVAL_OFF = {"form": "828:ccQDRSSE001-SurvivalMode.esl", "value": 0}
+# Survival_PlayerHasBeenPrompted: the "Enable Survival Mode?" box is a separate flag from the switch, and its box
+# stops the game (playtest 46: rotfern frozen on it with 828 already 0); marked answered on every seat with the switch
+SURVIVAL_PROMPTED = {"form": "8df:ccQDRSSE001-SurvivalMode.esl", "value": 1}
 HEADSHOT_PROFILE = 1  # rotfern, test 1: CIF's rule wants base Archery 60 and Overdraw40 (docs/verbs/headshot.md:35-68)
 HEADSHOT_PERK = 0x7934B  # Overdraw40
 HEADSHOT_ARCHERY = 60  # the actor value Marksman
@@ -166,6 +169,11 @@ def _standing(p: dict[str, Any]) -> None:
             raise ProfileError(f"profile {prof}: Survival is standing OFF from playtest 44 (Eli, 2026-11-03: \"no survival\")")
         if not same:
             gl.append(dict(SURVIVAL_OFF))
+        asked = [g for g in gl if str(g["form"]).lower() == SURVIVAL_PROMPTED["form"].lower()]
+        if any(g["value"] != SURVIVAL_PROMPTED["value"] for g in asked):
+            raise ProfileError(f"profile {prof}: Survival's prompt is standing answered from playtest 46 (its box froze rotfern's game)")
+        if not asked:
+            gl.append(dict(SURVIVAL_PROMPTED))
         s["globals"] = gl
         if prof == HEADSHOT_PROFILE:
             perks = s.get("perks") or []
@@ -591,6 +599,7 @@ def _standing_ready(rep: Report, p: dict[str, Any]) -> None:
         for seat in p["seats"]:
             prof = seat["profile"]
             client = seat_client(prof)
+            command({"kind": "console", "profileId": prof, "name": "SetGlobal", "args": [PLAYER, SURVIVAL_PROMPTED["form"], SURVIVAL_PROMPTED["value"]]})
             r = command({"kind": "console", "profileId": prof, "name": "SetGlobal", "args": [PLAYER, SURVIVAL_OFF["form"], SURVIVAL_OFF["value"]]})
             worst = 0.0
             for _ in range(5):
@@ -613,6 +622,120 @@ def _standing_ready(rep: Report, p: dict[str, Any]) -> None:
         played = [x for x in rows if x.split("=", 1)[0] == version]
         good = len(played) == 1 and played[0].endswith("=True")
         (rep.ok if good else rep.fail)(f"no-pause menus: {SOULS_DLL} on {client}'s {version or 'unknown'} game: {', '.join(rows) or str(r.get('err-data', 'no answer'))[:120]}")
+
+
+def last_grant(server_log: str, cell: int) -> str:
+    """How a cell's current host got it, from the server's cell-host lines ("<actor> hosts cell <id> at epoch N", "<actor>
+    stops hosting cell <id>", "cell <id> is unhosted"): "fresh" when the last grant came with nobody hosting (the first
+    since the server started, or after "is unhosted"), "inherited" when it followed another seat's stop directly (that seat
+    loaded the cell as a guest first: its replayed pillar graphs and its own scripts disagree, playtest 46's stuck
+    pillars), "none" when no grant is in the log."""
+    want = f"{cell:x}"
+    hosted = False
+    how = "none"
+    for line in server_log.splitlines():
+        if "cell-host:" not in line or f"cell {want} " not in line + " ":
+            continue
+        if f"hosts cell {want} at epoch" in line:
+            how = "inherited" if hosted else "fresh"
+            hosted = True
+        elif f"stops hosting cell {want}" in line:
+            hosted = True  # until an "is unhosted" line, the next grant is a hand-off
+        elif f"cell {want} is unhosted" in line:
+            hosted = False
+    return how
+
+
+def _camp_cells(p: dict[str, Any]) -> list[int]:
+    """The interior cells the profile's camp puts a seat in (an exterior camp names a worldspace, which has no one host)."""
+    cells = []
+    for t in (p.get("camp") or {}).get("teleports") or []:
+        c = str(t.get("cell") or "")
+        if ":" in c:
+            n = int(c.split(":", 1)[0], 16)
+            if n not in cells and n != 0x3C:
+                cells.append(n)
+    return cells
+
+
+def _streams(rep: Report, p: dict[str, Any]) -> None:
+    """Each seat's Moonlight stream on this Mac: a live one kept, a stale one (no socket) replaced, a missing one opened."""
+    for name, port in sorted((p.get("streams") or {}).items()):
+        pids = subprocess.run(["pgrep", "-f", f"Moonlight stream core.gaussing.tv:{port}"], capture_output=True, text=True).stdout.split()
+        live = [x for x in pids if subprocess.run(["sh", "-c", f"lsof -nP -a -p {x} -i | grep -cE 'UDP|TCP'"], capture_output=True, text=True).stdout.strip() not in ("", "0")]
+        if live:
+            rep.ok(f"stream {name} ({port}) live, pid {live[0]}")
+            continue
+        for x in pids:
+            subprocess.run(["kill", x], capture_output=True)
+        subprocess.run(["open", "-n", "-a", "Moonlight", "--args", "stream", f"core.gaussing.tv:{port}", "Desktop",
+                        "--display-mode", "windowed", "--1080"], capture_output=True)
+        time.sleep(12)
+        pids = subprocess.run(["pgrep", "-f", f"Moonlight stream core.gaussing.tv:{port}"], capture_output=True, text=True).stdout.split()
+        (rep.ok if pids else rep.fail)(f"stream {name} ({port}) opened: {pids or 'no process'}")
+
+
+def _lay(rep: Report, p: dict[str, Any]) -> bool:
+    """The profile's build laid first (lay: {server: <tag>, dist: {branch, sha}, client: <sha>}, each optional), so no
+    later push relaunches a seat after the world is restored: the server image by turbo-srv, the dist by turbo-dist with
+    each seat checked in turbo.log (a missing seat laid once more), the client script by turbo-client."""
+    lay = p.get("lay") or {}
+    started = _srv("date -u +%Y-%m-%dT%H:%M:%SZ").strip()
+    if lay.get("server"):
+        tag = _srv("grep -E '^SERVER_TAG=' /srv/lab/.env | cut -d= -f2").strip()
+        if tag != lay["server"]:
+            subprocess.run(["just", "turbo-srv", str(lay["server"])], cwd=ROOT, capture_output=True, text=True)
+            tag = _srv("grep -E '^SERVER_TAG=' /srv/lab/.env | cut -d= -f2").strip()
+        (rep.ok if tag == lay["server"] else rep.fail)(f"server {tag} (wanted {lay['server']})")
+    if lay.get("dist"):
+        branch, sha = str(lay["dist"]["branch"]), str(lay["dist"]["sha"])[:8]
+        env = dict(os.environ, SHA=sha)
+        for seats in ("both", None):
+            missing = [c for c, vmid in sorted(_clients().items())
+                       if not _srv(f"awk -v s={started} '$1 >= s && $4 == \"{vmid}\" && $5 == \"{sha}\"' /srv/lab/turbo.log").strip()]
+            if not missing:
+                break
+            for c in (["both"] if seats == "both" else missing):
+                subprocess.run(["just", "turbo-dist", branch, c], cwd=ROOT, env=env, capture_output=True, text=True)
+        missing = [c for c, vmid in sorted(_clients().items())
+                   if not _srv(f"awk -v s={started} '$1 >= s && $4 == \"{vmid}\" && $5 == \"{sha}\"' /srv/lab/turbo.log").strip()]
+        (rep.fail if missing else rep.ok)(f"dist {branch} {sha} on every seat" + (f": missing on {missing}" if missing else ""))
+    if lay.get("client"):
+        r = subprocess.run(["just", "turbo-client", str(lay["client"])], cwd=ROOT, capture_output=True, text=True)
+        (rep.ok if r.returncode == 0 else rep.fail)(f"client {lay['client']} by turbo-client (exit {r.returncode})")
+    return not rep.bad
+
+
+def go(n: int) -> int:
+    """The one way into a playtest (Eli, 2026-11-04 after 46: "that should be canonized into a script instead of hand
+    rolled every time"), in a fixed order: the profile's build laid first; setup (the world restored, the server's host
+    table fresh, the camp, the standing base); the streams; ready, which relaunches both seats TOGETHER (a seat
+    relaunched alone hands its hosted cells to a seat that loaded them as a guest); then every interior camp cell's host
+    proven a fresh grant from the server's own lines, both seats relaunched together again when one was inherited (at most
+    twice). The recorder is the caller's next command: `just playtest-record <n>`, in the background."""
+    p = load_profile(n)
+    rep = Report()
+    print(f"== playtest {n}: go {time.strftime('%H:%M:%S')}", flush=True)
+    if not _lay(rep, p):
+        print(f"== go stopped: the build is not laid ({len(rep.bad)} failed)")
+        return 1
+    if setup(n) != 0:
+        print("== go stopped: setup failed")
+        return 1
+    since = _srv("date -u +%Y-%m-%dT%H:%M:%SZ").strip()
+    _streams(rep, p)
+    for attempt in range(3):
+        rc = ready(n)
+        log = _srv(f"cd /srv/lab && docker compose logs --no-color --since {since} skymp-server 2>/dev/null | grep 'cell-host:'", timeout=90)
+        hows = {c: last_grant(log, c) for c in _camp_cells(p)}
+        bad = {f"{c:x}": h for c, h in hows.items() if h != "fresh"}
+        print(f"   hosts: " + (", ".join(f"{c:x} {h}" for c, h in hows.items()) or "no interior camp cell"), flush=True)
+        if rc == 0 and not bad:
+            print(f"== playtest {n} ready {time.strftime('%H:%M:%S')}: next `just playtest-record {n}` in the background")
+            return 0
+        print(f"   attempt {attempt + 1}: ready exit {rc}, not fresh {bad or 'none'}: both seats relaunched together again", flush=True)
+    print(f"== playtest {n} NOT ready after three attempts")
+    return 1
 
 
 def switched(overlay_text_now: str, key: str, on: bool) -> str:
@@ -669,8 +792,8 @@ def main(argv: list[str]) -> int:
         except ProfileError as e:
             print(f"== profile {argv[1]}: {e}", file=sys.stderr)
             return 2
-    if len(argv) != 2 or argv[0] not in ("setup", "ready", "check") or not argv[1].isdigit():
-        print("usage: playtest_setup.py setup|ready|check <n> | switch <n> <" + "|".join(SWITCHES) + "> on|off", file=sys.stderr)
+    if len(argv) != 2 or argv[0] not in ("setup", "ready", "check", "go") or not argv[1].isdigit():
+        print("usage: playtest_setup.py go|setup|ready|check <n> | switch <n> <" + "|".join(SWITCHES) + "> on|off", file=sys.stderr)
         return 2
     n = int(argv[1])
     try:
@@ -678,7 +801,7 @@ def main(argv: list[str]) -> int:
             p = load_profile(n)
             print(f"profile {n} ok: {len(p['seats'])} seats, {sum(len(seat_commands(s)) for s in p['seats'])} sets, world {p['world']}")
             return 0
-        return setup(n) if argv[0] == "setup" else ready(n)
+        return go(n) if argv[0] == "go" else setup(n) if argv[0] == "setup" else ready(n)
     except ProfileError as e:
         print(f"== profile {n}: {e}", file=sys.stderr)
         return 2

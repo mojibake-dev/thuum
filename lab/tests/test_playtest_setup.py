@@ -145,6 +145,38 @@ class PlaytestProfile(unittest.TestCase):
         # before 44 nothing is laid: the old profiles load as they were written
         self.assertNotIn("weatherSync", self.load(PROFILE).get("server") or {})
 
+    def test_the_survival_prompt_is_standing_answered(self):
+        # playtest 46 (2026-11-04): the "Enable Survival Mode?" box froze rotfern's game with the switch (828) already 0;
+        # its flag (8DF) is laid answered on every seat beside the switch, and a profile cannot ask it again
+        from playtest_setup import SURVIVAL_PROMPTED, ProfileError
+
+        p = self.load(PROFILE.replace("id: 24", "id: 44"), 44)
+        for s in p["seats"]:
+            self.assertIn(SURVIVAL_PROMPTED, s["globals"])
+        bad = PROFILE.replace("id: 24", "id: 44").replace(
+            "    by_hand:", "    globals: [{form: \"8df:ccQDRSSE001-SurvivalMode.esl\", value: 0}]\n    by_hand:")
+        with self.assertRaises(ProfileError):
+            self.load(bad, 44)
+
+    def test_a_cells_last_grant_is_fresh_or_inherited(self):
+        # the server's cell-host lines, as playtest 46 logged them (23:07 to 23:09Z): a grant after "is unhosted" or the
+        # first one is fresh; one right after another seat's stop is inherited (the stuck pillars' hand-off)
+        from playtest_setup import last_grant
+
+        p = "skymp-server-1  | [2026-11-04 23:0{}] [info] PartOne - cell-host: {}"
+        fresh_then_handoff = "\n".join([
+            p.format("7:10.527", "ff000001 stops hosting cell 371de (epoch 1)"),
+            p.format("7:10.531", "cell 371de is unhosted, frozen at its record (epoch 1 kept)"),
+            p.format("7:56.991", "ff000001 hosts cell 371de at epoch 2"),
+            p.format("9:06.593", "ff000001 stops hosting cell 371de (epoch 2)"),
+            p.format("9:06.598", "ff000000 hosts cell 371de at epoch 3"),
+        ])
+        self.assertEqual(last_grant(fresh_then_handoff, 0x371DE), "inherited")
+        self.assertEqual(last_grant("\n".join(fresh_then_handoff.splitlines()[:3]), 0x371DE), "fresh")
+        self.assertEqual(last_grant(p.format("0:00.000", "ff000001 hosts cell 371de at epoch 1"), 0x371DE), "fresh")
+        self.assertEqual(last_grant(fresh_then_handoff, 0x3C), "none")  # another cell's lines say nothing of it
+        self.assertEqual(last_grant(p.format("1:00.000", "ff000000 hosts cell 371def at epoch 1"), 0x371DE), "none")
+
     def test_a_profile_cannot_turn_a_standing_item_off(self):
         from playtest_setup import ProfileError
 

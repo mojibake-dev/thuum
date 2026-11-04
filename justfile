@@ -514,6 +514,14 @@ turbo-log class sha8 asked playable what="":
 turbo-back *args:
     @lab/tools/turbo-back.sh {{args}}
 
+# THE way into a playtest (Eli, 2026-11-04 after 46: "that should be canonized into a script instead of hand rolled
+# every time"): the profile's build laid first (lay: server, dist, client), then setup (the world restored, the host
+# table fresh), the streams, ready's relaunch of BOTH seats together, every interior camp cell's host proven a fresh
+# grant from the server's own lines (relaunched together again if one was inherited), the standing base with the
+# survival prompt answered. Then `just playtest-record <n>` in the background.
+playtest-go n:
+    @uv run --project lab/labapi python lab/tools/playtest_setup.py go {{n}}
+
 # A playtest's seats from its profile, lab/playtests/<n>.yaml (ADR-040 item 6): the world restored with both seats
 # relaunched, the hold, the camp, each seat's spells, values, items and bars set server-side and read back, Sunshine
 # restarted; then the Moonlight streams, then playtest-ready. `check` only reads the profile.
