@@ -241,6 +241,30 @@ Four reads on the lab, each a Frida run on the existing scripts before the recei
    Ghidra on 1.6.1170 with its Address Library id cross-checked by `just addr`, its prologue bytes and call shape, where skse64 really
    drains its queue, and the detour's hazards (reentrancy, locks, Papyrus); the result's `thread` field against Main.threadID is the
    claim, as read 6's was. The seats roll back to the canon's dist meanwhile (numidium).
+   READ (2026-11-03 night, the re-analyst against sky-re's Ghidra and skse64 2.2.6's source at lab/.cache; HYPOTHESIS by
+   decompile unless a header or the lab says so): Main.threadID is stored by Main's constructor (WinMain's init allocates
+   sizeof(Main) 0x270 and calls it; the ctor stores GetCurrentThreadId at +0x28 and names the thread "Main") on the thread WinMain
+   then loops on, calling Main::Update each frame while the window is active or a load is on, so it IS the main loop's thread, the
+   one the Frida recipes ran the apply on from the death-path hook. Main::Update is Address Library 36564 (RVA 0x645ea0), which the
+   fork already pins as Offsets::Hooks::FrameUpdate RELOCATION_ID(35565, 36564) (skyrim_platform/game/Offsets.h:15; its thunk
+   commented out at Hooks.cpp:526; skse64 uses the same address; Frida attached to it live on 2026-10-24, quit-path.js 004815);
+   `void Main::Update(Main*)`, prologue 48 8B C4 55 41 54 41 55 41 56 41 57 48 81 EC 30 01 00 00 (19 bytes of whole non-RIP-relative
+   instructions; a call-through detour is viable). SKSE's AddTask: CommonLib hands the task to the proxy (Interfaces.cpp:166-168),
+   skse64 pushes it to s_tasks (Hooks_Threads.cpp:36) and drains it in its BSTaskPool::ProcessTasks hook, installed at
+   Main::Update+0xB9C (runs only while paused or frozen) and at 0x6479E0+0x1C, whose only caller is the frame's "Post process" stage
+   (a stage table at 0x142011d00 with "Cell update signal/sync", "Poll controls"), run on a job thread with the SkyrimVM update: so
+   in play SKSE tasks and Papyrus share one stage off the main thread, which is what run 043219 measured (10536, 10528, 10572, 10540,
+   one equal to the native's own thread). SKSE's UI task queue (AddUITask, Interfaces.h:198) is drained by skse64's hook in
+   UI::ProcessMessages (Hooks_UI.cpp:46-86, at +0xAB5 of 0xFA3FA0 = Address Library 82082), which Main::Update calls every frame on
+   the main thread outside the pause branch, gated by one unread mode byte. Hazards for a detour on 36564: no reentrancy seen; not
+   called while alt-tabbed without a load (a drain stalls then); skse64 patches +0x9A and +0xB9C in the body, the fork nothing; the
+   lab's skee64, SkyrimSoulsRE, TMS_AIPathingFreezeFix and DeathDropOverhaul could hook the prologue (verify the 19 bytes, refuse on
+   a mismatch); never wait on the JS pool thread or the VM (PushAndWait, Papyrus, a native's answer: the VM runs concurrently on the
+   Post process thread, the deadlock's shape), run nothing under our queue lock, let no exception escape (an unwind through
+   Main::Update ends the process), skip before kDataLoaded, with quitGame set or gameActive (+0x13) false, and bound the drain (4 tasks
+   or 2 ms). BUILT, the cheap half first: m3-canon-3-apply-main f77fbd00 queues the apply through AddUITask (one call changed, the
+   queued line names the queue), HYPOTHESIS until x-corpse-record v3's "answered on the main thread" reads equal ids; the fallback is
+   the detour as specified (orig then a bounded drain after the frame, a once-only "frame thread N main N" line).
 
 ## Status
 
