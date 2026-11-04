@@ -8130,3 +8130,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the late redress and undoes it); leg E never ran. v5 (sha1 91a85648) records that equality with the "resurrect" and "redressed"
   counts, runs leg D twice for a pick swap's odds, and reaches leg E. 1c's probe runs on the lab now (5236's image and 18531's dist),
   then x-corpse-record v4 on 88497c54's dist when its job lands.
+- 22:15 PST 2026-11-03 (06:15Z 11-04) (thuum-cf): the completion head's pipeline 5243 (m3-canon-3-apply-main 88497c54) green at 06:15Z,
+  client-build 18551: the dist for x-corpse-record v4 (133e4808), to run against the canon's server after 1c's probe; expected on c2
+  "completed 13491's dying death before the apply: lifeState 1 -> 2 (read 5)" and the lay recorded at leg A, the returns claimed
+  through legs R and B.
