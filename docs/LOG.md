@@ -8641,3 +8641,5 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   migration or wire needed for a pillar); the guest's replay carries the jump again, the host never replays. Its read by path:
   x-puzzle-handoff v1, sha1 c0ca8641 (c2 hosts first, c1 inherits at c2's relaunch, the re-sync line, c1's own E turning aa8cb with
   a report and an animates). A fresh review runs on the commit; the builds queued. Not 46's unless Eli wants hand-offs tonight.
+- 15:34 PST 2026-11-04 (23:34Z 11-04) (thuum-cf): the hand-off commit 30839d4b built green (pipeline 5369, client and server builds); its review runs,
+  its read x-puzzle-handoff c0ca8641 waits for the lab after 46; 68093a7d (the node-rotation head with it) builds.
