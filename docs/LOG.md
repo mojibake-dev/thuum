@@ -8284,3 +8284,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   case's first positive witness, on c2's copy of 39fe4 after c1 fell (c2 the host): alive, 3D loaded, faceNode TRUE, worn [80144,
   80273, 111522] equal to the fate's, race 79686 the fate's (H1 holds there; the read on c1's own copy waits for a run that survives
   the load).
+- 02:25 PST 2026-11-04 (10:25Z 11-04) (numidium): the lab side of tonight's v8 reads. Dress v8's first error (092107) was the lab's: faceNode sat in the
+  driver's describe(), not npc-state, and lab-api's NpcStateView lacked it; thuum 2cb385d1 moved the read and taught the view (1061
+  lab-api tests OK, the image from pipeline 5279, lab-api recreated, c4539d22's dist laid again with the new driver bundle, new
+  snapshots). playtest-relaunch.sh now keeps each seat's Skyrim Platform and lab-driver logs on the results site
+  (relaunch-logs/<stamp>-<client>-platform.log and -driver.log) before any stop (thuum 6dc39981; read on c2 after 100832's crash, 397
+  lines kept), so a relaunch or a crash in 45 keeps its session. 45's chain: pipeline 5284's client-build 18674 (3bd97f7c) behind
+  18669 on the one Windows runner, then the dist on both seats with skymp-server:m3-canon-4-followups-c4539d22, new snapshots, dress
+  v8, oracle v3, corpse v6; three green and canon fast-forwards to 3bd97f7c, then 45's setup (about 04:15 PST).
