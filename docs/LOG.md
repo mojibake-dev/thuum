@@ -8261,3 +8261,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
 - 01:14 PST 2026-11-04 (09:14Z 11-04) (thuum-cf): pipeline 5274 (m3-canon-4-followups c4539d22) GREEN: server-build 18639, client-build 18640. 45's pair is
   image m3-canon-4-followups-c4539d22 with 18640's dist and the faceNode driver; numidium runs dress v8 bf1c8f36, oracle v3 3ce3a89b
   and corpse v6 8f22e960 on it, then canon fast-forwards to c4539d22 for the lay.
+- 01:53 PST 2026-11-04 (09:53Z 11-04) (thuum-cf): on c4539d22's pair (numidium): x-fate-login-bleak v3 GREEN 20261104-092409 (three logins into the
+  Temple, no crash, every claim), x-corpse-record v6 GREEN 092901 (Eli's W4 shape); x-fate-dress-bleak v8 ERROR 092107 at step 17 on
+  two lab faults of mine, not the build's: the faceNode read sat in the driver's describe() (the state step's player and near list),
+  not in the npc-state case the probe reads, and lab-api's NpcStateView had no faceNode (E_ASSERT_SYNTAX). numidium fixed both
+  (thuum 2cb385d1: the read in npc-state after is3DLoaded, the view taking it, None on an old driver; 1061 lab-api tests OK), relays
+  the dist with the new driver bundle and reruns v8. Lesson: a new lab fact is read end to end (the step's answer, the view, one
+  run) before a probe claims it.
