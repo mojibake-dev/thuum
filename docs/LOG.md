@@ -8449,3 +8449,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   is two early-load crashes on c1 in nine runs on f4014f39's platform, two signatures. My call: 45 is NOT blocked (its item 3 is
   the live read of this relaunch; a crash there is a finding with its dump); the re-analyst reads 78536 and the chain meanwhile,
   the dump and the pid948 log in my scratchpad; the identity of 0xff000b33 asked of numidium.
+- 12:36 PST 2026-11-04 (20:36Z 11-04) (thuum-cf): correction on 202729's crash (numidium's read of the dump and the server's record): 0xFF000B33 is the
+  runtime TESNPC base the engine makes for a leveled actor, not a reference; the Character is 1d219, LvlDraugrMelee2HMale, the
+  ambush draugr at its Temple spot, ALIVE on the server (never died, health 1, worn [145061, 244868]), dressed and armed by the
+  init detours in the crash's own millisecond (the "armed ... at entry 0" line twice). The armed detour rewrites the engine's own
+  roll output (the pick array) inside the leveled-item roll and makes no equip or 3D call, so the trigger, if ours, is the engine's
+  equip of the weapon we wrote (or the init running twice) meeting a lying ambush draugr's blended ragdoll (HYPOTHESIS); the
+  re-analyst reads 78536's chain with that question. 45 proceeds.
