@@ -614,3 +614,15 @@ never where the script thinks it is):
 Reads: x-puzzle-handoff (c2 hosts first, c1 loads as a guest, c2 relaunches, c1 inherits: c1's own E turns aa8cb, the server's
 animates, the guest's view by node-rotation); the restart-persistence scenario for the count; b-puzzle-relay as the regression.
 
+BUILT (15:25 PST 2026-11-04, 23:25Z 11-04), client alone, smaller than the draft: the record's lastAnimation already encodes a pillar's side
+(StartState0M is M; Trigger0N turns from N, so the side is N+1), and the local script's StartState0N at the cell load (the hook sees
+the engine's own event on every seat; a TypeScript play never re-enters) gives the initial side, so no count, no migration and no
+wire are needed for a pillar. Fork m3-canon-4-pillar-side 30839d4b (objectAnimationService.ts, remoteServer.ts; on
+m3-canon-4-noderot 68093a7d): at cellHostChanged {hosted: true} each pillar of the cell has its graph put back on its script's
+initial side (StartState0I; the round Trigger02 then Trigger03 for Side01), activation blocked meanwhile, then k = (S - I) mod 3
+activations fed to its own script through refr.activate(player) spaced by the turn, each reported, relayed and recorded; the line
+"pillar <id> re-synced at the grant of <cell>: the script's initial side I, the record <event> (side S), k turn(s) fed to the script".
+The guest's replay carries the jump again; the host never replays (the deferred hostsCell skip). Draft items 2 (the count) and 3
+(the record through the server) stay as the structural shape for other scripted objects. Read: x-puzzle-handoff v1 by path
+(sha1 c0ca8641); a fresh review runs on the commit.
+

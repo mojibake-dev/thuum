@@ -8635,3 +8635,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   client's graph re-sync to the script's initial side at a grant, decision 5's activation count fed to the new host (mod 3 for a
   pillar), the record's replay moved to the server as an ObjectAnimation to non-host loaders (CreateActor without lastAnimation);
   the read x-puzzle-handoff. fffd8a66 built green (5363).
+- 15:25 PST 2026-11-04 (23:25Z 11-04) (thuum-cf): the hand-off fix BUILT, client alone: fork m3-canon-4-pillar-side 30839d4b (on fffd8a66; carried
+  onto m3-canon-4-noderot 68093a7d): at a grant the new host puts each pillar's graph back on its script's initial side and feeds
+  its own script the record's side as activations (lastAnimation encodes the side: StartState0M is M, Trigger0N is N+1; no count,
+  migration or wire needed for a pillar); the guest's replay carries the jump again, the host never replays. Its read by path:
+  x-puzzle-handoff v1, sha1 c0ca8641 (c2 hosts first, c1 inherits at c2's relaunch, the re-sync line, c1's own E turning aa8cb with
+  a report and an animates). A fresh review runs on the commit; the builds queued. Not 46's unless Eli wants hand-offs tonight.
