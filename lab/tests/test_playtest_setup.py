@@ -128,6 +128,33 @@ class PlaytestProfile(unittest.TestCase):
             with self.assertRaises(ProfileError, msg=bad):
                 self.load(PROFILE + bad)
 
+    def test_the_standing_base_is_laid_into_every_profile_from_44(self):
+        # Eli, 2026-11-03: "every test should have - no survival - weather synced - rotfern has headshots - no-pause on
+        # menus"; a profile that leaves one out gets it, so a copied profile cannot drop it
+        from playtest_setup import HEADSHOT_PERK, SURVIVAL_OFF
+
+        bare = PROFILE.replace("id: 24", "id: 44").replace("    values: {Marksman: 60}\n", "").replace("    perks: [0x7934B]\n", "")
+        p = self.load(bare, 44)
+        self.assertIs(p["server"]["weatherSync"], True)
+        for s in p["seats"]:
+            self.assertIn(SURVIVAL_OFF, s["globals"])
+        one = p["seats"][0]
+        self.assertIn(HEADSHOT_PERK, one["perks"])
+        self.assertEqual(one["values"]["Marksman"], 60)
+        self.assertNotIn("perks", p["seats"][1])  # Prisoner's seat gets no headshot conditions
+        # before 44 nothing is laid: the old profiles load as they were written
+        self.assertNotIn("weatherSync", self.load(PROFILE).get("server") or {})
+
+    def test_a_profile_cannot_turn_a_standing_item_off(self):
+        from playtest_setup import ProfileError
+
+        p44 = PROFILE.replace("id: 24", "id: 44")
+        for bad in (p44 + "server: {weatherSync: false}\n",
+                    p44.replace("    by_hand:", "    globals: [{form: \"828:ccQDRSSE001-SurvivalMode.esl\", value: 1}]\n    by_hand:"),
+                    p44.replace("values: {Marksman: 60}", "values: {Marksman: 40}")):
+            with self.subTest(bad=bad[-60:]), self.assertRaises(ProfileError):
+                self.load(bad, 44)
+
     def test_a_switch_sets_one_key_of_the_running_overlay(self):
         # playtest-switch (numidium, 2026-11-02): one turbo switch over the running overlay, every other key kept
         import json

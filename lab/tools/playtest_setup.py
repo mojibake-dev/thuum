@@ -49,6 +49,16 @@ SWITCHES = ("locks", "weatherSync", "perks", "leveling")
 SERVER_KEYS = {"npcEnabled", "gameHour", *SWITCHES}
 PLAYER = 20  # the console's word for the player itself (0x14)
 BARS = ("health", "magicka", "stamina")
+# The standing base (Eli, 2026-11-03, after playtest 44's first lay: "every test should have - no survival - weather synced -
+# rotfern has headshots - no-pause on menus", then "everything that we KNOW works should be in from here on out"). From
+# profile 44 on, check_profile lays what a profile leaves out and refuses a profile that turns one off, and ready() proves
+# the four on the relaunched seats. The menus' no-pause is the Skyrim Souls RE layer (lab/layer, merged into main 32459beb).
+STANDING_FROM = 44
+SURVIVAL_OFF = {"form": "828:ccQDRSSE001-SurvivalMode.esl", "value": 0}
+HEADSHOT_PROFILE = 1  # rotfern, test 1: CIF's rule wants base Archery 60 and Overdraw40 (docs/verbs/headshot.md:35-68)
+HEADSHOT_PERK = 0x7934B  # Overdraw40
+HEADSHOT_ARCHERY = 60  # the actor value Marksman
+SOULS_DLL = r"Data\SKSE\Plugins\SkyrimSoulsRE.dll"  # the archive's SKSE/Plugins/SkyrimSoulsRE.dll (lab/layer/essentials.tsv)
 
 
 class ProfileError(ValueError):
@@ -134,7 +144,39 @@ def check_profile(p: Any, n: int) -> dict[str, Any]:
         _int(v, f"stream {k}'s port")
     if ((p.get("after") or {}).get("readback")) not in (None, "percentages"):
         raise ProfileError("after.readback is percentages or absent")
+    if n >= STANDING_FROM:
+        _standing(p)
     return p
+
+
+def _standing(p: dict[str, Any]) -> None:
+    """The standing base laid into a checked profile: weatherSync on, Survival off on every seat, rotfern's headshot
+    conditions. A profile that turns one off is refused, so no copy of a profile can drop it (40's every-switch-off shape
+    went forward unchecked into 41 to 44)."""
+    server = p.get("server") or {}
+    if server.get("weatherSync") is False:
+        raise ProfileError("weatherSync is standing from playtest 44 (Eli, 2026-11-03: \"weather synced\"); a profile cannot turn it off")
+    server["weatherSync"] = True
+    p["server"] = server
+    for s in p["seats"]:
+        prof = s["profile"]
+        gl = s.get("globals") or []
+        same = [g for g in gl if str(g["form"]).lower() == SURVIVAL_OFF["form"].lower()]
+        if any(g["value"] != SURVIVAL_OFF["value"] for g in same):
+            raise ProfileError(f"profile {prof}: Survival is standing OFF from playtest 44 (Eli, 2026-11-03: \"no survival\")")
+        if not same:
+            gl.append(dict(SURVIVAL_OFF))
+        s["globals"] = gl
+        if prof == HEADSHOT_PROFILE:
+            perks = s.get("perks") or []
+            if HEADSHOT_PERK not in perks:
+                perks.append(HEADSHOT_PERK)
+            s["perks"] = perks
+            values = s.get("values") or {}
+            if values.get("Marksman", HEADSHOT_ARCHERY) < HEADSHOT_ARCHERY:
+                raise ProfileError(f"profile {prof}: rotfern's headshots are standing from playtest 44 (Eli, 2026-11-03); Marksman is at least {HEADSHOT_ARCHERY}")
+            values.setdefault("Marksman", HEADSHOT_ARCHERY)
+            s["values"] = values
 
 
 def _check_teleport(t: Any) -> None:
@@ -432,8 +474,55 @@ def ready(n: int) -> int:
     for seat in p["seats"]:
         if seat.get("by_hand"):
             rep.note(f"profile {seat['profile']} by hand: {seat['by_hand']}")
+    if n >= STANDING_FROM:
+        _standing_ready(rep, p)
     print(f"== seats {'ready' if not rep.bad else 'NOT ready'} {time.strftime('%H:%M:%S')}: {'all ok' if not rep.bad else str(len(rep.bad)) + ' failed'}", flush=True)
     return 0 if not rep.bad else 1
+
+
+def _standing_ready(rep: Report, p: dict[str, Any]) -> None:
+    """The standing base proven on the relaunched seats, ready's last step: weatherSync on in the running overlay;
+    Survival off sent again to each seat in turn, since a relaunch lets the game's own save switch it back on (playtest
+    43: survival back after the final relaunch, and a re-send 5 s after it froze c2), each only after a steady minute
+    of heartbeats and watched for 15 s after; Skyrim Souls RE's plugin in every game folder of both clones. rotfern's
+    Archery and Overdraw40 are read above with the seat's values and perks; the shot itself is the stage's b-headshot."""
+    try:
+        laid = json.loads(_srv(f"cat {OVERLAY}"))
+    except ValueError:
+        laid = {}
+    (rep.ok if laid.get("weatherSync") is True else rep.fail)(f"weather synced: the running overlay's weatherSync is {laid.get('weatherSync')!r}")
+
+    def beats() -> dict[str, float]:
+        return _http("GET", "/status").get("heartbeats_s_ago") or {}
+
+    steady = True
+    for _ in range(6):
+        h = beats()
+        if not h or max(h.values()) > 8:
+            steady = False
+            break
+        time.sleep(10)
+    if not steady:
+        rep.fail(f"survival off: not sent, a seat was not heartbeating steadily ({beats()})")
+    else:
+        for seat in p["seats"]:
+            prof = seat["profile"]
+            client = seat_client(prof)
+            r = command({"kind": "console", "profileId": prof, "name": "SetGlobal", "args": [PLAYER, SURVIVAL_OFF["form"], SURVIVAL_OFF["value"]]})
+            worst = 0.0
+            for _ in range(5):
+                time.sleep(3)
+                worst = max(worst, float(beats().get(client, 99.0)))
+            (rep.ok if r.get("ok") and worst <= 8 else rep.fail)(f"survival off on profile {prof} ({client}): sent {r.get('ok')}, worst heartbeat {worst:.1f} s over the 15 s after")
+            if worst > 8:
+                break  # a stalled seat is the finding; nothing more is sent
+    souls = ("Get-ChildItem 'C:\\sky-lab\\games' -Filter '*.txt' | ForEach-Object { $g = (Get-Content $_.FullName -Raw).Trim(); "
+             "$_.BaseName + '=' + (Test-Path (Join-Path $g '" + SOULS_DLL + "')) }")
+    for client, vmid in sorted(_clients().items()):
+        r = _guest_exec(vmid, souls)
+        rows = [x.strip() for x in (r.get("out-data") or "").splitlines() if x.strip()]
+        good = bool(rows) and all(x.endswith("=True") for x in rows)
+        (rep.ok if good else rep.fail)(f"no-pause menus: {SOULS_DLL} on {client}: {', '.join(rows) or str(r.get('err-data', 'no answer'))[:120]}")
 
 
 def switched(overlay_text_now: str, key: str, on: bool) -> str:
