@@ -554,3 +554,14 @@ HYPOTHESIS until Eli's T4 at the pillars (turbo) and x-puzzle-guest-view v2's no
 rotation, the shape sitting on its node's origin; NetImmerse's Euler natives take arrays the platform cannot pass). Known limit: a
 Trigger01 relayed to a guest still on Side02/03 is dropped until a Trigger02/03 resyncs it.
 
+PLAYTEST 46 (14:48 PST 2026-11-04, 22:48Z 11-04): with 843fed95 turbo-client'd, NEITHER seat could turn any pillar: every E reached the
+server, zero "animates" lines, no "object animation" line on either seat. The cause, from the change: remoteServer's replay of
+the record's lastAnimation at a CreateActor runs on every seat, the host included, and 843fed95 routed it through the jump, so the
+host's graph was moved to the record's side (StartState0N, Trigger0N) while its script stayed on its own start state; the script's
+first Trigger0N had no transition, PlayAnimationAndWait never saw its Turned0N and the script's busy flag never cleared. The
+host's graph is its script's: the record reaches the host's script through its activations (decision 5), never through graph
+events. HOTFIX ae010d0a: the jump is a live relay's alone (a guest's); the record's replay plays the plain trigger as before (the
+host's seat relaunched to clear the stuck script). The guest's replay at a load therefore still lands on the record's side only
+when the plain trigger matches its default side: the limit stands until the host's script state is fed from the record (decision
+5's activation counts, or the script's own state property through script-variables), the next build.
+

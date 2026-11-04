@@ -8604,3 +8604,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   turbo-client 843fed95 after it.
 - 14:36 PST 2026-11-04 (22:36Z 11-04) (thuum-cf): fork m3-canon-4-noderot e80fb0c8 built green (pipeline 5355): the dist with the node-rotation
   export on top of the pillar fix, for x-puzzle-guest-view v2 and trace v5 after playtest 46.
+- 14:48 PST 2026-11-04 (22:48Z 11-04) (thuum-cf): PLAYTEST 46 live: with 843fed95 turbo-client'd, neither seat could turn any pillar (every E at the
+  server, zero "animates", no "object animation" line on either seat). The cause in the change: the record's replay at a
+  CreateActor runs on every seat, the host included, and 843fed95 gave it the side jump, which moved the host's graph off its
+  script's own start state; the script's first Trigger0N found no transition, PlayAnimationAndWait never saw Turned0N, busy stayed
+  set, every later activation ignored. HOTFIX fork m3-canon-4-pillar-side ae010d0a: the jump is a live relay's alone (a guest's);
+  the record's replay plain as before; the host's seat relaunched to clear the stuck script; numidium turbo-clients it. The limit
+  that stands: a guest's replay lands on the record's side only when the plain trigger matches its default side, until the host's
+  script state is fed from the record (ADR-059 decision 5), the next build. traps.md "The pillar's side" carries it.
