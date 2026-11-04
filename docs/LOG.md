@@ -8620,3 +8620,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the marks never guarded a re-entry, only hid genuine reports; F1's next build: the record as an ObjectAnimation to non-host
   loaders, CreateActor without lastAnimation). ae010d0a's build was green; fffd8a66 builds; the lay for 46 is fffd8a66 by
   turbo-client, numidium holding on this word.
+- 15:18 PST 2026-11-04 (23:18Z 11-04) (thuum-cf): 46's second lay (fffd8a66, both seats relaunched, c1 the host by INHERITANCE at epoch 3 after c2's
+  relaunch): still no pillar turns, 16 activates at the server, zero animates (numidium). The mechanism from the code: c1 loaded
+  the Temple as a guest, so the replay ran on it as a guest and moved its pillar graphs to the record's sides while its scripts
+  sat on their initial sides; at the inheritance its scripts' first Trigger0I had no transition, PlayAnimationAndWait never
+  returned, busy for good. The review's F3 in practice: a guest that becomes the host after its graph moved (a replay, or any
+  live relay after a turn) is stuck, pre-existing since the relay began; 45 never had a hand-off. Every grant path tells the
+  platform (the gate lead withdrawn unless the inheritance leg shows "grant ... ignored"). Protocol for tonight: the Temple's
+  host first-in and never relaunched during the pillars. Fix in kind offered (client, about an hour): at a grant the new host
+  re-syncs each pillar's graph to its script's initial side (the StartState0N the hook saw from the local script at the cell
+  load); the structural fix is decision 5's state feed. numidium bisects f4014f39, 7c79fc3e, fffd8a66 with an inheritance leg.
