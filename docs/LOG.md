@@ -8554,3 +8554,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
 - 13:39 PST 2026-11-04 (21:39Z 11-04) (thuum-cf): fork m3-canon-4-reroll-main 8926d2c8 built green (pipeline 5335: client-build 18822, server-build
   18821): its dist is the re-roll reads' (oracle v5, dress v9, trace v4) with the hands image and the 61f417e0 driver, then
   x-puzzle-guest-view; numidium's arming stands. m3-canon-4-objtype 8c3a0254 builds behind it as the next candidate.
+- 13:44 PST 2026-11-04 (21:44Z 11-04) (thuum-cf): m3-canon-4-objtype's 5341 failed its client build on TS2339 (sendInputsService's targets are typed
+  undefined[], so the fault line's target.toString narrowed to never; the client's TypeScript is type-checked by the Windows build
+  alone); fixed 7c79fc3e (the id read past the type), its build queued. The objtype head for the pair after the re-roll reads is
+  7c79fc3e.
