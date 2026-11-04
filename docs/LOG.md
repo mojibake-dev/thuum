@@ -8365,3 +8365,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   so in fate.worn, not lit again 25 s after the re-roll. Not the dress; the claim's contract (npc-fate.md READ ON 2c17bc85): the
   fix in kind is FateOf's worn as armor and weapons alone with the driver's npc-state.worn leaving lights out, after the arrows
   reads. Dress v8 on 2c17bc85 playing, then the arrows control and f4014f39's reads.
+- 11:20 PST 2026-11-04 (19:20Z 11-04) (thuum-cf): f4014f39 built green (pipeline 5305: server-build 18728, client-build 18729). Dress v8 on 2c17bc85
+  GREEN 20261104-191105 (numidium): every claim held, no crash file; both seats after D1, D2 and D3's respawns and leg F's late-load
+  swap read 39fe4 alive, 3D loaded, faceNode true, worn equal to the fate's and identical on c1 and c2 each time: THE HEAD HOLDS at T3
+  on the respawn path; the login path's one red is oracle v4's torch measurement (190713). D3's kill crashed no seat (no arrows in
+  the copy this run, which fits READ 8). The fix in kind for the torch is written on the local fork branch m3-canon-4-fate-worn
+  865c7046 off f4014f39 (FateOf's worn is ARMO and WEAP by the espm's record type, every other worn type an inventory row; the
+  ring test's sum follows; a torch T0 on the campfire bandit; fork-lint green), unpushed and unbuilt until Eli's W4 word with 45's
+  decision, after the arrows reads on f4014f39 (corpse v6, x-corpse-arrows, dress v8, oracle v4 by hand). The chain: deploy-srv,
+  x-corpse-arrows on 2c17bc85 as the control, then f4014f39.

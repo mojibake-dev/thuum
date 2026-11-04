@@ -2618,6 +2618,13 @@ re-roll the AI has not lit it again 25 s later. The dress is whole; the claim's 
 DRESSES (armor and the worn weapon, the detours') with the host's AI's holdings. The fix in kind (after the arrows reads, one change
 per read): FateOf's worn carries ARMO and WEAP alone (a LIGH stays out) and the driver's npc-state.worn leaves lights out the same
 way, both sides of the equality the dress; a server change plus a driver line with a T0. Written locally, unpushed.
+Dress v8 on 2c17bc85 GREEN (20261104-191105, numidium): the respawn path's five reads (the baseline, D1, D2, D3, leg F's late-load
+swap) all alive, 3D loaded, faceNode true, worn equal to the fate's, identical on both seats: the head holds at T3 on the respawn
+path, the torch the login path's one red. The fix is fork m3-canon-4-fate-worn 865c7046 (local, off f4014f39): FateOf's worn is
+ARMO and WEAP by the espm's record type (an id the files lack, or a server without an espm, is no part of the dress: rule 5), the
+other worn types rows; the ring test's worn sum follows; a T0 puts Torch01 in the campfire bandit's hand and reads it as a row of 1
+and no worn entry while the bow stays worn. The driver's npc-state.worn already lists armor and weapons alone (slots plus hands typed
+41 and 26), so no driver line is needed; the two sides measure the dress. W4 with 45's decision; built only on Eli's word.
 
 ## Status
 
