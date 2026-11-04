@@ -346,6 +346,15 @@ doc's later row for the pick, never built); skill books gave both seats experien
 
 ## Known limits
 
+- A server set of a skill made before the seat's first actor-values report of the session, followed by the seat's relogin before
+  any report matched it, read the race default at the next claim: b-headshot 20261104-025239 on canon-3 (c1's first login 02:53:12, Marksman 60
+  by labCommand papyrus-av about 02:53:23Z, c1's "connection terminated by the transport layer" at 02:53:31 and its second login
+  at 02:53:32, its first report "recorded 164 bases" at 02:53:36, "ClaimHeadshot ... archery 15" and E_HEADSHOT_ARCHERY at
+  02:54:16), while the same steps with no relogin were green (015705 on
+  0c23306e) and so were the console's SetActorValue and AddPerk on canon-3 (025617). HYPOTHESIS: the held value is session state
+  the disconnect clears, or the record enters with the first report after the relogin without the held base. A T0 for the hold
+  across a relogin is the next step; the lab's premises set skills through server-console and the playtest setup reads them back
+  (2026-11-03 night, thuum-cf).
 - With leveling on, the seat's actor values report moves none of the record's skills, experience, threshold, level or
   legendary counts, nor the skills' bases (ActionListener::OnActorValues; perks.md's pick reads them): the server computes them.
   A Legendary reset at a seat is therefore not recorded under leveling until it is a verb (the engine's reset stands on that

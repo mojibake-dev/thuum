@@ -7787,3 +7787,31 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   Marksman 15 against the scenario's client-side papyrus-av set of 60; whether canon-3's perk-points merge (the record's fields that
   "ride no report") now keeps the bases from a client's report by design (R0, leveling owns the bases) is being read; numidium runs
   x-headshot-server-av (the same claims with the server console's SetActorValue and AddPerk, the playtest setup's path).
+- 19:25 PST 2026-11-03 (03:25Z 11-04) (thuum-cf): playtest 44's second lay on canon-3, three things in the hour. (1) The watcher-apply
+  HOTFIX: c1 (rotfern, the owner and host) froze at the server restart inside ApplyChangeForm on a DEAD copy (its own headshot kill
+  0x29602 re-served at the reconnect; the platform log's last line "ApplyChangeForm 0x29602: 3755 bytes fnv 0x4f899034 flags 0x8a040427
+  remap rows 0 -> 35568", the heartbeat 390 s stale, the call off the main thread), so the dead-only premise never was the gate and H1,
+  the apply from the platform's thread, is the cause (change-form.md: FALSIFIED further, Dynamic read 6). Fork m3-canon-3-apply-off
+  2136311f (off canon-3 9869d28c, client only): a `watcherApplyOff` guard at the top of ChangeFormService.tryApply, so no path calls
+  the native (the arrival, the kill's bind, the pass), one lab line per record ("record held, the watcher apply is off on this build");
+  serialize, the send and the store untouched. Built here with turbo-client-build (webpack clean, 3145 KiB), pushed with
+  CLIENT_BUILD_WINDOWS=0 (pipeline 5204: server-build and the wire jobs, no Windows job), the ref sent to numidium at 03:21Z for both
+  seats' relaunch. Numidium's read of items 2b and 2c in the same playtest: the late arrival's bind kill leaves its copies in kDying,
+  so the dead-only premise refused their records every time ("check actor dead (lifeState 2): 1 FAILED" for 0x29602 and 0x29600, again
+  after the 03:14:43Z restart; Eli: "they appear dead i suppose where they initially spawn? not where they fell on rotferns screen"),
+  while c2's login batch of bodies dead at creation applied; the death's completion (Dynamic read 5) is the one fix for the live death
+  and the late arrival both, written into change-form.md. (2) b-headshot v2 aa185e2e, its own commit: the premise through
+  server-console SetActorValue and AddPerk (the playtest setup's shape), claims unchanged, a fresh reviewer's two header corrections
+  applied (the setup sends SetAV since 17b59fea, AddPerk since 284a4d51; the set's stamp). The red's mechanism from the logs: v1's
+  papyrus-av is the same server native (lab/gamemode calls Actor.SetActorValue, as the console's SetAV entry does), so no authority
+  changed; 025239 had c1's transport drop and second login (02:53:31 and 02:53:32) between the set (about 02:53:23) and the shot, its
+  first actor-values report at 02:53:36 after the relogin, and the claim read 15; 015705 (no relogin) and 025617 (the console steps)
+  read 60. What the relogin does to a held skill set is a leveling HYPOTHESIS (leveling.md Known limits); a T0 for the hold across a
+  relogin is next. (3) x-rune-glyph v2 by path (lab/.cache/probes/x-rune-glyph.yaml, sha1 39335231), to run after the playtest: the
+  log-count steps' patterns are the claims' own (the dot form), and the cast premise: v1's 900 ms hold released before the charge
+  completed (c1's console: MRh_SpellAimedStart at 02:51:53.666Z, the equipped idle back at 54.555Z, no cast line, no projectile on
+  either seat, nothing on the server); Frost Rune charges 0.5 s (UESP) and the seats carry Spell Cast Time Progression (the essentials
+  layer, committed 2026-10-19, on the seats by 10-21's runs; a GetChargeTime hook whose multiplier at Destruction 15 is unread), the
+  10-20 green predating the layer on the seats or meeting a shorter charge; each hold is 2000 ms now. Magicka ruled out: the typed
+  setav is a replaced console command the server runs (ConsoleCommands SetAV, within wire-rules' BASE_MAX 1e6, no refusal logged),
+  and the charge started, which the engine refuses outright without the magicka.

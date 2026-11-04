@@ -155,6 +155,26 @@ so the completion is read 5 of the Dynamic plan (why an AI-on released copy neve
 the 3D's rest against the process clock; KillImmediate 37735 is the engine's own completion the process-level moves call, the
 candidate for the fork to call on a settled dying copy), never a wider premise.
 
+FALSIFIED further, playtest 44 (2026-11-03 night, the canon-3 dist 9869d28c, numidium's read of C:\sky-lab\pt44-c1-sp.log; the
+log reaches results/playtest-44 at the recorder's stop): the dead-only premise does not prevent the hang. c1 (rotfern, the owner
+and host) froze at the server restart inside the apply on a DEAD copy, its own headshot kill 0x29602 (CIF's instant death,
+03:10:44Z) re-served at its reconnect: the platform log ends "ApplyChangeForm 0x29602 check actor dead (lifeState 2): 2 ok ...
+check entry record null ... null ok" then "ApplyChangeForm 0x29602: 3755 bytes fnv 0x4f899034 flags 0x8a040427 remap rows 0 ->
+35568" (19:14:58 local) and nothing after, the heartbeat 390 s stale, the call off the main thread (Main.threadID 8328 against the
+caller's 1440 on c2's runs, c1's the same check). So H1, the apply from the platform's thread, is the cause; the life state was
+never the gate. The hotfix for the rest of the playtest: fork m3-canon-3-apply-off 2136311f (off canon-3, client only), where
+ChangeFormService.tryApply returns before the native under a `watcherApplyOff` constant with one lab line per record ("corpse
+<hex> record held, the watcher apply is off on this build"); serialize, the send and the store are untouched; a turbo-client
+bundle for both seats. The apply comes back only on the main thread under its own probe (read 6). In the same playtest (items 2b
+and 2c, Eli: "the bandits are dead on prisoners screen, but they appear dead i suppose where they initially spawn? not where they
+fell on rotferns screen") the late arrival's bind kill leaves its copies in kDying too, not kDead, so the dead-only premise
+refused the record every time: "[19:15:37:122] ApplyChangeForm 0x29602 check actor dead (lifeState 2): 1 FAILED ... refused
+0x29602 at premises: actor dead (lifeState 2) (1)", the same for 0x29600, both again after the server restart at 03:14:43Z;
+against it, c2's login batch at 19:04:34 (the temple's skeevers and placed corpses, dead at creation) all applied ("lifeState 2
+then 2"). "The bind kill's apply stays immediate (a body dead at its creation has no running ragdoll)" does not hold for a copy
+the bind kill makes dead at load: it sits in kDying like the live death's copy, so the death's completion (read 5) is the one
+fix for both, and the apply's thread (read 6) the one fix for the freezes.
+
 ## Tests
 
 - T0: the validator's refusals (every code), the store and its migration, the restart persistence.
@@ -182,6 +202,12 @@ Four reads on the lab, each a Frida run on the existing scripts before the recei
    the fork's completion of the death on a settled dying copy (KillImmediate through a native, or the process level moved) before
    the dead-only apply. Until then a live death on the watcher applies no record and the body lies where the watcher's own ragdoll
    left it.
+6. The apply on the main thread (H1's cure, playtest 44's two freezes): the REMAP apply queued from the native to where the
+   engine runs its own rebuild (Main's thread, where the fork defers the scripts and rerollActor's drop and rebuild run) and
+   answered at the next update instead of returning in the caller's thread; the candidate queue is the task interface CommonLibSSE-NG
+   exposes (SKSE::GetTaskInterface()->AddTask), HYPOTHESIS until the native's startup line and the answer's `thread` field read the
+   main thread's id on the lab, on a dead copy first (apply-on-demand.js's premise), then read 5's completed dying copy. Until it
+   runs there the watcher apply stays off (m3-canon-3-apply-off).
 
 ## Status
 
