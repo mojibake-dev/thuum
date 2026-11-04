@@ -8102,3 +8102,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the main thread", never "another thread", never "no answer"), the record surviving the restart, both seats answering the lab after
   each apply; the owner's own body 46 units from the record (043219 and 053639 alike) recorded as its own finding. It runs on
   f77fbd00 after the canon's W4 reruns and dress v4. change-form.md's read 7 carries the CONFIRMED.
+- 21:44 PST 2026-11-03 (05:44Z 11-04) (thuum-cf): 1c's pipeline 5236 (m3-canon-fate-inv 7cd63e69) green on every job at 05:43Z: the
+  server image m3-canon-fate-inv-7cd63e69 (T0 with the review's assertions, the contract test on the regenerated ActorFate fixtures,
+  wire-test, wire-fuzz, difftest) and client-build 18531. x-fate-inventory v1 (90b98f7b) runs on both together, the canon otherwise
+  (the server swapped to that image, both seats on 18531's dist, a SCHEMA 35 server taking no canon client), after the canon's W4
+  reruns, dress v4 and x-corpse-record v4 on f77fbd00. A green there makes 1c the first fix proven alone against the canon: `canon`
+  fast-forwards to 7cd63e69 (the apply head f77fbd00, also off 2136311f, then merges into the line rather than rebasing: no rebase of
+  anything pushed).
