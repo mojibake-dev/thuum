@@ -7906,3 +7906,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   playtest with the key as their premise. Item 6 (progression) held across the server restart and both relaunches ("not taken (level
   1 against the record's 2; under the record: 8:60 9:21 15:16 17:23 21:16)", "recorded 164 bases, level 2"). lab-api's server
   log_count is counted live before each evaluation (a3e5ba4b, 2026-10-24), so the scenarios' server claims need no log-count step.
+- 20:16 PST 2026-11-03 (04:16Z 11-04) (thuum-cf): the runner clear: client-build 18459 (m3-canon-3-apply-main 1e489b6c, pipeline
+  5210) green at 04:05Z, the flip's retry 18460 (m4-scripts-flip 8896ef0c) green at 04:15Z, r2's 18453 green at 03:52Z. The dist for
+  x-corpse-record v3 (3430e911) is 18459's, to run alone on canon-3's server with both seats on it after the playtest's queue (the
+  pillar reads b-object-anim and b-puzzle-relay v2 first, then this, then rune v2 and b-headshot v2's deploy); the flip's and r2's
+  dists exist for their held heads and wait for Eli's word. Holding until 44 ends.
