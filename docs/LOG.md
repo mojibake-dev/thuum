@@ -7911,3 +7911,19 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   x-corpse-record v3 (3430e911) is 18459's, to run alone on canon-3's server with both seats on it after the playtest's queue (the
   pillar reads b-object-anim and b-puzzle-relay v2 first, then this, then rune v2 and b-headshot v2's deploy); the flip's and r2's
   dists exist for their held heads and wait for Eli's word. Holding until 44 ends.
+- 20:21 PST 2026-11-03 (04:21Z 11-04) (thuum-cf): playtest 44's props (Eli: "physics props do not work"; the mill: "ff000000 claims
+  prop 1c0c6 by touch 1: granted", "E_PROP_NOT_OWNER: ff000001 moves prop 1c0c6; another seat simulates it", "E_PROP_CELL: ff000001
+  claims prop 19073 by touch 1; the claimant is not in the prop's cell", "ff000001 claims prop 19074 ... granted"; item 7 VERIFIED IN
+  PLAY, no duplicate NPC, Embry and Hod talk). Read from git: nothing in the corpse slice or the hold touches the prop path; canon-3
+  carries prop-physics slice one as of 10-29 (8699e3c8, 720a6608) and none of turbo 2's arm-one prop commits (f67fb0f8 the claim's
+  owner validations retired per ADR-063 decision 4, 8415e637/81c8cb0f the touch IMPULSE claim, 020de9ab/8ad535f7 the first-sample
+  flight budget, f07ba07e/0def5a22 slice two's movable statics, 8deb7809 the arbitration rule), which live only on m4-prop-arbitration,
+  the union-srv branches and the promote-record branches: none is on parity either, and parity 188a8dea is canon-3's merge base with
+  zero commits the canon lacks (the canon is 74 ahead; parity is behind it). My 11-03 ancestry audit missed the prop arm. numidium's
+  correction, which stands: that bundle was never verified in play (after 41 "props worse than at the start", "13 of 13 claims granted,
+  props thrashed") and 43's "physics mostly works" was read on the same prop code canon-3 has, so canon-3's props ARE the known base and
+  the mill is that base at a cell edge (E_PROP_CELL on the second seat's claim) or something still to read; no prop bundle into the
+  canon. Two options for Eli at the playtest's end (numidium puts them): (a) the physics arm's first step on this baseline, the impulse
+  probe Eli named (an arrow on a bucket, a Fireball at a pile, both seats' views); (b) ADR-063 decision 4's one decided change,
+  f67fb0f8's retirement of E_PROP_CELL and E_PROP_REACH, as its own head off canon-3 with its own two-seat probe at a cell edge. Both
+  probes drafted by path tonight; nothing on a seat.
