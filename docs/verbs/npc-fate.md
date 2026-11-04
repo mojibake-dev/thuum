@@ -2422,6 +2422,14 @@ detours). Two follow-ups, neither a blocker, both for the round after playtest 4
   (MpActor.cpp serves whatever is held); the apply's dead premise refuses the bad order. Fix: drop the held record in RespawnFated.
 - Note (HYPOTHESIS): the two writers are serialized only by the main thread parking while gameThrQ drains on the OnUpdate thread
   (main.cpp:131; ChangeForm.cpp); the apply's "answered on the main thread" line is the read.
+- READ ON CANON-4 (08:41Z 11-04; x-corpse-record v5 42d3e70e, run 20261104-083324, numidium): legs A and B held and no seat froze; leg
+  R red on the owner's two claims alone (c1 "applied" plus "not applied" 0, "answered on the main thread" 0): on canon-4 the owner
+  re-hosted the street before its apply's premises were met, and changeFormService drops a held record when this seat simulates
+  the body and the kill was not the bind's ("changeform 13491: the record dropped, this seat simulates the body", five times), its
+  engine's body 0 to 1 unit from the record ("promote gate 13491: the engine at (20265, -46146, -121), the record at (20265, -46147,
+  -121)"); on 072601 the apply came before the grant (timing). The owner's case by design, not a regression: the record is for
+  watchers. The claim change (the owner's drop with its body within 32 units of the record accepted as the owner's case) is a W4
+  for Eli, numidium's ask.
 
 ### 1d. The guest's copy of a fighting NPC stood elsewhere (39fe1)
 
@@ -2511,6 +2519,16 @@ the record in rerollActor and redressActor alike ("the copy is dead here, a corp
 inventory reconciled to the record"), 1c's loot on corpses. The JS dead-wait of 552e8dc1 is gone; instead a fate for a reference
 the engine does not hold yet waits in pending for its load ("late fate for <id>: not in the engine yet, the redress waits for its
 load"), so every loaded copy passes rerollActor once, early or late: one path. The in-flight guard stays.
+READ ON CANON-4 (00:41 PST 2026-11-04, 08:41Z 11-04; x-fate-dress-bleak v6 fc546670, run 20261104-082903 on image m3-canon-4-7b6fc953 with dist 18610,
+numidium): after the respawn no rerollActor line at all, the claim (the old path's two lines >= 2) red at step 64 before the
+equalities. Underneath, a gap in the rework: the respawn's new fate reaches the copy while it is still dead (reconcile-only), the
+stand-up then dresses it from the fate, and nothing re-asks, so a fate naming ANOTHER pick leaves the stood-up clone with its old
+pick (the swap never runs). Not playtest 44's regressions (no half-built corpse, the loot the record, the apply returning), so a
+known limit for playtest 45 and FIXED on m3-canon-4-followups: rerollActor's decision is one game-thread body, RerollOnGameThread
+(a dead copy reconciles alone; a clone whose pick is the fate's is redressed alone; otherwise the engine's re-roll and the 3D
+reloaded), run by rerollActor's task and by resurrectActor's task right after Actor::Resurrect ("resurrected <id> (... dressed from
+the fate true)"). Dress v7 for that head: after a respawn the stand-up's line >= 1 plus the re-roll or redress-alone line >= 1,
+then the worn and race equalities.
 
 ## Status
 

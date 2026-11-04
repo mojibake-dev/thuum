@@ -8237,3 +8237,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   record once (SetActorValue 0x14 Health, within BASE_MAX) and TGM right after each connect; claims unchanged. For playtest 45's
   item 3: a seat that relaunches inside a hostile cell loads in unprotected, the game's own rule; relaunch where nothing is alive
   nearby or accept the fight.
+- 00:41 PST 2026-11-04 (08:41Z 11-04) (thuum-cf): canon-4's other two reads (numidium): x-fate-dress-bleak v6 RED 082903 at the respawn's claim (no
+  rerollActor line after the stand-up), a claim written for the old path and, under it, a real gap in b763f766: a respawn whose
+  fate names another pick leaves the stood-up clone with its old pick (the late fate reached a dead copy, the stand-up dressed
+  from the fate, nothing re-asked); a known limit for 45, fixed on m3-canon-4-followups (RerollOnGameThread, the whole decision
+  run by the stand-up too; pushed server-only). x-corpse-record v5 RED 083324 on the owner's two leg-R claims alone: the owner
+  drops its held record when it simulates the body ("the record dropped, this seat simulates the body"), its body within a unit of
+  the record, no freeze, c2 applied twice: the owner's case by design; v6's claim change (the drop accepted as the owner's case) is
+  Eli's W4. Recommendation sent: lay canon-4 7b6fc953 for 45 when oracle v3 is green, with the two known limits in the checklist.
