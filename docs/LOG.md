@@ -8140,3 +8140,49 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   and the Long Bow had no row. numidium added "Skyrim.esm:LongBow" to guests.yaml (thuum e1005fa8, deployed, lab-api restarted) and
   froze v1b (the two names, every other line the same, lab/.cache/probes/frozen/dae397e3/); my working file carries the same names and
   reads sha1 dae397e3, one file. v1b runs on 1c's build now; x-corpse-record v4 on 88497c54's dist (18551) after it.
+- 23:10 PST 2026-11-03 (07:10Z 11-04) (thuum-cf): x-fate-inventory v1b (dae397e3) RED at leg B on 1c's build (run 20261104-062409): leg A held
+  (the copy equal to the record on the gold and the Long Bow, both 0; the detour's arming line; E_EQUIP_UNKNOWN_WEAPON 0), the
+  take-all refused four HuntingBows "whose record holds 0" (the refusal works). Read in docs/verbs/npc-fate.md 1c: FINDING 1, the
+  put before the roll wiped by RollFateIfUnrolled's inventory reset (Init had rolled at level 0), FIXED c312fd39 on
+  m3-canon-fate-inv (CanRollFate; no roll at Init for a fate-able actor, the fate's roll beside the puts; a nested list's count
+  honoured in EvaluateListRecurse, the one-arrow bandits; T0 rolls 39fe2 after a put) building server-only as pipeline 5252;
+  FINDING 2 unexplained by reading (the record without the bow and arrows its base's own rows give, the engine's copy with two
+  HuntingBows no detoured call passed): the T0 case is the server half's oracle, a Frida plan on 16128/16129/16155/14752 the
+  engine half's. A CRASH HOLD on 1c's dist (18531): c1 crashed three times in a row at 06:12:38Z, 06:13:00Z, 06:13:23Z at the
+  login's late fates in Bleak Falls, each right after "rerolled 380b5 through the engine" and "puppet 39fe2: AI off", job-thread
+  stacks with TESObjectWEAP pointers (one through 38894 EquipObject); the re-analyst reads the three stacks; nothing of 1c goes to
+  a seat before that. numidium told (two messages).
+- 23:10 PST 2026-11-03 (07:10Z 11-04) (thuum-cf): x-corpse-record v4 (133e4808) on 88497c54's dist and the canon's server, run 20261104-063832
+  (numidium's read): every apply RETURNED, the owner's own dead copy at the reconnect included (playtest 44's freeze is gone), c2's
+  read-5 completion fired once; leg R red on the record's identity across the restart (the owner re-settled about 13 units and
+  re-sent). Eli's W4 "Yes, change it": v5 by path (sha1 42d3e70e): leg R claims the record present and the body within 32 units per
+  axis, leg B's first check the same, the two completion lines recorded on both seats, one new claim (c2's "before the apply" once).
+  The lifeState finding (every lay "2 then 1": the record carries the owner's kDying at the 1.5 s rest, before the 2.0 s flip)
+  BUILT 2b5b33db on m3-canon-3-apply-main (pipeline 5251: server 18575, client 18576): the completion runs after the lay as well,
+  "completed <id>'s dying death after the lay: lifeState 1 -> 2 (read 5)". v5 runs on that dist when it lands; v6 claims the line.
+- 23:28 PST 2026-11-03 (07:28Z 11-04) (thuum-cf): the re-analyst's static read of 1c's three crashes (npc-fate.md 1c, THE READ): the AI process's
+  equip-queue flush on a job thread reading an inventory entry's ExtraDataList the reconcile freed (Actor::RemoveItem of a weapon
+  queues the next-best weapon's equip with that entry's list and purges nodes only by the list passed; the fork passed nullptr and
+  removed the queued weapon next). Fixed 802842d9 on m3-canon-fate-inv in the engine's own order (remove by the entry's own list,
+  worn stacks unequipped first with the queue off, reconcile before the dress, AddWornOutfit unqueued), pipeline 5255 (server 18585,
+  client 18586); the Frida confirmation plan in the doc. T0 green on 5253 (bf4ec042: TemplateInventoryTest rolls the fate first), the
+  new case proving a fresh level-1 roll of 39fe2 carries a bow and arrows. 1e's order read on numidium's c1-relaunch-080.log (redress
+  first, the stand-up's inventory reset after, 33 queued resurrects a respawn) and built on the same branch: a dead copy's late fate
+  waits for its stand-up, the natives refuse a corpse, one resurrect in flight per actor. x-fate-dress-bleak v6 fc546670 by path
+  (server.npcRollLevel 25, numidium's grammar, thuum 39e455e5). x-corpse-record v5 running on 2b5b33db's dist.
+- 23:38 PST 2026-11-03 (07:38Z 11-04) (thuum-cf): x-corpse-record v5 (42d3e70e) on 2b5b33db's dist and the canon's server, run 20261104-072601
+  (numidium): legs A and R GREEN (17 of 17, 15 of 15: the record present and within 32 units through the restart, every apply
+  answered on the main thread, no freeze), leg B 6 of 7. The post-lay completion CONFIRMED on c2: "completed 0x13491's dying death
+  before the apply: lifeState 1 -> 2", "applied (... lifeState 2 then 1)", "completed 0x13491's dying death after the lay: lifeState
+  1 -> 2 (read 5)" at 23:29:05:186, and leg B's apply "lifeState 2 then 2" (the owner's re-sent record carried kDead). The one red:
+  "13491 died at day" counted twice, the second at the restart's load ("MpActor::ApplyChangeForm 13491 - respawning dead actor",
+  the same day 1.3717, the clock unchanged): a load is not a death, so the load's line is reworded on the server ("lies dead since
+  day N (loaded from the record)"), the claim unchanged, committed server-only on m3-canon-3-apply-main (numidium: no W4 needed;
+  Eli's canon rule covers the fast-forward once v5 is green on the reworded pair). c2's one "not applied" was the premise retry
+  ("3D present (Get3D2) (null)", applied at the poll 3054 ms later), by design. Pipeline 5255 (802842d9) green: the crash oracle's
+  pair is image m3-canon-fate-inv-802842d9 with dist 18586 (SCHEMA 35, both halves); the oracle probe x-fate-login-bleak v1 by path
+  (09633967, three logins into the Temple, the reconcile line and the seat answering each time) and its trace twin x-fate-login-
+  bleak-trace v1 (d3bef3ab) with lab/frida/equip-queue-trace.js (39814, 39821, 39822, 38894, 38901, 19689, 37797, 16059, 41381 by
+  `just addr`; `fault: true` is the use-after-free). The branch head 552e8dc1 (1e: a dead copy's late fate waits for its stand-up,
+  the natives refuse a corpse, one resurrect in flight) builds as 5256. x-fate-dress-bleak v6 fc546670 takes numidium's
+  server.npcRollLevel 25 (thuum 39e455e5).

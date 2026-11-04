@@ -295,6 +295,24 @@ Four reads on the lab, each a Frida run on the existing scripts before the recei
    the restart and the late arrival (an answer either way, on the main thread, never a give-up, both seats answering the lab). The
    owner's own body against the record (46 units in 043219 and 053639) is a finding of its own, recorded there: the rest's record
    against the body's later settle.
+   READ (07:10Z 11-04; x-corpse-record v4 133e4808, run 20261104-063832 on 88497c54's dist (SkyrimPlatformImpl 1cb0606cd543a1d2) and
+   the canon's server, numidium's read): legs A and R RETURNED on every apply, the owner's own dead copy at the reconnect included
+   (playtest 44's freeze gone); c2 "completed 0x13491's dying death before the apply: lifeState 1 -> 2 (read 5)" once, then
+   "applied (... lifeState 2 then 1)"; leg R's four reds were the record's identity across the restart (the owner's engine
+   re-settled the body about 13 units after its reconnect and sent a fresh at-rest record: fnv, stamp, x and y moved, correctly);
+   Eli's W4 word "Yes, change it": v5 (by path, sha1 42d3e70e) claims the record present and the body within 32 units per axis,
+   fnv and stamp recorded. FINDING: every apply answered "lifeState 2 then 1", the owner's own reconnect apply too: the record's
+   actor block carries the owner's kDying at its at-rest serialize (the rest at about 1.5 s, before fDyingTimer's 2.0 s flip), so
+   the lay puts the copy back to kDying, where a non-owner's completion never comes and the next apply needs read 5's again. BUILT
+   2b5b33db on m3-canon-3-apply-main (pipeline 5251): the same completion runs after ApplyImpl when the laid state is kDying,
+   "completed <id>'s dying death after the lay: lifeState 1 -> 2 (read 5)"; a laid body is dead on every seat whatever the record
+   carries, and the owner's serialize stays its engine's own state (no kDead written into a record the engine did not reach).
+   CONFIRMED (07:38Z 11-04, x-corpse-record v5 42d3e70e, run 20261104-072601 on 2b5b33db's dist, SkyrimPlatformImpl 4c88ea4d1482ad6b):
+   c2 "completed 0x13491's dying death before the apply: lifeState 1 -> 2", "applied (35568 1, ... lifeState 2 then 1)", then
+   "completed 0x13491's dying death after the lay: lifeState 1 -> 2 (read 5)" at 23:29:05:186; leg B's apply "lifeState 2 then
+   2" (the owner's re-sent record, serialized after its own completion, carries kDead). Every apply of legs A, R and B answered on
+   the main thread, the owner's own reconnect apply included: playtest 44's freeze is gone. The run's one red was the server's
+   death line counted twice across the restart (the load re-ran the death's bookkeeping; reworded on the server, npc-fate.md).
 
 ## Status
 

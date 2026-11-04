@@ -471,3 +471,20 @@ TURN_SIGN) that ramps lockAngle with the pick snapped: HYPOTHESIS that the menu'
   (x-shared-chest-phantom's frame). Ids by `just addr`, each equal to
   the doc's RVA; argument layouts beyond CommonLib's from Ghidra
   (2026-11-03), HYPOTHESIS. Written 2026-11-03; never run. 1.6.1170 only.
+
+- equip-queue-trace.js: the AI process's equip queue against the inventory
+  removals (docs/verbs/npc-fate.md 1c, THE READ of c1's three crashes on
+  18531 and the fix 802842d9). Hooks the queue flush 39814, the node
+  allocator 39821, the purge 39822, ActorEquipManager::EquipObject 38894
+  and UnequipObject 38901 (actor, object, list, count, the queue, force,
+  sounds and applyNow bytes), TESObjectREFR::RemoveItem 19689 and Actor::
+  RemoveItem 37797 (this, item, count, reason, the list passed), the entry
+  deleter 16059 and the actor-update job body 41381; keeps every list a
+  node took, a removal named or the deleter freed, and prints `fault:
+  true` on an equip or unequip whose list a node took and a removal or
+  free consumed (the use-after-free), `queued: true` on a removal whose
+  list a node holds (the fix's purge match). Params refs (the actors) and
+  cap; a summary every 5 s. Arm between a seat's relaunch and its connect
+  into Bleak Falls (lab/.cache/probes/x-fate-login-bleak-trace.yaml). Ids
+  by `just addr` on 2026-11-04; names the re-analyst's static read
+  (HYPOTHESIS) or CommonLib's. Written 2026-11-04; never run. 1.6.1170 only.

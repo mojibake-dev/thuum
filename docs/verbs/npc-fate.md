@@ -2323,6 +2323,81 @@ the detour's "inventory row(s) written" line, E_EQUIP_UNKNOWN_WEAPON 0; B) kill-
 the relaunch) and the copy equal again. Runs on 5236's server image and dist alone (both halves changed, SCHEMA 35), the canon
 otherwise.
 
+READ (23:10 PST 2026-11-03, 07:10Z 11-04; x-fate-inventory v1b dae397e3, run 20261104-062409 on 5236's image and 18531's dist): leg A held every
+claim (the record and the copy equal on the gold and the Long Bow, both 0; "armed 39fe2 from the server's roll at entry 0: 1 engine
+pick(s) dropped (1 weapon(s)), 1 of the server's weapons and 0 inventory row(s) written"; E_EQUIP_UNKNOWN_WEAPON 0) and leg B went
+RED at the take-all: four "E_TAKE_NOT_IN_RECORD: ff000000 takes 1 of 13985 from 39fe2, whose record holds 0" (the take path's
+refusal works as designed; the boots and the dagger moved). Behind the red:
+- FINDING 1 (the record): the 10 gold put at step 10 read 0 after the load. Cause in the code: MpActor::Init rolled 39fe2's base at
+  level 0 at the server's start, and RollFateIfUnrolled reset the inventory (changeForm.inv = Inventory()) to replace that roll,
+  taking the put with it. FIXED on m3-canon-fate-inv c312fd39 (pipeline 5252, server-only): CanRollFate() names the roll's
+  preconditions (espm, not from a save, alive, unfated, a base above 0x7); Init rolls nothing for an actor the fate pass will roll
+  (the engine's own shape: the base's rows resolve once, at the first load, at the loader's level) and RollFateIfUnrolled lands the
+  roll beside what the inventory holds; a saved, dead or player's actor keeps the old rule (a body's first open rolls it). T0:
+  NpcFateTest rolls 39fe2 at level 1 after a put of 10 gold.
+- FINDING 2, two halves, UNEXPLAINED by reading. (a) The record held no bow and no arrows, though 39fe2's base MS13BanditCampfire02
+  0x39fe5 keeps its own rows (ACBS template flags 0x0eff, UseInventory 0x100 unset; CNTO IronDagger 0x1397e x1,
+  LItemBanditWeaponArrows 0x39d2f x1, LItemBanditWeaponBow 0x39d2e x1; both lists LVLD 0, LVLF 3, no LVLG; no override in any plugin
+  of the load order; all read by lab/esm.py), so the roll gives one bow (eight level-1 entries, LongBow 0x3b562 or HuntingBow
+  0x13985) and the arrows; EquipBestWeapon took the dagger (right 1397e, HuntingBow 7 and LongBow 6 outdamage it), so no bow was
+  in the record at the roll. The T0 case on c312fd39 is the oracle: it asserts the bow in hand and 1 to 20 arrows after the fate
+  pass; red there is the server's own bug, green moves the cause to the lab server's state. One server bug beside it, fixed in
+  c312fd39: EvaluateListRecurse passed countMult 1 to a nested list, dropping the entry's count (BaseArrowIron75 x20 gave one arrow
+  at most: bandits with one arrow). (b) The engine's copy held two HuntingBows and no arrows at step 16 (before the kill, the copy
+  in combat with c1), while the detour's one arming call dropped its one weapon pick and every later entry's picks (picks->clear()
+  on each call, "0 inventory row(s) written", the fate's inv empty), the outfit roll was skipped ("dressed 39fe2 ... 3 of 3 tagged
+  for outfit 1e608 ... the engine's outfit roll skipped"; the three worn are HideBoots 0x13910, the cuirass 0x10594d and the
+  dagger), no quest alias forces 39fe2 (a QUST alias scan of Skyrim.esm: 0 hits for 39fe1, 39fe2, 39fe4), SPID distributes no bow
+  (c1-po3_SpellPerkItemDistributor.log), no VMAD on the placement or its bases. The two bows did not pass 16128 as detoured.
+  HYPOTHESES, ranked: the clone's leveled rows resolve through a second path 16128 does not cover (an init before the arm, or an
+  entry adder of its own) and the count 2 is one roll per init; the combat AI's weapon pick for a Missile class. Dynamic plan:
+  a Frida script on 16128 (ContainerAdd), 16129 (InitLeveledItems), 16155 and 14752 with owner 39fe2, logging the ordinal, each
+  pick's form id and count, the caller's return address and the thread, from the cell's load to the first npc-state, and the
+  owner's InventoryChanges entryList dumped after the load. Until that read, the cure in kind is the record applied at every load
+  (RedressOnGameThread's reconcile called at the actor's 3D load for every fate, early or late: one path), HELD BACK by the crash.
+- CRASH, HOLD on 1c's dist: c1 crashed three times in a row on 18531 at 06:12:38Z, 06:13:00Z and 06:13:23Z (c1-crash-2026-11-03-
+  22-12-38/-22-13-00/-22-13-23.log, copied into 061637's and 062409's artifacts), each about 14 s after a launch inside the
+  playtest-relaunch hold, at the login's late fates in Bleak Falls: the platform logs pid1724, pid3888 and pid2060 each end
+  "rerolled 380b5 through the engine from pick 55944 (or 5593c) toward the fate's 55942 (3D loaded true before, true after the
+  reload)" then "puppet 39fe2: AI off, combat stopped, keep-offset cleared, activation blocked", shortly after "inventory of 39fe2
+  reconciled to the record: 1 row(s) and 4 worn, 14 (15) removed, 0 added". The stacks sit on a BSJobs::JobThread with TESObjectWEAP
+  and BSFadeNode pointers on them: 12354+0xB5 from 11615+0x10F; 11696+0x38 from 38894+0x54 (EquipObject); 11585+0x16 from
+  11593+0xAB at address 0. HYPOTHESIS: the reconcile's RemoveItem of the copy's wielded weapon frees its 3D under a job thread, or
+  the engine re-roll's reload races the demote; the re-analyst's static read of the three stacks is below. Nothing of 1c reaches a
+  seat before its fix is proven; the canon (apply-off js, no reconcile) is clean of it.
+  THE READ (07:28Z 11-04, the re-analyst, static, HYPOTHESIS until the Frida trace; ids by `just addr`, names its own): one chain under
+  all three crashes: BSJobs::JobThread, 41380 (a job per actor), 41381 (Actor's UpdateNonRenderSafe vfunc then 39814), 39814 the
+  AI process's equip-queue flush (MiddleHighProcessData::itemstoEquipUnequip, include/RE/M/MiddleHighProcessData.h:157, each node
+  a QueuedItem holding ObjectEquipParams::extraDataList as a raw pointer, :66, :81-94), then per node UnequipObject (38901, crash
+  1: 38934, 38920, 11615 SetCannotWear, 12354 RemoveByType reading a freed list whose data word is 1; draugr 383f7, Ancient Nord
+  Greatsword) or EquipObject (38894, crash 2: 11696 IsWorn on a list whose presence word is 3; bandit 39fe2, Long Bow 0x3b562
+  beside the Iron Dagger; crash 3: 38929, 38001, 38004 AddWornItem, 16066 the worn-entry merger, 11593, 11585 GetType on a freed
+  BSExtraData's vtable; draugr 800a6, Ancient Nord Battleaxe). Not freed: the 3D, the biped, the process. The remover:
+  TESObjectREFR::RemoveItem 19689 to 16059 frees an entry's lists at zero count; Actor::RemoveItem 37797 purges queue nodes only
+  where the node's list equals the a_extraList passed (the fork passed nullptr, so nodes with a real list survived) and, for a
+  removed weapon with no menu open, QUEUES EquipObject of the next-best weapon with a_queueEquip true (39821 allocates the node and
+  copies the list pointer); Actor::AddWornOutfit(outfit, a_forceUpdate) forwards its second argument into the same queue flag (the
+  fork passed true; the engine's dresser 418622 passes 0). Ranked: 1. the reconcile's RemoveItem of the copy's weapons (each
+  removal queues the next-best's list, the loop removes that weapon too and frees it, the next actor-update job reads it; weapons
+  in all three, the dagger beside the bow, 14 removed on 39fe2, 1 on each draugr); 2. AddWornOutfit(outfit, true) a line earlier
+  queueing every tagged entry; 3. applyEquipment's default queue flag; 4. the 380b5 re-roll (none of its objects on the stacks);
+  5. the demote (frees no list). Safe idiom, the engine's own (Actor::SetDefaultOutfit, src/RE/A/Actor.cpp:1016-1029: remove first,
+  dress last, nothing queued across a removal; ActorEquipManager.h:19,22's a_queueEquip; InventoryEntryData::IsWorn :50).
+  BUILT 802842d9 on m3-canon-fate-inv (pipeline 5255): ReconcileInventoryOnGameThread removes each stack by its own ExtraDataList
+  (copied out first) after unequipping a worn stack with the queue off and applied now, the listless remainder with nullptr as
+  before; RedressOnGameThread strips, tags, reconciles, then AddWornOutfit(outfit, false); the lines say so ("{} worn stack(s)
+  unequipped first", "the record's rows reconciled first, the dress unqueued"). Oracle: three logins into Bleak Falls on that dist
+  where 18531 crashed three of three. Dynamic plan (the confirmation): a Frida script on 39821 (enter: actor, the equip flag, the
+  item, params->extraDataList, the caller, the thread), 39822 (item, list), 38894 and 38901 (a_extraData, the seventh argument,
+  the thread), 39814 (enter and leave, the thread), 19689 (item, count, a_extraList, the caller) and the 0x20 free under it, on a
+  login into Bleak Falls with fates on: on 18531 a 39821 node whose list equals a pointer freed under 19689 from RedressOnGameThread
+  and then 38894 or 38901 on a job thread with that pointer within a frame; on 802842d9 no node outliving its list. Falsifiers: the
+  faulting list never in a 39821 node before the crash; the free from a caller outside RedressOnGameThread; the crash recurring
+  with the queue flags at 0 and the reconcile before the dress.
+  T0 (07:28Z 11-04): pipeline 5253 (bf4ec042) GREEN with the new case, so a fresh roll of 39fe2 at level 1 does carry a bow in hand and
+  the arrows: FINDING 2 (a)'s missing bow is not the roll's code on the new flow; the probe's rerun on this branch's dist (the
+  record read at the load) decides whether the lab's old flow (Init's level-0 roll and the reset) or the server's state made it.
+
 ### 1d. The guest's copy of a fighting NPC stood elsewhere (39fe1)
 
 Facts (canon-3): the host samples every hosted actor's reference transform each 130 ms (sendInputsService.ts:114-118, :164-241,
@@ -2387,6 +2462,22 @@ resurrect told not to reset the inventory a fate dresses), one with 1c's reconci
 Probe x-fate-dress-bleak v2 (by path): c1 hosts the Temple, kills one campfire bandit, relaunches and comes back: the living
 bandit's and the corpse's npc-state (worn against the fate's count, raceId, is3DLoaded), the platform's "rerolled" and
 "redressed" lines, screenshots; on canon-3 it reads the bug, on the fix branch it claims the wear.
+
+READ (23:28 PST 2026-11-03, 07:28Z 11-04; x-fate-dress-bleak v5 91a85648, run 20261104-070209 on THE CANON, numidium's read of c1-relaunch-080.log):
+leg D held twice but no pick swapped (every leveled list at the Temple has one entry at level 1: LCharBanditOnlyNordM 0x37c28,
+LCharBanditMissileNordF 0x1a346, the steps' LCharBanditMissile 0x1e770, the ambush draugr's LCharDraugrMelee* lists, six bands 1, 5,
+9, 14, 19, 25; playtest 44's khajiit 29613 (37c06 to 9a549) and the 06:12Z hold's 380b5 (55944 to 55942) swapped at rotfern's level);
+the run timed out at 420 s in leg E. The ORDER is read: "rerollActor(39fe4): the loaded clone is the fate's pick 1bcd8 already,
+redress alone" and "redressed 39fe4 ... 4 of 4 tagged" at 23:06:44:534, then in the same millisecond "resurrected 39fe4 (puppet false,
+AI was off false, dead before true, dead after false)" and two more at :535: the stand-up (Actor::Resurrect(true, true), its inventory
+reset re-dressing the engine's own outfit) lands AFTER the redress, so the respawned copy wears the engine's roll, not the fate's
+(v4's finding). Beside it "resurrect 39fe4 (puppet false) queued" 33 times per respawn: the live word is applied by every view update,
+movement and property message while the engine still reads the copy dead, each tick queueing another stand-up. BUILT on
+m3-canon-fate-inv (with 1c and the crash fix): actorFateService.lateFate holds a fate for a copy that is dead here until its stand-up
+(the pending poll, PENDING_MAX_MS 120 s; a corpse whose record stays dead keeps its look, the change-form record lays it) and runs
+the re-roll or redress on the living copy, the record's last word; FateApi's rerollActor and redressActor refuse a dead actor; and
+deathService queues one stand-up per actor (RESURRECT_INFLIGHT_MS 2000, the mark cleared when the word and the engine agree). Probe
+v6 (fc546670, server.npcRollLevel 25 so the lists have six picks) reads the swap on the canon (the bug's witness) and on this dist.
 
 ## Status
 
