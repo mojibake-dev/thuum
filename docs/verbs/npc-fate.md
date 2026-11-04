@@ -2569,6 +2569,15 @@ true)". So H1's DoReset3D on a copy that had just stood up drops the model and t
 x-npc-late-3d 231926 read non-null) now that the inventory and the dress are the record's, and Actor::Update3DModel (A/Actor.h:633,
 AIProcess::Update3DModel, which wants the process) runs the flagged skin, head and face passes at once; the line says "reloaded
 true, the model passes run true". HYPOTHESIS until v8 reads is3DLoaded and faceNode true after a respawn on both seats.
+FACT (10:58Z 11-04; oracle v3 3ce3a89b on 3bd97f7c's pair, run 20261104-105107, GREEN with no crash; numidium's grep): the living
+re-roll is EVERY Temple login's, not a respawn's: c1.log holds seven "rerolled ... through the engine" lines at one party-mean login
+(02:55:55 PST), e9986 1fd50 to 48de3, 1d219 1ff2e to 1fd50, 380b8 387c4 to 387c8, 39fe1 39d01 to 1bcd8 (44's campfire bandit),
+380b5 5593b to 55943, 380b3 48de3 to 48de2, 8009e 38925 to 38920, all "3D loaded true before": the save's late joiner loads its
+clones with the engine's own attach re-roll (re-npc-roll.md section 9) before the fates arrive, so each leveled actor's pick differs
+from the server's and the late fate re-rolls it on the living loaded copy. On 3bd97f7c those seven would have stood invisible, and
+playtest 45 exercises 9f2757a3's rebuild block at every Temple login; so the oracle reruns on 9f2757a3 with each re-rolled copy's
+"3D loaded X after; reloaded Y, the model passes run Z" as the witness beside dress v8. This is also 44's 39fe1: the host's own
+live bandit re-rolled at the login, naked and headless under Load3D alone.
 
 ## Status
 

@@ -8302,3 +8302,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   m3-canon-4-followups: after DoReset3D the model is asked back through Actor::Load3D and Actor::Update3DModel runs the flagged
   passes at once (npc-fate.md 1e, READ ON 3bd97f7c). 45 waits on it (item 4 is a respawn read on both screens); oracle v3 and corpse
   v6 run on 3bd97f7c's pair meanwhile.
+- 02:58 PST 2026-11-04 (10:58Z 11-04) (thuum-cf): oracle v3 on 3bd97f7c GREEN 20261104-105107 (three Temple logins, no crash), and numidium's gate
+  puts it back in 9f2757a3's reads: seven "rerolled ... through the engine" lines at ONE party-mean login (the save's late joiner
+  loads the engine's own attach re-roll before the fates, so every leveled actor's pick differs from the server's): the living
+  re-roll is every Temple login's, 44's 39fe1 included, and 45 exercises 9f2757a3's rebuild block constantly; the oracle reruns on it
+  with each copy's "3D loaded X after; reloaded Y, the model passes run Z" line as the witness. Corpse v6 playing on 3bd97f7c.
