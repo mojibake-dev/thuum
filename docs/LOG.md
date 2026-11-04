@@ -8186,3 +8186,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   `just addr`; `fault: true` is the use-after-free). The branch head 552e8dc1 (1e: a dead copy's late fate waits for its stand-up,
   the natives refuse a corpse, one resurrect in flight) builds as 5256. x-fate-dress-bleak v6 fc546670 takes numidium's
   server.npcRollLevel 25 (thuum 39e455e5).
+- 23:30 PST 2026-11-03 (07:30Z 11-04) (thuum-cf): Eli, verbatim via numidium: "also yeah deff fix that use after free". So the equip-queue
+  use-after-free (npc-fate.md 1c, THE READ) is a must on m3-canon-fate-inv before any other claim of that branch, its oracle three
+  logins into Bleak Falls on the branch's pair without a crash (x-fate-login-bleak v1 09633967), the Frida trace of the queue flush
+  beside it where cheap (x-fate-login-bleak-trace v1 d3bef3ab, lab/frida/equip-queue-trace.js).
