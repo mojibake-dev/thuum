@@ -7890,3 +7890,19 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   code: the key in both seats' client settings, durably in the stage's client settings until the flip's hosted-cell gate retires it
   (numidium's tooling). The guest's pattern never opening the host's door is ADR-059's open decision 2, the design at this slice, not a
   regression. Told numidium; x-bleak-pillars not written.
+- 20:13 PST 2026-11-03 (04:13Z 11-04) (thuum-cf): the key diagnosis HELD (numidium): activationUnblockedBases laid live on both seats
+  at 20:01 PST (each relaunched with it written in the stopped game, both game folders and C:\sky-lab's staged template) and into
+  lab/deploy/sky-client/skymp5-client-settings.txt for every stage (thuum 6ddf8ae2). Eli: "prisoner rotates first pillar. works
+  great. 2nd pillar STARTED desynced. resumed syncing once the rotation passed the one it was desynced ON. last pillar didn't work at
+  all. when rotfern rotates one it only rotates on prisoners screen not her own", then "being able to see that rotfern set the correct
+  pattern from prisoners screen, she was able to open the gate": the puzzle works end to end on the host's faces. Three pieces for the
+  pillar list: (1) a pillar's starting face differs between the seats (the lastAnimation restore at load against the other's), (2) one
+  pillar never turns, (3) the guest's own turn plays on the host's screen and not on her own. For (3) the last green b-puzzle-relay
+  (20261102-104258 on 64dbacfe) had the guest's "object animation aa8cb Trigger01 played" 0.3 s after the host's "reported" for every
+  guest turn, so it is a regression against 11-02's build or the stage's lists; b-puzzle-relay v2 (its own commit) claims that pair
+  after leg A (>= 1 each) and records it after leg B, and corrects leg C's E_TRAP_NO_REF == 0 (the 11-02 17:53 audit's rewrite, never
+  run, contradicting the header's "0x4fcdf by design" and leg A's claim) to leg A's shape, flagged W4 for Eli's word. b-object-anim
+  needs no change (the host's turn reported and played, the faces in its screenshots before the turn); both run on canon-3 after the
+  playtest with the key as their premise. Item 6 (progression) held across the server restart and both relaunches ("not taken (level
+  1 against the record's 2; under the record: 8:60 9:21 15:16 17:23 21:16)", "recorded 164 bases, level 2"). lab-api's server
+  log_count is counted live before each evaluation (a3e5ba4b, 2026-10-24), so the scenarios' server claims need no log-count step.
