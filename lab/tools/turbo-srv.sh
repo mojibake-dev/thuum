@@ -22,8 +22,11 @@ here=$(cd "$(dirname "$0")/../.." && pwd)
 ssh_srv() { ssh -o BatchMode=yes -o ServerAliveInterval=15 -J "$jump" "$host" "$@"; }
 online() {
   curl -fsS -m 15 -X POST "$api/state/rpc/labState" -H 'content-type: application/json' -d '{"payload":{"kind":"online"}}' \
-    | python3 -c 'import json,sys; print(" ".join(str(p) for p in sorted(x.get("profileId") for x in json.load(sys.stdin).get("players", []))))'
+    | python3 -c 'import json,sys; print(" ".join(str(p) for p in sorted(x.get("profileId") for x in json.load(sys.stdin).get("players", []))))' 2>/dev/null
 }
+# every seat online before the push is online again; a seat that came up meanwhile (a relaunch's, a snapshot's start) is no
+# failure (2026-11-03: c1 logged in during the push to 68da0cdb, before "2", after "1 2", and the exact compare exited 6)
+covers() { local s; for s in $seats; do case " $now " in *" $s "*) ;; *) return 1;; esac; done; }
 t0=$(date +%s)
 active=$(curl -fsS -m 15 "$api/status" | python3 -c 'import sys,json; print(json.load(sys.stdin).get("run") or "")')
 [ -z "$active" ] || { echo "== a lab run is active ($active): a turbo push waits for it" >&2; exit 3; }
@@ -51,10 +54,10 @@ echo "   server up $(( $(date +%s) - t0 )) s after the push"
 now=""
 for _ in $(seq 1 90); do
   now=$(online || true)
-  [ "$now" = "$seats" ] && break
+  covers && break
   sleep 2
 done
-if [ "$now" = "$seats" ]; then
+if covers; then
   echo "== seats back online (${now:-none}) $(( $(date +%s) - t0 )) s after the push $(date +%H:%M:%S)"
 else
   echo "== seats online now: ${now:-none}, before: ${seats:-none} (180 s): relaunch a missing one (just playtest-relaunch c1|c2) or just turbo-back" >&2
