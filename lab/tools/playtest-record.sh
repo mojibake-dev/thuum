@@ -183,6 +183,14 @@ for pair in c1:711 c2:712; do
       | python3 -c 'import json,sys; sys.stdout.write(json.load(sys.stdin).get("content",""))' > "$tmp/$name" 2>/dev/null
     ssh_srv "cat > $out/$name" < "$tmp/$name" && note "$name: $(wc -l < "$tmp/$name" | tr -d ' ') lines"
   done
+  # the console tee, where the client's own lines are (an inventory apply, the hands' re-equip, a say's verdict): its
+  # last 60,000 lines, so one file-read stays well under the guest agent's 16 MiB cap (playtest 44, 2026-11-03: the
+  # arrows' re-equip could not be read, the recorder kept no console)
+  name="$c-console.log"; copy="C:\\sky-lab\\playtest-$n-$name"
+  ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 60 -- powershell -NoProfile -Command \"Get-Content -LiteralPath 'C:\\sky-lab\\$c-console.log' -Tail 60000 | Set-Content -LiteralPath '$copy' -Encoding utf8\"" > /dev/null 2>&1
+  ssh -o BatchMode=yes "$jump" "pvesh get /nodes/core/qemu/$vmid/agent/file-read --file '$copy' --output-format json" 2>/dev/null \
+    | python3 -c 'import json,sys; sys.stdout.write(json.load(sys.stdin).get("content",""))' > "$tmp/$name" 2>/dev/null
+  ssh_srv "cat > $out/$name" < "$tmp/$name" && note "$name: $(wc -l < "$tmp/$name" | tr -d ' ') lines (the tee's last 60,000)"
 done
 for c in c1 c2; do
   # a game whose log stops while the playtest goes on is a finding (ADR-033): the log's last line, then the
