@@ -8205,3 +8205,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   fate's reconcile on a dead body, the codegen union). The playtest build's reads run on canon-4's own pair when its pipeline lands:
   x-fate-login-bleak v1, x-fate-inventory v1b, x-fate-dress-bleak v6, x-corpse-record v5; four green and canon fast-forwards to
   7b6fc953, the image becomes the canon's server. The 802842d9 oracle numidium is running attributes the use-after-free fix alone.
+- 23:58 PST 2026-11-03 (07:58Z 11-04) (thuum-cf): the use-after-free oracle on the 802842d9 pair (image m3-canon-fate-inv-802842d9, dist 18586),
+  x-fate-login-bleak v1 09633967, run 20261104-075040 (numidium): NO CRASH in three logins into the Temple (the only crash logs in
+  the artifacts are the old 22:12 to 22:13 PST ones), the seat answering after each relaunch (online after 11.0, 11.0 and 10.0 s),
+  logins 1 and 2 holding every claim ("inventory of 39fe2 reconciled to the record" 1, of 39fe4 1, both alive, 39fe4's 3D); login
+  3 red on the claim's timing alone: the Temple unhosted 30 s after the connect, so no late fate and no reconcile yet. The fix
+  alone holds the crash path (Eli's "deff fix that use after free" attributed to 802842d9). v2 of the probe (8d211440) waits for
+  the host grant (until, 90 s) and 15 s more before each login's reads, claims unchanged; the trace twin v2 72b84417 the same; both
+  for canon-4's pair.
