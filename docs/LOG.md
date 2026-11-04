@@ -7711,3 +7711,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   candidates once this is proven: the bandits' server-rolled head gear (E_HEADSHOT_HELMET would say so) and rotfern's base Marksman
   under 60 after relaunches (the first ClaimHeadshot line's archery field). The same 5 s resend is the one periodic change on
   rotfern's engine in the session, so the arrows regression's read weighs it first (a RemovePerk on an equipped bow's perk).
+- 18:02 PST 2026-11-03 (02:02Z 11-04) (thuum-cf): The ancestry audit of everything verified in play since playtest 36 against the base 0c23306e (an agent, by sha
+  and by patch, since many recorded dist shas were rebased into parity): all in except two fork heads, the observer's rune glyph
+  (m2-rune-glyph dd5aa100, in canon-1 f9a275f4) and the perk picks counter (m5-perk-points dcfc2e08 and bbec6de7, 41 break 2:
+  without it the base's points are level minus 1 minus perks HELD, so the standing Overdraw40 leaves rotfern zero points at her
+  level-up and 44's item 6 fails for her by construction). canon-2 cut for Eli's word: m3-canon-2 32990829 = canon-1 plus
+  m5-perk-points, server-only (no client or platform change: canon-1's dist f9a275f4 pairs with either server image), fork-lint clean.
+  Lab-side: 44.yaml's locks false against item 3's key lock; the baseline's traps still need the lever laid (no ADR-062 slice in the
+  base). In but retired or broken, nothing to remove: the shared-chest reopen behind chestRedraw (default inplace), the host-snippet
+  reanimate (F17, its replacement unmerged), the arm-one prop model (the "mostly works"). Missing but never verified in play, for
+  later by Eli's order: follow-vouch, reanimate-claim, the deaths-client and settle fixes, the five prop branches, the ADR-062 slices,
+  trap-hit, mod-lock. The flip head fb547765's build (5173) green; 8896ef0c's running.
