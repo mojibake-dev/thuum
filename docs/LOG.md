@@ -8353,3 +8353,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   seat removes the copy's own attached arrows before the lay (ExtraDataList::RemoveByType), the record's arrows re-attached by the
   finish pass; its full pipeline running. The head for 45 is now 2c17bc85 (the dress order) plus f4014f39; reads: corpse v6 and
   dress v8 (its arrows condition the probe cannot force; the Frida read of 11577 and 12782 under an apply is the confirmation).
+- 11:07 PST 2026-11-04 (19:07Z 11-04) (thuum-cf): x-corpse-arrows v1 by path (numidium's ask: 45's item 1 is rotfern shooting the bandits with Prisoner
+  watching, and no corpse probe ever laid a record of a body with arrows): c1 the host with a Long Bow, placed 400 units from 39fe4
+  facing it (approach), four shots so arrows stick on both seats, then kill-ref; claims the hits on the record, the owner's record
+  sent, both seats answering after the apply, c2's apply applied on the main thread with no refusal, no E_CHANGEFORM_; the body's
+  places and the fix's line recorded; lab/frida/arrows-apply-trace.js armed on c2 before the shots (35568, 12095, 37178, 11577,
+  12329, 12782 by `just addr`; a null extra at the loader is the fault). Reads on f4014f39's pair: corpse v6, x-corpse-arrows,
+  dress v8.

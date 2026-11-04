@@ -488,3 +488,17 @@ TURN_SIGN) that ramps lockAngle with the pick snapped: HYPOTHESIS that the menu'
   into Bleak Falls (lab/.cache/probes/x-fate-login-bleak-trace.yaml). Ids
   by `just addr` on 2026-11-04; names the re-analyst's static read
   (HYPOTHESIS) or CommonLib's. Written 2026-11-04; never run. 1.6.1170 only.
+
+- arrows-apply-trace.js: a change-form record's attached-arrows block
+  against the copy's own arrows under the apply (docs/verbs/change-form.md
+  READ 8, the applying seat's crash of x-fate-dress-bleak v8 183635 and the
+  fix f4014f39). Hooks the apply 35568 (a window per listed form, on its
+  thread), ExtraDataList::LoadGame 12095, Actor::Set3D 37178 (a null node
+  flagged), RemoveByType 11577 (type 0x98 flagged), GetByType 12329 (0x98's
+  leave, found or null) and the attached-arrows loader 12782 (a null extra
+  flagged). Params refs (the forms whose applies open a window) and cap; a
+  summary every 5 s. Arm on the watcher before the kill
+  (lab/.cache/probes/x-corpse-arrows.yaml). Ids by `just addr` on
+  2026-11-04; names the re-analyst's static read (HYPOTHESIS) or
+  CommonLib's. Written 2026-11-04; never run. 1.6.1170 only.
+
