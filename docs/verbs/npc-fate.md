@@ -2298,6 +2298,31 @@ E_EQUIP_UNKNOWN_WEAPON 0, the host's npc-state worn equal to the fate's, on cano
 `canon` (2136311f) as m3-canon-fate-inv; the arrows regression ("re-equip her bow or her arrows don't work") rides it: a looted
 stack the record lacked resynced the quiver the same way.
 
+BUILT (2026-11-03 night) on m3-canon-fate-inv off `canon` 2136311f, five commits: c9d64b33 the take's E_TAKE_NOT_IN_RECORD and the
+put's E_PUT_NOT_HELD with ResyncAfterRefusedMove instead of RemoveItems' throw (T0 green, CI 5226); 4ce1d78b the fate's rows on the
+wire (FateInvRow {base_id, count}, ActorFateEntry.inv at cap::FATE_INV 32, the table bound 32 KiB, check_fates refusing a 0 id or
+count, SCHEMA_VERSION 35, the two ActorFate fixtures regenerated, the C++ InvRow and FateOf); 4667649a the platform (Fates::Fate.inv,
+setActorFate and armActorFate's fourth argument, the container-path detour dropping every engine pick for a fated owner and writing
+the fate's worn weapons plus its rows at the arming entry, RedressOnGameThread ending in ReconcileInventoryOnGameThread through
+GetInventory, RemoveItem and AddObjectToContainer) and the client (ActorFateEntry.inv, flatInvRows, the applied key, the copy fates,
+the codegen); 7c3c9f79 a type; 7cd63e69 the fresh review's eleven findings applied as written (NO-GO on one blocker: FateOf filtered
+its rows by the inventory entries' worn flag, which an NPC's entries never carry, the Equipment record holding the worn set, so
+every outfit piece and the rolled weapon landed twice; now a base's row is its inventory count less its Equipment worn count, with
+the ring-roll T0 asserting it; the detour writes a row less what the copy holds, the base's fixed CNTO rows and the changes made,
+since 16128 runs for the leveled rows alone; the reconcile skips the leveled-list bases GetInventory lists and counts at or below
+zero; OnTakeItem strips the taker's worn flag as the put does; MpActor::DropItem refuses E_DROP_NOT_HELD with the resync; the tests
+assert both resync messages; one arming line per pass, drops at debug; the comments true). Point 4 (the hosted equipment branch as a
+plain drop) stays deferred behind the probe. Pipeline 5236 builds both halves. Dynamic (HYPOTHESIS, the review's finding 10): on a
+LIVING late-fated actor the reconcile removes the engine's wielded weapon and adds the record's row unequipped, so the hands are
+empty until the AI's next pick and the host's interim equipment report records empty hands (E_HIT_WEAPON on a swing meanwhile):
+a transient the probe's npc-state read times; if it shows in play, the fix is an equip of the fate's worn weapon after the
+reconcile (AddWornOutfit's weapon behaviour unread). Probe x-fate-inventory v1 (by path, sha1 90b98f7b): 10 gold put in 0x39fe2's
+record before any seat loads the Temple, c1 enters and hosts, A) c1's copy of 39fe2 and 39fe4 equal the record (gold, the Long Bow),
+the detour's "inventory row(s) written" line, E_EQUIP_UNKNOWN_WEAPON 0; B) kill-ref, the body opened, take all: E_TAKE_NOT_IN_RECORD
+0, the body's gold moved; C) c1 relaunches and comes back: "inventory of 39fe4 reconciled to the record" (or the detour's line since
+the relaunch) and the copy equal again. Runs on 5236's server image and dist alone (both halves changed, SCHEMA 35), the canon
+otherwise.
+
 ### 1d. The guest's copy of a fighting NPC stood elsewhere (39fe1)
 
 Facts (canon-3): the host samples every hosted actor's reference transform each 130 ms (sendInputsService.ts:114-118, :164-241,

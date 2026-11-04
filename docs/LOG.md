@@ -8062,3 +8062,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   relaunches and comes back: "inventory of 39fe4 reconciled to the record" (or the detour's line since the relaunch) and the copy equal
   again. On canon-3 the equalities are the red. Runs on m3-canon-fate-inv's dist after its review and full pipeline, alone against
   the canon's server with its own image (the server half changed: the refusals, FateOf, SCHEMA 35, so both ends on the branch).
+- 21:27 PST 2026-11-03 (05:27Z 11-04) (thuum-cf): 1c reviewed (a fresh agent, ADR-064 rule A): NO-GO on one blocker, GO-grade on the
+  rest, all eleven applied as written in 7cd63e69. The blocker: FateOf filtered its rows by the inventory entries' worn flag, which an
+  NPC's inventory entries never carry (the Equipment record holds the worn set), so every outfit piece and the rolled weapon rode in
+  `inv` as well as `worn` and would have landed twice on every copy through both the detour and the reconcile; a base's row is now its
+  inventory count less its Equipment worn count, and the ring-roll T0 asserts no row names a worn base and the rows sum to the
+  inventory less the worn (the T0 the design named, not written before). The rest: the container-path detour runs for the leveled rows
+  alone, so a row is written less the base's fixed CNTO rows and the changes made (the owner's TESContainer and the changes' entryList);
+  the reconcile reads GetInventory without the leveled-list bases and skips counts at or below zero; OnTakeItem strips the taker's
+  worn flag as the put does (the record's row matches by every extra but the count); MpActor::DropItem refuses E_DROP_NOT_HELD with the
+  resync (the last client-word throw); the tests assert both resync messages; one arming line per init pass; the comments true; the
+  living actor's transient disarm at a late reconcile recorded as a Dynamic HYPOTHESIS. Pushed server-only, then the full pipeline
+  5236 started by hand (both halves: the server image with the refusals and SCHEMA 35, the Windows dist). The probe x-fate-inventory
+  v1 (90b98f7b) runs on that image and dist alone after the canon queue. npc-fate.md's 1c section carries the BUILT paragraph.
