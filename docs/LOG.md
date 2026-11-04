@@ -8456,3 +8456,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   roll output (the pick array) inside the leveled-item roll and makes no equip or 3D call, so the trigger, if ours, is the engine's
   equip of the weapon we wrote (or the init running twice) meeting a lying ambush draugr's blended ragdoll (HYPOTHESIS); the
   re-analyst reads 78536's chain with that question. 45 proceeds.
+- 12:40 PST 2026-11-04 (20:40Z 11-04) (thuum-cf): playtest 45 set up and Eli pinged at 12:39 PST (numidium): the pair skymp-server:m3-canon-4-hands-4c6d9f24
+  with f4014f39's dist (client-build 18729) and the 61f417e0 driver; the world playtest-m3-39-paused restored, both seats at the
+  Temple entrance at noon, the standing base checked, the hold 240 min, the recorder into results/playtest-45/. The build under
+  test is frozen until Eli ends 45; the re-analyst's read of 202729's ragdoll crash lands into the LOG and npc-fate.md meanwhile,
+  no deploy behind it.
