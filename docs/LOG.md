@@ -8258,3 +8258,6 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   The faceNode driver is on thuum main (3e0a5a31) and numidium lays it before the dist, so dress v8 (by path) claims
   c1.npc_state(0x39fe4).faceNode == true at every read beside the worn and race equalities; nothing else changed from v7. Run order
   on c4539d22's pair (pipeline 5274): dress v8, oracle v3, corpse v6.
+- 01:14 PST 2026-11-04 (09:14Z 11-04) (thuum-cf): pipeline 5274 (m3-canon-4-followups c4539d22) GREEN: server-build 18639, client-build 18640. 45's pair is
+  image m3-canon-4-followups-c4539d22 with 18640's dist and the faceNode driver; numidium runs dress v8 bf1c8f36, oracle v3 3ce3a89b
+  and corpse v6 8f22e960 on it, then canon fast-forwards to c4539d22 for the lay.
