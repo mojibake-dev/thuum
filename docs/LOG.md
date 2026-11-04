@@ -8523,3 +8523,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   puppetService's reconcile stands aside for a resurrect's in-flight window (its AI and block writes now land on the main thread,
   unordered against the tick, so the two writers no longer serialize: finding 4's lazy fix); the header's and the services'
   comments say the main thread. fork-lint green, the client build queued behind 4d699db8's on the one runner.
+- 13:31 PST 2026-11-04 (21:31Z 11-04) (thuum-cf): playtest 45's item 5 (the guest's own pillar turn plays on the host's screen alone, 44's shape; Eli:
+  "turbo mode to close out the pillars, then move onto the next builds. scripting then physics"), read from results/playtest-45/:
+  the server log has every guest turn reaching the host's engine and the host's animation relayed back ("ff000001 activates aa8cX
+  ... relayed to 1 other game(s)" then within 150 ms "aa8cX animates aa8cX 'Trigger0N' ... (its host ff000000 reports): recorded,
+  relayed to 1 game(s)"; the few activations without an animation fell inside the script's busy window); the console captures end
+  at 20:31 on both seats, three minutes in, so nothing of the guest's own play survives; the pillar script is host-scoped in the
+  platform's gate (papyrus-admitted.tsv, ADR-059 decision 6, FridaHooks AdmittedByChain), so the guest's engine turns nothing
+  itself and its screen depends on the relayed playAnimation, the path the host's turns take and show. The guest's view was never
+  measured (b-puzzle-relay claims the "played" log line). Next: a probe on the guest's own view by path (x-puzzle-guest-view: c2
+  turns one pillar; a console {match} step catches its "played" line; a node-pos driver step reads a named node of the pillar's
+  mesh on both seats before and after, recorded in v1, claimed in v2), then turbo at the pillars with Eli. The compile fix's
+  pipeline 5334 is green; 8926d2c8's 5335 builds; numidium's arming for the re-roll reads stands.
