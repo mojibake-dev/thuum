@@ -7676,3 +7676,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   strands no raise), pipeline 5176 (server and Windows client). Earlier heads' builds: 5162 (8f3c76fe) and 5161 (r2 d9c49f7e) green;
   5169 and 5173 running for the superseded heads. Stage day's inputs are all placed: the probes x-bleak-scripts v1 (42ac4e80) and
   x-scene-relay v2 (6b22808d), the three scenario drafts and the tools patch in their order, the docs on main.
+- 17:33 PST 2026-11-03 (01:33Z 11-04) (thuum-cf): Playtest 44's first lay (numidium's report) and Eli's reset, verbatim: "every test should have no survival,
+  weather synced, rotfern has headshots, no-pause on menus", "stop juggling a million things that are at various stages of
+  completion. get back to a cannon working thing", "everything that we KNOW works should be in from here on out". Findings: (1) the
+  dying-copy premise (7845bb22) HANGS the watcher: c2 froze twice inside the engine's apply ("ApplyChangeForm 0x39fe2 ... -> 35568" the
+  platform log's last line at 17:06:19 and 17:12:56, lifeState 1, thread 8868 against main 12188): H1's thread risk made real, the
+  HYPOTHESIS FALSIFIED; reverted on every future head (f2 1c38dc49, r2 4a9de849, m4-scripts-flip 978fee25) and written into
+  change-form.md with the Dynamic read for the dying copy's completion (0x6e3310's test, KillImmediate 37735). (2) No headshot fired:
+  39fe2 and 39fe4 died of two plain arrow hits each, no CIF line though CIF loaded; b-headshot's last green was 11-02 before r3.
+  (3) Skyrim Souls RE lived only on apocrypha/layer-souls, so every stage from main dropped it. The canon numidium lays: the server
+  0c23306e as built, its client 2225c932's dist plus cc026686's js (the dead-only apply, no hang), layer-souls merged into main
+  (32459beb), weatherSync on, survival off; a layer-stage of main with b-headshot as its probe. 7845bb22's dist and f2's js stay off
+  the seats until each is proven alone against the canon; new heads for the lab held tonight. If b-headshot is red on the canon, the
+  headshot's cause is next before anything else lands.
