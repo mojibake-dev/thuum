@@ -8134,3 +8134,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   client-build 18551: the dist for x-corpse-record v4 (133e4808), to run against the canon's server after 1c's probe; expected on c2
   "completed 13491's dying death before the apply: lifeState 1 -> 2 (read 5)" and the lay recorded at leg A, the returns claimed
   through legs R and B.
+- 22:24 PST 2026-11-03 (06:24Z 11-04) (thuum-cf): x-fate-inventory v1 (90b98f7b) on 1c's image and dist (SkyrimPlatformImpl
+  80d6f70e9b84300e) stopped at its first claim on a lab premise, not the build: "item 'Skyrim.esm:0xf' is not in the items table; add
+  it to guests.yaml" (run 20261104-061637): the inventory facts' item spec takes editor-id names (Skyrim.esm:Gold001), never a hex id,
+  and the Long Bow had no row. numidium added "Skyrim.esm:LongBow" to guests.yaml (thuum e1005fa8, deployed, lab-api restarted) and
+  froze v1b (the two names, every other line the same, lab/.cache/probes/frozen/dae397e3/); my working file carries the same names and
+  reads sha1 dae397e3, one file. v1b runs on 1c's build now; x-corpse-record v4 on 88497c54's dist (18551) after it.
