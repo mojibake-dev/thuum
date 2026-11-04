@@ -8374,3 +8374,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   ring test's sum follows; a torch T0 on the campfire bandit; fork-lint green), unpushed and unbuilt until Eli's W4 word with 45's
   decision, after the arrows reads on f4014f39 (corpse v6, x-corpse-arrows, dress v8, oracle v4 by hand). The chain: deploy-srv,
   x-corpse-arrows on 2c17bc85 as the control, then f4014f39.
+- 11:22 PST 2026-11-04 (19:22Z 11-04) (thuum-cf): x-corpse-arrows v1 control on 2c17bc85 RED on its premise (20261104-191715, numidium): "hits 39fe4 with"
+  0; one arrow of four holds released, the crosshair on the pillar above the Bandit Thug (fighting test 2, his back to c1), the
+  approach at 400 units leaving c1 at z 620 against his 573 with a level heading and no pitch; nothing laid (the wrapper refused
+  f4014f39's lay while the run's tail ran), the seats still on 2c17bc85. v2 by path, sha1 2f8cd311: b-npc-headshot-host v7's recipe
+  as it stands (approach to 150 in the record's frame, the host's npc-ai lever off so he stands, then per shot approach, look-at
+  head to head, draw-weapon, wait 3, hold-key 199 1500, wait 2; four shots, then kill-ref); claims as they were. numidium runs it
+  as the control on 2c17bc85, then lays f4014f39 for the reads.
