@@ -8424,3 +8424,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   fast-forwarded to f4014f39 (from 2136311f, ancestry checked, both remotes verified): the arrows fix, the dress order, the head's
   reload, the idempotent redress, the apply on the main thread and 1c's inventory are the canon now. Next: the hands pair's reads,
   then canon to 9218156a.
+- 12:19 PST 2026-11-04 (20:19Z 11-04) (thuum-cf): the hands pair (skymp-server:m3-canon-4-hands-9218156a, f4014f39's dist with the 61f417e0 driver
+  bundle): oracle v5 GREEN 20261104-200613 (three logins, 39fe1's worn equal to the fate's with Torch01 counted; the host's AI
+  drops the torch at each relogin and relights it about 5 s later, the record following) and dress v9 GREEN 201238 (five reads,
+  c2's worn equal to c1's and to the fate's each time, head true, no crash). numidium runs x-fate-inventory v1b dae397e3 on the
+  pair as the loot regression read; on its green canon moves to 9218156a and playtest 45 goes on this pair.

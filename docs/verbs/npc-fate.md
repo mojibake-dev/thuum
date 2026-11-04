@@ -2642,6 +2642,13 @@ f4014f39's dist and the driver's bundle.
 Dress v8 on f4014f39 GREEN (20261104-194400, numidium): five reads whole on both seats, c2 re-rolled twice and applied three
 records, no crash; oracle v4 on f4014f39 (194942) red on 39fe1's worn alone with the old driver, the head true: the hands head's
 two reads are the measurement's.
+THE HANDS READ (12:19 PST 2026-11-04, 20:19Z 11-04; numidium's runs on the hands pair, skymp-server:m3-canon-4-hands-9218156a with
+f4014f39's dist and the 61f417e0 driver bundle): oracle v5 GREEN 20261104-200613 (three logins, 39fe1 re-rolled by the engine at
+each, worn [80146, 80264, 111522, 120044, 455576, 455582] with 120044 Torch01 counted and equal to the fate's; the server's reports
+show the host's AI dropping the torch at each relogin and relighting it about 5 s later, left 0 then left 1d4ec, the record
+following); dress v9 GREEN 201238 (five reads, c2's worn equal to c1's and to the fate's each time, the head true, no crash). So
+the contract holds at T3 on both paths: the hands are the host's, the puppet's equal them, the dress the roll. The last read before
+45 is x-fate-inventory v1b on this pair (the rule changes what a body's record holds).
 
 ## Status
 
