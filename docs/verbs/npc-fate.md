@@ -2680,7 +2680,9 @@ window's size. The dead copies' UnequipObject is not on the crash thread's stack
 (ResetInventory's roll, then the load's). A side effect even without a crash: the deferred DetachHavok strips Havok from the NEW
 skeleton of every living clone re-rolled this way until something re-attaches it. The engine's own attach pairs 37323 with the
 inventory reset on the main thread, where Set3D detaches inline; the fix in kind is the re-roll's 3D work on the main thread through
-SKSE's task interface, the shape change-form's apply already has (2b5b33db, CONFIRMED there). The Frida read (lab/frida, to write):
+SKSE's task interface, the shape change-form's apply already has (2b5b33db, CONFIRMED there): BUILT fork m3-canon-4-reroll-main
+cc5c82b6 off 4c6d9f24 (QueueFateTask: RerollActor, RedressActor and ResurrectActor through AddUITask, the gameThrQ fallback said
+once; the "rerolled" line ends "on thread N main M", the witness). The Frida read (lab/frida/reroll-main-trace.js, its README entry):
 sequence hooks 37323, 19730 (with 39033's answer and whether 36933/36939 ran), 37178, 37177, 19727, 37307 (tid and Get3D2 at entry),
 36993 (the queue push, task id), 16129 (tid and caller, the two "armed" lines), 104651 (names the VM thread); chain hooks 20103,
 63357, 63596, 63792, 78536 (the body, its constraints array, and per element whether the first qword lies inside the exe image,

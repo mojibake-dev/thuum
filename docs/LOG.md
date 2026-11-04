@@ -8483,3 +8483,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   thread (19730 through 39033 and 36933), our Load3D then binds the new skeleton on 7380 while the main thread's drained DetachHavok
   reads the NEW 3D and removes its collision objects, recycling the buffer. Fix in kind, after 45: the re-roll's 3D work on the main
   thread through SKSE's task interface, the apply's own shape (2b5b33db); the Frida plan in the doc. Nothing on a seat now.
+- 13:12 PST 2026-11-04 (21:12Z 11-04) (thuum-cf): the ragdoll crash's fix in kind BUILT: fork m3-canon-4-reroll-main cc5c82b6 off 4c6d9f24, the
+  fate's engine work (RerollActor, RedressActor, ResurrectActor) queued through SKSE's AddUITask onto the main thread, the apply's
+  shape, with a once-said gameThrQ fallback and "on thread N main M" at the end of the rerolled line; fork-lint green, the client
+  build running (a fresh read-only review of the diff runs beside it, ADR-064 rule A). lab/frida/reroll-main-trace.js written (27
+  hooks by just addr, the window per re-roll, the collector's element dump, DetachHavok's race flag, the lifetime ring, Main's
+  thread from 403449) with its README entry. The read after 45: oracle v5 and dress v9 on cc5c82b6's dist with the hands image
+  and the driver, plus the trace on the re-rolling seat; then the pair for 46. Nothing on a seat while 45 runs.

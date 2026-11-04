@@ -501,4 +501,22 @@ TURN_SIGN) that ramps lockAngle with the pick snapped: HYPOTHESIS that the menu'
   (lab/.cache/probes/x-corpse-arrows.yaml). Ids by `just addr` on
   2026-11-04; names the re-analyst's static read (HYPOTHESIS) or
   CommonLib's. Written 2026-11-04; never run. 1.6.1170 only.
-
+- reroll-main-trace.js: the living re-roll's 3D work against the main thread's
+  deferred DetachHavok (docs/verbs/npc-fate.md THE RAGDOLL CRASH READ; c1-crash-
+  2026-11-04-12-30-04 in x-fate-inventory 20261104-202729). Twenty-seven hooks by
+  `just addr`: the re-roll 37323 opens a window on its thread for a listed actor
+  (refs), TESObjectREFR::Set3D 19730 with its null node, ShouldUseTaskQueue 39033's
+  answer, the deferred tasks 36933 and 36939 and the queue push 36993, Load3D
+  37177 and 19727 (whose leave closes the window), the root bind 20103, 63357,
+  63596, 63792, 78423, 78507 and the collector 78536 (the body's constraints array
+  printed element by element with an in-exe flag, the dump's shape), DetachHavok
+  37307 with Get3D2 through vtable slot 0x70 and a `race` flag when it runs on
+  Main's thread while a window is open elsewhere, a lifetime ring (68170, 78066,
+  79805, 79806, 79807, 79810, 77864, 77883) logged on any thread while a window is
+  open, InitLeveledItems 16129, and NativeFunctionBase::Call 104651 once per thread
+  to name the VM thread; the ready line reads Main's thread from its singleton
+  (403449, threadID at +0x28). Params: refs, cap, elements. Expected before fork
+  m3-canon-4-reroll-main cc5c82b6: the re-roll and the chain on the VM thread,
+  shouldQueue true, a deferDetach, and on a near miss detachHavok on Main with a
+  non-null get3D2 inside the window; after it: the re-roll on Main's thread, no
+  deferral.
