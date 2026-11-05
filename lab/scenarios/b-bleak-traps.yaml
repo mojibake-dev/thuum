@@ -1,3 +1,15 @@
+# b-bleak-traps v2 (thuum-cf, 2026-11-05; the scripting ladder's rung 1, ADR-068, on fork m4-scripts-1-flip): one STEP change, no
+# claim changed: the two relaunch writes of activationUnblockedBases are deleted (the host's engine runs its hosted cells' world
+# scripts and the client lifts activation for ACTI and MSTT in a hosted cell by the cell's state, ADR-062's flip; the flip's client
+# never reads the key). NPCs stay off here: v1 read leg A's 'E_TRAP_ == 0' as 4 on canon 7c79fc3e and on 83a40da3 alike (020830,
+# 021251, 013206, 013632), the ambush trigger 0x38098's ACHR children refused E_TRAP_NO_REF; rung 1's server (fork ccc98a2d) judges a
+# host's linked activation of an actor as the actor's simulator's, an unloaded ACHR by its record, so leg A no longer reads them.
+# NPCs on is read first by the probe x-bleak-traps-npcs v2 on rung 1's stage (its v1, 20261105-023048 on canon's build, read 3
+# E_TRAP_UNLINKED and 1 E_TRAP_NO_REF and stopped at leg A); a green there makes npcEnabled true this scenario's v3.
+# HYPOTHESIS H-P1 (leg E): the puzzle lever 0xaa8c3 is a FURN (LeverPushAnimatingNoPlayer 0xb7db4), which the flip's lift does not
+# cover, so it stays activation-blocked on every seat; leg E rests on the blocked lever still delivering the press to its
+# defaultPillarPuzzleLever script's OnActivate (the Creation Kit's BlockActivation: blocked references still send OnActivate).
+# v1's header follows.
 # b-bleak-traps (thuum-magnus, 07:50 PST 2026-11-01, from x-bleak-traps v4 20261101-153828 green on m4-traps 19e8d981 under the layer
 # layer-world-scripts; docs/verbs/traps.md, docs/DECISIONS.md ADR-059, M4; the exit d-bleak-falls comes after the puzzle's slices).
 # Bleak Falls Temple 0x371de's traps and levers run as Papyrus scripts on the cell's host and reach the guest as relayed activations:
@@ -27,8 +39,6 @@ server:
 timeout_s: 900
 artifacts: [server.log, c1.log, c2.log, screenshots]
 steps:
-  - c1: relaunch {until: gone, files: [{json: "Data/Platform/Plugins/skymp5-client-settings.txt", key: "activationUnblockedBases", value: "1a4bb c6440 21513 3e726 aa8ce b7db4 173fc 2079f"}]}
-  - c2: relaunch {until: gone, files: [{json: "Data/Platform/Plugins/skymp5-client-settings.txt", key: "activationUnblockedBases", value: "1a4bb c6440 21513 3e726 aa8ce b7db4 173fc 2079f"}]}
   - c1: connect
   - c2: connect
   - wait: 10
