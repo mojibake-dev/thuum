@@ -1,3 +1,46 @@
+# b-bleak-traps v3 (thuum-cf, 2026-11-05 22:5xZ; D-T2, Eli's outcome: "a player steps on a plate, that wall moves in both games,
+# and does damage in both"; "a swinging wall should hit BOTH players in its path, not just the person who triggered it";
+# ADR-068 D-S3, traps follow the interaction; for fork m4-scripts-2b-traps ece35376 or later on both seats and the server,
+# the trap family as D-T1 widened it and D-T4 B's engine multipliers, the seats at their own difficulty): legs A and B are
+# promoted from x-trap-wall-both v1.2 (lab/.cache/probes, 51484945), GREEN 56 of 56 in 20261105-224256, its steps and claims
+# verbatim but for the frame noted below, plus x-trap-family-fire v1.1's movement claims (green 20261105-135134).
+# REMOVED, v2's: A's until on the server's "567f2 activates 54b15 in cell 371de" (>= 1 within 5 s) and A's claims on c1's
+# "Sent a linked activation of  54b15 by 567f2" >= 1 and c2's "relayed activation 54b15 by 567f2" >= 1; B's until and claim on
+# the server's line (>= 2) and its claim on c2's relayed line (>= 2). D-S3 made them false by design: every seat fires the
+# family pair itself and nothing is reported or relayed.
+# ADDED to each leg, the movement: the three removed strings claimed at 0 (c1's linked report, c2's relayed play, the server's
+# "567f2 activates 54b15", the head of both its relay lines for the pair); each seat's "trap 54b15 fired here by 567f2: every
+# seat fires the trap family itself" (activationService.ts:95) risen over the walk's baseline on both seats (the stepper's
+# engine for its player, the other's for its figure, H-T2: docs/engine/scripts.md S7). Kept in each leg: no E_TRAP_ refusal.
+# ADDED to each leg, the damage (v1.2's claims; the hit counted once on its player's own engine, docs/engine/scripts.md S8): both players' own drops (healthCurrent before the walk less at the read) at
+# least 45; both records at most 0.85; each seat's figure of the other player under 0.9 and within 0.05 of that player's
+# record; per player, one hit (a drop at most 62, a record at least 0.7933, one bare ProcessTrapHit census row reading "1 in
+# 30 s") or two genuine hits on its own engine, forward and return swing (a drop of 100 to 122, a record of 0.5933 to
+# 0.6667, one row reading 2 or two rows reading 1); no " (not hosted)" row on either seat. Its premises: the lever line, the
+# family's ready line and the multipliers line (claimed up to its first name, printConsole cutting at 128 bytes) on both
+# seats; both Health bases 300, both full, both records 1.0; each player within 30 units of its spot on its own engine right
+# before each walk; no fired line between the players settling and the walk; the walk a walk (the stepper south of y -5300
+# 1 s in). The frame: v1.2 runs with god mode never set and claims no ConsoleCommands god mode line; this scenario's prelude
+# sets TGM, so god mode goes off on both before A's baselines and on again after B's reads (legs D and E run under it), and
+# its lines are claimed instead: "god mode off" 2 and "god mode on" 2 at A, 2 and 4 at B. v1.2's SetAV and walk toggle sit
+# at A's start here, after the prelude's host check. One frame difference more: in v1.2 each player's first entry into the cell
+# is at its spot (a premise there), while here A's spots are reached by near teleports from the prelude's entrance with each
+# figure already on the other screen, so a stray firing in that step turns A's no-fired premise red; such a red is read from the
+# counts and the step notes, not taken against the claims.
+# CHANGED steps, legs A and B only: the stepper walks onto the plate from (8589, -5460) instead of a teleport onto it (a
+# player's own teleport runs its ragdoll removal, whose window zeroes its multipliers); the bystander at (8589, -5538), in
+# the swing (B's c1 stood at (8589, -5738) in v2, past the panel's reach); between the legs v1.2's staging: c2 out through
+# lab-spawn, c1 to away2 (8500, -6038), c2 back to away1 (8589, -6038), both outside the panel's 275-unit reach and south of
+# the plate, a 20 s wait, then both step in from the south; each leg's census wait of 70 s.
+# Declared, from the reads before this version (docs/verbs/traps.md): a plate may fire once as a player re-enters its cell
+# (HYPOTHESIS: the client's model apply in that tick, remoteServer.ts:544, :554; docs/engine/scripts.md S10), which the staging keeps out of the claims
+# (the fired counts before and after its 20 s wait are RECORDED, and the walk's baseline is taken after it); a body the wall
+# carries across the plate drags its figure across the other seat's copy one relay hop later and may fire it again (S9; v1.2's
+# c2 fired 2 to 4 in leg B), which the fired claims, rises, allow. Legs D and E (the lever's portcullis and the puzzle
+# lever's darts, mechanisms: still the host's report and the server's relay) and every other step are v2's byte for byte;
+# legs D and E start from v2's positions and god mode but not v2's state: the Health base stays 300, current health is not
+# restored after B's hits, the walk toggle stays on, and c2's game has reloaded the Temple once; no D or E claim reads these.
+# Its own commit (rule 13); Eli checks the claims before it (ADR-064 decision 4). v2's header follows.
 # b-bleak-traps v2 (thuum-cf, 2026-11-05; the scripting ladder's rung 1, ADR-068, on fork m4-scripts-1-flip): one STEP change, no
 # claim changed: the two relaunch writes of activationUnblockedBases are deleted (the host's engine runs its hosted cells' world
 # scripts and the client lifts activation for ACTI and MSTT in a hosted cell by the cell's state, ADR-062's flip; the flip's client
@@ -52,33 +95,298 @@ steps:
   - wait: 20
   - assert:
       - server.host(0x371de).client == "c1"
-  # A. the host onto the plate; the watcher 200 units back, facing it
-  - c2: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5538, z: -2054, rot: [0, 0, 0]}
-  - wait: 6
-  - c1: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5338, z: -2054, rot: [0, 0, 0]}
-  - until: {within: 5, every: 0.5, expect: ['server.log_count("567f2 activates 54b15 in cell 371de") >= 1']}
-  - wait: 4
+  # A. the host walks onto the plate while the guest stands in the wall's swing (v3, promoted from x-trap-wall-both v1.2,
+  # green 20261105-224256): both Health bases 300 through the server first; c1 at the stepper's start, 77 units short of
+  # the plate's top; c2 in the swing, 199 units from the wall's hinge (a server teleport is placed, not glided)
+  - c1: server-console {name: SetAV, args: [0x14, "Health", 300]}
+  - c2: server-console {name: SetAV, args: [0x14, "Health", 300]}
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5460, z: -2044, rot: [0, 0, 0]}
+  - until: {within: 30, every: 1, expect: ['server.host(0x371de).client == "c1"']}
+  - c2: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5538, z: -2044, rot: [0, 0, 0]}
+  - wait: 8
+  # v1.2: the fired counts once both have settled at their spots, against the walk's baseline
+  - c1: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
+  - server: snapshot {name: c1FiredEntryA, of: 'c1.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - c2: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
+  - server: snapshot {name: c2FiredEntryA, of: 'c2.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - c1: log-count {pattern: "scriptNonOwnerSkip nonLatent: a non-owned state row"}
+  - c2: log-count {pattern: "scriptNonOwnerSkip nonLatent: a non-owned state row"}
+  - c1: log-count {pattern: "trap family ready: [0-9]+ root"}
+  - c2: log-count {pattern: "trap family ready: [0-9]+ root"}
+  - c1: log-count {pattern: ".verb:traps. world damage multipliers: the engine.s own for the difficulty in force .D-T4 B.: fDiffMultHPToPCVE"}
+  - c2: log-count {pattern: ".verb:traps. world damage multipliers: the engine.s own for the difficulty in force .D-T4 B.: fDiffMultHPToPCVE"}
+  # the walk toggle on, once on each seat (a new game starts running)
+  - c1: tap-key {code: 58}
+  - c2: tap-key {code: 58}
+  # god mode off on both for the walks (the prelude's TGM put it on), on again after leg B's reads
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c1: set-percentages {health: 1.0}
+  - c2: set-percentages {health: 1.0}
+  - wait: 2
+  - c1: av-read {names: [health]}
+  - server: snapshot {name: c1BaseA, of: "c1.av().health"}
+  - server: snapshot {name: c1Hp0A, of: "c1.av().healthCurrent"}
+  - c2: av-read {names: [health]}
+  - server: snapshot {name: c2BaseA, of: "c2.av().health"}
+  - server: snapshot {name: c2Hp0A, of: "c2.av().healthCurrent"}
+  - server: snapshot {name: c1Rec0A, of: "server.actor(c1).healthPercentage"}
+  - server: snapshot {name: c2Rec0A, of: "server.actor(c2).healthPercentage"}
+  - c1: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
+  - server: snapshot {name: c1Fired0A, of: 'c1.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - c2: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
+  - server: snapshot {name: c2Fired0A, of: 'c2.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - c1: log-count {pattern: "census ObjectReference.ProcessTrapHit [0-9]+ in 30 s"}
+  - server: snapshot {name: c1Bare0A, of: 'c1.log_count("census ObjectReference.ProcessTrapHit [0-9]+ in 30 s")'}
+  - c1: log-count {pattern: "census ObjectReference.ProcessTrapHit 1 in 30 s"}
+  - server: snapshot {name: c1One0A, of: 'c1.log_count("census ObjectReference.ProcessTrapHit 1 in 30 s")'}
+  - c1: log-count {pattern: "census ObjectReference.ProcessTrapHit 2 in 30 s"}
+  - server: snapshot {name: c1Two0A, of: 'c1.log_count("census ObjectReference.ProcessTrapHit 2 in 30 s")'}
+  - c2: log-count {pattern: "census ObjectReference.ProcessTrapHit [0-9]+ in 30 s"}
+  - server: snapshot {name: c2Bare0A, of: 'c2.log_count("census ObjectReference.ProcessTrapHit [0-9]+ in 30 s")'}
+  - c2: log-count {pattern: "census ObjectReference.ProcessTrapHit 1 in 30 s"}
+  - server: snapshot {name: c2One0A, of: 'c2.log_count("census ObjectReference.ProcessTrapHit 1 in 30 s")'}
+  - c2: log-count {pattern: "census ObjectReference.ProcessTrapHit 2 in 30 s"}
+  - server: snapshot {name: c2Two0A, of: 'c2.log_count("census ObjectReference.ProcessTrapHit 2 in 30 s")'}
+  - c1: settings {gmst: [fDiffMultHPToPCVE, fDiffMultHPToPCE, fDiffMultHPToPCN, fDiffMultHPToPCH, fDiffMultHPToPCVH, fDiffMultHPToPCL]}
+  - c2: settings {gmst: [fDiffMultHPToPCVE, fDiffMultHPToPCE, fDiffMultHPToPCN, fDiffMultHPToPCH, fDiffMultHPToPCVH, fDiffMultHPToPCL]}
+  # v1.2: each player where its spot is, read on its own seat, right before the walk
+  - c1: dump-state
+  - server: snapshot {name: c1PosXA, of: "c1.state.x"}
+  - server: snapshot {name: c1PosYA, of: "c1.state.y"}
+  - c2: dump-state
+  - server: snapshot {name: c2PosXA, of: "c2.state.x"}
+  - server: snapshot {name: c2PosYA, of: "c2.state.y"}
+  # no teleport of either player from here to the reads
+  - c1: watch-start {}
+  - c2: watch-start {}
+  - c1: hold-key {code: 17, ms: 3500}
+  - wait: 1
+  - server: snapshot {name: c1Y1A, of: "server.actor(c1).y"}
+  - wait: 5
+  - c1: av-read {names: [health]}
+  - server: snapshot {name: c1HpA, of: "c1.av().healthCurrent"}
+  - c2: av-read {names: [health]}
+  - server: snapshot {name: c2HpA, of: "c2.av().healthCurrent"}
+  - server: snapshot {name: c1RecA, of: "server.actor(c1).healthPercentage"}
+  - server: snapshot {name: c2RecA, of: "server.actor(c2).healthPercentage"}
+  - c1: av-read {names: [health], other: true}
+  - server: snapshot {name: c1SeesC2A, of: "c1.av_of(c2).healthPercentage"}
+  - c2: av-read {names: [health], other: true}
+  - server: snapshot {name: c2SeesC1A, of: "c2.av_of(c1).healthPercentage"}
+  - c1: watch-stop
+  - c2: watch-stop
+  - server: snapshot {name: c1EndA, of: "server.actor(c1)"}
+  - server: snapshot {name: c2EndA, of: "server.actor(c2)"}
   - c1: screenshot
   - c2: screenshot
+  - c1: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
+  - server: snapshot {name: c1FiredA, of: 'c1.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - c2: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
+  - server: snapshot {name: c2FiredA, of: 'c2.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  # the census's two windows (the platform's 30 s flush, then the client's 30 s summary)
+  - wait: 70
+  - c1: log-count {pattern: "census ObjectReference.ProcessTrapHit [0-9]+ in 30 s"}
+  - c1: log-count {pattern: "census ObjectReference.ProcessTrapHit 1 in 30 s"}
+  - c1: log-count {pattern: "census ObjectReference.ProcessTrapHit 2 in 30 s"}
+  - c1: log-count {pattern: "census ObjectReference.ProcessTrapHit .skipped. [0-9]+ in 30 s"}
+  - c1: log-count {pattern: "census ObjectReference.ProcessTrapHit .not hosted. [0-9]+ in 30 s"}
+  - c2: log-count {pattern: "census ObjectReference.ProcessTrapHit [0-9]+ in 30 s"}
+  - c2: log-count {pattern: "census ObjectReference.ProcessTrapHit 1 in 30 s"}
+  - c2: log-count {pattern: "census ObjectReference.ProcessTrapHit 2 in 30 s"}
+  - c2: log-count {pattern: "census ObjectReference.ProcessTrapHit .skipped. [0-9]+ in 30 s"}
+  - c2: log-count {pattern: "census ObjectReference.ProcessTrapHit .not hosted. [0-9]+ in 30 s"}
+  - server: snapshot {name: c1BareA, of: 'c1.log_count("census ObjectReference.ProcessTrapHit [0-9]+ in 30 s")'}
+  - server: snapshot {name: c1OneA, of: 'c1.log_count("census ObjectReference.ProcessTrapHit 1 in 30 s")'}
+  - server: snapshot {name: c1TwoA, of: 'c1.log_count("census ObjectReference.ProcessTrapHit 2 in 30 s")'}
+  - server: snapshot {name: c1SkippedA, of: 'c1.log_count("census ObjectReference.ProcessTrapHit .skipped. [0-9]+ in 30 s")'}
+  - server: snapshot {name: c2BareA, of: 'c2.log_count("census ObjectReference.ProcessTrapHit [0-9]+ in 30 s")'}
+  - server: snapshot {name: c2OneA, of: 'c2.log_count("census ObjectReference.ProcessTrapHit 1 in 30 s")'}
+  - server: snapshot {name: c2TwoA, of: 'c2.log_count("census ObjectReference.ProcessTrapHit 2 in 30 s")'}
+  - server: snapshot {name: c2SkippedA, of: 'c2.log_count("census ObjectReference.ProcessTrapHit .skipped. [0-9]+ in 30 s")'}
   - c1: log-count {pattern: "Sent a linked activation of  54b15 by 567f2"}
   - c2: log-count {pattern: "relayed activation 54b15 by 567f2"}
   - assert:
-      - 'c1.log_count("Sent a linked activation of  54b15 by 567f2") >= 1'
-      - 'c2.log_count("relayed activation 54b15 by 567f2") >= 1'
+      # the premises (x-trap-wall-both v1.2's; this scenario's frame counts its TGM lines in place of the probe's none)
+      - server.host(0x371de).client == "c1"
+      - 'c1.log_count("scriptNonOwnerSkip nonLatent: a non-owned state row") >= 1'
+      - 'c2.log_count("scriptNonOwnerSkip nonLatent: a non-owned state row") >= 1'
+      - 'c1.log_count("trap family ready: [0-9]+ root") >= 1'
+      - 'c2.log_count("trap family ready: [0-9]+ root") >= 1'
+      - 'c1.log_count(".verb:traps. world damage multipliers: the engine.s own for the difficulty in force .D-T4 B.: fDiffMultHPToPCVE") >= 1'
+      - 'c2.log_count(".verb:traps. world damage multipliers: the engine.s own for the difficulty in force .D-T4 B.: fDiffMultHPToPCVE") >= 1'
+      - 'server.log_count("ConsoleCommands: ff00000[01] god mode off") == 2'
+      - 'server.log_count("ConsoleCommands: ff00000[01] god mode on") == 2'
+      - 'snapshot("c1BaseA") >= 299 and snapshot("c1BaseA") <= 301'
+      - 'snapshot("c2BaseA") >= 299 and snapshot("c2BaseA") <= 301'
+      - 'snapshot("c1Hp0A") >= 299'
+      - 'snapshot("c2Hp0A") >= 299'
+      - 'snapshot("c1Rec0A") >= 0.999'
+      - 'snapshot("c2Rec0A") >= 0.999'
+      # each player within 30 units of its spot on its own engine before the walk, and nothing fired since both settled
+      - '(snapshot("c1PosXA") - 8589) * (snapshot("c1PosXA") - 8589) + (snapshot("c1PosYA") + 5460) * (snapshot("c1PosYA") + 5460) < 900'
+      - '(snapshot("c2PosXA") - 8589) * (snapshot("c2PosXA") - 8589) + (snapshot("c2PosYA") + 5538) * (snapshot("c2PosYA") + 5538) < 900'
+      - 'snapshot("c1Fired0A") == snapshot("c1FiredEntryA")'
+      - 'snapshot("c2Fired0A") == snapshot("c2FiredEntryA")'
+      - 'snapshot("c1Y1A") < -5300'
+      - 'snapshot("c1FiredA") > snapshot("c1Fired0A")'
+      - 'snapshot("c2FiredA") > snapshot("c2Fired0A")'
+      # D-S3: each seat fired the wall itself, and the pair went nowhere: no report from the host, no relay, no relayed play
+      - 'c1.log_count("Sent a linked activation of  54b15 by 567f2") == 0'
+      - 'c2.log_count("relayed activation 54b15 by 567f2") == 0'
+      - 'server.log_count("567f2 activates 54b15") == 0'
       - 'server.log_count("E_TRAP_") == 0'
-  # the host off the plate, the wall resets; B. the guest onto it: the host's engine fires for the figure
-  - c1: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5738, z: -2054, rot: [0, 0, 0]}
-  - wait: 12
-  - c2: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5338, z: -2054, rot: [0, 0, 0]}
-  - until: {within: 5, every: 0.5, expect: ['server.log_count("567f2 activates 54b15 in cell 371de") >= 2']}
-  - wait: 4
+      # the damage: c1 stepped, c2 stood in the path; both hit once (or twice, the return swing), each on its own engine,
+      # the record carrying each to the other game
+      - 'snapshot("c1Hp0A") - snapshot("c1HpA") >= 45'
+      - 'snapshot("c2Hp0A") - snapshot("c2HpA") >= 45'
+      - 'snapshot("c1RecA") <= 0.85'
+      - 'snapshot("c2RecA") <= 0.85'
+      - 'snapshot("c2SeesC1A") < 0.9'
+      - 'abs(snapshot("c2SeesC1A") - snapshot("c1RecA")) < 0.05'
+      - 'snapshot("c1SeesC2A") < 0.9'
+      - 'abs(snapshot("c1SeesC2A") - snapshot("c2RecA")) < 0.05'
+      - '(snapshot("c1Hp0A") - snapshot("c1HpA") <= 62 and snapshot("c1RecA") >= 0.7933 and snapshot("c1BareA") - snapshot("c1Bare0A") == 1 and snapshot("c1OneA") - snapshot("c1One0A") == 1) or (snapshot("c1Hp0A") - snapshot("c1HpA") >= 100 and snapshot("c1Hp0A") - snapshot("c1HpA") <= 122 and snapshot("c1RecA") >= 0.5933 and snapshot("c1RecA") <= 0.6667 and ((snapshot("c1BareA") - snapshot("c1Bare0A") == 1 and snapshot("c1TwoA") - snapshot("c1Two0A") == 1) or (snapshot("c1BareA") - snapshot("c1Bare0A") == 2 and snapshot("c1OneA") - snapshot("c1One0A") == 2)))'
+      - '(snapshot("c2Hp0A") - snapshot("c2HpA") <= 62 and snapshot("c2RecA") >= 0.7933 and snapshot("c2BareA") - snapshot("c2Bare0A") == 1 and snapshot("c2OneA") - snapshot("c2One0A") == 1) or (snapshot("c2Hp0A") - snapshot("c2HpA") >= 100 and snapshot("c2Hp0A") - snapshot("c2HpA") <= 122 and snapshot("c2RecA") >= 0.5933 and snapshot("c2RecA") <= 0.6667 and ((snapshot("c2BareA") - snapshot("c2Bare0A") == 1 and snapshot("c2TwoA") - snapshot("c2Two0A") == 1) or (snapshot("c2BareA") - snapshot("c2Bare0A") == 2 and snapshot("c2OneA") - snapshot("c2One0A") == 2)))'
+      - 'c1.log_count("census ObjectReference.ProcessTrapHit .not hosted. [0-9]+ in 30 s") == 0'
+      - 'c2.log_count("census ObjectReference.ProcessTrapHit .not hosted. [0-9]+ in 30 s") == 0'
+  # B. the mirror, staged (v1.2): c2 out through lab-spawn, so its game holds no Temple; c1 to away2 by a near teleport no
+  # other screen sees; c2 back by a cell change to away1. Both staging spots lie outside the panel's reach and south of the
+  # plate, so a created figure that glides from a stale spot across the plate fires the wall at nobody
+  - c2: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 8500, y: -6038, z: -1995, rot: [0, 0, 0]}
+  - wait: 5
+  - c2: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -6038, z: -1999, rot: [0, 0, 0]}
+  - wait: 5
+  # any stray firing ends and the wall comes to rest: the counts before and after the wait RECORDED, not claimed
+  - c1: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
+  - server: snapshot {name: c1FiredPreStageB, of: 'c1.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - c2: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
+  - server: snapshot {name: c2FiredPreStageB, of: 'c2.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - wait: 20
+  - c1: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
+  - server: snapshot {name: c1FiredStageB, of: 'c1.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - c2: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
+  - server: snapshot {name: c2FiredStageB, of: 'c2.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  # into place from the south along x 8589: the stepper first (its figure is placed, passing the empty bystander spot, and
+  # stops about 37 units short of the plate's trigger, 77 short of its top), then the bystander (its figure stops 78 units south
+  # of the stepper); no figure's
+  # path crosses the plate's y on either screen; c2, the guest, walks onto the plate
+  - c2: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5460, z: -2044, rot: [0, 0, 0]}
+  - wait: 2
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5538, z: -2044, rot: [0, 0, 0]}
+  - wait: 8
+  - c1: set-percentages {health: 1.0}
+  - c2: set-percentages {health: 1.0}
+  - wait: 2
+  - c1: av-read {names: [health]}
+  - server: snapshot {name: c1BaseB, of: "c1.av().health"}
+  - server: snapshot {name: c1Hp0B, of: "c1.av().healthCurrent"}
+  - c2: av-read {names: [health]}
+  - server: snapshot {name: c2BaseB, of: "c2.av().health"}
+  - server: snapshot {name: c2Hp0B, of: "c2.av().healthCurrent"}
+  - server: snapshot {name: c1Rec0B, of: "server.actor(c1).healthPercentage"}
+  - server: snapshot {name: c2Rec0B, of: "server.actor(c2).healthPercentage"}
+  - c1: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
+  - server: snapshot {name: c1Fired0B, of: 'c1.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - c2: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
+  - server: snapshot {name: c2Fired0B, of: 'c2.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - c1: settings {gmst: [fDiffMultHPToPCVE, fDiffMultHPToPCE, fDiffMultHPToPCN, fDiffMultHPToPCH, fDiffMultHPToPCVH, fDiffMultHPToPCL]}
+  - c2: settings {gmst: [fDiffMultHPToPCVE, fDiffMultHPToPCE, fDiffMultHPToPCN, fDiffMultHPToPCH, fDiffMultHPToPCVH, fDiffMultHPToPCL]}
+  # v1.2: each player where its spot is, read on its own seat, right before the walk
+  - c2: dump-state
+  - server: snapshot {name: c2PosXB, of: "c2.state.x"}
+  - server: snapshot {name: c2PosYB, of: "c2.state.y"}
+  - c1: dump-state
+  - server: snapshot {name: c1PosXB, of: "c1.state.x"}
+  - server: snapshot {name: c1PosYB, of: "c1.state.y"}
+  # no teleport of either player from here to the reads
+  - c1: watch-start {}
+  - c2: watch-start {}
+  - c2: hold-key {code: 17, ms: 3500}
+  - wait: 1
+  - server: snapshot {name: c2Y1B, of: "server.actor(c2).y"}
+  - wait: 5
+  - c2: av-read {names: [health]}
+  - server: snapshot {name: c2HpB, of: "c2.av().healthCurrent"}
+  - c1: av-read {names: [health]}
+  - server: snapshot {name: c1HpB, of: "c1.av().healthCurrent"}
+  - server: snapshot {name: c2RecB, of: "server.actor(c2).healthPercentage"}
+  - server: snapshot {name: c1RecB, of: "server.actor(c1).healthPercentage"}
+  - c2: av-read {names: [health], other: true}
+  - server: snapshot {name: c2SeesC1B, of: "c2.av_of(c1).healthPercentage"}
+  - c1: av-read {names: [health], other: true}
+  - server: snapshot {name: c1SeesC2B, of: "c1.av_of(c2).healthPercentage"}
+  - c1: watch-stop
+  - c2: watch-stop
+  # god mode on again on both (legs D and E run under it)
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - server: snapshot {name: c1EndB, of: "server.actor(c1)"}
+  - server: snapshot {name: c2EndB, of: "server.actor(c2)"}
   - c1: screenshot
   - c2: screenshot
+  - c1: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
+  - server: snapshot {name: c1FiredB, of: 'c1.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - c2: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
+  - server: snapshot {name: c2FiredB, of: 'c2.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - wait: 70
+  - c1: log-count {pattern: "census ObjectReference.ProcessTrapHit [0-9]+ in 30 s"}
+  - c1: log-count {pattern: "census ObjectReference.ProcessTrapHit 1 in 30 s"}
+  - c1: log-count {pattern: "census ObjectReference.ProcessTrapHit 2 in 30 s"}
+  - c1: log-count {pattern: "census ObjectReference.ProcessTrapHit .skipped. [0-9]+ in 30 s"}
+  - c1: log-count {pattern: "census ObjectReference.ProcessTrapHit .not hosted. [0-9]+ in 30 s"}
+  - c2: log-count {pattern: "census ObjectReference.ProcessTrapHit [0-9]+ in 30 s"}
+  - c2: log-count {pattern: "census ObjectReference.ProcessTrapHit 1 in 30 s"}
+  - c2: log-count {pattern: "census ObjectReference.ProcessTrapHit 2 in 30 s"}
+  - c2: log-count {pattern: "census ObjectReference.ProcessTrapHit .skipped. [0-9]+ in 30 s"}
+  - c2: log-count {pattern: "census ObjectReference.ProcessTrapHit .not hosted. [0-9]+ in 30 s"}
+  - server: snapshot {name: c1BareB, of: 'c1.log_count("census ObjectReference.ProcessTrapHit [0-9]+ in 30 s")'}
+  - server: snapshot {name: c1OneB, of: 'c1.log_count("census ObjectReference.ProcessTrapHit 1 in 30 s")'}
+  - server: snapshot {name: c1TwoB, of: 'c1.log_count("census ObjectReference.ProcessTrapHit 2 in 30 s")'}
+  - server: snapshot {name: c1SkippedB, of: 'c1.log_count("census ObjectReference.ProcessTrapHit .skipped. [0-9]+ in 30 s")'}
+  - server: snapshot {name: c2BareB, of: 'c2.log_count("census ObjectReference.ProcessTrapHit [0-9]+ in 30 s")'}
+  - server: snapshot {name: c2OneB, of: 'c2.log_count("census ObjectReference.ProcessTrapHit 1 in 30 s")'}
+  - server: snapshot {name: c2TwoB, of: 'c2.log_count("census ObjectReference.ProcessTrapHit 2 in 30 s")'}
+  - server: snapshot {name: c2SkippedB, of: 'c2.log_count("census ObjectReference.ProcessTrapHit .skipped. [0-9]+ in 30 s")'}
+  - c1: log-count {pattern: "Sent a linked activation of  54b15 by 567f2"}
   - c2: log-count {pattern: "relayed activation 54b15 by 567f2"}
   - assert:
-      - 'server.log_count("567f2 activates 54b15 in cell 371de") >= 2'
-      - 'c2.log_count("relayed activation 54b15 by 567f2") >= 2'
+      - server.host(0x371de).client == "c1"
+      - 'server.log_count("ConsoleCommands: ff00000[01] god mode off") == 2'
+      - 'server.log_count("ConsoleCommands: ff00000[01] god mode on") == 4'
+      - 'snapshot("c1BaseB") >= 299 and snapshot("c1BaseB") <= 301'
+      - 'snapshot("c2BaseB") >= 299 and snapshot("c2BaseB") <= 301'
+      - 'snapshot("c1Hp0B") >= 299'
+      - 'snapshot("c2Hp0B") >= 299'
+      - 'snapshot("c1Rec0B") >= 0.999'
+      - 'snapshot("c2Rec0B") >= 0.999'
+      # each player within 30 units of its spot before the walk, and nothing fired since the staging wait's end
+      - '(snapshot("c2PosXB") - 8589) * (snapshot("c2PosXB") - 8589) + (snapshot("c2PosYB") + 5460) * (snapshot("c2PosYB") + 5460) < 900'
+      - '(snapshot("c1PosXB") - 8589) * (snapshot("c1PosXB") - 8589) + (snapshot("c1PosYB") + 5538) * (snapshot("c1PosYB") + 5538) < 900'
+      - 'snapshot("c1Fired0B") == snapshot("c1FiredStageB")'
+      - 'snapshot("c2Fired0B") == snapshot("c2FiredStageB")'
+      - 'snapshot("c2Y1B") < -5300'
+      - 'snapshot("c1FiredB") > snapshot("c1Fired0B")'
+      - 'snapshot("c2FiredB") > snapshot("c2Fired0B")'
+      # D-S3: each seat fired again; still nothing reported or relayed
+      - 'c1.log_count("Sent a linked activation of  54b15 by 567f2") == 0'
+      - 'c2.log_count("relayed activation 54b15 by 567f2") == 0'
+      - 'server.log_count("567f2 activates 54b15") == 0'
       - 'server.log_count("E_TRAP_") == 0'
+      # the damage: the mirror (c2 stepped, c1, the host, stood in the path), the census rows risen from A's
+      - 'snapshot("c2Hp0B") - snapshot("c2HpB") >= 45'
+      - 'snapshot("c1Hp0B") - snapshot("c1HpB") >= 45'
+      - 'snapshot("c2RecB") <= 0.85'
+      - 'snapshot("c1RecB") <= 0.85'
+      - 'snapshot("c1SeesC2B") < 0.9'
+      - 'abs(snapshot("c1SeesC2B") - snapshot("c2RecB")) < 0.05'
+      - 'snapshot("c2SeesC1B") < 0.9'
+      - 'abs(snapshot("c2SeesC1B") - snapshot("c1RecB")) < 0.05'
+      - '(snapshot("c1Hp0B") - snapshot("c1HpB") <= 62 and snapshot("c1RecB") >= 0.7933 and snapshot("c1BareB") - snapshot("c1BareA") == 1 and snapshot("c1OneB") - snapshot("c1OneA") == 1) or (snapshot("c1Hp0B") - snapshot("c1HpB") >= 100 and snapshot("c1Hp0B") - snapshot("c1HpB") <= 122 and snapshot("c1RecB") >= 0.5933 and snapshot("c1RecB") <= 0.6667 and ((snapshot("c1BareB") - snapshot("c1BareA") == 1 and snapshot("c1TwoB") - snapshot("c1TwoA") == 1) or (snapshot("c1BareB") - snapshot("c1BareA") == 2 and snapshot("c1OneB") - snapshot("c1OneA") == 2)))'
+      - '(snapshot("c2Hp0B") - snapshot("c2HpB") <= 62 and snapshot("c2RecB") >= 0.7933 and snapshot("c2BareB") - snapshot("c2BareA") == 1 and snapshot("c2OneB") - snapshot("c2OneA") == 1) or (snapshot("c2Hp0B") - snapshot("c2HpB") >= 100 and snapshot("c2Hp0B") - snapshot("c2HpB") <= 122 and snapshot("c2RecB") >= 0.5933 and snapshot("c2RecB") <= 0.6667 and ((snapshot("c2BareB") - snapshot("c2BareA") == 1 and snapshot("c2TwoB") - snapshot("c2TwoA") == 1) or (snapshot("c2BareB") - snapshot("c2BareA") == 2 and snapshot("c2OneB") - snapshot("c2OneA") == 2)))'
+      - 'c1.log_count("census ObjectReference.ProcessTrapHit .not hosted. [0-9]+ in 30 s") == 0'
+      - 'c2.log_count("census ObjectReference.ProcessTrapHit .not hosted. [0-9]+ in 30 s") == 0'
   # D. the puzzle room; the host pulls the lever, the portcullis rises on both (the standing spots are v3's, in reach of both levers)
   - c1: teleport {cell: "371de:Skyrim.esm", x: 5300, y: -1200, z: -768, rot: [0, 0, 90]}
   - c2: teleport {cell: "371de:Skyrim.esm", x: 5400, y: -900, z: -768, rot: [0, 0, 90]}
