@@ -1,3 +1,11 @@
+# b-bleak-traps v2 (thuum-cf, 2026-11-05; the correction Eli approved for b-object-anim v2 and v3 and b-puzzle-relay v3, W4 "Yes,
+# both", 2026-11-03, applied to the scenario that shares their frame and had not run on any canon since 11-02): leg A's
+# 'server.log_count("E_TRAP_") == 0' read 4 on 83a40da3's dist (20261105-013206 and its rerun 013632; the linked activation itself
+# held both times): all four lines "E_TRAP_NO_REF: ff000000 reports 38098 activating 380b[3459], no such reference", the trigger's
+# links to the ambush draugr, references the server never loads, the same four lines b-object-anim's header records on THE CANON
+# (20261104-044647, 055038). The run stopped at that claim, so legs B, D and E were not read. Each of the four E_TRAP_ claims (A, B,
+# D, E) now reads E_TRAP_ less the NO_REF lines for 38098's draugr links == 0, b-object-anim v3's exact expression; every other
+# E_TRAP_ code and any other NO_REF still counts. No other claim or step changed. v1's header follows.
 # b-bleak-traps (thuum-magnus, 07:50 PST 2026-11-01, from x-bleak-traps v4 20261101-153828 green on m4-traps 19e8d981 under the layer
 # layer-world-scripts; docs/verbs/traps.md, docs/DECISIONS.md ADR-059, M4; the exit d-bleak-falls comes after the puzzle's slices).
 # Bleak Falls Temple 0x371de's traps and levers run as Papyrus scripts on the cell's host and reach the guest as relayed activations:
@@ -55,7 +63,7 @@ steps:
   - assert:
       - 'c1.log_count("Sent a linked activation of  54b15 by 567f2") >= 1'
       - 'c2.log_count("relayed activation 54b15 by 567f2") >= 1'
-      - 'server.log_count("E_TRAP_") == 0'
+      - 'server.log_count("E_TRAP_") - server.log_count("E_TRAP_NO_REF: .* reports 38098 activating 380b[0-9a-f], no such reference") == 0'
   # the host off the plate, the wall resets; B. the guest onto it: the host's engine fires for the figure
   - c1: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5738, z: -2054, rot: [0, 0, 0]}
   - wait: 12
@@ -68,7 +76,7 @@ steps:
   - assert:
       - 'server.log_count("567f2 activates 54b15 in cell 371de") >= 2'
       - 'c2.log_count("relayed activation 54b15 by 567f2") >= 2'
-      - 'server.log_count("E_TRAP_") == 0'
+      - 'server.log_count("E_TRAP_") - server.log_count("E_TRAP_NO_REF: .* reports 38098 activating 380b[0-9a-f], no such reference") == 0'
   # D. the puzzle room; the host pulls the lever, the portcullis rises on both (the standing spots are v3's, in reach of both levers)
   - c1: teleport {cell: "371de:Skyrim.esm", x: 5300, y: -1200, z: -768, rot: [0, 0, 90]}
   - c2: teleport {cell: "371de:Skyrim.esm", x: 5400, y: -900, z: -768, rot: [0, 0, 90]}
@@ -83,7 +91,7 @@ steps:
   - c2: log-count {pattern: "relayed activation 3b9f1 by 6a9e2"}
   - assert:
       - 'c2.log_count("relayed activation 3b9f1 by 6a9e2") >= 1'
-      - 'server.log_count("E_TRAP_") == 0'
+      - 'server.log_count("E_TRAP_") - server.log_count("E_TRAP_NO_REF: .* reports 38098 activating 380b[0-9a-f], no such reference") == 0'
   # E. the puzzle lever with the pillars unsolved: the failure's four darts, each once, the door marker never named
   - c1: look-at {formId: 0xaa8c3}
   - wait: 2
@@ -106,5 +114,5 @@ steps:
       - 'c2.log_count("relayed activation 3720f by aa8c3") == 1'
       - 'c2.log_count("relayed activation 2ad49 by aa8c3") == 1'
       - 'c2.log_count("relayed activation 2ad43 by aa8c3") == 1'
-      - 'server.log_count("E_TRAP_") == 0'
+      - 'server.log_count("E_TRAP_") - server.log_count("E_TRAP_NO_REF: .* reports 38098 activating 380b[0-9a-f], no such reference") == 0'
       - 'server.log_count("E_ACTIVATE_REACH") == 0'
