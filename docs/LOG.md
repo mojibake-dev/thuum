@@ -8771,3 +8771,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   aa8cb 'trigger02' ... recorded, relayed to 1 game(s)" (04:17:28Z). RED: x-puzzle-handoff v3 (37d0d4ce) 20261105-041840 at leg
   C: c1 inherited (04:22:55Z, epoch 2) and logged its re-sync, but "the script's side 2, the record Trigger01 (side 2), 0 turn(s)
   fed" against the claim's side 1 and one turn, and its own E after the grant gave no second "animates"; with thuum-cf.
+- 20:52 PST 2026-11-04 (04:52Z 11-05) (numidium): thuum-cf's hand-off fix e320b76a (the side noted only from events the seat did not
+  play itself) laid the same way (bundle ac1cae7d at e320b76a, not c4775a85's, on all four game folders): b-puzzle-relay
+  20261105-043113, b-object-anim 043628 and x-puzzle-guest-view v3 044145 GREEN again; x-puzzle-handoff v3 RED (044707) with the
+  identical lines: c1's only aa8cb events before the grant are the relayed activation and "Trigger01 played (relayed, refused)",
+  and its re-sync still reads "the script's side 2, the record Trigger01 (side 2), 0 turn(s) fed", so the fix ran and the side
+  came from elsewhere; with thuum-cf. The lab is free.
