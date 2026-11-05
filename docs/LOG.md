@@ -8699,3 +8699,23 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   queued apply and the settle wait, ChangeForm.cpp nets zero) pushed server-only: pipeline 5386 green, T0 100% of 13 (589 cases),
   wire-test and wire-fuzz green; fork-lint clean; its fresh review runs; T2 and the stage wait for the lab after Step 0. Pipelines
   5375, 5376 and 5377 (83a40da3, d1f23444, bb559685) built green on both builds. The Frida README gains say-verdict.js's entry.
+- 18:11 PST 2026-11-04 (02:11Z 11-05) (thuum-cf): Step 0's (a) on 83a40da3's dist (numidium, set 20261105-012144-step0-a-83a40da3): b-puzzle-relay
+  GREEN 012144, b-object-anim GREEN 012659, x-fate-dress-bleak v9 GREEN 014048, b-bleak-traps RED twice (013206, 013632) on leg A's
+  'E_TRAP_ == 0' alone, read 4: "E_TRAP_NO_REF: ff000000 reports 38098 activating 380b3" and 380b4, 380b5, 380b9, the ambush
+  trigger's links to the draugr, which the server does not record with npcEnabled false (the run stopped there; legs B, D and E
+  unread). The same four lines b-object-anim's header records on the canon. A claim rewrite (b-object-anim v3's expression) was
+  committed as 74a89ea2 and REVERTED as ba043d13 (a rewrite after a green goes to Eli first, ADR-064 decision 4); Eli then read the
+  cause: "it sounds like in these labs AI is needed to some degree right?" Yes: the premise, not the claim. Probe by path
+  x-bleak-traps-npcs v1 (sha1 f6c8dacf: b-bleak-traps v1 with npcEnabled true, nothing else) runs after numidium's control of
+  b-bleak-traps on canon 7c79fc3e's own dist and before (b); green makes b-bleak-traps v2 that premise change alone. Rung 1's fresh
+  review: FIX FIRST on one finding, the merge's three non-scripting heads (d9836510, 8f3c76fe, fb547765) reverted in 8a5de0bc (the
+  six client files equal canon's); finding 2 (a record's KillImmediate re-ran a corpse's OnDeath on the owner under the flip's gate)
+  fixed narrower than proposed in 1fdd7208 (a RecordDeathScope, not PlatformCall); findings 3 (an essential NPC's script kill) and
+  4 (a script dressing a hosted NPC) recorded as known limits for rung 4 (docs/verbs/papyrus-events.md "ADR-068, rung 1"); the fix's
+  own fresh review runs; m4-scripts-1-flip 1fdd7208 pushed server-only. Reads after approval (docs/research/scripts-one-system
+  section 8): DA04's apparition is stage 40 (EnableHM: the FX's PlayAnim02, the activator, the talking activator and the collision
+  enabled); no world-object script in Bleak Falls or Embershard carries a PlayerRef property (27 of 54 call Game.GetPlayer); the
+  derived per-player quest rule marks no Skyrim.esm start-game-enabled quest and leaves PlayerVampireQuest unmarked (no alias), so
+  the lists stay (ADR-068's measured note). Rung 2: the client layer built (m4-scripts-2-client, four commits, tsc clean, merges
+  clean with 73ed0c52); the wire and server and the platform layers in progress; native-frame.js and x-native-frame v1 (sha1
+  34e8944b) written, for a pre-flip dist after Step 0.

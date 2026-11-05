@@ -537,3 +537,35 @@ TURN_SIGN) that ramps lockAngle with the pick snapped: HYPOTHESIS that the menu'
   addr`; the branch reading is the re-analyst's static read of 2026-11-03
   (HYPOTHESIS until a run). sha1 a710d784; fresh review GO with its notes applied;
   never run yet. 1.6.1170 only.
+- native-frame.js: the frame NativeFunctionBase::Call holds for a script's own
+  native call, the read that opens rung 2 of the scripting ladder (docs/research/
+  scripts-one-system-2026-11-05.md 6.2, 6.9 and 6.11 items 3, 9, 11 and 17;
+  ADR-068 decision 2; lab/.cache/probes/x-native-frame.yaml v1). Attach only, no
+  engine call from a listener. Call 104651 in JavaScript: every native counted
+  by Class.Name and per thread, a summary every 10 s with calls per second per
+  thread, the top 20 natives, every native whose subject is REF and the callers
+  outside SkyrimSE.exe; a full `call` row for ObjectReference.PlayAnimation,
+  PlayAnimationAndWait and Debug.SendAnimationEvent on REF with the native's own
+  members (name, class, latent, the parameter table, the callback at +0x50
+  against 56205 and 56206), the Stack (id, state, frames, callback), the top
+  frame (owningFunction against `this`, owningObjectType, self, size, the args
+  at +0x40 + 16 i decoded by TypeInfo), the previous frame (the calling script's
+  type, function and state; a ScriptFunction by its vtable, 252888) and, at the
+  leave, the CallResult and the Stack's state and returnValue (H-F1).
+  Stack::GetStackFrameVariable 104484 is hooked through a CModule, never called:
+  it is also the interpreter's local-operand fetch (105216, 105217), so a
+  JavaScript listener there would run for every Papyrus instruction; its answers
+  are kept per open Call window and compared with the frame read (`args agree
+  yes|no|partial|unread`, `same slot`); the JavaScript fallback detaches itself
+  past GETVAR_CAP calls in 10 s. Main's thread from 403449; a kernel32!Sleep
+  pulse. LAB_PARAMS: REF (default 0xaa8cb), TTL (600), ALL (false), GETVAR
+  (auto, cmodule, js or off), GETVAR_CAP (20000), ROWS (200). Expected on the
+  host's three turns of 0xaa8cb: three rows `call
+  ObjectReference.PlayAnimationAndWait on aa8cb args Trigger0N Turned0N from
+  defaultPuzzlePillarScript.<function> ... frame own yes args agree yes ... ret
+  2 kInProgress caller vm` for N 1, 2 and 3, the Trigger02 row being H-W1's
+  answer. Ids by `just addr` on 2026-11-05; layouts CommonLib's (file:line in
+  the header); Call's body and 104484's callers are pyghidra-mcp's static read
+  of the same day (HYPOTHESIS). The JavaScript logic was exercised locally
+  against a mocked runtime and frame; sha1 a09f21a9; never run yet. 1.6.1170
+  only.

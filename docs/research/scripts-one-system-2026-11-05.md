@@ -696,3 +696,44 @@ scope (ac2d442c); the flip branch against canon (a7815e76); the flip's native ho
 CommonLibSSE-NG b93280e8 and the fork's hooks on d1f23444 (ad5aed35); TES3MP, OpenMW, Skyrim Together, NV:MP, VaultMP, fnv-coop and
 the Papyrus VM's public write-ups (a794506f); and the mechanism, ladder and skeptic designs (three Plan agents). Nothing was edited
 and no branch was cut during the research; the decisions are ADR-068's. Dated 2026-11-05.
+
+## 8. Reads after approval (2026-11-05, read-only, the game files on sky-srv; CONFIRMED from the bytes unless tagged)
+
+The acting player in the two first dungeons. Over the 14,302 vanilla scripts the census reads, 2,599 string tables name
+GetPlayer, 82 name PlayerRef, 40 both. On the world objects of BleakFallsBarrow01 0x371de, BleakFallsBarrow02 0x371dd and
+EmbershardMine01 0xb6be6 (each REFR's and its base's VMAD), 54 distinct scripts: 27 name GetPlayer, NONE names PlayerRef. Among
+them defaultPillarPuzzleLever, TrapTriggerBase ("playerOnlyTrigger"), TrapHitBase, masterAmbushScript, defaultActivateSelf
+("playerOnly"), HallofStoriesKeyholeScript ("allowNonPlayerActivation"), HallofStoriesDiskScript, PhysicsTrapHit and MS13's stage
+triggers. So in these dungeons a script tests the player only through Game.GetPlayer(): the acting-player scope's swap of that
+native's result covers both the call and the compare `akActionRef == Game.GetPlayer()` (the compare's right side is the swapped
+figure). The PlayerRef-property miss of 6.11 item 5 is absent here and small elsewhere (82 scripts, 40 of which also call
+GetPlayer).
+
+DA04's apparition. QUST 0x2d512 (overridden by Dawnguard, Dragonborn and USSEP; all four bind the same 13 fragments): stage 40's
+fragment (Fragment_6) completes objectives 30 and 35, shows 41 to 45, gives the player the Extractor and the BloodHarvest perk
+(Game.GetPlayer().AddItem, AddPerk) and calls DA04QuestScript.EnableHM(True), which plays PlayAnim02 on HermaeusMoraFX 0xf5afe and
+Enables HermaeusMoraActivator 0xf5b00, HermaeusMoraTA 0x3278e and HermaeusMoraCollision 0xf5b01 (each placed initially disabled,
+record flags 0x40000c00); stage 60 MoveHM() (the Alt refs 0xf5b05, 0xf5b04, 0xf5b03 and a MoveTo to 0x15b73) then EnableHM(True);
+stage 200 EnableHM(False); two dialogue fragments (TIF 0x3277b, 0x32784, DefiedHermaeusMora) disable it too. Under Dragonborn the
+TA carries DLC2DA04PropertiesScript and EnableHM switches its face FX by ChangeState instead of the animation. The shunts carry
+DA04HMActivatorShuntScript: OnActivate passes the activation on only when `akActivator == Game.GetPlayer()` (the acting-player
+gate again). DA04SeptimusAscension 0x1a333 starts from INFO 0x1a304's fragment (GetStage DA04 == 50 and the speaker Septimus); its
+phases complete on GetVMQuestVariable (TESCondition 629) of SeptimusStartAscension_var and BoxOpened_var, the condition-read
+variables of rung 5; the Disappear spell 0x106e1e's effect script calls Kill on Septimus (a script kill, ActorDeath cause 3); the
+end fragment sets stage 55 or 105. DA04SeptimusReadsScroll 0x3499e is referenced by no record in any of the four files (nothing
+starts it). So x-mora-scene's stage is 40, and every piece of it falls on a ladder row: the stage (rung 5's request), the three
+Enables (state rows on the outpost's host, rung 4's RefState), PlayAnim02 (an action row, rung 2), the player's AddItem and
+AddPerk (the acting-player scope, rung 5), the TACT's lines (rung 6's speaker-owner rule), the scene's phase variables (rung 5's
+stream), Septimus's death (cause 3).
+
+The per-player quest rule, measured as Eli's answer asks (every alias the player, ALFR 0x14 or ALUA 0x7, or created In the player's
+inventory). Start-game-enabled quests marked per player: Skyrim.esm none of 330 (143 have no alias; 187 have a world alias; the 19
+with a Player alias all have unique-actor or forced-ref aliases too); Dragonborn DLC2DialogueRavenRock; Survival's main quest
+SurvivalModeMainQuest; two mods' controllers. Not start-game-enabled but per player by aliases: the Survival need quests and
+Survival_PlayerInfoQuest, PlayerWerewolfQuest 0x2ba16, Dawnguard's DLC1PlayerVampireQuest 0x71d0. Against today's lists (44 denied,
+4 allowed): none of the 48 is in the derived set; they are world quests by their aliases. PlayerVampireQuest 0xeafd5 has NO alias,
+so the strict rule leaves it unmarked, and the vacuous reading ("no alias is every alias") would mark 143 Skyrim.esm quests,
+dialogue hubs among them. Result: the rule does not yet separate the cases, so by Eli's answer the lists stay. A refinement for
+rung 5 to measure the same way: a quest is the player's when every alias it fills is the player's AND (it has an alias, or every
+reference its script's natives target is the player's own, read from the census by script); DLC1VCController 0x201a428 (four
+forced-ref door aliases) stays world as it should.

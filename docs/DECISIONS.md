@@ -4674,3 +4674,10 @@ running vanilla scripts on the server's VM (ADR-059's reason stands); every seat
 Together's shape, with their documented failures: the allow-list's packet spam, the stage override's thread, the scene lines racing
 ahead, the unshared aliases); per-native entry hooks with register conventions; name lists of any shape; lastAnimation and the pillar
 re-sync as the record; a process-wide Override.
+
+Measured 2026-11-05 (thuum-cf, the research file's section 8): the derived per-player rule marks no Skyrim.esm
+start-game-enabled quest and leaves PlayerVampireQuest 0xeafd5 unmarked (it has no alias), so by Eli's answer the allowed and
+denied lists stay; rung 5 measures a refinement the same way (the aliases AND the targets of the quest script's natives). In the
+first two dungeons no world-object script carries a PlayerRef property (27 of 54 call Game.GetPlayer), so the acting-player
+scope's swap of that native's result covers their player tests. DA04's apparition is stage 40 (EnableHM: PlayAnim02 on the FX,
+Enable on the activator, the talking activator and the collision).

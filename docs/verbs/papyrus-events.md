@@ -354,6 +354,33 @@ too, not only on a guest (the host of 0x9732 runs handlers for cells it does not
 on 2012f92" 2 beside the platform's 2 (the console setstage's own path on the host, as the probe expects). The open set's size on a
 host is at least these filtered 67 in the first windows; D-S1's measurement holds on both viewpoints.
 
+## ADR-068, rung 1: the flip on canon (2026-11-05, thuum-cf)
+
+Fork m4-scripts-1-flip: the merge 772c00d3 of m4-scripts-flip 8896ef0c onto canon 7c79fc3e (wire-schema lib.rs keeps SCHEMA 35;
+changeFormService.ts was a union, then canon's whole after the reverts below; ChangeForm.cpp's premise and its revert net zero),
+pipeline 5386 green (T0 100% of 13, 589 cases; wire-test, wire-fuzz). Its fresh review (FIX FIRST) and what each finding became:
+1. The merge carried three non-scripting heads canon kept out (d9836510 the container hold's client notes, 8f3c76fe the watcher's
+   resurrect hold, fb547765 the record's ragdoll-settle wait), none proven alone against the canon: reverted in 8a5de0bc; the six
+   client files they touched equal canon's byte for byte. They return as their own proven heads in the corpse lane.
+2. A corpse laid from its record re-ran its own OnDying and OnDeath on the owner's seat (canon's apply completes the death with
+   Actor::KillImmediate; the flip's gate passes a simulated actor's events): 1fdd7208 raises a thread-local RecordDeathScope
+   around the apply's two KillImmediate calls (ChangeForm::CompletingRecordDeath) and the gate blanks OnDying and OnDeath under it,
+   with the line "[verb:scripts] OnDeath to <id> blanked: a death completed from the record, not a world death". Narrower than the
+   review's PlatformCall::Scope on purpose: PlatformCall is also raised for the platform's own latent calls, so a death applied from
+   the server's word on a live actor (the world's first) would have lost its scripts. HYPOTHESIS: KillImmediate raises the death
+   events synchronously on its thread; x-corpse-record v6's leg R reads the line.
+3. KNOWN LIMIT, PLAUSIBLE: a script's kill of an ESSENTIAL NPC (cause 3 bypasses the essential check; the host's KillEssential
+   clears the flag on the host alone) leaves the watchers' copies standing, the watcher's actor.kill refusing an essential actor
+   (deathService.ts), its dead check re-killing every 2 s. The fix (a watcher kills an essential copy as KillEssential does, or the
+   record's apply carries the death) goes with rung 4's Kill row; the Delphine case is its two-seat read.
+4. KNOWN LIMIT, PLAUSIBLE: a host-run script that dresses a hosted NPC meets the canon's dress rule (worn armor the record lacks is
+   dropped, which refuses the hosted actor's whole equipment report, its hands included). ADR-068's seam observes the script's
+   EquipItem call itself, so rung 4's EquipItem row carries the named item into the record; until then the server should drop only
+   the unknown entry rather than the report (a rung 2 server item). The read: E_EQUIP_REFUSED for a hosted actor in a stage's log.
+The stage (after Step 0): the three trap and puzzle scenarios without their lever writes (lab/.cache/drafts/*-flip.yaml, each its
+own commit), x-bleak-scripts v1 (sha1 42ac4e80), and x-corpse-record v6 (sha1 8f22e960) for finding 2's line; T2 on sky-srv when
+the lab is free; the Windows client build when the seats are idle (a client build beside live seats contends for the host).
+
 ## Status
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared
