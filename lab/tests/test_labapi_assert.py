@@ -1370,16 +1370,36 @@ class NodeRotationTests(unittest.TestCase):
                      'c1.node_rotation(0xaa8cb, "Pillar01", "late").has',       # a platform without pollNodeRotation
                      'c1.node_rotation(0xaa8cb, "Pillar02").has',               # a node the step never polled
                      'c1.node_rotation(0x123, "Pillar01").has',                 # no step for that reference
-                     'c1.node_rotation(0xaa8cb, "Pillar01", "gone").angle_to(c1.node_rotation(0xaa8cb, "Pillar01")) < 1'):
+                     'c1.node_rotation(0xaa8cb, "Pillar01", "gone").angle_to(c1.node_rotation(0xaa8cb, "Pillar01")) < 1',
+                     'c1.node_rotation(0xaa8cb, "Pillar01", "gone").local_angle_to(c1.node_rotation(0xaa8cb, "Pillar01")) < 1'):
             with self.assertRaises(AssertionData, msg=expr):
                 ev.evaluate(expr)
         self.assertTrue(ev.evaluate('c1.node_rotation(0xaa8cb, "Pillar01", "gone").has == false'))
+
+    def test_a_local_turn_reads_through_a_stale_world_transform(self):
+        # x-puzzle-guest-view v2 20261105-032634, both seats alike: Pillar01's local z went 0 to -2.1083 (a full face,
+        # -120.8 degrees) while its world z read -1.5708 then 3.6791, as from a half turn (59.2 degrees)
+        from labapi.assertions import Evaluator
+        views = NodeRotationViews()
+
+        def row(world, local):
+            return {"formId": 0xAA8CB, "deferred": {"available": True, "read": True,
+                                                     "nodes": [{"node": "Pillar01", "has": True, "world": world, "local": local}]}}
+
+        for c in ("c1", "c2"):
+            views.reads[c][(0xAA8CB, "before")] = row([0.0, 0.0, -1.5708], [0.0, 0.0, 0.0])
+            views.reads[c][(0xAA8CB, "afterA")] = row([0.0, 0.0, 3.6791], [0.0, 0.0, -2.1083])
+        ev = Evaluator(RichServer(), views, ["c1", "c2"])
+        self.assertTrue(ev.evaluate('abs(c2.node_rotation(0xaa8cb, "Pillar01", "afterA").local_angle_to(c2.node_rotation(0xaa8cb, "Pillar01", "before")) - 120.8) < 0.1'))
+        self.assertTrue(ev.evaluate('abs(c2.node_rotation(0xaa8cb, "Pillar01", "afterA").angle_to(c2.node_rotation(0xaa8cb, "Pillar01", "before")) - 59.2) < 0.1'))
+        self.assertTrue(ev.evaluate('c1.node_rotation(0xaa8cb, "Pillar01", "afterA").local_angle_to(c2.node_rotation(0xaa8cb, "Pillar01", "afterA")) < 0.01'))
 
     def test_its_call_shapes_are_checked(self):
         from labapi.assertions import AssertionSyntax, Evaluator
         ev = Evaluator(RichServer(), NodeRotationViews(), ["c1", "c2"])
         for expr in ('c1.node_rotation(0xaa8cb).has', 'c1.node_rotation("Pillar01", 0xaa8cb).has',
                      'c1.node_rotation(0xaa8cb, "Pillar01").angle_to(5) < 1',
+                     'c1.node_rotation(0xaa8cb, "Pillar01").local_angle_to("before") < 1',
                      'c1.node_rotation(0xaa8cb, "Pillar01").world == 0'):
             with self.assertRaises(AssertionSyntax, msg=expr):
                 ev.evaluate(expr)

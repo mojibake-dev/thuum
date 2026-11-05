@@ -70,13 +70,15 @@ the lab can grep (E_ASSERT_*).
   <client>.figure_spells().count | .extra | .base    that client's figure of the other player at its last figure-spells
                                                      step: its added spells, those it holds in no hand or power slot,
                                                      and its base's form id (ADR-046)
-  <client>.node_rotation(<id>, "<node>").has | .angle_to(<rotation>)
+  <client>.node_rotation(<id>, "<node>").has | .angle_to(<rotation>) | .local_angle_to(<rotation>)
                                                      a named node of a loaded reference as that seat's engine
                                                      holds it, from its last node-rotation {formId, nodes} step's
                                                      deferred read (the platform's pollNodeRotation, the previous
                                                      poll's answer: a read is two steps); angle_to is the degrees
                                                      between two world rotations, another seat's or a {label}
-                                                     read's, whatever Euler triple each came as
+                                                     read's, whatever Euler triple each came as; local_angle_to the
+                                                     same between the node's local rotations (its turn under its
+                                                     parent, which a stale world transform cannot hide)
   <client>.node_rotation(<id>, "<node>", "<label>")  the same from its node-rotation {label: "<label>"} step
   <client>.node_scale()                              the engine's scale of the node its last node-scale
                                                      step read on its own player
@@ -866,13 +868,14 @@ def _euler_xyz(a: tuple[float, float, float]) -> list[list[float]]:
 class NodeRotationView:
     """c.node_rotation(id, node[, label]): a named node of a loaded reference as that seat's engine held it at its last
     node-rotation step's deferred read (the fork's sp.pollNodeRotation, e80fb0c8): whether the reference's 3D has the
-    node, and its world rotation as an Euler triple (radians, ToEulerAnglesXYZ)."""
+    node, and its world and local rotations as Euler triples (radians, ToEulerAnglesXYZ)."""
 
     client: str
     formId: int
     node: str
     has: bool
     world: tuple[float, float, float] | None
+    local: tuple[float, float, float] | None = None
 
     def angle_to(self, other: "NodeRotationView") -> float:
         """The angle in degrees of the rotation between this world rotation and another, from the trace of R1^T R2
@@ -881,9 +884,23 @@ class NodeRotationView:
         for v in (self, other):
             if not v.has or v.world is None:
                 raise AssertionData(f"{v.client}'s read of {v.formId:#x} has no node {v.node!r}")
-        r1, r2 = _euler_xyz(self.world), _euler_xyz(other.world)
-        tr = sum(r1[i][j] * r2[i][j] for i in range(3) for j in range(3))
-        return math.degrees(math.acos(max(-1.0, min(1.0, (tr - 1.0) / 2.0))))
+        return _angle_between(self.world, other.world)
+
+    def local_angle_to(self, other: "NodeRotationView") -> float:
+        """The same between the two local rotations, the node's turn under its parent: x-puzzle-guest-view v2
+        20261105-032634 read Pillar01's local z at -120.8 degrees after a full turn on both seats while its world
+        transform still stood as from a half turn (59.2 degrees by angle_to)."""
+        for v in (self, other):
+            if not v.has or v.local is None:
+                raise AssertionData(f"{v.client}'s read of {v.formId:#x} has no local rotation for {v.node!r}")
+        return _angle_between(self.local, other.local)
+
+
+def _angle_between(a: tuple[float, float, float], b: tuple[float, float, float]) -> float:
+    """Degrees of the rotation between two Euler triples, from the trace of R1^T R2 (tr = 1 + 2 cos angle)."""
+    r1, r2 = _euler_xyz(a), _euler_xyz(b)
+    tr = sum(r1[i][j] * r2[i][j] for i in range(3) for j in range(3))
+    return math.degrees(math.acos(max(-1.0, min(1.0, (tr - 1.0) / 2.0))))
 
 
 @dataclass(frozen=True)
@@ -1769,13 +1786,15 @@ class _ClientRef:
         row = next((r for r in deferred.get("nodes") or [] if isinstance(r, dict) and r.get("node") == node), None)
         if row is None:
             raise AssertionData(f"{self.name}'s {step} did not poll the node {node!r}")
-        world = row.get("world")
         has = bool(row.get("has"))
-        try:
-            w = (float(world[0]), float(world[1]), float(world[2])) if has else None
-        except (TypeError, IndexError, ValueError) as e:
-            raise AssertionData(f"{self.name}'s {step} row for {node!r} lacks a world rotation ({e})") from e
-        return NodeRotationView(self.name, int(form_id), node, has, w)
+        triples = []
+        for frame in ("world", "local"):
+            v = row.get(frame)
+            try:
+                triples.append((float(v[0]), float(v[1]), float(v[2])) if has else None)
+            except (TypeError, IndexError, ValueError) as e:
+                raise AssertionData(f"{self.name}'s {step} row for {node!r} lacks a {frame} rotation ({e})") from e
+        return NodeRotationView(self.name, int(form_id), node, has, triples[0], triples[1])
 
     def npc_state(self, form_id: int) -> NpcStateView:
         """The seat's last npc-state step for that NPC (`npc-state {formId}`)."""
@@ -2133,7 +2152,7 @@ _ID_STRING_METHODS = {
 }
 # Methods that take another view of their own kind: c1.node_rotation(id, n).angle_to(c2.node_rotation(id, n))
 _VIEW_METHODS = {
-    NodeRotationView: {"angle_to"},
+    NodeRotationView: {"angle_to", "local_angle_to"},
 }
 # Methods that take a client's own watch and a string: c2.watched(c1).flights_match(c1.watched_self(), "angle")
 _PAIR_METHODS = {
@@ -2153,7 +2172,7 @@ _NULLARY = {
 _METHODS = {
     _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref", "follow", "fate", "log_count", "stream"},
     _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "inventory", "globalValue", "projectile", "poison", "skill", "level", "weather", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near", "node_rotation"},
-    NodeRotationView: {"angle_to"},
+    NodeRotationView: {"angle_to", "local_angle_to"},
     InventoryView: {"count"},
     RefsNearView: {"count", "has", "distance", "runtime_of", "pos", "disabled"},
     EffectsView: {"left", "magnitude"},
