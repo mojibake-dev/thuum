@@ -59,7 +59,46 @@ for attempt in 1 2; do
   [ "$attempt" = 2 ] && exit 5
   sleep 5
 done
+# the game's process within a minute of the task, else the task again, at most twice (playtest 46, 14:34: both seats'
+# tasks ran right after their streams opened, neither game started, nothing crashed or logged an error, and the wait
+# below ran its five minutes out)
+gexec() { ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$1")" 2>/dev/null | python3 -c 'import sys,json; print((json.load(sys.stdin).get("out-data") or "").strip())' 2>/dev/null || true; }
+for retry in 1 2 3; do
+  up=0
+  for i in $(seq 1 12); do
+    sleep 5
+    [ "$(gexec 'if (Get-Process SkyrimSE -ErrorAction SilentlyContinue) { "up" } else { "down" }')" = up ] && { up=1; break; }
+  done
+  [ "$up" = 1 ] && break
+  [ "$retry" = 3 ] && { echo "$client: no game process after the launch task three times" >&2; exit 4; }
+  echo "$client: no game process a minute after the launch task; the task again ($retry)" >&2
+  gexec 'Start-ScheduledTask -TaskName sky-lab-launch; "started"' >/dev/null
+done
 # off the list once the game is gone, then back on it after the login
 for i in $(seq 1 20); do case "$(online)" in *"\"profileId\":$profile}"*) sleep 3;; *) break;; esac; done
-for i in $(seq 1 60); do case "$(online)" in *"\"profileId\":$profile}"*) echo "$client (profile $profile) is back online"; exit 0;; esac; sleep 5; done
-echo "$client did not come back online within five minutes" >&2; exit 4
+back=0
+for i in $(seq 1 48); do case "$(online)" in *"\"profileId\":$profile}"*) back=1; break;; esac; sleep 5; done
+[ "$back" = 1 ] || { echo "$client did not come back online within four minutes" >&2; exit 4; }
+echo "$client (profile $profile) is back online"
+# Survival off and its prompt answered again for this seat: a relaunch lets the game's own save switch Survival back on
+# (playtest 46: Prisoner's after a restore with no ready step), sent only after a steady minute of this seat's heartbeats
+# (playtest 43: a re-send 5 s after a relaunch froze c2); the last line stays the online one for the callers that read it
+steady=0
+for i in $(seq 1 18); do
+  hb=$(curl -fsS -m 10 "$api/status" 2>/dev/null | python3 -c "import sys,json; print(json.load(sys.stdin).get('heartbeats_s_ago',{}).get('$client', 99))" 2>/dev/null || echo 99)
+  if python3 -c "import sys; sys.exit(0 if float('$hb') < 8 else 1)"; then steady=$((steady + 1)); else steady=0; fi
+  [ "$steady" -ge 6 ] && break
+  sleep 10
+done
+if [ "$steady" -ge 6 ]; then
+  for g in '"8df:ccQDRSSE001-SurvivalMode.esl",1' '"828:ccQDRSSE001-SurvivalMode.esl",0'; do
+    curl -fsS -m 20 -X POST "$api/state/rpc/labCommand" -H 'content-type: application/json' \
+      -d "{\"payload\": {\"kind\":\"console\",\"profileId\":$profile,\"name\":\"SetGlobal\",\"args\":[20,$g]}}" >/dev/null 2>&1 \
+      || echo "$client: survival's global $g not sent" >&2
+  done
+  echo "$client: survival off and its prompt answered, sent after a steady minute" >&2
+else
+  echo "$client: survival off NOT re-sent, its heartbeats never held steady for a minute" >&2
+fi
+echo "$client (profile $profile) is back online"
+exit 0
