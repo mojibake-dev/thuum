@@ -8786,3 +8786,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the node-rotation export and the whale on two seats (not yet in play). Noted to thuum-cf for v4's fresh review (ADR-064's
   rewritten claims): leg C's counts sit at the side-2 branch's floor, so the side-1 branch's feed goes unchecked; a threshold
   tied to the branch keeps both strict.
+- 22:16 PST 2026-11-04 (06:16Z 11-05) (numidium): the fresh review of 83a40da3..066cce4e's four unread pieces (a read-only agent,
+  findings to thuum-cf unedited): e320b76a FIX FIRST (onCreateActor's early self-played mark could swallow a seat's own genuine
+  pillar event, so its side went unnoted), ccc98a2d's T0 case FIX FIRST (it ran with NPCs off and could not fail), c4775a85 and
+  the merge GO with notes. thuum-cf's canon candidate 80c07073 (e320b76a reverted, the early mark dropped, the marks keyed on the
+  event's lower case) laid by turbo-client over bb559685's dist (bundle 0701f789; sky-srv's canon v3 scenarios checked by hash,
+  no deploy): b-puzzle-relay 20261105-054750, b-object-anim 055309, x-puzzle-guest-view v3 055834 and x-puzzle-handoff v5 060354
+  GREEN; x-puzzle-handoff-late v2 (d93033de) RED (060929): the late joiner c1, granted the Temple at epoch 2, re-synced aa8cc (0
+  turns fed) but its aa8cb re-sync, the one that had to feed a turn (side 1 against the record's 2), threw "SP3NativeValueCasts::
+  JsObjectToNative..." (the console cuts the native's name); no green run had fed a turn before. Canon stays at 83a40da3, the
+  hand-off MECHANISM ONLY; with thuum-cf. The lab is free.
