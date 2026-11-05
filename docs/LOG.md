@@ -9096,3 +9096,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   with it; on c2 it fired three times within 2.4 s of creating c1's figure. On the host, that swing hit c1 in the bystander spot
   and carried it out of the path; the leg's health reset then hid that hit's damage. So the host-as-bystander case is unread, not
   refused. A v1.2 would check c1's position at the walk and step into the swing only after the re-entry firings end.
+- 14:50 PST 2026-11-05 (22:50Z 11-05) (numidium, thuum-cf's probe): x-trap-wall-both v1.2 (51484945) GREEN 20261105-224256 on the
+  ece35376 pin, 56 of 56: Eli's D-T2 outcome reads on both legs. Both players stage south of the plate, out of the swing, with
+  their positions and no stray firing read before each walk. Leg A, the host steps: c1 lost 52.9 (record 0.8203, c2 sees 0.8230)
+  and c2, standing in the swing, lost 54.6 (record 0.8136, c1 sees 0.8167). Leg B, the guest steps: c2 lost 53.0 (record 0.8206,
+  c1 sees 0.8247) and the host, standing in the swing, lost 50.7 (record 0.8275, c2 sees 0.8288). Each player was hit once, on its
+  own engine only: each seat's unskipped trap-hit census rose by one a leg, each skipped its copy's hit on the other's figure, and
+  no player took two. So the wall hits every player in its path, each on that player's own screen, and each record reaches the
+  other game. thuum-cf's read of 220449's re-entry firing: no stale spot and no glide (the figures were created at fresh
+  positions). c2's own plate fired in the same tick as the client's model apply (setOpen(false) and the disabled apply on the
+  plate and wall; HYPOTHESIS that it fires a family trigger, the fix to skip both for family refs). The other firings were the
+  echo of a carried body crossing the other seat's copy, as vanilla does. It ships as a declared known issue for playtest 47 and
+  is fixed after. The merge's gates left: the 746aff6c slot (the wire follower, x-trap-wire-follower) and Eli's check of the D-T2
+  rewrites.
