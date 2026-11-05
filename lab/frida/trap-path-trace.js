@@ -53,7 +53,8 @@ const ACHR = 0x3e; // include/RE/F/FormTypes.h:202
 const PLAYER_ID = 0x14;
 const FIGURE_MIN = 0xff000000;
 
-function emit(row) { send(row); }
+// every row to console.log as well: lab-api's preamble captures console.log alone (lamp-shot-trace.js v1.1's review)
+function emit(row) { send(row); console.log(JSON.stringify(row)); }
 
 function fileVersion(path) {
   const ver = Module.load('version.dll');
@@ -143,7 +144,7 @@ if (at === undefined) {
   };
   // a call the process makes constantly, so a zero count means the Interceptor itself is not live here
   try {
-    const sleep = Module.getExportByName('kernel32.dll', 'Sleep');
+    const sleep = Process.getModuleByName('kernel32.dll').getExportByName('Sleep'); // Frida 17 dropped the static form
     counts.sleep = 0;
     Interceptor.attach(sleep, { onEnter: function () { counts.sleep++; } });
     resolved.sleep = { at: sleep.toString() };

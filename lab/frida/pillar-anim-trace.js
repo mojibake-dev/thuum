@@ -31,7 +31,8 @@ const FORM_ID = 0x14; // include/RE/T/TESForm.h:354
 const FORM_TYPE = 0x1a; // include/RE/T/TESForm.h:356
 const ACHR = 0x3e; // include/RE/F/FormTypes.h:202
 
-function emit(row) { send(row); }
+// every row to console.log as well: lab-api's preamble captures console.log alone (lamp-shot-trace.js v1.1's review)
+function emit(row) { send(row); console.log(JSON.stringify(row)); }
 
 function fileVersion(path) {
   const ver = Module.load('version.dll');
