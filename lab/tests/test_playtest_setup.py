@@ -177,6 +177,41 @@ class PlaytestProfile(unittest.TestCase):
         self.assertEqual(last_grant(fresh_then_handoff, 0x3C), "none")  # another cell's lines say nothing of it
         self.assertEqual(last_grant(p.format("1:00.000", "ff000000 hosts cell 371def at epoch 1"), 0x371DE), "none")
 
+    def test_roles_names_each_camp_cells_host_from_this_server_process(self):
+        # playtest 46's end (2026-11-04 23:52Z on): the run before the last restart ended on a stop, which must not make
+        # this process's first grant look inherited; the host is named by the online table, not by its actor id
+        import contextlib
+        import io
+        from unittest import mock
+
+        import playtest_setup as t
+
+        p = "skymp-server-1  | [2026-11-04 {}] [info] {}"
+        log = "\n".join([
+            p.format("23:30:01.089", "WireServer: listening on :7777 (netcode, unsecure tokens, no password), up to 8 clients"),
+            p.format("23:40:00.000", "PartOne - cell-host: ff000000 stops hosting cell 371de (epoch 3)"),
+            p.format("23:52:13.118", "WireServer: listening on :7777 (netcode, unsecure tokens, no password), up to 8 clients"),
+            p.format("23:53:10.262", "PartOne - cell-host: ff000001 hosts cell 371de at epoch 1"),
+        ])
+        handoff = "\n".join([log,
+                              p.format("23:59:31.168", "PartOne - cell-host: ff000001 stops hosting cell 371de (epoch 1)"),
+                              p.format("23:59:31.173", "PartOne - cell-host: ff000000 hosts cell 371de at epoch 2")])
+        profile = {"seats": [{"profile": 1, "name": "test 1"}, {"profile": 2, "name": "test 2"}],
+                   "camp": {"teleports": [{"profileId": 1, "cell": "371de:Skyrim.esm"}]}}
+        online = {"players": [{"actorId": 0xFF000000, "profileId": 1}, {"actorId": 0xFF000001, "profileId": 2}]}
+
+        def read(text, host, epoch):
+            def state(payload):
+                return online if payload["kind"] == "online" else {"found": True, "hosted": True, "actorId": host, "epoch": epoch}
+            out = io.StringIO()
+            with mock.patch.object(t, "load_profile", return_value=profile), mock.patch.object(t, "_srv", return_value=text), \
+                    mock.patch.object(t, "state", side_effect=state), contextlib.redirect_stdout(out):
+                self.assertEqual(t.roles(46), 0)
+            return out.getvalue().strip()
+
+        self.assertEqual(read(log, 0xFF000001, 1), "cell 371de: host test 2 (profile 2), epoch 1, its grant fresh; every other seat in it is a guest")
+        self.assertEqual(read(handoff, 0xFF000000, 2), "cell 371de: host test 1 (profile 1), epoch 2, its grant inherited; every other seat in it is a guest")
+
     def test_a_profile_cannot_turn_a_standing_item_off(self):
         from playtest_setup import ProfileError
 

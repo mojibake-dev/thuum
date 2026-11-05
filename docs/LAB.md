@@ -1003,6 +1003,66 @@ snapshot, no promotion. Every push gets a line in /srv/lab/turbo.log on sky-srv.
   - `--world` also restores the newest saved turbo world, which relaunches
     both seats.
 
+## Playtests
+
+A T4 session with Eli at the seats: a profile, lab/playtests/<n>.yaml, and a
+checklist, docs/private/playtest-<n>.md (playtest-record and playtest-check
+read it as playtest-m2-<n>.md; a link to it does). The way in is one command,
+never its steps by hand (Eli, 2026-11-04 after 46: "that should be
+canonized into a script instead of hand rolled every time").
+- `just playtest-go <n>` runs, in order:
+  - the profile's build first, `lay: {server: <tag>, dist: {branch, sha},
+    client: <sha>}`, each optional: turbo-srv, turbo-dist with each seat's
+    line read back from turbo.log, turbo-client. Nothing is pushed after the
+    world is restored, since a push relaunches.
+  - setup: the world restored, the server's host table fresh, the hold, the
+    camp, each seat's spells, values, items, perks and bars, the standing
+    base.
+  - the streams: each kept, replaced (no socket) or opened.
+  - ready: both seats relaunched together, then its checks.
+  - each interior camp cell's host proven a fresh grant from the server's
+    cell-host lines; an inherited grant relaunches both seats together
+    again, three attempts at most.
+  - the roles: which seat hosts each camp cell; every other seat in it is a
+    guest. The checklist names the guest after this line, not before.
+- `just playtest-record <n>` next, as a tracked background task.
+- During the session:
+  - a seat's setup goes through the server, `just playtest-console <profile>
+    <name> <args>` (SetGlobal, AddPerk, addshout), never typed into a game
+    and never a hand-built labCommand;
+  - `just playtest-respawn <formId> [true]` and `just playtest-kill <formId>
+    [killer]` for the NPC items;
+  - `just playtest-roles <n>` before and after any item that depends on who
+    hosts;
+  - `just playtest-streams <n>` for a dead or missing stream;
+  - `just playtest-relaunch <c>` for one seat, an item's own relaunch or a
+    crash: it runs the launch task again when no game process shows within
+    a minute (three times at most), waits for the login, and after a steady
+    minute of heartbeats sends the standing survival lines again.
+- The end: `just playtest-record-stop`, `just playtest-save <label>`, `just
+  lab-release`, then the LOG entry.
+
+What tonight's playtests taught (45 and 46, 2026-11-04):
+- Both seats relaunch together. A seat relaunched alone hands its hosted
+  cells to the other seat, which loaded them as a guest, and that cell's
+  scripted content sticks: in 46 neither seat could turn a pillar until a
+  world restore. A host relaunched onto a record holding the session's turns
+  sticks them too. A pillar's state lives in its host's Papyrus alone, never
+  fed from the record (ADR-059 decision 5), so this holds until the
+  scripting arm lands.
+- An item that relaunches one seat relaunches the guest of the scripted
+  cell, never its host.
+- The standing base is sent again after every relaunch: a relaunched game's
+  save switches Survival back on (46: Prisoner, after a restore that skipped
+  ready), and an unanswered "Enable Survival Mode?" box freezes the game (46:
+  rotfern). Survival_ModeToggle 0 and Survival_PlayerHasBeenPrompted 1 go out
+  at setup, at ready, and after every playtest-relaunch.
+- A launch is not trusted until its process shows: in 46, at 14:34, both
+  launch tasks ran right after their streams opened and neither game
+  started.
+- A restore is not a start: ready follows it, inside playtest-go.
+- No script is edited while it runs; bash reads its file as it goes.
+
 ## Network faults
 
 Inside sky-srv, per scenario:

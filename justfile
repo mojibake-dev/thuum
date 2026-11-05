@@ -522,6 +522,16 @@ turbo-back *args:
 playtest-go n:
     @uv run --project lab/labapi python lab/tools/playtest_setup.py go {{n}}
 
+# Who hosts each interior cell of playtest n's camp now, and whether that grant was fresh or inherited (a seat handed
+# a cell it loaded as a guest sticks the cell's scripted content, playtest 46's pillars); every other seat is its guest.
+playtest-roles n:
+    @uv run --project lab/labapi python lab/tools/playtest_setup.py roles {{n}}
+
+# Playtest n's Moonlight streams on this Mac (the profile's streams: ports): a live one kept, a stale one (no socket)
+# replaced, a missing one opened; playtest-go's own step.
+playtest-streams n:
+    @uv run --project lab/labapi python lab/tools/playtest_setup.py streams {{n}}
+
 # A playtest's seats from its profile, lab/playtests/<n>.yaml (ADR-040 item 6): the world restored with both seats
 # relaunched, the hold, the camp, each seat's spells, values, items and bars set server-side and read back, Sunshine
 # restarted; then the Moonlight streams, then playtest-ready. `check` only reads the profile.
@@ -568,6 +578,18 @@ playtest-step seat step:
 # gives profile 1 Fire Breath (20 is 0x14, the player itself; a hex or decimal number is a number, anything else a string).
 playtest-console profile name *args:
     @python3 -c 'import json, re, sys; num = lambda x: int(x, 0) if re.fullmatch(r"-?(0[xX][0-9a-fA-F]+|[0-9]+)", x) else x; print(json.dumps({"payload": {"kind": "console", "profileId": int(sys.argv[1]), "name": sys.argv[2], "args": [num(x) for x in sys.argv[3:]]}}))' {{profile}} {{name}} {{args}} | curl -fsS -m 15 -X POST "{{lab_api}}/state/rpc/labCommand" -H 'content-type: application/json' --data-binary @-; echo
+
+# In a playtest, a dead game-file actor up again from the server (the gamemode's labCommand respawn-ref): by the fate's
+# own path, at its placement and rolled anew, as the game's 240-hour respawn would; `just playtest-respawn <formId> true`
+# stands it where it fell instead. Refused for one that is not dead.
+playtest-respawn formId in_place="false":
+    @python3 -c 'import json, sys; print(json.dumps({"payload": {"kind": "respawn-ref", "formId": int(sys.argv[1], 0), "inPlace": sys.argv[2] == "true"}}))' {{formId}} {{in_place}} | curl -fsS -m 15 -X POST "{{lab_api}}/state/rpc/labCommand" -H 'content-type: application/json' --data-binary @-; echo
+
+# In a playtest, a game-file actor killed by the server (the gamemode's labCommand kill-ref: the console verb's Kill, run
+# as a seat's console): `killer` the profile whose actor is the killer (its console runs the verb), none a death with no
+# killer (run as profile 1's console).
+playtest-kill formId killer="":
+    @python3 -c 'import json, sys; k = sys.argv[2] if len(sys.argv) > 2 else ""; p = {"kind": "kill-ref", "profileId": int(k or 1), "formId": int(sys.argv[1], 0)}; p.update({"killerProfileId": int(k)} if k else {}); print(json.dumps({"payload": p}))' {{formId}} {{killer}} | curl -fsS -m 15 -X POST "{{lab_api}}/state/rpc/labCommand" -H 'content-type: application/json' --data-binary @-; echo
 
 # In a playtest, open a player's race menu from the server (profile 1 or 2; the gamemode's labCommand open-race-menu).
 playtest-race-menu profile:

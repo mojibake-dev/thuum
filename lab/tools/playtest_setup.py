@@ -706,6 +706,36 @@ def _lay(rep: Report, p: dict[str, Any]) -> bool:
     return not rep.bad
 
 
+def roles(n: int) -> int:
+    """Who hosts each interior cell of profile n's camp now, and how the host got it (last_grant over the server's
+    cell-host lines since its process started): a playtest's checklist says which seat is the guest, and a cell's
+    scripts run on its host alone (playtest 46: the roles swapped across relaunches and the checklist assumed them)."""
+    p = load_profile(n)
+    names = {s["profile"]: s.get("name") or f"profile {s['profile']}" for s in p["seats"]}
+    # the container's log keeps every run since its creation (a `docker compose restart` keeps the container): only the
+    # lines after the wire's last "listening on" are this process's host table
+    lines = _srv("cd /srv/lab && docker compose logs --no-color skymp-server 2>/dev/null | grep -E 'cell-host:|WireServer: listening on'", timeout=120).splitlines()
+    starts = [i for i, x in enumerate(lines) if "WireServer: listening on" in x]
+    log = "\n".join(lines[starts[-1] + 1:] if starts else lines)
+    online = {int(pl.get("actorId") or 0): int(pl.get("profileId") or 0) for pl in state({"kind": "online"}).get("players") or []}
+    cells = _camp_cells(p)
+    if not cells:
+        print(f"profile {n}: no interior camp cell")
+    for c in cells:
+        h = state({"kind": "cellHost", "cell": c})
+        prof = online.get(int(h.get("actorId") or 0), 0)
+        who = (f"{names.get(prof, f'profile {prof}')} (profile {prof})" if prof else f"actor {int(h.get('actorId') or 0):x}, not online") if h.get("hosted") else "nobody"
+        print(f"cell {c:x}: host {who}, epoch {h.get('epoch')}, its grant {last_grant(log, c)}; every other seat in it is a guest")
+    return 0
+
+
+def streams(n: int) -> int:
+    """The profile's two Moonlight streams on this Mac kept, replaced or opened (go's step, alone)."""
+    rep = Report()
+    _streams(rep, load_profile(n))
+    return 1 if rep.bad else 0
+
+
 def go(n: int) -> int:
     """The one way into a playtest (Eli, 2026-11-04 after 46: "that should be canonized into a script instead of hand
     rolled every time"), in a fixed order: the profile's build laid first; setup (the world restored, the server's host
@@ -731,6 +761,7 @@ def go(n: int) -> int:
         bad = {f"{c:x}": h for c, h in hows.items() if h != "fresh"}
         print(f"   hosts: " + (", ".join(f"{c:x} {h}" for c, h in hows.items()) or "no interior camp cell"), flush=True)
         if rc == 0 and not bad:
+            roles(n)
             print(f"== playtest {n} ready {time.strftime('%H:%M:%S')}: next `just playtest-record {n}` in the background")
             return 0
         print(f"   attempt {attempt + 1}: ready exit {rc}, not fresh {bad or 'none'}: both seats relaunched together again", flush=True)
@@ -792,8 +823,8 @@ def main(argv: list[str]) -> int:
         except ProfileError as e:
             print(f"== profile {argv[1]}: {e}", file=sys.stderr)
             return 2
-    if len(argv) != 2 or argv[0] not in ("setup", "ready", "check", "go") or not argv[1].isdigit():
-        print("usage: playtest_setup.py go|setup|ready|check <n> | switch <n> <" + "|".join(SWITCHES) + "> on|off", file=sys.stderr)
+    if len(argv) != 2 or argv[0] not in ("setup", "ready", "check", "go", "roles", "streams") or not argv[1].isdigit():
+        print("usage: playtest_setup.py go|setup|ready|check|roles|streams <n> | switch <n> <" + "|".join(SWITCHES) + "> on|off", file=sys.stderr)
         return 2
     n = int(argv[1])
     try:
@@ -801,7 +832,7 @@ def main(argv: list[str]) -> int:
             p = load_profile(n)
             print(f"profile {n} ok: {len(p['seats'])} seats, {sum(len(seat_commands(s)) for s in p['seats'])} sets, world {p['world']}")
             return 0
-        return go(n) if argv[0] == "go" else setup(n) if argv[0] == "setup" else ready(n)
+        return {"go": go, "setup": setup, "ready": ready, "roles": roles, "streams": streams}[argv[0]](n)
     except ProfileError as e:
         print(f"== profile {n}: {e}", file=sys.stderr)
         return 2
