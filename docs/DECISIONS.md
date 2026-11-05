@@ -4717,3 +4717,7 @@ landing together (the second alone would leave a guest's rocks hanging): ADR-058
 the owner of a fired trap's bodies, streamed until they rest), and the seam's table gains SetMotionType and ApplyHavokImpulse as
 state rows a non-owner skips (the non-owner skip lever rung 2 carries). Placed in rung 6, before q-embershard, so the dungeon's
 proof runs on synced rocks; until then each seat drops its own, as today.
+
+As built, 23:27 PST 2026-11-04 (07:27Z 11-05) (rung 2's merged-head review): decision 4's ScriptCall budget is per sender across its rows (wire-rules
+natives.rs), not "per-sender per-row" as decision 4 reads; the across-rows shape is the safer one and stands, the decision's
+text kept as it was accepted.
