@@ -8914,3 +8914,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   rows, the same on both seats: SetLockLevel, Lock, EnableNoWait (one each in a 30 s window); "(not hosted)" on the latent
   RemoveItem, MoveTo, Disable. So every dist lay from here (which writes the template) is a proven state, playtest 47's
   included.
+- 06:16 PST 2026-11-05 (14:16Z 11-05) (numidium): the trap slice (D-S3) window 1 READ ON THE LAB, six of seven on m4-scripts-2b-traps
+  46b95609 (`just verb-stage`, its own Windows dist 19165, platform a54c1ba0, the lever template; the bare tag checked to be
+  46b95609's image index): b-puzzle-relay v4 20261105-134221, x-trap-spots 134713, x-trap-family-fire 135134 (H-T2 holds, so
+  boulders and bleak-scripts read as D-S3 reads), x-trap-boulders-claim 140118, x-bleak-scripts v3.1 140410 and
+  x-puzzle-handoff-late-flip v1.3 141042 GREEN; x-trap-lamp-trigger RED (135717) on its premises: c1's press on the oil lamp 0x9b0fb
+  gave no engine activation line, no trap result and nothing at the server, and c1's Firebolt at 0x9b0e2 never reached the server
+  (no OnSpellCast line of either shape); neither lamp is among the nine traps both seats logged "never blocked here (D-S3)". With
+  thuum-cf; b-bleak-traps and b-object-anim stay out until Eli's D-T2. The lab is idle on 46b95609's lay.
