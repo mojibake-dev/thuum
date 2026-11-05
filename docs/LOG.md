@@ -8665,3 +8665,19 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   it. Process lessons, now code: `just playtest-go <n>` (f736fd95) lays the build first, relaunches both seats only together
   and proves each interior camp cell's host a fresh grant from the server's cell-host lines; the standing base answers
   Survival's prompt (8DF), whose box froze rotfern's game; a relaunch outside the ready step let Prisoner's survival come back.
+- 16:43 PST 2026-11-04 (00:43Z 11-05) (numidium): playtest tooling, Eli's "in the mean time you need to sort your shit out for playtest
+  tooling" while thuum-magnus plans the scripting one shot. In: 0ed4b942 (playtest-relaunch.sh runs the launch task again when no
+  game process shows a minute after it, three times at most, and sends Survival off and its prompt answered after a steady minute
+  of heartbeats, so every relaunch path keeps the standing base), 7c1bde9f (`just playtest-roles <n>`: each interior camp cell's
+  host by the server's online table, its grant fresh or inherited; `just playtest-streams <n>`; `just playtest-respawn <formId>
+  [true]` and `just playtest-kill <formId> [killer]` over the gamemode's respawn-ref and kill-ref; LAB.md's "## Playtests", the
+  runbook with 45 and 46's rules), dd5461c0 (a relaunch keeps a standing hold; a profile's lay block checked whole). PROVEN:
+  `playtest-go` end to end on the canon, 00:25Z to 00:42Z (16 min, the first attempt), from a scratch copy of 46's profile with
+  the canon's lay (server m3-canon-4-hands-4c6d9f24, dist m3-canon-4-objtype 7c79fc3e) and no streams: the dist on both seats
+  read back from turbo.log, setup and ready all ok, the Temple's host test 2 at epoch 3 on a fresh grant. The seats now run
+  canon 7c79fc3e's whole dist (83a40da3's turbo bundle gone), as clean-m1-next holds. What the proof found, fixed in dd5461c0:
+  ready's relaunch had replaced the profile's hold with the relaunch's own 180 minutes, an hour short of a 240-minute playtest.
+  Not exercised: the stream step (no stream opened on Eli's desktop while it worked elsewhere); it runs at the next playtest.
+  lab-api recreated on 8622fbe7 at 00:24Z with the lab free (a scenario that is no YAML answers 400 E_SCENARIO). For the canon
+  wrap-up (thuum-cf's plan, awaiting Eli): 977eccc1, node-rotation's deferred read and `c.node_rotation(<id>, "<node>"[,
+  "<label>"]).angle_to(...)`, the grammar x-puzzle-guest-view v2 claims on; lab-api takes it at its next recreate.
