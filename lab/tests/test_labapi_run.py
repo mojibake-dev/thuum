@@ -851,7 +851,8 @@ class CrashEvidence(RunTests):
         self.assertTrue(errors[0].startswith("E_RUN_CRASH: c1's game crashed"), errors)
         self.assertIn("SkyrimSE.exe.4242.dmp (80537918 bytes", errors[0])
         self.assertIn("kept as c1-SkyrimSE-crash.dmp", errors[0])
-        self.assertEqual(errors[1], f"E_RUN_GAME_LOST: c1's game ({self.WAS}) was not running at the run's end")
+        self.assertEqual(errors[1], f"E_RUN_GAME_LOST: c1's game ({self.WAS}) was not running at the run's end; "
+                                    "CrashLogger wrote no log for pid 4242")
         self.assertTrue(all(f["kind"] == "lab" and f["client"] == "c1" for f in body["failures"]), body["failures"])
         for name in ("c1-SkyrimSE-crash.dmp", "c1-launch.log", "c1-skse64.log"):
             self.assertIn(name, body["artifacts"])
@@ -870,8 +871,52 @@ class CrashEvidence(RunTests):
         run_id, body = self._run(self.RUN)
         self.assertEqual(body["verdict"], "error", body)
         self.assertEqual([f["error"] for f in body["failures"]],
-                         [f"E_RUN_GAME_REPLACED: c1's game was {self.WAS} at the version check and {now} at the run's end"])
+                         [f"E_RUN_GAME_REPLACED: c1's game was {self.WAS} at the version check and {now} at the run's end; "
+                          "CrashLogger wrote no log for pid 4242"])
         self.assertIn("c1-launch.log", body["artifacts"])
+
+    # CrashLogger's log as c1 wrote it on 2026-11-05 (20261105-152648's c1-crash-2026-11-05-07-27-25.log, cut down and
+    # moved onto WAS: the seat's clock seven hours behind UTC, the game up 14 s), a system frame put before the plugin's
+    CRASH_LOG = (
+        "CRASH TIME: 2026-10-17 15:00:14\nSkyrim SSE v1.6.1170\nCrashLoggerSSE v1-24-0-0 Jun 28 2026 00:14:22\n\n"
+        'Unhandled exception "EXCEPTION_ACCESS_VIOLATION" at 0x7FF76E39D242 SkyrimSE.exe+02AD242\tmov rax, [rcx]\n'
+        "Exception Flags: 0x00000000 (Continuable)\n\nPROCESS INFO:\n\tProcess ID: 4242\n\tCrash Thread ID: 5056\n"
+        "\tProcess Uptime: 00:00:14 (14000ms)\n\nCALL STACK ([P]robable / [S]tack scan):\n"
+        "\t[ 0][P] 0x7FF76E39D242      SkyrimSE.exe+02AD242 -> 18789+0x162\tmov rax, [rcx]\n"
+        "\t[ 1][P] 0x7FFF5A15E8D7      KERNEL32.DLL+002E8D7\n"
+        "\t[ 2][P] 0x7FFEDD87B2D8 SkyrimSoulsRE.dll+003B2D8\tmov rcx, [rsp+0x38] |  C:\\repos\\SkyrimSoulsRE\\src\\Menus\\MapMenuEx.cpp:391\n"
+        "\t[ 3][S] 0x7FF76E5ED9D3      SkyrimSE.exe+04FD9D3 -> 31577+0x63\tnop\n")
+
+    def _crash_logs(self, logs):
+        pve = self.services.control._b
+        for name, text in logs.items():
+            pve.skse_logs.append(name)
+            pve.files[f"C:\\sky-lab\\c1-{name}"] = text
+
+    def test_the_lost_games_crash_logger_log_names_its_crash(self):
+        # c1's terrain-upgrade race at the initial load, nine times since 11-01, each a bare E_RUN_GAME_REPLACED before
+        now = "5151@2026-10-17T22:00:40.0000000Z"
+        self._seat({"games": [now], "dumps": [], "curl": -1})
+        self._crash_logs({"crash-2026-10-17-15-00-14.log": self.CRASH_LOG})
+        run_id, body = self._run(self.RUN)
+        self.assertEqual(body["verdict"], "error", body)
+        self.assertEqual([f["error"] for f in body["failures"]],
+                         [f"E_RUN_GAME_REPLACED: c1's game was {self.WAS} at the version check and {now} at the run's end; "
+                          "its crash in c1-crash-2026-10-17-15-00-14.log: EXCEPTION_ACCESS_VIOLATION at SkyrimSE.exe+02AD242 "
+                          "(18789+0x162), 14000 ms after its start, through SkyrimSoulsRE.dll+003B2D8"])
+        self.assertIn("c1-crash-2026-10-17-15-00-14.log", body["artifacts"])
+
+    def test_a_reused_pids_older_log_is_not_the_lost_games(self):
+        # a rolled-back seat can start its game under a pid an older crash log already names: its start, the log's
+        # time less its uptime, must sit a whole number of quarter hours from the game's
+        self._seat({"games": [], "dumps": [], "curl": -1})
+        self._crash_logs({"crash-2026-10-17-14-57-00.log": self.CRASH_LOG.replace("15:00:14", "14:57:00"),
+                          "crash-2026-10-12-09-13-51.log": self.CRASH_LOG.replace("2026-10-17 15:00:14", "2026-10-12 09:13:51")})
+        run_id, body = self._run(self.RUN)
+        self.assertEqual([f["error"] for f in body["failures"]],
+                         [f"E_RUN_GAME_LOST: c1's game ({self.WAS}) was not running at the run's end; CrashLogger wrote no log for pid 4242"])
+        from labapi.runner import crash_logger_signature
+        self.assertEqual(crash_logger_signature(self.tmp, "c1", "unreadable"), "no CrashLogger log read ('unreadable' is no pid and start)")
 
     def test_the_same_game_and_no_dump_leave_the_run_green(self):
         self._seat({"games": [self.WAS], "dumps": [], "curl": -1})

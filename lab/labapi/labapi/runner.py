@@ -122,6 +122,49 @@ if ($dumps.Count -gt 0) {
 Write-Output ('{"games": [' + ($games -join ', ') + '], "dumps": [' + $list + '], "curl": ' + $curl + '}')
 """
 
+# the modules a CrashLogger call stack passes through below any plugin, never the plugin it names
+_CRASH_LOG_SYSTEM = frozenset({"kernel32.dll", "kernelbase.dll", "ntdll.dll", "ucrtbase.dll", "vcruntime140.dll",
+                               "vcruntime140_1.dll", "msvcp140.dll"})
+
+
+def crash_logger_signature(run_dir: Path, client: str, game: str) -> str:
+    """The lost game's own CrashLogger log among the run's <client>-crash-*.log artifacts, as one clause for its
+    E_RUN_GAME_REPLACED or E_RUN_GAME_LOST: the exception, its address, the first probable frame's Address Library
+    id, the process uptime, and the first plugin frame on the stack when the fault is not in it. `game` is the
+    version check's "<pid>@<start, UTC>". A log is the game's when its Process ID is that pid and its start (CRASH
+    TIME, on the seat's local clock, less the uptime) sits a whole number of quarter hours from the game's start,
+    within ten seconds, so a pid a rolled-back seat reuses never claims an older log. c1's terrain-upgrade race at
+    the initial load (SkyrimSE.exe+02AD242, about 14 s up; LOG 2026-10-31) read as a bare replacement until this
+    (PLAN 2026-11-02: "a lab-api fault signature owed")."""
+    m = re.fullmatch(r"(\d+)@(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d)(?:\.(\d+))?Z", game)
+    if not m:
+        return f"no CrashLogger log read ({game!r} is no pid and start)"
+    pid = m.group(1)
+    started = calendar.timegm(time.strptime(m.group(2), "%Y-%m-%dT%H:%M:%S")) + float("0." + (m.group(3) or "0"))
+    for log in sorted(run_dir.glob(f"{client}-crash-*.log"), reverse=True):
+        text = log.read_text(errors="replace")
+        if not re.search(rf"^\s*Process ID: {pid}\s*$", text, re.M):
+            continue
+        at = re.search(r"^CRASH TIME: (\d{4}-\d\d-\d\d \d\d:\d\d:\d\d)", text, re.M)
+        up = re.search(r"Process Uptime: \S+ \((\d+)ms\)", text)
+        if not at or not up:
+            continue
+        offset = calendar.timegm(time.strptime(at.group(1), "%Y-%m-%d %H:%M:%S")) - int(up.group(1)) / 1000 - started
+        if abs(offset) > 14 * 3600 or abs(offset - round(offset / 900) * 900) > 10:
+            continue
+        # the faulting module and offset, or the bare address of a call through a null pointer (no module)
+        exc = re.search(r'Unhandled exception "([^"]+)" at (0x[0-9A-Fa-f]+)(?:[ \t]+(\S+\+[0-9A-Fa-f]+))?', text)
+        frames = re.findall(r"^\s*\[\s*\d+\]\[P\]\s+0x[0-9A-Fa-f]+\s+(\S+?\+[0-9A-Fa-f]+)(?: -> (\d+\+0x[0-9A-Fa-f]+))?", text, re.M)
+        what = f"{exc.group(1)} at {exc.group(3) or exc.group(2)}" if exc else "an unread exception"
+        if frames:
+            if not exc or frames[0][0] != exc.group(3):
+                what += f", first frame {frames[0][0]}"
+            if frames[0][1]:
+                what += f" ({frames[0][1]})"
+        module = ((exc.group(3) if exc else None) or (frames[0][0] if frames else "")).split("+")[0].lower()
+        plugin = next((f for f, _ in frames if f.split("+")[0].lower() not in _CRASH_LOG_SYSTEM | {"skyrimse.exe", module}), None)
+        return f"its crash in {log.name}: {what}, {up.group(1)} ms after its start" + (f", through {plugin}" if plugin else "")
+    return f"CrashLogger wrote no log for pid {pid}"
 
 
 # a FormDesc in braces inside a console step's text (guests.PLUGIN_RELATIVE's shape), typed as the run's id
@@ -1909,7 +1952,8 @@ class Runner:
         one the version check found or a relaunch step started. A seat whose game was replaced
         (launch.ps1 starts the game again when it dies within a minute of its window, and the run
         went on against the new one) or gone at the end failed the same way. Its launch.log and
-        SKSE logs come with the failure. Every read failure is a note."""
+        SKSE logs come with the failure, and the lost game's CrashLogger log, when it wrote one,
+        names its crash in the failure's text. Every read failure is a note."""
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
             return False
@@ -1955,10 +1999,16 @@ class Runner:
                 errors.append(f"E_RUN_GAME_REPLACED: {client}'s game was {was} at the version check and {', '.join(games)} at the run's end")
         if not errors:
             return False
-        for error in errors:
-            rec.failures.append({"step": "end", "kind": "lab", "client": client, "error": error})
+        added = [{"step": "end", "kind": "lab", "client": client, "error": error} for error in errors]
+        rec.failures.extend(added)
         await self._fetch_client_file(rec, g, f"{client}-launch.log", f"'{self.s.client_lab_dir}\\launch.log'")
         await self._skse_logs(rec, g, client)
+        if was:
+            # the lost game's own CrashLogger log, from the SKSE logs just kept: a crash reads as itself
+            crash = crash_logger_signature(rec.dir, client, was)
+            for f in added:
+                if f["error"].startswith(("E_RUN_GAME_REPLACED", "E_RUN_GAME_LOST")):
+                    f["error"] += f"; {crash}"
         return True
 
     def _since(self, rec: RunRecord) -> int:
