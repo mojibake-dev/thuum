@@ -890,4 +890,21 @@ Window 2's reads (07:56 PST 2026-11-05 (15:56Z 11-05); numidium's stage on the p
   by the player's own hand (in review).
 - The DestructionStage difftest session is on the slice (fork 029769f7, pushed server-only); its sessions are the trial's byte
   for byte, so that trial (41 of 41 identical) is the head's T2.
+- x-trap-lamp-trigger v3.1 GREEN (08:10 PST 2026-11-05 (16:10Z 11-05); 20261105-160444): the player's own hand cast drops the lamp on the host and the
+  record carries it to the guest. lamp-shot-trace.js CONFIRMED the static read's hit route by run: the hand's launch (shooter
+  0x14, Firebolt 0x12fd0, angleZ 3.0665 and angleX -0.1966: heading 175.7, 11.3 degrees up, the aim the count model put
+  there; c1 landed at z -2311.305 again), the impact on 0x9b0fb (44213), the hit event to it (38668: cause 0x14, source 0x12fd0),
+  OnMagicEffectApply and OnHit to its script, the engine's destructible damage (36909, cause 0x14), two OnDestructionStageChanged;
+  then c1's two reports, the server's "ff000000 reports 9b0fb at stage 1, destroyed false: recorded (the first report),
+  relayed to 1 game(s)" and "... at stage 2, destroyed true: recorded ...", c2's two "applied from the record", no "here
+  already", no E_DESTRUCTION_. The lamp's oil hazard then hit c1 under god mode. The scripted press and the scripted cast stay
+  unread as routes and need not be read: a player shoots a lamp by hand.
+- H-DEAF CONFIRMED by run (x-trap-wire-restart 153200's recorded leg): c2's fresh game, the wire's record applied at its login,
+  walked the wire's line again and nothing fired (no "fired here" for the wire or the rocks, no claim), while the spent-trap
+  blank printed three "to b6d3f blanked: a destroyed trap family reference" lines.
+- Rock 0xb6d4d stayed hung (z about 8843, its game-file height) on both seats and in the record through all of 153200, though
+  the server granted c2's claim of all seven; the other six rested near z 8630 to 8650. The seats and the record agree, so no
+  sync fault; the fall itself flaked for one rock in one firing (HYPOTHESIS: the impulse never woke it). In 154408 all seven fell.
+Window 2 is read: what is left of D-S3 before it merges whole is x-trap-hit (point 2) on D-T4's fix (fork e4c78077, local, in
+review), x-trap-dodge (window 3), D-T1 and D-T2 (Eli's), and the restart scenario committed from x-trap-wire-restart (rule 6).
 

@@ -8969,3 +8969,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   and "stage 2, destroyed true", each "recorded (the first report), relayed to 1 game(s)", and c2 applied both from the record.
   A correction to my 15:53 entry, from thuum-cf's read of the watch: the spike wall's one hit in the premise's leg B took c1 from
   1000 to 939.97 (60 health); the 963.3 I logged was the reading after regeneration.
+- 08:10 PST 2026-11-05 (16:10Z 11-05) (thuum-cf, numidium's window 2 end): x-trap-lamp-trigger v3.1 GREEN (160444): a player's hand cast drops the
+  Temple's lamp on the host, the record carries stage 1 then destroyed to the guest, and lamp-shot-trace.js confirmed the hit
+  route end to end (launch, impact, hit event, OnHit, destructible damage, the stage events). H-DEAF confirmed (the spent wire
+  deaf in a fresh game, the blank's three lines). One rock of seven stayed hung in 153200 on both seats and in the record (a
+  physics flake, not sync). D-T4's fix built on the slice, local (fork e4c78077: the player's actor-damage cut in the
+  DamageActor replacement, the world multiplier worldDamageMult, 1 by default), its fresh review running.
