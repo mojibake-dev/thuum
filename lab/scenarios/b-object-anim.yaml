@@ -1,3 +1,39 @@
+# b-object-anim v5 (thuum-cf, 2026-11-05; D-T2, Eli's outcome: "a player steps on a plate, that wall moves in both games,
+# and does damage in both"; ADR-068 D-S3, traps follow the interaction, for fork
+# m4-scripts-2b-traps ece35376 or later on both seats and the server): legs A and B claim D-S3's path for the plate 0x567f2 and
+# the spike wall 0x54b15, trap-family references every seat's engine fires and swings itself, as the probe x-trap-family-fire
+# v1.1 read it green (20261105-135134, on 46b95609; of the paths this scenario reads, only ff9b804a's family test changes up to
+# ece35376, which keeps both in it, ece35376's own edits there being comments): the
+# wall is no longer ObjectAnimation's, so no seat reports it, the server records and relays none of it, no seat plays a relay.
+# REMOVED: A's until on the server's "567f2 activates 54b15 in cell 371de" (>= 1 within 5 s) and B's (>= 2); A's c1 "object
+# animation 54b15 .* reported" >= 1, c2 "object animation 54b15 .* played" >= 1 and server "54b15 animates 54b15" >= 1; B's c2
+# played >= 2. Those three strings are claimed at 0 in both legs. ADDED to each leg: each seat's "trap 54b15 fired here by 567f2:
+# every seat fires the trap family itself" (x-trap-family-fire's pattern, activationService.ts:95's line up to its tail ", not
+# reported (D-S3)") risen over its count taken just before the plate step (the stander's engine for its player, the other's for
+# its figure: H-T2, CONFIRMED by 135134, docs/engine/scripts.md S7; at least one, as the engine fires a plate more than once); the server's "567f2 activates
+# 54b15" at 0 from the run's start (x-trap-family-fire's string, the head of both of the server's relay lines for the pair); in
+# B, A's E_TRAP_ claim (a guest's report of the pair would be E_TRAP_NOT_HOST, x-trap-family-fire's review finding 6). KEPT with
+# a new reading: c2's "Sent a trigger.s own activation" == 0 no longer says c2's engine fires nothing (its fired line says it
+# does); it says c2 never reports the plate's own activation, which the cell's host alone does (activationService.ts:104). KEPT
+# as they were: no E_OBJANIM_ in A and B, A's E_TRAP_ claim, B's recorded health read (its question is x-trap-dodge's now).
+# The wall's own animation events (180For, its Back, Rearm, by name on 54b15) are no longer claimable on either seat: the seam
+# runs a family reference's PlayAnimation and PlayAnimationAndWait under the script action's mark, so the sendAnimationEvent
+# hooks never note them, and never queues them, so no ScriptCall, no "native ... on 54b15" line and no "reported" line follow
+# (ScriptNatives.cpp:697-718 and :863, objectAnimationService.ts:164-174, scriptCallService.ts:66-79 and :148-154; a record's
+# replay skips a family reference, remoteServer.ts:588-590); 135134's console logs hold no "object animation 54b15" line on
+# either seat. What each seat still prints is the census's " (trap)" row, "census ObjectReference.PlayAnimationAndWait (trap) 3
+# in 30 s" (scriptCallService.ts:217, the suffix ScriptNatives.cpp:232): a 30 s tally of every family reference's calls of that
+# row, naming neither the wall nor its event, printed within a minute of the calls (135134: one such line on each seat 41 to
+# 57 s after each swing, none other in the run; x-bleak-scripts v3.1 140410 claims it over a run). So each leg ADDS each seat's
+# tally risen over its count taken before the plate step, read 65 s after the leg's other claims (x-bleak-scripts v3.1's wait),
+# the pattern x-trap-family-fire's census shape on the fork's line; another family reference's call in the window would raise
+# it too, so it reads the swing in this cell, not the wall by name. The plate's damage is claimed in b-bleak-traps v3 (both
+# players in the wall's path, each hit counted once on its own engine), not here: this scenario keeps god mode on, so leg A's
+# watcher at (8589, -5538), inside the swing (b-bleak-traps v3's bystander spot), takes none. Leg C (the pillar: still the
+# host's report and ObjectAnimation's relay) and every other step are v4's byte for byte. Its own commit (rule 13); Eli checks
+# the claims before it (ADR-064 decision 4). The wall's motion by reference would be the driver's node-rotation read on
+# 0x54b15's panel (lab/driver/src/index.ts:2137), which no probe has read yet: a follow-up probe, not a claim now. The headers
+# below are the previous versions'.
 # b-object-anim v4 (thuum-cf, 2026-11-05; ADR-062's flip on fork m4-scripts-1-flip, the scripting ladder's rung 1, ADR-068): the two
 # relaunch writes of activationUnblockedBases are deleted (the client lifts activation in a hosted cell by the cell's state; no
 # list of bases). No claim changed. The headers below are the previous versions'.
@@ -46,43 +82,94 @@ steps:
   # A. the host onto the plate; the guest 200 units back, facing it
   - c2: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5538, z: -2054, rot: [0, 0, 0]}
   - wait: 6
+  # v5 (D-S3): each seat's fired lines and its census of the family's PlayAnimationAndWait, counted just before the plate
+  # step, the baselines the leg's claims rise over
+  - c1: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
+  - server: snapshot {name: c1FiredBeforeA, of: 'c1.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - c2: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
+  - server: snapshot {name: c2FiredBeforeA, of: 'c2.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - c1: log-count {pattern: "census ObjectReference.PlayAnimationAndWait .trap. [0-9]+ in 30 s"}
+  - server: snapshot {name: c1TrapCensusBeforeA, of: 'c1.log_count("census ObjectReference.PlayAnimationAndWait .trap. [0-9]+ in 30 s")'}
+  - c2: log-count {pattern: "census ObjectReference.PlayAnimationAndWait .trap. [0-9]+ in 30 s"}
+  - server: snapshot {name: c2TrapCensusBeforeA, of: 'c2.log_count("census ObjectReference.PlayAnimationAndWait .trap. [0-9]+ in 30 s")'}
   - c1: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5338, z: -2054, rot: [0, 0, 0]}
-  - until: {within: 5, every: 0.5, expect: ['server.log_count("567f2 activates 54b15 in cell 371de") >= 1']}
-  - wait: 4
+  # v5 (D-S3): no seat reports the family pair, so the server has no line to wait on; v4's until bound (5 s) and its settle (4 s)
+  - wait: 9
   - c1: screenshot
   - c2: screenshot
+  - c1: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
+  - c2: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
   - c1: log-count {pattern: "object animation 54b15 .* reported"}
   - c2: log-count {pattern: "object animation 54b15 .* played"}
   - c2: log-count {pattern: "Sent a trigger.s own activation"}
   - assert:
-      - 'c1.log_count("object animation 54b15 .* reported") >= 1'
-      - 'c2.log_count("object animation 54b15 .* played") >= 1'
+      # v5 (D-S3): each seat fired the wall itself (c1's engine for its own player, c2's for c1's figure, H-T2) and swings it
+      # from its own script, so nothing of the wall crosses: no report, no record, no relay, no relayed play
+      - 'c1.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself") > snapshot("c1FiredBeforeA")'
+      - 'c2.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself") > snapshot("c2FiredBeforeA")'
+      - 'c1.log_count("object animation 54b15 .* reported") == 0'
+      - 'c2.log_count("object animation 54b15 .* played") == 0'
+      # v5: c2's engine fires the plate now; this reads that c2 never reports the plate's own activation (the host alone does)
       - 'c2.log_count("Sent a trigger.s own activation") == 0'
-      - 'server.log_count("54b15 animates 54b15") >= 1'
+      - 'server.log_count("54b15 animates 54b15") == 0'
+      - 'server.log_count("567f2 activates 54b15") == 0'
       - 'server.log_count("E_OBJANIM_") == 0'
       # v2 (W4, Eli): the plate's links to the ambush draugr 380b3, 380b4 and 380b5 are references the server never loads, refused
       # E_TRAP_NO_REF by design (OnLinkedActivation's marker branch); every other E_TRAP_ code and any other NO_REF stays at zero
       - 'server.log_count("E_TRAP_") - server.log_count("E_TRAP_NO_REF: .* reports 38098 activating 380b[0-9a-f], no such reference") == 0'
-  # the host off the plate, the wall resets; B. the guest onto it: the host's engine fires for the figure, the guest's engine
-  # runs no script of its own under the gate. (v3 carried decision 4's trap-hit trace here; read 20261102-051618: fourteen
+  # v5: each seat's census of its own swing, printed within a minute of the calls (x-bleak-scripts v3.1's wait)
+  - wait: 65
+  - c1: log-count {pattern: "census ObjectReference.PlayAnimationAndWait .trap. [0-9]+ in 30 s"}
+  - c2: log-count {pattern: "census ObjectReference.PlayAnimationAndWait .trap. [0-9]+ in 30 s"}
+  - assert:
+      - 'c1.log_count("census ObjectReference.PlayAnimationAndWait .trap. [0-9]+ in 30 s") > snapshot("c1TrapCensusBeforeA")'
+      - 'c2.log_count("census ObjectReference.PlayAnimationAndWait .trap. [0-9]+ in 30 s") > snapshot("c2TrapCensusBeforeA")'
+  # the host off the plate, the wall resets; B. the guest onto it: each seat fires the wall itself (D-S3, v5), c2's engine for
+  # its own player and c1's for c2's figure. (v3 carried decision 4's trap-hit trace here; read 20261102-051618: fourteen
   # Actor::DamageActor calls on the figure, none through RestoreActorValue, the figure's health kept by the platform's cut.)
   - c1: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5738, z: -2054, rot: [0, 0, 0]}
   - wait: 6
+  - c1: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
+  - server: snapshot {name: c1FiredBeforeB, of: 'c1.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - c2: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
+  - server: snapshot {name: c2FiredBeforeB, of: 'c2.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - c1: log-count {pattern: "census ObjectReference.PlayAnimationAndWait .trap. [0-9]+ in 30 s"}
+  - server: snapshot {name: c1TrapCensusBeforeB, of: 'c1.log_count("census ObjectReference.PlayAnimationAndWait .trap. [0-9]+ in 30 s")'}
+  - c2: log-count {pattern: "census ObjectReference.PlayAnimationAndWait .trap. [0-9]+ in 30 s"}
+  - server: snapshot {name: c2TrapCensusBeforeB, of: 'c2.log_count("census ObjectReference.PlayAnimationAndWait .trap. [0-9]+ in 30 s")'}
   - c2: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5338, z: -2054, rot: [0, 0, 0]}
-  - until: {within: 5, every: 0.5, expect: ['server.log_count("567f2 activates 54b15 in cell 371de") >= 2']}
-  - wait: 4
+  # v5 (D-S3): no seat reports the family pair, so the server has no line to wait on; v4's until bound (5 s) and its settle (4 s)
+  - wait: 9
   - c1: screenshot
   - c2: screenshot
+  - c1: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
+  - c2: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
   - c2: log-count {pattern: "Sent a trigger.s own activation"}
   - c2: log-count {pattern: "object animation 54b15 .* played"}
+  - c1: log-count {pattern: "object animation 54b15 .* reported"}
   # decision 4's read, recorded not claimed: the wall swung at c2's FIGURE on c1's engine (god mode is c2's own game's, not
   # the figure's); whether the figure's health dropped there says which path a trap's harm takes (TrapHitBase on the host)
   - c1: av-read {other: true, names: [health]}
   - c2: av-read {names: [health]}
   - assert:
+      # v5 (D-S3): each seat fired again (c2's engine for its own player, c1's for c2's figure); still nothing of the wall crosses
+      - 'c1.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself") > snapshot("c1FiredBeforeB")'
+      - 'c2.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself") > snapshot("c2FiredBeforeB")'
       - 'c2.log_count("Sent a trigger.s own activation") == 0'
-      - 'c2.log_count("object animation 54b15 .* played") >= 2'
+      - 'c2.log_count("object animation 54b15 .* played") == 0'
+      - 'c1.log_count("object animation 54b15 .* reported") == 0'
+      - 'server.log_count("54b15 animates 54b15") == 0'
+      - 'server.log_count("567f2 activates 54b15") == 0'
       - 'server.log_count("E_OBJANIM_") == 0'
+      # v5: A's refusal claim through B too (a guest's report of the pair would be E_TRAP_NOT_HOST)
+      - 'server.log_count("E_TRAP_") - server.log_count("E_TRAP_NO_REF: .* reports 38098 activating 380b[0-9a-f], no such reference") == 0'
+  # v5: each seat's census of its own swing, printed within a minute of the calls (x-bleak-scripts v3.1's wait)
+  - wait: 65
+  - c1: log-count {pattern: "census ObjectReference.PlayAnimationAndWait .trap. [0-9]+ in 30 s"}
+  - c2: log-count {pattern: "census ObjectReference.PlayAnimationAndWait .trap. [0-9]+ in 30 s"}
+  - assert:
+      - 'c1.log_count("census ObjectReference.PlayAnimationAndWait .trap. [0-9]+ in 30 s") > snapshot("c1TrapCensusBeforeB")'
+      - 'c2.log_count("census ObjectReference.PlayAnimationAndWait .trap. [0-9]+ in 30 s") > snapshot("c2TrapCensusBeforeB")'
   # C. the puzzle room: the host turns the first pillar once, the guest watches it
   - c1: teleport {cell: "371de:Skyrim.esm", x: 5400, y: -900, z: -768, rot: [0, 0, 90]}
   - c2: teleport {cell: "371de:Skyrim.esm", x: 5300, y: -1200, z: -768, rot: [0, 0, 90]}
