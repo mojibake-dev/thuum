@@ -2802,7 +2802,7 @@ class ClientResets(RunTests):
                       "Clean (Join-Path $lab 'burst') @('request.json', 'done.json') @()",
                       "Clean (Join-Path $lab 'input') @('request.json', 'done.json') @()",
                       "Clean (Join-Path $g 'Data\\SKSE\\Plugins\\CharGen\\Presets') $presets @()",
-                      "Clean 'C:\\Users\\lab\\Documents\\My Games\\Skyrim Special Edition\\Saves' @('TESMODPLATFORM-*') @()",
+                      "Clean 'C:\\Users\\lab\\Documents\\My Games\\Skyrim Special Edition\\Saves' @('TESMODPLATFORM-*', 'Quicksave*', 'Autosave*') @()",
                       "Clean 'C:\\Users\\lab\\Documents\\My Games\\Skyrim Special Edition\\SKSE' @('skyrim-platform-pid*.log') @()"):
             self.assertIn(named, first)
         # skymp5-client's presets always, and by name the ones the seat's last run saved through lab-driver

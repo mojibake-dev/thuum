@@ -2368,6 +2368,17 @@ function run(step: Step, player: Actor): unknown {
       for (const n of names(a.gmstInt)) gmst[n] = Game.getGameSettingInt(n);
       return { ini, gmst };
     }
+    case "allow-save": {
+      // thuum ADR-068 rung 3's first read (x-script-save): skymp5-client turns saving off at its first update and at
+      // every load (enforceLimitationsService.ts: Game.SetInChargen(true, false, false), the first argument
+      // abDisableSaving; docs/verbs/rest.md), so a probe that reads the engine's own save turns it back on in this
+      // game until the next load: SetInChargen(false, false, false), the save bit alone changed (waiting and the
+      // controls message were off already). Until that load every save route is open, the autosaves too (a rest, a
+      // wait, travel, a dungeon's DefaultAutoSaveScript trigger); the relaunch's cleaning removes Quicksave* and
+      // Autosave* (runner.py), since loading one would put the seat in single-player. The answer is the write made
+      Game.setInChargen(false, false, false);
+      return { setInChargen: [false, false, false] };
+    }
     case "set-gmst": {
       // What a player's console can do (setgs): change a game setting in
       // this client only. A validation verb's negative control: with
@@ -3079,7 +3090,7 @@ function run(step: Step, player: Actor): unknown {
     case "hold-key": {
       // A key held down through the engine's input system (SKSE
       // Input.HoldKey) and released ms later from the update loop: real
-      // movement under the controls (W 17 forward, Left Shift 42 sprint),
+      // movement under the controls (W 17 forward, Left Shift 42 run, Left Alt 56 sprint),
       // where move only sets a position. args: {code, ms}, or {codes: [..],
       // ms} for keys pressed in the same tick (both attack keys for a dual
       // cast, which the engine takes only when the second press is close to

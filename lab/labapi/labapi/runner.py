@@ -2275,7 +2275,9 @@ def _client_relaunch_ps(lab_dir: str, driver_log: str, presets: list[str], stop:
     - every recorded game folder's RaceMenu presets: skymp5-client's thuum-*.jslot (raceMenuService.ts) and
       `presets`, the names the seat's last run's racemenu-save steps wrote (lab-driver's racemenu-save);
     - the Saves folder's TESMODPLATFORM-* files, Skyrim Platform's generated saves, which it deletes itself only once
-      a load has settled (LoadGame.cpp:47-60), so a kill before then leaves them;
+      a load has settled (LoadGame.cpp:47-60), so a kill before then leaves them, and its Quicksave* and Autosave*
+      files, the engine's own saves a probe's allow-save step lets through (x-script-save), which a later load would
+      turn into single-player (skymp5-client's singlePlayerService);
     - the SKSE folder's skyrim-platform-pid*.log, launch.ps1's copies of a game that exited in its first minute
       (launch.ps1:126-133), which Runner._skse_logs would collect as the next run's.
     Crash dumps stay: the run's end counts only those written since a few minutes before its start (_CRASH_PS's
@@ -2324,7 +2326,7 @@ def _client_relaunch_ps(lab_dir: str, driver_log: str, presets: list[str], stop:
         "  $g = ([string](Get-Content -LiteralPath $rec.FullName -Raw)).Trim()",
         "  if ($g) { Clean (Join-Path $g 'Data\\SKSE\\Plugins\\CharGen\\Presets') $presets @() }",
         "}",
-        f"Clean '{skse.parent / 'Saves'}' @('TESMODPLATFORM-*') @()",
+        f"Clean '{skse.parent / 'Saves'}' @('TESMODPLATFORM-*', 'Quicksave*', 'Autosave*') @()",
         f"Clean '{skse}' @('skyrim-platform-pid*.log') @()",
         "if ($left.Count -gt 0) { @{ hot = $false; removed = $gone.Count; left = @($left); held = @($held); stale = $stale } | ConvertTo-Json -Compress; exit 4 }",
         "$ErrorActionPreference = 'Stop'",

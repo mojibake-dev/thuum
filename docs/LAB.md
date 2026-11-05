@@ -457,7 +457,7 @@ is the one named, read after each press; the order of the menu's list is
 the menu's, so a scenario names the race instead of counting presses),
 hold-key
 {code, ms} (a key held through SKSE's Input.HoldKey and released ms later:
-real movement under the controls, 17 W forward, 42 Left Shift sprint; the
+real movement under the controls, 17 W forward, 42 Left Shift run, 56 Left Alt sprint (Skyrim's stock map, UESP Skyrim:Controls); the
 clones' control map binds the right attack to 199 Home and the left attack
 to 207 End, lab/deploy/sky-client/controlmap.ps1, since SKSE's HoldKey on a
 mouse button does nothing), arrows (how many arrow projectiles stand in the
@@ -825,7 +825,9 @@ C:\sky-lab: there, frida\ (each run's script and its .out, .err, .log and
 screenshot, burst and mouse steps' files); each game folder's
 Data\SKSE\Plugins\CharGen\Presets (thuum-*.jslot and the presets the seat's
 last run saved by name); the Saves folder's TESMODPLATFORM-* (Skyrim
-Platform's generated saves, which a kill before its load settles leaves); the
+Platform's generated saves, which a kill before its load settles leaves) and
+Quicksave* and Autosave* (the engine's own saves a probe's allow-save step lets
+through, which a later load would turn into single-player); the
 SKSE folder's skyrim-platform-pid*.log (launch.ps1's copies, which the next
 run's end would collect as its own). Crash dumps stay: a run's end counts
 only those written since a few minutes before its start, and a crash it finds
