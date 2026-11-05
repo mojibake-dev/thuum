@@ -4708,3 +4708,12 @@ beside the seam's mirror is read on rung 2's stage and changed if it harms. The 
 build, test, change what does not work. Options not taken: A, owner-only (every visible effect a channel before guests stop
 running a script); C, every seat runs every script with state changes gated (TES3MP's shape, which ADR-063's D-F1 C keeps for
 quests alone).
+
+D-S2's addendum, Eli 23:07 PST 2026-11-04 (07:07Z 11-05) ("i actually will weigh in that i think boulders, the one physics based trap, SHOULD be
+solely physics items that are synced"): a body a trap moves by physics (PhysicsTrap's falling rocks, Embershard 0xb6d45 and its six
+siblings; by the same rule any trap body under SetMotionType and ApplyHavokImpulse, the bone alarms' among them) is a synced
+physics item, never a cosmetic copy: the cell's host simulates it and the others follow its stream until it rests. Two pieces,
+landing together (the second alone would leave a guest's rocks hanging): ADR-058's prop stream takes trap bodies (the cell's host
+the owner of a fired trap's bodies, streamed until they rest), and the seam's table gains SetMotionType and ApplyHavokImpulse as
+state rows a non-owner skips (the non-owner skip lever rung 2 carries). Placed in rung 6, before q-embershard, so the dungeon's
+proof runs on synced rocks; until then each seat drops its own, as today.
