@@ -1,3 +1,12 @@
+# b-puzzle-relay v4 (thuum-cf, 2026-11-05; the scripting ladder's rung 1, ADR-068, on fork m4-scripts-1-flip; Eli's word
+# 2026-11-05, "Yes, move them"; the whale's claims ADR-068 names for this scenario come as v5): (1) the two relaunch writes of activationUnblockedBases are deleted (the flip lifts activation for ACTI and MSTT in a
+# hosted cell; its client never reads the key). (2) Leg B's two claims on the HOST's own press of pillar three move to the flip's
+# channel: the flip sends no Activate for a player's own press on a lifted activator in a hosted cell (activationService.ts), so
+# 'server.log_count("ff000000 activates aa8cd in cell 371de") == 1' and 'c2.log_count("relayed activation aa8cd by ff000000") == 1'
+# read 0 by construction; they become the host's own line for the local press == 1, the server's "aa8cd animates aa8cd" >= 1 (the
+# host's report of the turn, added) and the guest's "object animation aa8cd .* played" >= 1 (the turn on the guest). Every other
+# claim byte for byte v3's. HYPOTHESIS H-P1 (leg C): the puzzle lever 0xaa8c3 is a FURN (LeverPushAnimatingNoPlayer 0xb7db4) the
+# flip's lift does not cover; leg C rests on the blocked lever still delivering the press to its script's OnActivate.
 # b-puzzle-relay v3 (thuum-cf, 2026-11-03 night; Eli's W4 word via numidium, "Yes, both"): leg C's 'server.log_count("aa8c3 activates")
 # >= 1' failed at 0 on THE CANON (20261104-045100) while the door opened ("3e728 activates 3b9f1" 1) and every other claim of legs A, B
 # and C held: the lever's own linked line is the FAILURE path (its four darts), absent on a solved puzzle, so the claim read the
@@ -40,8 +49,6 @@ server:
 timeout_s: 900
 artifacts: [server.log, c1.log, c2.log, screenshots]
 steps:
-  - c1: relaunch {until: gone, files: [{json: "Data/Platform/Plugins/skymp5-client-settings.txt", key: "activationUnblockedBases", value: "1a4bb c6440 21513 3e726 aa8ce b7db4 173fc 2079f"}]}
-  - c2: relaunch {until: gone, files: [{json: "Data/Platform/Plugins/skymp5-client-settings.txt", key: "activationUnblockedBases", value: "1a4bb c6440 21513 3e726 aa8ce b7db4 173fc 2079f"}]}
   - c1: connect
   - c2: connect
   - wait: 10
@@ -84,8 +91,8 @@ steps:
       - 'server.log_count("E_TRAP_RATE") == 0'
       - 'server.log_count("E_TRAP_NO_CELL") == 0'
       - 'server.log_count("E_TRAP_NO_REF") - server.log_count("activating 4fcdf, no such reference") == 0'
-  # B. the rest of the solve: the guest turns pillar one once more and pillar two twice; the HOST turns pillar three once (its
-  #    turn relayed to the guest the same way)
+  # B. the rest of the solve: the guest turns pillar one once more and pillar two twice; the HOST turns pillar three once (on
+  #    the flip its engine runs the press itself and the guest sees the turn as the host's object animation)
   - c2: activate {refId: 0xaa8cb}
   - wait: 3
   - c2: activate {refId: 0xaa8cc}
@@ -101,7 +108,9 @@ steps:
   - c1: activate {refId: 0xaa8cd}
   - wait: 3
   - c1: log-count {pattern: "relayed activation aa8c[bc] by ff000001"}
-  - c2: log-count {pattern: "relayed activation aa8cd by ff000000"}
+  # v4: the host's own press is its engine's (ADR-062's flip sends no Activate for it); the guest sees the turn played
+  - c1: log-count {pattern: "the engine.s own activation of aa8cd in a hosted cell"}
+  - c2: log-count {pattern: "object animation aa8cd .* played"}
   # v2, recorded not claimed: every turn's animation reported by the host and played by the guest (four and four in 104258)
   - c1: log-count {pattern: "object animation aa8c[bcd] .* reported"}
   - c2: log-count {pattern: "object animation aa8c[bcd] .* played"}
@@ -109,9 +118,10 @@ steps:
   - c2: screenshot
   - assert:
       - 'server.log_count("ff000001 activates aa8c[bc] in cell 371de") == 4'
-      - 'server.log_count("ff000000 activates aa8cd in cell 371de") == 1'
+      - 'c1.log_count("the engine.s own activation of aa8cd in a hosted cell") == 1'
       - 'c1.log_count("relayed activation aa8c[bc] by ff000001") == 4'
-      - 'c2.log_count("relayed activation aa8cd by ff000000") == 1'
+      - 'server.log_count("aa8cd animates aa8cd") >= 1'
+      - 'c2.log_count("object animation aa8cd .* played") >= 1'
   # C. the host pulls the puzzle lever: the marker's portcullis on success, the darts on failure (a read either way)
   - c2: look-at {formId: 0x3b9f1}
   # back to the lever's reach (the lever 0xaa8c3 at (5002, -903) is 420 units from (5300, -1200))
