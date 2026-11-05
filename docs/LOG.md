@@ -8761,3 +8761,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   b-bleak-traps v2 is the relaunch removal alone (NPCs stay off; ccc98a2d clears leg A), with x-bleak-traps-npcs v2 (sha1
   e6525bde) reading NPCs on at rung 1's stage first; H-P1 stated in both lever legs' headers. Call's whole-game rate on a host:
   about 5,400 a second on six VM worker threads, 98.7% the platform's own.
+- 20:24 PST 2026-11-04 (04:24Z 11-05) (numidium): the whale, READ ON THE LAB (two seats, not yet in play). thuum-cf's fork
+  m3-canon-4-whale c4775a85 (pillar events matched without case: the script's own PlayAnimationAndWait("trigger02", "Turned02"),
+  x-native-frame 20261105-033116, never passed the platform's case-exact 'Trigger*' filter) laid by turbo-client over bb559685's
+  dist (bundle 281d1965 with its `startstate*` registration on all four game folders), snapshotted. GREEN: b-puzzle-relay
+  20261105-040105, b-object-anim 040711 (run set 20261105-040105-whale-c4775a85), and x-puzzle-guest-view v3 (3027db06)
+  20261105-041238, every view claim by lab-api's new local_angle_to (3ce2a193, live 03:57Z): the guest's turn A 120.8 degrees
+  under the pillar's parent, the whale B 120.4, C 118.8, both seats 0.0 apart after each; the server's first ever "aa8cb animates
+  aa8cb 'trigger02' ... recorded, relayed to 1 game(s)" (04:17:28Z). RED: x-puzzle-handoff v3 (37d0d4ce) 20261105-041840 at leg
+  C: c1 inherited (04:22:55Z, epoch 2) and logged its re-sync, but "the script's side 2, the record Trigger01 (side 2), 0 turn(s)
+  fed" against the claim's side 1 and one turn, and its own E after the grant gave no second "animates"; with thuum-cf.
