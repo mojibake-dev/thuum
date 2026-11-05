@@ -9003,3 +9003,20 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   census 0; c1's skipped census stayed 0 while c1's fired line rose (0, 1, 2), so the host's copy of the wall never reached
   c2's figure either, and c1's screenshots show c2 upright past the plate. With x-trap-hit v3.1 (172521), both halves of Eli's
   "dodge what THEY see" are read on two seats. MECHANISM ONLY until a claimed scenario or Eli's eyes.
+- 10:37 PST 2026-11-05 (18:37Z 11-05) (numidium): the lab-api fault signature owed since 11-02 (PLAN, M5's STATE of 05:09 PST
+  11-02) is paid: thuum 73e0608d, live at 18:37Z (pulled with rung 3's lay). A run's E_RUN_GAME_REPLACED or E_RUN_GAME_LOST now
+  names the lost game's own CrashLogger crash, matched by its pid and by its start (the log's CRASH TIME less its uptime, a whole
+  number of quarter hours from the game's UTC start, within 10 s), e.g. "its crash in c1-crash-2026-11-04-23-57-01.log:
+  EXCEPTION_ACCESS_VIOLATION at SkyrimSE.exe+02AD242 (18789+0x162), 14161 ms after its start, through SkyrimSoulsRE.dll+003B2D8".
+  Today's two errors on c1 (075626, 152648) were apocrypha's terrain-overlay race at the initial load (LOG 10-31). It has hit c1
+  nine times in the crash logs kept since 11-01, every one on LAND 0xA7B3 and LOD tile Tamriel.4.28.-20 at 13.7 to 14.5 s of
+  uptime, and c2 never. Skyrim Souls RE's terrain hook is only a wrapper on the path: it is absent from the first five stacks, so
+  the race is the engine's own. A new reading of the asymmetry (HYPOTHESIS): the race is tied to c1's boot spot. Both crash stacks
+  hold cell 0xBBB1 and cell 0x97B3 (Skyrim.esm XCLC):
+  - 0xBBB1 is (32, -15). c1 boots there: the clean snapshot's profile 1 stands at (133854.5, -61425.7), 14 units north of
+    the y -61440 border.
+  - 0x97B3 is (30, -17), RiftWatchtowerExterior02. It is the southwest corner of c1's 5x5 boot grid and lies inside the
+    crashing LOD tile.
+  c2 boots 154 units south, at (133857, -61580) in (32, -16), and never crashed. The test that would settle it: boot c1 at
+  c2's cell for the same number of relaunches. It is a lab lever, but apocrypha's option B (a thuum engine-fixes DLL) still
+  fixes it for every player; both are Eli's call.
