@@ -986,3 +986,10 @@ in Bleak Falls Barrow or Embershard Mine, playtest 47's route. HYPOTHESIS, unrea
 every seat (objectReferenceEx.ts:125) beside the server's open state, so a press may open it locally before the server's word;
 the read when a route reaches one: a press on a TrapTriggerHinge door (Volskygge02 holds two) watched on both seats for the
 door's open state and the server's door line, one press and one toggle expected.
+Eli's outcomes for D-T2 and D-T5 (12:3x to 12:4x PST 2026-11-05 (20:3xZ to 20:4xZ 11-05); the words in docs/research/
+trap-slice-d-s3-2026-11-05.md's last paragraph). D-T2: a player steps on the plate, the wall moves in both games and does damage
+in both, and it hits every player in its path, not only the one who stepped. As built that is each seat's own wall hitting its
+own player once (D-S3 point 2), the record carrying the drop to the other game; with two players in the path, unread:
+x-trap-wall-both reads it before b-bleak-traps v3 and b-object-anim v5 (drafted, uncommitted) claim it. D-T5: one difficulty
+for every hit (C, the server's, after 47); Adept meanwhile, the client's default pin since fork bddd4ff9 (local; it pushes when
+the stage of ece35376 ends).

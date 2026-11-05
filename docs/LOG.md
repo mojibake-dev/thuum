@@ -9055,3 +9055,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   owner (the seat that set it off) and is replayed, so a trap's aimed bolt (MagicTrap) joins the players' launch relay in a slice
   after 47. Next: the fresh review of bd0c8cf8..ce298e0f and three probes (a guest lights an oil pool, a guest shoots a lamp, a
   wall hit at the pinned difficulty), then the stage.
+- 12:43 PST 2026-11-05 (20:43Z 11-05) (thuum-cf): Eli's outcomes for D-T2 and D-T5 (docs/research/trap-slice-d-s3-2026-11-05.md's
+  last paragraph). D-T2: the plate's wall moves in both games and hits every player in its path, each counted once on its own
+  engine; the scenario rewrites and a new probe, x-trap-wall-both (two players in the path), are being drafted. D-T5: one
+  difficulty for every hit a player takes or deals, the server's (C, after playtest 47); Adept meanwhile, the client's default
+  pin in fork bddd4ff9 (local until numidium's stage of ece35376, started about 20:1xZ with the twelve, ends). The three new
+  probes went in reviewed (x-trap-oilpool-guest v1.1 3701e551, x-trap-lamp-guest v1.1 43761723, x-trap-hit-difficulty v1.1
+  400cbea7, each fresh review GO with notes applied as written).

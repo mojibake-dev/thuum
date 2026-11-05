@@ -131,3 +131,18 @@ projectile"), with the boulders: motion every machine computes alike (a swinging
 motion that depends on aim or physics (falling rocks, an aimed bolt such as MagicTrap's) has one owner, the seat that set it off,
 and the others replay it; a hit counts on the hit player's own seat. Players' and hosted casters' bolts already carry their
 launch (magicSyncService's hosted launch report); a caster that is a world object is the gap, a slice after 47.
+
+Eli's outcomes for the two open calls, 12:3x to 12:4x PST 2026-11-05 (20:3xZ to 20:4xZ 11-05). D-T2: "a player steps on a plate,
+that wall moves in both games, and does damage in both", and "a swinging wall should hit BOTH players in its path, not just the
+person who triggered it, similar to how it can kill NPCs". So legs A and B of b-bleak-traps and b-object-anim are rewritten to
+claim the new path (each seat fires its own wall, nothing relayed) and b-bleak-traps' to claim the damage with both players in
+the wall's path: each player's own engine counts its own hit once and the server's record carries it to every other game; the
+other seat's copy hitting that player's figure is cut and logged " (skipped)". The two-players claim has no read yet, so
+x-trap-wall-both reads it first; an NPC in the path is the follow-up (its hit counts on its simulator, the cell's host). D-T5:
+"difficulty should apply to all things, idk why difficulty set to legendary wouldn't apply to bandits also- but that said then
+yes at testing everything should be set to adept". Why the bandits did not scale: the server computes every hit one actor deals
+another (ADR-028), its formula takes no difficulty (TES5DamageFormula.cpp:272, upstream's TODO(#461)), and the player's own
+engine cuts that hit (the DamageActor replacement), so the engine's table never reaches it. So C is the outcome (one difficulty
+applied to every hit a player takes or deals, the server's), after playtest 47; meanwhile the client pins Adept by default
+(fork bddd4ff9, held locally until numidium's stage of ece35376 ends), where both tables read 1 and traps and bandits agree.
+
