@@ -8936,3 +8936,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   ObjectReference.Activate (platform) 1") and the engine answered false before any activation line or DamageObject; the scripted
   cast resolved and hit nothing. H-CAST falsified (a script cast is not the player's cast on the wire). Next: the re-analyst's
   static read of ActivateRef and a premise probe with a Frida trace (docs/verbs/traps.md, window 1's reads).
+- 07:26 PST 2026-11-05 (15:26Z 11-05) (thuum-cf): D-S3's window 2 written and reviewed: x-trap-wire-restart v1.2 (running, numidium), x-trap-lamp-trigger
+  v2.1 with lab/frida/lamp-shot-trace.js v1.1 (thuum e5755935, placed on sky-srv), x-trap-boulders-rest v1.1 (lab-api
+  56ae7fc7: refs_near().listed, pos_of, disabled_of), x-trap-hit-premise v2 in review; x-trap-hit v2.1 held on the premise's
+  answer. The reviews' catches: v1's teleports rewrite the client's zeroed damage multipliers, regeneration hides a hit, the
+  send-only traces printed nothing (trap-path and pillar-anim fixed too), the restart probe's served counts needed baselines.
+  The lamp's static read (HYPOTHESIS, docs/verbs/traps.md): a player's press on a nameless base is refused before any event,
+  and a player's Spell.Cast flies along the player's aim. T2: the DestructionStage difftest session tried green, all 41 sessions
+  identical (fork 029769f7, pushed once the lab is quiet). Open, HYPOTHESIS: a trap may deal a player no damage as built
+  (traps.md, window 2's paragraph).

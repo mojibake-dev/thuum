@@ -762,7 +762,10 @@ rung 2's seam; the pieces and their rungs:
 - A single-use result: DestructionStage (MsgType 78, docs/WIRE.md), reported by the seat that caused it or saw it first, recorded
   once (the stage only rises, destroyed only goes true), served to late joiners and after a restart from the reference's record.
   R2. Not validated (rule 5): that the reported step happened at all (the reporter's word); the server checks only that the
-  reference is a game-file non-actor and that the reporter's game has its cell loaded.
+  reference is a game-file non-actor and that the reporter's game has its cell loaded. A spent trap goes deaf on every seat: the
+  platform's gate gives a destroyed family reference its lifecycle events alone (FridaHooks.cpp, "a spent trap, hears its
+  lifecycle alone"; x-trap-boulders-claim 140118's c2.log read it on the wire b6d3f), so a copy whose script never fired, a late
+  joiner's or one the record reached first, cannot fire a single-use trap again.
 - A trap body moved by physics (Embershard's rocks): simulated by the seat whose firing moved it (a prop claim by impulse, touch
   3; the first firing wins, E_PROP_MOVING for the second), streamed to the others, its rest recorded; a following seat's own
   motion calls run neutralized. R2. Not validated: the body's samples (the prop stream's own rule).
@@ -848,4 +851,20 @@ host's shot (the teleport's heading onto the lamp, a mouse pitch swept up in fou
 on the firing seat (the cast, the launch's angles, the impact, the hit event, the destructible damage, the VM's events for the
 lamps, ActivateRef on them); expected: an impact on 0x9b0fb, OnHit and OnDestructionStageChanged to it, the host's report and
 the server's record.
+
+Window 2 (07:26 PST 2026-11-05 (15:26Z 11-05)): probes by path, each after its fresh review (ADR-064 amendment A): x-trap-wire-restart v1.2 (rule 6: the
+destruction record across a server restart and into a fresh game; H-DEAF expected true by the spent-trap blank), x-trap-lamp-trigger
+v2.1 (the host's aimed shot under lab/frida/lamp-shot-trace.js), x-trap-boulders-rest v1.1 (each rock at one place on both
+seats and in the record, on lab-api 56ae7fc7's refs_near().pos_of), x-trap-hit-premise v2 (below). x-trap-hit v2.1 is HELD.
+The T2 difftest session for DestructionStage (fork 029769f7, local until the lab is quiet): tried on sky-srv against
+m4-scripts-2b-traps-46b95609's binary, all 41 sessions identical to their declarations.
+Trap damage to a player, HYPOTHESIS until x-trap-hit-premise reads it (x-trap-hit v2's fresh review, finding 2, and the premise
+probe's review): skymp5-client writes all six fDiffMultHPToPC* to 0 at its first update and again at every teleport of the player
+(ragdollService.ts, remoteServer.ts's safeRemoveRagdollFromWorld), for ADR-028's "no game applies [an actor's damage] on its
+own", while the repo's static read of DamageActor 37335 (docs/research/re-37335-and-rune-landing.md (c) 3) applies the
+multiplier to a player victim unless the byte flag is set and the multiplier is at least 1.0, and a trap's hit passes flag 0:
+as built a trap may deal a player nothing, against ADR-028's own decision that the world's damage, a trap's included, stays the
+victim's game's. The same read puts a fall (flag 1) under a multiplier below 1.0 as well. Every trap probe before it ran under
+god mode. If the premise reads yes, the fix carries ADR-028 out as written (the world's damage the game's own); it reopens
+nothing.
 
