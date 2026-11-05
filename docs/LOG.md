@@ -8945,3 +8945,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   and a player's Spell.Cast flies along the player's aim. T2: the DestructionStage difftest session tried green, all 41 sessions
   identical (fork 029769f7, pushed once the lab is quiet). Open, HYPOTHESIS: a trap may deal a player no damage as built
   (traps.md, window 2's paragraph).
+- 07:53 PST 2026-11-05 (15:53Z 11-05) (numidium): the trap slice's window 2 on the pinned lay (server m4-scripts-2b-traps-46b95609): after
+  thuum-cf's T2 (waited out, its services cycling between sessions), x-trap-wire-restart v1.2 (74284ec5) GREEN 20261105-153200
+  (rule 6's restart read for the destruction record: b6d3f's record served to both seats after the restart, the relaunched c2
+  applying it; its first run 152648 errored on c1's game replaced 23 s after the version check, every claim holding, the second
+  such c1 fault today after 075626); x-trap-lamp-trigger v2.1 (f2e441ac) RED 153748: the aim works (c1's mouse sweep put the
+  crosshair on 0x9b0fb), but the driver's Papyrus Spell.Cast from the player never cast (lamp-shot-trace.js on c1:
+  castSpellImmediate and launch 0 through six casts; only three Spell.cast results returned), so v3 casts by hand; lab-api
+  recreated on 56ae7fc7 (refs_near().pos_of); x-trap-boulders-rest v1.1 (aeffd269) GREEN 154408; x-trap-hit-premise v2.1
+  (f7089d64) GREEN 154820, its recorded answer: as built (the client's fDiffMultHPToPC* at 0) the spike wall's hit leaves c1 at
+  1000 of 1000 health, and with the six at 1.0 the same walk takes it to 963.3: a trap's DamageActor reads the multiplier.
