@@ -381,6 +381,26 @@ The stage (after Step 0): the three trap and puzzle scenarios without their leve
 own commit), x-bleak-scripts v1 (sha1 42ac4e80), and x-corpse-record v6 (sha1 8f22e960) for finding 2's line; T2 on sky-srv when
 the lab is free; the Windows client build when the seats are idle (a client build beside live seats contends for the host).
 
+## ADR-068, rung 2: the one seam (00:46 PST 2026-11-05, 08:46Z 11-05, thuum-cf)
+
+Fork m4-scripts-2-seam 9745d401 (rung 1's head dd280139 merged in 3a39a7df; 9745d401 feeds the pillars' script side from the
+seam, since its mark silences the animation hooks for an owned call's extent), pipeline 5433 green (Windows client 19122, T0 598
+cases), its fresh review GO with notes; on its stage with x-puzzle-whale v1.1 and x-bleak-scripts v2.1.
+
+The record path (fork 7ee68bd7, pushed after the stage; its fresh review GO with notes): a ScriptCall action on a game-file
+placement the server never loads (the Hall of Stories door FX 0x5256c, an MSTT, played by HallofStoriesKeyholeScript.openDoor)
+is judged by its record (its cell from the record's group or, for an exterior, its position's grid square through
+WorldState::CellOf; the reporter's hosting of that cell at the epoch) and mirrored to every other game that reports the cell
+loaded, with the held path's two lines byte for byte. Authority: R2. Not validated (rule 5, recorded here): the mirror's audience
+is client-reported, the games whose CellLoaded reports name the cell, with no reach check (a game that reports a cell loaded gets
+its mirrors; an unload report dropped by CellLoaded's budget leaves the entry until that game disconnects); the content is
+cosmetic. Declared limits: (a) nothing is kept for an unheld placement, so a late joiner misses its lasting pose until rung 3's
+record; (b) a placement a script moved (MoveTo, SetPosition, TranslateTo) is judged in its record's original cell; (c) an
+exterior placement stored in one cell's group but positioned in a neighbour's square is judged by the square, while the
+platform's owner test reads the engine's parent cell. Fixes in flight from the same review: the per-sender budget is spent
+before any lookup (a malformed or unheld subject costs no game-file search), the failed-attach list holds each id once, and an
+exterior placement's unit case.
+
 ## Status
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared
