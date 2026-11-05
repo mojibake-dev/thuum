@@ -964,7 +964,7 @@ trap-prefix-census-2026-11-05.md section 4: the chain to TrapBase, TrapTriggerBa
 "trap" name in any case; every script on the reference a trap class and its base no inventory object): 4,887 family references
 against 3,622, the oil pools, oil lamps, explosive gas, bear traps, poison gas, rockfall dust, spike beds and Nordic platforms
 joining, the TG02 and TGTQ04 quest subclasses and the 52 soul gem pickups staying the host's. D-T4 B, the world's damage scaled
-to the difficulty: c09b1dd5 leaves the engine's six fDiffMultHPToPC* in force (read once before this client's first write,
+to the difficulty (a trap's hit; a fall's is not raised above Adept, re-37335 (a) and UESP's difficulty page): c09b1dd5 leaves the engine's six fDiffMultHPToPC* in force (read once before this client's first write,
 logged as "[verb:traps] world damage multipliers"; 0 for the player's own ragdoll removal window; worldDamageMult a lab
 override; 0 without the DamageActor cut). At skymp5-client's pinned Legendary, Update.esm's fDiffMultHPToPCL is 3.0, so a wall
 hit that cost 60.03 at 1.0 should cost about 180 (inferred, unread). ce298e0f, built ahead of D-T5 (which difficulty the world

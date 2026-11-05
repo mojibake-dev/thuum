@@ -118,10 +118,12 @@ traps"), after the slice merges. D-T1: "all traps should be equally triggerable 
 the census's section 4 states: a trap class by the chain to TrapBase, TrapTriggerBase, TrapHitBase or HazardBase, or by the
 script's own "trap" name in any case; a reference family when every script is a trap class and its base is no inventory object
 (the 52 soul gem pickups stay the host's). D-T4 B: "traps should be scaled to difficulty"; built (c09b1dd5): with the DamageActor
-cut installed the client leaves the engine's six fDiffMultHPToPC* in force. That raised D-T5, which difficulty: skymp5-client pins
+cut installed the client leaves the engine's six fDiffMultHPToPC* in force. It scales a trap's hit and not a fall's: the static read skips the multiplier for a fall at 1.0 or more
+(docs/research/re-37335-and-rune-landing.md (a)), as the game does (UESP's difficulty page: fall damage is not raised above
+Adept, https://en.uesp.net/wiki/Skyrim:Difficulty), so the fall named above in this memo's D-T4 holds at Adept only. That raised D-T5, which difficulty: skymp5-client pins
 iDifficulty 5, Legendary (disableDifficultySelectionService.ts, no reason in the code), and Update.esm's GMST 0x010009d5 sets
 fDiffMultHPToPCL to 3.0 (the 2.5 above was the executable's default), so a wall hit at the lab's level goes from 60 to about 180,
-while the server's formula gives actor hits no difficulty yet (TES5DamageFormula.cpp:207, upstream's TODO(#461)); A keep
+while the server's formula gives actor hits no difficulty yet (TES5DamageFormula.cpp:272 on the branch, upstream's TODO(#461)); A keep
 Legendary, B pin Adept, C one server-set difficulty for every hit; thuum-cf recommends B for 47, then C; the pin reads the
 client setting difficulty since ce298e0f (built ahead, merges on the word). D-T2 stays open. Eli's direction on moving things
 (the soul gem trap: "we should use the same rational for other spells following a trajectory so both people see the same

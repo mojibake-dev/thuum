@@ -9050,7 +9050,7 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   host's), c09b1dd5 the engine's own difficulty multipliers left in force, ce298e0f the pin read from the client setting
   difficulty (built ahead of D-T5). A correction to my D-T4 memo: Legendary's damage-taken multiplier is 3.0 (Update.esm GMST
   0x010009d5), not 2.5, so a wall hit at the lab's level goes from 60 to about 180 under skymp5-client's pinned Legendary, while
-  actor hits stay unscaled (TES5DamageFormula.cpp:207, upstream's TODO(#461)): D-T5, which difficulty, is Eli's, with D-T2. Eli's
+  actor hits stay unscaled (TES5DamageFormula.cpp:272 on the branch, upstream's TODO(#461)): D-T5, which difficulty, is Eli's, with D-T2. Eli's
   direction for moving things: what every machine computes alike plays on each seat, what depends on aim or physics has one
   owner (the seat that set it off) and is replayed, so a trap's aimed bolt (MagicTrap) joins the players' launch relay in a slice
   after 47. Next: the fresh review of bd0c8cf8..ce298e0f and three probes (a guest lights an oil pool, a guest shoots a lamp, a
