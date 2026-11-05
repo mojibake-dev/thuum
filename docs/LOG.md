@@ -8994,3 +8994,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   246.8). b-push RED 171416 on its old y-claim flake (six of its nine runs since 10-20 read c2's y at -149 to -206), while its
   health reading shows the change: c2 ends a push at 0.918, against 0.938 to 0.943 in every earlier run, so falls now cost health.
   It merges only on Eli's D-T4.
+- 10:09 PST 2026-11-05 (18:09Z 11-05) (numidium, thuum-cf's dodge read): x-trap-dodge v2.1 (e0ec0f21, recorded: it claims its premises
+  only) GREEN 20261105-175906 on the pinned D-T4 lay (server m4-scripts-2b-traps-bd0c8cf8, both seats bd0c8cf8, c2's six
+  multipliers at 1): a guest that outruns the spike wall on its own screen is unhurt everywhere. Leg 1, a run (W 4000 ms, 86 to
+  90 units per 250 ms on the watch's track, faster than the probe's 288 u/s estimate): c2 crossed the plate near 2.0 s and ended
+  at y -4616. Leg 2, a sprint (SprintStart at 509 ms, stamina 100 to 91 by 1125 ms and 0.69 in the server's record): y -4520.
+  In both legs c2's watched health held 300 with no hit or stagger, its server record stayed 1.0 and its own ProcessTrapHit
+  census 0; c1's skipped census stayed 0 while c1's fired line rose (0, 1, 2), so the host's copy of the wall never reached
+  c2's figure either, and c1's screenshots show c2 upright past the plate. With x-trap-hit v3.1 (172521), both halves of Eli's
+  "dodge what THEY see" are read on two seats. MECHANISM ONLY until a claimed scenario or Eli's eyes.
