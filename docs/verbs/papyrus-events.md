@@ -401,6 +401,33 @@ platform's owner test reads the engine's parent cell. Fixes in flight from the s
 before any lookup (a malformed or unheld subject costs no game-file search), the failed-attach list holds each id once, and an
 exterior placement's unit case.
 
+## ADR-068, rung 3: the script record's first read (10:50 PST 2026-11-05 (18:50Z 11-05), thuum-cf)
+
+Rung 3 (the script record: TESModPlatform.SerializeScriptState mirroring the engine's own per-object writer, ApplyScriptState,
+SendScriptEvent; docs/research/scripts-one-system-2026-11-05.md section 6.5) rests on H-R1, the static read of the engine's save
+(docs/research/adr065-papyrus-state-2026-11-03.md Q1 and Q3). Read first, on the lab, before any of it is built (CLAUDE.md rule 2):
+x-script-save v1.1 (20261105-184120, numidium's run on the D-T4 lay bd0c8cf8 with lab-driver 73e0608d's allow-save, since
+skymp5-client turns saving off at every load) traced one F5 quicksave on c1, the Temple's host, with two puzzle pillars turned
+(lab/frida/script-save-trace.js v2). H-R1 CONFIRMED by trace, MECHANISM ONLY (recorded under ADR-064 amendment B):
+- One SaveGame pass (104828, 2.4 s with the hooks): 64591 script objects written by Object::Save (104249), every one writing
+  exactly its type chain's variable count (104317's answer inside it): 64591 matched, 0 mismatched, 0 not constructed.
+- One Object::Save per attached script: the spike wall 0x54b15's two scripts wrote two objects under one handle
+  (TrapSwingingWall over MovingTrap over TrapBase, 52 variables, state Idle; TrapHitBase, 29, state CannotHit).
+- Positional: every watched object's variables were written in index order 0 to n-1 (each Variable::Save's address against
+  the object's variables[] at +0x30); the pillars 0xaa8cb and 0xaa8cc as defaultPuzzlePillarScript, 5 variables each (raw types
+  3, 3, 5, a class, 5), in their turned states position02 and position01; the plate 0x567f2 as PressurePlate over
+  traptriggerbase, 23 variables, state inactive. The flags written: constructed, initialized, valid, no properties pending,
+  no lock holder. (v2's summary counted 25081 positional objects with variables and did not split the rest: script-save-trace.js
+  v2.1 counts non-positional and zero-variable objects apart for the next read.)
+- Handles: all 64593 SaveHandle calls of the pass came from the object table's writer (105016, +0x145c57f), none inside an
+  object's data, in kinds 0 (64436), 1 (143) and 2 (14); a plain form's handle is kind 0 with mid 0xFFFF and its form id low
+  (48703 objects), the others kind 0 with another mid (15731).
+- The save did not stall the seat's connection: no stale-host line for c1 around it; c1 kept the Temple at epoch 1.
+What the encoder takes from it: per attached script {type name, state, flags, variables in positional order, their count the
+chain's total}, an object variable as its handle, a plain form's handle (kind 0, mid 0xFFFF, the form id). Still HYPOTHESIS
+for rung 3: H-R2 (a mid-latent object read through its lock's stack), H-R3 (a direct currentState write runs no state events),
+H-R4 (the apply race-free under the closed gate), H-R5 (lifecycle handlers plus the record restart a world script).
+
 ## Status
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared

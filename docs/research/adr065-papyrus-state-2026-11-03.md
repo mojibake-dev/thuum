@@ -173,6 +173,10 @@ Bleak Falls Temple with two pillars turned, a console `save adr065-q1` (the type
 step, Eli's F5 on the seat under a lab hold). Expect one Object::Save per attached script, the pillars' scripts in their turned
 state, variable counts equal to GetTotalNumVariables, and handle kinds within {0, 1, 2}.
 
+Read on the lab (10:50 PST 2026-11-05 (18:50Z 11-05)): CONFIRMED by trace, x-script-save v1.1 20261105-184120 (docs/verbs/papyrus-events.md, ADR-068
+rung 3's first read): 64591 objects, every count matching 104317's, one Object::Save per attached script, positional for every
+watched object, handles in kinds 0 to 2 written by the object table (105016), plain forms kind 0 with mid 0xFFFF.
+
 What would falsify this: a variable count written that differs from the type chain's sum (the positional model is wrong); a
 handle kind outside {0, 1, 2} or a plain form whose mid is not 0xFFFF (the encoding is wrong); an Object::Save count that differs
 from the attachedScripts population walked under the lock (objects live outside the map).

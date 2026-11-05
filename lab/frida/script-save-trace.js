@@ -1,3 +1,7 @@
+// script-save-trace.js v2.1 (2026-11-05, after x-script-save 20261105-184120): the frame's index kept as this.frameAt, not
+// this.depth (an InvocationContext's own read-only property: the run's one "no setter for property" error, two calls left
+// unsummarized); the summary splits the objects with variables into positional and non-positional and counts those with none,
+// so "positional" reads for every object (v2's count left the zero-variable ones unread).
 // script-save-trace.js v2 (2026-11-05, its fresh review's fixes applied as written): SaveHandle tallied at every call (handles
 // are written in the object table, 105016 under 104883, before any object's data, never inside Object::Save), by kind (bits 48
 // to 63), by mid (bits 32 to 47: 0xFFFF a plain form) and by caller; no address-space walk per object (Frida 17's
@@ -115,13 +119,14 @@ function top() {
 
 let pass = 0;
 function freshSummary() {
-  return { objects: 0, matched: 0, positional: 0, notConstructed: 0, mismatched: [], byKind: {}, handles: { calls: 0, byKind: {}, plain: 0, other: 0, callers: {} } };
+  return { objects: 0, matched: 0, positional: 0, nonPositional: 0, noVariables: 0, notConstructed: 0, mismatched: [], byKind: {}, handles: { calls: 0, byKind: {}, plain: 0, other: 0, callers: {} } };
 }
 let summary = freshSummary();
 let summaryDirty = false;
 function emitSummary(why) {
   emit({ fn: 'summary', pass: pass, why: why, objects: summary.objects, matched: summary.matched, positional: summary.positional,
-    notConstructed: summary.notConstructed, mismatched: summary.mismatched, byKind: summary.byKind, handles: summary.handles });
+    nonPositional: summary.nonPositional, noVariables: summary.noVariables, notConstructed: summary.notConstructed,
+    mismatched: summary.mismatched, byKind: summary.byKind, handles: summary.handles });
   summaryDirty = false;
 }
 
@@ -203,13 +208,13 @@ if (at === undefined) {
       const stack = (frames[tid] = frames[tid] || []);
       stack.push(frame);
       this.tid = tid;
-      this.depth = stack.length - 1;
+      this.frameAt = stack.length - 1;
     },
     leave: function () {
       const stack = frames[this.tid];
-      if (!stack || stack.length <= this.depth) return;
-      const frame = stack[this.depth];
-      stack.length = this.depth;
+      if (!stack || stack.length <= this.frameAt) return;
+      const frame = stack[this.frameAt];
+      stack.length = this.frameAt;
       summary.objects++;
       summaryDirty = true;
       const kindKey = frame.h === null ? 'none' : String(frame.h.kind) + (frame.h.mid === 0xffff ? ':plain' : ':other');
@@ -223,7 +228,9 @@ if (at === undefined) {
       }
       let positional = frame.indices.length === frame.varsSaved;
       for (let i = 0; positional && i < frame.indices.length; i++) positional = frame.indices[i] === i;
-      if (positional && frame.varsSaved > 0) summary.positional++;
+      if (frame.varsSaved === 0) summary.noVariables++;
+      else if (positional) summary.positional++;
+      else summary.nonPositional++;
       if (frame.watched) {
         emit({
           fn: 'object', pass: pass, tid: this.tid, h: frame.h, type: frame.type, chain: frame.chain, state: frame.state, flags: frame.flags,
