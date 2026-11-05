@@ -9062,3 +9062,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   pin in fork bddd4ff9 (local until numidium's stage of ece35376, started about 20:1xZ with the twelve, ends). The three new
   probes went in reviewed (x-trap-oilpool-guest v1.1 3701e551, x-trap-lamp-guest v1.1 43761723, x-trap-hit-difficulty v1.1
   400cbea7, each fresh review GO with notes applied as written).
+- 13:37 PST 2026-11-05 (21:37Z 11-05) (numidium, thuum-cf's stage request): fork m4-scripts-2b-traps ece35376 (Eli's D-T1 family
+  widening ff9b804a, D-T4 B c09b1dd5 with the engine's own fDiffMultHPToPC*, the difficulty pin ce298e0f built ahead of D-T5, the
+  review's notes) staged by `just verb-stage` (dist bc4059998c092175 in all four game folders, the driver of main 52b6e6ba,
+  clean-m1-next on both seats), the server then pinned to m4-scripts-2b-traps-ece35376 (its image id 15955e54446e the bare tag's),
+  and thuum-cf's twelve run in its order. Eight GREEN: x-trap-oilpool-guest v1.1 20261105-204840, x-trap-family-fire 210326,
+  b-trap-record-restart 211229, b-duel 211731, b-shout 212032, b-shout-repeat 212404, b-shadowbond 212555, b-god 212826. Four RED,
+  each an answer: x-trap-lamp-guest v1.1 205402 (the host reported the lamp's stage 1 first, 17 ms before the guest whose cast it
+  was, so stage 1 races between the copies too); x-trap-hit-difficulty v1.1 205713 (both legs lost 59, a x1 hit at Adept, under
+  the engine's six with L 3: the pin's INI write, iDifficulty:GamePlay, never reaches the player's difficulty field, its own
+  HYPOTHESIS answered no, so every floor here ran at x1); x-trap-boulders-rest v1.1 210948 (rock 0xb6d4d hung at its game-file
+  height, z 8843, on every seat and in the record, 2 of its last 3 firings); b-push 213147 (the old y flake, y -156.3 against
+  -650, health 0.9145 as at x1). No lab faults, no reruns. The merge waits on Eli's D-T2 and D-T5; thuum-cf reads the artifacts.
