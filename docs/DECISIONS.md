@@ -4721,3 +4721,10 @@ proof runs on synced rocks; until then each seat drops its own, as today.
 As built, 23:27 PST 2026-11-04 (07:27Z 11-05) (rung 2's merged-head review): decision 4's ScriptCall budget is per sender across its rows (wire-rules
 natives.rs), not "per-sender per-row" as decision 4 reads; the across-rows shape is the safer one and stands, the decision's
 text kept as it was accepted.
+
+Eli's requirement, 00:00 PST 2026-11-05 (08:00Z 11-05) ("as truth: some traps are single use, like lamps or boulders. so if i , even as a guest, shoot a
+lamp. that should transmit to the host"): one owner means one RECORD of a trap's result, never one player allowed to cause it. Any
+seat can set off a single-use trap (an oil lamp shot, a tripwire walked into); the cause or the result it saw travels from that
+seat, the server records it once (the first report wins, so two shots cannot break a lamp twice), and every seat applies it, a
+late joiner and a restart included. The destruction record is rung 4's DestructionStage row; the boulders' trigger reaches their
+simulator with the trap-body slice (D-S2's addendum).
