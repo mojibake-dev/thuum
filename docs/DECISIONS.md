@@ -4504,3 +4504,173 @@ playtest."
 8. These three run in turbo mode: probes and reverse engineering as each change needs them, and a playtest launches without the full
    ceremony (no requirement that every item carry a green two-seat run first, no full gate before a playtest); merges to parity keep
    their gates.
+
+## ADR-068: Scripts as one system: a script runs on its object's owner, its consequences cross one seam, the receiver applies the owner's bytes, and the record carries the script's state
+
+Status: ACCEPTED 2026-11-05 by Eli in the planning session ("approve plan run"), after the three answers: the whole ladder, rungs 0
+to 7, with playtests 47 to 49; per-player quests by a derived rule (a quest is the player's when every alias it fills is the player
+or lives in the player's inventory), measured against today's allowed and denied lists before it replaces them; a green
+x-puzzle-handoff v2 merges d1f23444 into canon as the safety until rung 3 deletes it. Also recorded here: D-C1, the fork's `parity`
+branch retired in favour of the one trunk `canon` (Eli: "sure, that's acceptable"); parity is never merged to again and never
+renamed, and `main` stays the upstream mirror (ADR-016). PROPOSED and researched by thuum-cf the same night from six readers and
+three designs: docs/research/scripts-one-system-2026-11-05.md, the research file whose sections this ADR cites (6.1 to 6.11 and 7).
+
+Context. Skyrim's content is Papyrus: every trap, puzzle, ambush, scene trigger, quest reward, vampire stage and Daedric apparition is
+a script on a reference, a quest, an alias or a magic effect, run by each seat's engine independently, so in a shared world each
+seat's scripts fight the server over state it owns (ADR-044's reason for the gate). thuum answered one piece at a time: a name list
+(ADR-059), a relay per effect (RelayedActivation, ObjectAnimation, TrapHit, WordWall, QuestStage), a hand-off re-sync for the pillar
+(d1f23444); playtests 41, 43, 45 and 46 are one lesson, the per-feature shape cannot finish. ADR-062 flipped the default (the host
+runs every world script of its hosted cells, the consequences travel and are accepted, R2), ADR-063 made ownership the law, ADR-065
+made the engine's own saved state the observe point, D-F1 C gave quests no owner; what was missing is the one mechanism that carries
+a script's consequences from the engine that owns the object to every other seat and the one record that lets a new owner or a late
+joiner continue the script where it stands. The research found the seam the engine already has (one dispatch every native call
+passes, carrying the typed frame), the record the engine already keeps (each script object's state and variables, not portable per
+object from the save, so ours to encode) and the authoritative-owner shape in the one cousin that works (fnv-coop), against the
+every-seat simulation TES3MP and Skyrim Together document failing; the readers' maps are the research file's sections 1 to 5.
+
+Decision.
+1. The law (6.1). A script runs on the engine that owns its object (ADR-063 decision 1 applied to the VM), and a script's consequence
+   crosses exactly one of two channels: STATE, what the engine would save for the object, observed by the owner's change tracking
+   (ADR-065 decision 2), carried as the engine's own serializer bytes (ChangeForm 72, Ack 73, Apply 74), applied by the receiver's
+   LoadGame; or ACTION, what the engine never saves (an animation event, a sound, a shader, a notification, a line), observed only at
+   the native boundary, the call itself the message, executed on the receiver under the platform's mark so it is never re-captured.
+   A call on a self this seat does not own is filtered at the boundary and tallied, never reported; a call the platform itself makes
+   is the platform's, never a script's.
+2. The seam (6.2). One hook on BSScript::NF_util::NativeFunctionBase::Call (IFunction's slot 0x0F, CL
+   include/RE/N/NativeFunctionBase.h:47; RELOCATION_ID(97923, 104651), `just addr 104651` 0x143dc00) replaces the flip's 24 entry
+   hooks and their register conventions. It is a REPLACEMENT (the HookHandler::Replace shape of 53987 and 35225), not an attach: a state row on a seat that does not own the
+   self skips the body and returns kCompleted with the row's None or false, latent rows return kFailed, action rows run. It reads the
+   typed frame through the engine's own accessor, Stack::GetStackFrameVariable (Stack.h:67; RELOCATION_ID(97746, 104484), `just
+   addr` 0x1432850), by GetParam's declared types, never by pointer arithmetic; the calling script is previousFrame's
+   owningObjectType. Its table is keyed by IFunction* (the flip's g_boundFunctions idiom over Hooks::GetBoundNatives at
+   kDataLoaded); the hot path is fixed-index atomic counters, no lock, no allocation, one JS crossing per frame carrying the frame's
+   captured calls as an array, no drop for a state row.
+3. The table (6.3). docs/NATIVES.md gains hand-maintained columns kept by `just ledger`: kind (state, action, local, everyone),
+   subject (self, arg0, none), owner (cell host, simulator, player seat, nobody), audience, carried as (change form flag, typed verb,
+   ScriptCall, nothing), relay as (the same native, a non-latent twin plus the arg map, nothing), keep (none, last, log). The table is
+   data: one Rust const in wire-rules generated from NATIVES.md (NativeRows.inc for the platform, fork-lint refusing a stale one),
+   consulted by the validator and mirrored into the platform's install-time map. Rule 10 becomes mechanical: a native with no row
+   has no channel.
+4. The acceptance (6.4). STATE on a non-owner is ADR-065's path plus the script record; where the change form cannot carry a state
+   (globals, a quest's stages, an alias fill, the player's own records) the typed verb carries it. ACTION is ONE message, ScriptCall
+   (C2S, reliable, R2: epoch, self, class, function, typed args, the caller's script and handler, latent), mirrored by the existing
+   SpSnippet 30 to the audience minus the sender; the server never understands the action: the SHAPE is the gate (the pair is an
+   action row, the argument count and kinds match the row, the self is a load-order form or a server id the sender owns and never a
+   player's figure from a client, arrays absent by construction, count at most 11, a per-sender per-row budget; the value is never
+   judged, ADR-062's amendment). One per-object SEQUENCE owned by the server (beside ADR-066's epoch, which fences authority, not
+   order) rides every record served and every action relayed for the object; relays never go through PartOne's deferred queue; the
+   receiver applies in sequence, holds an action past its applied record, drops one at or below it; a late joiner gets the record
+   and the last action as one message. ONE mark, thread-plus-stack (PlatformCall's thread-local depth raised by the Call hook for a
+   platform-dispatched stack), is consulted by the SendEvent gate, the animation hooks and the natives' hooks; the process-wide
+   Override retires. Every latent row names its non-latent twin for relays (PlayAnimationAndWait to PlayAnimation, Enable to
+   EnableNoWait, Disable to DisableNoWait, Sound.PlayAndWait to Sound.Play); a row with no twin is never relayed; on a non-owner a
+   blocked latent returns the kFailed shape, so no guest stack ever hangs.
+5. The record (6.5). The owner encodes each attached script of an owned reference as {type, currentState, flags, positional
+   variables} through the VM's own identity (the handle from the policy, attachedScripts under its lock, the type's count, objects
+   as handle plus type name, arrays capped at 128) and sends ScriptState; the server keeps it beside the form's change form (the
+   engine's Papyrus section is whole-VM and not portable per object; the bytes and the compare are ours, an FNV like the acked
+   hash). A record is read only at a QUIESCENT point of its object (no running or waiting stack whose self is the object); else the
+   last quiescent record stands and the in-flight stack is abandoned at the hand-off, its effect carried by the action already
+   relayed. The read trigger is the end of any stack that made a captured call on the object plus a per-frame hash of each hosted
+   object's variables against the last reported (GotoState and assignment never pass the seam). The apply on a new owner or a late
+   joiner runs on the VM's thread inside a TESModPlatform native, before that seat's gate opens for the cell (the grant's
+   tellPlatform moves after the apply and the OwnerAck): FindBoundObject once `initialized` is set, the count check, each variable
+   through Variable's setters, currentState written directly (no state events, H-R3), then the change form, then the ack, then
+   SetCellHosted. On a late joiner the SendEvent gate blanks OnLoad and OnCellLoad for an object whose record is pending and the
+   apply re-sends them once through SendScriptEvent, so the seat's own handler renders FROM the record by the script's own code.
+6. Ownership by kind (6.6). A world object's scripts are the cell host's (GetParentCell then the hosted set fed by SetCellHosted); an
+   actor's are its simulator's (hosted and not a puppet); the player's own (0x14, the player's effects, the player-alias quests) are
+   the player's seat's; a quest, a scene, an alias and a global have nobody (D-F1 C): an `everyone` row the server records and
+   relays, run on every seat, its consequences hitting the gates at THEIR selves; a static native's owner is its subject argument's.
+   The SPEAKER-OWNER RULE: a speaker is owned like its kind (an actor by its simulator, a talking activator by its cell's host) and a
+   conversation claims the speaker for the player who opened it; the topic-info sink filters by the speaker's owner instead of
+   Hosted::Is, ActorSpeech 54 and ActorClaim 56 widen to any reference, and the receiver plays a non-actor's line through the
+   reference-level say under the mark, so both players hear Hermaeus Mora (the walk-through is the research file's section 7). D-Q1,
+   the derived rule: a quest is per player when every alias it fills is the player or lives in the player's inventory (esm.py over
+   every QUST's aliases), measured against today's allowed and denied lists before it replaces them; the lists stay until the
+   derivation matches.
+7. One observe point per row (6.7, finding 8). STATE.md's observe column names exactly one point per row: the boundary for actions
+   with no change flag, AddChange for state, the engine's sinks for dialogue and scene phases (TESScenePhaseEvent for scenes, relayed
+   as actions keyed by the quest's sequence); the Call hook's thread-local depth makes the engine-level animation hooks (38048,
+   14297) drop what the boundary owns, and they stay for what the engine itself drives; on the server every relayed consequence
+   carries its cause key (the object's sequence or the quest and stage pair) and the record folds a repeated key, so no server-side
+   grant exists beside a fragment; the platform's own AddItem and RemoveItem bypass the native, so inventory is never an action, it
+   is the inventory verb's R0 row. SendEventAll (104801, `just addr` 0x1447b40) gets the same gate as SendEvent.
+8. What cannot be carried (6.8). Running and suspended stacks, latent waits, queued DelayFunctors and FunctionMessages in flight
+   (ADR-065 decision 5): the new owner's script starts from its state and variables with no pending wait, a latent in flight on the
+   old owner finishes there with its late natives filtered once the release lands, and vanilla's traps and ambushes re-arm at
+   OnCellAttach and OnLoad, which D-S1 A runs on the new owner before the grant. Correction to ADR-065: update registrations CAN be
+   carried, since queuedOnUpdateEvents are plain data {updateType, timeToSendEvent, updateTime, handle} (SkyrimVM.h:143-158,
+   :246-249) re-issued on the new owner under the platform's mark, one RegisterForSingleUpdate per entry; a rung 3 option, not a
+   promise. A script whose state lives outside the VM (StorageUtil, JContainers) restarts from nothing: a declared limit.
+9. Proof by the ladder, each rung one fork branch cut from the rung below's head, canon fast-forwarding after each proof, a failed
+   rung parked and the rung above re-merged, never a rebase: rung 0 the canon wrap-up
+   (83a40da3, d1f23444, bb559685 as each reads green); rung 1 the flip on canon (m4-scripts-1-flip, the merge of 8896ef0c,
+   x-bleak-scripts v1); rung 2 the one seam (m4-scripts-2-seam, the Call hook, ScriptCall, x-native-frame v1 before any report, the
+   whale); rung 3 the script record (m4-scripts-3-record, ScriptState and its apply, x-puzzle-handoff v3, b-script-state-restart);
+   rung 4 the state rows (m4-scripts-4-rows, RefState, ScriptPlacement, AliasFill, WorldGlobal, the standing); rung 5 quests under
+   D-F1 C (m4-scripts-5-quests, the start and stop words, the acting-player scope, the condition-read variables); rung 6 whole
+   dungeons and the two named proofs (m4-scripts-6-speaker, q-golden-claw, q-embershard, x-mora-scene, x-vampire-stage); rung 7 the
+   chaff (m4-scripts-7-chaff, the regression gate as one run set). Playtest 47 after rung 2, 48 after rungs 3 to 5, 49 after rungs
+   6 and 7; 26.5 agent half-days, about 17 lab windows plus three playtest windows, 10 calendar days end to end, about 8 with the
+   R0 rungs off the lab; the smaller verified ladder, rungs 0 to 3, is day 5 at the latest. Deleted on the way (6.10): the 24
+   entry hooks and their register conventions; lastAnimation everywhere; the pillar re-sync and its state; the self-played marks
+   and EVENT_PATTERNS; activationUnblockedBases and the admitted host rows; the per-player quest start; vampirism's suppression of
+   the quest script; the (row, self) latent notes. Kept: the SendEvent gate and SetCellHosted as the one event decision point,
+   the lifecycle exception, and every existing channel and gate 6.10 lists.
+
+Consequences. Platform (a Windows build per seat rung): the Call replacement and its table (NativeRows.inc), PlatformCall's depth in
+the SendEvent and animation gates, SerializeScriptState, ApplyScriptState and SendScriptEvent, SetActingPlayer, the speaker-owner
+sink; wire: ScriptCall 75, ScriptState 76, ScriptStateApply 77, DestructionStage 78, AliasFill 79, WorldGlobal 80, ScriptVariables
+81, the word u8 on QuestStage 57, ActorSpeech 54 and ActorClaim 56 widened to a reference, each with its validator, fixtures, C++
+struct and WIRE.md row in one commit (rule 4), SCHEMA_VERSION past 35; server: wire-rules natives.rs and script_state.rs,
+ActionListener's OnScriptCall, the per-object sequence, questRuns and the login replay of running quests, IsSeatsOwnQuest and
+E_QUEST_OWN_START retired; client: ScriptCallService replacing ScriptNativeService, the apply ahead of the grant's tellPlatform,
+questStageService's start and stop, VoiceService.ask on a reference; lab: lab/frida/native-frame.js, lab-driver's script_state step,
+the probes by path (x-bleak-scripts v1 to v3, x-native-frame v1, x-puzzle-whale v1, x-script-save v1, x-puzzle-handoff v3,
+x-golden-claw-alias v1, x-standing, x-acting-player v1, x-mora-scene v1 and v2, x-vampire-stage v1, with rung 0's x-puzzle-handoff v2,
+x-puzzle-guest-view v2 and x-fate-dress-bleak v9); docs: NATIVES.md's columns, STATE.md's observe column, papyrus-events.md as the
+system's doc, traps.md, quest-stage.md, change-form.md and vampirism.md. Migrations (rule 6): scriptState on the change form,
+questRuns on the journal, worldGlobals, the ref state (isDisabled, isDeleted, destructionStage). Scenarios added: b-script-state-restart,
+b-ref-state-restart, b-world-global, b-quest-stage-two-seats, q-golden-claw and q-embershard (each green twice before the ADR closes);
+b-puzzle-relay v4 gains the whale's claims; b-quest-rumor v2 and b-quest-stage-restart v2 are rewritten under the new rule with Eli's
+word (W1). R0 rungs (4a, 5a, 7a) merge on T0 and T2 with no lab window; every seat rung has a fresh read-only review of its
+engine-facing diff before its first lab run (ADR-064 rule A).
+
+Risks. H-S1: at Call's entry stack->top holds the native's self and typed arguments for a script's own call; Frida on 104651 beside
+the 24 entries, each entry hit preceded on its thread by a Call hit whose top->self and top->args[i] equal the entry's registers.
+H-S2: a native queued as a FunctionMessage still enters through slot 0x0F; the guest's live GlobalVariable.SetValue census row shows
+a Call hit per entry hit. H-S3: the frame read by the research's finding 9 (the arguments through 104484 by GetParam's declared types,
+the caller previousFrame's owningObjectType, a plain form's id from the handle's low 32 bits); x-native-frame v1's args[0]
+Trigger01/02/03 in order, args[1] Turned0N, the self resolving to 0xaa8cb and a caller frame naming defaultPuzzlePillarScript. H-L1
+to H-L3: the flip's latent marking (the Stack's callback +0x90 and id +0x80); the flip's own trace, unchanged. H-A1: the process-wide
+Override misclassifies concurrent script calls; a counter "(platform by Override on a non-worker thread)" on one stage run, answered
+by construction once the one mark replaces it (the ladder also names rung 5's Game.GetPlayer swap H-A1; its fallback keeps the
+fragment skip). H-R1: variables[] is positional, parent-first, count = GetTotalNumVariables; Object::Save 104249 and Variable::Save
+104293 hooked under a console save on the host, the count written equal to the chain's sum. H-R2: a mid-latent object is readable
+through lockStructure's Stack state; the same trace on a pillar during its PlayAnimationAndWait, state 3 on the lock's Stack. H-R3: a
+direct currentState write runs no state events; DispatchMethodCall1 hits named OnBeginState or OnEndState during an apply, zero.
+H-R4: writing variables inside a native is race-free while the gate is closed; the apply's count of running stacks whose top->self
+is the object, zero. H-R5: lifecycle handlers plus the record restart vanilla's world scripts on a new owner; b-bleak-traps' plate
+under a hand-off fires on the new host. H-V1: the REFR change form with kAnimation kept restores a sequence object's side on another
+seat; c1's turned pillar serialized with bit 28, applied on c2 before the 3D, the node's rotation read by bb559685's export. H-O1: a
+hosted actor's PlayIdle is carried by the action stream; one UpdateAction per PlayIdle census hit on a hosted NPC. H-D1: no
+engine-level animation hit on a non-door world object outside a script native's extent; the depth-zero hit counter on a dungeon
+stage, zero. H-G1: a TACT's dialogue line reaches TESTopicInfoEvent with the TACT as speaker; the sink logs a speaker of form type
+0x3D for 0x3278d on the talking seat. H-P1: the puzzle lever 0xb7db4 is a FURN the lift does not cover and its OnActivate under the
+block still fires the darts; b-bleak-traps on rung 1's stage, a red a one-line fix first (the lift's kind set gains a scripted FURN
+in a hosted cell). H-W1: the Trigger02 row is present at Call where the old hooks log nothing; x-native-frame v1 on the host while c1
+turns aa8cb three times. H-F1: the result Variable's shape per row's return type for the replacement's skip; the trace on
+x-native-frame reads it. H-T1: DA04's summoning stage relays and the activator enables on both seats through the state row;
+x-mora-scene v1's stage line on both seats and the TACT's enabled flag read on the guest. H-Q1: a relayed SetStage runs the fragment
+on the receiving seat; standing evidence x-script-natives v7, run 062800, the fragment's skip line on the guest. Each closes by one
+observation in its verb doc, with a Dynamic section where a read fails (rule 8); a seam that fails H-S1 to H-S3 keeps the 24 entry
+hooks for their rows and reads the frame for the three animation rows alone, the whale still proven through the old ObjectAnimation
+message fed by the seam; a record that does not move the graph keeps the lastAnimation replay for guests until rung 7 and ships the
+record for the hand-off alone.
+
+What this rejects: a typed message per action family (a family would need a server rule to earn a type, and an action has none);
+running vanilla scripts on the server's VM (ADR-059's reason stands); every seat simulating with variable sync (TES3MP's and Skyrim
+Together's shape, with their documented failures: the allow-list's packet spam, the stage override's thread, the scene lines racing
+ahead, the unshared aliases); per-native entry hooks with register conventions; name lists of any shape; lastAnimation and the pillar
+re-sync as the record; a process-wide Override.

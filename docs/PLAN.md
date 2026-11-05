@@ -1458,6 +1458,10 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   5123, its stage next with x-corpse-record v2 (sha1 0ee1ea9c, the restart leg). Eli's order (decision 7): containers, then scripting
   and quests, then physics objects, in turbo mode (decision 8: probes and RE as needed, no full ceremony before a playtest).
 
+- STATE 2026-11-04 17:28 PST (thuum-cf): ADR-068 accepted; the scripting one-shot's ladder (rungs 0 to 7) approved by Eli; Step 0
+  (the canon wrap-up on the pillar heads: 83a40da3, then 73ed0c52 with d1f23444's tree) running on the lab; rung 1 (fork
+  m4-scripts-1-flip 772c00d3, the flip on canon) T0 green on pipeline 5386, its review, T2 and stage next.
+
 ### M5: Progression (4 to 8 weeks, Class A/B). Started 2026-10-31 (the weekend pass)
 
 - STATE (05:09 PST 2026-11-02, thuum-magnus): the object-animation pair MERGED, fork parity ad1aa50a (from c8c21cd1) and the host-scoped layer

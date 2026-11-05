@@ -520,3 +520,20 @@ TURN_SIGN) that ramps lockAngle with the pick snapped: HYPOTHESIS that the menu'
   shouldQueue true, a deferDetach, and on a near miss detachHavok on Main with a
   non-null get3D2 inside the window; after it: the re-roll on Main's thread, no
   deferral.
+- say-verdict.js: why a relayed voice line's say on a WATCHER seat's puppet ends
+  "refused" instead of started, played or inaudible (docs/private/scripts-arm-
+  scope.md's B3; docs/verbs/npc-stream.md). Attach to the watcher's game, filtered
+  to the speaker FORM: one `say` row per SayTopic 39162 call, with the high-process
+  stage 39642's entry, branch and return, the busy test 37266, whether the picker
+  25541 ran and walked conditions (25544, TESCondition::IsTrue 29888 and the item
+  evaluator 29924), the play 39643 with the voice-file start 39772 or the sound
+  path 39771, and SpeakSoundFunction 37542's audibility gate inputs against the
+  audio listener (67710 per axis); the verdict word computed as PuppetApi.cpp
+  computes it, printed as `say <actor> info <info> -> <word>` beside VoiceService's
+  console line. Outside a window: infoEvent rows (25616), clearGreetTopic rows
+  (39334 with the caller's module), UpdateVoiceTimer 37752 counts, a liveness row
+  every 10 s, a summary at TTL per verdict and refusing branch. LAB_PARAMS: FORM
+  (hex, required), TTL (default 600), VERBOSE, ITEMS. Attach only. Ids by `just
+  addr`; the branch reading is the re-analyst's static read of 2026-11-03
+  (HYPOTHESIS until a run). sha1 a710d784; fresh review GO with its notes applied;
+  never run yet. 1.6.1170 only.

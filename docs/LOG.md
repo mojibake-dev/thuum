@@ -8681,3 +8681,21 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   lab-api recreated on 8622fbe7 at 00:24Z with the lab free (a scenario that is no YAML answers 400 E_SCENARIO). For the canon
   wrap-up (thuum-cf's plan, awaiting Eli): 977eccc1, node-rotation's deferred read and `c.node_rotation(<id>, "<node>"[,
   "<label>"]).angle_to(...)`, the grammar x-puzzle-guest-view v2 claims on; lab-api takes it at its next recreate.
+- 17:28 PST 2026-11-04 (01:28Z 11-05) (thuum-cf): Eli approved the scripting one-shot ("approve plan run") after three answers: the whole ladder,
+  rungs 0 to 7, with playtests 47 to 49; per-player quests by a derived rule (a quest is the player's when every alias it fills is
+  the player or lives in the player's inventory), measured against the lists first; a green x-puzzle-handoff v2 merges the hand-off
+  into canon as the safety. Recorded as ADR-068 (docs/DECISIONS.md) with the research in docs/research/scripts-one-system-2026-11-05.md
+  (six readers: the repo's decisions, the flip branch, its hook, the engine through CommonLibSSE-NG, TES3MP, OpenMW, Skyrim
+  Together, NV:MP and fnv-coop; three designs: the mechanism, the ladder, a skeptic). The model: a script runs on its object's owner;
+  one seam, NativeFunctionBase::Call 104651 as a replacement reading the typed frame; one message, ScriptCall, mirrored as SpSnippet
+  30 under a Rust table generated from NATIVES.md; one record, the change form plus each script object's state and variables. Eli's
+  Mora question while reviewing added the speaker-owner rule to rung 6 (a talking activator's lines heard on both seats). D-C1: the
+  fork's parity branch retired, canon the one trunk (CLAUDE.md's submodule line). Step 0 corrected from git after approval: the three
+  pillar heads are siblings (83a40da3 and d1f23444 both off fffd8a66; bb559685 canon plus cherry-picks), so canon goes 7c79fc3e to
+  83a40da3 on (a)'s run set, then to 73ed0c52 (d1f23444 merged onto 83a40da3, a tree byte-identical to d1f23444's, 6a2678d1) on
+  (b)'s run set on d1f23444's dist; x-puzzle-guest-view v2 (sha1 7c1f5c89, v1 archived) keeps v1's claims and adds the view, and is
+  expected red at the whale turn, so bb559685 rides into rung 2. numidium's (a) has run since 01:21Z on the lay proven on both seats.
+  Rung 1 (fork m4-scripts-1-flip 772c00d3, the flip merged onto canon; lib.rs keeps SCHEMA 35, changeFormService.ts a union of the
+  queued apply and the settle wait, ChangeForm.cpp nets zero) pushed server-only: pipeline 5386 green, T0 100% of 13 (589 cases),
+  wire-test and wire-fuzz green; fork-lint clean; its fresh review runs; T2 and the stage wait for the lab after Step 0. Pipelines
+  5375, 5376 and 5377 (83a40da3, d1f23444, bb559685) built green on both builds. The Frida README gains say-verdict.js's entry.

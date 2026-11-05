@@ -47,7 +47,8 @@ toolchain per layer, every feature the same shape.
                          .claude/ (rules, skills, agents, settings), justfile,
                          .mcp.json, .gitlab-ci.yml
 - skymp/ .............. git submodule: our public fork mojibake-dev/skymp, branch
-                         parity (main mirrors upstream, ADR-016). Subprojects:
+                         canon (parity retired 2026-11-04, ADR-068; main mirrors
+                         upstream, ADR-016). Subprojects:
                          skymp5-server, skymp5-client, skyrim-platform, papyrus-vm,
                          libespm, savefile, and our skymp-wire/ (ADR-015). Its vcpkg
                          submodule is initialized only where the server is built.
