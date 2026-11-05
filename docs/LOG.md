@@ -9074,3 +9074,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   HYPOTHESIS answered no, so every floor here ran at x1); x-trap-boulders-rest v1.1 210948 (rock 0xb6d4d hung at its game-file
   height, z 8843, on every seat and in the record, 2 of its last 3 firings); b-push 213147 (the old y flake, y -156.3 against
   -650, health 0.9145 as at x1). No lab faults, no reruns. The merge waits on Eli's D-T2 and D-T5; thuum-cf reads the artifacts.
+- 13:41 PST 2026-11-05 (21:41Z 11-05) (thuum-cf's readings of the four reds, logged by numidium): x-trap-lamp-guest 205402's
+  outcome holds and its premise was wrong. Both copies fell on their own: c2's console has its own stage-1 report and then "from
+  the record: here already" twice, and c1 has its own stage 1 and 2. The record and the relay worked: one stage-1 record, the
+  other dropped, stage 2 recorded once (MECHANISM ONLY, no rerun). x-trap-hit-difficulty 205713's HYPOTHESIS is answered NO. The
+  pin writes the INI setting only, never the player's difficulty field that DamageActor indexes (PlayerCharacter.h:399), so
+  upstream's pin never pinned the damage and the seats play at their own field, Adept. D-T4 B's mechanism held: the engine's six,
+  a hit at x1. Eli's D-T5 outcome is Adept for testing, and one difficulty for every hit later, written into that field from the
+  server's value. Fork 0f2f3c55 makes Adept the pin's default and is the head the merge takes. Rock 0xb6d4d (2 of 3 firings asleep
+  at spawn height on the owner's engine) gets a trace probe, x-trap-rock-hang, in draft. b-push's red is the old y flake. Next on
+  the current lay: x-trap-wall-both (Eli's D-T2 outcome, in its fresh review), then the D-T2 scenario rewrites and the merge on
+  0f2f3c55.
