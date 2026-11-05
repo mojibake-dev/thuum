@@ -8962,3 +8962,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the fix moves the actor-damage cut into the platform's DamageActor replacement, A recommended). x-trap-lamp-trigger v2.1 RED
   on its premise: the driver's Papyrus Spell.Cast from the player never casts (the trace: 0 CastSpellImmediate, 0 Launch); v3
   casts by hand. Fork 029769f7: the DestructionStage difftest session on the slice, its T2 the 41-of-41 trial.
+- 08:09 PST 2026-11-05 (16:09Z 11-05) (numidium): the oil lamp READ ON THE LAB: x-trap-lamp-trigger v3.1 (8776aceb) GREEN 20261105-160444 on
+  the pinned trap-slice lay. The player's own hand cast (three 2000 ms holds at -185, -210 and -160 mouse counts; c1 landed at z
+  -2311.3, as v2.1) launched three Firebolts (lamp-shot-trace.js on c1: launch 3); the first hit 0x9b0fb, its destruction went to
+  stage 1 then 2 and the lamp fell, its hazard hitting c1 among others; the server recorded "ff000000 reports 9b0fb at stage 1"
+  and "stage 2, destroyed true", each "recorded (the first report), relayed to 1 game(s)", and c2 applied both from the record.
+  A correction to my 15:53 entry, from thuum-cf's read of the watch: the spike wall's one hit in the premise's leg B took c1 from
+  1000 to 939.97 (60 health); the 963.3 I logged was the reading after regeneration.
