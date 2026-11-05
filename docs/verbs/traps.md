@@ -689,20 +689,21 @@ cell's host, else nobody):
   actor's simulator's (the NPC stream carries it), not relayed". HYPOTHESIS until a two-seat read: the NPC stream carries what
   follows (the actor's waking, its walk and its attack) to the other games' puppets (x-bleak-traps-npcs v2 reads it on rung 1's
   stage).
-- Another seat (a dialogue's claimant, ADR-052; a thrall's commander once ADR-060's row lands; the host of the cell an exterior
-  ambush's actor stands in while its trigger stands in the reporter's): the same RelayedActivation (target, caster) to that
-  seat's game alone, within the reporter's budget of eight linked relays a second (shared with the non-actor path; a refusal
+- Another seat (a dialogue's claimant, ADR-052; a pass-margin follow into the reporter's cell; a thrall's commander once
+  ADR-060's row lands): the same RelayedActivation (target, caster) to that seat's game alone, within the reporter's budget of eight linked relays a second (shared with the non-actor path; a refusal
   spends none). The line: "[verb:traps] <host> reports <caster> activating actor <id>: its simulator <owner> is another seat's,
   relayed to it". Before the relay two checks, the non-actor path's own: the reporter hosts the cell the trigger stands in
   ("E_TRAP_NOT_HOST: <host> reports <caster> activating actor <id>, its trigger in a cell it does not host"; with no claim the
-  cell's host simulates the actor, so a guest's report would otherwise wake the host's own), and the actor's game-file record's
-  XAPR names the trigger ("E_TRAP_UNLINKED: <host> reports <caster> activating actor <id>, whose activation parents do not name
-  it"; read from the ACHR as InitScripts reads a non-actor's, since the table skips actors). HYPOTHESIS until a T3 run: the
+  cell's host simulates the actor, so a guest's report would otherwise wake the host's own; a trigger the server never loads, a
+  marker on OnActivate's record path, has no cell the server knows: "E_TRAP_NO_CELL: <host> reports <caster> activating actor
+  <id>, its trigger's cell is unknown", 5 of Skyrim.esm's 937 actor activation links), and the actor's game-file record's XAPR
+  names the trigger ("E_TRAP_UNLINKED: <host> reports <caster> activating actor <id>, whose activation parents do not name it";
+  read from the ACHR as MpObjectReference::Init reads a non-actor's, since the table skips actors). HYPOTHESIS until a T3 run: the
   simulator's engine wakes the actor on the relayed activate (relayedActivationService plays target.activate(caster) for any
   reference).
 An actor the server never loaded (0x380b4, NPCs on or off) is judged an actor by its game-file record (ACHR) and has no
 simulator the server knows of: dropped. Before this rule the pairs read E_TRAP_UNLINKED (the activation-parent table is filled for
-non-actor references alone, MpObjectReference::InitScripts) with NPCs on and E_TRAP_NO_REF with NPCs off (x-bleak-traps-npcs
+non-actor references alone, MpObjectReference::Init) with NPCs on and E_TRAP_NO_REF with NPCs off (x-bleak-traps-npcs
 20261105-023048; b-bleak-traps v1 on canon and on 83a40da3, 20261105-013206, 013632, 020830, 021251).
 T0: TrapRelayTest's "A host's linked activation of an actor is the actor's simulator's" (the unloaded draugr 0x380b4 judged by
 its record while NPCs are off, then the loaded 0x380b3 with the reporter as its simulator; each drop line once through the
@@ -714,3 +715,13 @@ host's report of the plate 0x567f2 and the draugr refused E_TRAP_UNLINKED).
 Not validated (rule 5, recorded here): that the trigger fired at all and when (the host's word, R2; the XAPR delays are the
 engine's), and what the woken actor does next (the NPC stream's own rows). The drop records nothing, since the stream is the
 record.
+OPEN, the exterior ambush (the review of 066cce4e..536e30d4, finding 1): the client reports a linked activation only when its
+seat hosts the TARGET's cell (activationService.ts's linked branch), so a trigger in a cell one seat hosts whose actor stands in a
+cell another seat hosts is reported by nobody: the trigger's host is not the target's, and the actor's host never runs the
+trigger's script (its gate blanks a cell it does not host). The ambush then wakes on no seat. 72 of Skyrim.esm's 937 actor
+activation links cross an exterior cell boundary. The fix is the client's gate for an actor target (report when the seat hosts
+the CASTER's cell, which is what the server's relay checks), as its own change with its own two-seat probe.
+OWED at T3 (rule 3) before the relay counts as proven: a read of the relay itself, a claim or a follow putting an activation
+child on the guest, then its trigger fired on the host, then the guest's "relayed activation <actor> by <trigger>" and the actor
+waking there. The dialogue claim cannot be staged on a hostile ambush actor, so the read waits for a follow or a thrall
+(ADR-060) in reach of a linked trigger; until then the relay is T0's alone and this section's HYPOTHESIS stands.

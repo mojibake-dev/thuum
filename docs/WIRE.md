@@ -750,6 +750,10 @@ reports its engine's non-player activation as today's Activate {caster, target};
 alone, for a pair the target's activation parents name (XAPR), at most eight a second, records it through Activate's own path
 (a door's open, the hazard note) and relays it so each other engine plays it with the caster the host's did. Fixtures
 70-RelayedActivation-0 and -1. No session triggers it (the fake clients activate no linked pair), so nothing is declared.
+An actor target (ADR-068; fork m4-scripts-1-flip, 03714dc8 and 101705a8; docs/verbs/traps.md "A linked activation of an
+actor"): never relayed to the cell's other games and never recorded through Activate; dropped when the reporter or nobody
+simulates the actor, else sent to that one simulator's game alone, after the reporter hosting the trigger's cell and the actor's
+own XAPR naming the trigger, within the same budget. The shape is unchanged.
 
 ### CreateActor's restrictedRaces and permittedRaces (character-creation, the permit; M5)
 
