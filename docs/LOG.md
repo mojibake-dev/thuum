@@ -9020,3 +9020,23 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   c2 boots 154 units south, at (133857, -61580) in (32, -16), and never crashed. The test that would settle it: boot c1 at
   c2's cell for the same number of relaunches. It is a lab lever, but apocrypha's option B (a thuum engine-fixes DLL) still
   fixes it for every player; both are Eli's call.
+- 10:49 PST 2026-11-05 (18:49Z 11-05) (numidium, thuum-cf's GO): ADR-068 rung 3's first read, x-script-save v1.1 (75d32b1b,
+  recorded under amendment B) GREEN 20261105-184120 on the D-T4 pin (server m4-scripts-2b-traps-bd0c8cf8, bd0c8cf8's dist) with
+  lab-api 73e0608d (allow-save's action), deploy-srv's script-save-trace.js v2 (c7d5a845) and the driver of 73e0608d laid by
+  client-driver (30c4b329dd47ecf8 in all four game folders, clean-m1-next retaken on both seats). allow-save answered
+  {setInChargen: [false, false, false]}, and F5 made the engine's own quicksave ("Quicksaving..." on c1's screen, SKSE's kSaveGame
+  at 18:43:50.461): one SaveGame pass, 2.4 s with the trace's hooks, read by a trace whose ready row is c1's game (pid 10732, base
+  0x7ff75c130000). The answer: 64591 script objects saved, every one writing exactly its type chain's variable count (104317's;
+  mismatched none, not-constructed none). Every handle (64593) was written from one caller, +0x145c57f inside 105016, the object
+  table (just addr: 0x145c460): 48703 plain forms at kind 0 and mid 0xFFFF, the rest kind 0 with a mid (15731), kind 1 (143) and
+  kind 2 (14). The watched rows read as the static model had it: the pillars 0xaa8cb position02 and 0xaa8cc position01 (one press
+  each off initialState 1 and 3), 5 of 5 variables; the plate 0x567f2 inactive, 23 of 23 (PressurePlate 2 over traptriggerbase
+  21); the wall 0x54b15 as two objects under one handle (TrapSwingingWall Idle 52 of 52 over MovingTrap and TrapBase; TrapHitBase
+  CannotHit 29 of 29), so one Object::Save per attached script, positional. No stale-host line for c1 around the save. Loose ends
+  for thuum-cf: the trace's objectSave hook threw once ("TypeError: no setter for property"; 64593 calls against 64591
+  summarized), and SaveHandle ran 133 more times after the pass left. MECHANISM ONLY: the encoder's premise (H-R1's shape and
+  count) now stands on a trace.
+  A correction to my 10:37 entry: c2's boot loads cells 0xBBB1 and 0x97B3 too (this run's server log, 18:41:34, ff000001), since
+  its 5x5 grid around (32, -16) holds both. So the crash stacks' cells do not single out c1's grid. What still differs is where
+  they sit in it (0x97B3 is c1's southwest corner but only an edge cell of c2's) and c1's spot 14 units from the cell border. The
+  boot-spot reading stays a weaker HYPOTHESIS, with the same test.
