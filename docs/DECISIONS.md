@@ -4733,7 +4733,7 @@ D-S2's addendum amended, Eli 00:02 PST 2026-11-05 (08:02Z 11-05) ("yes", to movi
 is simulated by the seat whose firing moved it (ADR-058's toucher rule for props), not by the cell's host, and streamed to the
 others; its resting place is recorded.
 
-D-S3, traps follow the interaction. PROPOSED by thuum-cf 00:02 PST 2026-11-05 (08:02Z 11-05), from Eli's lean ("this honestly has me leaning towards traps
+D-S3, traps follow the interaction. ACCEPTED by Eli 00:04 PST 2026-11-05 (08:04Z 11-05) ("that's a go"); proposed by thuum-cf 00:02 PST 2026-11-05 (08:02Z 11-05), from Eli's lean ("this honestly has me leaning towards traps
 just being a client calculated thing across the board"), his requirement on single-use traps above, and his word "yes so in that
 way traps almost function like npcs during conversations". The rule is ADR-052's conversation claim and ADR-058's toucher applied to
 traps, one rule and no trap list: whoever sets a trap off owns that firing.
