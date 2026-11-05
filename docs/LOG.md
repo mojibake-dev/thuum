@@ -8859,3 +8859,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   call on a placement the server never loads judged by its record and mirrored to the cell's loaders) waits for its review and
   the stage's end. Eli's calls tonight, recorded in ADR-068: D-S2 B; the boulders by the seat that set them off; single-use
   results recorded once from whoever caused them; D-S3 ACCEPTED, traps follow the interaction (its design read running).
+- 01:28 PST 2026-11-05 (09:28Z 11-05) (numidium): RUNG 2 (the seam) READ ON THE LAB, seven of seven on m4-scripts-2-seam 9745d401, staged by
+  `just verb-stage` (its own Windows dist, GitLab client-build 19122, platform ee725dd5; the bare tag checked to be 9745d401's image
+  index): b-object-anim v4 20261105-085021, b-puzzle-relay v4 085442, b-bleak-traps v2 085813, x-puzzle-whale v1.1 090155,
+  x-bleak-scripts v2.1 090617, x-puzzle-handoff-flip v2 091118, x-puzzle-handoff-late-flip v1.3 091440. Read for rung 2's new
+  claims: both seats logged "31 of 31 table rows bound" and "native dispatch replaced" (NativeFunctionBase::Call, Address Library
+  104651) with no "Gum refused"; the spike wall's three PlayAnimationAndWait calls from TrapSwingingWall.fireTrap reported at the
+  boundary and relayed (seq 1 to 3); c2 played each relayed pillar turn once (Trigger01, trigger02, Trigger03); no E_SCRIPTCALL_
+  through x-bleak-scripts (its other refusals listed to thuum-cf: a new E_TRAP_NO_REF four on 4f749, E_WORDWALL_REACH from 8,000
+  units). Canon had moved to dd280139 (the flip) before this stage. The lab is idle.
