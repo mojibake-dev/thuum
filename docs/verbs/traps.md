@@ -770,7 +770,7 @@ rung 2's seam; the pieces and their rungs:
   triggers (levers, pull chains, the puzzle lever) and their targets still go through the host and its relay. Phase 2: a
   player-only trigger's pair is reported from the seat whose player tripped it (the server's not-the-host exception for a trigger
   whose VMAD sets playerOnlyTrigger, from a reporter with the cell loaded).
-HYPOTHESIS until the slice's probes read them: H-T2 (an unblocked plate on a non-hosting seat fires its children there), H-PO1
+HYPOTHESIS until the slice's probes read them: H-T2 (an unblocked plate on a non-hosting seat fires its children there; CONFIRMED by run, x-trap-family-fire 20261105-135134 on 46b95609: the guest's plate fired for the host's figure and each seat fired the wall itself, nothing reported or relayed, the pull chain's blades still through the host), H-PO1
 (Object::GetProperty reads playerOnlyTrigger), H-AW (a neutral argument written into the native's frame is what its body reads),
 H-KF (a Keyframed follower rock hurts its own seat's player), H-DS1 and H-DF1 (the destroyed flag's timing beside the stage
 event), H-DS4 (the engine's own stage explosion plays when a served record is applied), H-EX (an explosion's damage goes through
@@ -790,4 +790,19 @@ game-file position, E_PROP_FAR, UNMEASURED; a per-row distance allowance at the 
 per-sample floor); the record only rises, so an engine cell reset never re-arms a trap; the relay goes to the reference's grid
 listeners, so a seat with a large interior loaded past that 3x3 hears a record at its next subscribe and may fire its own copy
 meanwhile; the served line logs at info on every subscribe.
+
+Window 1 (06:20 PST 2026-11-05 (14:20Z 11-05); numidium's stage on fork m4-scripts-2b-traps 46b95609, the lever on): six of seven green, b-puzzle-relay v4
+134221, x-trap-spots 134713, x-trap-family-fire 135134, x-trap-boulders-claim 140118 (the seat that trips the wire claims the
+rocks), x-bleak-scripts v3.1 140410, x-puzzle-handoff-late-flip v1.3 141042. RED, a premise: x-trap-lamp-trigger 135717, neither
+lamp set off. The lamp 0x9b0fb is ACTI 0x90efc TrapFallingOilLamp01, its base's TrapFallingOilLampColLayer falling on OnActivate,
+OnHit or OnMagicEffectApply in its waiting state (switchToFalling: DamageObject 10, DisableLinkChain), destructible with 100 health
+and two stages; yet on c1, the Temple's host, the driver's Activate returned false, no activate event fired (no "engine's own
+activation" line), the script's DamageObject census read 0, and the driver's Spell.Cast at 0x9b0e2 reached nothing either.
+Dynamic plan (rule 8; the read before any lamp claim): a probe of the lamp's trigger alone on the host, recording (1) whether
+0x9b0fb is in the host's loaded refs at the press (refs-near with ids), (2) the platform's SendEvent gate for the lamp's handle
+around the press (the gate's blank tally, or a Frida trace on the event dispatch filtered to the lamp's VM handle: OnActivate
+reaching the script or blanked), (3) Activate's return beside the reference's activation-blocked state, and (4) a hit by another
+route (a melee strike, or a hand cast aimed once the driver can turn the camera onto a reference); expected: OnActivate reaching
+the script on the host moves the lamp to Triggered and its DamageObject runs. D-T1 (the lamp's family) is Eli's and does not
+change the host's case.
 

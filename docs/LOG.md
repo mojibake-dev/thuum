@@ -8922,3 +8922,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   gave no engine activation line, no trap result and nothing at the server, and c1's Firebolt at 0x9b0e2 never reached the server
   (no OnSpellCast line of either shape); neither lamp is among the nine traps both seats logged "never blocked here (D-S3)". With
   thuum-cf; b-bleak-traps and b-object-anim stay out until Eli's D-T2. The lab is idle on 46b95609's lay.
+- 06:20 PST 2026-11-05 (14:20Z 11-05) (thuum-cf, from numidium's stage): D-S3's window 1 on fork m4-scripts-2b-traps 46b95609, the lever on, six of seven
+  green: b-puzzle-relay v4 134221, x-trap-spots 134713, x-trap-family-fire 135134 (H-T2 CONFIRMED: the guest's plate fires for the
+  host's figure, each seat fires the wall itself, nothing reported or relayed, the pull chain's blades still through the host),
+  x-trap-boulders-claim 140118 (the seat that trips the wire claims the rocks), x-bleak-scripts v3.1 140410 (the trap-slice
+  version), x-puzzle-handoff-late-flip v1.3 141042. Red on a premise: x-trap-lamp-trigger 135717 (neither lamp set off: the
+  driver's Activate on the host returned false with no activate event, its Spell.Cast reached nothing); the lamp trigger's
+  Dynamic plan is in docs/verbs/traps.md. Next: window 2's probes cut from these reads.
