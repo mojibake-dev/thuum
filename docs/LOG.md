@@ -9117,3 +9117,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   tonight; canon fast-forwards 9745d401 to 0f2f3c55. b-bleak-traps v3 (2bcc3635) and b-object-anim v5 (7da2a9e7) committed on
   Eli's OK (23:2xZ); docs/engine/scripts.md S7 to S11 (d30a2984); x-trap-wall-both v1.2 GREEN 56 of 56 (224256), Eli's D-T2
   outcome both ways. Declared for 47 in docs/verbs/traps.md's last paragraph.
+- 15:33 PST 2026-11-05 (23:33Z 11-05) (numidium, thuum-cf's slot): fork m4-scripts-2b-traps 746aff6c (64e36af8, the wire follower
+  firing its own copy, with its review's notes) staged by verb-stage, dist eaa3b26797405055, the server pinned to
+  m4-scripts-2b-traps-746aff6c (image a389961b5d65). The first try stopped at verb-stage's step 1b on GitHub's Formatting check,
+  whose "SP Types (FunctionsDump): skyrimPlatform.ts is stale" fails on an unchanged tree: the same sha 9745d401 passed it on
+  m4-scripts-2-seam and failed it on canon. A rerun of the failed job went green. Green: x-trap-wire-follower v1.1 230626 (the
+  merge's last gate), x-trap-oilpool-guest 231701, b-trap-record-restart 232113, x-trap-family-fire 232535. Red: x-trap-rock-hang
+  v1.1 231108, as an answer (b6d4d hung at z 8843, its trace for thuum-cf), and x-trap-boulders-rest 231500, a 746aff6c
+  regression. Rock b6d4d hung at spawn height on its owner c2 but fell on c1 and in the record. The server granted c2's claim,
+  then 4.3 s later refused c2's moves (E_PROP_NOT_OWNER, another seat simulates it): c1, no longer following, let its own copy's
+  rock script run, so two seats simulated one rock and the players saw different things. So 746aff6c waits for a follow-window fix
+  after playtest 47, and Eli confirmed tonight's merge as m4-scripts-2c-traps at 0f2f3c55 (D-T1, D-T4 B and the Adept pin, the
+  ece35376 code staged and read before).
