@@ -1067,6 +1067,32 @@ function sceneOf(ref: ObjectReference): number | null {
   }
 }
 
+// node-rotation's deferred read (thuum docs/verbs/traps.md "The pillar's side"): the fork's Skyrim Platform reads a
+// loaded reference's named nodes on the game thread when pollNodeRotation(id, names) asks, and nodeRotation(id) answers
+// the last read as [{node, has, world: [x, y, z], local: [x, y, z]}] (Euler XYZ radians, NiMatrix3::ToEulerAnglesXYZ;
+// fork e80fb0c8, PuppetApi.h), the read NetImmerse's out-array natives cannot give (x-puzzle-guest-view 20261104-220217).
+// Reached through the module object as faceOf's getters are, and in their timing: the answer is the previous poll's,
+// and the step polls anew, so a single read is two steps; on a build without the getters it says so and calls nothing.
+function nodeRotationOf(formId: number, nodes: string[]): Record<string, unknown> {
+  const api = skyrimPlatform as unknown as Record<string, unknown>;
+  const read = api["nodeRotation"];
+  const poll = api["pollNodeRotation"];
+  if (typeof read !== "function" || typeof poll !== "function") return { available: false };
+  let last: unknown = null;
+  try {
+    last = (read as (id: number) => unknown)(formId);
+  } catch (e) {
+    last = null;
+  }
+  try {
+    (poll as (id: number, names: string[]) => void)(formId, nodes);
+  } catch (e) {
+    return { available: true, read: Array.isArray(last), nodes: Array.isArray(last) ? last : [], pollError: String(e) };
+  }
+  if (!Array.isArray(last)) return { available: true, read: false, nodes: [] };
+  return { available: true, read: true, nodes: last };
+}
+
 // face-keyframes's read (playtest 37's face probe, 2026-10-28): the fork's Skyrim Platform reads an actor's three
 // FaceGen keyframe sets (BSFaceGenAnimationData's expression, modifier and phoneme, CommonLib
 // RE/B/BSFaceGenAnimationData.h:39-42) on the game thread when pollFaceKeyframes(id) asks, and faceKeyframes(id)
@@ -2123,6 +2149,9 @@ function run(step: Step, player: Actor): unknown {
       // A {formId} that is no actor reads any loaded reference the same way
       // (an activator's animated node: a puzzle pillar's turn as each seat's
       // own engine shows it, playtest 45's item 5), its AI bit null.
+      // `deferred` is the platform's own read of the same nodes (nodeRotationOf
+      // above: the previous poll's answer, then a poll anew), which lab-api's
+      // c.node_rotation(id, node[, label]) claims on; {label} names the read.
       const id = num(a.formId);
       const target: ObjectReference | null =
         a.player === true ? player : namedNpc(a) ?? (id ? ObjectReference.from(Game.getFormEx(id)) : null);
@@ -2163,6 +2192,7 @@ function run(step: Step, player: Actor): unknown {
         toward,
         towardHas: NetImmerse.hasNode(target, toward, false),
         nodes: read,
+        deferred: nodeRotationOf(target.getFormID(), nodes),
       };
     }
     case "head-parts": {

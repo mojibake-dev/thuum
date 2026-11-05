@@ -83,6 +83,7 @@ class StepBoard:
         # node-scale answers: "self" (the player's) and "other" ({other: true},
         # every actor nearby under "all")
         self._node_scales: dict[str, dict[str, Any]] = {}
+        self._node_rotations: dict[str, dict[tuple[int, str], dict[str, Any]]] = {}
         # av-read answers, "self" and "other", the same way
         self._av_reads: dict[str, dict[str, Any]] = {}
         # racemenu-save answers by the name saved: {bytes, sha256, saved}
@@ -171,6 +172,16 @@ class StepBoard:
         if step.action == "node-scale" and isinstance(body.get("data"), dict):
             kind = "other" if (step.args or {}).get("other") else "self"
             self._node_scales.setdefault(step.client, {})[kind] = body["data"]
+        if step.action == "node-rotation" and isinstance(body.get("data"), dict) and "error" not in body["data"]:
+            # a reference's named nodes as that seat's engine holds them (c.node_rotation(id, node[, label]); thuum
+            # docs/verbs/traps.md "The pillar's side"), kept by the form id read and the step's {label}, so a probe
+            # reads one pillar before and after a turn on both seats
+            try:
+                key = (int(body["data"].get("formId") or 0), str((step.args or {}).get("label") or ""))
+            except (TypeError, ValueError):
+                key = (0, "")
+            if key[0]:
+                self._node_rotations.setdefault(step.client, {})[key] = body["data"]
         if step.action == "av-read" and isinstance(body.get("data"), dict):
             # actor values read on the player ("self") or the nearest other
             # actor ("other", with every actor nearby): thuum docs/verbs/
@@ -300,6 +311,9 @@ class StepBoard:
     def node_scales(self, observer: str) -> dict[str, Any] | None:
         return self._node_scales.get(observer)
 
+    def node_rotations(self, observer: str) -> dict[tuple[int, str], dict[str, Any]] | None:
+        return self._node_rotations.get(observer)
+
     def av_reads(self, observer: str) -> dict[str, Any] | None:
         return self._av_reads.get(observer)
 
@@ -331,6 +345,7 @@ class StepBoard:
         self._skills.clear()
         self._weather.clear()
         self._node_scales.clear()
+        self._node_rotations.clear()
         self._av_reads.clear()
         self._presets.clear()
         self._consoles.clear()

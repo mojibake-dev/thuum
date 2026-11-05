@@ -70,6 +70,14 @@ the lab can grep (E_ASSERT_*).
   <client>.figure_spells().count | .extra | .base    that client's figure of the other player at its last figure-spells
                                                      step: its added spells, those it holds in no hand or power slot,
                                                      and its base's form id (ADR-046)
+  <client>.node_rotation(<id>, "<node>").has | .angle_to(<rotation>)
+                                                     a named node of a loaded reference as that seat's engine
+                                                     holds it, from its last node-rotation {formId, nodes} step's
+                                                     deferred read (the platform's pollNodeRotation, the previous
+                                                     poll's answer: a read is two steps); angle_to is the degrees
+                                                     between two world rotations, another seat's or a {label}
+                                                     read's, whatever Euler triple each came as
+  <client>.node_rotation(<id>, "<node>", "<label>")  the same from its node-rotation {label: "<label>"} step
   <client>.node_scale()                              the engine's scale of the node its last node-scale
                                                      step read on its own player
   <client>.morph() | .morph_of(<client>)             a body morph its node-scale {morph} step read, the
@@ -174,6 +182,7 @@ class ViewsFacade(Protocol):
     def skills(self, observer: str) -> dict[str, Any] | None: ...
     def weather(self, observer: str) -> dict[str, Any] | None: ...
     def node_scales(self, observer: str) -> dict[str, Any] | None: ...
+    def node_rotations(self, observer: str) -> dict[tuple[int, str], dict[str, Any]] | None: ...
     def av_reads(self, observer: str) -> dict[str, Any] | None: ...
     def presets(self, observer: str) -> dict[str, Any] | None: ...
     def consoles(self, observer: str) -> dict[str, Any] | None: ...
@@ -841,6 +850,40 @@ class RefView:
     # server's ms clock when it was recorded (0 without one); None from a server without the property
     changeFormFnv: int | None = None
     changeFormAt: int | None = None
+
+
+def _euler_xyz(a: tuple[float, float, float]) -> list[list[float]]:
+    """The rotation matrix an Euler triple stands for, as CommonLib's NiMatrix3::SetEulerAnglesXYZ builds it
+    (CommonLibSSE-NG src/RE/N/NiMatrix3.cpp:90), the inverse of the ToEulerAnglesXYZ the platform's read uses."""
+    sx, sy, sz = (math.sin(v) for v in a)
+    cx, cy, cz = (math.cos(v) for v in a)
+    return [[cy * cz, cy * sz, -sy],
+            [sx * sy * cz - cx * sz, sx * sy * sz + cx * cz, sx * cy],
+            [cx * sy * cz + sx * sz, cx * sy * sz - sx * cz, cx * cy]]
+
+
+@dataclass(frozen=True)
+class NodeRotationView:
+    """c.node_rotation(id, node[, label]): a named node of a loaded reference as that seat's engine held it at its last
+    node-rotation step's deferred read (the fork's sp.pollNodeRotation, e80fb0c8): whether the reference's 3D has the
+    node, and its world rotation as an Euler triple (radians, ToEulerAnglesXYZ)."""
+
+    client: str
+    formId: int
+    node: str
+    has: bool
+    world: tuple[float, float, float] | None
+
+    def angle_to(self, other: "NodeRotationView") -> float:
+        """The angle in degrees of the rotation between this world rotation and another, from the trace of R1^T R2
+        (tr = 1 + 2 cos angle): two seats' Euler triples for one pose can differ by a wrap or a gimbal branch, the
+        angle between the rotations cannot."""
+        for v in (self, other):
+            if not v.has or v.world is None:
+                raise AssertionData(f"{v.client}'s read of {v.formId:#x} has no node {v.node!r}")
+        r1, r2 = _euler_xyz(self.world), _euler_xyz(other.world)
+        tr = sum(r1[i][j] * r2[i][j] for i in range(3) for j in range(3))
+        return math.degrees(math.acos(max(-1.0, min(1.0, (tr - 1.0) / 2.0))))
 
 
 @dataclass(frozen=True)
@@ -1708,6 +1751,32 @@ class _ClientRef:
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s projectile {int(ref_id):#x} lacks {e}") from e
 
+    def node_rotation(self, form_id: int, node: str, label: str = "") -> NodeRotationView:
+        """The seat's last node-rotation step for that reference (`node-rotation {formId, nodes[, label]}`): its
+        deferred read's row for the node. A platform without the read, or a first step (whose answer is the poll
+        before it, none), is a data error, never a pass."""
+        fn = getattr(self._views, "node_rotations", None)
+        reads = fn(self.name) if fn else None
+        data = (reads or {}).get((int(form_id), str(label)))
+        step = f"node-rotation {{formId: {int(form_id):#x}" + (f", label: {label!r}" if label else "") + "}"
+        if not isinstance(data, dict):
+            raise AssertionData(f"{self.name} has not reported a {step} step")
+        deferred = data.get("deferred")
+        if not isinstance(deferred, dict) or not deferred.get("available"):
+            raise AssertionData(f"{self.name}'s platform has no pollNodeRotation (a dist before fork e80fb0c8)")
+        if not deferred.get("read"):
+            raise AssertionData(f"{self.name}'s {step} answered no poll yet: the read is the previous poll's, two steps")
+        row = next((r for r in deferred.get("nodes") or [] if isinstance(r, dict) and r.get("node") == node), None)
+        if row is None:
+            raise AssertionData(f"{self.name}'s {step} did not poll the node {node!r}")
+        world = row.get("world")
+        has = bool(row.get("has"))
+        try:
+            w = (float(world[0]), float(world[1]), float(world[2])) if has else None
+        except (TypeError, IndexError, ValueError) as e:
+            raise AssertionData(f"{self.name}'s {step} row for {node!r} lacks a world rotation ({e})") from e
+        return NodeRotationView(self.name, int(form_id), node, has, w)
+
     def npc_state(self, form_id: int) -> NpcStateView:
         """The seat's last npc-state step for that NPC (`npc-state {formId}`)."""
         fn = getattr(self._views, "npc_state", None)
@@ -2005,6 +2074,7 @@ class _ClientRef:
 
 _ATTRS = {
     _ParityRef: {"findings", "ok", "report"},
+    NodeRotationView: {"has"},
     ActorView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage",
                 "hasAppearance", "raceId", "sex",
                 "appearanceAttempts", "lastAppearanceRaceId", "lastAppearanceAllowed", "headParts",
@@ -2057,6 +2127,14 @@ _FORM_SPEC_METHODS = {
     _ServerRef: {"spell", "host", "ref", "follow", "fate", "inventory"},  # inventory: a client name or a ref
     _ClientRef: {"inventory"},  # a ref: the container as that seat's own game holds it
 }
+# Methods that take a form id and a string, then optionally a second: c2.node_rotation(0xaa8cb, "Pillar01", "before")
+_ID_STRING_METHODS = {
+    _ClientRef: {"node_rotation"},
+}
+# Methods that take another view of their own kind: c1.node_rotation(id, n).angle_to(c2.node_rotation(id, n))
+_VIEW_METHODS = {
+    NodeRotationView: {"angle_to"},
+}
 # Methods that take a client's own watch and a string: c2.watched(c1).flights_match(c1.watched_self(), "angle")
 _PAIR_METHODS = {
     WatchView: {"flights_match"},
@@ -2074,7 +2152,8 @@ _NULLARY = {
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref", "follow", "fate", "log_count", "stream"},
-    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "inventory", "globalValue", "projectile", "poison", "skill", "level", "weather", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near"},
+    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "inventory", "globalValue", "projectile", "poison", "skill", "level", "weather", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near", "node_rotation"},
+    NodeRotationView: {"angle_to"},
     InventoryView: {"count"},
     RefsNearView: {"count", "has", "distance", "runtime_of", "pos", "disabled"},
     EffectsView: {"left", "magnitude"},
@@ -2216,6 +2295,14 @@ class Evaluator:
                         args.append(a.id)  # a client name is passed as its name
                     else:
                         args.append(self._eval(a))
+                if node.func.attr in _ID_STRING_METHODS.get(type(obj), set()):
+                    if not 2 <= len(args) <= 3 or isinstance(args[0], bool) or not isinstance(args[0], int) or not all(isinstance(a, str) for a in args[1:]):
+                        raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes a form id, a node name and, optionally, a label")
+                    return self._read(node, getattr(obj, node.func.attr)(*args))
+                if node.func.attr in _VIEW_METHODS.get(type(obj), set()):
+                    if len(args) != 1 or type(args[0]) is not type(obj):
+                        raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes another {type(obj).__name__}")
+                    return self._read(node, getattr(obj, node.func.attr)(args[0]))
                 if node.func.attr in _PAIR_METHODS.get(type(obj), set()):
                     if len(args) != 2 or not isinstance(args[0], SelfWatchView) or not isinstance(args[1], str):
                         raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes a client's watched_self() and a string")

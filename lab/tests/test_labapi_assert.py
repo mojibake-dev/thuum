@@ -1324,6 +1324,67 @@ class HeadPartTests(unittest.TestCase):
             ev.evaluate('c2.head_parts() == ""')
 
 
+class NodeRotationViews(NearViews):
+    """Each seat's node-rotation reads of one puzzle pillar (0xaa8cb), as the driver answers with the platform's
+    deferred read: c1 at a 120-degree turn about z, c2 at the same pose written as another Euler triple, and c2's
+    {label: before} read at rest; c2's first step on another pillar answered no poll yet."""
+
+    def __init__(self):
+        super().__init__()
+        import math
+        turn = 2 * math.pi / 3
+
+        def read(world, has=True, available=True, answered=True):
+            return {"formId": 0xAA8CB, "deferred": {"available": available, "read": answered,
+                                                     "nodes": [{"node": "Pillar01", "has": has, "world": world, "local": world}]}}
+
+        # the same rotation: x and y turned half a circle each, z by turn - pi (SetEulerAnglesXYZ's identity at pi, pi, pi)
+        self.reads = {
+            "c1": {(0xAA8CB, ""): read([0.0, 0.0, turn])},
+            "c2": {(0xAA8CB, ""): read([math.pi, math.pi, turn + math.pi]), (0xAA8CB, "before"): read([0.0, 0.0, 0.0]),
+                   (0xAA8CC, ""): read([0.0, 0.0, 0.0], answered=False)},
+        }
+
+    def node_rotations(self, observer):
+        return self.reads.get(observer)
+
+
+@needs_deps
+class NodeRotationTests(unittest.TestCase):
+    def test_two_seats_poses_compare_by_the_angle_between_them(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(RichServer(), NodeRotationViews(), ["c1", "c2"])
+        # one pose in two Euler triples is no angle apart; the turn is 120 degrees from c2's own read before it
+        self.assertTrue(ev.evaluate('c1.node_rotation(0xaa8cb, "Pillar01").angle_to(c2.node_rotation(0xaa8cb, "Pillar01")) < 0.01'))
+        self.assertTrue(ev.evaluate('abs(c2.node_rotation(0xaa8cb, "Pillar01").angle_to(c2.node_rotation(0xaa8cb, "Pillar01", "before")) - 120) < 0.01'))
+        self.assertTrue(ev.evaluate('c1.node_rotation(0xaa8cb, "Pillar01").has == true'))
+
+    def test_a_missing_or_unanswered_read_is_a_data_error(self):
+        from labapi.assertions import AssertionData, Evaluator
+        views = NodeRotationViews()
+        views.reads["c1"][(0xAA8CB, "late")] = {"formId": 0xAA8CB, "deferred": {"available": False}}
+        views.reads["c1"][(0xAA8CB, "gone")] = {"formId": 0xAA8CB, "deferred": {"available": True, "read": True,
+                                                                               "nodes": [{"node": "Pillar01", "has": False, "world": [0, 0, 0]}]}}
+        ev = Evaluator(RichServer(), views, ["c1", "c2"])
+        for expr in ('c2.node_rotation(0xaa8cc, "Pillar01").has',               # the first step's answer is no poll
+                     'c1.node_rotation(0xaa8cb, "Pillar01", "late").has',       # a platform without pollNodeRotation
+                     'c1.node_rotation(0xaa8cb, "Pillar02").has',               # a node the step never polled
+                     'c1.node_rotation(0x123, "Pillar01").has',                 # no step for that reference
+                     'c1.node_rotation(0xaa8cb, "Pillar01", "gone").angle_to(c1.node_rotation(0xaa8cb, "Pillar01")) < 1'):
+            with self.assertRaises(AssertionData, msg=expr):
+                ev.evaluate(expr)
+        self.assertTrue(ev.evaluate('c1.node_rotation(0xaa8cb, "Pillar01", "gone").has == false'))
+
+    def test_its_call_shapes_are_checked(self):
+        from labapi.assertions import AssertionSyntax, Evaluator
+        ev = Evaluator(RichServer(), NodeRotationViews(), ["c1", "c2"])
+        for expr in ('c1.node_rotation(0xaa8cb).has', 'c1.node_rotation("Pillar01", 0xaa8cb).has',
+                     'c1.node_rotation(0xaa8cb, "Pillar01").angle_to(5) < 1',
+                     'c1.node_rotation(0xaa8cb, "Pillar01").world == 0'):
+            with self.assertRaises(AssertionSyntax, msg=expr):
+                ev.evaluate(expr)
+
+
 @needs_deps
 class NodeScaleTests(unittest.TestCase):
     def test_own_and_figure_scales_read_the_last_node_scale_steps(self):
