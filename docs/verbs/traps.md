@@ -942,3 +942,17 @@ multipliers read 1.0; c2's walk (leg A) left c2 at 247.024 of 300 on its own eng
 hit row bare and c1's copy " (skipped)"; c1's walk (leg B) the mirror, 246.775 of 300; neither seat's " (not hosted)" row.
 A trap hurts exactly the player its own screen showed it hitting. The fix merges with the slice only on Eli's D-T4.
 
+The dodge (10:09 PST 2026-11-05 (18:09Z 11-05); numidium's run of x-trap-dodge v2.1, 20261105-175906, on the pinned D-T4 lay bd0c8cf8; recorded under
+ADR-064 amendment B, so MECHANISM ONLY until a claimed scenario or Eli's eyes): a guest outruns the spike wall its own engine
+swings and is hurt nowhere. c2's six multipliers read 1 before each leg (a hit would have cost about 60). Leg 1, a run (W 4000
+ms, 86 to 90 units per 250 ms, about 350 units a second; the plate crossed near 2.0 s, the run ended at y -4616): c2's watched
+health 300 throughout with no StaggerPlayer, its record 1.0, its own ProcessTrapHit row 0 after two census windows, while both
+seats' "fired here" lines rose (c2's own plate fired the wall) and c1's " (skipped)" row stayed 0 (c1's copy never reached the
+figure). Leg 2, a sprint (W, then Left Alt in the next step: SprintStart at 509 ms, stamina falling, about 510 units a second,
+ended at y -4520): the same, health 300 and 1.0, no row on either seat. With x-trap-hit v3.1, Eli's rule reads on two seats: a
+trap's hit counts on the seat whose screen showed it, and a dodge on a player's own screen costs nothing anywhere. A claimed
+scenario would take its end bounds from this run (the run ended past v2.1's estimate).
+D-S3 stands read on every point: the firing (H-T2), the hit's owner (D-S2 B), the single-use record (DestructionStage, its
+restart scenario), the trap bodies (the rocks' claim and rest), the relay's split, the spent trap's blank, the lamp by hand, the
+dodge. Left before it merges whole: Eli's D-T1, D-T2 (its scenario rewrites follow the word) and D-T4 (the fix staged green).
+
