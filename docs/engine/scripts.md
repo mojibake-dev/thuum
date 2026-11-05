@@ -1,0 +1,29 @@
+# A world object's script and its animations across seats: the engine model (ADR-068)
+
+Written 21:4x PST 2026-11-04 (05:4xZ 11-05, thuum-cf) under ADR-064's amendment C: the facts the pillar runs of 2026-11-05 taught,
+written down before the next probes rely on them (x-puzzle-handoff v5, x-puzzle-handoff-late v1 and their flip twins). The design
+they feed is ADR-068 (docs/DECISIONS.md) and docs/research/scripts-one-system-2026-11-05.md; the verb docs that cite these rows are
+docs/verbs/traps.md (the pillars, the linked activations) and docs/verbs/papyrus-events.md (the gate).
+
+The reading rule is non-owning-seat.md's: a code read or a decompiler read is a hypothesis with a source, a run id confirms. File
+and line references are the fork's skyrim-platform/src/platform_se/skyrim_platform (SP) and skymp5-client/src/services/services
+(client) at m3-canon-4-whale 80c07073.
+
+## The rows
+
+| Row | Claim | State | Evidence |
+| --- | --- | --- | --- |
+| S1 | The platform's hook filters are case-exact while the engine's animation events are case-blind: Handler::Matches compares a StartsWith or EndsWith pattern with memcmp and an Exact one with `==` (SP Handler.cpp:20-42), and the pillar script calls PlayAnimationAndWait("trigger02", "Turned02") in lower case, so the pattern 'Trigger*' never matched the whale turn and no seat reported it | the call's spelling and the miss CONFIRMED by run; where the lower case comes from HYPOTHESIS (the string pool keeps the first spelling it interned) | x-native-frame 20261105-033116 (args[0] "trigger02" on the native's own frame); with fork c4775a85's case-blind pillar patterns, x-puzzle-guest-view v3 20261105-041238 and the server's first "aa8cb animates aa8cb 'trigger02'" at 04:17:28Z |
+| S2 | A relayed activation runs the receiving seat's own world script: the client applies it with a non-latent Activate (client relayedActivationService.ts:45), which callNative runs under the platform's process-wide Override (SP CallNativeApi.cpp:151), and the Papyrus gate returns before its cell-host test under Override (SP FridaHooks.cpp:231-235), so a guest's pillar script hears OnActivate and turns its own graph | CONFIRMED by run | x-puzzle-handoff v3 20261105-041840 and 044707: c1 ran c2's press as a guest, its re-sync at the grant read "the script's side 2, the record Trigger01 (side 2), 0 turn(s) fed", and the relayed animation 50 ms later read "Trigger01 played (relayed, refused)"; v4 20261105-045605 green on this premise |
+| S3 | A TypeScript play (ObjectReference.playAnimation through callNative) reaches none of the platform's animation hooks, which return under Override (SP FridaHooks.cpp:476-480 for SendAnimationEvent, :540-544 for PlayAnimation): a relayed or replayed play moves a seat's graph and never its script, and a self-played mark is never consumed | CONFIRMED by run | five runs of 11-05 with 45 pillar plays and no "dropped as self-played" line: b-puzzle-relay 20261105-040105 and 043113 (10 plays each on c2), x-puzzle-guest-view v3 041238 and 044145 (8 each on c2), x-puzzle-handoff v4 045605 (6 on c1, 3 on c2) |
+| S4 | On the flip (ADR-062, fork m4-scripts-1-flip) a player's own press on a lifted activator in a cell its seat hosts is the engine's alone: the client logs "the engine's own activation of <id> in a hosted cell" and sends no Activate (client activationService.ts on the flip), so no other seat receives a relayed activation for it and S2 cannot arise from a host's own press | HYPOTHESIS (a code read) until b-puzzle-relay v4 or x-puzzle-handoff-flip v1 reads it | b-puzzle-relay v4's leg B claims (thuum 06c30a57) |
+
+## What a design relies on
+
+- S1: every pattern a seat registers for a script's event matches without case, and a claim on a script's event names both
+  spellings (lab-api's patterns are case-exact Python `re`).
+- S2 and S3 together: before ADR-068's rung 2 a guest renders a host's scripted object by two paths at once, its own script run
+  by the relayed activation and the host's relayed animation played by TypeScript; the first moves the guest's script, the second
+  only its graph. A seat that inherits a cell therefore holds a script whose side depends on which relays it received as a guest
+  (the pillar re-sync's two branches). Rung 2 closes S2 (the gate tells the platform's own apply apart from a script's event), and
+  rung 3's record replaces the re-sync.
