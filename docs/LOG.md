@@ -8880,3 +8880,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   after the stage: 4ed8c0ab (the Hall of Stories door FX by its record, the per-sender budget before any lookup with the failed
   attach list deduplicated, an exterior placement's case; Rust 516 tests, fork-lint clean; its first compile in CI), canon
   staying at 9745d401 until it is read. Open with Eli: D-T1 to D-T3 for D-S3 (docs/research/trap-slice-d-s3-2026-11-05.md).
+- 04:16 PST 2026-11-05 (12:16Z 11-05) (thuum-cf): D-S3, traps follow the interaction, BUILT on fork m4-scripts-2b-traps 46b95609 (pipeline 5445 all green:
+  Windows client 19165, server 19164, T0 612 cases; Rust 535; tsc, clippy and fork-lint clean). Three layers built in parallel
+  on one base (3edb908c the three table rows, 1c204f92 the platform exports declared), merged 9ff1895e (pipeline 5442 green, the
+  blind-written platform C++ compiling under MSVC on its first push), then the two fresh reviews' notes: the apply blank lifted
+  one update after the last DamageObject, both spellings of the stage event hooked, a falling rock never re-placed by its own
+  create word (4ca17866); a destruction record only for a trap or destructible world body (E_DESTRUCTION_KIND), a trap body's
+  sample tethered to 2048 units of its game-file position (E_PROP_FAR), the per-sample floor replaced by a distance allowance at
+  the speed cap, and no load before a refusal (0b2a0a51 to 46b95609). Docs: WIRE.md's DestructionStage (MsgType 78, wire id 86,
+  SCHEMA 37), traps.md's D-S3 section and declared limits, NATIVES.md's three rows, STATE.md's kFlags note, prop-physics.md's
+  allowance and tether. The lever: scriptNonOwnerSkip nonLatent now ships in the client settings template every stage lays
+  (18eaf29e), since D-S3's hit rule needs it in play. The probes' review was FIX FIRST under ADR-064 amendment B (each of
+  x-trap-dodge, x-trap-lamp and x-trap-boulders asked four or five questions on unread premises), so they are being rewritten
+  into windows of one question each, window 1 the premises (x-trap-spots, x-trap-family-fire, x-trap-lamp-trigger,
+  x-trap-boulders-claim) with x-bleak-scripts v3 (d4779e40, rewritten: the wall a trap every seat fires itself). b-bleak-traps
+  and b-object-anim stay out of the slice's stage until Eli's D-T2.
