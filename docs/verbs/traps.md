@@ -993,3 +993,33 @@ own player once (D-S3 point 2), the record carrying the drop to the other game; 
 x-trap-wall-both reads it before b-bleak-traps v3 and b-object-anim v5 (drafted, uncommitted) claim it. D-T5: one difficulty
 for every hit (C, the server's, after 47); Adept meanwhile, the client's default pin since fork bddd4ff9 (local; it pushes when
 the stage of ece35376 ends).
+
+D-T1 and D-T4's stage (13:41 PST 2026-11-05 (21:41Z 11-05) reading; numidium's stage of fork m4-scripts-2b-traps ece35376,
+server image 15955e54446e, dist bc4059998c092175, about 20:1xZ to 21:3xZ): eight of twelve GREEN, x-trap-oilpool-guest v1.1
+20261105-204840 (the guest's own Firebolt lit Temple pool 0x9b0e6 and the pool burned on both seats: Eli's "ignite pools" from a
+guest, CONFIRMED by run), x-trap-family-fire 210326, b-trap-record-restart 211229, and the floors b-duel 211731, b-shout 212032,
+b-shout-repeat 212404, b-shadowbond 212555, b-god 212826. The four reds, each read:
+- x-trap-lamp-guest v1.1 20261105-205402 stopped at its until on a premise the design never promised: the guest's report first.
+  Both copies fell. c2, the shooter, logged its own "trap result 9b0fb: stage 1, destroyed false reported" and then "from the
+  record: here already" twice (its own copy reached stage 2 by itself); c1 its own stage 1 and stage 2 reports. The host's copy,
+  hit by the guest's replayed bolt, reported first: the server's "ff000000 reports 9b0fb at stage 1, destroyed false: recorded
+  (the first report), relayed to 1 game(s)" at 20:55:51.691, then "ff000001 reports 9b0fb at stage 1 ...: the record stands
+  (stage 1, destroyed false); dropped" at .708, then ff000000's stage 2, destroyed true, recorded. So a guest's shot drops the lamp
+  in both games, recorded once, and the first report races between the seats at stage 1 too (Lamport 1978, CACM 21(7): no order
+  between two unsynchronized clocks without a message between them). MECHANISM ONLY, recorded; no rerun owed for the slice.
+- x-trap-hit-difficulty v1.1 20261105-205713: 26 of 27 held, and the one red answers its HYPOTHESIS: NO. Leg A (the pin's 5) lost
+  59.07 of 400 and leg B (c1 relaunched with "difficulty": 2) 59.02, with the six read at the engine's own table (VE 0.5, E 0.75, N
+  1, H 1.5, VH 2, L 3) in both. The pin writes iDifficulty:GamePlay alone, which never reaches the player's own field DamageActor
+  indexes (CommonLib PlayerCharacter.h:399, GetGameStatsData's difficulty at +0xB00, the static read's 26503), so upstream's pin
+  never pinned the damage and the seats play at their own difficulty, Adept. D-T4 B's mechanism held (the engine's table in force,
+  the wall's hit at Adept's 1.0); nothing above Adept was exercised, the floors included. Eli's D-T5 outcome stands on it: Adept
+  for testing (the lab's seats are), one difficulty for every hit in C, which writes that field from the server's value (fork
+  0f2f3c55 makes Adept the pin's default and says so).
+- x-trap-boulders-rest v1.1 20261105-210948: rock 0xb6d4d slept at its game-file height on the owner's own engine (z 8843.06 on
+  the server, 8842.76 on c1; c2's "stream b6d4[589abcd] asleep" 7 and c1's "followed no more" 7), the other six at rest at z
+  8621.6 to 8649.9: two of three firings now (153200, 210948; 154408 all seven fell). Unread, HYPOTHESIS: the owner's own calls
+  neutralized, the claim's ordering leaving the body Keyframed under the script's impulse, or vanilla. x-trap-rock-hang, a trace of
+  each rock's SetMotionType and ApplyHavokImpulse against its claim and grant on the tripping seat, reads it before the slice
+  merges.
+- b-push 20261105-213147: its old y flake (server.actor(c2).y -156.32 against < -650; 171416 the same), its health 0.9145 inside
+  its band.
