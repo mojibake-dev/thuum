@@ -4728,3 +4728,29 @@ seat can set off a single-use trap (an oil lamp shot, a tripwire walked into); t
 seat, the server records it once (the first report wins, so two shots cannot break a lamp twice), and every seat applies it, a
 late joiner and a restart included. The destruction record is rung 4's DestructionStage row; the boulders' trigger reaches their
 simulator with the trap-body slice (D-S2's addendum).
+
+D-S2's addendum amended, Eli 00:02 PST 2026-11-05 (08:02Z 11-05) ("yes", to moving the boulders to the seat that set them off): a trap body moved by physics
+is simulated by the seat whose firing moved it (ADR-058's toucher rule for props), not by the cell's host, and streamed to the
+others; its resting place is recorded.
+
+D-S3, traps follow the interaction. PROPOSED by thuum-cf 00:02 PST 2026-11-05 (08:02Z 11-05), from Eli's lean ("this honestly has me leaning towards traps
+just being a client calculated thing across the board"), his requirement on single-use traps above, and his word "yes so in that
+way traps almost function like npcs during conversations". The rule is ADR-052's conversation claim and ADR-058's toucher applied to
+traps, one rule and no trap list: whoever sets a trap off owns that firing.
+1. Every seat runs the trap family's scripts in any cell (the class chain of TrapBase, TrapTriggerBase and TrapHitBase, ADR-044's
+   chain shape, never a name), so each seat's engine fires a trap for what it sees, a figure on a plate included, and its own
+   player dodges what it sees.
+2. A trap's hit on a player is that player's own seat's: the hit event on the seat's own player passes the gate, its damage is the
+   player's own and is reported as its actor values; a seat's hit on another player's figure never counts.
+3. A single-use trap's result (a lamp destroyed, a tripwire spent, a one-shot trap sprung) is reported by the seat that caused it,
+   recorded once by the server (the first report wins), and applied on every seat, a late joiner and a restart included (rung
+   4's DestructionStage row and the trap's spent state).
+4. A trap body moved by physics follows the amended addendum: the firing seat simulates and streams it.
+5. The server stops relaying a linked activation of a trap-family target to seats that run the trap themselves (they fire it from
+   their own engines); the relay stays for every other target, the mechanisms a trap's lever opens among them (a portcullis's
+   open state is the cell host's).
+Open, for the build: two seats firing one single-use trap together (the first report wins and the other seat's local result
+yields to the record); a trap's explosion placed on every seat, each copy hurting only its own seat's player by 2; which
+lever scripts sit in the family. Placed after rung 2's stage as its own slice, before playtest 47, so 47 plays it; proven by a
+two-seat dodging probe (each seat hurt only by what it sees, neither by the other's view), a single-use lamp probe (a guest's
+shot breaks it on both seats once, and after a restart), and the boulders' stream probe from a guest's tripwire.
