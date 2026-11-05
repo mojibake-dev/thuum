@@ -8719,3 +8719,24 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   the lists stay (ADR-068's measured note). Rung 2: the client layer built (m4-scripts-2-client, four commits, tsc clean, merges
   clean with 73ed0c52); the wire and server and the platform layers in progress; native-frame.js and x-native-frame v1 (sha1
   34e8944b) written, for a pre-flip dist after Step 0.
+- 19:38 PST 2026-11-04 (03:38Z 11-05) (numidium): the lab side of Step 0 (thuum-cf's plan, ADR-068; every lay read back in turbo.log, its
+  bundle proven by its own log text and its hash on all four game folders, then snapshotted). (a) as thuum-cf's 565b5232 records.
+  The control on canon 7c79fc3e's own dist: b-bleak-traps v1 RED twice (20261105-020830, 021251) on the same single claim and the
+  same four `E_TRAP_NO_REF ... 38098 activating 380b3/380b5/380b4/380b9` (trigger 38098 is an ACTI defaultActivateSelfTRIG, the
+  four are the ambush draugr), so the red predates 83a40da3. x-bleak-traps-npcs (f6c8dacf, npcEnabled true) on 83a40da3: RED
+  (20261105-023048) at the same claim, the shape changed: E_TRAP_UNLINKED for 380b3, 380b5 and 380b9 (now recorded, their
+  activation parents not naming 38098), E_TRAP_NO_REF for 380b4 (never sighted); thuum-cf's diagnosis and fix are on rung 1.
+  x-native-frame v1 GREEN (20261105-023520), its rows empty by the script's sized read. (b) on d1f23444: b-puzzle-relay GREEN
+  (20261105-025103), b-object-anim GREEN (025608), b-bleak-traps v1 RED (030120, 030523) as the known red; x-puzzle-handoff v2 RED
+  (030957) on its premise, not the hand-off: c2 connected first and is ff000001 (its TGM reply's actorId), the ids following the
+  profiles' records, so the until on "ff000000 activates aa8cb" read 0 while the server logged "ff000001 activates aa8cb ...
+  relayed". (c) on bb559685: x-puzzle-guest-view v2 RED (20261105-032634) at leg A: on both seats Pillar01's local z read -120.8
+  degrees after the guest's own E (a full face) while its world z read as from a half turn, so angle_to on world gave 59.2; the
+  before reads agreed at 0.0. x-native-frame v2's script (a9d58c4d) GREEN (20261105-033116): three PlayAnimationAndWait calls on
+  aa8cb from defaultPuzzlePillarScript.RotatePillarToState, frame own and args agree, and the whale's event is a lowercase
+  "trigger02" (Trigger01, trigger02, Trigger03): HYPOTHESIS, the case the relay never matched. Also: aba0fa01 retires parity in
+  the lab tools (verb-merge fast-forwards canon). Two faults of mine on the way, both repaired: a kill of the first control's
+  process tree did nothing (zsh passed the pid list as one word) and the c1 rollback I ran next collided with its lay (c1 rolled
+  back again, the control rerun clean); and a sweep chain I had gated with `set -e` ran past a missing script and emptied the shared
+  justfile for about two minutes (restored from HEAD and hermaeus-mora's course hunk). `set -e` does nothing in the Bash tool's own
+  commands (they run on the left of an `&&`), so a chain is gated with `&&` or run under `bash -e`. The lab is free.
