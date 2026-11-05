@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # T2 on sky-srv (docs/LAB.md, CLAUDE.md `just test-proto`), M1 shape (ADR-019):
-#   1. the server build under test (SERVER_TAG, default the .env's or parity)
+#   1. the server build under test (SERVER_TAG, default the .env's; canon builds no image of its own)
 #      from the clean world, the fakeclient smoke against it, its effects
 #      checked through the lab gamemode's labState RPC;
 #   2. attributes across a restart (docs/verbs/attributes.md): profile 9's
@@ -49,11 +49,12 @@ rpc() { # rpc <name> <payload json>
 }
 
 env_tag=$(ssh_srv 'grep -E "^SERVER_TAG=" /srv/lab/.env 2>/dev/null | cut -d= -f2' || true)
-tag=${SERVER_TAG:-${env_tag:-parity}}
+tag=${SERVER_TAG:-$env_tag}
+[ -n "$tag" ] || { echo "== no SERVER_TAG and none in /srv/lab/.env: name the server build under test (parity is retired, canon builds no image)" >&2; exit 2; }
 legacy=${LEGACY_TAG:-parity-legacy}
 # The difftest artifact comes from the branch that built the tag: a tag with a
 # commit suffix (m1-hostility-9e68db37) names that branch and that commit; a
-# bare one (parity) the branch's latest. Looking the whole tag up as a branch
+# bare one the branch's latest. Looking the whole tag up as a branch
 # found nothing, and T2 skipped the diff (2026-10-04).
 ref=${DIFFTEST_REF:-$(printf '%s' "$tag" | sed -E 's/-[0-9a-f]{8}$//')}
 sha=$(printf '%s' "$tag" | sed -nE 's/.*-([0-9a-f]{8})$/\1/p')

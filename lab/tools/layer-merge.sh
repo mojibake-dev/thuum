@@ -23,7 +23,7 @@
 # RUNSET_AFTER), on the same staging, when a lab fault stopped the first one.
 # GATE_SET=<set id> LAYER_RUN=<run id> TRAIN=<fork branch> (ADR-042a): the layer was
 # staged and the train staged over it, one sweep proving the pair; the train's
-# `GATE_SET=<id> PROMOTE=0 just verb-merge <train>` goes first (parity must have it),
+# `GATE_SET=<id> PROMOTE=0 just verb-merge <train>` goes first (canon must have it),
 # then steps 1 and 2 are gate-cite.py --layer's eight checks over that set and the
 # layer stage's own green run (its smoke or a decider), and step 4 promotes the
 # pair's clean-m1-next.
@@ -43,9 +43,9 @@ if [ -n "${GATE_SET:-}" ]; then
   : "${TRAIN:?GATE_SET for a layer names TRAIN, the fork branch staged over it}"
   fork=${FORK_DIR:-skymp}
   echo "== 1-2. the stage and its sweep, cited (ADR-042a): $GATE_SET with $TRAIN over the layer's run $LAYER_RUN"
-  git -C "$fork" fetch -q origin "$TRAIN" parity
-  git -C "$fork" merge-base --is-ancestor "origin/$TRAIN" origin/parity \
-    || { echo "== parity does not have $TRAIN yet: its \`GATE_SET=$GATE_SET PROMOTE=0 just verb-merge $TRAIN\` goes first" >&2; exit 2; }
+  git -C "$fork" fetch -q origin "$TRAIN" canon
+  git -C "$fork" merge-base --is-ancestor "origin/$TRAIN" origin/canon \
+    || { echo "== canon does not have $TRAIN yet: its \`GATE_SET=$GATE_SET PROMOTE=0 just verb-merge $TRAIN\` goes first" >&2; exit 2; }
   FORK_DIR="$fork" python3 lab/tools/gate-cite.py --layer "$branch" "$LAYER_RUN" "$GATE_SET" "$TRAIN" | sed 's/^/ /' \
     || { echo "== the citation does not hold (above): nothing merged; layer-merge's own sweep (no GATE_SET) on a stage laid for it" >&2; exit 1; }
   setfile=$(mktemp -t layer-cite)

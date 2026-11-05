@@ -27,7 +27,7 @@ def main():
         rest = which[2:]
         variables = [a.split("=", 1) for a in rest if "=" in a]
         refs = [a for a in rest if "=" not in a]
-        ref = refs[0] if refs else {"thuum": "main", "skymp": "parity"}[name]
+        ref = refs[0] if refs else {"thuum": "main", "skymp": "canon"}[name]
         tok = token(name, "gitlab-thuum-api")
         form = [("ref", ref)]
         for k, v in variables:

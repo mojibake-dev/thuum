@@ -1,27 +1,27 @@
 #!/usr/bin/env bash
-# verb-merge.sh <fork branch> [scenario...]: a verb branch's merge to parity the
+# verb-merge.sh <fork branch> [scenario...]: a verb branch's merge to canon the
 # ADR-030 way, one shape for every verb (it replaces the per-merge chain scripts
 # that encoded this nine times with a new bug each). In order:
 #   1. the lab tree deployed (the gate's scenarios and lab/gate.yaml on sky-srv);
 #   2. the full T2 on the branch's server image (`just test-proto <branch>`;
 #      T2=skip when a T2 of this head is already recorded, or with
 #      T2_LOG=<log> when one runs beside the gate: step 3b waits for that log
-#      to end green before parity moves);
+#      to end green before canon moves);
 #   3. (R0=1: ADR-053's fast path instead, for an R0 change no seat runs: refused
 #      when the fork diff touches seat code, else T0 is the head's server-build
 #      with its ctest green, and no lab gate runs; the nightly is its T3)
 #      the gate: lab/gate.yaml's `always`, the scenarios named here (the verb's
 #      own and the touched verbs'), and `watch` (the open ADR-027 items), as one
-#      run set; a red stops everything before parity moves. GATE_SET=<run set id>
+#      run set; a red stops everything before canon moves. GATE_SET=<run set id>
 #      cites a finished set instead (ADR-042: a nightly or a layer's sweep of this
 #      exact stage), or a chain <first>+<rest> (a gate a lab fault cut short and
 #      RUNSET_AFTER finished), when lab/tools/gate-cite.py's five checks hold; else
 #      the gate runs;
-#   4. fork parity fast-forwarded to the commit the gate played: the branch's
+#   4. fork canon fast-forwarded to the commit the gate played: the branch's
 #      head as read at the start, held to the gate's own builds by gate-cite.py
 #      (--head, and --fresh for a gate this merge ran); a commit pushed to the
 #      branch meanwhile waits for its next stage (a plain push; a branch that is
-#      not ahead of parity stops here);
+#      not ahead of canon stops here);
 #   5. both clones' clean-m1-next promoted to clean-m1 when the branch changed
 #      the client (PROMOTE=1 forces it, PROMOTE=0 skips it);
 #   6. a dated entry appended to docs/LOG.md with the run ids, to finish by hand
@@ -33,19 +33,19 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 branch=${1:?fork branch}; shift
 fork=${FORK_DIR:-skymp}   # the fork checkout to fetch, read and push from; a worktree without the submodule names the shared one
-git -C "$fork" fetch -q origin "$branch" parity
-sha=$(git -C "$fork" rev-parse "origin/$branch"); head=${sha:0:8}   # what parity takes, whatever the branch does meanwhile
+git -C "$fork" fetch -q origin "$branch" canon
+sha=$(git -C "$fork" rev-parse "origin/$branch"); head=${sha:0:8}   # what canon takes, whatever the branch does meanwhile
 echo "== verb-merge $branch ($head) $(date +%H:%M:%S)"
-if ! git -C "$fork" merge-base --is-ancestor origin/parity "$sha"; then
-  echo "== origin/$branch does not contain origin/parity: merge parity into the branch first (never rebase)" >&2; exit 2
+if ! git -C "$fork" merge-base --is-ancestor origin/canon "$sha"; then
+  echo "== origin/$branch does not contain origin/canon: merge canon into the branch first (never rebase)" >&2; exit 2
 fi
-if [ "$(git -C "$fork" rev-parse origin/parity)" = "$sha" ]; then
-  echo "== origin/$branch is parity already; nothing to merge" >&2; exit 2
+if [ "$(git -C "$fork" rev-parse origin/canon)" = "$sha" ]; then
+  echo "== origin/$branch is canon already; nothing to merge" >&2; exit 2
 fi
 # ADR-064: the verb docs naming these scenarios may not promise a probe by path that no lab run played (the runtime
 # check written "by path" and never run was playtest 41's pattern; lab/tools/probe-runs.py)
 if [ "$#" -gt 0 ]; then
-  python3 lab/tools/probe-runs.py "$@" || { echo "== a verb doc names an unrun probe: run it, or reword its line; parity not moved" >&2; exit 2; }
+  python3 lab/tools/probe-runs.py "$@" || { echo "== a verb doc names an unrun probe: run it, or reword its line; canon not moved" >&2; exit 2; }
 fi
 
 echo "== 1. deploy-srv $(date +%H:%M:%S)"
@@ -77,26 +77,26 @@ PY
     case "$sb" in success|failed|none) break;; esac
     sleep 30
   done
-  [ "$sb" = success ] || { echo "== no successful server-build at $head (${sb:-unread}): its image is not pushed, so no T2; parity not moved" >&2; exit 1; }
+  [ "$sb" = success ] || { echo "== no successful server-build at $head (${sb:-unread}): its image is not pushed, so no T2; canon not moved" >&2; exit 1; }
   echo "== 2. T2 on skymp-server:$branch-$head $(date +%H:%M:%S)"
   t2log=lab/results/runsets/t2-$branch-$head.log; mkdir -p lab/results/runsets
   if ! just test-proto "$branch-$head" > "$t2log" 2>&1; then
-    tail -8 "$t2log"; echo "== T2 not green ($t2log): parity not moved" >&2; exit 1
+    tail -8 "$t2log"; echo "== T2 not green ($t2log): canon not moved" >&2; exit 1
   fi
-  grep -q '^T2 green' "$t2log" || { tail -4 "$t2log"; echo "== T2 did not end green: parity not moved" >&2; exit 1; }
+  grep -q '^T2 green' "$t2log" || { tail -4 "$t2log"; echo "== T2 did not end green: canon not moved" >&2; exit 1; }
   echo "   $(grep '^T2 green' "$t2log")"
 fi
 
 setfile=""; cited=""; runs=""; watch=""; r0=""
 if [ "${R0:-}" = 1 ]; then
   # ADR-053's rung fast path: a change whose state is R0 (the server computes) and that changes no engine behavior on any
-  # seat merges on T0 and T2 alone, the nightly its T3. Refused mechanically when the fork's diff against parity touches
+  # seat merges on T0 and T2 alone, the nightly its T3. Refused mechanically when the fork's diff against canon touches
   # seat code (the client, Skyrim Platform, the front end, the gamemode's libraries and scripts, the wire's client FFI);
   # T0 is the head's server-build, whose image build runs ctest, read from its trace (the job skips ctest without the esm)
   echo "== 3. R0 (ADR-053): T0 and T2, no lab gate $(date +%H:%M:%S)"
-  seat=$(git -C "$fork" diff --name-only origin/parity "$sha" | grep -E '^(skymp5-client|skyrim-platform|skymp5-front|skymp5-functions-lib|skymp5-scripts|skymp-wire/crates/wire-client-ffi)/' || true)
+  seat=$(git -C "$fork" diff --name-only origin/canon "$sha" | grep -E '^(skymp5-client|skyrim-platform|skymp5-front|skymp5-functions-lib|skymp5-scripts|skymp-wire/crates/wire-client-ffi)/' || true)
   if [ -n "$seat" ]; then
-    echo "== R0 refused: $head changes seat code against parity (merge it with its gate):" >&2
+    echo "== R0 refused: $head changes seat code against canon (merge it with its gate):" >&2
     printf '   %s\n' $seat >&2; exit 2
   fi
   t0=$(python3 - "$sha" <<'PY'
@@ -160,13 +160,13 @@ if [ -n "${GATE_SET:-}" ]; then
 fi
 if [ -z "$setfile" ]; then
   if ! lab/tools/runset.sh "merge-$branch" $gate; then
-    echo "== the gate is not green: parity not moved" >&2; exit 1
+    echo "== the gate is not green: canon not moved" >&2; exit 1
   fi
   setfile=$(ls -t lab/results/runsets/*-merge-"$branch"*.json | head -1)
   # the gate played $head's stage, as one build that nothing replaced: a cited set's checks 2 to 5
   echo "   the gate's builds against $head"
   if ! FORK_DIR="$fork" python3 lab/tools/gate-cite.py --fresh --head "$sha" "$(basename "${setfile%.json}")" "$branch" $gate; then
-    echo "== the gate did not play $head's stage (above): parity not moved" >&2; exit 1
+    echo "== the gate did not play $head's stage (above): canon not moved" >&2; exit 1
   fi
 fi
 runs=$(python3 -c 'import json,sys; rs=json.load(open(sys.argv[1])); r=[e["run"] for s in rs["scenarios"] for e in rs["runs"].get(s,[]) if e.get("run")]; print(f"{r[0]} to {r[-1]} ({len(r)} runs)" if r else "")' "$setfile")
@@ -174,25 +174,25 @@ watch=$(python3 -c 'import json,sys; print(", ".join(json.load(open(sys.argv[1])
 fi
 
 if [ -n "${T2_LOG:-}" ]; then
-  # a T2 run beside the gate (T2=skip with T2_LOG=<its log>): parity moves only once that log ends green
+  # a T2 run beside the gate (T2=skip with T2_LOG=<its log>): canon moves only once that log ends green
   echo "== 3b. the T2 beside the gate ($T2_LOG) $(date +%H:%M:%S)"
   until grep -q -E '^T2 (green|red|partial|trial)|^T2 exit [0-9]' "$T2_LOG" 2>/dev/null; do sleep 20; done
-  grep -q '^T2 green' "$T2_LOG" || { grep -E '^T2 ' "$T2_LOG" | tail -2; echo "== the T2 beside the gate is not green: parity not moved" >&2; exit 1; }
+  grep -q '^T2 green' "$T2_LOG" || { grep -E '^T2 ' "$T2_LOG" | tail -2; echo "== the T2 beside the gate is not green: canon not moved" >&2; exit 1; }
   echo "   $(grep -m1 '^T2 green' "$T2_LOG")"
 fi
 
-echo "== 4. parity -> $branch $head $(date +%H:%M:%S)"
-git -C "$fork" fetch -q origin "$branch" parity
+echo "== 4. canon -> $branch $head $(date +%H:%M:%S)"
+git -C "$fork" fetch -q origin "$branch" canon
 now=$(git -C "$fork" rev-parse "origin/$branch")
-[ "$now" = "$sha" ] || echo "   origin/$branch moved to ${now:0:8} during the merge: parity takes the gated $head, the rest waits for its stage"
-old_parity=$(git -C "$fork" rev-parse origin/parity)
-git -C "$fork" push -q origin "$sha:refs/heads/parity"
-git -C "$fork" fetch -q origin parity
-[ "$(git -C "$fork" rev-parse origin/parity)" = "$sha" ] || { echo "== parity did not land on $head" >&2; exit 1; }
-echo "   fork parity = $head (was ${old_parity:0:8})"
+[ "$now" = "$sha" ] || echo "   origin/$branch moved to ${now:0:8} during the merge: canon takes the gated $head, the rest waits for its stage"
+old_canon=$(git -C "$fork" rev-parse origin/canon)
+git -C "$fork" push -q origin "$sha:refs/heads/canon"
+git -C "$fork" fetch -q origin canon
+[ "$(git -C "$fork" rev-parse origin/canon)" = "$sha" ] || { echo "== canon did not land on $head" >&2; exit 1; }
+echo "   fork canon = $head (was ${old_canon:0:8})"
 
-# what the branch changed on the client side since the parity it grew from
-client_changed=$(git -C "$fork" diff --name-only "$old_parity" "$sha" -- skymp5-client skyrim-platform skymp-wire/crates/wire-client-ffi 2>/dev/null | head -1 || true)
+# what the branch changed on the client side since the canon it grew from
+client_changed=$(git -C "$fork" diff --name-only "$old_canon" "$sha" -- skymp5-client skyrim-platform skymp-wire/crates/wire-client-ffi 2>/dev/null | head -1 || true)
 promote=${PROMOTE:-}
 [ -n "$promote" ] || { [ -n "$client_changed" ] && promote=1 || promote=0; }
 if [ "$promote" = 1 ]; then
@@ -205,9 +205,9 @@ else
 fi
 
 if [ -n "$r0" ]; then
-  entry="- $branch merged to fork parity $head ($(date -u +%Y-%m-%dT%H:%MZ)):$r0; T2 ${T2:-green} on skymp-server:$branch; clones $([ "$promote" = 1 ] && echo promoted || echo 'not promoted'). Verbs: (fill in)."
+  entry="- $branch merged to fork canon $head ($(date -u +%Y-%m-%dT%H:%MZ)):$r0; T2 ${T2:-green} on skymp-server:$branch; clones $([ "$promote" = 1 ] && echo promoted || echo 'not promoted'). Verbs: (fill in)."
 else
-  entry="- $branch merged to fork parity $head ($(date -u +%Y-%m-%dT%H:%MZ)): the gate $(basename "${setfile%.json}")$cited, $runs${watch:+; watch items: $watch}; T2 ${T2:-green} on skymp-server:$branch; clones $([ "$promote" = 1 ] && echo promoted || echo 'not promoted'). Verbs: (fill in)."
+  entry="- $branch merged to fork canon $head ($(date -u +%Y-%m-%dT%H:%MZ)): the gate $(basename "${setfile%.json}")$cited, $runs${watch:+; watch items: $watch}; T2 ${T2:-green} on skymp-server:$branch; clones $([ "$promote" = 1 ] && echo promoted || echo 'not promoted'). Verbs: (fill in)."
 fi
 today="### $(date -u +%Y-%m-%d)"
 grep -q "^$today\$" docs/LOG.md || printf '\n%s\n\n' "$today" >> docs/LOG.md

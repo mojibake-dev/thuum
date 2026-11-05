@@ -1,5 +1,5 @@
 # thuum task runner. Every command CLAUDE.md names lives here.
-# Layout: this superproject (docs/, lab/), skymp/ (our fork, branch parity, which
+# Layout: this superproject (docs/, lab/), skymp/ (our fork, trunk canon, which
 # holds skymp-wire/), CommonLibSSE-NG/ (upstream), addrlib/ (gitignored download).
 # Pinned 2026-09-24 from skymp/docs, skymp/Dockerfile, and docs/LAB.md.
 
@@ -11,7 +11,7 @@ addrlib  := "addrlib"
 lab_api  := env_var_or_default("LAB_API", "https://thuum.gaussing.tv/lab")
 runtime  := "1.6.1170"
 # The fork branch whose Windows build the lab clients run (ADR-018: the 1.7 port).
-client_branch := "parity"   # the 1.7 port fast-forwarded parity on 2026-10-02 (ADR-018); one branch
+client_branch := "canon"   # the one trunk since 2026-11-04 (Eli: parity retired); the 1.7 port went in on 2026-10-02 (ADR-018)
 # Upstream's Dockerfile targets x86-64. On Apple Silicon export
 # DOCKER_PLATFORM=linux/amd64 (emulated, slow); on sky-ci leave it unset.
 docker_platform := env_var_or_default("DOCKER_PLATFORM", "")
@@ -653,7 +653,7 @@ sweep name="sweep" *scenarios:
     @lab/tools/runset.sh "{{name}}" {{scenarios}}
 
 # A verb branch's merge the ADR-030 way: deploy-srv, the full T2 on the branch's image (T2=skip to cite one), the gate
-# (lab/gate.yaml's always, the scenarios named, the watch items) as one run set, fork parity fast-forwarded, both clones
+# (lab/gate.yaml's always, the scenarios named, the watch items) as one run set, fork canon fast-forwarded, both clones
 # promoted when the branch changed the client (PROMOTE=1 or 0 to decide), a dated docs/LOG.md entry to finish by hand.
 verb-merge branch *scenarios:
     @lab/tools/verb-merge.sh "{{branch}}" {{scenarios}}
