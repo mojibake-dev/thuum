@@ -832,3 +832,20 @@ Window 1's reads (06:32 PST 2026-11-05 (14:32Z 11-05); numidium's three from the
   a lamp (the teleport's heading, a mouse pitch, crosshairRef recorded), and the console's GetDisabled and GetDestroyed on the lamp
   before the press. Expected on a working route: OnActivate or OnHit on the lamp's handle, then DamageObject on the host.
 
+The lamp's static read (07:03 PST 2026-11-05 (15:03Z 11-05); the re-analyst on sky-re through pyghidra, REA down; every line HYPOTHESIS until
+lab/frida/lamp-shot-trace.js reads it): TESObjectREFR::ActivateRef 19796 (CommonLibSSE-NG src/RE/T/TESObjectREFR.cpp:52-57)
+returns false, before it sends TESActivateEvent (20038 on ScriptEventSourceHolder+0x58) and so before SkyrimVM's sink 53959
+queues OnActivate, when the activator is the player and the reference's base has no name and is neither water nor a talking
+activator; ACTI 0x90efc carries no FULL (lab/esm.py), so a player's press on an oil lamp is never a route, while a non-player
+activator (a trigger, the lamp itself) skips the rule, and kBlockActivate is read only after the event. The Papyrus Activate
+native 56139 returns ActivateRef's answer unchanged. Spell.Cast's native 55747 queues a CastFunctor whose run (55744) calls
+CastSpellImmediate 34404; with the player as caster the desired target is replaced and the bolt launches (Projectile::Launch
+44108, CommonLibSSE-NG Projectile.cpp:255-258) along the player's own heading and pitch, so v1's level bolt flew under the hanging
+lamp. A projectile's impact (44213) sends TESHitEvent (38668), relayed to the reference's scripts as OnHit by SkyrimVM's sink
+53974, after the engine has queued the destructible's damage (QueueUpdateDestructibleObject 36909, TaskQueueInterface.cpp:32-35),
+which raises the lamp's stage and so its script's OnDestructionStageChanged too. Dynamic plan: x-trap-lamp-trigger v2 aims the
+host's shot (the teleport's heading onto the lamp, a mouse pitch swept up in four steps, a cast at each) with lamp-shot-trace.js
+on the firing seat (the cast, the launch's angles, the impact, the hit event, the destructible damage, the VM's events for the
+lamps, ActivateRef on them); expected: an impact on 0x9b0fb, OnHit and OnDestructionStageChanged to it, the host's report and
+the server's record.
+
