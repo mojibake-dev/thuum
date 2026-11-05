@@ -106,7 +106,9 @@
 #   mods/papyrus-admitted/Platform/papyrus-scripts.txt
 #                                   ADR-044: "<plugin>: <script class> ..." per admitted plugin
 #                                   (lab/layer/papyrus-admitted.tsv), what skymp5-client admits
-#                                   through its Papyrus event block; a layer file like the rest,
+#                                   through its Papyrus event block everywhere (no host rows since
+#                                   ADR-062's flip: the host runs its cells' world scripts by rule);
+#                                   a layer file like the rest,
 #                                   so a clone gets it at Data\Platform\papyrus-scripts.txt
 #   esm/ and esm/1.6.1170/          the plugins again, where each game version's
 #                                   server loads them (server-settings.json), with

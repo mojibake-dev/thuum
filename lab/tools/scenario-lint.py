@@ -44,10 +44,8 @@ SWITCHES = {"cellHost", "npcPuppet", "propPhysics"}
 # which server a seat talks to and as whom (b-npc-loot's offline seat; npc-puppet's landing hang, 2026-10-21)
 PLUMBING = {"server-port", "gameData.profileId"}
 # (scenario id, key): premises already committed, each with the change that retires it
-BASELINE = {
-    ("b-bleak-traps", "activationUnblockedBases"): "ADR-062 slice 3",
-    ("b-object-anim", "activationUnblockedBases"): "ADR-062 slice 3",
-    ("b-puzzle-relay", "activationUnblockedBases"): "ADR-062 slice 3",
+BASELINE: dict[tuple[str, str], str] = {
+    # emptied by ADR-062's flip (2026-11-04): the three scenarios' activationUnblockedBases writes are gone
 }
 # verb docs whose T3 box was ticked before VERB.md's "Two seats:" line (2026-11-02)
 DOCS_BASELINE = {"character-creation", "console-commands", "favorites", "hostility-sync", "learned-effects",

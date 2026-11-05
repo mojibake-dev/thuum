@@ -82,9 +82,10 @@ class ScenarioLintTest(unittest.TestCase):
             with self.subTest(change=change):
                 self.assertEqual(len(self.relaunch(change)), 1, change)
 
-    def test_the_baseline_holds_its_named_scenarios_only(self):
+    def test_the_baseline_is_empty_since_the_flip(self):
+        # ADR-062's flip retired the three activationUnblockedBases writes; no scenario is exempt any more
         key = '{json: "Data/Platform/Plugins/skymp5-client-settings.txt", key: "activationUnblockedBases", value: "1a4bb"}'
-        self.assertEqual(self.relaunch(key, "b-bleak-traps"), [])
+        self.assertEqual(len(self.relaunch(key, "b-bleak-traps")), 1)
         self.assertEqual(len(self.relaunch(key, "b-bleak-traps-two")), 1)
 
     def doc(self, two: str, t3: str = "x", name: str = "lint-verb") -> Path:
