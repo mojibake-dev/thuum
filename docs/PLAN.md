@@ -1462,6 +1462,13 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   (the canon wrap-up on the pillar heads: 83a40da3, then 73ed0c52 with d1f23444's tree) running on the lab; rung 1 (fork
   m4-scripts-1-flip 772c00d3, the flip on canon) T0 green on pipeline 5386, its review, T2 and stage next.
 
+- STATE 2026-11-05 00:41 PST (thuum-cf): canon fast-forwarded to fork dd280139, the flip (rung 1 proven on the lab eight of eight, 072606 to
+  080101; rung 0's wrap-up read five of five on fe753e3f, x-puzzle-handoff-late v3.1 082013 last: the inheriting host's feed and
+  whale); rung 2 (m4-scripts-2-seam 9745d401, pipeline 5433 green, T0 598) on its stage. Eli's calls of the night (ADR-068): D-S2
+  B (one owner for consequences, cosmetic copies on any seat), the boulders simulated by the seat that set them off, single-use
+  results recorded once from whoever caused them, D-S3 ACCEPTED (traps follow the interaction), its own slice after rung 2's
+  stage and before playtest 47.
+
 ### M5: Progression (4 to 8 weeks, Class A/B). Started 2026-10-31 (the weekend pass)
 
 - STATE (05:09 PST 2026-11-02, thuum-magnus): the object-animation pair MERGED, fork parity ad1aa50a (from c8c21cd1) and the host-scoped layer

@@ -8847,3 +8847,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   x-puzzle-handoff-late-flip v1.3 080101 (its first run 075626 an error on a replaced c1 game, every claim holding). Then the
   canon lay back (server m3-canon-4-hands-4c6d9f24, bb559685's dist, fe753e3f's bundle) and x-puzzle-handoff-late v3.1 GREEN
   (20261105-082013): fe753e3f's five reads done; thuum-cf fast-forwards canon to fe753e3f and then to dd280139. The lab is idle.
+- 00:41 PST 2026-11-05 (08:41Z 11-05) (thuum-cf): canon is the flip. Fork canon fast-forwarded 83a40da3 to dd280139 in one push (both remotes): rung 0's
+  wrap-up read five of five on fe753e3f (b-puzzle-relay 064323, b-object-anim 064841, x-puzzle-guest-view v3 065355,
+  x-puzzle-handoff v5 070841, x-puzzle-handoff-late v3.1 082013, the inheriting host's feed then the whale on its first press),
+  and rung 1 (m4-scripts-1-flip dd280139, which holds fe753e3f) eight of eight on numidium's stage (b-object-anim v4 072606,
+  b-puzzle-relay v4 073028, b-bleak-traps v2 073349, its first green since 11-02, x-bleak-scripts v1 073731, x-corpse-record v6
+  074223, x-bleak-traps-npcs v2 074845, x-puzzle-handoff-flip v2 075237, x-puzzle-handoff-late-flip v1.3 080101 after a lab
+  fault's rerun). The flip's lab lane landed with it (thuum 0454b594). Rung 2 (m4-scripts-2-seam 9745d401: rung 1's head merged,
+  the seam feeding the pillars' script side) pushed with its Windows build, pipeline 5433 green (T0 598), its fresh review GO
+  with notes; its stage running with x-puzzle-whale v1.1 and x-bleak-scripts v2.1. The Hall of Stories door FX fix (7ee68bd7: a
+  call on a placement the server never loads judged by its record and mirrored to the cell's loaders) waits for its review and
+  the stage's end. Eli's calls tonight, recorded in ADR-068: D-S2 B; the boulders by the seat that set them off; single-use
+  results recorded once from whoever caused them; D-S3 ACCEPTED, traps follow the interaction (its design read running).
