@@ -396,7 +396,7 @@ pinned:
 | POST /lab/runset | `{name, scenarios: [ids] or "all", game?}`: the scenarios of the deployed tree played one after another with ADR-027's and the lab-fault reruns applied (ADR-030: the merge gate and the nightly sweep are both this); returns the set, `GET /lab/runset/<id>` its progress and verdict (green, watch, red, error), `GET /lab/runsets` the recent ones |
 | POST /lab/runset/<id>/stop, /resume | stop after the current run; go on from the scenario after the last one run |
 | POST /lab/clients/<c>/rollback `{to}` | a live session's client-only rollback (ADR-041 item 5): the clone back to `to`, its newest lab snapshot, by a stop, a disk rollback and a start, then the guest agent; allowed under a hold, refused beside a run or a snapshot (`just client-rollback c1`) |
-| POST /lab/hold `{minutes, reason}`, POST /lab/release | the lab is somebody's (a playtest, a staging writing the clones): /run, /runset, /up and /down answer 409 E_RUN_HOLD with the reason and the nightly does not start, until the minutes pass or the release; the playtest tools hold three hours by themselves, verb-stage while it writes the clones |
+| POST /lab/hold `{minutes, reason}`, POST /lab/release | the lab is somebody's (a playtest, a staging writing the clones): /run, /runset, /up and /down answer 409 E_RUN_HOLD with the reason and the nightly does not start, until the minutes pass or the release; the playtest tools hold three hours by themselves (a relaunch never cuts a standing hold short: one with three hours or more left stands, a shorter one gets three hours under its own reason), verb-stage while it writes the clones |
 | POST /lab/clients/<c>/perks `{ids}` | a playtest seat's perks, only under a playtest's hold: perks are the player's game's alone (no server path until M5) and every login's generated save drops them, so lab-driver's `add-perks {ids, keep: true}` adds them and adds back any a load dropped (every 2 s), and lab-api sends the list again on the first poll after a 20 s heartbeat gap (a relaunched game); the release forgets them, as does a run's start; GET /lab/status shows them as `perks`; the answer is the driver's `{added, had, missing, refused, kept}`. A profile's `perks: [0x7934B]` per seat (lab/playtests/<n>.yaml) goes through it at playtest-setup and again at playtest-ready |
 
 Results are browsed at https://thuum.gaussing.tv/results/<run>/; a run set's
@@ -1038,7 +1038,8 @@ canonized into a script instead of hand rolled every time").
   - `just playtest-relaunch <c>` for one seat, an item's own relaunch or a
     crash: it runs the launch task again when no game process shows within
     a minute (three times at most), waits for the login, and after a steady
-    minute of heartbeats sends the standing survival lines again.
+    minute of heartbeats sends the standing survival lines again. It keeps
+    the playtest's hold.
 - The end: `just playtest-record-stop`, `just playtest-save <label>`, `just
   lab-release`, then the LOG entry.
 
