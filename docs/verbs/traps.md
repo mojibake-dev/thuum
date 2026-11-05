@@ -908,3 +908,24 @@ Window 2's reads (07:56 PST 2026-11-05 (15:56Z 11-05); numidium's stage on the p
 Window 2 is read: what is left of D-S3 before it merges whole is x-trap-hit (point 2) on D-T4's fix (fork e4c78077, local, in
 review), x-trap-dodge (window 3), D-T1 and D-T2 (Eli's), and the restart scenario committed from x-trap-wire-restart (rule 6).
 
+D-T4's fix (08:29 PST 2026-11-05 (16:29Z 11-05); fork m4-scripts-2b-traps e4c78077 and bd0c8cf8, the second its fresh review's notes applied as written,
+GO with notes; built ahead of Eli's answer, so it stages and reads and merges only on it): the platform's DamageActor
+replacement cuts any damage another actor deals the player (the server's, R0), unconditionally, and records whether it went
+in (isDamageActorReplaced); the client sets the six fDiffMultHPToPC* from worldDamageMult (1 by default) only while the
+replacement is in (0 otherwise), and the player's own ragdoll removal alone zeroes them for its window. R2 for the world's
+damage (the victim's engine computes it, its actor values report it); worldDamageMult is a per-seat client setting, R3 as every
+client setting is, so a seat set to 0 ignores the world's damage on its own engine (a server-carried value is the shape if
+D-T4's answer must hold for every seat). HYPOTHESIS, from the review, each unread: the attacker-less paths that now land on the
+player's own engine besides a trap's (37336's environmental damage and 36991's call; a hazard a figure's spell placed, such as
+Wall of Flames, whose caster AddTarget's refusal does not cover and whose DamageActor attacker is unread; an owner that no
+longer resolves: a rune outliving its figure, an arrow in flight, an effect's remaining ticks); the self-cast relay
+(CastBondProc) passes both guards and carries concealment alone today; a lamp's or an oil pool's explosion credited to its
+shooter (setActorCause) would now be cut on another seat's player (x-trap-lamp reads c1's health under the fire); a fall read
+unzeroed under the old 0 (b-push), so its path is unread, and the static read skips the multiplier for a fall at 1.0 or more,
+so D-T4's option B would scale a trap and not a fall. The stage's regression read needs floors on the server's record, which a
+converged double count cannot pass: b-duel, b-block, b-marksman, b-spell, b-hailstone, b-poison, b-fod-kill; b-shout and
+b-shout-repeat and b-shadowbond as before; b-push (equal to its history: falls unchanged; about 0.96: the landing names the
+pusher and is now cut; lower: falls newly scaled); b-god's TIM leg; x-trap-hit v3. b-npc-archer, b-npc-caster, b-host-own-hit
+and c-dungeon-enemies run under TGM, which puts the victim's own engine in god mode, so none can see a local copy. A low record
+is read against the seat's height first: the summit sheds seats, and falls cost health.
+

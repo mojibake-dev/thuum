@@ -8975,3 +8975,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   deaf in a fresh game, the blank's three lines). One rock of seven stayed hung in 153200 on both seats and in the record (a
   physics flake, not sync). D-T4's fix built on the slice, local (fork e4c78077: the player's actor-damage cut in the
   DamageActor replacement, the world multiplier worldDamageMult, 1 by default), its fresh review running.
+- 08:29 PST 2026-11-05 (16:29Z 11-05) (thuum-cf): D-T4's fix built ahead on the slice: fork e4c78077 (the player's actor-damage cut in the platform's
+  DamageActor replacement; worldDamageMult) and bd0c8cf8 (its fresh review's notes: the replacement's result exported and the
+  multiplier held at 0 without it, the ragdoll window the player's own, falls and the attacker-less paths HYPOTHESIS), both
+  pushed, the Windows builds queued. b-trap-record-restart committed (thuum 8f63a6a4) and deployed. x-trap-hit v3 (walks) in
+  review. The stage reads the floors' regression set (docs/verbs/traps.md) and merges only on Eli's D-T4.
