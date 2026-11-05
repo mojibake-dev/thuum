@@ -90,7 +90,9 @@ world position, so `headZ - z` tells a body lying from one upright; .scene, the
 scene that seat's game runs it in, 0 for none; .faceNode, whether its copy holds
 the facegen head node, false on a re-roll's half-built 3D); `refs-near {formTypes: [43]}` then
 `c.refs_near().runtime_of(<base id>)` counts that base's runtime copies (ids
-from 0xff000000); a `weather {read: true}` step's sky is read as
+from 0xff000000), and `c.refs_near().listed(<ref id>)`, `.pos_of(<ref id>)`
+and `.disabled_of(<ref id>)` read one listed reference by its own form id, not
+its base's (a trap's several rocks of one base, docs/verbs/traps.md's D-S3); a `weather {read: true}` step's sky is read as
 `c.weather().current` (the engine's current weather, a form id), `.outgoing`
 (the one it blends from, 0 once settled) and `.transition` (the blend's
 progress, 1 once settled; docs/verbs/weather.md); a watch records each actor's heading, read as

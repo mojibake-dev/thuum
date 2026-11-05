@@ -119,6 +119,13 @@ the lab can grep (E_ASSERT_*).
   <client>.refs_near().distance(<form id>)          how far the nearest one lies (the listing's exact
                                                      figure before the search's bisected one); none is
                                                      a data error
+  <client>.refs_near().listed(<ref id>)             whether the step listed that reference itself (its own
+                                                     form id, not its base's) within the radius; a step
+                                                     that listed no type is a data error, not a false
+  <client>.refs_near().pos_of(<ref id>)             where that reference stands in that seat's game (.x
+                                                     .y .z, the listing's absolute pos): one of several
+                                                     references of a base, such as a trap's rocks
+  <client>.refs_near().disabled_of(<ref id>)        whether that reference is disabled in that game
   <client>.poison(<form id>).count | .poisonId      the poison on that item's stack in that client's
                                                      inventory and its charges, from its last poisons
                                                      step (docs/verbs/magic-effects.md); 0 and 0 when
@@ -703,6 +710,45 @@ class RefsNearView:
             raise AssertionData(f"{self._client}'s refs-near step listed no reference of {int(base_id):#x} (the disabled flag "
                                 f"comes from the listing by type, never from the ids search)")
         return bool(nearest.get("disabled"))
+
+    def _row(self, form_id: int) -> dict[str, Any] | None:
+        """The listed row of that reference by its own form id (a base's several references told apart), None when the
+        step listed it nowhere; a step that listed no type at all is a data error, since it looked for nothing."""
+        if not self._types:
+            raise AssertionData(f"{self._client}'s refs-near step listed no form type, so it looked for no reference")
+        for rows in self._types.values():
+            refs = rows.get("refs") if isinstance(rows, dict) else None
+            for ref in refs if isinstance(refs, list) else []:
+                if isinstance(ref, dict) and "distance" in ref and ref.get("formId") == int(form_id):
+                    return ref
+        return None
+
+    def listed(self, form_id: int) -> bool:
+        """Whether the step listed that reference itself within its radius (its own form id, the listing's formId):
+        loaded in the observer's game and near, whatever its base (thuum docs/verbs/traps.md, the lamp's premise)."""
+        return self._row(form_id) is not None
+
+    def pos_of(self, form_id: int) -> "PosView":
+        """Where that reference stands in the observer's game, by its own form id (the listing's pos): one of a base's
+        several references compared across seats, such as Embershard's rocks (thuum docs/verbs/traps.md, D-S3's trap
+        bodies), where pos(baseId) names only the nearest of the base."""
+        row = self._row(form_id)
+        if row is None:
+            raise AssertionData(f"{self._client}'s refs-near step did not list the reference {int(form_id):#x}")
+        p = row.get("pos")
+        if not (isinstance(p, list) and len(p) == 3):
+            raise AssertionData(f"{self._client}'s refs-near step listed {int(form_id):#x} without a position")
+        try:
+            return PosView(float(p[0]), float(p[1]), float(p[2]))
+        except (TypeError, ValueError) as e:
+            raise AssertionData(f"{self._client}'s refs-near step listed {int(form_id):#x} with a malformed position: {e}")
+
+    def disabled_of(self, form_id: int) -> bool:
+        """Whether that reference, by its own form id, is disabled in the observer's game (the listing's flag)."""
+        row = self._row(form_id)
+        if row is None:
+            raise AssertionData(f"{self._client}'s refs-near step did not list the reference {int(form_id):#x}")
+        return bool(row.get("disabled"))
 
     def distance(self, base_id: int) -> float:
         listed = self._listed(base_id)
@@ -2137,7 +2183,7 @@ _NUMBER_METHODS = {
 # Methods that take a form id: c.marker(0x00016223)
 _ID_METHODS = {
     _ClientRef: {"marker", "known", "favorite", "held", "projectile", "poison", "watched_id", "npc_state", "quest"},
-    RefsNearView: {"has", "distance", "runtime_of", "pos", "disabled"},
+    RefsNearView: {"has", "distance", "runtime_of", "pos", "disabled", "listed", "pos_of", "disabled_of"},
 }
 # Methods that take a form id as a number or a string: c2.watched(c1).launched("0x3f9eb")
 _FORM_SPEC_METHODS = {
@@ -2174,7 +2220,7 @@ _METHODS = {
     _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "inventory", "globalValue", "projectile", "poison", "skill", "level", "weather", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near", "node_rotation"},
     NodeRotationView: {"angle_to", "local_angle_to"},
     InventoryView: {"count"},
-    RefsNearView: {"count", "has", "distance", "runtime_of", "pos", "disabled"},
+    RefsNearView: {"count", "has", "distance", "runtime_of", "pos", "disabled", "listed", "pos_of", "disabled_of"},
     EffectsView: {"left", "magnitude"},
     WatchView: {"took", "sent", "ever", "drops", "rises", "movedBy", "launched", "flights_match"},
     SelfWatchView: {"saw", "ever", "drops", "rises", "launched"},

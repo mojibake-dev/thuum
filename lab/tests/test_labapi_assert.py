@@ -917,6 +917,30 @@ class PuppetFactsTests(unittest.TestCase):
         with self.assertRaises(AssertionData):
             ev.evaluate("c2.refs_near().pos(0x3E8F0).x == 0")
 
+    def test_a_reference_read_by_its_own_form_id(self):
+        # D-S3's trap bodies and the lamp's premise: one reference of a base told apart by its own id
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(RichServer(), RefsNearViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c1.refs_near().listed(0xFF000F10) == true"))
+        self.assertTrue(ev.evaluate("c1.refs_near().listed(0xFF000F99) == false"))
+        self.assertTrue(ev.evaluate("c1.refs_near().pos_of(0xFF000F10).y == 55.0"))
+        self.assertTrue(ev.evaluate("c1.refs_near().disabled_of(0xFF000F11) == true"))
+        self.assertTrue(ev.evaluate("c1.refs_near().disabled_of(0xFF000F10) == false"))
+        # by base id, a reference's own reads find nothing: the two kinds of id are never mixed
+        self.assertTrue(ev.evaluate("c1.refs_near().listed(0x3E8F0) == false"))
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c1.refs_near().pos_of(0x3E8F0).x == 0")
+        with self.assertRaises(AssertionData):
+            ev.evaluate("c1.refs_near().disabled_of(0xFF000F99)")
+        # c2's step listed the activators and found none near: false, not an error
+        self.assertTrue(ev.evaluate("c2.refs_near().listed(0xFF000F10) == false"))
+        # a step that listed no type looked for no reference: a data error, not a false
+        views = RefsNearViews()
+        views.read["c2"]["types"] = {}
+        bare = Evaluator(RichServer(), views, ["c1", "c2"])
+        with self.assertRaises(AssertionData):
+            bare.evaluate("c2.refs_near().listed(0xFF000F10)")
+
     def test_a_seats_npc_state_a_copy_count_and_a_watched_actors_turns(self):
         from labapi.assertions import AssertionData, Evaluator
         ev = Evaluator(RichServer(), PuppetViews(), ["c1", "c2"])
