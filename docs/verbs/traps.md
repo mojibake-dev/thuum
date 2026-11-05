@@ -1023,3 +1023,31 @@ b-shout-repeat 212404, b-shadowbond 212555, b-god 212826. The four reds, each re
   merges.
 - b-push 20261105-213147: its old y flake (server.actor(c2).y -156.32 against < -650; 171416 the same), its health 0.9145 inside
   its band.
+
+The rest of the slice's reads before its merge (14:45 PST 2026-11-05 (22:45Z 11-05) reading).
+- x-trap-wall-both v1.1 20261105-220449 (45 of 48): leg A is Eli's D-T2 outcome for a guest bystander, CONFIRMED by run: c1,
+  the host, stepped on the plate while c2 stood in the swing; both were hit once, each on its own engine (c1 300 to 244.75, c2
+  300 to 247.23; each seat's bare ProcessTrapHit census row +1), both records down (0.8136, 0.8204) and each seat's view of the
+  other player within 0.004 of that player's record. Leg B (the host as bystander) unread: between the legs, as c2 came back
+  through lab-spawn, the plate fired on both seats with nobody walking and c1's own copy carried c1 out of the swing; v1.2
+  (51484945) stages both players south of the plate before stepping in, with position premises.
+- The re-entry firing, read from 220449's logs (a read-only agent; HYPOTHESIS where marked): no stale spot and no glide, both
+  figures created at their players' fresh positions (CreateActor reads the emitter's position after Teleport's SetPos,
+  PartOne.cpp:1264, 1386; a server teleport is vouched as a jump and snapped, ActionListener.cpp:519-546). Two firings: (1) c2's
+  own plate at 23.442 on its clock, with neither c2's player nor c1's figure in its copy of the cell, in the same tick as the
+  client's model apply calling setOpen(false) and the disabled apply on the plate and wall (remoteServer.ts:544, :554):
+  HYPOTHESIS that the apply fires a family trigger, the candidate fix skipping both for family references as dealWithRef skips
+  the activation block, after a read of Skyrim Platform's triggerEnter for family triggers on both seats; declared for playtest
+  47 (a plate may fire once as a player re-enters its cell). (2) The echo: a body the wall carries across the plate drags its
+  figure across the other seat's copy one relay hop later (183 ms here, 177 in leg A's walk), firing it there too, which is
+  what a body crossing the plate does in the game; read as correct, not a defect (one interval's trail is interpolation's cost:
+  Valve, "Source Multiplayer Networking"; Bernier, "Latency Compensating Methods in Client/Server In-game Protocol Design and
+  Optimization", GDC 2001).
+- The rockfall's other seat (20261105-153200, -154408, -210948): the seat that did not trip the wire never fired its own copy's
+  children (zero "fired here" lines on c1 against 9 or 10 on c2): the live record set its wire destroyed 133, 150 and 140 ms
+  before its own Tripwire state's SetDestroyed, and a destroyed reference's activation forwards nothing (HYPOTHESIS, engine
+  side), so c1's platform never broke and its dust never rose. Fixed in fork 746aff6c (a live record's destroyed flag waits up
+  to 3000 ms, UNMEASURED, for the seat's own copy; served and late records apply at once), read by x-trap-wire-follower v1.1
+  (db821624) in the next slot. Rock 0xb6d4d's hang: the seam is ruled out (no neutralized line, no followed flag on the owner),
+  the platform 0xb6d47 still holding it favoured (HYPOTHESIS), read by x-trap-rock-hang v1.1 (45888dff) with
+  lab/frida/rock-motion-trace.js v1.1 on the tripping seat.
