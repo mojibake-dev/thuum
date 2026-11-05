@@ -94,3 +94,18 @@ replayed arrow, HYPOTHESIS H-ARROW); D-T2 rewriting b-bleak-traps' and b-object-
 D-S3 removes (green runs, so ADR-064 decision 4); D-T3 the schedule. thuum-cf's, stated: the relay stops only for a family pair
 (F3); the reporting seat decides (F4); phase 2 in the slice (any seat triggers, Eli's requirement); the skip lever nonLatent for
 the slice's stage; the latent body calls neutralized rather than skipped; H-KF's fallback decided at the boulders probe.
+
+D-T4 (07:56 PST 2026-11-05 (15:56Z 11-05)), a trap's and a fall's damage to a player. CONFIRMED by run (x-trap-hit-premise 20261105-154820, docs/verbs/
+traps.md's window 2 reads): as built a trap's hit deals the player nothing, because skymp5-client zeroes the six
+fDiffMultHPToPC* (ADR-028: no actor's hit counts on the player's own engine) and the engine's DamageActor applies the same
+multiplier to the world's damage; at 1.0, one spike-wall hit cost 60 of 1000. ADR-028's decision keeps the world's damage the
+victim's game's, so the fix carries it out: the platform's DamageActor replacement (FridaHooks.cpp, which cuts a figure's, a
+puppet's and an NPC's damage from a player's hand today and never touches the player) also cuts any damage another actor deals
+the player (the server computes it, R0), and the multiplier then scales only the world's damage (a trap, a fall, lava; damage
+with no attacker, or the player's own). The stage's regression read: b-duel, b-shout, b-shout-repeat and b-shadowbond stay
+single-counted (an actor's damage that reached DamageActor with no attacker would start to count locally). The open choice is
+the multiplier: A 1.0, the game's base (a spike wall's 60 at the lab's level); B the pinned difficulty's own (the client pins
+iDifficulty 5, Legendary; the repo's static read puts the six between 0.5 and 2.5, so about two and a half times: a fresh
+character dies to two wall hits); C traps and falls stay harmless, ADR-028 amended. thuum-cf recommends A: the world bites at
+the game's own base, and nothing about multiplayer needs it harder or softer.
+

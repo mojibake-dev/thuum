@@ -868,3 +868,26 @@ victim's game's. The same read puts a fall (flag 1) under a multiplier below 1.0
 god mode. If the premise reads yes, the fix carries ADR-028 out as written (the world's damage the game's own); it reopens
 nothing.
 
+Window 2's reads (07:56 PST 2026-11-05 (15:56Z 11-05); numidium's stage on the pinned lay, lab-api 56ae7fc7):
+- x-trap-wire-restart v1.2 GREEN (20261105-153200; its first run 152648 ended E_RUN_GAME_REPLACED, c1's game replaced about 20 s
+  after the start, a lab fault numidium chases, every claim block held there too): the destruction record survives a server
+  restart and reaches a fresh game (rule 6 for D-S3's record).
+- x-trap-boulders-rest v1.1 GREEN (20261105-154408): each of Embershard's seven rocks rests within 32 units of the server's
+  record on both seats, c2's at-rest samples and c1's follow ends claimed per rock.
+- x-trap-hit-premise v2.1 GREEN on its premises (20261105-154820), its answer CONFIRMED by run: as built a trap's hit deals the
+  player NOTHING. Leg A (the client's six fDiffMultHPToPC* read 0 before and after the walk): c1 walked onto the Temple plate,
+  the wall's hit counted bare on c1 (one census row), and c1's watched health never moved (two samples, both 1000). Leg B (the
+  six set to 1.0 by set-gmst, read 1 before and after the walk, no teleport between): one drop, 1000 to 939.97 at 9.1 s into the
+  walk, the leg's one counted hit: a spike wall's hit costs 60 at the lab's level, not the 75 the trap-path read assumed
+  (HYPOTHESIS falsified). The gate is the multiplier: DamageActor 37335 applies it to a player victim's damage from the world
+  as well as from an actor, so the client's zero (ADR-028's way of keeping an actor's hit off the player's own engine) also
+  zeroes the world's damage ADR-028 keeps the game's. A fall rides the same gate (HYPOTHESIS, the static read's flag rule).
+  D-T4 (docs/research/trap-slice-d-s3-2026-11-05.md) is the fix's one open choice; x-trap-hit v2.1 stays HELD on it.
+- x-trap-lamp-trigger v2.1 RED (20261105-153748) on its own premise, not D-S3: the aim held (the crosshair on the lamp's body at
+  -100 counts, about 5 degrees over it at -250: c1 turns about 16.7 counts a degree), but the driver's Papyrus Spell.Cast with
+  the player as source never reached a cast: lamp-shot-trace.js, live (kernel32 Sleep 2.1M calls, the VM's SendEvent 54k), counted
+  0 CastSpellImmediate and 0 Projectile::Launch through all six casts, and 3 of the 6 latent calls returned (why: unread). v3 casts
+  by the player's own hand (in review).
+- The DestructionStage difftest session is on the slice (fork 029769f7, pushed server-only); its sessions are the trial's byte
+  for byte, so that trial (41 of 41 identical) is the head's T2.
+

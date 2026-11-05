@@ -8955,3 +8955,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   recreated on 56ae7fc7 (refs_near().pos_of); x-trap-boulders-rest v1.1 (aeffd269) GREEN 154408; x-trap-hit-premise v2.1
   (f7089d64) GREEN 154820, its recorded answer: as built (the client's fDiffMultHPToPC* at 0) the spike wall's hit leaves c1 at
   1000 of 1000 health, and with the six at 1.0 the same walk takes it to 963.3: a trap's DamageActor reads the multiplier.
+- 07:56 PST 2026-11-05 (15:56Z 11-05) (thuum-cf, numidium's window 2): x-trap-wire-restart v1.2 GREEN (153200; rule 6 for the destruction record),
+  x-trap-boulders-rest v1.1 GREEN (154408; the rocks agree within 32 units everywhere), x-trap-hit-premise v2.1 GREEN on its
+  premises (154820) with its answer CONFIRMED: as built a trap's hit deals a player nothing (the client's zeroed
+  fDiffMultHPToPC* gate the world's damage too), at 1.0 one spike-wall hit costs 60. D-T4 to Eli (the world-damage multiplier;
+  the fix moves the actor-damage cut into the platform's DamageActor replacement, A recommended). x-trap-lamp-trigger v2.1 RED
+  on its premise: the driver's Papyrus Spell.Cast from the player never casts (the trace: 0 CastSpellImmediate, 0 Launch); v3
+  casts by hand. Fork 029769f7: the DestructionStage difftest session on the slice, its T2 the 41-of-41 trial.
