@@ -8777,3 +8777,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   identical lines: c1's only aa8cb events before the grant are the relayed activation and "Trigger01 played (relayed, refused)",
   and its re-sync still reads "the script's side 2, the record Trigger01 (side 2), 0 turn(s) fed", so the fix ran and the side
   came from elsewhere; with thuum-cf. The lab is free.
+- 21:02 PST 2026-11-04 (05:02Z 11-05) (numidium): the pillar hand-off READ ON THE LAB: x-puzzle-handoff v4 (4723f4d0; thuum-cf: v3's red was
+  its premise, c1's own script having run the relayed press as a guest under the platform's Override, ADR-068 finding 7, so
+  side 2 was the script's truth) GREEN on e320b76a's lay, 20261105-045605: c1 inherited the Temple (05:00:15Z, epoch 2), its
+  re-sync read "the script's side 2, the record Trigger01 (side 2), 0 turn(s) fed", and its first press was the whale: "object
+  animation aa8cb trigger02 reported", then the server's "ff000000 activates aa8cb ... relayed" and "aa8cb animates aa8cb
+  'trigger02' ... recorded, relayed to 1 game(s)". With the three greens before it, e320b76a holds the side sync, the hand-off,
+  the node-rotation export and the whale on two seats (not yet in play). Noted to thuum-cf for v4's fresh review (ADR-064's
+  rewritten claims): leg C's counts sit at the side-2 branch's floor, so the side-1 branch's feed goes unchecked; a threshold
+  tied to the branch keeps both strict.
