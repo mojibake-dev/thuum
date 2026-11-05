@@ -8817,3 +8817,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (SetMotionType, ApplyHavokImpulse), silence the sounds trap scripts play themselves, and leave a bridge's collision marker
   standing until rung 4; so rung 2 keeps the linked relay and the Override, their retirement waits for those channels
   (ADR-068's new "Measured 2026-11-05, the trap census" note), and b-bleak-traps' guest claims need no move at rung 2.
+- 23:14 PST 2026-11-04 (07:14Z 11-05) (numidium): thuum-cf's canon candidate fe753e3f (the hand-off re-sync takes the pillar and the
+  player again by id after every wait: the platform forgets its object pool at each TESModPlatform update, so a wrapper kept
+  across a wait throws) laid the same way (bundle f1e06d54): b-puzzle-relay 20261105-064323, b-object-anim 064841,
+  x-puzzle-guest-view v3 065355 GREEN; x-puzzle-handoff v5 RED on a lab fault (065857: c2's relaunch exec lost by the guest
+  agent, E_PVE_EXEC_LOST) and GREEN on its rerun (070841); x-puzzle-handoff-late v2 RED (070329) on one claim only, the race its
+  review named: the late joiner's feed now runs ("the script's side 1, the record Trigger01 (side 2), 1 turn(s) fed", no
+  throw), but c2's new game was back in the cell when it landed, so the server relayed it to 1 game, not the claimed 0. Rung
+  1's stage held for thuum-cf's word (a red in this set stops it).
