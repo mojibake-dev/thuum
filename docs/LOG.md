@@ -9109,3 +9109,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   echo of a carried body crossing the other seat's copy, as vanilla does. It ships as a declared known issue for playtest 47 and
   is fixed after. The merge's gates left: the 746aff6c slot (the wire follower, x-trap-wire-follower) and Eli's check of the D-T2
   rewrites.
+- 15:32 PST 2026-11-05 (23:32Z 11-05) (thuum-cf): the trap slice's merge head moved back to 0f2f3c55 on Eli's word ("go with
+  recommendation"). The wire follower's fix (fork 746aff6c) read green (x-trap-wire-follower 20261105-230626) but made a hung
+  rock diverge between the seats (x-trap-boulders-rest 231500: the owner's copy hung, the follower's own copy moved its rock
+  once its follow ended at the owner's rest sample, and the record took the follower's fall), so it waits for a second fix after
+  playtest 47. New fork branch m4-scripts-2c-traps points at 0f2f3c55 (no new commit) for numidium's verb-stage and verb-merge
+  tonight; canon fast-forwards 9745d401 to 0f2f3c55. b-bleak-traps v3 (2bcc3635) and b-object-anim v5 (7da2a9e7) committed on
+  Eli's OK (23:2xZ); docs/engine/scripts.md S7 to S11 (d30a2984); x-trap-wall-both v1.2 GREEN 56 of 56 (224256), Eli's D-T2
+  outcome both ways. Declared for 47 in docs/verbs/traps.md's last paragraph.

@@ -1051,3 +1051,20 @@ The rest of the slice's reads before its merge (14:45 PST 2026-11-05 (22:45Z 11-
   (db821624) in the next slot. Rock 0xb6d4d's hang: the seam is ruled out (no neutralized line, no followed flag on the owner),
   the platform 0xb6d47 still holding it favoured (HYPOTHESIS), read by x-trap-rock-hang v1.1 (45888dff) with
   lab/frida/rock-motion-trace.js v1.1 on the tripping seat.
+
+The wire follower's slot and the merge's head (15:32 PST 2026-11-05 (23:32Z 11-05); numidium's stage of fork m4-scripts-2b-traps
+746aff6c, server image a389961b5d65, dist eaa3b26797405055). GREEN: x-trap-wire-follower v1.1 20261105-230626 (the seat that did
+not trip the wire fired its own copy's linker and platform once each, its wait premise held: S11's fix works),
+x-trap-oilpool-guest 231701, b-trap-record-restart 232113. x-trap-rock-hang v1.1 231108 red as an answer (its trace under read).
+x-trap-boulders-rest v1.1 231500 RED, a 746aff6c REGRESSION: the owner's (c2's) b6d4d hung at spawn height and its at-rest sample
+ended c1's follow ("trap body b6d4d followed no more: its owner's at-rest sample"); c1's own copy, firing since 746aff6c, then
+moved its rock with nothing left to neutralize its script's calls, and with c2's claim lapsed the record took another seat as
+the simulator ("E_PROP_NOT_OWNER: ff000001 moves prop b6d4d; another seat simulates it" at 23:16:14.094, no ff000000 claim line),
+so the rock lay fallen on c1 and the server and hung on c2: two worlds for one body, where before 746aff6c a hang stayed the same
+on every seat. HYPOTHESIS until the run's read lands: the cell's host is the lapsed body's simulator by default. So 746aff6c
+does not merge; its fix waits for a second one (a trap body's neutralization kept through the firing window after another
+seat's claim, past its rest sample). Eli's word (15:3x PST, "go with recommendation"): tonight's merge is 0f2f3c55's tree, by the
+new branch m4-scripts-2c-traps pointing at 0f2f3c55 (no new commit, no force push), canon 9745d401 to 0f2f3c55 by fast-forward.
+Declared for playtest 47: on the seat that did not trip a wire, the wire trap's platform break and dust do not play (S11, its fix
+on m4-scripts-2b-traps, not merged); a rock may hang, the same on both seats; a plate may fire once as a player re-enters its
+cell (S10); b-push's y flake.
