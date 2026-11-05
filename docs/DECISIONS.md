@@ -4694,3 +4694,17 @@ relayed activation, beside the seam's mirror of its animations; the second play 
 pillars' "played (relayed, refused)" shows), a declared limit read on rung 2's stage, with the server's rule (no mirror of a self
 the activation table names as a child to a listener it relays that self's linked activations to) as the fix if the stage reads
 harm. The pillars, whose host presses relay no activation on the flip, are unaffected.
+
+D-S2, decided by Eli 22:41 PST 2026-11-04 (06:41Z 11-05) after the trap census ("are we dead certain that's the best model?"; then "i guess fuck it we
+build it this way like u say and then test it, and change what doesnt work, but i will say, keep in mind, there's what is
+'technically correct' in terms of the state of the art, and then theres 'correct' for how skyrim will LET us make this work in a
+way that feels most seamless"): B. One owner for CONSEQUENCES (state, damage, items, quest progress: the law of decision 1 and
+ADR-063); every seat MAY run COSMETIC copies whose results are discarded (a sound, a particle, an animation, a dart's flight with
+its damage off), so decision 3's "non-owners render and never simulate" reads "a non-owner's simulation never counts". Where a
+trap body comes to rest is state, carried by the prop stream's trap-body slice after scripting (Embershard's rocks fall on every
+seat meanwhile, landing where each seat's own physics puts them: a known limit). A guest's copy of a linked target's script, run
+from the relayed activation, is such a cosmetic copy once rung 2's seam keeps its state rows from counting; the double play
+beside the seam's mirror is read on rung 2's stage and changed if it harms. The judge is the T4 playtest, not the literature:
+build, test, change what does not work. Options not taken: A, owner-only (every visible effect a channel before guests stop
+running a script); C, every seat runs every script with state changes gated (TES3MP's shape, which ADR-063's D-F1 C keeps for
+quests alone).
