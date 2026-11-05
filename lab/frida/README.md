@@ -566,6 +566,11 @@ TURN_SIGN) that ramps lockAngle with the pick snapped: HYPOTHESIS that the menu'
   2 kInProgress caller vm` for N 1, 2 and 3, the Trigger02 row being H-W1's
   answer. Ids by `just addr` on 2026-11-05; layouts CommonLib's (file:line in
   the header); Call's body and 104484's callers are pyghidra-mcp's static read
-  of the same day (HYPOTHESIS). The JavaScript logic was exercised locally
-  against a mocked runtime and frame; sha1 a09f21a9; never run yet. 1.6.1170
-  only.
+  of the same day (HYPOTHESIS). v1 (sha1 a09f21a9) ran once, x-native-frame
+  20261105-023520 on 83a40da3: both hooks attached on the right process, the
+  CModule compiled, no call row was written (its sized string read never
+  matched a name), and the per-interval counts showed one PlayAnimationAndWait
+  on 0xaa8cb per turn, the whale turn included, where the old graph hook
+  reported Trigger01 and Trigger03 alone; Call ran about 5,400 a second on six
+  VM worker threads, 98.7% of it the platform's own. v2 reads each name to its
+  NUL. 1.6.1170 only.

@@ -1,4 +1,7 @@
-// native-frame.js v1 (thuum-cf, 2026-11-05): the Dynamic read that opens rung 2 of the scripting ladder (docs/research/
+// native-frame.js v2 (thuum-cf, 2026-11-05): the Dynamic read that opens rung 2 of the scripting ladder (docs/research/
+// v2's one change (2026-11-05): nfFixed reads a BSFixedString to its NUL (v1's sized read turned every class and name into 160
+// bytes of the string pool, so x-native-frame 20261105-023520 wrote no call row; its per-interval counts still showed one
+// PlayAnimationAndWait on 0xaa8cb per turn, the whale turn included, where the old graph hook reported Trigger01 and 03 alone).
 // scripts-one-system-2026-11-05.md 6.2, 6.9 and 6.11 items 3, 9, 11 and 17; ADR-068 decision 2, the one seam). What the VM's one
 // native dispatch, BSScript::NF_util::NativeFunctionBase::Call, holds at its entry for a script's OWN native call, read on the HOST
 // of Bleak Falls Temple (cell 0x371de) while it turns the first puzzle pillar (ACTI 0xaa8cb, defaultPuzzlePillarScript) three times
@@ -349,9 +352,14 @@ function nfU32(p, o) { try { return p.add(o).readU32(); } catch (e) { return -1;
 function nfS32(p, o) { try { return p.add(o).readS32(); } catch (e) { return null; } }
 function nfF32(p, o) { try { return +p.add(o).readFloat().toPrecision(7); } catch (e) { return null; } }
 function nfFixed(field) { // a BSFixedString field: _data is the characters (BSFixedString.h:232, :116-121); null the empty string
+  // v2 (x-native-frame 20261105-023520): read to the terminating NUL, then cut at 160. A sized readCString converts
+  // exactly that many bytes, each NUL as U+FFFD, so v1 read 160 bytes of the string pool for every class and name, no
+  // name matched the filter and the run wrote no call row (frida-gum's readCString: g_utf8_make_valid (data, length))
   try {
     const s = field.readPointer();
-    return s.isNull() ? '' : s.readCString(160);
+    if (s.isNull()) return '';
+    const text = s.readCString();
+    return text === null ? null : text.slice(0, 160);
   } catch (e) {
     return null;
   }
