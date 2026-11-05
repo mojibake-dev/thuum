@@ -18,8 +18,22 @@ jump=${JUMP_HOST:-root@core.gaussing.tv}
 api=${LAB_API:-https://thuum.gaussing.tv/lab}
 srv=${SRV_HOST:-eli@10.10.70.10}
 spl='C:\Users\lab\Documents\My Games\Skyrim Special Edition\SKSE\skyrim-platform.log'
-# the lab is Eli's for the playtest: runs, run sets and the nightly wait (lab-api's hold, docs/LAB.md); `just lab-release` ends it
-hold() { curl -fsS -m 15 -X POST "$api/hold" -H 'content-type: application/json' -d "{\"minutes\": 180, \"reason\": \"$1\"}" >/dev/null 2>&1 || true; }
+# the lab is Eli's for the playtest: runs, run sets and the nightly wait (lab-api's hold, docs/LAB.md); `just lab-release` ends it.
+# A standing hold is never cut short or renamed: one with three hours or more left stands as it is, and a shorter one keeps its
+# reason for the three hours (playtest-go's proof, 2026-11-05: ready's relaunch turned the profile's hold into this one's
+# 180 minutes, an hour short of 45's 240, which the recorder and the nightly both read)
+hold() {
+  local st left reason
+  st=$(curl -fsS -m 15 "$api/status" 2>/dev/null | python3 -c 'import json, sys
+h = (json.load(sys.stdin) or {}).get("hold") or {}
+print(int(h.get("seconds_left") or 0), h.get("reason") or "")' 2>/dev/null) || st="0 "
+  left=${st%% *}
+  reason=${st#* }
+  [ "${left:-0}" -ge 10800 ] 2>/dev/null && return 0
+  [ -n "$reason" ] || reason=$1
+  curl -fsS -m 15 -X POST "$api/hold" -H 'content-type: application/json' \
+    -d "$(python3 -c 'import json, sys; print(json.dumps({"minutes": 180, "reason": sys.argv[1]}))' "$reason")" >/dev/null 2>&1 || true
+}
 enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
 keep() {  # the logs of the session the stop ends, off the clone, copied first as playtest-record.sh does (the game holds them open)
   local stamp kind src copy name tmp ps

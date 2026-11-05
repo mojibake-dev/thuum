@@ -94,6 +94,10 @@ class PlaytestProfile(unittest.TestCase):
             PROFILE.replace("  - profile: 2", "  - profile: 1"),
             PROFILE.replace("perks: [0x7934B]", "perks: [Overdraw40]"),
             PROFILE.replace("perks: [0x7934B]", "perks: [0]"),
+            PROFILE + "lay: {server: m3-canon-4-hands-4c6d9f24, dist: 7c79fc3e}\n",
+            PROFILE + "lay: {dist: {branch: m3-canon-4-objtype, sha: 12345678}}\n",   # an unquoted all-digit sha reads as a number
+            PROFILE + "lay: {client: canon}\n",
+            PROFILE + "lay: {srv: m3-canon-4-hands-4c6d9f24}\n",
         ]
         for text in bad:
             with self.assertRaises(ProfileError, msg=text[:80]):
@@ -157,6 +161,10 @@ class PlaytestProfile(unittest.TestCase):
             "    by_hand:", "    globals: [{form: \"8df:ccQDRSSE001-SurvivalMode.esl\", value: 0}]\n    by_hand:")
         with self.assertRaises(ProfileError):
             self.load(bad, 44)
+
+    def test_a_profiles_lay_names_the_build(self):
+        p = self.load(PROFILE + 'lay: {server: m3-canon-4-hands-4c6d9f24, dist: {branch: m3-canon-4-objtype, sha: "7c79fc3e"}, client: "83a40da3"}\n')
+        self.assertEqual(p["lay"]["dist"], {"branch": "m3-canon-4-objtype", "sha": "7c79fc3e"})
 
     def test_a_cells_last_grant_is_fresh_or_inherited(self):
         # the server's cell-host lines, as playtest 46 logged them (23:07 to 23:09Z): a grant after "is unhosted" or the

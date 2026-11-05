@@ -147,9 +147,28 @@ def check_profile(p: Any, n: int) -> dict[str, Any]:
         _int(v, f"stream {k}'s port")
     if ((p.get("after") or {}).get("readback")) not in (None, "percentages"):
         raise ProfileError("after.readback is percentages or absent")
+    _check_lay(p.get("lay"))
     if n >= STANDING_FROM:
         _standing(p)
     return p
+
+
+def _check_lay(lay: Any) -> None:
+    """The profile's build, go's first step (_lay): {server: <image tag>, dist: {branch, sha}, client: <commit>}, each
+    optional, every commit a quoted hex sha (an all-digit one would read as a number)."""
+    if lay is None:
+        return
+    if not isinstance(lay, dict) or not lay or set(lay) - {"server", "dist", "client"}:
+        raise ProfileError(f"lay takes server, dist and client, got {lay!r}")
+    sha = re.compile(r"[0-9a-f]{8,40}")
+    if "server" in lay and not (isinstance(lay["server"], str) and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", lay["server"])):
+        raise ProfileError(f"lay.server is a server image tag (turbo-srv's <ref-slug>-<sha8>), got {lay['server']!r}")
+    d = lay.get("dist")
+    if "dist" in lay and not (isinstance(d, dict) and set(d) == {"branch", "sha"} and isinstance(d["branch"], str)
+                              and d["branch"] and isinstance(d["sha"], str) and sha.fullmatch(d["sha"])):
+        raise ProfileError(f"lay.dist is {{branch, sha}}, a fork branch and its commit, got {d!r}")
+    if "client" in lay and not (isinstance(lay["client"], str) and sha.fullmatch(lay["client"])):
+        raise ProfileError(f"lay.client is a fork commit (turbo-client's), got {lay['client']!r}")
 
 
 def _standing(p: dict[str, Any]) -> None:
