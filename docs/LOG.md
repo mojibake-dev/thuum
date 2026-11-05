@@ -8825,3 +8825,17 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   review named: the late joiner's feed now runs ("the script's side 1, the record Trigger01 (side 2), 1 turn(s) fed", no
   throw), but c2's new game was back in the cell when it landed, so the server relayed it to 1 game, not the claimed 0. Rung
   1's stage held for thuum-cf's word (a red in this set stops it).
+- 23:39 PST 2026-11-04 (07:39Z 11-05) (thuum-cf): a correction to the 07:14Z reading of x-puzzle-handoff-late v2's red (070329), from the fresh review
+  of its rewrite: c2's new game was NOT back in the Temple when the feed landed. The feed's "recorded, relayed to 1 game(s)"
+  (07:07:39.156) went to c2's OLD session, which held its listener slot until netcode's 15 s token timeout ("user 1 left" at
+  07:07:40.896; the new game connected at 07:07:55.698, 16.5 s after the feed), while the server grants the cell about 9 s after
+  the old game stops (kStaleHostMs 4 s, then the 5 s grace); in seven hand-off runs the old session dropped 4.70 to 5.38 s after
+  the grant, so v2's "relayed to 0 game" claim would have failed in nearly every run of this shape (docs/engine/scripts.md S6).
+  Its rewrite (the feed's report recorded once, the relay count recorded unclaimed) reviewed GO with notes, applied as written:
+  x-puzzle-handoff-late v3.1 (c8cf7973) and x-puzzle-handoff-late-flip v1.3 (703dd338), each with the review's claims on c2's
+  new game before leg D (its own replay taken, no relayed Trigger01; canon, no relayed activation). S3 narrowed: a TypeScript
+  play never consumes a self-played mark, but the seat's own script's event right after it can (060354). Rung 2's merged-head
+  review GO with notes: x-bleak-scripts v2.1 (dbf7474a) and x-puzzle-whale v1.1 (c7fc8f8e) for its stage; its open items (the
+  Hall of Stories door FX an MSTT the server never loads, the scripts line's volume) in the rung 2 spec. Eli's two calls
+  tonight: D-S2 B (one owner for consequences, cosmetic copies on any seat; build, test, change) and the boulders as synced
+  physics items (rung 6, before q-embershard). Open with Eli: traps run on every seat with hits judged by the victim's seat.
