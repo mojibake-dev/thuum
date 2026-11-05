@@ -12,6 +12,10 @@ HYPOTHESIS until a probe reads them.
   ObjectReference, trapRockfallEffects extends ObjectReference. Inside the family: PressurePlate, Tripwire, SoundTrap, TrapLever
   (TrapTriggerBase); MovingTrap (so TrapSwingingWall, BladeTrap), DartTrap, PhysicsTrap, TrapRiggedRockfall (TrapBase);
   PhysicsTrapHit (TrapHitBase). So the oil lamp, D-S3 point 3's example, falls outside point 1's rule: Eli's word (D-T1).
+  CORRECTED 11:2x PST 2026-11-05 (19:2xZ 11-05) by the prefix census (docs/research/trap-prefix-census-2026-11-05.md): 13
+  trap-named scripts fall outside the chain, not three (TrapBear, TrapExplosiveGas, TrapPoisonGas, trapSoulGemController among
+  them), HazardBase (no trap name; the spike beds and Nordic platforms) is a fourth root the chain misses, and TrapExplosiveGas
+  has two quest subclasses (TG02Beehive, TGTQ04BannerBurnScript) that a prefix read up the chain would admit.
 - F2. The gate decides per REFERENCE (one passing script lets the event reach all of a reference's scripts, FridaHooks.cpp:384-441),
   so the rule is "every script on the reference is in the family". Levers, pull chains and pull bars carry TrapLever beside a
   mechanism script (NorLever01SCRIPT, NorPullBar01SCRIPT, defaultPillarPuzzleLever), so under that rule they stay the cell host's,
@@ -109,3 +113,19 @@ iDifficulty 5, Legendary; the repo's static read puts the six between 0.5 and 2.
 character dies to two wall hits); C traps and falls stay harmless, ADR-028 amended. thuum-cf recommends A: the world bites at
 the game's own base, and nothing about multiplayer needs it harder or softer.
 
+Eli's answers, 10:5x to 11:1x PST 2026-11-05 (18:5xZ to 19:1xZ 11-05). D-T3 A: playtest 47 includes traps ("let 47 include
+traps"), after the slice merges. D-T1: "all traps should be equally triggerable by both guest and host"; built (fork ff9b804a) as
+the census's section 4 states: a trap class by the chain to TrapBase, TrapTriggerBase, TrapHitBase or HazardBase, or by the
+script's own "trap" name in any case; a reference family when every script is a trap class and its base is no inventory object
+(the 52 soul gem pickups stay the host's). D-T4 B: "traps should be scaled to difficulty"; built (c09b1dd5): with the DamageActor
+cut installed the client leaves the engine's six fDiffMultHPToPC* in force. That raised D-T5, which difficulty: skymp5-client pins
+iDifficulty 5, Legendary (disableDifficultySelectionService.ts, no reason in the code), and Update.esm's GMST 0x010009d5 sets
+fDiffMultHPToPCL to 3.0 (the 2.5 above was the executable's default), so a wall hit at the lab's level goes from 60 to about 180,
+while the server's formula gives actor hits no difficulty yet (TES5DamageFormula.cpp:207, upstream's TODO(#461)); A keep
+Legendary, B pin Adept, C one server-set difficulty for every hit; thuum-cf recommends B for 47, then C; the pin reads the
+client setting difficulty since ce298e0f (built ahead, merges on the word). D-T2 stays open. Eli's direction on moving things
+(the soul gem trap: "we should use the same rational for other spells following a trajectory so both people see the same
+projectile"), with the boulders: motion every machine computes alike (a swinging wall, a fixed dart line) plays on each seat;
+motion that depends on aim or physics (falling rocks, an aimed bolt such as MagicTrap's) has one owner, the seat that set it off,
+and the others replay it; a hit counts on the hit player's own seat. Players' and hosted casters' bolts already carry their
+launch (magicSyncService's hosted launch report); a caster that is a world object is the gap, a slice after 47.

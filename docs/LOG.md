@@ -9040,3 +9040,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   its 5x5 grid around (32, -16) holds both. So the crash stacks' cells do not single out c1's grid. What still differs is where
   they sit in it (0x97B3 is c1's southwest corner but only an edge cell of c2's) and c1's spot 14 units from the cell border. The
   boot-spot reading stays a weaker HYPOTHESIS, with the same test.
+- 11:27 PST 2026-11-05 (19:27Z 11-05) (thuum-cf): Eli answered three of the trap slice's calls (docs/research/
+  trap-slice-d-s3-2026-11-05.md's last paragraph): D-T3 A, playtest 47 includes traps; D-T1, "all traps should be equally
+  triggerable by both guest and host"; D-T4 B, "traps should be scaled to difficulty". The prefix census behind D-T1 is
+  docs/research/trap-prefix-census-2026-11-05.md: 32 trap-named scripts, 13 outside the class chain (F1 said three), HazardBase a
+  fourth root the chain misses (34 spike beds, 15 Nordic platforms), and a prefix read up the chain would have admitted two quest
+  subclasses of TrapExplosiveGas (TG02Beehive, TGTQ04BannerBurnScript). Built on fork m4-scripts-2b-traps and pushed (pipeline
+  5479): ff9b804a the wider family (4,887 family references against 3,622; the 52 soul gem pickups are items and stay the
+  host's), c09b1dd5 the engine's own difficulty multipliers left in force, ce298e0f the pin read from the client setting
+  difficulty (built ahead of D-T5). A correction to my D-T4 memo: Legendary's damage-taken multiplier is 3.0 (Update.esm GMST
+  0x010009d5), not 2.5, so a wall hit at the lab's level goes from 60 to about 180 under skymp5-client's pinned Legendary, while
+  actor hits stay unscaled (TES5DamageFormula.cpp:207, upstream's TODO(#461)): D-T5, which difficulty, is Eli's, with D-T2. Eli's
+  direction for moving things: what every machine computes alike plays on each seat, what depends on aim or physics has one
+  owner (the seat that set it off) and is replayed, so a trap's aimed bolt (MagicTrap) joins the players' launch relay in a slice
+  after 47. Next: the fresh review of bd0c8cf8..ce298e0f and three probes (a guest lights an oil pool, a guest shoots a lamp, a
+  wall hit at the pinned difficulty), then the stage.

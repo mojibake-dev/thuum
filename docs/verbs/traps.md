@@ -956,3 +956,20 @@ D-S3 stands read on every point: the firing (H-T2), the hit's owner (D-S2 B), th
 restart scenario), the trap bodies (the rocks' claim and rest), the relay's split, the spent trap's blank, the lamp by hand, the
 dodge. Left before it merges whole: Eli's D-T1, D-T2 (its scenario rewrites follow the word) and D-T4 (the fix staged green).
 
+
+Eli's answers and the heads that carry them (10:5x to 11:2x PST 2026-11-05 (18:5xZ to 19:2xZ 11-05); docs/research/
+trap-slice-d-s3-2026-11-05.md's last paragraph holds the words). D-T3 A: playtest 47 includes traps, after the slice merges.
+D-T1, every trap triggerable from every seat: fork ff9b804a widens the family by the census's rule (docs/research/
+trap-prefix-census-2026-11-05.md section 4: the chain to TrapBase, TrapTriggerBase, TrapHitBase or HazardBase, or the script's own
+"trap" name in any case; every script on the reference a trap class and its base no inventory object): 4,887 family references
+against 3,622, the oil pools, oil lamps, explosive gas, bear traps, poison gas, rockfall dust, spike beds and Nordic platforms
+joining, the TG02 and TGTQ04 quest subclasses and the 52 soul gem pickups staying the host's. D-T4 B, the world's damage scaled
+to the difficulty: c09b1dd5 leaves the engine's six fDiffMultHPToPC* in force (read once before this client's first write,
+logged as "[verb:traps] world damage multipliers"; 0 for the player's own ragdoll removal window; worldDamageMult a lab
+override; 0 without the DamageActor cut). At skymp5-client's pinned Legendary, Update.esm's fDiffMultHPToPCL is 3.0, so a wall
+hit that cost 60.03 at 1.0 should cost about 180 (inferred, unread). ce298e0f, built ahead of D-T5 (which difficulty the world
+plays at; Eli's), reads the pin from the client setting difficulty (default 5, upstream's). Open with Eli: D-T2 (the two
+scenarios' legs A and B) and D-T5. Owed before the stage: the fresh review of bd0c8cf8..ce298e0f (ADR-064 amendment A) and the
+three probes' reviews (x-trap-oilpool-guest, x-trap-lamp-guest, x-trap-hit-difficulty); pipeline 5479 builds ce298e0f.
+Declared, HYPOTHESIS: a family trap's state that no record carries stays each seat's copy (a bear trap re-armed by one player's
+press is armed on that seat alone).
