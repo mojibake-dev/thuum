@@ -973,7 +973,7 @@ scenarios' legs A and B) and D-T5. Owed before the stage: the fresh review of bd
 three probes' reviews (x-trap-oilpool-guest, x-trap-lamp-guest, x-trap-hit-difficulty); pipeline 5479 builds ce298e0f.
 Declared, HYPOTHESIS: a family trap's state that no record carries stays each seat's copy (a bear trap re-armed by one player's
 press is armed on that seat alone).
-The fresh review of bd0c8cf8..ce298e0f (ADR-064 amendment A; 12:0x PST 2026-11-05 (20:0xZ 11-05)): GO with notes, applied as
+The fresh review of bd0c8cf8..ce298e0f (ADR-064 amendment A; 11:4x PST 2026-11-05 (19:4xZ 11-05)): GO with notes, applied as
 written in fork ece35376 (no second review): the pin's reach to the world's damage tagged HYPOTHESIS (the pin writes the INI
 setting iDifficulty:GamePlay, the static read has DamageActor index the player's own difficulty field, PlayerCharacter.h:399), so
 x-trap-hit-difficulty reads two legs, difficulty 5 and 2; a light caveat beside the item test (IsInventoryObject counts every
