@@ -929,3 +929,16 @@ pusher and is now cut; lower: falls newly scaled); b-god's TIM leg; x-trap-hit v
 and c-dungeon-enemies run under TGM, which puts the victim's own engine in god mode, so none can see a local copy. A low record
 is read against the seat's height first: the summit sheds seats, and falls cost health.
 
+D-T4's stage (09:31 PST 2026-11-05 (17:31Z 11-05); numidium's verb-stage of fork m4-scripts-2b-traps bd0c8cf8, server sha256:d1dee00d, client build 19241,
+platform a66d1b9b): twelve of thirteen GREEN. The floors held: b-duel 164913, b-block 165255, b-marksman 165616, b-spell 165828,
+b-hailstone 170029, b-poison 170230, b-fod-kill 170441, b-shout 170622, b-shout-repeat 170944, b-shadowbond 171135, b-god 171627
+(its TIM leg: a lethal arrow under immortal mode left c1 at 0.0547, then 0.013, alive), so no actor's damage counts twice under
+the moved cut. RED b-push 171416 on its own old flake (its y claim read -170.02; six of its nine runs of 10-20 and 10-21 read
+-149 to -206 there): its push mechanics held, and its health read the falls: c2's record 0.9178 after the push against 0.9376 to
+0.9431 in all nine past runs, so a fall now costs the player its own engine's damage, as ADR-028 keeps it (the old zero had
+cut it).
+D-S3 point 2 CONFIRMED by run on the fix: x-trap-hit v3.1 GREEN (20261105-172521, c0031667, all 28 claims): both walkers' six
+multipliers read 1.0; c2's walk (leg A) left c2 at 247.024 of 300 on its own engine with its record down and c1's full, c2's
+hit row bare and c1's copy " (skipped)"; c1's walk (leg B) the mirror, 246.775 of 300; neither seat's " (not hosted)" row.
+A trap hurts exactly the player its own screen showed it hitting. The fix merges with the slice only on Eli's D-T4.
+

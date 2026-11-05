@@ -8980,3 +8980,8 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   multiplier held at 0 without it, the ragdoll window the player's own, falls and the attacker-less paths HYPOTHESIS), both
   pushed, the Windows builds queued. b-trap-record-restart committed (thuum 8f63a6a4) and deployed. x-trap-hit v3 (walks) in
   review. The stage reads the floors' regression set (docs/verbs/traps.md) and merges only on Eli's D-T4.
+- 09:31 PST 2026-11-05 (17:31Z 11-05) (thuum-cf, numidium's D-T4 stage): fork m4-scripts-2b-traps bd0c8cf8 twelve of thirteen green (the floors b-duel,
+  b-block, b-marksman, b-spell, b-hailstone, b-poison, b-fod-kill, b-shout, b-shout-repeat, b-shadowbond, b-god; x-trap-hit
+  v3.1 172521 with all 28 claims: a trap's hit lands on the hit player's own seat alone, 60 of 300, the other copy skipped),
+  b-push red on its old y flake with falls now costing health (0.9178 against 0.94 in every past run). D-S3 point 2 confirmed.
+  Merges on Eli's D-T4.
