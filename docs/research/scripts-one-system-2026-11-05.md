@@ -737,3 +737,34 @@ dialogue hubs among them. Result: the rule does not yet separate the cases, so b
 rung 5 to measure the same way: a quest is the player's when every alias it fills is the player's AND (it has an alias, or every
 reference its script's natives target is the player's own, read from the census by script); DLC1VCController 0x201a428 (four
 forced-ref door aliases) stays world as it should.
+
+## 9. The trap census (2026-11-05 06:1xZ, read-only; the full read is docs/research/trap-census-2026-11-05.md)
+
+The question: once rung 2's seam relays a host's script animations (PlayAnimation, PlayAnimationAndWait, Debug.SendAnimationEvent,
+SetAnimationVariableBool/Int/Float), can the server stop relaying linked activations to guests and the guest's gate blank their
+scripts (closing docs/engine/scripts.md S2), with every trap still visible? Read from the lab's game files (Skyrim.esm and the 99
+later plugins, the scripts' winning copies, the meshes and behavior graphs) for Bleak Falls Temple 0x371de, Bleak Falls Sanctum
+0x371dd and Embershard Mine 0xb6be6. The answer: not yet.
+- Dark on a guest: the puzzle's four darts 0x39fdd, 0x3720f, 0x2ad49, 0x2ad43 (DartTrap: Weapon.Fire and a windup Sound.Play, no
+  animation, no graph) and Embershard's seven falling rocks (PhysicsTrap: SetMotionType Dynamic and ApplyHavokImpulse, then Havok;
+  the prop stream takes no trap bodies, prop-physics.md:532).
+- Moving but silent or without a hit effect: the spike wall 0x54b15, the six swinging blades, the rockfall dust 0xb6d40 (the
+  sounds the scripts play themselves, Sound.Play, and TrapHitBase's Weapon.Fire dust puff; the swing sounds are graph annotations
+  and travel with the relayed events: H1).
+- A state with no channel: Embershard's bridge 0xb6c26 turns its collision marker 0x105c99 on and off through
+  EnableLinkChain and DisableLinkChain; under the closure the guest's Disable is a skipped state row and nothing carries the host's
+  until rung 4's RefState (H5: an invisible wall on the lowered bridge).
+- Covered whole: the portcullises, the bridges' motion, the rigged rockfall, the sarcophagus lids (dark today: an actor caster never
+  reaches the linked relay, H4), and every player-pressed piece (levers, pull chains, the pull bar, the pillars, the keyhole and
+  rings). The DOOR 0x45f3c is the engine's own sequence, carried by the server's isOpen record. The draugr and the spider are the
+  NPC stream's (ccc98a2d and its fixes).
+- The smallest set of extra rows: Weapon.Fire (subject arg0), Sound.Play (subject arg0), and SetMotionType with ApplyHavokImpulse,
+  or trap bodies on the prop stream instead (the design law's answer: the host's physics streamed, no guest simulating). Relaying
+  Weapon.Fire or an impulse as the same native makes the guest's engine fly a real dart or push a real body, simulation on a
+  non-owner (ADR-063 decision 3), so each needs a receiver rule (H6: a relayed dart hits the guest's own player).
+- Two relays carry an owner's input and stay in every shape: a guest's own press of a scripted object (to the host), and a linked
+  activation whose caster and target have different owners (03714dc8's relay to the simulator).
+- H-D1 predicts at least one depth-zero animation hit on a non-door: the FURN puzzle lever 0xaa8c3, whose pull is the engine's
+  furniture code (H3).
+The consequence for the ladder is ADR-068's "Measured 2026-11-05, the trap census" note: rung 2 keeps the linked relay and the
+Override, and their retirement waits for the channels above.

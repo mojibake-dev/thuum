@@ -8796,3 +8796,24 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   turns fed) but its aa8cb re-sync, the one that had to feed a turn (side 1 against the record's 2), threw "SP3NativeValueCasts::
   JsObjectToNative..." (the console cuts the native's name); no green run had fed a turn before. Canon stays at 83a40da3, the
   hand-off MECHANISM ONLY; with thuum-cf. The lab is free.
+- 22:29 PST 2026-11-04 (06:29Z 11-05) (thuum-cf): the late joiner's red read and fixed, rung 1's next head built, the trap census. The red (numidium's
+  060929 above) is a stale form wrapper: Skyrim Platform forgets every JS wrapper of a form at the next Papyrus update
+  (Sp3NativeValueCasts.cpp's NativeObjectToJsObject, then JsObjectToNativeObject's range check; its own docs/native.md says to
+  take the form again by id), and the re-sync kept the pillar across its waits, so the first native after a wait (the side-1
+  reset's Trigger03) threw; fork m3-canon-4-whale fe753e3f takes the pillar and the player again after every wait and names the
+  step in its error line (pushed server-only, tsc clean, under a fresh review); docs/engine/scripts.md gains S5, and S1 to S4
+  went in at d823aff2 (ADR-064 amendment C) before the probes relied on them. The rerun on fe753e3f's lay is the same five
+  (b-puzzle-relay and b-object-anim by name, sky-srv still on the canon v3s; x-puzzle-guest-view v3; x-puzzle-handoff v5;
+  x-puzzle-handoff-late v2 d93033de, v1 cc568b06's fresh review GO with notes applied as written); all five green moves canon
+  to fe753e3f. Rung 1 (m4-scripts-1-flip, local 536e30d4, not yet pushed): ccc98a2d's T0 case made able to fail (0aba88c4),
+  a host's linked activation of an actor another seat simulates relayed to that seat alone (03714dc8), with the non-actor
+  path's two checks before it, the reporter hosting the trigger's cell and the actor's own XAPR naming the trigger (dcef5d8f,
+  rule 5: with no claim a guest's report would have woken the host's own actor), and the whale head merged; fork-lint and tsc
+  clean, its fresh review running; it merges fe753e3f before its push, since on the flip both hand-off probes feed a turn.
+  docs/verbs/traps.md's actor section and Authority lines updated. The flip twins for rung 1's stage, both reviewed GO with
+  notes (applied as written): x-puzzle-handoff-flip v2 (0c253c5a) and x-puzzle-handoff-late-flip v1.1 (2e4c9404), by path.
+  The trap census (docs/research/trap-census-2026-11-05.md, read-only over the lab's game files): with rung 2's six animation
+  rows, ending the linked relay to guests would darken the puzzle's darts (Weapon.Fire) and Embershard's falling rocks
+  (SetMotionType, ApplyHavokImpulse), silence the sounds trap scripts play themselves, and leave a bridge's collision marker
+  standing until rung 4; so rung 2 keeps the linked relay and the Override, their retirement waits for those channels
+  (ADR-068's new "Measured 2026-11-05, the trap census" note), and b-bleak-traps' guest claims need no move at rung 2.

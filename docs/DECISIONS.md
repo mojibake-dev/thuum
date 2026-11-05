@@ -4681,3 +4681,16 @@ denied lists stay; rung 5 measures a refinement the same way (the aliases AND th
 first two dungeons no world-object script carries a PlayerRef property (27 of 54 call Game.GetPlayer), so the acting-player
 scope's swap of that native's result covers their player tests. DA04's apparition is stage 40 (EnableHM: PlayAnim02 on the FX,
 Enable on the activator, the talking activator and the collision).
+
+Measured 2026-11-05, the trap census (thuum-cf, the research file's section 9 and docs/research/trap-census-2026-11-05.md): with
+rung 2's six action rows, a guest that stopped receiving linked activations would lose the puzzle's four darts (Weapon.Fire, no
+animation), Embershard's seven falling rocks (SetMotionType and ApplyHavokImpulse, then Havok), the sounds trap scripts play
+themselves (Sound.Play), and a bridge's collision marker (EnableLinkChain, a state row with no channel before rung 4). So decision
+4's retirement of the process-wide Override, and with it the end of the linked relay to guests (docs/engine/scripts.md S2), wait
+for those channels: Sound.Play and Weapon.Fire as action rows with a receiver rule (a relayed trap projectile harms no player on
+the receiving seat, the host's TrapHit 72 carrying the damage), RefState (rung 4), and trap bodies on the prop stream so no guest
+simulates them. Until then rung 2 keeps both: a linked target's consequences reach a guest by its own script, run from the
+relayed activation, beside the seam's mirror of its animations; the second play of one event is refused by the graph (as the
+pillars' "played (relayed, refused)" shows), a declared limit read on rung 2's stage, with the server's rule (no mirror of a self
+the activation table names as a child to a listener it relays that self's linked activations to) as the fix if the stage reads
+harm. The pillars, whose host presses relay no activation on the flip, are unaffected.

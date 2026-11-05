@@ -54,6 +54,9 @@ run through the server's own activation-parent table (ActivateChilds) with each 
 games; the lever's linked activation (caster lever, target door) from the host, the door opened.
 Rate limit / bounds: a self-activation per reference at most twice a second; a linked activation only from the
 cell's host and only between references the game files link (XAPR or XLKR of the target names the caster).
+An actor target (ADR-068, "A linked activation of an actor" below): R2 on the seat that simulates the actor; the server
+drops the report when the reporter or nobody simulates it, and relays it to the simulator alone otherwise, after the same
+two checks (the reporter hosts the trigger's cell, the actor's own XAPR names the trigger) and within the same budget.
 
 ## Engine surface
 
@@ -672,19 +675,42 @@ relayed 'trigger02' as it does for Trigger03. Lines say 'trigger02' in lowercase
 the whale) and x-puzzle-handoff v3 (sha1 37d0d4ce, the profiles' ids, a whale claim on the new host) on bb559685's dist with
 c4775a85's bundle; green moves canon 83a40da3 to c4775a85 (the side sync, the hand-off, the export, the whale).
 
-### A linked activation of an actor (21:08 PST 2026-11-04, 05:08Z 11-05; fork ccc98a2d on m4-scripts-1-flip, ADR-068)
+### A linked activation of an actor (21:08 PST 2026-11-04, 05:08Z 11-05; fork ccc98a2d on m4-scripts-1-flip, ADR-068; the relay to another simulator and its checks 22:01 PST 2026-11-04, 06:01Z 11-05, fork 03714dc8 and dcef5d8f)
 
-Authority: R2, carried by the NPC stream, never by this verb. A host's report of its engine's linked activation whose TARGET is
-an actor (an ambush's draugr woken by its trigger: Bleak Falls Temple's defaultActivateSelfTRIG 0x38098 and its ACHR children
-0x380b3, 0x380b4, 0x380b5, 0x380b9, whose XAPR name the trigger with delays 0, 4, 3, 5 s) is that actor waking on the seat that
-simulates it. The server neither judges it nor relays it (OnLinkedActivation, before the reference, cell, host and link checks):
-the host's engine runs the waking (the masterAmbushScript, the AI), the NPC stream carries what follows to the other games
-(their puppets render it, ADR-063 decision 3), and a relayed activation would run the engine's activation on a watcher's puppet.
-The line: "[verb:traps] <host> reports <caster> activating actor <id>: the actor's simulator's (the NPC stream carries it), not
-relayed". An actor the server never loaded (0x380b4, NPCs on or off) is judged an actor by its game-file record (ACHR). Before
-this rule the pairs read E_TRAP_UNLINKED (the activation-parent table is filled for non-actor references alone,
-MpObjectReference::InitScripts) with NPCs on and E_TRAP_NO_REF with NPCs off (x-bleak-traps-npcs 20261105-023048; b-bleak-traps
-v1 on canon and on 83a40da3, 20261105-013206, 013632, 020830, 021251). T0: TrapRelayTest's "A host's linked activation of an
-actor is the actor's simulator's" (a loaded and an unloaded draugr, no relay, no throw, the plate's wall still relayed). Not
-validated: the server takes the host's word that the target woke (R2, rule 5's "recorded as unvalidated", here recorded nowhere
-since the stream is the record).
+Authority: R2 on the seat that simulates the actor. A host's report of its engine's linked activation whose TARGET is an actor
+(an ambush's draugr woken by its trigger: Bleak Falls Temple's defaultActivateSelfTRIG 0x38098 and its ACHR children 0x380b3,
+0x380b4, 0x380b5, 0x380b9, whose XAPR name the trigger with delays 0, 4, 3, 5 s) is that actor waking on its simulator. The
+server never relays it to the cell's other games (a relay there would run the engine's activation on a watcher's puppet, which
+renders and never simulates, ADR-063 decision 3) and asks who simulates the actor (OnLinkedActivation, before the reference,
+cell, host and link checks of the non-actor path; WorldState::HostOf: the player a follow or a dialogue claim names, else the
+cell's host, else nobody):
+- The reporter, or nobody, or a simulator with no game connected: dropped, since the reporter's engine ran the waking or no
+  engine runs the actor. The line, unchanged since ccc98a2d: "[verb:traps] <host> reports <caster> activating actor <id>: the
+  actor's simulator's (the NPC stream carries it), not relayed". HYPOTHESIS until a two-seat read: the NPC stream carries what
+  follows (the actor's waking, its walk and its attack) to the other games' puppets (x-bleak-traps-npcs v2 reads it on rung 1's
+  stage).
+- Another seat (a dialogue's claimant, ADR-052; a thrall's commander once ADR-060's row lands; the host of the cell an exterior
+  ambush's actor stands in while its trigger stands in the reporter's): the same RelayedActivation (target, caster) to that
+  seat's game alone, within the reporter's budget of eight linked relays a second (shared with the non-actor path; a refusal
+  spends none). The line: "[verb:traps] <host> reports <caster> activating actor <id>: its simulator <owner> is another seat's,
+  relayed to it". Before the relay two checks, the non-actor path's own: the reporter hosts the cell the trigger stands in
+  ("E_TRAP_NOT_HOST: <host> reports <caster> activating actor <id>, its trigger in a cell it does not host"; with no claim the
+  cell's host simulates the actor, so a guest's report would otherwise wake the host's own), and the actor's game-file record's
+  XAPR names the trigger ("E_TRAP_UNLINKED: <host> reports <caster> activating actor <id>, whose activation parents do not name
+  it"; read from the ACHR as InitScripts reads a non-actor's, since the table skips actors). HYPOTHESIS until a T3 run: the
+  simulator's engine wakes the actor on the relayed activate (relayedActivationService plays target.activate(caster) for any
+  reference).
+An actor the server never loaded (0x380b4, NPCs on or off) is judged an actor by its game-file record (ACHR) and has no
+simulator the server knows of: dropped. Before this rule the pairs read E_TRAP_UNLINKED (the activation-parent table is filled for
+non-actor references alone, MpObjectReference::InitScripts) with NPCs on and E_TRAP_NO_REF with NPCs off (x-bleak-traps-npcs
+20261105-023048; b-bleak-traps v1 on canon and on 83a40da3, 20261105-013206, 013632, 020830, 021251).
+T0: TrapRelayTest's "A host's linked activation of an actor is the actor's simulator's" (the unloaded draugr 0x380b4 judged by
+its record while NPCs are off, then the loaded 0x380b3 with the reporter as its simulator; each drop line once through the
+default logger, no E_TRAP_ line, no relay, the plate's wall still relayed; 0aba88c4 made it able to fail: deleting the rule turns
+the two reports into E_TRAP_NO_REF and E_TRAP_UNLINKED) and "A host's linked activation of an actor another seat simulates goes
+to that seat's game alone" (before any claim, the guest's report of the pair refused E_TRAP_NOT_HOST with nothing relayed; the
+guest's dialogue claim makes it the simulator, the host's report relayed to the guest alone with the trigger as the caster; the
+host's report of the plate 0x567f2 and the draugr refused E_TRAP_UNLINKED).
+Not validated (rule 5, recorded here): that the trigger fired at all and when (the host's word, R2; the XAPR delays are the
+engine's), and what the woken actor does next (the NPC stream's own rows). The drop records nothing, since the stream is the
+record.
