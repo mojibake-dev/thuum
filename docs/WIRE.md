@@ -742,6 +742,21 @@ WordKnown) and tells the seat as the console's TeachWord does (SpSnippet Game.Te
 E_WORDWALL_NO_REF, E_WORDWALL_NOT_A_WALL, E_WORDWALL_CELL, E_WORDWALL_REACH; a word known already is a no-op. Fixtures
 69-WordWall-0 and -1. The difftest session word-wall reports from another cell (refused; the legacy server drops the type).
 
+### DestructionStage (t 78, wire id 86): a single-use trap's result, recorded once from whoever caused it (traps, ADR-068 D-S3)
+
+Fork m4-scripts-2b-traps (2026-11-05, SCHEMA_VERSION 37): DestructionStage (id 86 by ADR-019's MsgType plus 8; ids 84 and 85
+hold two reserved, never-sent rows for ADR-068's ScriptState and ScriptStateApply, MsgType 76 and 77), both directions,
+reliable: `{ refr: u32, stage: u8, destroyed: bool, served: bool }`. C2S: a seat reports a trap-family or destructible reference's
+stage rise or its destruction, the cause or the first seat that saw it (served false). S2C: the server relays a newly recorded
+step to the reference's other listeners (served false) and serves the record to a late subscriber right after its create word and
+after a restart (served true). Validator: refr not 0 and below 0xff000000 (E_VAL_RANGE), stage at most 127, 8 at once then 2 a
+second per sender; fixtures 78-DestructionStage-0 and -1. The server's rule (wire-rules destruction.rs): the stage only rises,
+destroyed only goes true, the first report of each step wins; refusals E_DESTRUCTION_NO_REF, _ACTOR, _CELL (the reporter's game
+does not have the cell loaded), _RANGE. The value is the reporter's word (R2, rule 5: recorded, never judged). A schema 36 client
+cannot connect to a schema 37 server (netcode's protocol id carries the version), so the slice's client and server are built from
+one tree. The same slice raises PropTransform's budget to 128 at once, then 96 a second (UNMEASURED: a firing streams up to eight
+trap bodies at 10 Hz).
+
 ### RelayedActivation (t 70): a linked activation the cell's host reported, to the cell's other games (traps, M4)
 
 Since fork m4-traps (01:43 PST 2026-11-01, SCHEMA_VERSION 28): RelayedActivation (id 78, MsgType 70), server to client, reliable, to the

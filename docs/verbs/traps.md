@@ -746,3 +746,37 @@ the probes' claims:
   of <k>", before the platform's text, which the console cuts at 128 characters.
 Known, from the review: the reset's own "no longer hosts" return (after its first wait) prints nothing, so a probe cannot tell a
 reset stopped there from a re-sync never begun; a line for it rides the next commit that touches the re-sync.
+
+### D-S3, traps follow the interaction (02:37 PST 2026-11-05, 10:37Z 11-05; fork m4-scripts-2b-traps 9ff1895e, its reviews and first build running)
+
+ADR-068's D-S3 (accepted by Eli 08:04Z): whoever sets a trap off owns that firing, as a conversation claims an NPC (ADR-052) and a
+touch claims a prop (ADR-058). The design and its findings: docs/research/trap-slice-d-s3-2026-11-05.md. Built in three layers on
+rung 2's seam; the pieces and their rungs:
+- The firing: every seat runs the trap family's scripts (every script on the reference in the class chain of TrapBase,
+  TrapTriggerBase, TrapHitBase; the platform's TrapFamily.cpp), in any cell, and fires a trap for what its own engine sees, a
+  figure on a plate included. R3 per seat (D-S2 B's cosmetic copies). The client never blocks activation on a family reference;
+  the seam runs a family reference's natives as the seat's own (state rows counted " (trap)", action rows unmirrored).
+- The hit: ObjectReference.ProcessTrapHit's self is the hit actor, owned on that actor's own seat alone, so a non-owner's copy
+  skips it (scriptNonOwnerSkip nonLatent) and each player is hurt only by what its own screen showed. R1 (the hit seat computes;
+  the player's health reaches the server as its actor values). Retires fork m4-trap-hit's host report (never merged).
+- A single-use result: DestructionStage (MsgType 78, docs/WIRE.md), reported by the seat that caused it or saw it first, recorded
+  once (the stage only rises, destroyed only goes true), served to late joiners and after a restart from the reference's record.
+  R2. Not validated (rule 5): that the reported step happened at all (the reporter's word); the server checks only that the
+  reference is a game-file non-actor and that the reporter's game has its cell loaded.
+- A trap body moved by physics (Embershard's rocks): simulated by the seat whose firing moved it (a prop claim by impulse, touch
+  3; the first firing wins, E_PROP_MOVING for the second), streamed to the others, its rest recorded; a following seat's own
+  motion calls run neutralized. R2. Not validated: the body's samples (the prop stream's own rule).
+- The relay: a linked pair whose trigger and target are both family is fired by every seat itself and not reported; mechanism
+  triggers (levers, pull chains, the puzzle lever) and their targets still go through the host and its relay. Phase 2: a
+  player-only trigger's pair is reported from the seat whose player tripped it (the server's not-the-host exception for a trigger
+  whose VMAD sets playerOnlyTrigger, from a reporter with the cell loaded).
+HYPOTHESIS until the slice's probes read them: H-T2 (an unblocked plate on a non-hosting seat fires its children there), H-PO1
+(Object::GetProperty reads playerOnlyTrigger), H-AW (a neutral argument written into the native's frame is what its body reads),
+H-KF (a Keyframed follower rock hurts its own seat's player), H-DS1 and H-DF1 (the destroyed flag's timing beside the stage
+event), H-DS4 (the engine's own stage explosion plays when a served record is applied), H-EX (an explosion's damage goes through
+DamageActor, cut for figures and puppets). Open with Eli: D-T1 (the oil lamp's script, TrapFallingOilLampColLayer, is outside the
+class chain: a "trap" name prefix, two named roots, or the host's), D-T2 (rewriting b-bleak-traps' and b-object-anim's legs A and
+B, which claim the host's relay of the plate's wall). The probes: x-trap-dodge, x-trap-lamp, x-trap-boulders (lab/.cache/probes,
+by path, with their fresh review before the first run). Owed before the slice merges whole: a restart-persistence scenario for
+the destruction record (rule 6) and a T2 difftest session for DestructionStage.
+

@@ -44,7 +44,7 @@ ChangeForm once slice 3 lands); a channel-less R0 to R2 row is a missing channel
 | `TESFaction.kFactionFlags` | flag bit 1 | include/RE/T/TESFaction.h:130 | undeclared |  |  |  |
 | `TESFaction.kFactionReactions` | flag bit 2 | include/RE/T/TESFaction.h:131 | undeclared |  |  |  |
 | `TESFaction.kFactionCrimeCounts` | flag bit 31 | include/RE/T/TESFaction.h:132 | undeclared |  |  |  |
-| `TESForm.kFlags` | flag bit 0 | include/RE/T/TESForm.h:46 | undeclared |  |  |  |
+| `TESForm.kFlags` | flag bit 0 | include/RE/T/TESForm.h:46 | undeclared | DestructionStage, for the destroyed bit alone | the form's flags: its destroyed bit (kDestroyed, TESForm.h:91) and the destruction stage beside it travel as DestructionStage under ADR-068 D-S3 (R2, fork m4-scripts-2b-traps); the disabled bit is rung 4's RefState, so the row stays undeclared until every bit has its channel | traps |
 | `TESLevCharacter.kAddedObject` | flag bit 31 | include/RE/T/TESLevCharacter.h:24 | undeclared |  |  |  |
 | `TESLevItem.kAddedObject` | flag bit 31 | include/RE/T/TESLevItem.h:22 | undeclared |  |  |  |
 | `TESLevSpell.kAddedObject` | flag bit 31 | include/RE/T/TESLevSpell.h:22 | undeclared |  |  |  |

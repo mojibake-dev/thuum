@@ -999,7 +999,7 @@ Status meanings:
 | `ObjectReference.AddInventoryEventFilter` (method) | missing |  |  |  |
 | `ObjectReference.AddItem` (method, latent) | delegated | R2 | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:944]; hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): a host-run script's call on a hosted cell's object or a simulated actor is raised to JS and counted, the platform's own calls apart; census-only until slice 2's report row [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:1051] | papyrus-events |
 | `ObjectReference.AddToMap` (method) | missing | R3 | Not on the server VM yet (a quest revealing a marker needs a player to reveal it for; a later verb). With the map-markers verb (fork branch m1-map-markers until it lands), the server itself sends it to a player's client as an SpSnippet after a login, once per marker that player discovered (docs/verbs/map-markers.md): the map is client-local, the record is the server's. | map-markers |
-| `ObjectReference.ApplyHavokImpulse` (method, latent) | missing |  |  |  |
+| `ObjectReference.ApplyHavokImpulse` (method, latent) | missing | R2 | a client native, never the server VM's; the seam's table row (ADR-068 D-S3, fork m4-scripts-2b-traps): on a trap-family body, run and batched on the firing seat (its prop claim by impulse), run with magnitude 0 on a seat that follows another's stream (HYPOTHESIS H-AW) | traps |
 | `ObjectReference.BlockActivation` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:1062] |  |
 | `ObjectReference.CalculateEncounterLevel` (method) | missing |  |  |  |
 | `ObjectReference.CanFastTravelToMarker` (method) | missing |  |  |  |
@@ -1101,7 +1101,7 @@ Status meanings:
 | `ObjectReference.PlaySyncedAnimationAndWaitSS` (method, latent) | missing |  |  |  |
 | `ObjectReference.PlaySyncedAnimationSS` (method) | missing |  |  |  |
 | `ObjectReference.PlayTerrainEffect` (method) | missing |  |  |  |
-| `ObjectReference.ProcessTrapHit` (method) | missing |  |  |  |
+| `ObjectReference.ProcessTrapHit` (method) | missing | R1 | a client native, never the server VM's; the seam's table row (ADR-068 D-S3, fork m4-scripts-2b-traps): its self is the hit actor, owned on that actor's own seat alone (the player's, an NPC's simulator), so a non-owner's copy skips it (scriptNonOwnerSkip nonLatent) and a hit counts once, judged by what the hit seat saw | traps |
 | `ObjectReference.PushActorAway` (method) | missing |  |  |  |
 | `ObjectReference.RemoveAllInventoryEventFilters` (method) | missing |  |  |  |
 | `ObjectReference.RemoveAllItems` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:1053] |  |
@@ -1127,7 +1127,7 @@ Status meanings:
 | `ObjectReference.SetItemHealthPercent` (method) | missing |  |  |  |
 | `ObjectReference.SetItemMaxCharge` (method) | missing |  |  |  |
 | `ObjectReference.SetLockLevel` (method) | implemented | R0 | writes the level byte into the server's lock record (docs/verbs/locks.md; fork m4-locks); hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): a host-run script's call on a hosted cell's object or a simulated actor is raised to JS and counted, the platform's own calls apart; census-only until slice 2's report row [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:1081] | locks |
-| `ObjectReference.SetMotionType` (method, latent) | missing |  |  |  |
+| `ObjectReference.SetMotionType` (method, latent) | missing | R2 | a client native, never the server VM's; the seam's table row (ADR-068 D-S3, fork m4-scripts-2b-traps): on a trap-family body, run and batched on the firing seat, run as Keyframed (4) on a seat that follows another's stream (HYPOTHESIS H-AW) | traps |
 | `ObjectReference.SetNoFavorAllowed` (method) | missing |  |  |  |
 | `ObjectReference.SetOpen` (method) | implemented | R0 | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:970]; hooked at its entry on the client by ADR-062 slice 1b (ScriptNatives.cpp): a host-run script's call on a hosted cell's object or a simulated actor is raised to JS and counted, the platform's own calls apart; census-only until slice 2's report row [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:1077] | papyrus-events |
 | `ObjectReference.SetPosition` (method, latent) | delegated |  | The server also sends it itself, to the other players' games at a cast teleport's landing: the caster's figure placed there at once, not glided (R3 there; the record moves with the caster's own report; docs/verbs/cast-teleport.md, the look on other screens). [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:1069] | cast-teleport |
