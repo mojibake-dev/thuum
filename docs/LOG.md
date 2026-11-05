@@ -8839,3 +8839,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   Hall of Stories door FX an MSTT the server never loads, the scripts line's volume) in the rung 2 spec. Eli's two calls
   tonight: D-S2 B (one owner for consequences, cosmetic copies on any seat; build, test, change) and the boulders as synced
   physics items (rung 6, before q-embershard). Open with Eli: traps run on every seat with hits judged by the victim's seat.
+- 00:28 PST 2026-11-05 (08:28Z 11-05) (numidium): RUNG 1 (the flip) READ ON THE LAB, eight of eight on m4-scripts-1-flip dd280139, staged by
+  `REUSE_DIST=1 just verb-stage` (pipeline 5410's dist at 066cce4e with skymp5-client.js built at dd280139 over it, the bare flip
+  tag checked to be dd280139's image index): b-object-anim v4 20261105-072606, b-puzzle-relay v4 073028, b-bleak-traps v2 073349
+  (its first green since 11-02), x-bleak-scripts v1 073731, x-corpse-record v6 074223 (the record-death OnDeath blanks: one per
+  dispatch, Sven's aliases raising more), x-bleak-traps-npcs v2 074845, x-puzzle-handoff-flip v2 075237 and
+  x-puzzle-handoff-late-flip v1.3 080101 (its first run 075626 an error on a replaced c1 game, every claim holding). Then the
+  canon lay back (server m3-canon-4-hands-4c6d9f24, bb559685's dist, fe753e3f's bundle) and x-puzzle-handoff-late v3.1 GREEN
+  (20261105-082013): fe753e3f's five reads done; thuum-cf fast-forwards canon to fe753e3f and then to dd280139. The lab is idle.
