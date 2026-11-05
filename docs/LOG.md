@@ -8985,3 +8985,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   v3.1 172521 with all 28 claims: a trap's hit lands on the hit player's own seat alone, 60 of 300, the other copy skipped),
   b-push red on its old y flake with falls now costing health (0.9178 against 0.94 in every past run). D-S3 point 2 confirmed.
   Merges on Eli's D-T4.
+- 09:31 PST 2026-11-05 (17:31Z 11-05) (numidium): the D-T4 fix (players take trap and world damage again) staged as a built-ahead train,
+  m4-scripts-2b-traps bd0c8cf8 by `just verb-stage` (its own Windows dist 19241, platform a66d1b9b; the bare tag checked to be
+  bd0c8cf8's image index; the server pinned to m4-scripts-2b-traps-bd0c8cf8 after). Twelve of thirteen GREEN: b-duel
+  20261105-164913, b-block 165255, b-marksman 165616, b-spell 165828, b-hailstone 170029, b-poison 170230, b-fod-kill 170441,
+  b-shout 170622, b-shout-repeat 170944, b-shadowbond 171135, b-god 171627 (its TIM leg: a lethal arrow left c1 at 0.013, not
+  dead), x-trap-hit v3.1 172521 (both walkers' six multipliers at 1.0; c2 walked onto the plate and fell to 247 of 300, c1 to
+  246.8). b-push RED 171416 on its old y-claim flake (six of its nine runs since 10-20 read c2's y at -149 to -206), while its
+  health reading shows the change: c2 ends a push at 0.918, against 0.938 to 0.943 in every earlier run, so falls now cost health.
+  It merges only on Eli's D-T4.
