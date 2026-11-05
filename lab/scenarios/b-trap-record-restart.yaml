@@ -1,0 +1,188 @@
+# b-trap-record-restart (thuum-cf, 2026-11-05): the D-S3 destruction record's restart-persistence scenario (CLAUDE.md rule 6:
+# a schema change ships with a migration and a restart scenario; the record's migration is fork m4-scripts-2b-traps' -ws layer),
+# promoted verbatim from the probe x-trap-wire-restart v1.2 (sha1 74284ec5), GREEN on fork m4-scripts-2b-traps 46b95609 at
+# 20261105-153200: the same steps and the same claims, the id alone changed. Its recorded deafness leg read H-DEAF true (the spent
+# wire deaf in a fresh game, the spent-trap blank's three lines); turning that leg into claims is a later version with its own
+# fresh review (ADR-064 amendment A). Its own commit (rule 13). The probe's header follows.
+# x-trap-wire-restart v1.2 (thuum-cf, 2026-11-05): claim-neutral, the seven rocks' records (server.ref) snapshotted last of all,
+# after the deafness leg's reads, beside each seat's rock listing (x-trap-boulders-rest's fresh review, note 6, moved its
+# dropped restart leg's reads here: one restart, read once); no claim and no step before them changed. v1.1 follows.
+# x-trap-wire-restart v1.1 (thuum-cf, 2026-11-05; its fresh review GO with notes, notes 2 to 5 applied as written, so no second
+# review under ADR-064 amendment A): the served counts snapshotted before the restart and claimed risen (the server's log spans
+# the compose restart, so a served line from before it could have satisfied a bare count); the first report claimed exactly
+# once after the restart and after the relaunch (the record was not made anew); the served count before the relaunch
+# snapshotted and claimed risen at the fresh login, with c2's record in the mine; god mode set again after the restart and
+# after the relaunch (session state, dropped by a reconnect and a disconnect); H-DEAF expected TRUE, not false, as built: the
+# platform blanks every non-lifecycle event to a destroyed family reference (FridaHooks.cpp:426-452), which 140118's c2.log
+# shows ("OnTriggerLeave to b6d3f blanked: a destroyed trap family reference, a spent trap, hears its lifecycle alone"), so
+# the deafness leg counts that blank before and after the walk. The mine's host after the restart is the cold start's pick,
+# not necessarily c1; nothing claims it. v1 follows.
+# x-trap-wire-restart v1 (thuum-cf, 2026-11-05 15:1xZ; ADR-064 amendment B, window 2 of D-S3's probes; rule 6's restart read for
+# the destruction record that D-S3's -ws layer added with its migration; docs/verbs/traps.md's D-S3 section). For fork
+# m4-scripts-2b-traps 46b95609 or later on both seats and the server. ONE QUESTION: does a spent trap's destruction record survive
+# a server restart and reach every seat after it, a fresh game included? The subject is Embershard's tripwire 0xb6d3f, whose
+# record window 1 proved end to end (x-trap-boulders-claim 20261105-140118: c2's report, "recorded (the first report), relayed
+# to 1 game(s)", c1's "applied from the record"); the lamp waits on its premise probe. The record is served behind a
+# reference's create word on every subscribe (PartOne.cpp's onSubscribe: "[verb:traps] <refr>'s record (stage <n>, destroyed
+# <b>) served to <actor> after its create word"), and the receiver applies it under the apply blank
+# (trapResultService.ts: "trap result <refr> applied from the record: stage <n>, destroyed <b> (here stage <m>)", or "trap
+# result <refr> from the record: here already" when its engine is there already).
+# Legs, c1 hosting the mine 0xb6be6, god mode ON on both (the rocks fall; no health is read):
+# 1. the firing, x-trap-boulders-claim's walk: c2 walks north from c2start through the wire; the server's first-report line for
+#    b6d3f, the premise.
+# 2. the restart: the server restarts, both games reconnect without restarting and are sent back into the mine (c2 to c2start,
+#    south of the spent wire, the place its fresh game logs in at leg 3); the server serves b6d3f's record to each
+#    (ff000000 and ff000001, the profiles' stable ids) and each seat answers it ("applied" or "here already", risen over a
+#    snapshot taken before the restart: the game logs live through a reconnect).
+# 3. a fresh game: c2 relaunches and connects at c2start (a game that never saw the wire fire); its engine applies the served
+#    record, "trap result b6d3f applied from the record: stage 0, destroyed true"; no E_DESTRUCTION_ refusal anywhere so far.
+# RECORDED, NOT CLAIMED: the spent wire's deafness in the fresh game (HYPOTHESIS H-DEAF; v1 said expected FALSE, corrected in
+# v1.1 above to TRUE by the spent-trap blank: the record carries the destroyed flag and the stage, not the script's state, and
+# neither Tripwire nor TrapTriggerBase reads the destroyed flag in its armed state (the extracted pex: Tripwire's armed OnTriggerEnter is TrapTriggerBase's, which calls
+# localActivateFunction with no destroyed check), so the fresh c2 walking the wire's line again may fire it on its own engine;
+# what the server makes of a second report ("the record stands") and of the rocks' second claims (E_PROP_MOVING or a grant));
+# the rocks' places on each seat after the restart and in the fresh game (refs-near over form type 24, ACTI: the rocks' base
+# 0x79922 TrapFallingRockSm01 is an activator, so each rock is listed by its own id), the boulders' rest read's material.
+# Premises claimed: c1 hosts the mine; both seats' lever line and "trap family ready" line. Spots are x-trap-spots' (via
+# x-trap-boulders-claim): the ramp (2760, 3150), floor 8681.6, for c1; c2start (2787, 3300), floor 8626.6, 141 units south of
+# the wire's line, for c2; each sent 10 units over its floor. The walk: tap-key 58 (the walk toggle), then W for 2.5 s, about
+# 250 units.
+# HYPOTHESIS rested on: H-T2's tripwire form (window 1, CONFIRMED by 140118). Not read here: H-DS1 (the blank's timing), H-DS4,
+# H-KF, the rocks' rest claims (window 2's boulders rest read, after lab-api's refs_near().pos_of ships).
+# By path; assertions are evaluated by lab-api only (ADR-009).
+id: b-trap-record-restart
+milestone: M4
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: false
+  gameHour: 7.9
+timeout_s: 1500
+artifacts: [server.log, c1.log, c2.log, screenshots]
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c1: teleport {cell: "b6be6:Skyrim.esm", x: 2760, y: 3150, z: 8692, rot: [0, 0, 0]}
+  - until: {within: 30, every: 1, expect: ['server.host(0xb6be6).client == "c1"']}
+  - c2: teleport {cell: "b6be6:Skyrim.esm", x: 2787, y: 3300, z: 8637, rot: [0, 0, 0]}
+  - wait: 8
+  - c1: log-count {pattern: "scriptNonOwnerSkip nonLatent: a non-owned state row"}
+  - c2: log-count {pattern: "scriptNonOwnerSkip nonLatent: a non-owned state row"}
+  - c1: log-count {pattern: "trap family ready: [0-9]+ root"}
+  - c2: log-count {pattern: "trap family ready: [0-9]+ root"}
+  - assert:
+      - server.host(0xb6be6).client == "c1"
+      - 'c1.log_count("scriptNonOwnerSkip nonLatent: a non-owned state row") >= 1'
+      - 'c2.log_count("scriptNonOwnerSkip nonLatent: a non-owned state row") >= 1'
+      - 'c1.log_count("trap family ready: [0-9]+ root") >= 1'
+      - 'c2.log_count("trap family ready: [0-9]+ root") >= 1'
+
+  # 1. the firing: c2 walks north through the wire
+  - c2: tap-key {code: 58}
+  - wait: 1
+  - c2: hold-key {code: 17, ms: 2500}
+  - until: {within: 15, every: 1, expect: ['server.log_count("reports b6d3f at stage 0, destroyed true: recorded .the first report.") >= 1']}
+  - wait: 8
+  - c1: screenshot
+  - c2: screenshot
+  # the baselines before the restart: each seat's answers to a served record, the served lines, the rocks' places
+  - c1: log-count {pattern: "trap result b6d3f (applied from the record|from the record: here already)"}
+  - c2: log-count {pattern: "trap result b6d3f (applied from the record|from the record: here already)"}
+  - server: snapshot {name: c1Answers0, of: 'c1.log_count("trap result b6d3f (applied from the record|from the record: here already)")'}
+  - server: snapshot {name: c2Answers0, of: 'c2.log_count("trap result b6d3f (applied from the record|from the record: here already)")'}
+  - server: log-count {pattern: "b6d3f.s record .stage 0, destroyed true. served to ff000000 after its create word"}
+  - server: log-count {pattern: "b6d3f.s record .stage 0, destroyed true. served to ff000001 after its create word"}
+  - server: snapshot {name: served0Before, of: 'server.log_count("b6d3f.s record .stage 0, destroyed true. served to ff000000 after its create word")'}
+  - server: snapshot {name: served1Before, of: 'server.log_count("b6d3f.s record .stage 0, destroyed true. served to ff000001 after its create word")'}
+  - c1: refs-near {radius: 1500, formTypes: [24]}
+  - c2: refs-near {radius: 1500, formTypes: [24]}
+
+  # 2. the restart: the record back from the database, served to both reconnecting games
+  - wait: 5
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - c2: reconnect
+  - wait: 15
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  # both into the mine whatever place the restart gave them (a subscribe there serves the record), c2 south of the spent wire,
+  # which is also where its fresh game in leg 3 logs in
+  - c1: teleport {cell: "b6be6:Skyrim.esm", x: 2760, y: 3150, z: 8692, rot: [0, 0, 0]}
+  - c2: teleport {cell: "b6be6:Skyrim.esm", x: 2787, y: 3300, z: 8637, rot: [0, 0, 0]}
+  - wait: 10
+  - c1: screenshot
+  - c2: screenshot
+  - server: log-count {pattern: "b6d3f.s record .stage 0, destroyed true. served to ff000000 after its create word"}
+  - server: log-count {pattern: "b6d3f.s record .stage 0, destroyed true. served to ff000001 after its create word"}
+  - c1: log-count {pattern: "trap result b6d3f (applied from the record|from the record: here already)"}
+  - c2: log-count {pattern: "trap result b6d3f (applied from the record|from the record: here already)"}
+  - c1: refs-near {radius: 1500, formTypes: [24]}
+  - c2: refs-near {radius: 1500, formTypes: [24]}
+  - assert:
+      - 'server.log_count("b6d3f.s record .stage 0, destroyed true. served to ff000000 after its create word") > snapshot("served0Before")'
+      - 'server.log_count("b6d3f.s record .stage 0, destroyed true. served to ff000001 after its create word") > snapshot("served1Before")'
+      - 'c1.log_count("trap result b6d3f (applied from the record|from the record: here already)") > snapshot("c1Answers0")'
+      - 'c2.log_count("trap result b6d3f (applied from the record|from the record: here already)") > snapshot("c2Answers0")'
+      - 'server.log_count("reports b6d3f at stage [0-9]+, destroyed [a-z]+: recorded .the first report.") == 1'
+
+  # 3. a fresh game: c2 relaunched, the record alone puts the spent wire there
+  - server: log-count {pattern: "b6d3f.s record .stage 0, destroyed true. served to ff000001 after its create word"}
+  - server: snapshot {name: served1BeforeRelaunch, of: 'server.log_count("b6d3f.s record .stage 0, destroyed true. served to ff000001 after its create word")'}
+  - c2: relaunch {until: gone}
+  - c2: connect
+  - wait: 15
+  - c2: close-menu {name: MessageBoxMenu}
+  - c2: server-console {name: TGM}
+  - wait: 10
+  - c2: screenshot
+  - c2: log-count {pattern: "trap result b6d3f applied from the record: stage 0, destroyed true"}
+  - server: log-count {pattern: "E_DESTRUCTION_[A-Z_]+"}
+  - c2: refs-near {radius: 1500, formTypes: [24]}
+  - assert:
+      - 'c2.log_count("trap result b6d3f applied from the record: stage 0, destroyed true") >= 1'
+      - 'server.log_count("E_DESTRUCTION_[A-Z_]+") == 0'
+      - 'server.log_count("reports b6d3f at stage [0-9]+, destroyed [a-z]+: recorded .the first report.") == 1'
+      - 'server.log_count("b6d3f.s record .stage 0, destroyed true. served to ff000001 after its create word") > snapshot("served1BeforeRelaunch")'
+      - server.actor(c2).cell == "b6be6:Skyrim.esm"
+
+  # recorded, not claimed: the spent wire's deafness in the fresh game (H-DEAF, expected TRUE as built: the spent-trap blank);
+  # c2 stands at c2start
+  - wait: 2
+  - c2: log-count {pattern: "to b6d3f blanked: a destroyed trap family reference"}
+  - c2: log-count {pattern: "trap b6d3e fired here by b6d3f: every seat fires the trap family itself"}
+  - server: log-count {pattern: "reports b6d3f at stage [0-9]+, destroyed [a-z]+: the record stands"}
+  - c2: tap-key {code: 58}
+  - wait: 1
+  - c2: hold-key {code: 17, ms: 2500}
+  - wait: 10
+  - c1: screenshot
+  - c2: screenshot
+  - c2: log-count {pattern: "trap b6d3e fired here by b6d3f: every seat fires the trap family itself"}
+  - c2: log-count {pattern: "trap b6d4[589abcd] fired here by b6d3e: every seat fires the trap family itself"}
+  - c2: log-count {pattern: "trap body b6d4[589abcd] set moving by this seat.s script: claimed by impulse"}
+  - c2: log-count {pattern: "to b6d3f blanked: a destroyed trap family reference"}
+  - server: log-count {pattern: "reports b6d3f at stage [0-9]+, destroyed [a-z]+: the record stands"}
+  - server: log-count {pattern: "ff000001 claims prop b6d4[589abcd] by touch 3: granted"}
+  - server: log-count {pattern: "E_PROP_[A-Z_]+: ff000001 claims prop b6d4[589abcd]"}
+  - c1: refs-near {radius: 1500, formTypes: [24]}
+  - c2: refs-near {radius: 1500, formTypes: [24]}
+  # recorded, not claimed, last of all (a record the server does not hold reads red, and nothing may follow it): the seven
+  # rocks' records after the restart and the fresh login, beside each seat's listing above (x-trap-boulders-rest's review, note 6)
+  - server: snapshot {name: rockRecord5, of: "server.ref(0xb6d45)"}
+  - server: snapshot {name: rockRecord8, of: "server.ref(0xb6d48)"}
+  - server: snapshot {name: rockRecord9, of: "server.ref(0xb6d49)"}
+  - server: snapshot {name: rockRecordA, of: "server.ref(0xb6d4a)"}
+  - server: snapshot {name: rockRecordB, of: "server.ref(0xb6d4b)"}
+  - server: snapshot {name: rockRecordC, of: "server.ref(0xb6d4c)"}
+  - server: snapshot {name: rockRecordD, of: "server.ref(0xb6d4d)"}
+  - c1: dump-state
+  - c2: dump-state
