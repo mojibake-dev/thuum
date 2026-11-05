@@ -8905,3 +8905,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   against the claim's 200; 405.8 in the rerun, 416.2 with the lever off in 090617; no spider call among the census's skipped
   rows). So any lay of canon is read, playtest 47's included. My script's lever gate read c2 6 s after its post-snapshot boot and
   stopped on a missing line that came 15 s later: a gate after a snapshot waits for the new launch's line.
+- 05:06 PST 2026-11-05 (13:06Z 11-05) (thuum-cf, from numidium's read): canon 9745d401 holds with the non-owner skip ON (scriptNonOwnerSkip nonLatent, the
+  template 18eaf29e, laid fresh by turbo-dist; both seats' current launches logged the lever line): rung 2's seven green, run set
+  20261105-123118-canon-lever-9745d401 (b-object-anim 123118, b-puzzle-relay 123533, b-bleak-traps 123855), x-puzzle-whale v1.1
+  124236, x-puzzle-handoff-flip v2 125029, x-puzzle-handoff-late-flip v1.3 125350, x-bleak-scripts v2.1 125906 on its rerun
+  (124657's one red: the spider moved 100 units, under the claim's 200, an outlier beside the rerun's 405.8 and rung 2's 416.2;
+  the claim's 15 s window is timing-bound, a longer one goes into x-bleak-scripts after its review). The census's " (skipped)"
+  rows, the same on both seats: SetLockLevel, Lock, EnableNoWait (one each in a 30 s window); "(not hosted)" on the latent
+  RemoveItem, MoveTo, Disable. So every dist lay from here (which writes the template) is a proven state, playtest 47's
+  included.
