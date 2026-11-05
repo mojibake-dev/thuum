@@ -9085,3 +9085,14 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   at spawn height on the owner's engine) gets a trace probe, x-trap-rock-hang, in draft. b-push's red is the old y flake. Next on
   the current lay: x-trap-wall-both (Eli's D-T2 outcome, in its fresh review), then the D-T2 scenario rewrites and the merge on
   0f2f3c55.
+- 14:14 PST 2026-11-05 (22:14Z 11-05) (numidium, thuum-cf's probe): x-trap-wall-both v1.1 (237f0928, Eli's D-T2 outcome: does the
+  Temple wall hit every player in its path, each on its own engine?) RED 20261105-220449 on the ece35376 pin, 45 of 48 holding.
+  Leg A (the host steps, the guest stands in the swing) answers yes. Both were hit once, each on its own engine: c1 lost 55.3
+  (record 0.8136, c2 sees 0.8168) and c2 lost 52.8 (record 0.8204, c1 sees 0.8216), and c2 was carried to the usual spot. In leg B
+  the guest c2, stepping, lost 50.8 on its own engine, but the host was never in the path when the wall swung. c1's watch sits at
+  (8625.1, -5124.1), the carry spot, from start to end, so the three c1 claims fail with a drop of 0 and a record of 1.0. The
+  cause is a play-visible bug: as c2 came back from lab-spawn, the plate fired on both seats with nobody walking, right after each
+  seat created the other player's figure. On c1 it fired 1.4 s after c2's figure was created, and the ambush box 0x38098 fired
+  with it; on c2 it fired three times within 2.4 s of creating c1's figure. On the host, that swing hit c1 in the bystander spot
+  and carried it out of the path; the leg's health reset then hid that hit's damage. So the host-as-bystander case is unread, not
+  refused. A v1.2 would check c1's position at the walk and step into the swing only after the re-entry firings end.
