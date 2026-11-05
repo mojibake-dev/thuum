@@ -779,4 +779,15 @@ class chain: a "trap" name prefix, two named roots, or the host's), D-T2 (rewrit
 B, which claim the host's relay of the plate's wall). The probes: x-trap-dodge, x-trap-lamp, x-trap-boulders (lab/.cache/probes,
 by path, with their fresh review before the first run). Owed before the slice merges whole: a restart-persistence scenario for
 the destruction record (rule 6) and a T2 difftest session for DestructionStage.
+Declared limits, from the slice's two fresh reviews (GO with notes on 9ff1895e; their hardening rides the next head): the
+engine's own stage effects (a destructible's stage explosion placed by its stage data, script or not) are no Papyrus event, so
+no blank covers them, and a late joiner or a restarted seat standing under a shot lamp may be hit by its explosion again at the
+apply (x-trap-lamp's late and restart legs read the applying seat's health); the served record's blank is lifted one update
+after the last DamageObject (H-DS1); the loaded-cell gate on a destruction report rests on the reporter's own CellLoaded
+(client-reported, rule 5), and a trap body's touch-3 claim is the claimant's word (R2), bounded by the hardening (a destruction
+record only for a trap or destructible world body, E_DESTRUCTION_KIND; a world body's sample at most 2048 units from its
+game-file position, E_PROP_FAR, UNMEASURED; a per-row distance allowance at the 6000 units a second cap in place of the
+per-sample floor); the record only rises, so an engine cell reset never re-arms a trap; the relay goes to the reference's grid
+listeners, so a seat with a large interior loaded past that 3x3 hears a record at its next subscribe and may fire its own copy
+meanwhile; the served line logs at info on every subscribe.
 
