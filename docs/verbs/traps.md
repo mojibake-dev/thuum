@@ -973,3 +973,16 @@ scenarios' legs A and B) and D-T5. Owed before the stage: the fresh review of bd
 three probes' reviews (x-trap-oilpool-guest, x-trap-lamp-guest, x-trap-hit-difficulty); pipeline 5479 builds ce298e0f.
 Declared, HYPOTHESIS: a family trap's state that no record carries stays each seat's copy (a bear trap re-armed by one player's
 press is armed on that seat alone).
+The fresh review of bd0c8cf8..ce298e0f (ADR-064 amendment A; 12:0x PST 2026-11-05 (20:0xZ 11-05)): GO with notes, applied as
+written in fork ece35376 (no second review): the pin's reach to the world's damage tagged HYPOTHESIS (the pin writes the INI
+setting iDifficulty:GamePlay, the static read has DamageActor index the player's own difficulty field, PlayerCharacter.h:399), so
+x-trap-hit-difficulty reads two legs, difficulty 5 and 2; a light caveat beside the item test (IsInventoryObject counts every
+LIGH, carryable or not, TESForm.cpp:199; none in the family); the engine's six multipliers kept in the platform's storage at their
+first capture, so a reloaded plugin takes them back; x-trap-hit v3.1, sized for 60 a hit, needs worldDamageMult 1 on both seats
+on this build. Its open question, read on sky-srv the same hour: no door, furniture or static joined with ff9b804a. The family's
+68 references of those types were family since 46b95609: 50 doors carrying TrapTriggerHinge, 3 doors and cages with TrapLever
+alone, 13 levers and pull chains with TrapLever alone (two in HelgenKeep01), 2 thresher grooves (TrapDweThresher); none stands
+in Bleak Falls Barrow or Embershard Mine, playtest 47's route. HYPOTHESIS, unread: such a door keeps the engine's own activation on
+every seat (objectReferenceEx.ts:125) beside the server's open state, so a press may open it locally before the server's word;
+the read when a route reaches one: a press on a TrapTriggerHinge door (Volskygge02 holds two) watched on both seats for the
+door's open state and the server's door line, one press and one toggle expected.
