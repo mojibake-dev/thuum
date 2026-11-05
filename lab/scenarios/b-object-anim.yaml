@@ -1,3 +1,6 @@
+# b-object-anim v4 (thuum-cf, 2026-11-05; ADR-062's flip on fork m4-scripts-1-flip, the scripting ladder's rung 1, ADR-068): the two
+# relaunch writes of activationUnblockedBases are deleted (the client lifts activation in a hosted cell by the cell's state; no
+# list of bases). No claim changed. The headers below are the previous versions'.
 # b-object-anim v3 (thuum-cf, 2026-11-03 night; the same correction Eli approved, one id short: v2's run 20261104-055038 on THE CANON
 # read a fourth by-design refusal, "E_TRAP_NO_REF: ff000000 reports 38098 activating 380b9, no such reference", the plate's link to a
 # fourth ambush draugr (LvlDraugrAmbushMelee1HHelmetMale at (8033, -5040)); every other claim held. The subtraction now names the
@@ -27,8 +30,6 @@ server:
   netem: null
 timeout_s: 900
 steps:
-  - c1: relaunch {until: gone, files: [{json: "Data/Platform/Plugins/skymp5-client-settings.txt", key: "activationUnblockedBases", value: "1a4bb c6440 21513 3e726 aa8ce b7db4 173fc 2079f"}]}
-  - c2: relaunch {until: gone, files: [{json: "Data/Platform/Plugins/skymp5-client-settings.txt", key: "activationUnblockedBases", value: "1a4bb c6440 21513 3e726 aa8ce b7db4 173fc 2079f"}]}
   - c1: connect
   - c2: connect
   - wait: 10
