@@ -1,0 +1,56 @@
+# Playtest 47 (numidium, 2026-11-05 ~16:00 PST): traps, the pillars and the claw door (Eli's D-T3 A: "let 47 include traps").
+# The build is the canon at 0f2f3c55, fork m4-scripts-2c-traps merged by verb-merge: rung 2's seam (9745d401) with the trap
+# slice, Eli's D-T1 (every trap family by its class chain, from either seat), D-T4 B (the engine's own damage multipliers for
+# the difficulty in force) and D-T5 (Adept pinned by default). Proven on the lab before it: x-trap-wall-both v1.2
+# 20261105-224256 (the wall hits every player in its path, each once on its own engine), x-trap-oilpool-guest, the lamp's
+# record. 746aff6c (the wire follower) is not in it: its b6d4d regression waits for the follow-window fix (48).
+# thuum-cf's checklist is docs/private/playtest-47.md (eight items): lamps and oil pools from either seat, the plate and wall
+# with the other in its path (swapped), dodging, the pillars with the whale, the gate and the darts, a hand-off mid-puzzle on
+# Eli's word (numidium relaunches the host), the Sanctum to the claw door (try it: the guest first, then the host), anything else.
+# The camp is Bleak Falls Temple's entrance (0x371de), b-bleak-traps' and b-container-rest's spots (green in both), so the
+# route runs the traps first. No god mode at the start. Each seat carries the Golden Claw, MISC 0x39647 MS13GoldenClaw
+# (lab/esm.py on Skyrim.esm 1.6.1170; not E3GoldenClaw 0x999e7), through its items row: the keyhole's script judges the
+# activator's inventory on the Hall's host, and whoever ends up hosting it, the guest's case can be tried at the same door.
+# Declared, not passes or fails: a plate may fire once as a player re-enters its cell (S10, HYPOTHESIS); rock 0xb6d4d may
+# hang (on both seats alike on this build); on the seat that did not trip a wire, its platform break and dust do not play (S11).
+id: 47
+build: "canon 0f2f3c55 (fork m4-scripts-2c-traps merged by verb-merge; server m4-scripts-2c-traps-0f2f3c55, its verb-stage dist)"
+world: playtest-m3-39-paused-20261031T014638Z   # 39's end, as 41 to 46 began: the temple's and the slope's bandits alive
+hold:
+  minutes: 120
+  reason: "playtest 47: traps, the pillars and the claw door"
+server:
+  npcEnabled: true
+  gameHour: 12.0
+  locks: true   # every switch on, as the 44 baseline
+  weatherSync: true
+  perks: true
+  leveling: true
+camp:
+  teleports:   # the Temple's entrance, b-bleak-traps' spots (lab/scenarios/b-bleak-traps.yaml, b-container-rest.yaml)
+    - {kind: teleport, profileId: 1, cell: "371de:Skyrim.esm", pos: [-4200, 850, 650], rot: [0, 0, 90]}
+    - {kind: teleport, profileId: 2, cell: "371de:Skyrim.esm", pos: [-4100, 850, 650], rot: [0, 0, 90]}
+seats:
+  - profile: 1
+    name: "test 1"
+    perks: [0x7934b]   # Overdraw40 through the server's AddPerk (284a4d51): the headshot rule's condition
+    spells: []
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]   # Survival off
+    values:
+      Marksman: 60
+    items:
+      - {id: 0x39647, count: 1}   # the Golden Claw, MS13GoldenClaw
+    percentages: {health: 1, magicka: 1, stamina: 1}
+  - profile: 2
+    name: "test 2"
+    perks: []
+    spells: []
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]
+    items:
+      - {id: 0x39647, count: 1}   # the Golden Claw, MS13GoldenClaw
+    percentages: {health: 1, magicka: 1, stamina: 1}
+streams:
+  test1: 48989
+  test2: 49989
+after:
+  readback: percentages
