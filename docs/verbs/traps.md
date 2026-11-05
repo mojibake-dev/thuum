@@ -671,3 +671,20 @@ relayed 'trigger02' as it does for Trigger03. Lines say 'trigger02' in lowercase
 ("[Tt]rigger02"). The proof: b-puzzle-relay, b-object-anim, x-puzzle-guest-view v3 (sha1 3027db06, local rotations; turn B is
 the whale) and x-puzzle-handoff v3 (sha1 37d0d4ce, the profiles' ids, a whale claim on the new host) on bb559685's dist with
 c4775a85's bundle; green moves canon 83a40da3 to c4775a85 (the side sync, the hand-off, the export, the whale).
+
+### A linked activation of an actor (21:08 PST 2026-11-04, 05:08Z 11-05; fork ccc98a2d on m4-scripts-1-flip, ADR-068)
+
+Authority: R2, carried by the NPC stream, never by this verb. A host's report of its engine's linked activation whose TARGET is
+an actor (an ambush's draugr woken by its trigger: Bleak Falls Temple's defaultActivateSelfTRIG 0x38098 and its ACHR children
+0x380b3, 0x380b4, 0x380b5, 0x380b9, whose XAPR name the trigger with delays 0, 4, 3, 5 s) is that actor waking on the seat that
+simulates it. The server neither judges it nor relays it (OnLinkedActivation, before the reference, cell, host and link checks):
+the host's engine runs the waking (the masterAmbushScript, the AI), the NPC stream carries what follows to the other games
+(their puppets render it, ADR-063 decision 3), and a relayed activation would run the engine's activation on a watcher's puppet.
+The line: "[verb:traps] <host> reports <caster> activating actor <id>: the actor's simulator's (the NPC stream carries it), not
+relayed". An actor the server never loaded (0x380b4, NPCs on or off) is judged an actor by its game-file record (ACHR). Before
+this rule the pairs read E_TRAP_UNLINKED (the activation-parent table is filled for non-actor references alone,
+MpObjectReference::InitScripts) with NPCs on and E_TRAP_NO_REF with NPCs off (x-bleak-traps-npcs 20261105-023048; b-bleak-traps
+v1 on canon and on 83a40da3, 20261105-013206, 013632, 020830, 021251). T0: TrapRelayTest's "A host's linked activation of an
+actor is the actor's simulator's" (a loaded and an unloaded draugr, no relay, no throw, the plate's wall still relayed). Not
+validated: the server takes the host's word that the target woke (R2, rule 5's "recorded as unvalidated", here recorded nowhere
+since the stream is the record).
