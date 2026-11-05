@@ -806,3 +806,29 @@ route (a melee strike, or a hand cast aimed once the driver can turn the camera 
 the script on the host moves the lamp to Triggered and its DamageObject runs. D-T1 (the lamp's family) is Eli's and does not
 change the host's case.
 
+Window 1's reads (06:32 PST 2026-11-05 (14:32Z 11-05); numidium's three from the runs, mine of 135717's artifacts):
+- DestructionStage end to end, x-trap-boulders-claim 140118: c2, the tripper, "trap result b6d3f: stage 0, destroyed true
+  reported" (14:02:28.815Z on c2's clock); the server "ff000001 reports b6d3f at stage 0, destroyed true: recorded (the first
+  report), relayed to 1 game(s)" (14:02:30.745); c1 "trap result b6d3f applied from the record: stage 0, destroyed true (here
+  stage 0)" (14:02:29.113 on c1's clock; the seats' clocks run a few seconds behind sky-srv's); no "the record stands" line and no
+  E_DESTRUCTION_ in that server log. The message's report, record, relay and apply CONFIRMED by run for a destroyed flag at stage
+  0. H-DF1 (a destruction reaching its destroying stage sets kDestroyed) is not read by it: the stage stayed 0.
+- The lamp run 135717: the facing premise HELD. The Temple's north marker 0x37258 (STAT 0x3 NorthMarker, rot (0, 0, 180) by
+  lab/esm.py) turns the interior's compass, so the screenshots' "N" is world south, the heading both teleports asked: 020-c1 shows
+  a lit lamp hanging intact straight ahead after the press (0x9b0fb by its place, 256 units south), 035-c1 the oil corridor with
+  two lamps intact after the cast. c1's census at 13:59:18.712Z read "census ObjectReference.Activate (platform) 1 in 30 s": the
+  press reached the engine through rung 2's seam as the platform's own call, not skipped, and the engine answered false, with no
+  activation line from activationService, no DamageObject in any census window and no line naming 9b0fb or 90efc in either log.
+  The driver's Spell.Cast(player, 0x9b0e2) resolved ("onResult called: Spell.cast (call 1)", 13:59:06.589Z) and nothing
+  followed. H-CAST (the probe's: the driver's Spell.Cast raises the player's cast on the wire) FALSIFIED by run, 0 OnSpellCast
+  lines; no D-S3 lamp claim needs it (the lamp's own stage report is the path). The teleport to oilcast also crossed the oil room's
+  ambush box 0x383f9 (c1 "Sent a trigger's own activation for 383f9", then its linked 383f8, 800a9, 383ec, 383f7): that spot
+  stands inside the box, not outside as v1's header said.
+- Dynamic plan, revised with the facing ruled out: (1) the static read of TESObjectREFR::ActivateRef (CommonLibSSE-NG
+  src/RE/T/TESObjectREFR.cpp:52-57, RELOCATION_ID(19369, 19796), `just addr 19796` 0x2eac20) and of the Papyrus Activate native's
+  callback: every return before a TESActivateEvent or an OnActivate is queued, and what kBlockActivate (include/RE/E/ExtraFlags.h:17)
+  changes; the re-analyst's; (2) a premise probe with a Frida trace on c1: ActivateRef's entry and return for the lamps, the VM's
+  SendEvent rows for the lamps' handles with their names, the projectile's launch and the hit's dispatch for a hand cast aimed at
+  a lamp (the teleport's heading, a mouse pitch, crosshairRef recorded), and the console's GetDisabled and GetDestroyed on the lamp
+  before the press. Expected on a working route: OnActivate or OnHit on the lamp's handle, then DamageObject on the host.
+

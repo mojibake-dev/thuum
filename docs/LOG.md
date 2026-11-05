@@ -8929,3 +8929,10 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   version), x-puzzle-handoff-late-flip v1.3 141042. Red on a premise: x-trap-lamp-trigger 135717 (neither lamp set off: the
   driver's Activate on the host returned false with no activate event, its Spell.Cast reached nothing); the lamp trigger's
   Dynamic plan is in docs/verbs/traps.md. Next: window 2's probes cut from these reads.
+- 06:32 PST 2026-11-05 (14:32Z 11-05) (thuum-cf, numidium's reads of window 1 and mine): DestructionStage CONFIRMED end to end on the lab (x-trap-boulders-claim
+  140118: c2's report of b6d3f, the server's "recorded (the first report), relayed to 1 game(s)", c1's apply from the record, no
+  E_DESTRUCTION_). The lamp red (135717) was not the aim: the Temple's north marker 0x37258 is rotated 180, so the compass's "N"
+  was world south and c1 faced both lamps; the press passed rung 2's seam as the platform's own call ("census
+  ObjectReference.Activate (platform) 1") and the engine answered false before any activation line or DamageObject; the scripted
+  cast resolved and hit nothing. H-CAST falsified (a script cast is not the player's cast on the wire). Next: the re-analyst's
+  static read of ActivateRef and a premise probe with a Frida trace (docs/verbs/traps.md, window 1's reads).
