@@ -8740,3 +8740,24 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   back again, the control rerun clean); and a sweep chain I had gated with `set -e` ran past a missing script and emptied the shared
   justfile for about two minutes (restored from HEAD and hermaeus-mora's course hunk). `set -e` does nothing in the Bash tool's own
   commands (they run on the left of an `&&`), so a chain is gated with `&&` or run under `bash -e`. The lab is free.
+- 19:47 PST 2026-11-04 (03:47Z 11-05) (thuum-cf): Step 0's (b) on d1f23444's dist (set 20261105-025103): b-puzzle-relay GREEN 025103, b-object-anim
+  GREEN 025608, b-bleak-traps v1 RED 030120 and 030523 (the known four NO_REF lines, canon's own); x-puzzle-handoff v2 RED
+  030957 on a PREMISE (the ids follow the profiles' records, c1 ff000000, c2 ff000001, not the connect order). (c) on bb559685:
+  x-puzzle-guest-view v2 RED 032634 at leg A on a stale WORLD read (the node's local rotation turned -120.8 degrees, a full face,
+  on both seats; the guest's own E works). x-native-frame with native-frame.js v2 GREEN 033116: the seam reads the frame as ADR-068
+  assumes (three PlayAnimationAndWait rows on aa8cb from defaultPuzzlePillarScript, "frame own yes", "args agree yes", latent
+  return 2) and names THE WHALE'S CAUSE: the script calls "trigger02" in lowercase and the platform's hook pattern 'Trigger*' is
+  case-sensitive (Handler::Matches), so the whale was never reported (traps.md "The whale's real cause"). Fix fork
+  m3-canon-4-whale c4775a85 (TS, case-blind pillar patterns), on the pillar heads with the node-rotation export; its run set
+  with x-puzzle-guest-view v3 (local rotations, numidium's .local_angle_to) and x-puzzle-handoff v3 (ids fixed, a whale claim)
+  goes next and moves canon to c4775a85 in one step. Canon moved 7c79fc3e to 83a40da3 at 02:5xZ on (a) plus the canon control
+  (b-bleak-traps' red identical on canon). Rung 1 (m4-scripts-1-flip 1b22e5b7): the actor rule (ccc98a2d, T0 590 cases) and the
+  record-death blank widened to every event under the scope, checked before Override (the fix's review); known limit: the
+  owner's bind kill raises OnDying outside the scope (rung 3). Rung 2 (m4-scripts-2-seam 87c11993): assembled (platform, client,
+  wire layers on rung 1), pipeline 5396 green (T0 597 cases), its fresh review GO with notes; findings 3, 5 and 9 fixed (the
+  subject loads, the mark after the queue, a test holding NativeRows.inc to the Rust TABLE); finding 1 (merge canon and rung 1's
+  head) before its stage; finding 2's claims go into x-puzzle-whale v1. Eli's word: b-puzzle-relay v4 moves leg B's two
+  host-press claims to the flip's channel (committed after the whale run set, which still plays v3). The scenario drafts' review:
+  b-bleak-traps v2 is the relaunch removal alone (NPCs stay off; ccc98a2d clears leg A), with x-bleak-traps-npcs v2 (sha1
+  e6525bde) reading NPCs on at rung 1's stage first; H-P1 stated in both lever legs' headers. Call's whole-game rate on a host:
+  about 5,400 a second on six VM worker threads, 98.7% the platform's own.

@@ -655,3 +655,19 @@ claims the feed itself; F5 a catch says a failure and the feed stops when the se
 marks in the re-sync; F7 a record naming no side is said, the base decides a pillar when readable, the record keyed by the local
 id; F8 an unused import. Still ahead of its first lab run.
 
+
+### The whale's real cause (19:47 PST 2026-11-04, 03:47Z 11-05; supersedes "The dropped Trigger02"'s HYPOTHESIS)
+
+x-native-frame 20261105-033116 (bb559685's dist, native-frame.js v2) read the host's three turns of aa8cb at the VM's native
+dispatch, NativeFunctionBase::Call 104651: three rows on VM worker thread 9032, caller defaultPuzzlePillarScript.RotatePillarToState,
+"frame own yes", "args agree yes", Call returning 2 (kInProgress, a latent native): PlayAnimationAndWait on aa8cb with Trigger01
+Turned01, then trigger02 Turned02, then Trigger03 Turned03. The whale's event is the script's own LOWERCASE "trigger02". The engine
+matches a graph event without case, so the pillar turns; the platform's hook filter compares bytes (Handler::Matches, a memcmp for
+the StartsWith pattern 'Trigger*'), so the hook never handed "trigger02" to the client and no seat ever reported the whale (44, 45,
+46 and every relay run). The flag condition of 83a40da3 was harmless and beside the point. FIX: fork m3-canon-4-whale c4775a85 (on
+73ed0c52 merged with bb559685, tree bb559685's): each pillar pattern registered in both cases ('trigger*', 'turned*',
+'startState*' beside the old), and the side, jump and report regexes case-blind, so a guest jumps to the whale's side before a
+relayed 'trigger02' as it does for Trigger03. Lines say 'trigger02' in lowercase from now on; claims match case-blind
+("[Tt]rigger02"). The proof: b-puzzle-relay, b-object-anim, x-puzzle-guest-view v3 (sha1 3027db06, local rotations; turn B is
+the whale) and x-puzzle-handoff v3 (sha1 37d0d4ce, the profiles' ids, a whale claim on the new host) on bb559685's dist with
+c4775a85's bundle; green moves canon 83a40da3 to c4775a85 (the side sync, the hand-off, the export, the whale).
