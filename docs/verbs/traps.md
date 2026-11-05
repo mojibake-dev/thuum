@@ -725,3 +725,24 @@ OWED at T3 (rule 3) before the relay counts as proven: a read of the relay itsel
 child on the guest, then its trigger fired on the host, then the guest's "relayed activation <actor> by <trigger>" and the actor
 waking there. The dialogue claim cannot be staged on a hostile ambush actor, so the read waits for a follow or a thrall
 (ADR-060) in reach of a linked trigger; until then the relay is T0's alone and this section's HYPOTHESIS stands.
+
+### The re-sync's form wrappers (22:40 PST 2026-11-04, 06:40Z 11-05; fork m3-canon-4-whale fe753e3f, merged into m4-scripts-1-flip dd280139)
+
+The first re-sync to feed a turn threw (x-puzzle-handoff-late v2 20261105-060929: c1 inherited Bleak Falls Temple with aa8cb's
+script on side 1 against the record's Trigger01; "pillar aa8cb re-sync at the grant of 371de failed: Error: SP3NativeValueCasts::
+JsObjectToNative...", the console's cut). A Skyrim Platform form wrapper dies at the first wrapper minted after the Papyrus update
+count moves (docs/engine/scripts.md S5), and the re-sync kept the pillar across its waits, so the side-1 reset's Trigger03, its
+first native after a wait, threw; v4 and v5 had fed nothing. fe753e3f takes the pillar and the player again by id after every wait
+(its fresh review GO with notes: no defect, no other wrapper in skymp5-client kept across a wait). The lines the re-sync prints, for
+the probes' claims:
+- "pillar <id> re-synced at the grant of <cell>: the script's side <I>, the record <event> (side <S>), <k> turn(s) fed to the
+  script" (unchanged; the console keeps it to about "fed to").
+- "pillar <id>: the re-sync at the grant of <cell> stopped, this seat no longer hosts the cell (<i> of <k> turn(s) fed)"
+  (unchanged).
+- NEW: "pillar <id>: the re-sync at the grant of <cell> stopped, the pillar is gone (the reset's Trigger03)" and "pillar <id>: the
+  re-sync at the grant of <cell> stopped, the pillar is gone (<i> of <k> turn(s) fed)"; the same with "the player is gone" cannot
+  fire (Game.getPlayer's fast path always wraps the player).
+- CHANGED: "pillar <id> re-sync at the grant of <cell> failed at <step>: <error>", the step StartState0<N>, Trigger03 or "turn <i>
+  of <k>", before the platform's text, which the console cuts at 128 characters.
+Known, from the review: the reset's own "no longer hosts" return (after its first wait) prints nothing, so a probe cannot tell a
+reset stopped there from a re-sync never begun; a line for it rides the next commit that touches the re-sync.
