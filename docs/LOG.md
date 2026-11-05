@@ -8868,3 +8868,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   boundary and relayed (seq 1 to 3); c2 played each relayed pillar turn once (Trigger01, trigger02, Trigger03); no E_SCRIPTCALL_
   through x-bleak-scripts (its other refusals listed to thuum-cf: a new E_TRAP_NO_REF four on 4f749, E_WORDWALL_REACH from 8,000
   units). Canon had moved to dd280139 (the flip) before this stage. The lab is idle.
+- 01:29 PST 2026-11-05 (09:29Z 11-05) (thuum-cf): rung 2, the one seam, proven on the lab and canon moved to it. numidium's stage on fork
+  m4-scripts-2-seam 9745d401 (client-build 19122, image sha256:59944623): seven of seven green, b-object-anim v4 085021,
+  b-puzzle-relay v4 085442, b-bleak-traps v2 085813, x-puzzle-whale v1.1 090155, x-bleak-scripts v2.1 090617,
+  x-puzzle-handoff-flip v2 091118, x-puzzle-handoff-late-flip v1.3 091440. Read from them: the seam's ready lines on both seats
+  ("31 of 31 table rows bound", "native dispatch replaced: NativeFunctionBase::Call at +143dc00 (Address Library 104651)", no
+  "Gum refused"); the spike wall's 180For, 180Back and Rearm reported at the boundary from TrapSwingingWall.fireTrap and mirrored
+  as PlayAnimation with seqs 1 to 3; the guest playing each relayed pillar turn exactly once (three plays, three turns, the whale
+  among them); no E_SCRIPTCALL_ through x-bleak-scripts. Fork canon fast-forwarded dd280139 to 9745d401 (both remotes). Unclaimed,
+  to read: E_WORDWALL_REACH twice in 090617 (709d2 reported from 8370 and 8608 units off the wall 709d1). Pushed server-only
+  after the stage: 4ed8c0ab (the Hall of Stories door FX by its record, the per-sender budget before any lookup with the failed
+  attach list deduplicated, an exterior placement's case; Rust 516 tests, fork-lint clean; its first compile in CI), canon
+  staying at 9745d401 until it is read. Open with Eli: D-T1 to D-T3 for D-S3 (docs/research/trap-slice-d-s3-2026-11-05.md).
