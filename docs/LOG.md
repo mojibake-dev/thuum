@@ -8895,3 +8895,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   into windows of one question each, window 1 the premises (x-trap-spots, x-trap-family-fire, x-trap-lamp-trigger,
   x-trap-boulders-claim) with x-bleak-scripts v3 (d4779e40, rewritten: the wall a trap every seat fires itself). b-bleak-traps
   and b-object-anim stay out of the slice's stage until Eli's D-T2.
+- 05:04 PST 2026-11-05 (13:04Z 11-05) (numidium): canon 9745d401 (rung 2) READ ON THE LAB WITH THE LEVER ON (thuum-cf's B: 18eaf29e's
+  template, "scriptNonOwnerSkip": "nonLatent", reaches every dist lay): its own dist laid fresh (bundle cea797cb, platform ee725dd5),
+  the server pinned at m4-scripts-2-seam-9745d401 since 09:29Z (the bare tag would follow the branch's server-only push 4ed8c0ab),
+  every game folder's settings and both seats' current launches logging "scriptNonOwnerSkip nonLatent: a non-owned state row's
+  non-latent body is skipped". GREEN: b-object-anim 20261105-123118, b-puzzle-relay 123533, b-bleak-traps 123855 (run set
+  20261105-123118-canon-lever-9745d401), x-puzzle-whale v1.1 124236, x-puzzle-handoff-flip v2 125029, x-puzzle-handoff-late-flip
+  v1.3 125350, and x-bleak-scripts v2.1 on its rerun 125906 after one red (124657: the spider 0x3a1e1 moved 100 units in 15 s
+  against the claim's 200; 405.8 in the rerun, 416.2 with the lever off in 090617; no spider call among the census's skipped
+  rows). So any lay of canon is read, playtest 47's included. My script's lever gate read c2 6 s after its post-snapshot boot and
+  stopped on a missing line that came 15 s later: a gate after a snapshot waits for the new launch's line.
