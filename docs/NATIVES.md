@@ -18,8 +18,8 @@ Status meanings:
 | delegated | 33 |
 | stub | 2 |
 | gamemode | 18 |
-| missing | 1305 |
-| total | 1467 |
+| missing | 1308 |
+| total | 1470 |
 
 | Native | Status | Rung | Reason / notes | Verb |
 | --- | --- | --- | --- | --- |
@@ -1323,6 +1323,7 @@ Status meanings:
 | `TESModPlatform.AddItemEx` (global) | missing |  |  |  |
 | `TESModPlatform.ApplyChangeForm` (global) | missing | R2 | Client only: applies a served change-form record (ChangeFormApply) to this seat's LOADED copy through the engine's own path (the REMAP step through 35928, the record into the changes map 35509, the apply 35568, the finish pass 35567); runs after the seat's own kill of the copy for ADR-067's corpse; returns a JSON string (applied, reason, fnvPatched, the diagnostics); never on the server VM (the bytes are validated and recorded there, never decoded). [declared in TESModPlatform.psc; fork adr065-sys1-native 54c31311] [not in SP's dump; declared in TESModPlatform.psc] | change-form |
 | `TESModPlatform.ApplyChangeFormResult` (global) | missing | R2 | Client only: the queued apply's answer for the reference's form (ApplyChangeForm runs its engine steps as an SKSE task on the game's main thread since playtest 44's three deadlocks on the OnUpdate thread, H1); the JSON object once (applied, reason, fnvPatched, thread, mainThread, onMainThread, the diagnostics), "" while the task has not run; never on the server VM. [declared in TESModPlatform.psc; fork m3-canon-3-apply-main faff697c] [not in SP's dump; declared in TESModPlatform.psc] | change-form |
+| `TESModPlatform.ApplyScriptState` (global) | missing | R2 | Client only: a served script record (its scripts as a JSON array) written over this seat's copies under the VM's attachedScriptsLock and runningStacksLock (exact class match; count, kind and state checks; Variable::operator=, FindBoundObject, CreateArray, a direct currentState write); answers applied, retry, scripts, resolved, none, seatLocal, stacksOnObject, holdUs, blanked, fnvAfter; an applied record lifts the pending mark. [declared in TESModPlatform.psc; fork m4-scripts-3-record 4f525bad] [not in SP's dump; declared in TESModPlatform.psc] | papyrus-events |
 | `TESModPlatform.BlockPapyrusEvents` (global) | missing |  | [not in SP's dump; declared in TESModPlatform.psc] |  |
 | `TESModPlatform.ClearTintMasks` (global) | missing |  |  |  |
 | `TESModPlatform.CloseMenu` (global) | missing |  | [not in SP's dump; declared in TESModPlatform.psc] |  |
@@ -1345,8 +1346,10 @@ Status meanings:
 | `TESModPlatform.ResetContainer` (global) | missing |  |  |  |
 | `TESModPlatform.ResizeHeadpartsArray` (global) | missing |  |  |  |
 | `TESModPlatform.ResizeTintsArray` (global) | missing |  |  |  |
+| `TESModPlatform.SendScriptEvent` (global) | missing | R2 | Client only: OnCellAttach, OnLoad or OnCellLoad sent to a reference's scripts and relayed (SendEvent, RelayEvent, ZeroFunctionArguments) under the platform's mark, unseenOnly skipping one served since the last load; answers sent, seen, scripts, reason. [declared in TESModPlatform.psc; fork m4-scripts-3-record 4f525bad] [not in SP's dump; declared in TESModPlatform.psc] | papyrus-events |
 | `TESModPlatform.SendStoryChangeLocation` (global) | missing |  | [not in SP's dump; declared in TESModPlatform.psc] |  |
 | `TESModPlatform.SerializeChangeForm` (global) | missing | R2 | Client only: the owner's engine serializes a loaded actor's change form on demand (a scratch BGSSaveFormBuffer 36035, the header 36037, CheckSaveGame, the initial data 35715, SaveGame, the pack 36081) with the id census on 35928 for the remap rows; returns the record as a JSON string (bodyHex, fnv1a, flags, version, remap, census) or "" on a refusal; the server records what the wire validated (R2: host computes, server records). [declared in TESModPlatform.psc; fork adr065-sys1-native 54c31311] [not in SP's dump; declared in TESModPlatform.psc] | change-form |
+| `TESModPlatform.SerializeScriptState` (global) | missing | R2 | Client only: the owner's read of a world object's attached scripts as the script record (type, state, flags, positional vars by folded kind, object handles; FNV-1a over the dump without names); quiescent false with busy for a stack on it, a lock or no init; "" for an actor, a runtime or trap family reference or a value the wire cannot carry; the server records what the wire validated. [declared in TESModPlatform.psc; fork m4-scripts-3-record 4f525bad] [not in SP's dump; declared in TESModPlatform.psc] | papyrus-events |
 | `TESModPlatform.SetActorValueBase` (global) | missing | R0 | Client only: applies a base value from the server's record after a login or a value the server set; never a server native (docs/verbs/actor-values.md). [not in SP's dump; declared in TESModPlatform.psc] | actor-values |
 | `TESModPlatform.SetCellHosted` (global) | missing |  | [not in SP's dump; declared in TESModPlatform.psc] |  |
 | `TESModPlatform.SetFavorite` (global) | missing | R3 | Client only: Skyrim Platform's native that marks the server's recorded favorites after a login, only items the player holds and magic it knows; never a server native (docs/verbs/favorites.md). [not in SP's dump; declared in TESModPlatform.psc] | favorites |

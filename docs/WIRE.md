@@ -757,6 +757,31 @@ cannot connect to a schema 37 server (netcode's protocol id carries the version)
 one tree. The same slice raises PropTransform's budget to 128 at once, then 96 a second (UNMEASURED: a firing streams up to eight
 trap bodies at 10 Hz).
 
+### ScriptState (t 76, wire id 84) and ScriptStateApply (t 77, wire id 85): the script record (ADR-068 rung 3)
+
+Fork m4-scripts-3-record 4f525bad (12:49 PST 2026-11-06, SCHEMA_VERSION 38; ADR-068 rung 3,
+docs/research/rung3-script-record-2026-11-06.md): the two reserved rows of 37 become real messages in place. ScriptState (MsgType
+76, wire id 84), client to server, reliable, R2: `{ epoch: u32, formId: u32, fnv1a: u32, scripts: [{ type, state, flags: u8, vars:
+[ScriptVar] }] }`, the owner's read of a world object's attached scripts through TESModPlatform.SerializeScriptState (each script
+object's type, Papyrus state, the flags Object::Save writes, its variables in positional order with their folded kinds: k 0 None,
+1 an object as `o` {kind, mid, form, type}, 2 `s`, 3 `i`, 4 `f`, 5 `b`, 10 to 15 an array as `a` with `elem` on 11; a None array
+is its kind with no payload). ScriptStateApply (MsgType 77, wire id 85), server to client, reliable: `{ formId, fnv1a, seq: u32,
+event?: String, scripts }`, the record served to a new host ahead of its HostGrant for each recorded reference in the cell and to
+a late subscriber behind the reference's create word, carrying the reference's last animation event and the object's sequence at
+the moment the record was taken (ADR-068 amendment A: the record carries its view). Caps (UNMEASURED): 16 scripts, 512 variables a
+script, strings of 1024, arrays of 128, 192 KiB a ScriptState and 256 KiB an apply. Validator (wire-validate): formId not 0 and
+below 0xff000000, 1 to 16 scripts with a type, flags with constructed (0x01) and initialized (0x08) and without a held lock
+(0x04), each kind in 0 to 5 or 10 to 15 with the payload its kind names, a handle's kind in 0 to 2 and its form neither 0x14 nor
+0xff000000 and up (E_VAL_RANGE), finite floats (E_VAL_NONFINITE), 64 at once then 8 a second per sender. The server's rule
+(wire-rules script_state.rs): the reference a game-file world object the server holds, no actor, the sender the cell's host at the
+cell's epoch, checked epoch first (ADR-066 decision 4), or the host just released at its own epoch while the cell is unhosted (the
+release read); refusals E_SCRIPTSTATE_NO_REF, _KIND, _EPOCH, _OWNER, logged by name and never answered. The record lives on the
+reference's change form (MpChangeFormREFR's scriptState, saved under a "scriptState" key; an older record reads as none) and
+survives a restart. The value is the owner's engine's word (R2, rule 5: recorded, never judged; a seat's apply checks each class,
+count, kind and state against its own VM before writing). A schema 37 client cannot connect to a schema 38 server, so the rung's
+client and server build from one tree; fixtures 76-ScriptState-0 and -1 (the second refused: a kind 3 handle) and
+77-ScriptStateApply-0 and -1; the difftest session script-state.
+
 ### RelayedActivation (t 70): a linked activation the cell's host reported, to the cell's other games (traps, M4)
 
 Since fork m4-traps (01:43 PST 2026-11-01, SCHEMA_VERSION 28): RelayedActivation (id 78, MsgType 70), server to client, reliable, to the
