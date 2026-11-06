@@ -756,6 +756,22 @@ def camp_neighbours(actors: list[tuple[int, str, float, float]], spot: tuple[flo
     return undeclared, rest
 
 
+def esm_listing(rc: int, out: str, err: str) -> str:
+    """lab/esm.py's answer over ssh as a listing: its exit 1 with nothing on stderr is "no record found", an empty listing
+    (48's second camp, Embershard's back door with no actor within 2,500 units, stopped the first neighbour check here);
+    any other failure, a traceback included, is raised."""
+    if rc == 0 or (rc == 1 and not err.strip()):
+        return out
+    raise RuntimeError(f"lab/esm.py on sky-srv: exit {rc}: {err.strip()[:200]}")
+
+
+def _esm(how: str, src: str) -> str:
+    """lab/esm.py run on sky-srv (where the master files are) with its source on stdin."""
+    r = subprocess.run(["ssh", "-o", "BatchMode=yes", "-J", JUMP, SRV, f"python3 - {how}"], input=src, capture_output=True,
+                       text=True, timeout=240)
+    return esm_listing(r.returncode, r.stdout, r.stderr)
+
+
 def _neighbours(rep: Report, p: dict[str, Any]) -> bool:
     """Each camp spot's placed actors (CAMP_NEAR), read from Skyrim.esm on sky-srv and checked against the restored
     world's records: False when one is alive there and camp.near does not list it."""
@@ -772,7 +788,7 @@ def _neighbours(rep: Report, p: dict[str, Any]) -> bool:
         n = int(cell, 16)
         x, y = float(t["pos"][0]), float(t["pos"][1])
         how = f"near {ESM} {n:#x} {x:.0f} {y:.0f} {CAMP_NEAR} NPC_" if n == EXTERIOR else f"cellrefs {ESM} {n:#x} NPC_"
-        actors = placed_actors(_srv(f"python3 - {how}", stdin=src, timeout=240))
+        actors = placed_actors(_esm(how, src))
         records: dict[int, dict[str, Any] | None] = {}
         for ref, _, ax, ay in actors:
             if math.hypot(ax - x, ay - y) <= CAMP_NEAR:

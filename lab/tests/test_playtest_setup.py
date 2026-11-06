@@ -361,6 +361,16 @@ class PlaytestProfile(unittest.TestCase):
         undeclared, _ = camp_neighbours(actors, spot, {0x29600: None}, set(), radius=2000)
         self.assertEqual([u.split()[0] for u in undeclared], ["0x29600"])
 
+    def test_an_empty_esm_listing_is_no_neighbours_not_a_failure(self):
+        # lab/esm.py exits 1 when it finds nothing: 48's second camp (Embershard's back door) has no actor within 2,500 units
+        from playtest_setup import esm_listing
+
+        self.assertEqual(esm_listing(1, "", ""), "")
+        self.assertEqual(esm_listing(0, "0x1 NPC_ 0x2 X at (0, 0, 0)\n", ""), "0x1 NPC_ 0x2 X at (0, 0, 0)\n")
+        for rc, err in ((1, "Traceback (most recent call last): ..."), (2, ""), (255, "ssh: connect refused")):
+            with self.subTest(rc=rc), self.assertRaises(RuntimeError):
+                esm_listing(rc, "", err)
+
     def test_every_committed_profile_loads(self):
         from playtest_setup import load_profile
 
