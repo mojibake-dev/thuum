@@ -1482,6 +1482,11 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   animated), the prop lease mirror (the rock divergence 746aff6c exposed), and after its read the login inside a cell (no
   OnCellLoad or OnCellAttach for a seat that logs in inside it: dead pillars, unarmed darts). Then ADR-068 rung 3 (the script
   record; the visible pillar reset at a hand-off). Open with Eli: the swing damage feel, the NPC pass-through, the guest's claw.
+- STATE 2026-11-06 11:35 PST (numidium): canon fast-forwarded to fork 5186df39, the train m4-traps-47 (the wire follower, the prop
+  lease mirror, the furniture occupant released, NPC trap kills on the trap's own evidence), by verb-merge citing its gate
+  20261106-105731 (b-prop-push pending) with its T2 green; both clones promoted. Its probes' reds were premises and the
+  declared rock hang (LOG); two v1.2 reads are owed. Next: the layer train apocrypha/layer-appearance (CBBE as a row with
+  the body morphs and no Face Pack, the hair remake, Rotfern's Fixes 0.1.0 under ADR-069), then playtest 48.
 
 ### M5: Progression (4 to 8 weeks, Class A/B). Started 2026-10-31 (the weekend pass)
 

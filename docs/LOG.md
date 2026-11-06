@@ -9206,3 +9206,19 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   waits for one draugr swing read on the server and in the engine after 47, and the feel is Eli's. The hand-off's re-run ambush
   and E_ACTIVATE_REACH refusing the draugr's own alcove go to the NPC ladder (frozen system 1). sky-ci's disk (5.2 GB free) went
   to core before m4-traps-47's push.
+- m4-traps-47 merged to fork canon 5186df39 (2026-11-06T19:34Z): the gate 20261106-105731-merge-m4-traps-47 (cited, ADR-042),
+  20261106-105731-smoke-two-players to 20261106-115913-b-npc-caster (19 runs; 14 green, b-duel and b-npc-caster green on a
+  relaunch rerun, b-prop-push red twice and pending, ADR-042b); T2 green on skymp-server:m4-traps-47-5186df39, run by numidium
+  under its hold just before the gate (10:25 to 10:57Z), then the merge with T2=skip; clones promoted. The train: 746aff6c
+  (the wire follower) with the prop lease mirror (529e003c), the furniture occupant released on death or deletion
+  (7c4580c9) and NPC trap kills accepted on the trap's own evidence (341c7389); 5186df39 is 5dcd13b1 with the level-two
+  unit case fixed (TrapKillTest.cpp:349 had read the rock 0xb6d4d's note in CI's whole run), its dist 5dcd13b1's
+  (REUSE_DIST=1). The stage's probes, by path: x-trap-wire-follower 095943 and x-trap-family-fire 100510 green;
+  x-trap-rock-hang green three times (101052, 101413, 101724), no hang; three red, each read by thuum-cf as its answer with
+  no claim touched: x-trap-npc-kill 095230 (leg A, the fix's own read, green: 380b3's death taken on the trap's evidence;
+  the reds one broken premise, the plate fired before the walks), x-lever-after-scene 095742 (its moveto never moved the
+  bandit; the lever fix is R0, green on T0's FurnitureOccupantTest and T2), x-trap-boulders-rest 100308 (red on rock
+  0xb6d4d's declared hang only; all seven rocks agree with the record on both seats, so the hang is the owner's physics,
+  not a mirror fault). Owed after the merge: x-trap-npc-kill v1.2 (3cec676d) and x-lever-after-scene v1.2 (d4d1386d).
+  verb-stage's "done" says nothing about its probes; numidium's chain took it for green and was stopped by hand before
+  its pin, and verb-stage now prints a probe tally (29324d97). The nightly skipped the 11-06 window under the train's holds.
