@@ -2634,6 +2634,10 @@ function run(step: Step, player: Actor): unknown {
       // snapshots apart are the read. Returns the state after
       const npc = namedNpc(a);
       if (!npc) return { error: "no placed npc and no {formId}" };
+      // a hold on a body raises it: SetDontMove(true) writes lifeState 9 over the death (docs/verbs/npc-talk.md's
+      // Dynamic plan), and x-trap-npc-kill v1.1 read a held body alive on the host, its package back, while the
+      // record and the other seat had it dead (20261106-095230), so the step refuses a dead NPC rather than raise it
+      if (a.held === true && npc.isDead()) return { error: "npc-hold refuses a dead NPC: SetDontMove would write lifeState 9 over its death" };
       npc.setDontMove(a.held === true);
       return { formId: npc.getFormID(), held: a.held === true, aiEnabled: npc.isAIEnabled() };
     }
