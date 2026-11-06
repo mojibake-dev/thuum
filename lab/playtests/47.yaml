@@ -27,9 +27,14 @@ server:
   perks: true
   leveling: true
 camp:
-  teleports:   # the Temple's entrance, b-bleak-traps' spots (lab/scenarios/b-bleak-traps.yaml, b-container-rest.yaml)
-    - {kind: teleport, profileId: 1, cell: "371de:Skyrim.esm", pos: [-4200, 850, 650], rot: [0, 0, 90]}
-    - {kind: teleport, profileId: 2, cell: "371de:Skyrim.esm", pos: [-4100, 850, 650], rot: [0, 0, 90]}
+  # the restart (Eli, 2026-11-05 23:1x PST: "restart test with both of them outside to be able to enter"): outside the Temple's
+  # entrance door 0x37603, at the game's own landing of its exterior door 0x15da5 (lab/esm.py door), so each seat logs in outside
+  # and walks into 0x371de by a real cell load (thuum-cf's read: a seat that logs in inside the Temple never gets OnCellLoad, so
+  # its pillars sit empty and its darts unarmed); test 2 sixty units ahead on the landing's facing. The first camp, inside the
+  # entrance, put Prisoner in the entrance bandits' reach at load-in. A bandit archer stands about 1,360 units off (0x29600).
+  teleports:
+    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [-2966, -43331, 6145], rot: [0, 0, 104.6]}
+    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [-2908, -43346, 6145], rot: [0, 0, 104.6]}
 seats:
   - profile: 1
     name: "test 1"
