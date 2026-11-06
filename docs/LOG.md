@@ -9129,3 +9129,17 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   rock script run, so two seats simulated one rock and the players saw different things. So 746aff6c waits for a follow-window fix
   after playtest 47, and Eli confirmed tonight's merge as m4-scripts-2c-traps at 0f2f3c55 (D-T1, D-T4 B and the Adept pin, the
   ece35376 code staged and read before).
+- 16:03 PST 2026-11-06 (00:03Z 11-06) (thuum-cf's rock reads, logged by numidium; corrections to my 7f4bb1f3 entry):
+  x-trap-rock-hang v1.1 231108 is NOT an answer. The trace's 50 ms body poll on Frida's JS thread froze c2 (kernel32 Sleep calls
+  from about 60,000 to under 1,100 per 10 s; a falling rock gained one frame's vz per 8 s window), so c1 won epoch 1 and the hung
+  copy was c1's, untraced. The probe needs rock-motion-trace.js v1.2 (one sample a frame, no Sleep callback) before it can read a
+  hang. H-RH1 refuted on both seats, H-RH2 refuted where readable, H-RH3 still favoured. x-trap-boulders-rest 231500's mechanism,
+  corrected: c1's rock script ran neutralized (no fireTrap native, no claim). c1's rest wake ("prop b6d4d at rest: Dynamic (the
+  stream ended)", propService.ts:820-826) put c1's copy, at c2's hung spot, back to Dynamic after c1's own platform had broken
+  (746aff6c's purpose), so it fell, correctly. c2's asleep sample started the 3 s lease (props.rs:339), the host became the
+  simulator by default (:170-203), and c1's first sample took the row (:331) with no PropOwner word. c2 never followed: its lease
+  mirror reopened its stale epoch-1 word on c1's first awake sample (propService.ts:262) and dropped the samples (:276-283). The
+  fix after 47 is a general prop one, propService.ts:259-263 (a sample reaching the seat its word names means the word lapsed:
+  take it as the new owner's), or a PropOwner word at the takeover (a wire change), not the follow window first named. Also:
+  propService.ts:763's asleep test reads the wall clock, so a seat hitching for seconds reads its bodies asleep. Tonight's merge
+  (0f2f3c55) carries none of 746aff6c.
