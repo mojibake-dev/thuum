@@ -8,9 +8,11 @@
 # The world is the canonical one Eli made at 47's end (rotfern and Ariadne at 200). Embershard Mine 0xb6be6 is untouched
 # there: the wire 0xb6d3f, its seven rocks and the platform 0xb6d47 hold no record (the game files' state), the eight bandits
 # are alive, the levers, bridges and bone alarms unmoved (the world's own records, read 2026-11-06 19:4xZ).
-# The camp (from profile 48: outside a cell, its living neighbours declared) is on the approach from Riverwood, beside the
-# pine TreePineForest03 0x628c8 at (9716, -55915, 1141) (lab/esm.py on the players' Skyrim.esm), 150 units up, facing the
-# mine's door 0xb6cce (its landing (8849, -58120, 1446), about 2,400 units on); test 2 sixty units ahead on that heading.
+# The camp (from profile 48: outside a cell, its living neighbours declared) is the game's own landing of Embershard's back
+# door 0xb6f29 (lab/esm.py door 0xb6f24 on the players' Skyrim.esm: (16198, -53980, 1349)), nothing alive within 2,500 units,
+# facing the main door 0xb6cce (its landing (8849, -58120, 1446), about 8,400 units on, the wolf 0x9b0dd and the lookout
+# 0xb6ce1 on the way); test 2 sixty units ahead on that heading. The first camp, on the approach from Riverwood with the wolf
+# 0x9b0dd 1,227 units off declared in camp.near, put test 2 in its bite at load-in: dead at 20:04Z before the go (numidium's).
 id: 48
 build: "canon 5186df39 (fork m4-traps-47 merged by verb-merge) under the layer stage of apocrypha/layer-appearance 5a5facb2"
 world: playtest-canon-chars-20261106T081837Z   # the canonical seats (Eli, 2026-11-06): rotfern and Ariadne at 200
@@ -26,12 +28,8 @@ server:
   leveling: true
 camp:
   teleports:
-    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [9800, -55915, 1290], rot: [0, 0, 203]}
-    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [9777, -55970, 1290], rot: [0, 0, 203]}
-  near:
-    - 0xb6ce1   # the mine's lookout, LvlBanditMelee1HAggro1024, alive in the record, about 2,050 units off by the door: item 4's first fight
-    - 0x9b0dd   # EncWolf, alive in the record at (10829, -55339), about 1,200 units off
-    - 0x992d8   # EncWolf, no record (alive where placed, (7543, -56331)), about 2,280 units off
+    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [16198, -53980, 1349], rot: [0, 0, 240.6]}
+    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [16146, -54009, 1380], rot: [0, 0, 240.6]}
 seats:
   - profile: 1
     name: "test 1"
