@@ -911,10 +911,13 @@ set no blame actor; Papyrus's akKiller is typed Actor; but a non-actor
 killer in the native event would make Skyrim
 Platform drop deathStart altogether, EventHandler.cpp L413-447, and the
 report would never leave the host: the lab's plate run decides, Arvel's
-plate in Bleak Falls Temple the natural read, x-npc-trap-report by path
-since 2026-10-24 22:50 and never run, its placeholders PLATE_REF,
-PLATE_X/Y/Z and the victim's id unfilled, so it cannot run as written until
-numidium's esm.py fills them); and the fall bound (200 units within 4 s is a
+plate in Bleak Falls Temple the natural read; superseded on 2026-11-06 by
+x-trap-npc-kill v1.1 (lab/.cache/probes, 99aa3bb3; a draugr held in the
+Temple wall's swing and a blade, the kill read through the server's own
+trap evidence, fork m4-traps-47 341c7389; its run in the stage of
+5186df39), the earlier draft x-npc-trap-report archived unrun, its
+placeholders PLATE_REF, PLATE_X/Y/Z and the victim's id never filled); and
+the fall bound (200 units within 4 s is a
 plausibility floor, not the engine's damage rule, which ran on the host;
 x-npc-fall-report reads a drop the engine kills at). MEASURED
 (x-npc-fall-report v3 20261025-012351 on 44 8efabb10, 18:26 PDT, numidium's
@@ -924,7 +927,7 @@ report went out, and the server took it by "a drop of 3813 units in the
 host's samples", killed the record and scheduled the 240 h reset; dead on
 the record and both seats; the bound of 200 held with room. Committed as
 lab/scenarios/b-npc-death-report.yaml (main 3c6c54e). The hazard's evidence
-is the trap half's open read above (x-npc-trap-report).
+is the trap half's read above (x-trap-npc-kill v1.1 since 2026-11-06).
 Nightly 20261025-124620 red on the roll, not the report (numidium's
 agent, 11:5x PDT): the subject 0x85547 came up a SKEEVER (EncSkeever
 0x23ab7, race 78337; the gate's green had EncWolf 0x23abe, 78346), one
@@ -1318,9 +1321,10 @@ the deferred kill did not hold.
   host's samples; the server records the death"). The NPC fight's reports
   read inside b-npc-death's and b-cell-host's runs (the log's "accepted" or
   "already dead" lines); a trap's death is the Server section's open trap
-  read (x-npc-trap-report) and no claim.
-  The trap read's probe, by path for the stage after playtest 34 (22:51
-  PDT, a research agent's draft): lab/.cache/probes/x-npc-trap-report.yaml,
+  read (x-trap-npc-kill v1.1 since 2026-11-06) and no claim.
+  The trap read's first probe (22:51 PDT, a research agent's draft, never
+  run and its placeholders never filled; superseded on 2026-11-06 by
+  x-trap-npc-kill v1.1 and archived): lab/.cache/probes/archive/x-npc-trap-report.yaml,
   Arvel the Swift's pressure plate and swinging spike wall in Bleak Falls
   Temple (0x371de; UESP's walkthrough lists no other plate in the zone; the
   lever puzzle's darts are a lever puller's activation, the blades and the
@@ -1339,7 +1343,7 @@ the deferred kill did not hold.
   loaded trigger raises OnTriggerEnter is undocumented (hence the walk
   first); the spike wall's leveled 75 damage against a level-1 bandit's 35
   health is a HYPOTHESIS on the roll, the probe's premise, read by its first
-  run (x-npc-trap-report has never run, its placeholders unfilled); a body
+  run (x-npc-trap-report never ran; x-trap-npc-kill v1.1 reads the kill); a body
   flung past 512 units reads E_DEATH_UNCHECKED.
 - T3 scenario id, the sketch: lab/scenarios/b-npc-fate.yaml (written by hand after the
   grammar lands, rule 13; the sketch): two seats under npcEnabled and
@@ -2234,8 +2238,12 @@ and about 120 below the eye (about 13 counts a degree on this seat; the rune pro
   ADR-062 runs it); on the guest the puppet died by the server's word inside the furniture's idle, no fall, the deaths2 flag keep
   ticking a graph that never left the idle. Fix on the bundle head m4-turbo2-chest 84ef8669 (TS): a killed puppet that has not
   dropped 16 units within 300 ms gets the engine's zero-force push (finding 71's cure), "body <id>: no fall N units after the
-  kill, pushed to ragdoll". HYPOTHESIS until x-npc-death-ambush (by path: c1 hosts the Temple and kill-refs the spider in its
-  perch, c2's npc-state z under the perch within 4 s).
+  kill, pushed to ragdoll". NOT in canon (read 2026-11-06: 84ef8669 is on m4-turbo2-chest and m4-prop-arbitration alone; canon
+  took that branch's late-fate fix d16f27c7, not this push), so the frozen guest-side body stands on canon; HYPOTHESIS, its probe
+  x-npc-death-ambush unrun and held for m4-turbo2-chest's own stage (c1 hosts the Temple and kill-refs the spider in its perch,
+  c2's npc-state z under the perch within 4 s; its fresh review of 2026-11-06, NO-GO on canon, owes a z claim against c2's own
+  pre-kill snapshot and a premise read of the hang itself, since -1796 is also the floor's height and 47 found the spider on the
+  ground).
 - The naked headless bandit (Eli: "rotfern just killed a naked headless bandit in bleakfalls"): c1's console at the Temple's load
   (00:34:41Z) queued "late fate ... engine re-roll or redress" for 39fe4, 39fe2 and 39fe1, and c1's equipment report then read
   "1 worn" for 39fe1 against the roll's five. The redress's own lines (FateApi.cpp: "rerollActor(<id>): ...", "redressed <id>
@@ -2743,7 +2751,7 @@ their deaths again" (break 2); c1 crashed in Sven's redress on an actor with no 
    (The roll, the death, the body's point, the respawn and the loot R0; the
    host's death report R1 since train-44, 2026-10-24: ActorDeath, checked by
    the server's own evidence; a hazard death's evidence the Server section's
-   open trap read (x-npc-trap-report), refused and counted until that run;
+   trap read (x-trap-npc-kill v1.1), refused and counted until fork 341c7389's trap evidence;
    the fall checked by the host's samples.)
 2. Does every address come from CommonLib, addrlib, or a Ghidra reference?
    (Headers by file:line; the roll site, the reset and the dead-at-load
@@ -3277,3 +3285,22 @@ samples. The cost a player feels: a guest's body opens about two seconds after i
 checklist. A later refinement, if the lag matters at turbo 2: the AI on at the body's release instead of the open, with H-54e's drift
 (45 units in 5 s) as its price. M3's exit gate runs on v6 (c-dungeon-enemies, b-npc-body-release, b-npc-loot, b-npc-death-report,
 m0-inventory, a-activation-reach, a-sleep, always, watch; T2 beside).
+
+## Trap kills on hosted NPCs: the first read (02:45 PST 2026-11-06 (10:45Z 11-06), thuum-cf)
+
+x-trap-npc-kill v1.1 20261106-095230, on fork m4-traps-47 5186df39, answered leg A. The server took the host's report of 380b3's
+wall kill on the trap's evidence ("death report: 380b3 died of unknown at (8656, -5449, -2052), host ff000000, killer 0: a trap's
+evidence beside the body (54b15, 769 ms before); the server records the death", 09:54:55Z), with no E_DEATH_UNCHECKED and no death
+by the server's word for it, dead on the record and on c2 within 5 s; the same run's three other wall kills went the same way
+(380b5 "(54b15, 1883 ms before)", 380b9 2348 ms, 8009e 1047 ms), and so did a blade kill the probe never named, which reads the 30
+s window anyway: draugr 380b8 died to blade 3ac33 on a note 5249 ms old ("death report: 380b8 died of unknown at (6497, -7136,
+-2305), host ff000000, killer 0: a trap's evidence beside the body (3ac33, 5249 ms before); the server records the death",
+09:55:59.8Z), a kill a 5 s window would have refused. No trap kill in the run was refused. The run is red on three claims and one
+broken premise: c1's landing woke the four ambush NPCs, they charged it across the plate, the plate fired 8.1 s after the landing,
+and the wall killed 380b5 before leg B, so the probe's own read of the window (380b5 on a blade's note 5000 ms old or more) never
+came. A lab fact from it: leg B's npc-hold on that body raised it on c1 (SetDontMove writes lifeState 9 over kDead, the
+re-analyst's read in npc-talk.md's Dynamic plan; c1's npc-state read 380b5 alive with its package 0x9bcbd while the record and c2
+had it dead), so lab-driver's npc-hold refuses a dead NPC from this change on (deployed with the next driver lay). v1.2
+(lab/.cache/probes, 3cec676d) holds the four at the landing, moves 380b3 into the wall's swing and 380b5 onto the middle blade by
+the server's own teleports (SetPos, MoveTo, delivered to the host), never holds after a move, no claim changed; its fresh review
+GO with notes, applied as written.

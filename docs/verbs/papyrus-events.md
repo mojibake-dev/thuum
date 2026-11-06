@@ -428,6 +428,20 @@ chain's total}, an object variable as its handle, a plain form's handle (kind 0,
 for rung 3: H-R2 (a mid-latent object read through its lock's stack), H-R3 (a direct currentState write runs no state events),
 H-R4 (the apply race-free under the closed gate), H-R5 (lifecycle handlers plus the record restart a world script).
 
+The build (11:36 PST 2026-11-06 (19:36Z 11-06), thuum-cf): the plan is docs/research/rung3-script-record-2026-11-06.md, a read-only
+agent's against fork 5186df39 (canon since the train m4-traps-47 merged). Its first read corrects decision 5's last sentence
+(ADR-068 amendment A): defaultPuzzlePillarScript's OnCellLoad turns the graph only once, guarded by doOnce, and from its first
+side, so a re-sent OnCellLoad cannot render a pillar from its record; the record carries its view (the last animation event and
+the object's sequence) beside the script state. The plan also finds three pieces the design assumed absent at 5186df39 (OwnerAck,
+a digest cadence, a restart step in difftest) and lastAnimation never saved (MpChangeForms.cpp's TODO), so the record's view
+stands in for it across a restart. The build, inside-out on fork branch m4-scripts-3-record: F1 the wire rule (wire-rules
+script_state.rs), F2 the record and its persistence, F3 ScriptState 76 and ScriptStateApply 77 end to end on the server
+(SCHEMA_VERSION 38), F4 the three TESModPlatform natives (SerializeScriptState, ApplyScriptState, SendScriptEvent) with the
+gate's pending blank, F5 the client's ScriptStateService, then the lab's script-state step and view and the probes
+x-script-state-read v1, x-puzzle-handoff v3, x-puzzle-late-join v1 and the restart scenario b-script-state-restart. Hypotheses
+H-R2 to H-R9 and H-L1 are the plan's section 5. D-L1 B rides the same native (SendScriptEvent) as an optional slice, built ahead of
+Eli's answer and never merged before it.
+
 ## Status
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared

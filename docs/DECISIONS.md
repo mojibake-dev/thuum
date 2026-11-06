@@ -4755,6 +4755,20 @@ lever scripts sit in the family. Placed after rung 2's stage as its own slice, b
 two-seat dodging probe (each seat hurt only by what it sees, neither by the other's view), a single-use lamp probe (a guest's
 shot breaks it on both seats once, and after a restart), and the boulders' stream probe from a guest's tripwire.
 
+Amendment A to decision 5, a premise corrected by the script's own code (thuum-cf, 03:3x PST 2026-11-06 (11:3xZ 11-06); recorded,
+not a new decision: the decision's intent, a late joiner and a new owner continue the room as its owner had it, is unchanged, and
+the mechanism it adds is decision 4's own rule from finding 1, "a late joiner gets the object's record and its last action as one
+message"). Decision 5's last sentence says the re-sent OnLoad and OnCellLoad let "the seat's own handler render FROM the record by
+the script's own code". The Temple pillar's handler cannot: defaultPuzzlePillarScript's OnCellLoad (its pex, disassembled by a
+read-only agent for the rung 3 plan, ops 3 to 4, 13 to 25 and 27) turns the graph only when doOnce is unset, and from
+::initialState_var, the script's first side, not its current one, then sets doOnce; a record applied from an owner that already ran
+it carries doOnce true, so the re-sent event does nothing and the graph stays wherever the seat's engine left it. So the record
+carries its view too: the reference's last animation event at the moment the record was taken, with the object's sequence (the
+seam's per-object sequence of decision 4), applied after the script state and before the gate opens, where the seat's own sequence
+for the form is behind the record's. The re-send stays, for handlers that do render from their state; the record without a view
+leaves the load handler alone. Built on rung 3's branch (docs/research/rung3-script-record-2026-11-06.md), read by x-puzzle-late-join
+v1 (H-R8: c2's Pillar01 within 5.7 degrees of c1's after the apply).
+
 ## ADR-069: Rotfern's Fixes: engine fixes ship to every player as one SKSE DLL, one detour per lab-read site, never as a lab-only patch
 
 Status: ACCEPTED 2026-11-06 by Eli, to apocrypha directly, after asking what the fixes are ("wait so what ARE the engine fixes???

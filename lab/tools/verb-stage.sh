@@ -254,10 +254,16 @@ if [ "${#probes[@]}" -gt 0 ]; then
   # a probe is a question: its red is an answer for the verb doc, not a staging failure, so every
   # probe runs and each prints its run id and verdict (m2-cast-action's first probe went red and,
   # under set -e, took the other three with it, 2026-10-14)
+  notgreen=()
   for probe in "${probes[@]}"; do
     echo "   $probe $(date +%H:%M:%S)"
     out=$(just lab-run "$probe" 2>&1) || true
-    printf '%s\n' "$out" | grep -E ' (green|red|error) -> ' || { echo "   (no verdict line from lab-run:)"; printf '%s\n' "$out" | tail -3; }
+    verdict=$(printf '%s\n' "$out" | grep -E ' (green|red|error) -> ') || true
+    if [ -n "$verdict" ]; then printf '%s\n' "$verdict"; else echo "   (no verdict line from lab-run:)"; printf '%s\n' "$out" | tail -3; fi
+    case "$verdict" in *' green -> '*) ;; *) p=${probe##*/}; notgreen+=("${p%.yaml}");; esac
   done
+  # the one line a chained merge reads: "done" below says nothing about the probes (2026-11-06, m4-traps-47 5186df39:
+  # three of five red, and a chain that took "done" for green went on toward its pin and verb-merge until stopped)
+  echo "== probes: $(( ${#probes[@]} - ${#notgreen[@]} )) green of ${#probes[@]}${notgreen[*]:+; not green: ${notgreen[*]}}"
 fi
 echo "== verb-stage $branch ($sha8) done $(date +%H:%M:%S)"
