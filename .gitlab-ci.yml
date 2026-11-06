@@ -185,7 +185,8 @@ rotferns-fixes-build:
   artifacts:
     name: rotferns-fixes
     paths: [lab/rotferns-fixes/dist]
-    expire_in: 3 months
+    # an essentials row of source ci names this job, so its artifact must outlive the default
+    expire_in: never
 
 scenario-gate:
   extends: .base

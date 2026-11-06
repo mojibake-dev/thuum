@@ -320,6 +320,19 @@ while IFS=$'\x1f' read -r folder source ref check take exclude plugins_ note; do
       got=$(tree_hash "$dest")
       [ "tree:$got" = "$check" ] || { echo "$folder: tree hash $got is not ${check#tree:}" >&2; exit 2; }
       n_fen=$((n_fen + 1));;
+    ci)
+      # a build job's artifact (ADR-069: the row takes the pipeline's output, never a hand-built file): ref is
+      # <project>/<job id>|<folder inside the artifact>, fetched once into lab/.cache/mods/ci/<project>-<job id>
+      # by glab.py, then checked like a staging folder (Rotfern's Fixes, rotferns-fixes-build)
+      ids=${ref%%|*}; inner=${ref#*|}; src="$cache/ci/${ids%%/*}-${ids#*/}"
+      [ -d "$src/$inner" ] || python3 "$root/lab/tools/glab.py" artifact "${ids%%/*}" "${ids#*/}" "$src" \
+        || { echo "$folder: could not fetch job ${ids#*/}'s artifact from ${ids%%/*} (glab.py artifact)" >&2; exit 2; }
+      [ -d "$src/$inner" ] || { echo "$folder: no '$inner' in job ${ids#*/}'s artifact" >&2; exit 2; }
+      mkdir -p "$dest"
+      rsync -a "${excl[@]}" "$src/$inner/" "$dest/"
+      got=$(tree_hash "$dest")
+      [ "tree:$got" = "$check" ] || { echo "$folder: tree hash $got is not ${check#tree:} (job ${ids#*/}'s artifact differs from the one the manifest was built from)" >&2; exit 2; }
+      n_fen=$((n_fen + 1));;
     nexus)
       ids=${ref%%|*}; archive="$cache/${ref#*|}"
       [ -f "$archive" ] || nexus_fetch "$archive" "$ids"

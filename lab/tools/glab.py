@@ -4,6 +4,7 @@ Read-only calls use the Keychain items thuum-mundus created (service
 gitlab-thuum-readapi, accounts thuum and skymp); `run` uses the project access
 tokens (service gitlab-thuum-api, same accounts, api scope). Tokens are never
 printed. Usage: glab.py [thuum|skymp ...] [N pipelines, default 3] | glab.py jobs <project> <pipeline-id> | glab.py log <project> <job-id> [lines]
+| glab.py artifact <project> <job-id> <dest dir>   (the job's artifacts archive, unzipped into dest)
 | glab.py run <project> [ref] [KEY=VALUE ...]   (an API pipeline: every changes:
 rule counts as matched, so the image jobs and difftest-build run even when the
 push pipeline skipped them; KEY=VALUE pairs become pipeline variables, so
@@ -37,6 +38,18 @@ def main():
         with urllib.request.urlopen(req, timeout=30) as r:
             p = json.load(r)
         print(f"pipeline {p['id']} {p['status']} {p['ref']} {p['sha'][:8]} {p['web_url']}")
+        return
+    if which and which[0] == "artifact":
+        # ADR-069: an essentials row of source `ci` takes a build job's artifact (persist-mods calls this)
+        import io, os, zipfile
+        name, job_id, dest = which[1], which[2], which[3]
+        req = urllib.request.Request(f"{G}/projects/{PROJECTS[name]}/jobs/{job_id}/artifacts", headers={"PRIVATE-TOKEN": token(name)})
+        with urllib.request.urlopen(req, timeout=300) as r:
+            blob = r.read()
+        os.makedirs(dest, exist_ok=True)
+        with zipfile.ZipFile(io.BytesIO(blob)) as z:
+            z.extractall(dest)
+            print(f"job {job_id}: {len(z.namelist())} entries into {dest}")
         return
     if which and which[0] == "jobs":
         name, pipeline_id = which[1], which[2]
