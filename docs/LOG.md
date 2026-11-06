@@ -9187,3 +9187,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   RaceMenu, given rotfern's spells and items, with 60 iron arrows each. The world is saved as
   playtest-pt47-end-ariadne-20261106T081423Z, the hold is released, and thuum-cf has the build list. Eli's appearance asks (an
   additional-hairs mod, face textures, CBBE's sliders in the SFW version) went to apocrypha.
+- 00:18 PST 2026-11-06 (08:18Z 11-06) (thuum-cf): playtest 47 closed and handed to thuum-cf for the build (Eli: "if we're good
+  on playtest and can pass it off to thuum for the build"); its results in numidium's docs/private/playtest-47-findings.md. Four
+  agents out, each on its own local fork branch from 746aff6c, nothing pushed until the train merges them: NPC trap kills accepted
+  by the server's death check (m4-traps-47-npckill), the furniture occupant released (m4-traps-47-lever), the prop lease mirror
+  with rock-motion-trace.js v1.2 (m4-traps-47-mirror), and a read of why a seat logging in inside a cell gets no OnCellLoad (with
+  its probe x-login-in-cell). Test 2 is Ariadne from playtest 47's end world (playtest-pt47-end-ariadne-20261106T081423Z).

@@ -1474,6 +1474,14 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   pending, the host's undeleted drop reference under Souls RE's InventoryMenu, HYPOTHESIS) with its T2 green; both clones
   promoted. 746aff6c (the wire follower) waits for the prop-lease fix after 47. Playtest 47 (lab/playtests/47.yaml, thuum-cf's
   checklist) next on Eli's go; declared: S10, S11, rock 0xb6d4d's hang.
+- STATE 2026-11-06 00:18 PST (thuum-cf): playtest 47 closed (numidium's docs/private/playtest-47-findings.md; Eli handed the build to
+  thuum-cf). Verified in play: lamps and pools from the guest, the plate and wall each hit counted once on its own engine, dodging,
+  the pillars and the gate and the darts from either seat after a real cell load, the hand-off, the host's claw, the webs, the
+  hanging blades. The build, one train m4-traps-47 from fork 746aff6c (the parked wire follower): NPC trap kills accepted by the
+  server (E_DEATH_UNCHECKED refused them since D-S3), a furniture's occupant released on death or leave (the puzzle lever never
+  animated), the prop lease mirror (the rock divergence 746aff6c exposed), and after its read the login inside a cell (no
+  OnCellLoad or OnCellAttach for a seat that logs in inside it: dead pillars, unarmed darts). Then ADR-068 rung 3 (the script
+  record; the visible pillar reset at a hand-off). Open with Eli: the swing damage feel, the NPC pass-through, the guest's claw.
 
 ### M5: Progression (4 to 8 weeks, Class A/B). Started 2026-10-31 (the weekend pass)
 
