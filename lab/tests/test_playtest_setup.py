@@ -312,6 +312,55 @@ class PlaytestProfile(unittest.TestCase):
         self.assertEqual([x["profileId"] for x in t], [1, 2])
         self.assertTrue(all(x["kind"] == "teleport" and len(x["pos"]) == 3 for x in t))
 
+    def test_from_48_a_camp_inside_a_cell_needs_its_reason(self):
+        # playtest 47's first session: both seats logged in inside Bleak Falls Temple and its scripts sat dead
+        from playtest_setup import ProfileError
+
+        inside = PROFILE.replace("id: 24", "id: 48").replace("camp: {teleports: playtest-start}", "camp:\n  teleports:\n"
+                 "    - {kind: teleport, profileId: 1, cell: \"371de:Skyrim.esm\", pos: [-7400, 1000, 520], rot: [0, 0, 0]}\n"
+                 "    - {kind: teleport, profileId: 2, cell: \"3c:Skyrim.esm\", pos: [-2908, -43346, 6145], rot: [0, 0, 104.6]}")
+        with self.assertRaisesRegex(ProfileError, "371de:Skyrim.esm"):
+            self.load(inside, 48)
+        reasoned = inside.replace("rot: [0, 0, 104.6]}", "rot: [0, 0, 104.6]}\n  interior: \"x-login-in-cell's read wants a login inside\"")
+        self.assertEqual(len(self.load(reasoned, 48)["camp"]["teleports"]), 2)
+        outside = inside.replace("371de:Skyrim.esm", "3c:Skyrim.esm")
+        self.assertEqual(len(self.load(outside, 48)["camp"]["teleports"]), 2)
+        self.load(PROFILE.replace("id: 24", "id: 48"), 48)  # playtest-start's two teleports are outside
+        self.load(inside.replace("id: 48", "id: 47"), 47)  # before 48 the profiles load as they were written
+
+    def test_a_camps_interior_and_near_are_checked(self):
+        from playtest_setup import ProfileError
+
+        camp = PROFILE.replace("camp: {teleports: playtest-start}", "camp:\n  teleports: playtest-start\n  near: [0x29600, 0x29602]")
+        self.assertEqual(self.load(camp)["camp"]["near"], [0x29600, 0x29602])
+        for bad in ("near: [bandit]", "near: [0]", "near: 0x29600", "interior: \"\"", "interior: 1", "spot: here"):
+            with self.subTest(bad=bad), self.assertRaises(ProfileError):
+                self.load(camp.replace("near: [0x29600, 0x29602]", bad))
+
+    def test_a_camps_neighbours_are_declared_or_dead(self):
+        # 47's restart camp: LvlBanditMissile 0x29600 1,364 units off and LvlBanditMelee2H 0x29602 at 2,392
+        from playtest_setup import camp_neighbours, placed_actors
+
+        listing = ("0x00029600 NPC_ 0x0001e79e LvlBanditMissile at (-2308, -44526, 6145), 1364 away\n"
+                   "0x00029602 NPC_ 0x0001e79d LvlBanditMelee2H at (-831, -44409, 5673), 2392 away\n"
+                   "0x000373a6 NPC_ 0x000328d5 TreasCorpseBanditNordMale at (-5647, 816, 518)\n"
+                   "0x00037603 DOOR 0x0002e4c3 NorLargeDoor at (-7537, 1018, 512)\n")
+        actors = placed_actors(listing)
+        self.assertEqual([a[:2] for a in actors], [(0x29600, "LvlBanditMissile"), (0x29602, "LvlBanditMelee2H"),
+                                                   (0x373A6, "TreasCorpseBanditNordMale")])
+        spot = (-2966.0, -43331.0)
+        # no record: alive where Skyrim.esm placed it; the corpse in the Temple is far outside the radius
+        undeclared, rest = camp_neighbours(actors, spot, {0x29600: None, 0x29602: None}, set())
+        self.assertEqual([u.split()[0] for u in undeclared], ["0x29600", "0x29602"])
+        self.assertEqual(rest, [])
+        # dead in the restored world, or listed in camp.near: named, not blocking
+        undeclared, rest = camp_neighbours(actors, spot, {0x29600: {"found": True, "isDead": True}, 0x29602: {"found": True, "isDead": False}}, {0x29602})
+        self.assertEqual(undeclared, [])
+        self.assertTrue(rest[0].endswith("dead") and rest[1].endswith("alive (camp.near)"), rest)
+        # 2,392 is outside a 2,000 radius
+        undeclared, _ = camp_neighbours(actors, spot, {0x29600: None}, set(), radius=2000)
+        self.assertEqual([u.split()[0] for u in undeclared], ["0x29600"])
+
     def test_every_committed_profile_loads(self):
         from playtest_setup import load_profile
 
