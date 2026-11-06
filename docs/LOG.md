@@ -9143,3 +9143,17 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   take it as the new owner's), or a PropOwner word at the takeover (a wire change), not the follow window first named. Also:
   propService.ts:763's asleep test reads the wall clock, so a seat hitching for seconds reads its bodies asleep. Tonight's merge
   (0f2f3c55) carries none of 746aff6c.
+- 18:11 PST 2026-11-05 (02:11Z 11-06) (numidium, Eli's go for tonight's merge): fork m4-scripts-2c-traps at 0f2f3c55 (the trap
+  slice: D-T1, D-T4 B, the Adept pin) staged (dist 643dda3c82cf7d38 in all four game folders, clean-m1-next on both seats, the
+  server pinned to m4-scripts-2c-traps-0f2f3c55, image 2d0c5b62e4ba) and NOT merged: canon stays at 9745d401. Two process faults
+  cost the first two verb-merge calls. (1) Mine: aba0fa01 (11-04, parity retired) had dropped verb-merge.sh, layer-merge.sh,
+  test-proto.sh and glab.py to 100644, so `just verb-merge`, `layer-merge` and `test-proto` failed with exit 126 since 11-04
+  18:35; 5418da92 restored the modes. (2) probe-runs.py refused two "by path" promises in verb docs naming the gate's scenarios,
+  for code the merge does not carry (cell-host.md's x-host-restart-follow, m3-follow-vouch; prop-physics.md's x-prop-static,
+  m4-prop-statics); with thuum-cf's OK, 38182424 scopes each to its branch's own stage, the guard carried in the paragraph. The
+  third call passed the T2, then the gate went red: run set 20261106-003311-merge-m4-scripts-2c-traps, 20 green and 1 red.
+  b-prop-push failed the same claim in all three runs (011237, 011509 relaunched, 020736 the lone-red rerun):
+  `c1.refs_near().runtime_of(0x5ace4) == 1` read 2, so the host holds two runtime copies of the clutter prop it walked into, with
+  every other claim holding. It was green in every run from 11-01 to 11-03, but it has never run on canon's rungs 1 and 2, so the
+  duplicate is either the slice's or canon's; one run on canon 9745d401's lay would place it. Reds green on their reruns: b-duel,
+  b-puzzle-relay (with a lab fault), b-npc-death, b-npc-caster. Playtest 47 waits on thuum-cf's call.
