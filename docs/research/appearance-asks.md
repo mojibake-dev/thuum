@@ -110,8 +110,24 @@ sync re-applies the recorded look every two seconds (racemenu-sync.md), and body
 preset it carries, so a look saved without morphs would overwrite them (HYPOTHESIS, not seen).
 Eli (2026-11-06): the sliders complaint is "the skylab clients one and two", and both seats have
 the plugin, its script, skee64 with bEnableBodyMorph=1 and no femalebody.tri or femalehands.tri, so
-the read is (b): the body cannot morph on a seat. The fix is folder 27's seven files on both
-seats (and in the CBBE row when CBBE becomes one).
+the read is (b): the body cannot morph on a seat. Eli's symptom matches it exactly: "sliders of the
+body while naked in race menu were the problem". The fix is folder 27's seven files on both seats
+(and in the CBBE row when CBBE becomes one).
+
+## What is staged for numidium's next slot (2026-11-06, nothing laid yet)
+
+- sky-srv /srv/lab/handover/cbbe-2.0.3-body-morphs/: CBBE 2.0.3's folder 27, the seven .tri in
+  Data layout with SHA256SUMS, verified on the server. Lay into both seats' 1.6.1170 Data; the
+  body sliders then move the naked body in the race menu.
+- sky-srv /srv/lab/handover/cbbe-face-pack-prune.txt: the 28 paths of CBBE 2.0.3's folder 10 (the
+  Face Pack) to delete under Data where present, both seats; vanilla's female faces return from the
+  BSA. The same untick on Fenestrate in Vortex is Eli's.
+- The hair: lab/.cache/mods/"Vanilla hair remake 63979 1.0.2 file 501460.7z" (8,827,229 bytes,
+  md5 a7102ae31a8a305a22cffdd9106dff73): 475 files in plain Data layout, 271 hair meshes and 204
+  .tri under meshes\actors\character\character assets\hair, no plugin, no textures (vanilla's
+  apply). It goes in as a client-only layer row (apocrypha/layer-appearance), staged with the
+  layer, not through the handover.
+- The SFW swap waits for Eli's BodySlide build (below).
 
 Rotfern: her meshes stay her own; a flat chest in her robes is a BodyMorph on her robes' .tri (the
 2026-10-07 read: her robes are CBBE 2.0.3 Vanilla Shape prebuilt meshes with morphs) plus the body
@@ -158,14 +174,24 @@ clean-m1 without them or add-mods takes a one-off prune list. And Fenestrate fol
 choice in Vortex (SFW in, CBBE 2.0.3 out, the slider plugin kept), or the two machines' looks
 differ.
 
+## The BodySlide build for the SFW step (Eli, on Fenestrate, once)
+
+Install CBBE SFW Edition in Vortex (NeverNude, Vanilla Outfits, no Face Pack) with BodySlide. In
+BodySlide: Outfit/Body "CBBE Body (SFW)" (or whatever the SFW body project is named in the list),
+Preset "CBBE (SFW)", tick "Build Morphs", then Batch Build with the groups CBBE (SFW), CBBE Vanilla
+(SFW), CBBE Dawnguard (SFW), CBBE Dragonborn (SFW), CBBE Creation Club (SFW) and the two 1st Person
+groups, all with Build Morphs on. The output (meshes and .tri, the body under character assets and
+every outfit) is the morph set; it lands in the layer as a `local` row beside the SFW row and the
+slider plugin from CBBE 2.0.3's folder 26. Hand it over as a folder (zip it) and say which preset
+and groups were used; the row records the hashes, the files stay out of the repo.
+
 ## Questions for Eli
 
 1. Answered 2026-11-06: Nexus 63979, Vanilla hair remake, as a replacer.
 2. Answered: client 2 (the seats; the Face Pack, hash-confirmed on both).
 3. Answered: the skylab clients one and two; the seats lack the body .tri (case b).
-4. Body shape under SFW: the archive ships one build (curvy); the seats today are 2.0.3's Vanilla
-   shape. Keep SFW's build as shipped, or have the BodySlide build (needed anyway for the morphs)
-   use a Vanilla-shape preset?
+4. Answered: "keep the shipped sfw shape, but the sliders should work". So the BodySlide build uses
+   the shipped preset "CBBE (SFW)" and exists only to produce the morph files.
 5. Answered: "bodyslide is probs on fenestrate". The SFW archive ships no morphs, so that one build
    is the SFW path's prerequisite.
 
