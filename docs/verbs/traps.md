@@ -1087,3 +1087,17 @@ asleep. The fix after playtest 47 is the mirror's (propService.ts:259-263: a sam
 word lapsed, so the sample is the new owner's and stays pending; a general prop fix, items included), or a PropOwner word at the
 takeover (a wire change, rule 4), not the follow window first named. Also read: propService.ts:763's asleep test reads the wall
 clock, so a seat hitching for seconds reports its bodies asleep (every "asleep" line in 231108 was such a read).
+
+The login inside a cell (00:51 PST 2026-11-06 (08:51Z 11-06); a read-only agent's read, docs/engine/scripts.md S12): playtest 47's
+dead pillars and unarmed darts came from the login path, not the trap slice and not the platform's gate. A seat that logs in
+inside a cell reaches it by loading the template save rewritten with the server's cell and position, a save load that raises
+no OnCellLoad and no OnCellAttach for that cell's scripts (HYPOTHESIS H-L1 for the engine's part), so Bleak Falls Temple's
+pillar scripts stayed in their empty state and its DartTrap copies never armed (fireTrap shoots only once onCellAttach sets
+isLoaded); every lab scenario enters by teleport, a real cell load, so none ever met it. Eli's call, D-L1: A, load into a
+neutral cell and move to the server's spot (the engine's own cell load, covering every event a cell entry sends; one more
+loading screen of up to about 5 s at each login, and a movement hold so the server never records the neutral spot); B, send
+the two events once after the login for each loaded cell whose cell-loaded event the platform never saw, after the grant and
+the record's apply (the shape of the client's story-event fix, questStageService.ts:391-425; no extra loading screen; the risk is
+a second OnCellLoad, which puts a pillar script back on its first side while its graph stays turned, so exactly once, recording
+what the engine did send). thuum-cf recommends B, and A if the read of H-L1 shows OnLoad or other entry events missing too. The
+probe x-login-in-cell v1 (lab/.cache/probes) reads the defect, red on today's build; its fresh review comes with the fix.
