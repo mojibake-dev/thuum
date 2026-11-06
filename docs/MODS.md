@@ -504,6 +504,17 @@ purges what it deployed. A file at that path with another hash stays and is coun
 on any clone whose base carried it (FSMP's DLL came off on 2026-10-20 only because its base lacked it), so a promoted mod
 could never leave.
 
+**Vanilla hair remake 1.0.2 (Eli, 2026-11-06, the hair link; "it's fine to just use them as
+replacers").** The row `vanilla-hair-remake-1.0.2` lays jg1's no-physics main file (Nexus 63979 file
+501460, 8.8 MB): 146 vanilla hairstyles remade from scratch for every playable race, as a replacer
+at the vanilla mesh paths, 271 hair meshes and 204 .tri under character assets\hair, no plugin and
+no textures (vanilla's hair textures, and any replacer of them, apply). Client-only by nature: no
+slot, nothing served, no load-order change; a player's hair records are vanilla's, the mesh they
+point at is the remade one. Main files reach the player characters only, since NPCs carry their hair
+in baked face data; the optional NPC file (501461, 70.5 MB of regenerated face data for over 2,000
+vanilla NPCs) is not taken, nor the SMP main file (510409), which needs FSMP. The read and Eli's
+other two appearance asks: docs/research/appearance-asks.md.
+
 **Out by Eli's letters.** Death Drop Overhaul 1.2.4 (D37 B, 2026-10-27 00:00 PDT, "recommended on
 both"): it drops a dead actor's held shield as a world reference on each client that the server
 never records (x-body-loot 20261026-231653 on 50b's stage), outside the one-authority rule, and it
