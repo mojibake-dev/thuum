@@ -865,3 +865,22 @@ touch kind is the client's word, bounded by the reach alone; a later tightening 
 accepted from the claimant within 2 s. Probe after the arm: x-prop-blast (c1 shouts Unrelenting Force at a cabbage cluster the host
 c2 simulates; claims: the touch-3 grants in the server log, no E_PROP_REACH or E_PROP_STEP, every cabbage's server position within the
 snap threshold of c1's and c2's reads 5 s after the blast).
+
+The drop's deleted copy (18:30 PST 2026-11-05 (02:30Z 11-06), thuum-cf, from a read-only agent's read of the three reds).
+b-prop-push went red three of three in canon's merge gate of fork m4-scripts-2c-traps 0f2f3c55 (run set 20261106-003311: 011237,
+011509, 020736) on step 27 alone, the check right after the drop: c1.refs_near().runtime_of(0x5ace4) == 1 read 2. The second entry
+is c1's own engine-made drop reference, which DropItemService logged as "Found and deleted reference" (0xff00093c, 0xff0008f5,
+0xff0008fe), listed deleted at the spot the engine spawned it, 128 units over the strip; the live copy carries a fresh id and sits
+on the ground; c1 got one create word for the drop and no destroy. In all five greens the engine freed the dropped reference
+within about 100 ms and formView.ts:340's placeAtMe reused its id; in the reds it is never freed, so the copy takes a new id, and
+runtime_of counts every listed 0xff reference of the base, deleted or not (lab/labapi/labapi/assertions.py:639-655). What
+separates the reds from the greens: Skyrim Souls RE v3.2.0 with bInventoryMenu true (the menu does not pause the game) is loaded
+on both seats in all three reds and in none of the five greens or the 68 earlier prop runs; it joined the standing layer at thuum
+main 32459beb (2026-11-03 17:20 PST), about three hours after the last green; this scenario drops from inside the InventoryMenu.
+Neither the trap slice's code nor canon's rungs touch the drop path (propService.ts byte-identical from c1600f98 to 9745d401;
+dropItemService.ts unchanged; D-S3's additions refuse runtime ids and inventory bases). HYPOTHESIS: with the menu unpaused the
+deleted drop stays flagged and unfreed (CommonLib's InGameFormFlag::kWantsDelete, TESForm.h:111); unread whether c1 shows it (a
+deleted reference is not drawn, by the engine's usual rule; the reds stop before a screenshot). The read: one b-prop-push run with
+c1's SkyrimSoulsRE.ini bInventoryMenu=false through the relaunch files lever: one listed entry carrying the deleted id means Souls
+RE; the deleted entry still listed clears it and points at the seam's judging of Delete (NativeRows.inc:25). Pending in
+lab/gate.yaml meanwhile; the claim itself unchanged (a runtime_of that skips deleted references would be a claim rewrite, Eli's).
