@@ -1487,6 +1487,11 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   20261106-105731 (b-prop-push pending) with its T2 green; both clones promoted. Its probes' reds were premises and the
   declared rock hang (LOG); two v1.2 reads are owed. Next: the layer train apocrypha/layer-appearance (CBBE as a row with
   the body morphs and no Face Pack, the hair remake, Rotfern's Fixes 0.1.0 under ADR-069), then playtest 48.
+- STATE 2026-11-06 14:05 PST (numidium): playtest 48 closed. NPC trap kills, the tripwire's rocks, levers and
+  bridges, bone alarms, persistence across a re-entry, the CBBE sliders and the hair were verified in play. The fixes it
+  owes go to thuum-cf (the loot strip, the guest's rope, the blade kill past the window, the RaceMenu flag, the bow) and
+  apocrypha (the SFW body, the four hair excludes); `mp host` (fork m4-mp-host f70bc16e) and rung 3 (m4-scripts-3-record)
+  are built and wait for their stages. The new canonical world: playtest-canon-chars-20261106T220411Z.
 
 ### M5: Progression (4 to 8 weeks, Class A/B). Started 2026-10-31 (the weekend pass)
 
