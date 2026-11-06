@@ -1,0 +1,210 @@
+# b-script-state-restart (thuum-cf, 15:36 PST 2026-11-06 (23:36Z 11-06)): ADR-068 rung 3's restart-persistence scenario (CLAUDE.md
+# rule 6: the script record rides the reference's change form across a server restart), promoted verbatim from its reviewed draft
+# v1.1 (lab/.cache/drafts, sha1 96baedfd), GREEN on fork m4-scripts-3-record 458a6930 at 20261106-232737 (rung 3's stage): the
+# record applied ahead of the new host's grant after the restart and behind a relaunched seat's create word, both seats' Pillar01
+# at 0.0 rad of each other, the next press Trigger03. The draft's header and every step and claim follow, byte for byte.
+# b-script-state-restart v1.1 DRAFT (thuum-cf, rung 3's lab layer, 2026-11-06; its fresh review GO with notes, 1 and 2 REQUIRED,
+# every note applied as written, so no second review under ADR-064 amendment A). For fork m4-scripts-3-record b2c11b69 or later on
+# both seats and the server (client 37d2a3cf, platform 27aa9f88), lab-api from thuum rung3-lab's second lab-api commit (the board
+# keeps a failed read's error in its reference's place, so c.script_state raises on it).
+# (1, REQUIRED) leg 3's c1 claims could not fail: c1 kept its VM through the reconnect, its own script already on position03. c1
+# now relaunches at lab-spawn after leg 2 (relaunch {until: gone}, connect, close-menu, TGM: b-trap-record-restart's leg 3), a
+# fresh game whose script can stand on position03 only by the record served behind its create word; and a failed read on the
+# fresh game is a data error, never its earlier game's answer (board.py, the same note). timeout_s 1500 to 1800 for the relaunch.
+# (2, REQUIRED) the served claims name their seat: "script state aa8cb served to ff000001 ahead of its grant" snapshotted after the
+# until that waits for the Temple to be unhosted and claimed risen after c2's grant; "script state aa8cb served to ff000000 after
+# its create word" snapshotted right before c1's entry and claimed risen after it (leg 1's unnamed served snapshots, read by nothing
+# now, dropped).
+# (3) The HYPOTHESIS, both branches named (it replaces v1's): SpSnippetService clears its lastSeq at the reconnect's own CreateActor
+# (spSnippetService.ts:19-23 at b2c11b69: a login, a reconnect or a restarted server starts the sequences over), so at c2's grant
+# after its re-entry its lastSeq for aa8cb equals the record's seq only if a guest apply at the re-login raised it (c2 logs in again
+# inside the unhosted Temple and may hear the record behind its create word there). In that branch the view is not played at the
+# grant (the apply plays it where the seat's seq is another than the record's) and leg 2's face rests on the graph keeping its side
+# through c2's own unload and reload; else the view plays at c2's grant and leg 2's face reads the view. c2-console.log's second
+# apply line says which branch ran: "view <event> current (seq <s>)" or "view <event> to play (seq <s>, ...)".
+# (4) How to read it: green, the record comes back from the database and every seat stands where it does. No "script state aa8cb
+# served to ff000001" line at all after the restart: the grant came before c2's subscription to the pillar, so nothing was served
+# ahead of it and nothing behind its create word (c2 hosted the cell by then): the rung's declared serve limit, not a lost record.
+# Leg 2's state red with the served line present: the apply refused or never ran (c2's "script state aa8cb applied at the grant of
+# 371de" line, or its "given up" line with the reason). Leg 2's face red with its state green: the first branch above, the graph
+# reset by the reload under a seq that matched. Leg 3's state red: the fresh c1 did not apply the record (its "applied as a guest"
+# line, a give-up, or a read error the step's note names). Leg 3's press red with a Trigger01 from ff000001: c2's script was not on
+# the record's state at the press. A red on leg 1's c2 premise: the guest's script followed the host's presses, and the restart's
+# question then reads the record on the fresh c1 alone. v1 follows.
+# b-script-state-restart v1 DRAFT (thuum-cf, rung 3's lab layer, 2026-11-06). A draft, kept outside lab/scenarios: a scenario
+# commits alone and after its review (CLAUDE.md rule 13, ADR-009), and ADR-064 amendment B assembles a gate scenario only from parts
+# already green, so this waits for x-script-state-read v1, x-puzzle-handoff v6 and x-puzzle-late-join v1 to read green on the rung's
+# build, then its own fresh review, then numidium's approval. ADR-068 rung 3's slot 3 (docs/research/rung3-script-record-2026-11-06.md
+# section 2): the script record's restart persistence (rule 6: F2's optional "scriptState" key on a reference's change form ships
+# with a restart-persistence scenario), run beside b-puzzle-relay v4, b-bleak-traps and b-object-anim unweakened. For fork
+# m4-scripts-3-record on F5's Windows head or later on both seats and the server, lab-api and lab-driver from thuum rung3-lab.
+# ONE QUESTION: does the Temple's script record survive a server restart and reach both seats after it, so the pillar's script and
+# its face stand where the record does in each game and the next press continues it?
+# Legs:
+# 1. before: c1 hosts the Temple and turns aa8cb twice from (5520, -896) (Trigger01, Trigger02: position03, side 3); c2, a guest at
+#    (5400, -900), watches, its own pillar script on position01 (the flip runs the host's presses in the host's engine alone; claimed:
+#    the premise that makes the record c2's only carrier). Snapshots: c1's state (statePre), the served counts (the server's log
+#    spans the compose restart, so a bare count could be met by a line from before it); c1's face read (label pre).
+# 2. the restart: the server restarts and both games log in again by themselves (skymp5-client reconnects after a restart; a
+#    running game's re-login moves its player, remoteServer.ts:815-850, with no save load, so each engine keeps its scripts); both go
+#    out to lab-spawn, the Temple unhosted, and c2 comes back in FIRST, a real cell load (the plan: "so the cell is a real load and
+#    S12 does not apply"), and hosts it. No game can send a record before a grant (its epoch is none), so the first grant's served
+#    line after the restart is the database's record. Claims: the served-at-grant count rose over its snapshot; c2's script-state
+#    of aa8cb equals statePre (its own engine held position01); c2's face within 5.7 degrees (0.1 rad) of c1's pre read.
+# 3. c1 back in, a guest: the served count rose by two at least (c2's grant and c1's create word); c1's state equals statePre and
+#    the two faces are within 5.7 degrees before any press; then c2's first press yields Trigger03 (once, and no Trigger01 reported
+#    by c2 as host: without the record its script's first press would be Trigger01).
+# 4. a late join (x-puzzle-late-join's shape, once green): c1 out to lab-spawn, c2 presses again (Trigger01, position01 to 02), c1
+#    back in; c1's state equals c2's, position02, and the faces are within 5.7 degrees.
+# HYPOTHESIS rested on (leg 2's face claim, flagged for the review): c2 played both pre-restart turns as relays, so its SpSnippet
+# lastSeq for aa8cb equals the record's seq (seeded across the restart, the plan's 1(c)) and the record's view is not replayed on it
+# (the apply sequence's step 3); its face after its own unload and reload then rests on the graph keeping its side through a cell
+# reload in one session. If not, leg 2's face claim reads red with its state claim green: the replay's condition (the seq, and a
+# load since) is the fix, not this claim.
+# RECORDED, NOT CLAIMED: both seats' apply lines (H-R4), the platform's blanked lines (H-R7), the refusal codes, screenshots.
+# Spots, each a green run's: c1 (5520, -896, -768) facing east and c2 (5400, -900, -768) in the puzzle room (x-puzzle-handoff
+# 20261105-082013, b-puzzle-relay); lab-spawn's strip, c1 at the origin and c2 at (0, -120) (docs/LAB.md's summit note). God mode
+# set again after the reconnect (session state, b-trap-record-restart's lesson). By path until promoted; assertions are evaluated by
+# lab-api only (ADR-009).
+id: b-script-state-restart
+milestone: M4
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: false
+  gameHour: 7.9
+timeout_s: 1800
+artifacts: [server.log, c1.log, c2.log, c1-console.log, c2-console.log, screenshots]
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 5520, y: -896, z: -768, rot: [0, 0, 90]}
+  - until: {within: 30, every: 1, expect: ['server.host(0x371de).client == "c1"']}
+  - c2: teleport {cell: "371de:Skyrim.esm", x: 5400, y: -900, z: -768, rot: [0, 0, 90]}
+  - wait: 10
+
+  # 1. two host turns, the record, and both seats' own scripts before the restart
+  - c1: activate {refId: 0xaa8cb}
+  - until: {within: 8, every: 0.5, expect: ['server.log_count("aa8cb animates aa8cb .[Tt]rigger01.") >= 1']}
+  - wait: 4
+  - c1: activate {refId: 0xaa8cb}
+  - until: {within: 8, every: 0.5, expect: ['server.log_count("aa8cb animates aa8cb .[Tt]rigger02.") >= 1']}
+  - wait: 8
+  - c1: script-state {formId: 0xaa8cb}
+  - c2: script-state {formId: 0xaa8cb}
+  - server: snapshot {name: statePre, of: "c1.script_state(0xaa8cb).state"}
+  - c1: node-rotation {formId: 0xaa8cb, nodes: ["Pillar01"], label: "pre"}
+  - wait: 1
+  - c1: node-rotation {formId: 0xaa8cb, nodes: ["Pillar01"], label: "pre"}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - server.host(0x371de).client == "c1"
+      - c1.script_state(0xaa8cb).state == "position03"
+      - c2.script_state(0xaa8cb).state == "position01"
+      - 'server.log_count("script state aa8cb recorded from") >= 1'
+
+  # 2. the restart; both log in again by themselves, both out, then c2 back in first: the Temple's host by the database's record
+  - wait: 5
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - c2: reconnect
+  - wait: 15
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -120, z: 0}
+  - until: {within: 30, every: 1, expect: ['server.host(0x371de).hosted == false']}
+  # (v1.1, 2) the grant's serve to c2 by name, its count before the grant
+  - server: log-count {pattern: "script state aa8cb served to ff000001 ahead of its grant"}
+  - server: snapshot {name: grantToC2Before, of: 'server.log_count("script state aa8cb served to ff000001 ahead of its grant")'}
+  - wait: 5
+  - c2: teleport {cell: "371de:Skyrim.esm", x: 5400, y: -900, z: -768, rot: [0, 0, 90]}
+  - until: {within: 30, every: 1, expect: ['server.host(0x371de).client == "c2"']}
+  - wait: 15
+  - c2: script-state {formId: 0xaa8cb}
+  - c2: node-rotation {formId: 0xaa8cb, nodes: ["Pillar01"], label: "after"}
+  - wait: 1
+  - c2: node-rotation {formId: 0xaa8cb, nodes: ["Pillar01"], label: "after"}
+  - c2: screenshot
+  - server: log-count {pattern: "script state aa8cb served to ff000001 ahead of its grant"}
+  - assert:
+      - server.host(0x371de).client == "c2"
+      - 'server.log_count("script state aa8cb served to ff000001 ahead of its grant") > snapshot("grantToC2Before")'
+      - c2.script_state(0xaa8cb).state == snapshot("statePre")
+      - 'c2.node_rotation(0xaa8cb, "Pillar01", "after").local_angle_to(c1.node_rotation(0xaa8cb, "Pillar01", "pre")) < 5.7'
+
+  # 3. (v1.1, 1) c1 relaunched at lab-spawn, a fresh game with no script state of its own; then in, a guest; then the new host's
+  #    first press continues the record
+  - c1: relaunch {until: gone}
+  - c1: connect
+  - wait: 15
+  - c1: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  # (v1.1, 2) the serve behind c1's create word by name, its count right before c1's entry
+  - server: log-count {pattern: "script state aa8cb served to ff000000 after its create word"}
+  - server: snapshot {name: createToC1Before, of: 'server.log_count("script state aa8cb served to ff000000 after its create word")'}
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 5520, y: -896, z: -768, rot: [0, 0, 90]}
+  - wait: 15
+  - c1: script-state {formId: 0xaa8cb}
+  - c1: node-rotation {formId: 0xaa8cb, nodes: ["Pillar01"], label: "after"}
+  - c2: node-rotation {formId: 0xaa8cb, nodes: ["Pillar01"], label: "after"}
+  - wait: 1
+  - c1: node-rotation {formId: 0xaa8cb, nodes: ["Pillar01"], label: "after"}
+  - c2: node-rotation {formId: 0xaa8cb, nodes: ["Pillar01"], label: "after"}
+  - c1: screenshot
+  - server: log-count {pattern: "script state aa8cb served to ff000000 after its create word"}
+  - assert:
+      - server.host(0x371de).client == "c2"
+      - 'server.log_count("script state aa8cb served to ff000000 after its create word") > snapshot("createToC1Before")'
+      - c1.script_state(0xaa8cb).state == snapshot("statePre")
+      - 'c1.node_rotation(0xaa8cb, "Pillar01", "after").local_angle_to(c2.node_rotation(0xaa8cb, "Pillar01", "after")) < 5.7'
+  - c2: activate {refId: 0xaa8cb}
+  - until: {within: 8, every: 0.5, expect: ['server.log_count("aa8cb animates aa8cb .[Tt]rigger03.") >= 1']}
+  - wait: 4
+  - c1: screenshot
+  - c2: screenshot
+  - server: log-count {pattern: "aa8cb animates aa8cb .[Tt]rigger03."}
+  - server: log-count {pattern: "aa8cb animates aa8cb .[Tt]rigger01. in cell 371de .its host ff000001"}
+  - assert:
+      - 'server.log_count("aa8cb animates aa8cb .[Tt]rigger03.") == 1'
+      - 'server.log_count("aa8cb animates aa8cb .[Tt]rigger01. in cell 371de .its host ff000001") == 0'
+
+  # 4. a late join: c1 out, c2 presses once more (Trigger01, position01 to 02), c1 back in
+  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}
+  - wait: 10
+  - c2: activate {refId: 0xaa8cb}
+  - until: {within: 8, every: 0.5, expect: ['server.log_count("aa8cb animates aa8cb .[Tt]rigger01. in cell 371de .its host ff000001") >= 1']}
+  - wait: 8
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 5520, y: -896, z: -768, rot: [0, 0, 90]}
+  - wait: 15
+  - c1: script-state {formId: 0xaa8cb}
+  - c2: script-state {formId: 0xaa8cb}
+  - c1: node-rotation {formId: 0xaa8cb, nodes: ["Pillar01"], label: "late"}
+  - c2: node-rotation {formId: 0xaa8cb, nodes: ["Pillar01"], label: "late"}
+  - wait: 1
+  - c1: node-rotation {formId: 0xaa8cb, nodes: ["Pillar01"], label: "late"}
+  - c2: node-rotation {formId: 0xaa8cb, nodes: ["Pillar01"], label: "late"}
+  - c1: screenshot
+  - c2: screenshot
+  # recorded: the apply lines (H-R4) and the platform's blanks (H-R7) on both seats, the server's refusals
+  - c1: log-count {pattern: "aa8cb applied"}
+  - c2: log-count {pattern: "aa8cb applied"}
+  - c1: log-count {pattern: "to aa8cb blanked: its script record pending"}
+  - c2: log-count {pattern: "to aa8cb blanked: its script record pending"}
+  - server: log-count {pattern: "E_SCRIPTSTATE_[A-Z]+"}
+  - assert:
+      - c2.script_state(0xaa8cb).state == "position02"
+      - c1.script_state(0xaa8cb).state == c2.script_state(0xaa8cb).state
+      - 'c1.node_rotation(0xaa8cb, "Pillar01", "late").local_angle_to(c2.node_rotation(0xaa8cb, "Pillar01", "late")) < 5.7'
+  - c1: dump-state
+  - c2: dump-state
