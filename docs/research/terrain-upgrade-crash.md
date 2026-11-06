@@ -279,7 +279,14 @@ over the TES grid), 13317 at + 0x534 (the same TES grid dimension, 359676) and 1
 grid of its own size). The detour is inside 18789, so it covers all three. numidium's rules review
 (2026-11-06) adds two checks for the run set beyond the falsifiers above: the skip count in
 rotferns-fixes.log (a run with skips and no fault is the proof; a run with neither proves only
-"installed"), and a look at how a skipped quad's LOD blend renders.
+"installed"), and a look at how a skipped quad's LOD blend renders. The count is reported at most
+every ten seconds and never at quit, so the run reads it at least 11 s after the load-in. The
+re-analyst's second read (05de68d3, GO): the flags die at +0x340, the detour assembles to 71 bytes
+(85 of the 128 with write_branch's stub), the locked increment is atomic against the reporter's load,
+and at exit ExitProcess ends the reporter thread before any DLL detaches, so spdlog is never used
+after destruction; two more falsifiers, a skip the count misses and a quit hang in the reporter's
+write. A Frida check if the count needs one: follow the E9 at 18789+0x14A to the stub and attach at
+the detour's skip label, detour+0x2C, on a cold login.
 
 Either way the layer test is the signature: a run set on c1 with no
 +02AD242 fault across the containers gate.
