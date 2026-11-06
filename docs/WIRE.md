@@ -745,7 +745,8 @@ E_WORDWALL_NO_REF, E_WORDWALL_NOT_A_WALL, E_WORDWALL_CELL, E_WORDWALL_REACH; a w
 ### DestructionStage (t 78, wire id 86): a single-use trap's result, recorded once from whoever caused it (traps, ADR-068 D-S3)
 
 Fork m4-scripts-2b-traps (2026-11-05, SCHEMA_VERSION 37): DestructionStage (id 86 by ADR-019's MsgType plus 8; ids 84 and 85
-hold two reserved, never-sent rows for ADR-068's ScriptState and ScriptStateApply, MsgType 76 and 77), both directions,
+held two reserved, never-sent rows for ADR-068's ScriptState and ScriptStateApply, MsgType 76 and 77, real messages since
+SCHEMA_VERSION 38, below), both directions,
 reliable: `{ refr: u32, stage: u8, destroyed: bool, served: bool }`. C2S: a seat reports a trap-family or destructible reference's
 stage rise or its destruction, the cause or the first seat that saw it (served false). S2C: the server relays a newly recorded
 step to the reference's other listeners (served false) and serves the record to a late subscriber right after its create word and

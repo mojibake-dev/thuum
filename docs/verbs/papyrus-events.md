@@ -442,6 +442,20 @@ x-script-state-read v1, x-puzzle-handoff v3, x-puzzle-late-join v1 and the resta
 H-R2 to H-R9 and H-L1 are the plan's section 5. D-L1 B rides the same native (SendScriptEvent) as an optional slice, built ahead of
 Eli's answer and never merged before it.
 
+The integrated rung and its review (13:23 PST 2026-11-06 (21:23Z 11-06), thuum-cf): fork m4-scripts-3-record 4f525bad merges the
+three layer branches (wire and server 91142e67, 85e2b60f, 47cae74c; platform 5b57999e, d008e0ca; client e008ad5f, 74cc6d07,
+3e668eed) and one test fix; fork-lint, cargo (557) and the client's tsc and webpack green, the server-only pipeline 5559 green
+(T0). Its fresh review: NO-GO until three fixes land (the client's login reset on its own CreateActor wiped records the server
+sent first; a guest's give-up lost the load events the gate blanked; the platform's busy answer could not name the stack H-R2
+reads), with notes; the fixes are on their layer branches now and the rung is merged again before its stage. Authority (rule 5),
+declared here: a record's values are the owner's engine's word, R2, recorded and never judged; the server validates their shape
+only (the wire's kinds, caps, handles and the sender's ownership at the epoch), and a receiving seat checks each script's class,
+variable count, kinds and state against its own VM before it writes anything. Declared limit, from the review's note 9: at a grant
+the server serves the records of the references the new host's game subscribes to (its emitters), so in an exterior or a large
+interior a recorded reference beyond that subscription is not served at the grant; the puzzle room and the probes' rooms are
+inside it. A late joiner is served behind each reference's create word, so the limit is the new host's alone; the follow-up is an
+index of recorded references by cell served at the grant, after the rung's proof.
+
 ## Status
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared
