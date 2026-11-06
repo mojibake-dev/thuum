@@ -1,3 +1,17 @@
+// rock-motion-trace.js v1.2 (thuum-cf, 2026-11-06 08:4xZ; its fresh review NO-GO as written, its fix applied as written):
+// readable() asks Memory.queryProtection, not Process.findRangeByAddress, which in Frida 17 walks every memory region from
+// address 0 (about 13 calls a rock read, about 0.5 s a frame at seven rocks on the main thread, the thread that steps
+// Havok); the sample's longest duration in each 10 s window rides the liveness row, so the trace shows its own cost; the
+// player update's thread id is printed once. The player's update is skipped under the free camera (tfc: the game calls
+// another function while the camera's current state is its free state), so no body rows appear then. The v1.2 draft's
+// header follows.
+// rock-motion-trace.js v1.2 DRAFT (thuum-cf, 2026-11-06, for its fresh review): v1.1 froze the seat it ran on
+// (x-trap-rock-hang 20261105-231108: kernel32 Sleep calls fell from about 60,000 to under 1,100 per 10 s, falling rocks
+// gained one frame's 0.95 of vz per 8 s window), its Sleep hook and its 50 ms poll on Frida's JS thread holding the lock
+// every hook needs. v1.2 drops the Sleep hook and samples the bodies once per game frame, inside the player's own
+// per-frame update: Actor::Update(float a_delta) (include/RE/A/Actor.h:371, slot 0xAD) read from VTABLE_PlayerCharacter[0]
+// (include/RE/Offsets_VTABLE.h:2231, `just addr 208040`: 0x18ab9c0) at load; HYPOTHESIS that the player's update runs once
+// a frame on the main thread, read by the liveness row's frame count. Rows on change, and every ROW_EVERY_FRAMES frames.
 // rock-motion-trace.js v1.1 DRAFT (thuum-cf, 2026-11-05, its fresh review's notes as written): PlayAnimation_Impl hooked
 // beside 38048 for the platform's 'break' as a NiControllerManager sequence; the poll window reopened by every
 // non-Keyframed set; the body re-read on every poll; an onLeave only on a hook whose handler reads the call's result;
@@ -42,9 +56,11 @@
 // Rows (t is this seat's Date.now(), the clock its console log stamps): {ready} once; {fn:'motionFunctor'|'impulseFunctor'}
 // per functor run; {fn:'setMotionType', before, after} and {fn:'linearImpulse', motion, v0, v1} per call on a watched
 // rock; {fn:'graphEvent'} and {fn:'playAnimation'} for the platform, the dust and the wire; {fn:'body'} for POLL_FOR_MS
-// past each non-Keyframed set, every POLL_MS, on change and every 250 ms, the body re-read from its reference each poll;
-// {fn:'liveness', counts} every 10 s; {fn, err} once per failing hook.
-// Params: WATCH (hex ids), POLL_MS (50), POLL_FOR_MS (8000). 1.6.1170 only. Run on the firing seat before its cell loads.
+// past each non-Keyframed set, sampled once a game frame from the player's update, a row on change and every
+// ROW_EVERY_FRAMES frames, the body re-read from its reference each sample; {fn:'updateThread', tid} once;
+// {fn:'liveness', counts, sampleMaxMs} every 10 s (sampleMaxMs the window's longest sample); {fn, err} once per failing hook.
+// Params: WATCH (hex ids), POLL_FOR_MS (8000), ROW_EVERY_FRAMES (15; v1.2: POLL_MS gone). 1.6.1170 only. Run on the
+// firing seat before its cell loads.
 const PARAMS = typeof LAB_PARAMS === "object" && LAB_PARAMS ? LAB_PARAMS : {};
 const ROCKS = (
   PARAMS.WATCH || [
@@ -60,7 +76,8 @@ const ROCKS = (
   return parseInt(s, 16);
 });
 const GRAPH = [0xb6d47, 0xb6d40, 0xb6d3f]; // the rigged platform, the dust, the wire (lab/esm.py ref, 2026-11-05)
-const POLL_MS = PARAMS.POLL_MS === undefined ? 50 : Number(PARAMS.POLL_MS);
+const ROW_EVERY_FRAMES =
+  PARAMS.ROW_EVERY_FRAMES === undefined ? 15 : Number(PARAMS.ROW_EVERY_FRAMES);
 const POLL_FOR_MS =
   PARAMS.POLL_FOR_MS === undefined ? 8000 : Number(PARAMS.POLL_FOR_MS);
 const OFFSETS = {
@@ -71,9 +88,11 @@ const OFFSETS = {
     impulseFunctorVtable: 0x1929018, // just addr 218347
     sendAnimation: 0x6a35f0, // just addr 38048
     playAnimation: 0x1d50a0, // just addr 14297: TESObjectREFR::PlayAnimation_Impl (CommonLibSSE-NG Offsets.h:546)
+    playerVtable: 0x18ab9c0, // just addr 208040: VTABLE_PlayerCharacter[0] (include/RE/Offsets_VTABLE.h:2231)
   },
 };
 const FORM_ID = 0x14; // TESForm.h:354
+const UPDATE_SLOT = 0xad; // Actor::Update(float a_delta), include/RE/A/Actor.h:371
 const SEQUENCE_NAME = 0x10; // include/RE/N/NiControllerSequence.h:87
 const NODE = {
   parent: 0x30,
@@ -125,11 +144,7 @@ function fileVersion(path) {
 function hex(n) {
   return (n >>> 0).toString(16);
 }
-function readable(p) {
-  if (p === null || p.isNull()) return false;
-  const r = Process.findRangeByAddress(p);
-  return r !== null && r.protection.indexOf("r") === 0;
-}
+function readable(p) { if (p === null || p.isNull()) return false; try { return Memory.queryProtection(p).charAt(0) === "r"; } catch (e) { return false; } }
 function ptrAt(p, off) {
   const q = p.add(off);
   return readable(q) ? q.readPointer() : NULL;
@@ -247,7 +262,7 @@ let pollUntil = 0;
 if (at === undefined) {
   emit({ error: "no offsets for this runtime", version: version });
 } else {
-  const counts = { sleep: 0 };
+  const counts = { frames: 0 };
   const resolved = {};
   let hooks = 0;
   const attach = function (name, target, callbacks) {
@@ -282,17 +297,6 @@ if (at === undefined) {
       fail("attach:" + name, e);
     }
   };
-  try {
-    const sleep =
-      Process.getModuleByName("kernel32.dll").getExportByName("Sleep");
-    Interceptor.attach(sleep, {
-      onEnter: function () {
-        counts.sleep++;
-      },
-    });
-  } catch (e) {
-    fail("attach:sleep", e);
-  }
   const track = function (refr) {
     const id = idOf(refr);
     if (ROCKS.indexOf(id) < 0) return 0;
@@ -475,10 +479,13 @@ if (at === undefined) {
       }
     },
   });
-  // the rocks' bodies for POLL_FOR_MS past each non-Keyframed set, on change and every 250 ms; each poll re-reads the body
-  // from its reference, so a body rebuilt or freed since the last read is never read through a stale pointer
+  // the rocks' bodies for POLL_FOR_MS past each non-Keyframed set, once a game frame from the player's own update, a row
+  // on change and every ROW_EVERY_FRAMES frames; each sample re-reads the body from its reference, so a body rebuilt or
+  // freed since the last read is never read through a stale pointer
   const last = {};
-  setInterval(function () {
+  let sampleMaxMs = 0;
+  let updateThreadSaid = false;
+  const sample = function () {
     if (pollUntil === 0 || Date.now() > pollUntil) return;
     Object.keys(watched).forEach(function (k) {
       const w = watched[k];
@@ -496,16 +503,38 @@ if (at === undefined) {
         prev.s.speed >= 1 !== s.speed >= 1 ||
         prev.s.frames[0] >= 5 !== s.frames[0] >= 5 ||
         JSON.stringify(prev.s.island) !== JSON.stringify(s.island);
-      if (changed || now - prev.at >= 250) {
-        last[k] = { s: s, at: now };
-        const row = { fn: "body", refr: hex(+k) };
+      if (changed || counts.frames - prev.frame >= ROW_EVERY_FRAMES) {
+        last[k] = { s: s, at: now, frame: counts.frames };
+        const row = { fn: "body", refr: hex(+k), frame: counts.frames };
         Object.keys(s).forEach(function (f) {
           row[f] = s[f];
         });
         emit(row);
       }
     });
-  }, POLL_MS);
+  };
+  try {
+    const update = exe.base.add(at.playerVtable).add(UPDATE_SLOT * Process.pointerSize).readPointer();
+    attach("playerUpdate", update, {
+      onEnter: function () {
+        counts.frames++;
+        if (!updateThreadSaid) {
+          updateThreadSaid = true;
+          emit({ fn: "updateThread", tid: Process.getCurrentThreadId() });
+        }
+        const t0 = Date.now();
+        try {
+          sample();
+        } catch (e) {
+          fail("sample", e);
+        }
+        const dt = Date.now() - t0;
+        if (dt > sampleMaxMs) sampleMaxMs = dt;
+      },
+    });
+  } catch (e) {
+    fail("attach:playerUpdate", e);
+  }
   emit({
     ready: true,
     version: version,
@@ -520,6 +549,8 @@ if (at === undefined) {
       fn: "liveness",
       pid: Process.id,
       counts: JSON.parse(JSON.stringify(counts)),
+      sampleMaxMs: sampleMaxMs,
     });
+    sampleMaxMs = 0;
   }, 10000);
 }
