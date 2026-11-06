@@ -42,11 +42,10 @@ fi
 if [ "$(git -C "$fork" rev-parse origin/canon)" = "$sha" ]; then
   echo "== origin/$branch is canon already; nothing to merge" >&2; exit 2
 fi
-# ADR-064: the verb docs naming these scenarios may not promise a probe by path that no lab run played (the runtime
-# check written "by path" and never run was playtest 41's pattern; lab/tools/probe-runs.py)
-if [ "$#" -gt 0 ]; then
-  python3 lab/tools/probe-runs.py "$@" || { echo "== a verb doc names an unrun probe: run it, or reword its line; canon not moved" >&2; exit 2; }
-fi
+# ADR-064: the verb docs naming these scenarios or the gate's always and watch may not promise a probe by path that no
+# lab run played (the runtime check written "by path" and never run was playtest 41's pattern; lab/tools/probe-runs.py);
+# a promise naming another branch ("by path for <branch>") is that branch's merge's to hold
+python3 lab/tools/probe-runs.py --branch "$branch" "$@" || { echo "== a verb doc names an unrun probe: run it, or reword its line; canon not moved" >&2; exit 2; }
 
 echo "== 1. deploy-srv $(date +%H:%M:%S)"
 just deploy-srv 2>&1 | tail -1
