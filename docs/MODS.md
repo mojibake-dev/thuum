@@ -542,8 +542,11 @@ outfit meshes), 793 added (mostly SFW's Creation Club outfits), 984 gone. The go
 all the BodySlide project files the 2.0.3 row laid into Data from its 09 Outfits BodySlide, tooling that
 never belonged there, plus four .tri for meshes that no longer reference them; the clones' lay record
 prunes them by hash. Goam's row still wins femalebody_1_sk and femalehands_1_sk. The BodySlide row is
-`local`, the proof's output kept in lab/.cache/mods; a pipeline job that rebuilds it from the two
-archives on sky-build is the next step. Underwear choice: NeverNude, vanilla-styled; the modern style is
+of source `ci`: `thuum/19669` (cbbe-sfw-bodyslide-build, pipeline 5577, commit 16f631e0) and
+its lab/bodyslide/dist, built on sky-build by lab/bodyslide/build.ps1 from the two archives
+lab/bodyslide/inputs.tsv names by md5, which lab/tools/bodyslide-inputs.sh places in D:\thuum-inputs
+(licensed files, never the repo or an artifact). The job's tree equals the hand proof's file for file,
+so the row's tree hash did not move; the artifact is kept. Underwear choice: NeverNude, vanilla-styled; the modern style is
 the "CBBE Underwear (SFW)" set plus SFW's 30 Underwear textures, if Eli prefers it.
 
 **CBBE 2.0.3 becomes a row (D2 B, Eli, 2026-11-06: "yeah let's go with B. fire at will").** The
