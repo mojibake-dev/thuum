@@ -1469,6 +1469,12 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   results recorded once from whoever caused them, D-S3 ACCEPTED (traps follow the interaction), its own slice after rung 2's
   stage and before playtest 47.
 
+- STATE 2026-11-05 18:34 PST (numidium): canon fast-forwarded to fork 0f2f3c55, the trap slice (ADR-068's D-S3 with Eli's D-T1,
+  D-T4 B and D-T5's Adept pin, fork m4-scripts-2c-traps), by verb-merge citing its gate 20261106-003311 (20 green; b-prop-push
+  pending, the host's undeleted drop reference under Souls RE's InventoryMenu, HYPOTHESIS) with its T2 green; both clones
+  promoted. 746aff6c (the wire follower) waits for the prop-lease fix after 47. Playtest 47 (lab/playtests/47.yaml, thuum-cf's
+  checklist) next on Eli's go; declared: S10, S11, rock 0xb6d4d's hang.
+
 ### M5: Progression (4 to 8 weeks, Class A/B). Started 2026-10-31 (the weekend pass)
 
 - STATE (05:09 PST 2026-11-02, thuum-magnus): the object-animation pair MERGED, fork parity ad1aa50a (from c8c21cd1) and the host-scoped layer

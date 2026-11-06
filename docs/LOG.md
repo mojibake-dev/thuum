@@ -9157,3 +9157,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   every other claim holding. It was green in every run from 11-01 to 11-03, but it has never run on canon's rungs 1 and 2, so the
   duplicate is either the slice's or canon's; one run on canon 9745d401's lay would place it. Reds green on their reruns: b-duel,
   b-puzzle-relay (with a lab fault), b-npc-death, b-npc-caster. Playtest 47 waits on thuum-cf's call.
+
+### 2026-11-06
+
+- m4-scripts-2c-traps merged to fork canon 0f2f3c55 (2026-11-06T02:32Z): the gate 20261106-003311-merge-m4-scripts-2c-traps
+  (cited, ADR-042), 20261106-003311-smoke-two-players to 20261106-020442-b-npc-caster (28 runs); T2 green on
+  skymp-server:m4-scripts-2c-traps-0f2f3c55 in the first verb-merge call (00:00Z to 00:33Z), skipped in the citing one; clones
+  promoted. Verbs: traps (ADR-068's D-S3 with Eli's D-T1, every trap family by its class chain, D-T4 B, the engine's own damage
+  multipliers, and D-T5, Adept pinned by default), papyrus-events (the trap family on the seam), destruction (DestructionStage's
+  record and relay), prop-physics (trap bodies in the stream). b-prop-push pending (887781fd: the host's own drop reference left
+  undeleted under Skyrim Souls RE's InventoryMenu, HYPOTHESIS, its read owed after 47). Declared for playtest 47: a plate may fire
+  once as a player re-enters its cell (S10), the wire trap's break and dust missing on the seat that did not trip it (S11), rock
+  0xb6d4d's hang. 746aff6c (the wire follower) waits for the prop-lease fix after 47. skymp pinned at canon 0f2f3c55.
