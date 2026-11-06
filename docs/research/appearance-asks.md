@@ -21,7 +21,22 @@ Beautiful Bodies Enhancer -CBBE SFW Edition-" 1.1.4 by Ousnius and Caliente (mai
 457.1 MB, 2026-08-16; optional "CBBE SFW Outfits - No Rim Lighting" 489066, 50.8 MB). That is
 ask 3's SFW version. Ask 1's hair mod still needs its link from Eli.
 
-## 1. Hairs (waiting on the link)
+## 1. Hairs: Vanilla hair remake, as the replacer it is (Eli, 2026-11-06)
+
+The link (2026-11-06): Nexus 63979, "Vanilla hair remake" 1.0.3 by jg1: a remake from scratch of
+146 vanilla hairstyles across all playable races, same scruffy look, more detail, optional SMP
+physics. By design it REPLACES the vanilla hair meshes at their paths and uses the vanilla hair
+textures (any texture replacer still applies); "Main files affect the player only" (NPCs carry
+their hair baked into face data, so the optional NPC files ship regenerated face data for over
+2,000 vanilla NPCs). Eli, after the read: "re the hair i changed my mind. it's fine to just use
+them as replacers." So no plugin, no slot, no server change: a client-only layer row of loose
+meshes. Files (2026-11-06): main "Vanilla hair remake" 501460 (v1.0.2, 8.4 MB, no physics, "Does
+not require HDT-SMP"); main "Vanilla hair remake SMP" 510409 (v1.0.3, 8.2 MB, needs FSMP, which the
+layer keeps out); optional NPCs 501461 (no physics, 70.5 MB) and SMP NPCs 500742; optional SMP
+Wigs 510410. The row is file 501460; the NPC file is a separate choice (2,000 NPCs' face data,
+conflicts with any mod that edits those NPCs' heads).
+
+The earlier note on packs, kept for the record:
 
 - The shape, whatever the pack: "additional hairs, not replacers" means a standalone plugin whose
   HDPT records add hairs beside vanilla's, with its meshes and textures; the plugin is served (the
@@ -42,16 +57,22 @@ ask 3's SFW version. Ask 1's hair mod still needs its link from Eli.
   blankdetailmap). CBBE's credits name the pack's sources: tktk1's Pretty Face, Fair Skin
   Complexion's specular and _sk, Eyebrows Match Hair. That is the smooth look. Goam Elven Ears
   Redone lays femalehead_sk.dds and femaleheadvampire_sk.dds (subsurface) over them.
-- **The seats** laid CBBE from lab/.cache/mods/cbbe-2.0.3-plan.json: folders 00 Required (Slim),
-  02 Vanilla, 26 RaceMenu Morphs, 28 Morph Files (Outfits), 08 Outfits Vanilla, 09 Outfits
-  BodySlide. No Face Pack (numidium's note that it was installed is not what the plan laid). So a
-  seat's female faces are vanilla's, with Goam's two _sk files on top.
+- **The seats** carry the Face Pack too, read from their disks on 2026-11-06 (c1 and c2, the
+  1.6.1170 game folder): textures\actors\character\female\femalehead.dds and femalehead_msn.dds
+  are loose and hash-identical to the archive's 10 Face Pack files (sha256 c064834e..., 79582540...),
+  with femalehead_s, femaleheadvampire, _msn and Goam's two _sk beside them. The plan in
+  lab/.cache/mods/cbbe-2.0.3-plan.json has no Face Pack folder, so the base image did not come from
+  that plan alone (Fenestrate's deployment is the likely source; the first draft of this page read
+  the plan as the seats' state and was wrong). Eli: "the faces were on client 2". Cause confirmed:
+  the Face Pack.
 - Khajiit faces (Ariadne) are vanilla on both: the Face Pack covers human, elf and orc faces only.
-- Least impactful fix, by machine: on Fenestrate, reinstall CBBE in Vortex with Face Pack unticked
-  (CBBE's FAQ Q5: a face texture other than the pack is fine "as long as it's compatible with the
-  CBBE seams"; vanilla is the reference the body textures were cut against, so test the neck on one
-  character). On a seat, if the complaint is there too, the only non-vanilla face bytes are Goam's
-  two _sk files; drop them from that row and compare. Which machine Eli meant is question 2 below.
+- Least impactful fix: remove the Face Pack's files from the seats (the 42 paths of folder 10 that
+  are present, 17 of them face textures, the rest tintmasks and race _msn maps) so vanilla's come
+  back from the BSA, and on Fenestrate reinstall CBBE in Vortex with Face Pack unticked. CBBE's FAQ
+  Q5: a face texture other than the pack is fine "as long as it's compatible with the CBBE seams";
+  test the neck on one character. The seats' files are base-image files, outside the lay record, so
+  the removal is an explicit list (numidium's lay or a one-off), or the CBBE layer row below with the
+  base re-made without it.
 
 ## 3. The CBBE sliders
 
@@ -76,7 +97,7 @@ Where each machine stands:
 | | Fenestrate | the seats |
 | --- | --- | --- |
 | plugin + scripts (26) | deployed | laid |
-| body .tri (27) | deployed (femalebody.tri etc.) | **not laid** (the plan has no folder 27) |
+| body .tri (27) | deployed (femalebody.tri etc.) | **absent** (read on both seats 2026-11-06; 635 other .tri present) |
 | outfit .tri (28) | deployed, 418 | laid, 418 |
 | outfit meshes | CBBE 2.0.3 | 08 Outfits Vanilla |
 
@@ -87,7 +108,10 @@ not run, a block or quest matter, probe it; (b) it appears and the naked body do
 seat: folder 27, seven files, trivially laid; (c) it appears, the body changes and snaps back: the
 sync re-applies the recorded look every two seconds (racemenu-sync.md), and body morphs ride the
 preset it carries, so a look saved without morphs would overwrite them (HYPOTHESIS, not seen).
-Question 3 below asks which.
+Eli (2026-11-06): the sliders complaint is "the skylab clients one and two", and both seats have
+the plugin, its script, skee64 with bEnableBodyMorph=1 and no femalebody.tri or femalehands.tri, so
+the read is (b): the body cannot morph on a seat. The fix is folder 27's seven files on both
+seats (and in the CBBE row when CBBE becomes one).
 
 Rotfern: her meshes stay her own; a flat chest in her robes is a BodyMorph on her robes' .tri (the
 2026-10-07 read: her robes are CBBE 2.0.3 Vanilla Shape prebuilt meshes with morphs) plus the body
@@ -136,15 +160,14 @@ differ.
 
 ## Questions for Eli
 
-1. The hair mod's link (74257 was the SFW body).
-2. The smooth faces: seen on Fenestrate, on a seat, or both?
-3. The sliders: on which machine, and which of (a) no CBBE category in the menu, (b) sliders move
-   but the body does not, (c) the body changes and snaps back?
+1. Answered 2026-11-06: Nexus 63979, Vanilla hair remake, as a replacer.
+2. Answered: client 2 (the seats; the Face Pack, hash-confirmed on both).
+3. Answered: the skylab clients one and two; the seats lack the body .tri (case b).
 4. Body shape under SFW: the archive ships one build (curvy); the seats today are 2.0.3's Vanilla
    shape. Keep SFW's build as shipped, or have the BodySlide build (needed anyway for the morphs)
    use a Vanilla-shape preset?
-5. Is BodySlide installed on Fenestrate (for one Batch Build with morphs, if the SFW archive ships
-   none)?
+5. Answered: "bodyslide is probs on fenestrate". The SFW archive ships no morphs, so that one build
+   is the SFW path's prerequisite.
 
 ## Sources
 
