@@ -504,21 +504,24 @@ purges what it deployed. A file at that path with another hash stays and is coun
 on any clone whose base carried it (FSMP's DLL came off on 2026-10-20 only because its base lacked it), so a promoted mod
 could never leave.
 
-**Rotfern's Fixes 0.1.0 (ADR-069; Eli, 2026-11-06: "let's create a patch called rotferns fixes that
-will contain anything we need like that").** The row `rotferns-fixes-0.1.0@1.6.1170` is the layer's
-first of source `ci`: it names a pipeline job, `thuum/19505` (rotferns-fixes-build, pipeline 5544,
-commit 24e1fcce), and the folder inside its artifact; persist-mods fetches the artifact once into
-lab/.cache/mods/ci/thuum-19505 with lab/tools/glab.py and checks it by tree hash like any staging
+**Rotfern's Fixes 0.1.1 (ADR-069; Eli, 2026-11-06: "let's create a patch called rotferns fixes that
+will contain anything we need like that").** The row `rotferns-fixes-0.1.1@1.6.1170` is the layer's
+first of source `ci`: it names a pipeline job, `thuum/19668` (rotferns-fixes-build, pipeline 5577,
+commit 16f631e0), and the folder inside its artifact; persist-mods fetches the artifact once into
+lab/.cache/mods/ci/thuum-19668 with lab/tools/glab.py and checks it by tree hash like any staging
 folder, so the row carries no file a pipeline did not build. The artifact is kept (it never expires,
 and the job's artifacts now never expire either). What it lays: SKSE\Plugins\RotfernsFixes.dll and
 its .pdb, ESP-less, no slot, scoped to 1.6.1170. The DLL, read byte-level: x64, the three SKSE exports,
-the declaration "Rotfern's Fixes" 0.1.0 by thuum with the Address Library flag, no struct use and an
+the declaration "Rotfern's Fixes" 0.1.1 by thuum with the Address Library flag, no struct use and an
 SKSE 2.2.6 floor (CommonLib's declaration fills its unused 16-slot version list with 1.0.0.0, its
 VersionNumber default, which SKSE ignores under the Address Library flag), imports the VC++ runtime
 and system DLLs only, and every contract log string present. Its one fix is the terrain-overlay null
 check (docs/research/terrain-upgrade-crash.md); the run set reads rotferns-fixes.log at least 11 s
-after the load-in for "installed" and the skip count. A change to lab/rotferns-fixes builds on main by
-itself; the row then moves to that job.
+after the load-in for "installed" and the skip count. Since 0.1.1 the log appends across launches with
+dated lines (numidium, playtest 48: 0.1.0's log held only the last of about ten launches, so a skip in an
+earlier session was lost); 0.1.0 was job 19505 (pipeline 5544, commit 24e1fcce). A later change to
+lab/rotferns-fixes builds on main by itself and the row then moves to that job; main's rebuild of the
+same source when the layer merges does not move it (a rebuild's DLL differs in its timestamp bytes).
 
 **CBBE SFW Edition replaces CBBE 2.0.3 (Eli, playtest 48, 2026-11-06: "now all we need is that sfw
 skin to come back in and we're good").** Three rows take the place of the 2.0.3 row.
@@ -546,7 +549,8 @@ of source `ci`: `thuum/19669` (cbbe-sfw-bodyslide-build, pipeline 5577, commit 1
 its lab/bodyslide/dist, built on sky-build by lab/bodyslide/build.ps1 from the two archives
 lab/bodyslide/inputs.tsv names by md5, which lab/tools/bodyslide-inputs.sh places in D:\thuum-inputs
 (licensed files, never the repo or an artifact). The job's tree equals the hand proof's file for file,
-so the row's tree hash did not move; the artifact is kept. Underwear choice: NeverNude, vanilla-styled; the modern style is
+so the row's tree hash did not move; the artifact is kept. Main's rebuild of the same source when the
+layer merges does not move the row. Underwear choice: NeverNude, vanilla-styled; the modern style is
 the "CBBE Underwear (SFW)" set plus SFW's 30 Underwear textures, if Eli prefers it.
 
 **CBBE 2.0.3 becomes a row (D2 B, Eli, 2026-11-06: "yeah let's go with B. fire at will").** The
