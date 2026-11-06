@@ -18,7 +18,8 @@ targets before writing, logs exactly one of `installed`, `wrong runtime`, `bytes
 it skips work, a `skipped N ... so far` line every ten seconds the count moved, all to
 Documents\My Games\Skyrim Special Edition\SKSE\rotferns-fixes.log. Those words are a contract:
 a scenario may count them; the skip count is what proves a fix fired, since a rare crash's absence
-proves nothing by itself (numidium's rules review, 2026-11-06). Rule 2 (docs/LAB.md): a site is a decompiler read until the run set
+proves nothing by itself (numidium's rules review, 2026-11-06). The count is reported at most every ten
+seconds and not at quit, so a run reads it at least 11 s after the load-in. Rule 2 (docs/LAB.md): a site is a decompiler read until the run set
 proves it; the proof for the first fix is a run set with no SkyrimSE.exe+02AD242 fault across the
 containers gate on both seats.
 

@@ -46,6 +46,8 @@ namespace
 
 	// quads skipped since launch; the detour increments it, a logger thread reports it
 	std::atomic<std::uint32_t> g_skips{ 0 };
+	// the detour's `lock inc dword [r11]` on it must be the atomic's whole representation (thuum-cf's re-analyst, 2026-11-06)
+	static_assert(sizeof(g_skips) == 4 && alignof(decltype(g_skips)) == 4 && decltype(g_skips)::is_always_lock_free);
 
 	// NiNode::children (NiTObjectArray at +0x110): _data at +0x118, _freeIdx (uint16) at +0x122, _size at +0x124
 	// (CommonLibSSE-NG NiNode.h, NiTArray.h:118-119); the engine's own test reads _freeIdx, so the detour does too
