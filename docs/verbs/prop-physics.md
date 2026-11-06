@@ -322,11 +322,11 @@ listed base's references from the game files as items (WorldState::AttachEspmRec
 the FormDesc at the ask), IsPropKind takes claims and transforms on them, and the client's scan admits MovableStatic beside the item
 types (FormTypeEx.isProp; the server sends records for the listed bases alone, so nothing else reaches the scan: no wire change, the
 record write slice one's, no migration). T0: PropTest's movable static case (the wheel's claim granted and its sample moving the record
-and relayed; the wall's refused; the list cleared; bad entries throw). Probe x-prop-static by path (9ef40b22): c1 hosts the smithy's
+and relayed; the wall's refused; the list cleared; bad entries throw). Probe x-prop-static (9ef40b22), unrun while fork m4-prop-statics is unmerged: c1 hosts the smithy's
 yard and walks through the wheel, both seats within 32 units and the record moved, the rest kept across a restart; HYPOTHESIS until it
 runs: the proxy controller's contact fires for the wheel's collision layer (a non-host's walk would claim it; the probe's walker is the
 host, so its leg needs no claim), and a walk shoves a cart wheel at all (the record's move is claimed over 4 units, not slice one's 16).
-Then b-prop-static in its own commit. Slice three (dragging, bodies) stays as written below.
+Then b-prop-static in its own commit. That stage runs the probe first, by path, before m4-prop-statics merges: probe-runs.py stops seeing this line once it names the branch (2026-11-05, the canon merge of 0f2f3c55, whose gate it refused). Slice three (dragging, bodies) stays as written below.
 
 ADR-058 decision 4 gave slice two the movable statics (MSTT) and the Blue Palace's physical container. The master file says otherwise
 for the lab's cells (esm.py on sky-srv, Skyrim.esm 1.6.1170, `near 0x3c` within 3000 units): eight MSTT references around Riverwood's

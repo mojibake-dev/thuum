@@ -815,9 +815,9 @@ follow into a cell nobody hosts by the sender's client-REPORTED loaded set alone
 remembered set, incomplete. Now the sender vouches by its loaded report OR by its reach (the server's own 3x3 around the player,
 PartOne's reach_ranked at every square change): the engine loads at least that grid, so a neighbour in reach is loaded whatever
 the report says. A cell neither reported nor in reach is still nobody's to vouch for; a door is a follow as before. T0: cells.rs
-a_neighbour_within_reach_is_vouched_for_without_a_loaded_report. Probe x-host-restart-follow by path (b-npc-handoff-restart's
+a_neighbour_within_reach_is_vouched_for_without_a_loaded_report. Probe x-host-restart-follow, for m3-follow-vouch's own stage and unrun while 720f914d is unmerged (b-npc-handoff-restart's
 frame, a restart with both games running, no "may not move" in the new log within 90 s, both seats' npc-state of Hilde and Sven
-recorded). An R0 (T0 and T2) into the next server train after the arm.
+recorded). An R0 (T0 and T2) into the next server train after the arm. That stage runs the probe first, by path, before m3-follow-vouch merges: probe-runs.py stops seeing this line once it names the branch (2026-11-05, the canon merge of 0f2f3c55, whose gate it refused).
 
 ## Client
 
