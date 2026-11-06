@@ -80,6 +80,17 @@ the lab can grep (E_ASSERT_*).
                                                      same between the node's local rotations (its turn under its
                                                      parent, which a stale world transform cannot hide)
   <client>.node_rotation(<id>, "<node>", "<label>")  the same from its node-rotation {label: "<label>"} step
+  <client>.script_state(<id>).quiescent | .fnv1a | .count | .busy | .busyState
+                                                     a reference's attached scripts as that seat's own VM holds them,
+                                                     from its last script-state {formId} step (ADR-068 rung 3's read,
+                                                     SerializeScriptState): no stack ran on it then (a busy answer has
+                                                     busy alone, the stack named, and busyState its state: 3 a latent
+                                                     wait), the record's FNV-1a 32, how many scripts it lists
+  <client>.script_state(<id>[, "<type>"]).state | .variable("<name>")
+                                                     one script's state and a variable of it (that type's, else the
+                                                     only script's; .script("<type>") names one as well), names and
+                                                     strings lowercased: a property by its own name, an int, a float
+                                                     or a bool as itself, an object as its form id, 0 for None
   <client>.node_scale()                              the engine's scale of the node its last node-scale
                                                      step read on its own player
   <client>.morph() | .morph_of(<client>)             a body morph its node-scale {morph} step read, the
@@ -141,6 +152,7 @@ import ast
 import json
 import math
 import operator
+import re
 from dataclasses import dataclass
 from typing import Any, Protocol
 from pathlib import Path
@@ -184,6 +196,7 @@ class ViewsFacade(Protocol):
     def projectiles(self, observer: str) -> dict[str, Any] | None: ...
     def refs_near(self, observer: str) -> dict[str, Any] | None: ...
     def npc_state(self, observer: str, form_id: int) -> dict[str, Any] | None: ...
+    def script_state(self, observer: str, form_id: int) -> dict[str, Any] | None: ...
     def quests(self, observer: str) -> dict[int, dict[str, Any] | None] | None: ...
     def poisons(self, observer: str) -> dict[str, Any] | None: ...
     def figure_spells(self, observer: str) -> dict[str, Any] | None: ...
@@ -1005,6 +1018,117 @@ class NpcStateView:
     # half-built 3D a re-roll left naked and headless (playtest 44's khajiit, npc-fate.md 1e, x-fate-dress-bleak v8);
     # None on a driver without the read
     faceNode: bool | None = None
+
+
+class ScriptStateView:
+    """c.script_state(id[, "<type>"]): a reference's attached scripts as that seat's own VM held them at its last
+    `script-state {formId}` step (lab-driver's call of TESModPlatform.SerializeScriptState, the read the script record is made
+    with: ADR-068 rung 3, docs/research/rung3-script-record-2026-11-06.md 1(a)). quiescent: no stack ran on the object then;
+    the native's busy answer carries busy alone, the stack it named, and busyState is that stack's state (3 a latent wait,
+    CommonLibSSE-NG include/RE/S/Stack.h:32). fnv1a: the record's FNV-1a 32 over its scripts; count: how many scripts the
+    answer lists. state and variable("<name>") read one script: the one script("<type>") or the accessor's second argument
+    names, else the only one (two or more and none named is a data error, as is any script read of a busy answer). state is
+    the object's currentState, "" for the empty state; variable reads by the answer's names (parallel to its positional
+    vars), a property found by its own name through its backing variable ("::<name>_var", the Papyrus compiler's): an int,
+    a float or a bool as itself, a string lowercased, an object as its form id (0 for a None, among them a seat-local
+    handle the native encodes as None), an untyped None (k 0) as 0, an array a data error. Papyrus compares names and
+    strings case-blind and the engine's string pool keeps the first spelling it interned, so types and names are matched
+    case-blind and state and string values read lowercased."""
+
+    def __init__(self, client: str, form_id: int, data: dict[str, Any], cls: str | None = None):
+        self._client = client
+        self._id = int(form_id)
+        self._data = data
+        self._cls = cls
+        quiescent = data.get("quiescent")
+        if not isinstance(quiescent, bool):
+            raise AssertionData(f"{client}'s script-state of {self._id:#x} lacks quiescent")
+        self.quiescent = quiescent
+        scripts = data.get("scripts")
+        # a busy answer reads no script; a quiescent one lists every attached script
+        self._scripts = [s for s in scripts if isinstance(s, dict)] if quiescent and isinstance(scripts, list) else None
+        busy = data.get("busy")
+        self.busy = busy if isinstance(busy, str) else None
+        # the platform's busy text names the stack's state as "state <n>" (the plan's shape: "stack 4711 state 3 in
+        # defaultPuzzlePillarScript.RotatePillarToState"); None when the text carries none
+        m = re.search(r"\bstate (\d+)", self.busy) if self.busy is not None else None
+        self.busyState = int(m.group(1)) if m else None
+        fnv = data.get("fnv1a")
+        self.fnv1a = fnv if quiescent and isinstance(fnv, int) and not isinstance(fnv, bool) else None
+        self.count = len(self._scripts) if self._scripts is not None else None
+
+    def _label(self) -> str:
+        return f"{self._client}'s script-state of {self._id:#x}"
+
+    def _types(self) -> str:
+        return ", ".join(str(s.get("type")) for s in self._scripts or []) or "none"
+
+    def _script(self) -> dict[str, Any]:
+        if self._scripts is None:
+            raise AssertionData(f"{self._label()} answered busy ({self.busy!r}) or listed no scripts: no script was read")
+        if self._cls is not None:
+            want = self._cls.lower()
+            for s in self._scripts:
+                if str(s.get("type", "")).lower() == want:
+                    return s
+            raise AssertionData(f"{self._label()} lists no script {self._cls!r} (it lists {self._types()})")
+        if len(self._scripts) != 1:
+            raise AssertionData(f"{self._label()} lists {len(self._scripts)} scripts ({self._types()}): name one, "
+                                'script("<type>") or script_state(<id>, "<type>")')
+        return self._scripts[0]
+
+    def script(self, cls: str) -> "ScriptStateView":
+        """The same answer read on the script of that type (case-blind); a quiescent answer that lists no such script is a
+        data error at once, a busy one when a script is read."""
+        view = ScriptStateView(self._client, self._id, self._data, cls)
+        if view._scripts is not None:
+            view._script()
+        return view
+
+    @property
+    def state(self) -> str:
+        v = self._script().get("state")
+        if not isinstance(v, str):
+            raise AssertionData(f"{self._label()} ({self._cls or self._types()}) has no state")
+        return v.lower()
+
+    def variable(self, name: str) -> Any:
+        s = self._script()
+        label = f"{self._label()} ({s.get('type')})"
+        names, values = s.get("names"), s.get("vars")
+        if not isinstance(names, list) or not isinstance(values, list) or len(names) != len(values):
+            raise AssertionData(f"{label} names no variables by position (names {names!r:.80}, vars "
+                                f"{len(values) if isinstance(values, list) else values!r})")
+        lowered = [str(n).lower() for n in names]
+        # the name itself, else an auto property's backing variable
+        index = next((i for want in (name.lower(), f"::{name.lower()}_var") for i, n in enumerate(lowered) if n == want), None)
+        if index is None:
+            raise AssertionData(f"{label} has no variable {name!r} (it has {', '.join(str(n) for n in names) or 'none'})")
+        v = values[index]
+        k = v.get("k") if isinstance(v, dict) else None
+        if isinstance(k, bool) or not isinstance(k, int):
+            raise AssertionData(f"{label}'s {name!r} is malformed: {v!r}")
+        if k == 0:
+            return 0
+        if k == 1:
+            o = v.get("o")
+            if o is None:
+                return 0
+            form = o.get("form") if isinstance(o, dict) else None
+            if isinstance(form, bool) or not isinstance(form, int):
+                raise AssertionData(f"{label}'s {name!r} is an object without a form id: {o!r}")
+            return form
+        slot = {2: ("s", str), 3: ("i", int), 4: ("f", (int, float)), 5: ("b", bool)}.get(k)
+        if slot is None:
+            kind = "an array" if 10 <= k <= 15 else "an unknown kind"
+            raise AssertionData(f"{label}'s {name!r} is {kind} (k {k}): the grammar reads one value")
+        key, types = slot
+        value = v.get(key)
+        if not isinstance(value, types) or (k != 5 and isinstance(value, bool)):
+            raise AssertionData(f"{label}'s {name!r} (k {k}) lacks its value: {v!r}")
+        if k == 2:
+            return value.lower()
+        return float(value) if k == 4 else value
 
 
 class QuestView:
@@ -1868,6 +1992,18 @@ class _ClientRef:
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s npc-state of {int(form_id):#x} lacks {e}") from e
 
+    def script_state(self, form_id: int, cls: str | None = None) -> ScriptStateView:
+        """c.script_state(id[, "<type>"]): the seat's last script-state step for that reference (`script-state {formId}`),
+        read on one attached script when a type is named. No step, or a step whose answer was an error (the native's
+        refusal, a dist without it), is a data error, never a pass: the error stays in the step's note."""
+        fn = getattr(self._views, "script_state", None)
+        data = fn(self.name, int(form_id)) if fn else None
+        if not isinstance(data, dict):
+            raise AssertionData(f"{self.name} has not reported a script-state step for {int(form_id):#x} (an error answer "
+                                "is the step's note, not a read)")
+        view = ScriptStateView(self.name, int(form_id), data)
+        return view.script(cls) if cls is not None else view
+
     def log_count(self, pattern: str) -> int:
         """c.log_count("<regex>"): the lines of that client's Skyrim Platform log matching the regex at its last
         log-count step of that same pattern, or an until's last poll naming it (each poll counts it anew)."""
@@ -2151,6 +2287,7 @@ _ATTRS = {
                    "isEssential", "isProtected", "activationBlocked", "cell", "is3DLoaded", "raceId", "worn",
                    "gazeTarget", "gazeSlot", "emotionType", "emotionValue", "exprOverride", "exprIndex", "exprValue",
                    "headX", "headY", "headZ", "scene", "faceNode"},
+    ScriptStateView: {"quiescent", "fnv1a", "count", "busy", "busyState", "state"},
     MarkerView: {"visible", "canTravel"},
     ProjectileView: {"distance"},
     PosView: {"x", "y", "z"},
@@ -2196,6 +2333,10 @@ _FORM_SPEC_METHODS = {
 _ID_STRING_METHODS = {
     _ClientRef: {"node_rotation"},
 }
+# Methods that take a form id and, optionally, a string: c1.script_state(0xaa8c3, "defaultPillarPuzzleLever")
+_ID_OPTIONAL_STRING_METHODS = {
+    _ClientRef: {"script_state"},
+}
 # Methods that take another view of their own kind: c1.node_rotation(id, n).angle_to(c2.node_rotation(id, n))
 _VIEW_METHODS = {
     NodeRotationView: {"angle_to", "local_angle_to"},
@@ -2217,8 +2358,9 @@ _NULLARY = {
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref", "follow", "fate", "log_count", "stream"},
-    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "inventory", "globalValue", "projectile", "poison", "skill", "level", "weather", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near", "node_rotation"},
+    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "inventory", "globalValue", "projectile", "poison", "skill", "level", "weather", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near", "node_rotation", "script_state"},
     NodeRotationView: {"angle_to", "local_angle_to"},
+    ScriptStateView: {"script", "variable"},
     InventoryView: {"count"},
     RefsNearView: {"count", "has", "distance", "runtime_of", "pos", "disabled", "listed", "pos_of", "disabled_of"},
     EffectsView: {"left", "magnitude"},
@@ -2363,6 +2505,10 @@ class Evaluator:
                 if node.func.attr in _ID_STRING_METHODS.get(type(obj), set()):
                     if not 2 <= len(args) <= 3 or isinstance(args[0], bool) or not isinstance(args[0], int) or not all(isinstance(a, str) for a in args[1:]):
                         raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes a form id, a node name and, optionally, a label")
+                    return self._read(node, getattr(obj, node.func.attr)(*args))
+                if node.func.attr in _ID_OPTIONAL_STRING_METHODS.get(type(obj), set()):
+                    if not 1 <= len(args) <= 2 or isinstance(args[0], bool) or not isinstance(args[0], int) or not all(isinstance(a, str) for a in args[1:]):
+                        raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes a form id and, optionally, a script's type")
                     return self._read(node, getattr(obj, node.func.attr)(*args))
                 if node.func.attr in _VIEW_METHODS.get(type(obj), set()):
                     if len(args) != 1 or type(args[0]) is not type(obj):

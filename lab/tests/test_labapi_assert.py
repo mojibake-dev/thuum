@@ -1429,6 +1429,109 @@ class NodeRotationTests(unittest.TestCase):
                 ev.evaluate(expr)
 
 
+class ScriptStateViews(NearViews):
+    """Each seat's script-state reads of Bleak Falls Temple's puzzle (ADR-068 rung 3, the record's read), in the answer's
+    shape (docs/research/rung3-script-record-2026-11-06.md 1(a)): c1 the host with the first pillar 0xaa8cb at rest on its
+    second face and the lever 0xaa8c3 with its two scripts; c2 the guest read 0.5 s into a turn, busy; the engine's string
+    pool has kept another spelling of the state."""
+
+    def __init__(self):
+        super().__init__()
+        lever = {"kind": 0, "mid": 65535, "form": 0xAA8C3, "type": "defaultPillarPuzzleLever"}
+        self.answers = {
+            "c1": {
+                0xAA8CB: {"formId": 0xAA8CB, "quiescent": True, "fnv1a": 0x9DC5811C, "scripts": [{
+                    "type": "defaultPuzzlePillarScript", "state": "Position02", "flags": 11,
+                    "names": ["doOnce", "::initialState_var", "myLinkedRef", "::solveState_var", "pillarSolved"],
+                    "vars": [{"k": 5, "b": True}, {"k": 3, "i": 1}, {"k": 1, "o": lever}, {"k": 3, "i": 3}, {"k": 5, "b": False}]}]},
+                0xAA8C3: {"formId": 0xAA8C3, "quiescent": True, "fnv1a": 0x1234, "scripts": [
+                    {"type": "defaultPillarPuzzleLever", "state": "Waiting", "flags": 11,
+                     "names": ["::numPillarsSolved_var", "::pillarCount_var", "::puzzleSolved_var", "::refActOnFailure01_var", "::ratio_var", "::tag_var", "::list_var"],
+                     "vars": [{"k": 3, "i": 1}, {"k": 3, "i": 3}, {"k": 5, "b": False}, {"k": 1}, {"k": 4, "f": 0.5}, {"k": 2, "s": "Trigger02"},
+                              {"k": 11, "elem": "ObjectReference", "a": []}]},
+                    {"type": "TrapLever", "state": "Inactive", "flags": 11, "names": ["a"], "vars": []}]},
+            },
+            "c2": {0xAA8CB: {"formId": 0xAA8CB, "quiescent": False, "busy": "stack 4711 state 3 in defaultPuzzlePillarScript.RotatePillarToState"}},
+        }
+
+    def script_state(self, observer, form_id):
+        return self.answers.get(observer, {}).get(form_id)
+
+
+@needs_deps
+class ScriptStateTests(unittest.TestCase):
+    def test_a_pillar_at_rest_reads_its_state_and_variables(self):
+        from labapi.assertions import Evaluator
+        ev = Evaluator(RichServer(), ScriptStateViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate('c1.script_state(0xaa8cb).quiescent == true and c1.script_state(0xaa8cb).count == 1'))
+        self.assertTrue(ev.evaluate('c1.script_state(0xaa8cb).state == "position02"'))        # lowercased, as Papyrus compares
+        self.assertTrue(ev.evaluate('c1.script_state(0xaa8cb).variable("initialState") == 1'))  # a property by its own name
+        self.assertTrue(ev.evaluate('c1.script_state(0xaa8cb).variable("::solveState_var") == 3'))
+        self.assertTrue(ev.evaluate('c1.script_state(0xaa8cb).variable("doOnce") == true and c1.script_state(0xaa8cb).variable("pillarSolved") == false'))
+        self.assertTrue(ev.evaluate('c1.script_state(0xaa8cb).variable("myLinkedRef") == 0xaa8c3'))  # an object as its form id
+        self.assertTrue(ev.evaluate('c1.script_state(0xaa8cb).fnv1a == 0x9dc5811c'))
+        self.assertEqual(ev.readings[f"c1.script_state({0xAA8CB}).state"], "position02")
+
+    def test_a_reference_with_two_scripts_names_the_one_it_reads(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(RichServer(), ScriptStateViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate('c1.script_state(0xaa8c3).count == 2'))
+        self.assertTrue(ev.evaluate('c1.script_state(0xaa8c3, "defaultPillarPuzzleLever").variable("numPillarsSolved") == 1'))
+        self.assertTrue(ev.evaluate('c1.script_state(0xaa8c3).script("DEFAULTPILLARPUZZLELEVER").state == "waiting"'))  # case-blind
+        self.assertTrue(ev.evaluate('c1.script_state(0xaa8c3, "TrapLever").state == "inactive"'))
+        self.assertTrue(ev.evaluate('c1.script_state(0xaa8c3, "defaultPillarPuzzleLever").variable("refActOnFailure01") == 0'))  # a None object
+        self.assertTrue(ev.evaluate('c1.script_state(0xaa8c3, "defaultPillarPuzzleLever").variable("ratio") == 0.5'))
+        self.assertTrue(ev.evaluate('c1.script_state(0xaa8c3, "defaultPillarPuzzleLever").variable("tag") == "trigger02"'))
+        for expr in ('c1.script_state(0xaa8c3).state == "waiting"',                                       # two scripts, none named
+                     'c1.script_state(0xaa8c3).variable("numPillarsSolved") == 1',
+                     'c1.script_state(0xaa8c3, "defaultPuzzlePillarScript").state == "waiting"',          # a type it lacks
+                     'c1.script_state(0xaa8c3).script("Nope").count == 2',
+                     'c1.script_state(0xaa8c3, "defaultPillarPuzzleLever").variable("list") == 0',        # an array
+                     'c1.script_state(0xaa8c3, "defaultPillarPuzzleLever").variable("pillarSolved") == 0',  # no such variable
+                     'c1.script_state(0xaa8c3, "TrapLever").variable("a") == 0'):                         # names without vars
+            with self.assertRaises(AssertionData, msg=expr):
+                ev.evaluate(expr)
+
+    def test_a_busy_answer_names_its_stack_and_reads_no_script(self):
+        # H-R2: a pillar 0.5 s into a turn answers quiescent false, its PlayAnimationAndWait's stack waiting on a latent
+        # function (Stack.h:32's kWaitingOnLatentFunction, 3)
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(RichServer(), ScriptStateViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate('c2.script_state(0xaa8cb).quiescent == false and c2.script_state(0xaa8cb).busyState == 3'))
+        self.assertTrue(ev.evaluate('c2.script_state(0xaa8cb).busy == "stack 4711 state 3 in defaultPuzzlePillarScript.RotatePillarToState"'))
+        self.assertTrue(ev.evaluate('c2.script_state(0xaa8cb, "defaultPuzzlePillarScript").quiescent == false'))  # a type is unread while busy
+        for expr in ('c2.script_state(0xaa8cb).state == "busy"', 'c2.script_state(0xaa8cb).variable("doOnce") == true',
+                     'c2.script_state(0xaa8cb).fnv1a == 0', 'c2.script_state(0xaa8cb).count == 0',
+                     'c1.script_state(0xaa8cb).busyState == 3'):                                          # a quiescent answer names none
+            with self.assertRaises(AssertionData, msg=expr):
+                ev.evaluate(expr)
+
+    def test_no_read_or_a_malformed_answer_is_a_data_error(self):
+        from labapi.assertions import AssertionData, Evaluator
+        views = ScriptStateViews()
+        views.answers["c1"][0xAA8CC] = {"formId": 0xAA8CC, "scripts": []}                        # no quiescent at all
+        views.answers["c1"][0xAA8CD] = {"formId": 0xAA8CD, "quiescent": True, "fnv1a": 1, "scripts": [
+            {"type": "defaultPuzzlePillarScript", "state": "position01", "names": ["doOnce"], "vars": [{"k": 5, "b": 1}]}]}
+        ev = Evaluator(RichServer(), views, ["c1", "c2"])
+        for expr in ('c1.script_state(0x39fdd).quiescent == true',                                  # never read on c1
+                     'c2.script_state(0xaa8c3).quiescent == true',
+                     'c1.script_state(0xaa8cc).quiescent == true',
+                     'c1.script_state(0xaa8cd).variable("doOnce") == true'):                         # a bool that is no bool
+            with self.assertRaises(AssertionData, msg=expr):
+                ev.evaluate(expr)
+        with self.assertRaises(AssertionData):
+            Evaluator(RichServer(), NearViews(), ["c1", "c2"]).evaluate('c1.script_state(0xaa8cb).quiescent == true')  # no reads kept
+
+    def test_its_call_shapes_are_checked(self):
+        from labapi.assertions import AssertionSyntax, Evaluator
+        ev = Evaluator(RichServer(), ScriptStateViews(), ["c1", "c2"])
+        for expr in ('c1.script_state().quiescent', 'c1.script_state("0xaa8cb").quiescent', 'c1.script_state(0xaa8cb, 3).quiescent',
+                     'c1.script_state(0xaa8cb, "a", "b").quiescent', 'c1.script_state(0xaa8cb).variable(3) == 1',
+                     'c1.script_state(0xaa8cb).script() == 1', 'c1.script_state(0xaa8cb).vars == 1', 'c1.script_state(0xaa8cb).names == 1'):
+            with self.assertRaises(AssertionSyntax, msg=expr):
+                ev.evaluate(expr)
+
+
 @needs_deps
 class NodeScaleTests(unittest.TestCase):
     def test_own_and_figure_scales_read_the_last_node_scale_steps(self):

@@ -2195,6 +2195,35 @@ function run(step: Step, player: Actor): unknown {
         deferred: nodeRotationOf(target.getFormID(), nodes),
       };
     }
+    case "script-state": {
+      // thuum ADR-068 rung 3, the script record's read (docs/research/rung3-script-record-2026-11-06.md 1(a) and
+      // 1(e)): a reference's attached scripts as this seat's own VM holds them, through the platform's native the
+      // record is made with (TESModPlatform.SerializeScriptState: under the VM's attachedScriptsLock and
+      // runningStacksLock, busy while any stack runs on the object), the driver's callNative idiom: {formId}.
+      // Answers the native's JSON parsed, {formId, quiescent, fnv1a, scripts: [{type, state, flags, names, vars}]},
+      // or {formId, quiescent: false, busy} naming the stack that holds it (H-R2), for lab-api's
+      // c.script_state(<id>[, "<type>"]). The native's empty answer is its refusal (no attached script, a trap
+      // family reference, an actor, a value past its cap: the seat's log says which), a dist without the native
+      // (before rung 3's F4) throws "Native function not found" (lab memory: a TESModPlatform native is three
+      // files); each is the step's error, its data, and the run goes on
+      const id = num(a.formId);
+      const target = id ? ObjectReference.from(Game.getFormEx(id)) : null;
+      if (!target) return { error: `no reference ${id.toString(16)} in this game` };
+      let answer: unknown;
+      try {
+        answer = callNative("TESModPlatform", "SerializeScriptState", undefined, target);
+      } catch (e) {
+        return { error: `SerializeScriptState unavailable on this platform: ${String(e)}` };
+      }
+      if (typeof answer !== "string" || answer === "") {
+        return { error: `SerializeScriptState refused ${id.toString(16)} (answer ${JSON.stringify(answer)}; the seat's log says why)` };
+      }
+      try {
+        return { formId: id, ...(JSON.parse(answer) as Record<string, unknown>) };
+      } catch (e) {
+        return { error: `SerializeScriptState's answer for ${id.toString(16)} is no JSON: ${String(e)}`, head: answer.slice(0, 200) };
+      }
+    }
     case "head-parts": {
       // the head parts on the player's base or, with {other: true}, on the
       // nearest other actor's, as the engine lists them (ActorBase

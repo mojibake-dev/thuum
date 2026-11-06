@@ -26,6 +26,32 @@ class BoardTests(unittest.TestCase):
         board.clear_views()
         self.assertIsNone(board.npc_state("c2", 0x13483))
 
+    def test_script_state_answers_are_kept_by_the_form_id_they_named(self):
+        # ADR-068 rung 3's read (c.script_state(id)): a busy answer names no formId of its own and is kept by the step's;
+        # a later read of the same reference replaces it; the native's refusal is an error answer, no read
+        from labapi.board import StepBoard
+
+        board = StepBoard(clock=lambda: 100.0)
+        busy = board.enqueue("c1", "script-state", {"formId": 0xAA8CB})
+        board.poll("c1")
+        board.complete(busy.id, {"ok": True, "data": {"quiescent": False, "busy": "stack 4711 state 3 in defaultPuzzlePillarScript.RotatePillarToState"}})
+        self.assertFalse(board.script_state("c1", 0xAA8CB)["quiescent"])
+        rest = board.enqueue("c1", "script-state", {"formId": 0xAA8CB})
+        board.poll("c1")
+        board.complete(rest.id, {"ok": True, "data": {"formId": 0xAA8CB, "quiescent": True, "fnv1a": 7, "scripts": []}})
+        lever = board.enqueue("c1", "script-state", {"formId": 0xAA8C3})
+        board.poll("c1")
+        board.complete(lever.id, {"ok": True, "data": {"formId": 0xAA8C3, "quiescent": True, "fnv1a": 9, "scripts": []}})
+        refused = board.enqueue("c1", "script-state", {"formId": 0x380B3})
+        board.poll("c1")
+        board.complete(refused.id, {"ok": True, "data": {"error": "SerializeScriptState refused 380b3 (answer \"\"; the seat's log says why)"}})
+        self.assertTrue(board.script_state("c1", 0xAA8CB)["quiescent"])
+        self.assertEqual(board.script_state("c1", 0xAA8C3)["fnv1a"], 9)
+        self.assertIsNone(board.script_state("c1", 0x380B3), "an error answer is no read")
+        self.assertIsNone(board.script_state("c2", 0xAA8CB))
+        board.clear_views()
+        self.assertIsNone(board.script_state("c1", 0xAA8CB))
+
     def test_inventory_answers_are_kept_by_the_ref_they_named(self):
         # two chests read in one run stay apart (c.inventory(ref), the root-cause plan's W4)
         from labapi.board import StepBoard

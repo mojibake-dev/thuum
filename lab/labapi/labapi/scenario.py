@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field, field_validator
 # a managed guest, a client verb on an unmanaged one.
 # craft: lab-driver reproduces the crafting menu's inventory effect at a station
 # (UNCONFIRMED until a lab run); lab-api resolves the recipe name to its form id.
-CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "node-rotation", "face-keyframes", "quest-stage", "set-stage", "draw-weapon", "anim-event", "figure-action", "repeat", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "allow-save", "set-av", "watch-start", "watch-stop", "markers", "known", "add-perks", "favorite", "favorites", "held", "inventory", "transfer", "globals", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "refs-near", "look", "solo-start", "place-npc", "place-ref", "npc-ai", "npc-hold", "npc-kill", "npc-state", "look-at", "npc-damage", "figure-spells", "npc-puppet", "npc-pose", "cell-events-start", "cell-events-stop", "play-idle", "combat-spell", "start-combat", "stop-combat", "papyrus-events", "papyrus-log", "quit"}
+CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "node-rotation", "script-state", "face-keyframes", "quest-stage", "set-stage", "draw-weapon", "anim-event", "figure-action", "repeat", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "allow-save", "set-av", "watch-start", "watch-stop", "markers", "known", "add-perks", "favorite", "favorites", "held", "inventory", "transfer", "globals", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "refs-near", "look", "solo-start", "place-npc", "place-ref", "npc-ai", "npc-hold", "npc-kill", "npc-state", "look-at", "npc-damage", "figure-spells", "npc-puppet", "npc-pose", "cell-events-start", "cell-events-stop", "play-idle", "combat-spell", "start-combat", "stop-combat", "papyrus-events", "papyrus-log", "quit"}
 # Server-side verbs (rung R0) go to the labCommand RPC; CONTRACT.md lists them.
 SERVER_ACTIONS = {"teleport", "give", "set-appearance", "open-race-menu", "set-percentages", "kill", "respawn", "papyrus-av", "staff-rank", "learn-spell",
                   "kill-ref", "respawn-ref", "server-console"}
@@ -298,6 +298,21 @@ def _ref_command_args(action: str, args: dict[str, Any], clients: list[str]) -> 
     return dict(args)
 
 
+def _script_state_args(args: dict[str, Any]) -> dict[str, Any]:
+    """script-state {formId}: a reference's attached scripts as the seat's own VM holds them (lab-driver's call of
+    TESModPlatform.SerializeScriptState, the script record's read: ADR-068 rung 3, docs/research/rung3-script-record-2026-11-06.md
+    1(a) and 1(e)), each script's state and positional variables, the record's FNV-1a 32 and whether no stack runs on the
+    object, kept per seat and per reference for c.script_state(<id>[, "<type>"]). The form id is a hex literal (0xaa8cb);
+    without one the driver answers an error the run would take as a pass, as a bare inventory did."""
+    unknown = sorted(set(args) - {"formId"})
+    if unknown:
+        raise ValueError(f"script-state takes formId, not {unknown}")
+    fid = args.get("formId")
+    if isinstance(fid, bool) or not isinstance(fid, int) or not 0 < fid <= 0xFFFFFFFF:
+        raise ValueError(f"script-state's formId is a reference's form id (0xaa8cb), got {fid!r}")
+    return dict(args)
+
+
 def _inventory_args(args: dict[str, Any]) -> dict[str, Any]:
     """inventory {ref}: a container's items as the seat's own game holds them, a chest's or a body's, by its reference's
     form id (or a FormDesc or a table name, which lab-api resolves before the driver sees it), for
@@ -464,7 +479,7 @@ def _relaunch_args(args: dict[str, Any]) -> dict[str, Any]:
 # the driver steps a playtest may send one seat outside a run (lab-api's playtest-step): input and its
 # rhythm, and reads that change nothing (a node's scale, the state, the voice, the projectiles nearby, a global's
 # value), never a console line (a seat's setup is the server's, Eli 2026-10-13) nor a connect
-PLAYTEST_READS = {"node-scale", "node-rotation", "face-keyframes", "dump-state", "head-parts", "voice", "held", "known", "projectiles", "graph-vars", "skills",
+PLAYTEST_READS = {"node-scale", "node-rotation", "script-state", "face-keyframes", "dump-state", "head-parts", "voice", "held", "known", "projectiles", "graph-vars", "skills",
                   "refs-near", "npc-state", "globals", "quest-stage"}
 # One lever on a world actor, for a live read Eli watches (playtest thirty's spinning wolves, 2026-10-21 16:5x, his
 # yes to the experiment): npc-ai switches one actor's engine AI off and back on through lab-driver (Actor.EnableAI);
@@ -596,6 +611,8 @@ def parse_step(raw: Any, clients: list[str]) -> Step:
         args = _ref_command_args(action, args, clients)
     if action == "inventory":
         args = _inventory_args(args)
+    if action == "script-state":
+        args = _script_state_args(args)
     if action == "transfer":
         args = _transfer_args(args)
     if action == "server-console":
