@@ -1087,3 +1087,29 @@ asleep. The fix after playtest 47 is the mirror's (propService.ts:259-263: a sam
 word lapsed, so the sample is the new owner's and stays pending; a general prop fix, items included), or a PropOwner word at the
 takeover (a wire change, rule 4), not the follow window first named. Also read: propService.ts:763's asleep test reads the wall
 clock, so a seat hitching for seconds reports its bodies asleep (every "asleep" line in 231108 was such a read).
+
+The login inside a cell (00:51 PST 2026-11-06 (08:51Z 11-06); a read-only agent's read, docs/engine/scripts.md S12): playtest 47's
+dead pillars and unarmed darts came from the login path, not the trap slice and not the platform's gate. A seat that logs in
+inside a cell reaches it by loading the template save rewritten with the server's cell and position, a save load that raises
+no OnCellLoad and no OnCellAttach for that cell's scripts (HYPOTHESIS H-L1 for the engine's part), so Bleak Falls Temple's
+pillar scripts stayed in their empty state and its DartTrap copies never armed (fireTrap shoots only once onCellAttach sets
+isLoaded); every lab scenario enters by teleport, a real cell load, so none ever met it. Eli's call, D-L1: A, load into a
+neutral cell and move to the server's spot (the engine's own cell load, covering every event a cell entry sends; one more
+loading screen of up to about 5 s at each login, and a movement hold so the server never records the neutral spot); B, send
+the two events once after the login for each loaded cell whose cell-loaded event the platform never saw, after the grant and
+the record's apply (the shape of the client's story-event fix, questStageService.ts:391-425; no extra loading screen; the risk is
+a second OnCellLoad, which puts a pillar script back on its first side while its graph stays turned, so exactly once, recording
+what the engine did send). thuum-cf recommends B, and A if the read of H-L1 shows OnLoad or other entry events missing too. The
+probe x-login-in-cell v1 (lab/.cache/probes) reads the defect, red on today's build; its fresh review comes with the fix.
+
+The puzzle lever's two faults (00:57 PST 2026-11-06 (08:57Z 11-06)). The occupant: the server never released a furniture
+occupant on death, so after the scene's bandit 0x39fe1 used the Temple's puzzle lever 0xaa8c3 (FURN 0xb7db4
+LeverPushAnimatingNoPlayer) and died, every player pull was refused in CheckIfObjectCanStartOccupyThis ("occupant is another
+object and is nearby"); fork m4-traps-47-lever (ec5add8d, 7c4580c9, its fresh review GO with notes applied as written) releases a
+dead or deleted occupant, and frees the lever only once the record has its occupant dead: in play that is a trap kill, refused
+until m4-traps-47-npckill ships beside it; a live NPC within 256 units still holds it. The motion: a clean lever seats no player
+at all (b-bleak-traps 20261106-004312: c1's "waiting for 'getFurnitureReference not null' to be true", then "gave up waiting ...
+after 15000 ms", then "sent ActivateMessage"), so the lever not moving under a player's pull is a second fault, the NoPlayer
+furniture under H-P1's activation block on every seat, unread, for after playtest 47; the script's activation still fires the
+darts and the gate. The probe x-lever-after-scene v1.1 (lab/.cache/probes, 01ca3c80) claims the release and the reply reaching
+each seat, the seat itself RECORDED.

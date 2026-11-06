@@ -9193,3 +9193,16 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   by the server's death check (m4-traps-47-npckill), the furniture occupant released (m4-traps-47-lever), the prop lease mirror
   with rock-motion-trace.js v1.2 (m4-traps-47-mirror), and a read of why a seat logging in inside a cell gets no OnCellLoad (with
   its probe x-login-in-cell). Test 2 is Ariadne from playtest 47's end world (playtest-pt47-end-ariadne-20261106T081423Z).
+- 00:38 PST 2026-11-06 (08:38Z 11-06) (numidium): two notes after 47's close. Eli chose D1 B for the terrain-overlay race at
+  SkyrimSE.exe+02AD242 ("also yes lets go with B"): a thuum engine-fixes SKSE DLL to the shape in apocrypha's
+  docs/research/terrain-upgrade-crash.md (branch apocrypha/terrain-crash-read), one CommonLibSSE-NG plugin with one detour, a
+  layer row every client loads; apocrypha builds it, numidium stages it, and its test is a run set with no +02AD242 fault on
+  either seat (47's c2 had its first). And a
+  death 47's notes missed, added to docs/private/playtest-47.md on Eli's word ("the double swing kill of prisoner and rotfern at
+  one point with the door"): in the oil-lamp room's draugr ambush (06:47Z) each player died of two swings, rotfern of 383ec's war
+  axe (35.2, landing 100 ms after the server's number for 383ec reached zero) and 383f7's greatsword (66.5), Prisoner of the
+  greatsword twice (67.2 each), each greatsword hit twice its ordinary 33.3. thuum-cf placed it: the doubling is the server's
+  TES5DamageFormula on a power attack (no difficulty multiplier yet, upstream's TODO #461); whether that number is the engine's
+  waits for one draugr swing read on the server and in the engine after 47, and the feel is Eli's. The hand-off's re-run ambush
+  and E_ACTIVATE_REACH refusing the draugr's own alcove go to the NPC ladder (frozen system 1). sky-ci's disk (5.2 GB free) went
+  to core before m4-traps-47's push.
