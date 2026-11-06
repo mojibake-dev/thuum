@@ -45,10 +45,13 @@ cmake --build build --config Release
 cmake --install build --config Release --prefix dist
 ```
 
-`dist\SKSE\Plugins\RotfernsFixes.dll` and its `.pdb` (Crash Logger reads pdbs) are the row:
-a `local` folder `rotferns-fixes-<version>@1.6.1170` under lab/.cache/mods with that `dist`
-content as plain Data layout, hashed into lab/layer/essentials.tsv like every local row; the files
-stay out of the repo, as every built artifact does. numidium lays it with layer-stage.
+`dist\SKSE\Plugins\RotfernsFixes.dll` and its `.pdb` (Crash Logger reads pdbs) are the job's
+artifact, and the layer row takes that artifact, never a hand-built copy (ADR-069 decision 4): an
+essentials row of source `ci` names the job and the folder inside its artifact
+(`thuum/<job id>|lab/rotferns-fixes/dist`) with the artifact's tree hash, and persist-mods fetches it
+once into lab/.cache/mods/ci/thuum-<job id> with `lab/tools/glab.py artifact` and checks it like any
+staging folder. The job's artifacts never expire. A hand build on sky-build proves a detour; it is
+not a row's source.
 
 ## Reading a site
 

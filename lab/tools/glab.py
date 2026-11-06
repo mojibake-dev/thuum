@@ -10,6 +10,19 @@ rule counts as matched, so the image jobs and difftest-build run even when the
 push pipeline skipped them; KEY=VALUE pairs become pipeline variables, so
 CLIENT_BUILD_WINDOWS=0 keeps the client build off the seats' host)"""
 import json, subprocess, sys, urllib.parse, urllib.request
+
+class _SameHostToken(urllib.request.HTTPRedirectHandler):
+    """urllib copies a request's headers onto its redirect; PRIVATE-TOKEN must not reach another host
+    (an artifact may be served from object storage). numidium's review of 613fc515, 2026-11-06."""
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        new = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if new is not None and urllib.parse.urlsplit(newurl).hostname != urllib.parse.urlsplit(req.full_url).hostname:
+            for k in [k for k in new.headers if k.lower() == "private-token"]:
+                del new.headers[k]
+        return new
+
+
+OPEN = urllib.request.build_opener(_SameHostToken()).open
 G = "https://gitlab.gaussing.tv/api/v4"
 PROJECTS = {"thuum": 6, "skymp": 7}
 
@@ -18,7 +31,7 @@ def token(name, service="gitlab-thuum-readapi"):
 
 def get(tok, path):
     req = urllib.request.Request(G + path, headers={"PRIVATE-TOKEN": tok})
-    with urllib.request.urlopen(req, timeout=30) as r:
+    with OPEN(req, timeout=30) as r:
         return json.load(r)
 
 def main():
@@ -35,7 +48,7 @@ def main():
             form += [("variables[][key]", k), ("variables[][value]", v)]
         data = urllib.parse.urlencode(form).encode()
         req = urllib.request.Request(f"{G}/projects/{PROJECTS[name]}/pipeline", data=data, method="POST", headers={"PRIVATE-TOKEN": tok})
-        with urllib.request.urlopen(req, timeout=30) as r:
+        with OPEN(req, timeout=30) as r:
             p = json.load(r)
         print(f"pipeline {p['id']} {p['status']} {p['ref']} {p['sha'][:8]} {p['web_url']}")
         return
@@ -43,13 +56,27 @@ def main():
         # ADR-069: an essentials row of source `ci` takes a build job's artifact (persist-mods calls this)
         import io, os, zipfile
         name, job_id, dest = which[1], which[2], which[3]
+        import shutil, tempfile
         req = urllib.request.Request(f"{G}/projects/{PROJECTS[name]}/jobs/{job_id}/artifacts", headers={"PRIVATE-TOKEN": token(name)})
-        with urllib.request.urlopen(req, timeout=300) as r:
+        with OPEN(req, timeout=300) as r:
             blob = r.read()
-        os.makedirs(dest, exist_ok=True)
-        with zipfile.ZipFile(io.BytesIO(blob)) as z:
-            z.extractall(dest)
-            print(f"job {job_id}: {len(z.namelist())} entries into {dest}")
+        parent = os.path.dirname(os.path.abspath(dest))
+        os.makedirs(parent, exist_ok=True)
+        # unzip beside dest and rename into place: a cut-off fetch or unzip never leaves a partial dest,
+        # which persist-mods would take as fetched (numidium's review of 613fc515, 2026-11-06)
+        tmp = tempfile.mkdtemp(prefix=os.path.basename(dest) + ".part-", dir=parent)
+        try:
+            with zipfile.ZipFile(io.BytesIO(blob)) as z:
+                z.extractall(tmp)
+                n = len(z.namelist())
+            os.chmod(tmp, 0o755)  # mkdtemp makes it owner-only
+            if os.path.exists(dest):
+                shutil.rmtree(dest)
+            os.rename(tmp, dest)
+        except BaseException:
+            shutil.rmtree(tmp, ignore_errors=True)
+            raise
+        print(f"job {job_id}: {n} entries into {dest}")
         return
     if which and which[0] == "jobs":
         name, pipeline_id = which[1], which[2]
@@ -62,7 +89,7 @@ def main():
         name, job_id = which[1], which[2]
         tok = token(name)
         req = urllib.request.Request(f"{G}/projects/{PROJECTS[name]}/jobs/{job_id}/trace", headers={"PRIVATE-TOKEN": tok})
-        with urllib.request.urlopen(req, timeout=30) as r:
+        with OPEN(req, timeout=30) as r:
             text = r.read().decode("utf-8", "replace")
         tail = int(which[3]) if len(which) > 3 else 60
         print("\n".join(text.splitlines()[-tail:]))

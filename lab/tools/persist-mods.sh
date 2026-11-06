@@ -331,7 +331,7 @@ while IFS=$'\x1f' read -r folder source ref check take exclude plugins_ note; do
       mkdir -p "$dest"
       rsync -a "${excl[@]}" "$src/$inner/" "$dest/"
       got=$(tree_hash "$dest")
-      [ "tree:$got" = "$check" ] || { echo "$folder: tree hash $got is not ${check#tree:} (job ${ids#*/}'s artifact differs from the one the manifest was built from)" >&2; exit 2; }
+      [ "tree:$got" = "$check" ] || { echo "$folder: tree hash $got is not ${check#tree:} (job ${ids#*/}'s artifact differs from the one the manifest was built from; delete $src to fetch it again)" >&2; exit 2; }
       n_fen=$((n_fen + 1));;
     nexus)
       ids=${ref%%|*}; archive="$cache/${ref#*|}"
