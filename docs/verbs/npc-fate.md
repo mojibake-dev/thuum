@@ -3285,3 +3285,22 @@ samples. The cost a player feels: a guest's body opens about two seconds after i
 checklist. A later refinement, if the lag matters at turbo 2: the AI on at the body's release instead of the open, with H-54e's drift
 (45 units in 5 s) as its price. M3's exit gate runs on v6 (c-dungeon-enemies, b-npc-body-release, b-npc-loot, b-npc-death-report,
 m0-inventory, a-activation-reach, a-sleep, always, watch; T2 beside).
+
+## Trap kills on hosted NPCs: the first read (02:45 PST 2026-11-06 (10:45Z 11-06), thuum-cf)
+
+x-trap-npc-kill v1.1 20261106-095230, on fork m4-traps-47 5186df39, answered leg A. The server took the host's report of 380b3's
+wall kill on the trap's evidence ("death report: 380b3 died of unknown at (8656, -5449, -2052), host ff000000, killer 0: a trap's
+evidence beside the body (54b15, 769 ms before); the server records the death", 09:54:55Z), with no E_DEATH_UNCHECKED and no death
+by the server's word for it, dead on the record and on c2 within 5 s; the same run's three other wall kills went the same way
+(380b5 "(54b15, 1883 ms before)", 380b9 2348 ms, 8009e 1047 ms), and so did a blade kill the probe never named, which reads the 30
+s window anyway: draugr 380b8 died to blade 3ac33 on a note 5249 ms old ("death report: 380b8 died of unknown at (6497, -7136,
+-2305), host ff000000, killer 0: a trap's evidence beside the body (3ac33, 5249 ms before); the server records the death",
+09:55:59.8Z), a kill a 5 s window would have refused. No trap kill in the run was refused. The run is red on three claims and one
+broken premise: c1's landing woke the four ambush NPCs, they charged it across the plate, the plate fired 8.1 s after the landing,
+and the wall killed 380b5 before leg B, so the probe's own read of the window (380b5 on a blade's note 5000 ms old or more) never
+came. A lab fact from it: leg B's npc-hold on that body raised it on c1 (SetDontMove writes lifeState 9 over kDead, the
+re-analyst's read in npc-talk.md's Dynamic plan; c1's npc-state read 380b5 alive with its package 0x9bcbd while the record and c2
+had it dead), so lab-driver's npc-hold refuses a dead NPC from this change on (deployed with the next driver lay). v1.2
+(lab/.cache/probes, 3cec676d) holds the four at the landing, moves 380b3 into the wall's swing and 380b5 onto the middle blade by
+the server's own teleports (SetPos, MoveTo, delivered to the host), never holds after a move, no claim changed; its fresh review
+GO with notes, applied as written.

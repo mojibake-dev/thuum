@@ -1113,3 +1113,19 @@ after 15000 ms", then "sent ActivateMessage"), so the lever not moving under a p
 furniture under H-P1's activation block on every seat, unread, for after playtest 47; the script's activation still fires the
 darts and the gate. The probe x-lever-after-scene v1.1 (lab/.cache/probes, 01ca3c80) claims the release and the reply reaching
 each seat, the seat itself RECORDED.
+
+The stage of fork m4-traps-47 5186df39 (02:45 PST 2026-11-06 (10:45Z 11-06); numidium's, server m4-traps-47-5186df39, both seats
+on its client, read by thuum-cf). Green: x-trap-wire-follower v1.1 20261106-095943 (a follower's live destroyed record waits out
+FIRE_GRACE_MS before it blanks its own firing, 746aff6c), x-trap-family-fire 20261106-100510, x-trap-rock-hang v1.3 three times
+(20261106-101052, 101413, 101724: no rock hung). x-trap-boulders-rest 20261106-100308 red on one claim, rock 0xb6d4d at rest at
+z 8839.79 against below 8740.3, the declared hang, while the seats and the record agree on all seven rocks: c2, their owner
+("stream b6d4[589abcd] asleep" seven times), within 0.1 unit of the record on every axis, and c1, the follower ("followed no
+more" seven times), within 0.2 on six and 4.1 in x on b6d4d (its refs-near of step 023 and c2's of 024 against the snapshots of
+steps 37 to 43). So the divergence 746aff6c's stage showed (a follower's rock where its owner's was not) is closed by the lease
+mirror (529e003c), and the hang is the owner's own physics, the same on every screen. The lever: x-lever-after-scene v1.1
+20261106-095742 read its premise, not its question: c1's console refused its first move ("Script command \"39fe1.moveto\" not
+found.", the `<ref>.<command>` form b-locks met on 2026-11-01), so the bandit never moved and nothing after it ran. The release
+(ec5add8d) is server-only, R0 under ADR-053, and merges on T0 (FurnitureOccupantTest in pipeline 5536's ctest) and T2; its lab
+read is owed: v1.2 (lab/.cache/probes, d4d1386d) moves the bandit by the server's console table (server-console MoveTo, the
+TeleportMessage to his host) and has c1's engine make his use (prid aa8c3, then activate 39fe1), no claim changed, its fresh
+review GO with notes, applied as written.
