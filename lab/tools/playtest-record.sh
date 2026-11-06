@@ -113,12 +113,17 @@ start_one() {  # start_one <client>: the recorder on one seat; a refusal is note
 }
 start_watch() { for c in c1 c2; do failed[$c]=0; start_one "$c"; done; }
 stop_watch() {  # stop_watch <k>: each watching seat's trace to the results site
-  for c in c1 c2; do
-    if [ "${watching[$c]:-0}" != 1 ]; then note "$c: no trace in cycle $1 (the seat never took watch-start)"; continue; fi
-    watching[$c]=0
-    assist "$c" watch-stop '{}' > "$tmp/stop-$c.json"
-    # the trace out of lab-api's answer, and one line about it (python from a heredoc: no quotes to escape)
-    if line=$(python3 - "$tmp/stop-$c.json" "$tmp/trace-$c-$1.json" <<'PY'
+  for c in c1 c2; do stop_one "$c" "$1"; done
+  # each seat's log against the other seat's trace of the same cycle, so both traces first
+  for c in c1 c2; do live_check "$c" "$1"; done
+}
+stop_one() {  # stop_one <client> <label>: one seat's trace to the results site as trace-<client>-<label>.json
+  local c=$1
+  if [ "${watching[$c]:-0}" != 1 ]; then note "$c: no trace in cycle $2 (the seat never took watch-start)"; return; fi
+  watching[$c]=0
+  assist "$c" watch-stop '{}' > "$tmp/stop-$c.json"
+  # the trace out of lab-api's answer, and one line about it (python from a heredoc: no quotes to escape)
+  if line=$(python3 - "$tmp/stop-$c.json" "$tmp/trace-$c-$2.json" <<'PY'
 import json, sys
 d = json.load(open(sys.argv[1]))
 t = d.get("result") if d.get("ok") else None
@@ -131,17 +136,39 @@ json.dump(t, open(sys.argv[2], "w"), indent=1, sort_keys=True)
 me = t.get("self") or {}
 print(f"{t.get('seconds', 0):.0f} s, {len(t.get('actors') or [])} actors, {len(me.get('events') or [])} own events, {len(me.get('casts') or [])} casts")
 PY
-    ); then
-      ssh_srv "cat > $out/trace-$c-$1.json" < "$tmp/trace-$c-$1.json"
-      note "$c: trace-$c-$1.json, $line"
-      # the watch's start on the clock and its trace: the stopped-log finding reads these
-      printf '%s\t%s\t%s\n' "$1" "${since[$c]}" "$tmp/trace-$c-$1.json" >> "$tmp/cycles-$c.tsv"
-    else
-      note "$c: no trace in cycle $1: ${line:-$(cut -c1-160 "$tmp/stop-$c.json")}"
+  ); then
+    ssh_srv "cat > $out/trace-$c-$2.json" < "$tmp/trace-$c-$2.json"
+    note "$c: trace-$c-$2.json, $line"
+    # the watch's start on the clock and its trace: the stopped-log finding reads these
+    printf '%s\t%s\t%s\n' "$2" "${since[$c]}" "$tmp/trace-$c-$2.json" >> "$tmp/cycles-$c.tsv"
+  else
+    note "$c: no trace in cycle $2: ${line:-$(cut -c1-160 "$tmp/stop-$c.json")}"
+  fi
+}
+# A relaunched game's driver starts with no watch (playtest 47: cycles 7, 9, 10 and 11 lost a seat's trace, "the driver
+# answered: no watch-start before watch-stop", each after a relaunch, and the seat took watch-start only at the next
+# cycle's start). A seat whose heartbeat stopped GAP_S or longer is cycled on its own as soon as it polls again: its
+# watch stopped (the partial trace saved as cycle <k>r when the driver kept it, as across a long menu) and started.
+gap_s=${PLAYTEST_GAP_S:-20}
+declare -A gapped=()
+beats() {  # each client's seconds since its last poll, "c1 0.4" a line, from lab-api's status
+  curl -fsS -m 15 "$api/status" 2>/dev/null \
+    | python3 -c 'import json,sys; [print(c, a) for c, a in (json.load(sys.stdin).get("heartbeats_s_ago") or {}).items()]' 2>/dev/null
+}
+regap() {  # regap <k>: a seat back from a heartbeat gap cycled on its own
+  local c age
+  while read -r c age; do
+    case "$c" in c1|c2) ;; *) continue;; esac
+    if awk -v a="$age" -v g="$gap_s" 'BEGIN { exit !(a >= g) }'; then
+      [ "${gapped[$c]:-0}" = 1 ] || note "$c: no poll for ${age%.*} s (a relaunch, or a long menu): its watch is cycled when it polls again"
+      gapped[$c]=1
+    elif [ "${gapped[$c]:-0}" = 1 ]; then
+      gapped[$c]=0
+      stop_one "$c" "${1}r"
+      failed[$c]=0
+      start_one "$c"
     fi
-  done
-  # each seat's log against the other seat's trace of the same cycle, so both traces first
-  for c in c1 c2; do live_check "$c" "$1"; done
+  done < <(beats)
 }
 
 stopping=0
@@ -158,6 +185,7 @@ while :; do
       curl -fsS -m 15 -X POST "$api/hold" -H 'content-type: application/json' -d '{"minutes": 10, "reason": "playtest-record: last cycle and logs"}' >/dev/null 2>&1 && own_hold=1
       note "the playtest's hold is gone: last cycle"; stopping=1; break
     fi
+    regap "$((k + 1))"
     # a seat that refused its start (a menu, a relaunch) is asked again every 30 s, not a cycle later
     if [ $((waited % 30)) = 0 ]; then for c in c1 c2; do [ "${watching[$c]:-0}" = 1 ] || start_one "$c"; done; fi
   done
