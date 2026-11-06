@@ -545,7 +545,15 @@ slot, nothing served, no load-order change; a player's hair records are vanilla'
 point at is the remade one. Main files reach the player characters only, since NPCs carry their hair
 in baked face data; the optional NPC file (501461, 70.5 MB of regenerated face data for over 2,000
 vanilla NPCs) is not taken, nor the SMP main file (510409), which needs FSMP. The read and Eli's
-other two appearance asks: docs/research/appearance-asks.md.
+other two appearance asks: docs/research/appearance-asks.md. Four of its meshes are left out by the row's
+excludes since playtest 48 (2026-11-06: c2's game crashed in RaceMenu while Eli flipped through
+hairs, SkyrimSE.exe+0D17F13, Khajiit hairs and an earring part on the stack): the vanilla records
+HairKhajiitFemale05, HairFemaleDremora01 and 02 and HairLineFemaleNord04 name a .tri the remake does
+not replace (khajiitfemalehair01.tri, femaledremorahair01/02.tri, 4hairlinefemale.tri), so each remade
+mesh would meet morph data built for the vanilla mesh. Of the 285 records whose mesh the remake
+replaces, these are the only four (the other 195 .tri it names are the remake's own); they stay
+vanilla, mesh and .tri together. Playable Headparts All Races offers every hair to every race and sex,
+which is how a Khajiit reached the Dremora and Nord ones.
 
 **Out by Eli's letters.** Death Drop Overhaul 1.2.4 (D37 B, 2026-10-27 00:00 PDT, "recommended on
 both"): it drops a dead actor's held shield as a world reference on each client that the server
