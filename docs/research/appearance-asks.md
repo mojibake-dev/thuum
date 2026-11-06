@@ -60,12 +60,18 @@ The earlier note on packs, kept for the record:
 - **The seats** carry the Face Pack too, read from their disks on 2026-11-06 (c1 and c2, the
   1.6.1170 game folder): textures\actors\character\female\femalehead.dds and femalehead_msn.dds
   are loose and hash-identical to the archive's 10 Face Pack files (sha256 c064834e..., 79582540...),
-  with femalehead_s, femaleheadvampire, _msn and Goam's two _sk beside them. The plan in
-  lab/.cache/mods/cbbe-2.0.3-plan.json has no Face Pack folder, so the base image did not come from
-  that plan alone (Fenestrate's deployment is the likely source; the first draft of this page read
-  the plan as the seats' state and was wrong). Eli: "the faces were on client 2". Cause confirmed:
-  the Face Pack.
+  with femalehead_s, femaleheadvampire, _msn and Goam's two _sk beside them. They come from the
+  render, not a base image: persist-mods laid CBBE from its FOMOD with the choices Vanilla Shape,
+  Vanilla Outfits, RaceMenu Morphs, Morph Files (Outfits) and, since 2982ce82 of 2026-10-07, Face
+  Pack, added for the neck seam of playtest nine (CBBE's body textures against vanilla's female
+  heads). lab/.cache/mods/cbbe-2.0.3-plan.json predates that commit; the first two drafts of this
+  page read it as the seats' state and were wrong twice. The clones' lay record lists every CBBE
+  file, so the existing prune (D37's, by hash) removes whatever a new render drops. Eli: "the faces
+  were on client 2". Cause confirmed: the Face Pack.
 - Khajiit faces (Ariadne) are vanilla on both: the Face Pack covers human, elf and orc faces only.
+- D2 B (Eli, 2026-11-06, "fire at will"): CBBE became a layer row on apocrypha/layer-appearance
+  (ba22fb2e) with Face Pack out and Morph Files (Body) in; the trade-off to watch is the neck seam
+  the pack was added for, which may come back on vanilla faces. The superseded plan:
 - Least impactful fix: remove the Face Pack's files from the seats (the 42 paths of folder 10 that
   are present, 17 of them face textures, the rest tintmasks and race _msn maps) so vanilla's come
   back from the BSA, and on Fenestrate reinstall CBBE in Vortex with Face Pack unticked. CBBE's FAQ
