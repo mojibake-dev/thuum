@@ -28,16 +28,15 @@ server:
   perks: true
   leveling: true
 camp:
-  # the reset (Eli, 2026-11-06 12:5x PST: "let's reset to place them both at the inside of the dungeons start to fuck with
-  # the traps"): the game's landing of the main door 0xb6cce inside the mine (lab/esm.py door: (2479, 1366, 9254), rot 11.5),
-  # test 2 sixty units ahead; the tripwire about 2,100 units on
-  interior: "Eli's reset just inside Embershard's main door to trip the boulder trap; a login inside the cell is D-L1's case, but the Tripwire arms in OnLoad (thuum-cf), so a wire that never fires for a seat logged in inside is that read"
+  # the third reset (Eli, 2026-11-06 13:3x PST: "yes please do a real cell load"): outside the main door, at the game's own
+  # landing of its exterior door 0xb6cce (lab/esm.py door 0xb6ccd: (8849, -58120, 1446), rot -39), so each seat walks into
+  # 0xb6be6 by a real cell load and D-L1 is out of the read; test 2 sixty units ahead on the landing's heading. The lookout
+  # 0xb6ce1 and the wolf 0x9b0dd are dead in this world.
   teleports:
-    - {kind: teleport, profileId: 1, cell: "b6be6:Skyrim.esm", pos: [2479, 1366, 9254], rot: [0, 0, 11.5]}
-    - {kind: teleport, profileId: 2, cell: "b6be6:Skyrim.esm", pos: [2491, 1425, 9254], rot: [0, 0, 11.5]}
+    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [8849, -58120, 1446], rot: [0, 0, -39]}
+    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [8811, -58073, 1470], rot: [0, 0, -39]}
   near:
-    - 0xb6ff7   # LvlBanditMeleeCommonerM, no server record in all of 48 (never streamed while the party crossed the mine), about 1,440 off
-    - 0xb6ff8   # LvlBanditMeleeNordM, the same, about 1,530 off
+    - 0x992d8   # EncWolf, no server record in all of 48 (never streamed), about 2,200 units off
 seats:
   - profile: 1
     name: "test 1"
