@@ -20,7 +20,7 @@ def load_versionlib(path):
     d = open(path, 'rb').read(); p = 0
     def rd(fmt):
         nonlocal p; v = struct.unpack_from(fmt, d, p); p += struct.calcsize(fmt); return v[0]
-    rd('<i'); [rd('<i') for _ in range(4)]; p += rd('<i'); ptr = rd('<i'); n = rd('<i')
+    rd('<i'); [rd('<i') for _ in range(4)]; name_len = rd('<i'); p += name_len; ptr = rd('<i'); n = rd('<i')  # read the length first: `p += rd()` reads p before rd advances it
     pvid = poff = 0; byoff = {}
     for _ in range(n):
         t = rd('<B'); lo, hi = t & 0xF, t >> 4

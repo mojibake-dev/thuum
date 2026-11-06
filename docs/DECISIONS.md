@@ -4788,3 +4788,7 @@ Consequences. Every player's engine differs from vanilla by exactly the detours 
 where; the lab seats and Fenestrate run the same bytes. A new fix is a commit to lab/rotferns-fixes (the detour, its page, its log
 line) and a pipeline run, not a new mod or a new build pipeline. A runtime update turns every fix off at once (wrong runtime in the
 log) until each site is re-read; nothing is patched blind. The first fix is the terrain-overlay null check at id 18789 + 0x14A.
+
+Note under ADR-069 (2026-11-06, numidium's rules review): a fix that skips work also logs its count (`skipped N ... so far`,
+every ten seconds the count moved), since a rare fault's absence alone does not show the fix fired; and a fix checks the bytes at its
+jump-back targets as well as at its site.

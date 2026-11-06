@@ -15,6 +15,9 @@
 #   cmake --install build --config Release --prefix dist   # dist/SKSE/Plugins/RotfernsFixes.dll (+ .pdb)
 cmake_minimum_required(VERSION 3.24)
 
+# the fork's fmt pin (skymp overlay_ports/fmt, 11.2.0, copied here): the pairing with this CommonLib commit the fork builds
+set(VCPKG_OVERLAY_PORTS "${CMAKE_CURRENT_SOURCE_DIR}/overlay_ports" CACHE STRING "")
+
 if(NOT DEFINED VCPKG_TARGET_TRIPLET)
     # spdlog and fmt static, the CRT dynamic: the DLL carries no runtime DLLs of its own into Data/SKSE/Plugins
     set(VCPKG_TARGET_TRIPLET "x64-windows-static-md" CACHE STRING "" FORCE)
@@ -50,7 +53,9 @@ add_commonlibsse_plugin(${PROJECT_NAME}
     SOURCES src/main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE xbyak::xbyak)
 target_precompile_headers(${PROJECT_NAME} PRIVATE <RE/Skyrim.h> <SKSE/SKSE.h>)
-target_compile_options(${PROJECT_NAME} PRIVATE /W4 /permissive- /Zc:preprocessor /utf-8)
+target_compile_options(${PROJECT_NAME} PRIVATE /W4 /permissive- /Zc:preprocessor /utf-8 $<$<CONFIG:Release>:/Zi>)
+# a PDB in Release too: Crash Logger reads it beside the DLL
+target_link_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:/DEBUG /OPT:REF /OPT:ICF>)
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "RotfernsFixes")
 
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION "SKSE/Plugins")

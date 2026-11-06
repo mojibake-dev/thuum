@@ -239,11 +239,17 @@ Fixes do not touch 18789. Two shapes, in order of laziness:
   children[0] itself and routes both the
   empty-array case and a null children[0] to the next-quad path at + 0x340
   (`inc esi`, `FF C6 49 83 C6 08 83 FE 04`), else continues at + 0x162
-  (`48 8B 01 FF 50 38`) with rax = children.data and rcx = the child, exactly as
-  the original fall-through left them. Safety read (2026-11-06): no branch in the
-  function targets + 0x14A..+ 0x162 (the `xor ecx,ecx; jmp +0x162` at + 0x154
-  becomes dead), and r11 is unused by the function, so the trampoline leaves
-  through `mov r11, imm64; jmp r11` and needs no reach arithmetic. Before writing,
+  (`48 8B 01 FF 50 38`) with rax = children._data and rcx = the child, exactly as
+  the original fall-through left them, counting each skip. Safety read: no branch
+  outside the span targets + 0x14A..+ 0x161 (inside it, its own `ja` at + 0x152 is
+  overwritten and its `xor ecx,ecx; jmp +0x162` at + 0x154 becomes dead), and r11
+  appears in 18789 only in the epilogue, written (lea r11 at + 0x357) before any
+  read, so it is dead at both exits and the trampoline leaves through
+  `mov r11, imm64; jmp r11`. Correction: apocrypha's first run of this read
+  printed nothing (disasm-chain.py's Address Library parser was off by four bytes,
+  fixed since), so the claim first stood on empty output; thuum-cf's re-analyst
+  and numidium's rules review confirmed it independently, and the fixed tool now
+  shows the same. Before writing,
   the DLL checks the runtime version and the ten bytes, and logs one of three
   lines: installed, wrong runtime, bytes mismatch; a later runtime refuses
   cleanly. One DLL in the layer, ESP-less, keyed by id with this page as its
@@ -266,6 +272,14 @@ effect: a skipped quad keeps its old overlay, noise and blend params until the n
 a LOD-blend seam on one quad. Falsifiers for the run set: no "installed" line, or a "Failed to
 handle allocation request" line; any +02AD242 fault; a fault at 18789+0x168 or +0x17C; a fault
 outside any module (the detour has no unwind data, so a stack past frame 0 there is noise).
+
+The patched function has three callers, all the same shape, a loop over a grid of loaded cells that
+takes each cell's land (18970) and calls 18789 on it: 13414 at + 0x65 (the sweep the crash logs show,
+over the TES grid), 13317 at + 0x534 (the same TES grid dimension, 359676) and 15960 at + 0x50 (over a
+grid of its own size). The detour is inside 18789, so it covers all three. numidium's rules review
+(2026-11-06) adds two checks for the run set beyond the falsifiers above: the skip count in
+rotferns-fixes.log (a run with skips and no fault is the proof; a run with neither proves only
+"installed"), and a look at how a skipped quad's LOD blend renders.
 
 Either way the layer test is the signature: a run set on c1 with no
 +02AD242 fault across the containers gate.
