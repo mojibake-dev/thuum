@@ -1,0 +1,54 @@
+# Playtest 48 (numidium, 2026-11-06 ~12:00 PST): Embershard Mine's traps and the appearance layer, on the canonical seats.
+# The build is canon 5186df39 (fork m4-traps-47 merged by verb-merge: the wire follower 746aff6c, the prop lease mirror, the
+# furniture occupant released on death or deletion, NPC trap kills accepted on the trap's own evidence) under the layer stage
+# of apocrypha/layer-appearance 5a5facb2 (CBBE 2.0.3 as a row with its body morph files and no Face Pack, the vanilla hair
+# remake as replacers, Rotfern's Fixes 0.1.0 under ADR-069). thuum-cf's checklist is docs/private/playtest-48.md (eight
+# items): the tripwire and its rocks from the guest with a bandit in tow, the levers and bridges, a bone alarm, the bandits,
+# out and back in; apocrypha's two layer items; anything else.
+# The world is the canonical one Eli made at 47's end (rotfern and Ariadne at 200). Embershard Mine 0xb6be6 is untouched
+# there: the wire 0xb6d3f, its seven rocks and the platform 0xb6d47 hold no record (the game files' state), the eight bandits
+# are alive, the levers, bridges and bone alarms unmoved (the world's own records, read 2026-11-06 19:4xZ).
+# The camp (from profile 48: outside a cell, its living neighbours declared) is on the approach from Riverwood, beside the
+# pine TreePineForest03 0x628c8 at (9716, -55915, 1141) (lab/esm.py on the players' Skyrim.esm), 150 units up, facing the
+# mine's door 0xb6cce (its landing (8849, -58120, 1446), about 2,400 units on); test 2 sixty units ahead on that heading.
+id: 48
+build: "canon 5186df39 (fork m4-traps-47 merged by verb-merge) under the layer stage of apocrypha/layer-appearance 5a5facb2"
+world: playtest-canon-chars-20261106T081837Z   # the canonical seats (Eli, 2026-11-06): rotfern and Ariadne at 200
+hold:
+  minutes: 120
+  reason: "playtest 48: Embershard Mine's traps and the appearance layer"
+server:
+  npcEnabled: true
+  gameHour: 12.0
+  locks: true   # every switch on, as the 44 baseline
+  weatherSync: true
+  perks: true
+  leveling: true
+camp:
+  teleports:
+    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [9800, -55915, 1290], rot: [0, 0, 203]}
+    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [9777, -55970, 1290], rot: [0, 0, 203]}
+  near:
+    - 0xb6ce1   # the mine's lookout, LvlBanditMelee1HAggro1024, alive in the record, about 2,050 units off by the door: item 4's first fight
+    - 0x9b0dd   # EncWolf, alive in the record at (10829, -55339), about 1,200 units off
+    - 0x992d8   # EncWolf, no record (alive where placed, (7543, -56331)), about 2,280 units off
+seats:
+  - profile: 1
+    name: "test 1"
+    perks: [0x7934b]   # Overdraw40 through the server's AddPerk (284a4d51): the headshot rule's condition
+    spells: []
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]   # Survival off
+    values:
+      Marksman: 60
+    percentages: {health: 1, magicka: 1, stamina: 1}
+  - profile: 2
+    name: "test 2"
+    perks: []
+    spells: []
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]
+    percentages: {health: 1, magicka: 1, stamina: 1}
+streams:
+  test1: 48989
+  test2: 49989
+after:
+  readback: percentages
