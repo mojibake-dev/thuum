@@ -490,7 +490,7 @@ docs/research/mod-layer-plan.md). Built by apocrypha on branch
 Winter Is Coming from decision 4, Realistic Aspen Trees after playtest 26, the Survival
 collection's two non-HDT warmth patches after playtest 27, Skyrim Souls RE for the pausing on
 2026-10-28, all below), on top of the layer's
-existing eight (RaceCompatibility, rotfern, RaceMenu, CBBE, Lost Grimoire, Apocalypse, Headshot
+existing eight (RaceCompatibility, rotfern, RaceMenu, CBBE (a row since 2026-11-06, below), Lost Grimoire, Apocalypse, Headshot
 Kills with CIF 2.0.7, AI Pathing Freeze Fix): 90 plugins in the clients' order (81 served, 9
 client-only at the tail), 45 of them light; the SKSE DLL mods scoped `@1.6.1170` (all of them loaded on Fenestrate's
 1.6.1170 under SKSE 2.2.6 or, Skyrim Souls RE, carry a build for it; none has run on 1.7.104), with Death Drop Overhaul
@@ -503,6 +503,22 @@ PREVIOUS.sums (persist-mods: the manifest it replaced, for a clone laid before t
 purges what it deployed. A file at that path with another hash stays and is counted. Before that, a dropped file stayed
 on any clone whose base carried it (FSMP's DLL came off on 2026-10-20 only because its base lacked it), so a promoted mod
 could never leave.
+
+**CBBE 2.0.3 becomes a row (D2 B, Eli, 2026-11-06: "yeah let's go with B. fire at will").** The
+render's own CBBE block (its FOMOD resolved each run with the choices Vanilla Shape, Vanilla Outfits,
+RaceMenu Morphs (BodyMorph), Morph Files (Outfits) and Face Pack) is gone; the row
+`cbbe-2.0.3@1.6.1170` lays that installer plan's folders in its order with two of Eli's appearance
+changes (docs/research/appearance-asks.md). Morph Files (Body) comes in: the seven .tri beside the
+body meshes, without which the naked body's sliders did nothing in the race menu on both seats.
+Face Pack goes out: its 27 face files (the 28th, femalehead_sk, is Goam's) are the "baby smooth"
+female faces; 2982ce82 had added the pack on 2026-10-07 for the neck seam of playtest nine, so
+vanilla faces over CBBE's body textures may show that seam again (to be looked at on the first
+stage; a seam-matched face texture with more detail is the next step if it does). A simulation of
+the row against the host's manifest of 2026-11-06: the same 2,285 files byte-for-byte, the 27 gone,
+the seven added; the clones' lay record lists the gone files, so add-mods prunes them by hash. The
+row is the layer's first, as the block laid CBBE before every row, and no hardcoded folder shares a
+path with it, so nothing else moves; its two plugins keep their slots, byte-identical to the
+archive's, and the canonical characters' looks keep loading.
 
 **Vanilla hair remake 1.0.2 (Eli, 2026-11-06, the hair link; "it's fine to just use them as
 replacers").** The row `vanilla-hair-remake-1.0.2` lays jg1's no-physics main file (Nexus 63979 file
