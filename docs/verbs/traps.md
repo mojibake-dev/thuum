@@ -1068,3 +1068,22 @@ new branch m4-scripts-2c-traps pointing at 0f2f3c55 (no new commit, no force pus
 Declared for playtest 47: on the seat that did not trip a wire, the wire trap's platform break and dust do not play (S11, its fix
 on m4-scripts-2b-traps, not merged); a rock may hang, the same on both seats; a plate may fire once as a player re-enters its
 cell (S10); b-push's y flake.
+
+The rock reads of the 746aff6c slot (16:03 PST 2026-11-05 (00:03Z 11-06) reading; a read-only agent over the two runs' logs and
+c2's trace). x-trap-rock-hang v1.1 20261105-231108 is not an answer: lab/frida/rock-motion-trace.js v1.1's 50 ms body poll on
+Frida's JS thread froze c2 (its Sleep calls fell from about 60,000 to under 1,100 per 10 s, and falling rocks gained one frame's
+0.95 of vz per 8 s window), so c1 won epoch 1 and the copy that hung was c1's, untraced; the trace needs a v1.2 that samples once
+per frame with no Sleep callback. What it still read: H-RH1 refuted on both seats (c2's fireTrap functors carry type 1 and its
+impulse functors 0, 0, -1, 15; no seam line), H-RH2 refuted where readable (the impulses landed on type 3, Dynamic), H-RH3
+favoured, not observed (b6d4d's first Dynamic frames rose and slid south-west while b6d45 fell; 'break' is a graph event, b6d47 at
+23:12:50.030, 246 ms before the first Dynamic set). x-trap-boulders-rest v1.1 231500's divergence, its mechanism corrected:
+c1's own rock script ran neutralized (no fireTrap native, no claim); c1's rest wake, "prop b6d4d at rest: Dynamic (the stream
+ended)" (propService.ts:820-826), put c1's copy, standing at c2's hung rest spot, back to Dynamic after c1's own platform had
+broken, so it fell, which is the physics a broken platform asks for; c2's asleep sample started the 3 s lease (props.rs:339), the
+cell's host became the simulator by default (:170-203) and c1's first sample took the row (:331) with no PropOwner word; c2 never
+followed because its lease mirror reopened its stale epoch-1 word on c1's first awake sample (propService.ts:262) and then dropped
+the samples (:276-283). HYPOTHESIS, H-RH3's form: the owner's rock stays up after its platform breaks because Havok left it
+asleep. The fix after playtest 47 is the mirror's (propService.ts:259-263: a sample reaching the seat its word names means that
+word lapsed, so the sample is the new owner's and stays pending; a general prop fix, items included), or a PropOwner word at the
+takeover (a wire change, rule 4), not the follow window first named. Also read: propService.ts:763's asleep test reads the wall
+clock, so a seat hitching for seconds reports its bodies asleep (every "asleep" line in 231108 was such a read).
