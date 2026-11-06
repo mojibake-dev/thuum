@@ -214,9 +214,10 @@ game start, three times in one window, none in the 15 runs since, and a rerun cl
 it. "ok bless." So the shapes below stay written up with no push; the signature note in
 lab-api is the only work owed, and it is numidium's.
 
-Eli, 2026-11-06 (via numidium): "also yes lets go with B", the thuum engine-fixes DLL below, built to
-this page. Both seats count now: playtest 47's c2 crashed with the same signature at 06:28:16Z, its
-first. The code lives in lab/engine-fixes on this branch (apocrypha/engine-fixes), and this page is
+Eli, 2026-11-06 (via numidium): "also yes lets go with B", the engine-fixes DLL below, built to this
+page; then, asked directly what the fixes are, named it: "let's create a patch called rotferns fixes that
+will contain anything we need like that" (ADR-069). Both seats count now: playtest 47's c2 crashed with the same signature at 06:28:16Z, its
+first. The code lives in lab/rotferns-fixes on this branch (apocrypha/engine-fixes), and this page is
 its spec; rule 2 holds, the site is a decompiler read until the run set proves it.
 
 Shape of a layer fix, as Eli chose it. No shipped mod covers this site: LOD
@@ -229,7 +230,7 @@ Fixes do not touch 18789. Two shapes, in order of laziness:
   disassembly above (the function by Address Library id, the two unchecked
   paths, the three logs). If taken, the layer gets the fix by updating a mod it
   already carries, and so does everyone else. Slow and not in our hands.
-- **B, a thuum engine-fixes DLL (chosen).** One CommonLibSSE-NG SKSE plugin (the
+- **B, Rotfern's Fixes, a thuum engine-fixes DLL (chosen).** One CommonLibSSE-NG SKSE plugin (the
   submodule is already in the repo; sky-build 720 is the Windows build box) that
   pins the runtime to 1.6.1170 (ADR-022) and installs one detour: at
   REL::ID(18789) + 0x14A, the `cmp word ptr [rax+0x122], 0; ja` pair (10 bytes,

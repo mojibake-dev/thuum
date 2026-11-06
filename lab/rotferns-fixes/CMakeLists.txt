@@ -1,5 +1,6 @@
-# thuum engine fixes: one SKSE plugin for the engine bugs the lab reads and Eli
-# decides to fix for every player (docs/research/terrain-upgrade-crash.md is the
+# Rotfern's Fixes: one SKSE plugin for the engine bugs the lab reads and Eli
+# decides to fix for every player (Eli, 2026-11-06: "let's create a patch called
+# rotferns fixes that will contain anything we need like that") (docs/research/terrain-upgrade-crash.md is the
 # first and, so far, the only one). Built over the repo's CommonLibSSE-NG
 # submodule for the 1.6.1170 runtime alone; each fix checks the runtime and the
 # bytes at its site before writing and logs installed / wrong runtime / bytes
@@ -11,7 +12,7 @@
 #     -DCMAKE_TOOLCHAIN_FILE=<vcpkg>/scripts/buildsystems/vcpkg.cmake \
 #     -DVCPKG_TARGET_TRIPLET=x64-windows-static-md
 #   cmake --build build --config Release
-#   cmake --install build --config Release --prefix dist   # dist/SKSE/Plugins/ThuumEngineFixes.dll (+ .pdb)
+#   cmake --install build --config Release --prefix dist   # dist/SKSE/Plugins/RotfernsFixes.dll (+ .pdb)
 cmake_minimum_required(VERSION 3.24)
 
 if(NOT DEFINED VCPKG_TARGET_TRIPLET)
@@ -19,7 +20,7 @@ if(NOT DEFINED VCPKG_TARGET_TRIPLET)
     set(VCPKG_TARGET_TRIPLET "x64-windows-static-md" CACHE STRING "" FORCE)
 endif()
 
-project(ThuumEngineFixes VERSION 0.1.0 LANGUAGES CXX)
+project(RotfernsFixes VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -41,7 +42,7 @@ find_package(xbyak CONFIG REQUIRED)
 # the generated plugin block (SKSEPlugin_Version, SKSEPlugin_Query) comes from this call: name, version,
 # author, Address Library compatibility and the SKSE floor; src/main.cpp defines SKSEPlugin_Load alone
 add_commonlibsse_plugin(${PROJECT_NAME}
-    NAME "thuum-engine-fixes"
+    NAME "Rotfern's Fixes"
     AUTHOR "thuum"
     VERSION ${PROJECT_VERSION}
     MINIMUM_SKSE_VERSION 2.2.6
@@ -50,7 +51,7 @@ add_commonlibsse_plugin(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} PRIVATE xbyak::xbyak)
 target_precompile_headers(${PROJECT_NAME} PRIVATE <RE/Skyrim.h> <SKSE/SKSE.h>)
 target_compile_options(${PROJECT_NAME} PRIVATE /W4 /permissive- /Zc:preprocessor /utf-8)
-set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "ThuumEngineFixes")
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "RotfernsFixes")
 
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION "SKSE/Plugins")
 install(FILES "$<TARGET_PDB_FILE:${PROJECT_NAME}>" DESTINATION "SKSE/Plugins" OPTIONAL)

@@ -1,9 +1,10 @@
-# thuum engine fixes
+# Rotfern's Fixes
 
-One SKSE plugin (ThuumEngineFixes.dll) for the engine bugs the lab reads and Eli decides to fix for
+One SKSE plugin (RotfernsFixes.dll) for the engine bugs the lab reads and Eli decides to fix for
 every player, ESP-less, keyed by Address Library id, each fix with a research page as its spec.
-Eli's call of 2026-11-06 ("also yes lets go with B") on the terrain-overlay race put the first one
-here; a lab-only patch of the seats was refused on principle (the seats run the players' game), so
+Eli's call of 2026-11-06 ("also yes lets go with B", then "sure if we're patching novel breaks let's do it.
+let's create a patch called rotferns fixes that will contain anything we need like that") on the
+terrain-overlay race put the first one here and named the plugin; a lab-only patch of the seats was refused on principle (the seats run the players' game), so
 the fix is a layer row every client loads.
 
 Fixes:
@@ -14,7 +15,7 @@ Fixes:
 
 Each fix checks the runtime (1.6.1170 only, ADR-022) and the bytes at its site before writing, and
 logs exactly one of `installed`, `wrong runtime`, `bytes mismatch` to
-Documents\My Games\Skyrim Special Edition\SKSE\thuum-engine-fixes.log. Those words are a contract:
+Documents\My Games\Skyrim Special Edition\SKSE\rotferns-fixes.log. Those words are a contract:
 a scenario may count them. Rule 2 (docs/LAB.md): a site is a decompiler read until the run set
 proves it; the proof for the first fix is a run set with no SkyrimSE.exe+02AD242 fault across the
 containers gate on both seats.
@@ -31,7 +32,7 @@ client build is in flight (numidium's word, 2026-11-06).
 # (the fork's submodule or C:\vcpkg), bootstrapped once with .\bootstrap-vcpkg.bat -disableMetrics
 $env:VCPKG_BINARY_SOURCES = "clear;files,D:/vcpkg-bincache,readwrite"
 $env:VCPKG_FEATURE_FLAGS = "manifests"
-cd lab\engine-fixes
+cd lab\rotferns-fixes
 cmake -B build -G "Visual Studio 17 2022" -A x64 `
   -DCMAKE_TOOLCHAIN_FILE=<vcpkg>\scripts\buildsystems\vcpkg.cmake `
   -DVCPKG_TARGET_TRIPLET=x64-windows-static-md
@@ -39,8 +40,8 @@ cmake --build build --config Release
 cmake --install build --config Release --prefix dist
 ```
 
-`dist\SKSE\Plugins\ThuumEngineFixes.dll` and its `.pdb` (Crash Logger reads pdbs) are the row:
-a `local` folder `thuum-engine-fixes-<version>@1.6.1170` under lab/.cache/mods with that `dist`
+`dist\SKSE\Plugins\RotfernsFixes.dll` and its `.pdb` (Crash Logger reads pdbs) are the row:
+a `local` folder `rotferns-fixes-<version>@1.6.1170` under lab/.cache/mods with that `dist`
 content as plain Data layout, hashed into lab/layer/essentials.tsv like every local row; the files
 stay out of the repo, as every built artifact does. numidium lays it with layer-stage.
 

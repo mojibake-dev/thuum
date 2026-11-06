@@ -128,14 +128,14 @@ driver-build:
 # with any other path: on a merge request
 # the commits since its base, on a push to main the commits the push brought (the
 # repo commits straight to main, so until 2026-10-13 this gate never ran).
-# The engine-fixes DLL (lab/engine-fixes, docs/research/terrain-upgrade-crash.md): built on sky-build
+# Rotfern's Fixes, the engine-fixes DLL (lab/rotferns-fixes, docs/research/terrain-upgrade-crash.md, ADR-069): built on sky-build
 # (VM 720, tag `windows`, the fork's shell runner with pwsh) the way the fork's client-build job builds
 # the client, so a change to the DLL triggers its own build and the layer row takes this job's artifact
 # (numidium, 2026-11-06: never a DLL in the row that no pipeline can rebuild). Off until core enables
-# sky-build's runner for this project: set the project variable ENGINE_FIXES_BUILD_WINDOWS to 1. vcpkg
+# sky-build's runner for this project: set the project variable ROTFERNS_FIXES_BUILD_WINDOWS to 1. vcpkg
 # is the fork's pinned commit, cloned once to the VM's D: and kept there; its binary cache is the
 # fork's (D:/vcpkg-bincache). Only the CommonLibSSE-NG submodule is checked out.
-engine-fixes-build:
+rotferns-fixes-build:
   stage: lint
   tags: [windows]
   variables:
@@ -146,9 +146,9 @@ engine-fixes-build:
     VCPKG_BINARY_SOURCES: "clear;files,D:/vcpkg-bincache,readwrite"
     VCPKG_FEATURE_FLAGS: "manifests"
   rules:
-    - if: $ENGINE_FIXES_BUILD_WINDOWS != "1"
+    - if: $ROTFERNS_FIXES_BUILD_WINDOWS != "1"
       when: never
-    - changes: [lab/engine-fixes/**/*, CommonLibSSE-NG, .gitlab-ci.yml]
+    - changes: [lab/rotferns-fixes/**/*, CommonLibSSE-NG, .gitlab-ci.yml]
   script:
     - New-Item -ItemType Directory -Force D:/vcpkg-bincache | Out-Null
     - |
@@ -157,15 +157,15 @@ engine-fixes-build:
       git -C D:/vcpkg-src checkout --quiet $env:VCPKG_COMMIT; if ($LASTEXITCODE) { exit 1 }
       if (-not (Test-Path D:/vcpkg-src/vcpkg.exe)) { & D:/vcpkg-src/bootstrap-vcpkg.bat -disableMetrics; if ($LASTEXITCODE) { exit 1 } }
     - |
-      cmake -S lab/engine-fixes -B lab/engine-fixes/build -G "Visual Studio 17 2022" -A x64 `
+      cmake -S lab/rotferns-fixes -B lab/rotferns-fixes/build -G "Visual Studio 17 2022" -A x64 `
         -DCMAKE_TOOLCHAIN_FILE=D:/vcpkg-src/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows-static-md
       if ($LASTEXITCODE) { exit 1 }
-    - cmake --build lab/engine-fixes/build --config Release; if ($LASTEXITCODE) { exit 1 }
-    - cmake --install lab/engine-fixes/build --config Release --prefix lab/engine-fixes/dist; if ($LASTEXITCODE) { exit 1 }
-    - Get-ChildItem -Recurse lab/engine-fixes/dist | ForEach-Object { "{0}`t{1}" -f $_.Length, $_.FullName }
+    - cmake --build lab/rotferns-fixes/build --config Release; if ($LASTEXITCODE) { exit 1 }
+    - cmake --install lab/rotferns-fixes/build --config Release --prefix lab/rotferns-fixes/dist; if ($LASTEXITCODE) { exit 1 }
+    - Get-ChildItem -Recurse lab/rotferns-fixes/dist | ForEach-Object { "{0}`t{1}" -f $_.Length, $_.FullName }
   artifacts:
-    name: engine-fixes
-    paths: [lab/engine-fixes/dist]
+    name: rotferns-fixes
+    paths: [lab/rotferns-fixes/dist]
     expire_in: 3 months
 
 scenario-gate:

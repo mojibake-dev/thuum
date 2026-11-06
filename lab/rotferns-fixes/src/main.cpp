@@ -1,4 +1,4 @@
-// thuum engine fixes: the terrain-overlay null check (docs/research/terrain-upgrade-crash.md).
+// Rotfern's Fixes: the terrain-overlay null check (docs/research/terrain-upgrade-crash.md).
 //
 // The engine's terrain update job, when a queued terrain task completes, sweeps every loaded cell's
 // land (Address Library 13414 -> 18789 on 1.6.1170) and writes the LOD block's diffuse and the noise
@@ -73,7 +73,7 @@ namespace
 		if (!path) {
 			return;
 		}
-		*path /= "thuum-engine-fixes.log"sv;
+		*path /= "rotferns-fixes.log"sv;
 		auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true);
 		auto log = std::make_shared<spdlog::logger>("global", std::move(sink));
 		log->set_level(spdlog::level::info);
@@ -115,7 +115,7 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
 {
 	SKSE::Init(a_skse);
 	InitLog();
-	SKSE::log::info("thuum-engine-fixes {} loading", REL::Version{ 0, 1, 0, 0 }.string());
+	SKSE::log::info("Rotfern's Fixes {} loading", REL::Version{ 0, 1, 0, 0 }.string());
 	SKSE::AllocTrampoline(64);
 	InstallTerrainOverlayNullCheck();
 	return true;

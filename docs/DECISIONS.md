@@ -4755,11 +4755,13 @@ lever scripts sit in the family. Placed after rung 2's stage as its own slice, b
 two-seat dodging probe (each seat hurt only by what it sees, neither by the other's view), a single-use lamp probe (a guest's
 shot breaks it on both seats once, and after a restart), and the boulders' stream probe from a guest's tripwire.
 
-## ADR-069: Engine fixes ship to every player as one SKSE DLL, one detour per lab-read site, never as a lab-only patch
+## ADR-069: Rotfern's Fixes: engine fixes ship to every player as one SKSE DLL, one detour per lab-read site, never as a lab-only patch
 
-Status: PROPOSED 2026-11-06 by apocrypha, on Eli's call of the same day for the first fix ("also yes lets go with B", numidium's
-relay of the two shapes on docs/research/terrain-upgrade-crash.md); the general rule below waits on Eli's word, as every ADR does.
-Numbered here provisionally; thuum-cf places it.
+Status: ACCEPTED 2026-11-06 by Eli, to apocrypha directly, after asking what the fixes are ("wait so what ARE the engine fixes???
+are WE patching things broken in skyrim proper?") and hearing that they are: "well fuck. sure if we're patching novel breaks let's
+do it. let's create a patch called rotferns fixes that will contain anything we need like that." The first fix rests on his earlier
+"also yes lets go with B" (numidium's relay of the two shapes on docs/research/terrain-upgrade-crash.md). PROPOSED the same day by
+apocrypha at numidium's suggestion; thuum-cf confirmed the number free on main.
 
 Context. The lab reads engine crashes down to the instruction (the terrain-overlay sweep, docs/research/terrain-upgrade-crash.md:
 a job thread dereferences a land quad's first child without a null check while the quad's geometry is not attached yet, a load-time
@@ -4769,20 +4771,20 @@ players' game, and a patched engine on the seats would stop measuring it. Upstre
 (Scrambled Bugs, po3's Tweaks) stays the lazier road when it is open, but it is slow and not in our hands.
 
 Decision.
-1. Engine fixes the lab finds and Eli takes ship as one SKSE plugin in the layer, thuum engine fixes (lab/engine-fixes,
-   ThuumEngineFixes.dll), ESP-less, loaded by every client; never as a patch of the lab seats alone.
+1. Engine fixes the lab finds and Eli takes ship as one SKSE plugin in the layer, Rotfern's Fixes (lab/rotferns-fixes,
+   RotfernsFixes.dll, Eli's name), ESP-less, loaded by every client; never as a patch of the lab seats alone.
 2. One fix is one detour at one site, keyed by Address Library id plus an offset into that function, with a research page as its
    spec (the bytes at the site read from the unpacked image, the inbound branches into the patched span, the register the exit
    uses, the resume and skip points). Rule 2 holds: a site is a decompiler read until the run set proves it.
 3. A fix is pinned to the runtime the players run (ADR-022, 1.6.1170; ADR-025 retired 1.7.104) and checks the bytes at its site
    before writing; it logs exactly one of three lines, installed, wrong runtime, bytes mismatch, and a mismatch leaves the game
    untouched. The three words are a contract a scenario may count.
-4. The DLL is built by its own pipeline job (engine-fixes-build, sky-build's windows runner, the fork's client-build toolchain and
-   vcpkg pin), which runs only when lab/engine-fixes changes; the layer row takes that job's artifact, so the row never carries a
+4. The DLL is built by its own pipeline job (rotferns-fixes-build, sky-build's windows runner, the fork's client-build toolchain and
+   vcpkg pin), which runs only when lab/rotferns-fixes changes; the layer row takes that job's artifact, so the row never carries a
    DLL no pipeline can rebuild. A hand build on sky-build proves a detour; it is not the row's source.
 5. The test of a fix is the lab's: a run set with no fault of the fixed signature across the gate on both seats.
 
 Consequences. Every player's engine differs from vanilla by exactly the detours the DLL lists, each with a page that says why and
-where; the lab seats and Fenestrate run the same bytes. A new fix is a commit to lab/engine-fixes (the detour, its page, its log
+where; the lab seats and Fenestrate run the same bytes. A new fix is a commit to lab/rotferns-fixes (the detour, its page, its log
 line) and a pipeline run, not a new mod or a new build pipeline. A runtime update turns every fix off at once (wrong runtime in the
 log) until each site is re-read; nothing is patched blind. The first fix is the terrain-overlay null check at id 18789 + 0x14A.
