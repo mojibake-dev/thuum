@@ -2238,8 +2238,12 @@ and about 120 below the eye (about 13 counts a degree on this seat; the rune pro
   ADR-062 runs it); on the guest the puppet died by the server's word inside the furniture's idle, no fall, the deaths2 flag keep
   ticking a graph that never left the idle. Fix on the bundle head m4-turbo2-chest 84ef8669 (TS): a killed puppet that has not
   dropped 16 units within 300 ms gets the engine's zero-force push (finding 71's cure), "body <id>: no fall N units after the
-  kill, pushed to ragdoll". HYPOTHESIS until x-npc-death-ambush (by path: c1 hosts the Temple and kill-refs the spider in its
-  perch, c2's npc-state z under the perch within 4 s).
+  kill, pushed to ragdoll". NOT in canon (read 2026-11-06: 84ef8669 is on m4-turbo2-chest and m4-prop-arbitration alone; canon
+  took that branch's late-fate fix d16f27c7, not this push), so the frozen guest-side body stands on canon; HYPOTHESIS, its probe
+  x-npc-death-ambush unrun and held for m4-turbo2-chest's own stage (c1 hosts the Temple and kill-refs the spider in its perch,
+  c2's npc-state z under the perch within 4 s; its fresh review of 2026-11-06, NO-GO on canon, owes a z claim against c2's own
+  pre-kill snapshot and a premise read of the hang itself, since -1796 is also the floor's height and 47 found the spider on the
+  ground).
 - The naked headless bandit (Eli: "rotfern just killed a naked headless bandit in bleakfalls"): c1's console at the Temple's load
   (00:34:41Z) queued "late fate ... engine re-roll or redress" for 39fe4, 39fe2 and 39fe1, and c1's equipment report then read
   "1 worn" for 39fe1 against the roll's five. The redress's own lines (FateApi.cpp: "rerollActor(<id>): ...", "redressed <id>
