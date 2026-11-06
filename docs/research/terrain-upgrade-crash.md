@@ -214,7 +214,12 @@ game start, three times in one window, none in the 15 runs since, and a rerun cl
 it. "ok bless." So the shapes below stay written up with no push; the signature note in
 lab-api is the only work owed, and it is numidium's.
 
-Shape of a layer fix, if Eli ever wants one. No shipped mod covers this site: LOD
+Eli, 2026-11-06 (via numidium): "also yes lets go with B", the thuum engine-fixes DLL below, built to
+this page. Both seats count now: playtest 47's c2 crashed with the same signature at 06:28:16Z, its
+first. The code lives in lab/engine-fixes on this branch (apocrypha/engine-fixes), and this page is
+its spec; rule 2 holds, the site is a decompiler read until the run set proves it.
+
+Shape of a layer fix, as Eli chose it. No shipped mod covers this site: LOD
 Refresh Bug Fix (Nexus 187070) resets the LOD quadtree after teleports and
 worldspace changes, and Bug Fixes SSE, Scrambled Bugs, po3's Tweaks and Engine
 Fixes do not touch 18789. Two shapes, in order of laziness:
@@ -224,21 +229,26 @@ Fixes do not touch 18789. Two shapes, in order of laziness:
   disassembly above (the function by Address Library id, the two unchecked
   paths, the three logs). If taken, the layer gets the fix by updating a mod it
   already carries, and so does everyone else. Slow and not in our hands.
-- **B, a thuum engine-fixes DLL.** One CommonLibSSE-NG SKSE plugin (the
+- **B, a thuum engine-fixes DLL (chosen).** One CommonLibSSE-NG SKSE plugin (the
   submodule is already in the repo; sky-build 720 is the Windows build box) that
   pins the runtime to 1.6.1170 (ADR-022) and installs one detour: at
-  REL::ID(18789) + 0x14A, the `cmp word ptr [rax+0x122], 0; ja` pair (10 bytes),
-  jump to a trampoline that reads children.size and children[0] itself and
-  routes both the empty-array case and a null children[0] to the next-quad path
-  at + 0x340 (`inc esi`), else continues at + 0x162 as before. About forty
-  lines with CommonLib's trampoline and Xbyak. The hook sits before the
-  compare, so the original `jmp + 0x162` from the empty-array branch is never
-  reached with a patched target under it. One DLL in the layer, ESP-less, keyed
-  by id with this page as its spec; later lab-found engine fixes go in the same
-  DLL the same way. The fork's MpClientPlugin could host the detour instead
-  (every client loads it already), but that couples an engine fix to the skymp
-  client's build and upstream merges; the separate DLL is the cleaner "we do
-  it this way".
+  REL::ID(18789) + 0x14A, the `cmp word ptr [rax+0x122], 0; ja` pair (10 bytes,
+  `66 83 B8 22 01 00 00 00 77 04` in the unpacked image), jump to a trampoline
+  that reads children.size and children[0] itself and routes both the
+  empty-array case and a null children[0] to the next-quad path at + 0x340
+  (`inc esi`, `FF C6 49 83 C6 08 83 FE 04`), else continues at + 0x162
+  (`48 8B 01 FF 50 38`) with rax = children.data and rcx = the child, exactly as
+  the original fall-through left them. Safety read (2026-11-06): no branch in the
+  function targets + 0x14A..+ 0x162 (the `xor ecx,ecx; jmp +0x162` at + 0x154
+  becomes dead), and r11 is unused by the function, so the trampoline leaves
+  through `mov r11, imm64; jmp r11` and needs no reach arithmetic. Before writing,
+  the DLL checks the runtime version and the ten bytes, and logs one of three
+  lines: installed, wrong runtime, bytes mismatch; a later runtime refuses
+  cleanly. One DLL in the layer, ESP-less, keyed by id with this page as its
+  spec; later lab-found engine fixes go in the same DLL the same way. The fork's
+  MpClientPlugin could host the detour instead (every client loads it already),
+  but that couples an engine fix to the skymp client's build and upstream
+  merges; the separate DLL is the cleaner "we do it this way".
 
 Either way the layer test is the signature: a run set on c1 with no
 +02AD242 fault across the containers gate.
