@@ -14,7 +14,9 @@ settings with it over them as /srv/lab/server/server-settings-run.json (the file
 restore recreates the server on that file; both setup and ready read the container's mount back. A lab run after the
 playtest mounts its own settings again. `server: {gameHour: 7.9}` sets the clock the same way, as the runner's time
 block does for a run (the epoch is setup's own time, the hour holds at it). `camp: {teleports: [...]}` names the camp's
-teleports as labCommand takes them, in order, where `playtest-start` reads playtest-start.sh's two.
+teleports as labCommand takes them, in order, where `playtest-start` reads playtest-start.sh's two. From profile 48 a
+camp is outside unless `camp: {interior: <reason>}` says why not, and every living actor placed near it is listed in
+`camp: {near: [<form id>, ...]}` (CAMP_RULES_FROM, playtest 47's two load-in faults).
 
 What pt23-setup.sh and pt23-after-streams.sh did for playtest twenty-three (2026-10-18), from a profile instead of
 a script per playtest. Every set is read back: an upward set-percentages can revert within 2 s (docs/LAB.md), and a
@@ -24,6 +26,7 @@ from __future__ import annotations
 
 import base64
 import json
+import math
 import os
 import re
 import subprocess
@@ -62,6 +65,18 @@ HEADSHOT_PROFILE = 1  # rotfern, test 1: CIF's rule wants base Archery 60 and Ov
 HEADSHOT_PERK = 0x7934B  # Overdraw40
 HEADSHOT_ARCHERY = 60  # the actor value Marksman
 SOULS_DLL = r"Data\SKSE\Plugins\SkyrimSoulsRE.dll"  # the archive's SKSE/Plugins/SkyrimSoulsRE.dll (lab/layer/essentials.tsv)
+# The camp's two rules, from profile 48 (playtest 47, 2026-11-05). Outside: both seats logged in inside Bleak Falls Temple
+# 0x371de and neither game ran the cell's OnCellLoad, so the pillars sat empty and the darts unarmed; after the restart
+# outside the entrance, both walked in by a real cell load and every scripted item worked. A camp inside a cell needs
+# camp.interior, its reason, until thuum-cf's login-inside-a-cell read (x-login-in-cell) is fixed. Declared neighbours:
+# the first camp put Prisoner in two entrance bandits' reach, dead 7.5 s after the ready relaunch, and the restart camp
+# had LvlBanditMissile 0x29600 1,364 units off. Every actor Skyrim.esm places within CAMP_NEAR of a camp spot (the x-y
+# plane, lab/esm.py's own `near` measure) that the restored world does not record dead is named, and setup stops before
+# the camp unless camp.near lists it.
+CAMP_RULES_FROM = 48
+CAMP_NEAR = 2500
+EXTERIOR = 0x3C  # Tamriel, the worldspace an exterior camp names (it has no one host; any other cell is a camp inside)
+ESM = "/srv/persist/esm/1.6.1170/Skyrim.esm"  # the players' master (ADR-025); /srv/persist/esm/Skyrim.esm is another build's
 
 
 class ProfileError(ValueError):
@@ -109,12 +124,27 @@ def check_profile(p: Any, n: int) -> dict[str, Any]:
     hour = server.get("gameHour", 0)
     if isinstance(hour, bool) or not isinstance(hour, (int, float)) or not 0 <= hour < 24:
         raise ProfileError(f"server.gameHour is an hour from 0 up to 24, got {server['gameHour']!r}")
-    camp = (p.get("camp") or {}).get("teleports")
+    camp_block = p.get("camp") or {}
+    if not isinstance(camp_block, dict) or set(camp_block) - {"teleports", "interior", "near"}:
+        raise ProfileError(f"camp takes teleports, interior and near, got {camp_block!r}")
+    camp = camp_block.get("teleports")
     if isinstance(camp, list) and camp:
         for t in camp:
             _check_teleport(t)
     elif camp not in (None, "playtest-start"):
         raise ProfileError(f"camp.teleports is playtest-start, a list of teleports, or absent, got {camp!r}")
+    interior = camp_block.get("interior")
+    if interior is not None and (not isinstance(interior, str) or not interior.strip()):
+        raise ProfileError("camp.interior is the reason a camp sits inside a cell, as text")
+    near = camp_block.get("near") or []
+    if not isinstance(near, list) or any(_int(r, "a camp.near form id") <= 0 for r in near):
+        raise ProfileError(f"camp.near is a list of form ids, got {near!r}")
+    if n >= CAMP_RULES_FROM and not interior:
+        inside = sorted({t["cell"] for t in _camp_list(camp) if _camp_cell(t) != EXTERIOR})
+        if inside:
+            raise ProfileError(f"a camp inside a cell ({', '.join(inside)}) logs its seat in with no OnCellLoad, so the cell's "
+                               "scripts sit dead (playtest 47's first session: the pillars and darts); camp outside and walk in, "
+                               "or give camp.interior its reason")
     seats = p.get("seats")
     if not isinstance(seats, list) or not seats:
         raise ProfileError("seats is a list")
@@ -471,6 +501,11 @@ def setup(n: int) -> int:
     _http("POST", "/hold", {"minutes": int(hold.get("minutes", 180)), "reason": hold.get("reason") or f"playtest {n}"})
     rep.ok(f"hold {hold.get('minutes', 180)} min: {hold.get('reason') or f'playtest {n}'}")
     camp = (p.get("camp") or {}).get("teleports")
+    if camp and n >= CAMP_RULES_FROM:
+        print(f"== the camp's neighbours {time.strftime('%H:%M:%S')}", flush=True)
+        if not _neighbours(rep, p):
+            print("== the camp has living neighbours camp.near does not list: no camp (list them, or move the camp)", flush=True)
+            return 3
     if camp:
         print(f"== the camp {time.strftime('%H:%M:%S')}", flush=True)
         for t in camp_teleports() if camp == "playtest-start" else camp:
@@ -665,16 +700,91 @@ def last_grant(server_log: str, cell: int) -> str:
     return how
 
 
+def _camp_list(camp: Any) -> list[dict[str, Any]]:
+    """A profile's camp.teleports as the teleports themselves: playtest-start.sh's two, the listed ones, or none."""
+    if camp == "playtest-start":
+        return camp_teleports()
+    return list(camp) if isinstance(camp, list) else []
+
+
+def _camp_cell(t: dict[str, Any]) -> int | None:
+    """A camp teleport's cell ("<hex>:<plugin>") as a form id, or None when it names none."""
+    c = str(t.get("cell") or "")
+    return int(c.split(":", 1)[0], 16) if ":" in c else None
+
+
 def _camp_cells(p: dict[str, Any]) -> list[int]:
     """The interior cells the profile's camp puts a seat in (an exterior camp names a worldspace, which has no one host)."""
     cells = []
-    for t in (p.get("camp") or {}).get("teleports") or []:
-        c = str(t.get("cell") or "")
-        if ":" in c:
-            n = int(c.split(":", 1)[0], 16)
-            if n not in cells and n != 0x3C:
-                cells.append(n)
+    for t in _camp_list((p.get("camp") or {}).get("teleports")):
+        n = _camp_cell(t)
+        if n is not None and n != EXTERIOR and n not in cells:
+            cells.append(n)
     return cells
+
+
+_PLACED = re.compile(r"^0x([0-9a-fA-F]+) NPC_ 0x[0-9a-fA-F]+ (\S+) at \(([-\d.]+), ([-\d.]+), [-\d.]+\)")
+
+
+def placed_actors(listing: str) -> list[tuple[int, str, float, float]]:
+    """lab/esm.py's `near` or `cellrefs` lines for NPC_ bases ("0x00029600 NPC_ 0x0001e79e LvlBanditMissile at (-2308,
+    -44526, 6145), 1364 away"): (the reference, its base's editor id, x, y)."""
+    out = []
+    for line in listing.splitlines():
+        m = _PLACED.match(line.strip())
+        if m:
+            out.append((int(m.group(1), 16), m.group(2), float(m.group(3)), float(m.group(4))))
+    return out
+
+
+def camp_neighbours(actors: list[tuple[int, str, float, float]], spot: tuple[float, float],
+                    records: dict[int, dict[str, Any] | None], declared: set[int],
+                    radius: float = CAMP_NEAR) -> tuple[list[str], list[str]]:
+    """One camp spot's placed actors within radius, as (undeclared, the rest): an actor is undeclared when the restored
+    world does not record it dead and camp.near does not list it. records maps a reference to its labState ref answer;
+    None means the server holds no record of it, so it stands where Skyrim.esm placed it, alive."""
+    undeclared, rest = [], []
+    for ref, edid, x, y in actors:
+        d = math.hypot(x - spot[0], y - spot[1])
+        if d > radius:
+            continue
+        rec = records.get(ref)
+        dead = bool(rec and rec.get("isDead"))
+        line = (f"{ref:#x} {edid}, {d:.0f} units off, " + ("dead" if dead else "alive" if rec else "no record (alive where placed)")
+                + (" (camp.near)" if ref in declared and not dead else ""))
+        (rest if dead or ref in declared else undeclared).append(line)
+    return undeclared, rest
+
+
+def _neighbours(rep: Report, p: dict[str, Any]) -> bool:
+    """Each camp spot's placed actors (CAMP_NEAR), read from Skyrim.esm on sky-srv and checked against the restored
+    world's records: False when one is alive there and camp.near does not list it."""
+    camp_block = p.get("camp") or {}
+    declared = {int(r) for r in camp_block.get("near") or []}
+    src = (ROOT / "lab" / "esm.py").read_text()
+    ok = True
+    for t in _camp_list(camp_block.get("teleports")):
+        cell, _, plugin = str(t.get("cell") or "").partition(":")
+        who = f"profile {t['profileId']}'s spot"
+        if plugin.lower() != "skyrim.esm":
+            rep.note(f"{who} is in {t.get('cell')!r}, not a Skyrim.esm cell: its neighbours are not read")
+            continue
+        n = int(cell, 16)
+        x, y = float(t["pos"][0]), float(t["pos"][1])
+        how = f"near {ESM} {n:#x} {x:.0f} {y:.0f} {CAMP_NEAR} NPC_" if n == EXTERIOR else f"cellrefs {ESM} {n:#x} NPC_"
+        actors = placed_actors(_srv(f"python3 - {how}", stdin=src, timeout=240))
+        records: dict[int, dict[str, Any] | None] = {}
+        for ref, _, ax, ay in actors:
+            if math.hypot(ax - x, ay - y) <= CAMP_NEAR:
+                ans = state({"kind": "ref", "actorId": ref})
+                records[ref] = ans if ans.get("found") else None
+        undeclared, rest = camp_neighbours(actors, (x, y), records, declared)
+        for line in rest:
+            rep.note(f"near {who}: {line}")
+        for line in undeclared:
+            rep.fail(f"near {who}, not in camp.near: {line}")
+        ok = ok and not undeclared
+    return ok
 
 
 def _streams(rep: Report, p: dict[str, Any]) -> None:
