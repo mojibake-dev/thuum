@@ -3304,3 +3304,20 @@ had it dead), so lab-driver's npc-hold refuses a dead NPC from this change on (d
 (lab/.cache/probes, 3cec676d) holds the four at the landing, moves 380b3 into the wall's swing and 380b5 onto the middle blade by
 the server's own teleports (SetPos, MoveTo, delivered to the host), never holds after a move, no claim changed; its fresh review
 GO with notes, applied as written.
+
+v1.2's read (11:45 PST 2026-11-06 (19:45Z 11-06), thuum-cf): x-trap-npc-kill v1.2 (3cec676d) on canon 5186df39, 20261106-193605,
+red on one claim of twenty. Leg A green with every premise held: the four holds kept the ambush NPCs off the plate (c1's fired
+count 0 at the landing and 0 before the passes), 380b3 stood in the wall's swing by the server's teleports, and the server took
+its kill on the trap's evidence (the 54b15 or 567f2 line once), no E_DEATH_UNCHECKED, no death by the server's word, dead on the
+record and on c2. Leg B's claim counted 0 for a staging reason: 380b5, held since the landing at (8642, -4474), went to the middle
+blade by the server's MoveTo and died there, but the server accepted its death on the fall path first, "a drop of 254 units in the
+host's samples" (19:39:30.5Z), the teleport's own height change from the corridor (z -2052) to the blades' floor (z -2306) read as
+a drop. The window it was there to read was read anyway by the NPC the claims never name: draugr 380b8 died to blade 3ac37 on a
+note 10228 ms old, accepted ("death report: 380b8 died of unknown at (6485, -7135, -2305), host ff000000, killer 0: a trap's
+evidence beside the body (3ac37, 10228 ms before); the server records the death", 19:39:33.2Z), the second such line in two runs
+(v1.1's 5249 ms). So the trap's evidence holds past 5 s; the probe's own leg B line is not rewritten to 380b8 after the fact (a
+red is not turned green by a new subject), and no v1.3 is owed for the question. Two findings for the after-47 list: the fall
+evidence counted a server teleport's height change as a drop (observed: the accepted drop equals the teleport's height change;
+which samples the death report compared is unread), a cause mislabel with no wrong death in it; and 380b5's body, teleported onto
+the blade's origin at the floor's height, fell through the world after its death ("body 380b5 at rest at (6256, -7493, -6882)"), a
+lab artifact of a server teleport into geometry.

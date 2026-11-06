@@ -1129,3 +1129,13 @@ found.", the `<ref>.<command>` form b-locks met on 2026-11-01), so the bandit ne
 read is owed: v1.2 (lab/.cache/probes, d4d1386d) moves the bandit by the server's console table (server-console MoveTo, the
 TeleportMessage to his host) and has c1's engine make his use (prid aa8c3, then activate 39fe1), no claim changed, its fresh
 review GO with notes, applied as written.
+
+The lever's release read (11:45 PST 2026-11-06 (19:45Z 11-06), thuum-cf): x-lever-after-scene v1.2 (d4d1386d) GREEN on canon
+5186df39, 20261106-194107: the bandit's console activation reached the server as his ("ProcessActivate aa8c3 - no occupant
+(activationSource = 39fe1)", c1's "Sent activation for caster= 39fe1 and target= aa8c3"), the record had him dead, and c1's pull
+released him ("ProcessActivate aa8c3 - occupant is dead or deleted (activationSource = ff000000)") with the use's reply reaching
+c1's game ("onOpenContainerMesage - waiting for 'getFurnitureReference not null' to be true"); c2's pull after c1's closing
+activation found the lever free ("no occupant (activationSource = ff000001)") and its reply reached c2; no "occupant is another
+object and is nearby" for either player, no E_ACTIVATE_REACH. A dead occupant no longer holds the furniture. Recorded as the probe
+said: neither seat was seated in the use (no "to be false" line) and no seat saw the lever move ("aa8c3 animates" 0, no "object
+animation aa8c3"), so the lever's motion under a player is the second fault, H-P1's NoPlayer furniture, still open.
