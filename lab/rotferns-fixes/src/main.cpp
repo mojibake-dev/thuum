@@ -6,8 +6,8 @@
 // loadedData->mesh[quad]->children[0]->AsGeometry() and dereferences children[0] without a null
 // check, on the empty-array path and on a null first child alike; a land whose quad geometry is not
 // attached yet (the initial load, a job thread) crashes at SkyrimSE.exe+02AD242. The detour below
-// replaces the compare at 18789+0x14A with the same read plus the two null checks, continuing at
-// +0x162 with rax = children.data and rcx = the child exactly as the original fall-through did, or
+// replaces the compare at 18789+0x14A with the same read plus the null checks, continuing at
+// +0x162 with rax = children._data and rcx = the child exactly as the original fall-through did, or
 // skipping to the next quad at +0x340.
 //
 // Rule 2 (docs/LAB.md): the site is a decompiler read until the run proves it. The runtime and the
@@ -16,6 +16,7 @@
 #include <RE/Skyrim.h>
 #include <SKSE/SKSE.h>
 
+#include <spdlog/sinks/basic_file_sink.h>
 #include <xbyak/xbyak.h>
 
 #include <array>
@@ -37,16 +38,19 @@ namespace
 	constexpr std::array<std::uint8_t, 10> kExpected{ 0x66, 0x83, 0xB8, 0x22, 0x01, 0x00, 0x00, 0x00, 0x77, 0x04 };
 	constexpr REL::Version                 kRuntime{ 1, 6, 1170, 0 };
 
-	// NiNode::children (NiTObjectArray at +0x110): data at +0x118, size (uint16) at +0x122 (CommonLibSSE-NG NiNode.h, NiTArray.h)
+	// NiNode::children (NiTObjectArray at +0x110): _data at +0x118, _freeIdx (uint16) at +0x122, _size at +0x124
+	// (CommonLibSSE-NG NiNode.h, NiTArray.h:118-119); the engine's own test reads _freeIdx, so the detour does too
 	struct Detour : Xbyak::CodeGenerator
 	{
 		Detour(std::uintptr_t a_resume, std::uintptr_t a_skip)
 		{
 			Xbyak::Label skip;
-			movzx(ecx, word[rax + 0x122]);  // mesh->children.size
+			movzx(ecx, word[rax + 0x122]);  // mesh->children._freeIdx, the engine's own test
 			test(ecx, ecx);
 			jz(skip);
-			mov(rax, ptr[rax + 0x118]);  // children.data
+			mov(rax, ptr[rax + 0x118]);  // children._data
+			test(rax, rax);              // the review's hardening (thuum-cf, 2026-11-06): a null array
+			jz(skip);
 			mov(rcx, ptr[rax]);          // children[0]
 			test(rcx, rcx);
 			jz(skip);
@@ -116,7 +120,9 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
 	SKSE::Init(a_skse);
 	InitLog();
 	SKSE::log::info("Rotfern's Fixes {} loading", REL::Version{ 0, 1, 0, 0 }.string());
-	SKSE::AllocTrampoline(64);
+	// the detour assembles to about 57 bytes and write_branch<5> takes a 14-byte stub from the same
+	// trampoline (CommonLib Trampoline.cpp:141-161); 64 failed the allocation at every launch (the review)
+	SKSE::AllocTrampoline(128);
 	InstallTerrainOverlayNullCheck();
 	return true;
 }

@@ -56,7 +56,7 @@ RDI NiSourceTexture, Tamriel.4.28.-20.DDS) and the shared noise texture
 BSMultiBoundNode, the RAX object); skip if null or no node; then
 
 ```
-+02AD22A  cmp  word ptr [rax+0x122], 0      ; mesh->children.size (NiTObjectArray at NiNode+0x110: data +8, size +0x12)
++02AD22A  cmp  word ptr [rax+0x122], 0      ; mesh->children._freeIdx (NiTObjectArray at NiNode+0x110: _data +8, _freeIdx +0x12, _size +0x14)
 +02AD232  ja   +02AD238
 +02AD234  xor  ecx, ecx                      ; no children: child = nullptr
 +02AD236  jmp  +02AD242
@@ -235,7 +235,8 @@ Fixes do not touch 18789. Two shapes, in order of laziness:
   pins the runtime to 1.6.1170 (ADR-022) and installs one detour: at
   REL::ID(18789) + 0x14A, the `cmp word ptr [rax+0x122], 0; ja` pair (10 bytes,
   `66 83 B8 22 01 00 00 00 77 04` in the unpacked image), jump to a trampoline
-  that reads children.size and children[0] itself and routes both the
+  that reads children._freeIdx (the engine's own test; _size is +0x124), a null _data and a null
+  children[0] itself and routes both the
   empty-array case and a null children[0] to the next-quad path at + 0x340
   (`inc esi`, `FF C6 49 83 C6 08 83 FE 04`), else continues at + 0x162
   (`48 8B 01 FF 50 38`) with rax = children.data and rcx = the child, exactly as
@@ -250,6 +251,21 @@ Fixes do not touch 18789. Two shapes, in order of laziness:
   MpClientPlugin could host the detour instead (every client loads it already),
   but that couples an engine fix to the skymp client's build and upstream
   merges; the separate DLL is the cleaner "we do it this way".
+
+The C++ review (thuum-cf's re-analyst, 2026-11-06, pyghidra-mcp on the unpacked image and CommonLib
+b93280e8; all addresses HYPOTHESIS until the run set): GO after two blocking fixes, both taken (a
+128-byte trampoline, since the detour and write_branch's stub need about 71 bytes and 64 would have
+failed the allocation at every launch; the basic_file_sink include) and one hardening, taken (a null
+_data skips the quad). The ten bytes match; at +0x162 only rcx is live; at +0x340 rax, rcx and r11
+are written before any read and the stack is the same on both exits; nothing outside the span
+branches into it; r11 appears only in the epilogue. The fix closes the crash the three logs show
+(RAX = the quad's BSMultiBoundNode, RCX = 0, the empty-array branch), not the race itself: a detach
+between the test and the virtual call, a null AsGeometry at +0x168, a null material at +0x17C, and
+the callers 13317 and 15960 against the non-atomic texture swaps stay open (HYPOTHESIS). Side
+effect: a skipped quad keeps its old overlay, noise and blend params until the next call, at worst
+a LOD-blend seam on one quad. Falsifiers for the run set: no "installed" line, or a "Failed to
+handle allocation request" line; any +02AD242 fault; a fault at 18789+0x168 or +0x17C; a fault
+outside any module (the detour has no unwind data, so a stack past frame 0 there is noise).
 
 Either way the layer test is the signature: a run set on c1 with no
 +02AD242 fault across the containers gate.
