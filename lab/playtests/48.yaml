@@ -28,15 +28,13 @@ server:
   perks: true
   leveling: true
 camp:
-  # the third reset (Eli, 2026-11-06 13:3x PST: "yes please do a real cell load"): outside the main door, at the game's own
-  # landing of its exterior door 0xb6cce (lab/esm.py door 0xb6ccd: (8849, -58120, 1446), rot -39), so each seat walks into
-  # 0xb6be6 by a real cell load and D-L1 is out of the read; test 2 sixty units ahead on the landing's heading. The lookout
-  # 0xb6ce1 and the wolf 0x9b0dd are dead in this world.
+  # the fourth reset (Eli, 2026-11-06 13:5x PST: "outside the temple door"), for NPCs at Bleak Falls Temple's spike wall and
+  # swinging blades: 47's restart camp at the game's landing of the Temple's door 0x15da5 (lab/playtests/47.yaml), each seat
+  # walking into 0x371de by a real cell load; the bandits 0x29600 and 0x29602 there are dead in this world, and the ambush
+  # draugr by the plate 0x567f2 and the wall 0x54b15 (0x380b3, 0x380b5, 0x380b9) are alive
   teleports:
-    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [8849, -58120, 1446], rot: [0, 0, -39]}
-    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [8811, -58073, 1470], rot: [0, 0, -39]}
-  near:
-    - 0x992d8   # EncWolf, no server record in all of 48 (never streamed), about 2,200 units off
+    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [-2966, -43331, 6145], rot: [0, 0, 104.6]}
+    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [-2908, -43346, 6145], rot: [0, 0, 104.6]}
 seats:
   - profile: 1
     name: "test 1"
