@@ -1,0 +1,57 @@
+# Playtest 48 (numidium, 2026-11-06 ~12:00 PST): Embershard Mine's traps and the appearance layer, on the canonical seats.
+# The build is canon 5186df39 (fork m4-traps-47 merged by verb-merge: the wire follower 746aff6c, the prop lease mirror, the
+# furniture occupant released on death or deletion, NPC trap kills accepted on the trap's own evidence) under the layer stage
+# of apocrypha/layer-appearance 5a5facb2 (CBBE 2.0.3 as a row with its body morph files and no Face Pack, the vanilla hair
+# remake as replacers, Rotfern's Fixes 0.1.0 under ADR-069). thuum-cf's checklist is docs/private/playtest-48.md (eight
+# items): the tripwire and its rocks from the guest with a bandit in tow, the levers and bridges, a bone alarm, the bandits,
+# out and back in; apocrypha's two layer items; anything else.
+# The world is the canonical one Eli made at 47's end (rotfern and Ariadne at 200). Embershard Mine 0xb6be6 is untouched
+# there: the wire 0xb6d3f, its seven rocks and the platform 0xb6d47 hold no record (the game files' state), the eight bandits
+# are alive, the levers, bridges and bone alarms unmoved (the world's own records, read 2026-11-06 19:4xZ).
+# The camp (from profile 48: outside a cell, its living neighbours declared) is the game's own landing of Embershard's back
+# door 0xb6f29 (lab/esm.py door 0xb6f24 on the players' Skyrim.esm: (16198, -53980, 1349)), nothing alive within 2,500 units,
+# facing the main door 0xb6cce (its landing (8849, -58120, 1446), about 8,400 units on, the wolf 0x9b0dd and the lookout
+# 0xb6ce1 on the way); test 2 sixty units ahead on that heading. The first camp, on the approach from Riverwood with the wolf
+# 0x9b0dd 1,227 units off declared in camp.near, put test 2 in its bite at load-in: dead at 20:04Z before the go (numidium's).
+id: 48
+build: "canon 5186df39 (fork m4-traps-47 merged by verb-merge) under the layer stage of apocrypha/layer-appearance 5a5facb2"
+world: playtest-pt48-wire-reset-20261106T205808Z   # 48's own world at 20:55Z (new Ariadne saved in RaceMenu), the
+  # tripwire 0xb6d3f and its seven rocks moved aside (reset-embershard-wire-20261106T205808Z): the trap fresh, the rest as played
+hold:
+  minutes: 120
+  reason: "playtest 48: Embershard Mine's traps and the appearance layer"
+server:
+  npcEnabled: true
+  gameHour: 12.0
+  locks: true   # every switch on, as the 44 baseline
+  weatherSync: true
+  perks: true
+  leveling: true
+camp:
+  # the fourth reset (Eli, 2026-11-06 13:5x PST: "outside the temple door"), for NPCs at Bleak Falls Temple's spike wall and
+  # swinging blades: 47's restart camp at the game's landing of the Temple's door 0x15da5 (lab/playtests/47.yaml), each seat
+  # walking into 0x371de by a real cell load; the bandits 0x29600 and 0x29602 there are dead in this world, and the ambush
+  # draugr by the plate 0x567f2 and the wall 0x54b15 (0x380b3, 0x380b5, 0x380b9) are alive
+  teleports:
+    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [-2966, -43331, 6145], rot: [0, 0, 104.6]}
+    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [-2908, -43346, 6145], rot: [0, 0, 104.6]}
+seats:
+  - profile: 1
+    name: "test 1"
+    perks: [0x7934b]   # Overdraw40 through the server's AddPerk (284a4d51): the headshot rule's condition
+    spells: []
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]   # Survival off
+    values:
+      Marksman: 60
+    percentages: {health: 1, magicka: 1, stamina: 1}
+  - profile: 2
+    name: "test 2"
+    perks: []
+    spells: []
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]
+    percentages: {health: 1, magicka: 1, stamina: 1}
+streams:
+  test1: 48989
+  test2: 49989
+after:
+  readback: percentages

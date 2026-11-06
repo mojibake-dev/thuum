@@ -9222,3 +9222,19 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   not a mirror fault). Owed after the merge: x-trap-npc-kill v1.2 (3cec676d) and x-lever-after-scene v1.2 (d4d1386d).
   verb-stage's "done" says nothing about its probes; numidium's chain took it for green and was stopped by hand before
   its pin, and verb-stage now prints a probe tally (29324d97). The nightly skipped the 11-06 window under the train's holds.
+- 14:05 PST 2026-11-06 (22:05Z 11-06) (numidium): playtest 48 closed (Eli: "NOW call it"), on canon 5186df39 under the layer stage of
+  apocrypha/layer-appearance 5a5facb2 (CBBE 2.0.3 as a row with the body morphs and no Face Pack, the vanilla hair remake,
+  Rotfern's Fixes 0.1.0), from the canonical world at Embershard Mine, then Bleak Falls Temple, with four resets by
+  playtest-go (two worlds composed: the tripwire's eight records moved aside, playtest-pt48-wire-reset-20261106T205808Z).
+  Verified in play: the tripwire's rocks from either seat hurting either; levers and bridges; bone alarms from both; out
+  and back in; bandit deaths; NPC trap kills at the Temple's wall and blades (47's E_DEATH_UNCHECKED fault fixed); the
+  CBBE sliders, the hair, human faces with no seam. Broken, for thuum-cf after 48: looting strips a body's armor; the
+  guest's rope stays taut when the host trips the wire (the trigger synced as a trap body); a blade kill after the 30 s
+  evidence window refused (the fix: the host's trap hit as evidence); a crash in RaceMenu leaves isRaceMenuOpen set
+  (Ariadne logged in to a default face, recovered by a restored copy); rotfern's bow re-equip again. Declared until the
+  corpse work: the wall's firings diverge per engine (a body on the plate). For apocrypha: four remade hairs crash
+  RaceMenu (excluded, 3ef308fe); the SFW body next by a headless BodySlide build on sky-build; the face row (D4) held.
+  Rotfern's Fixes installed on every launch, no +02AD242 fault, the skip path not exercised. Two camp misses of mine
+  first: a declared wolf killed test 2 at load-in, then the check raised on an empty camp (9fbfd008). The new canonical
+  world is playtest-canon-chars-20261106T220411Z (47's end with Ariadne's new look). Recorded in results/playtest-48/
+  (20 cycles); the world saved as playtest-pt48-end-20261106T220409Z; the hold released.
