@@ -14,7 +14,8 @@ own BodySlide projects run through BodySlide and Outfit Studio 6.1.0 (Nexus 201)
   --trimorphs --quiet: the NeverNude body, feet, hands and beast hands, then the outfit groups. It fails when a
   build hangs or a mesh lacks its BODYTRI link.
 - `../tools/bodyslide-inputs.sh`: places the two archives on sky-build (sky-srv serves them inside VLAN 70 for the
-  copy; the box checks each md5).
+  copy; the box checks each md5). Nothing in the estate backs D:\thuum-inputs up (core, 2026-11-06), so a rebuilt build box
+  needs this rerun before the job can run.
 - CI: `cbbe-sfw-bodyslide-build` in .gitlab-ci.yml runs build.ps1 on the windows runner when this folder changes,
   manually on a branch, and keeps `lab/bodyslide/dist` (Data-layout meshes and .tri) as its artifact. The essentials
   row `cbbe-sfw-bodyslide-1.1.4@1.6.1170` takes that artifact as a `ci` row; until the first job runs it is the hand
