@@ -109,13 +109,23 @@ So the smallest set that keeps the sliders is three pieces:
 2. The slider plugin from CBBE 2.0.3's folder 26 (Nexus 198 file 489053, the archive we hold):
    RaceMenuMorphsCBBE.esp and its five scripts, nothing else of that archive. One row with a
    folder pick, or a sub-row of the SFW row.
-3. Morph files for the SFW meshes. If the SFW archive ships .tri files, those (to be read: the
-   archive is in lab/.cache/mods as of this page, its contents and the body mesh's vertex count
-   against CBBE 2.0.3's are the next read). If not, BodySlide's Batch Build with "Build Morphs"
-   over the SFW addons, run once by Eli on Fenestrate with the chosen preset, gives meshes and .tri
-   that match each other; that output is a `local` row (hashes in the manifest, files in persist).
-   Reusing CBBE 2.0.3's folders 27 and 28 over SFW meshes is the fallback only if the vertex order
-   is identical (HYPOTHESIS until the two meshes are compared).
+3. Morph files for the SFW meshes, which the archive does not ship (read 2026-11-06, the main
+   file in lab/.cache/mods: 2,940 files, zero .tri, no RaceMenu Morphs plugin, no scripts; its
+   CBBE.esp is byte-identical to 2.0.3's). BodySlide's Batch Build with "Build Morphs" over the SFW
+   projects (folder 11 Outfits BodySlide: 1,372 project files, groups CBBE (SFW), CBBE Vanilla
+   (SFW), Dawnguard, Dragonborn, Creation Club and the two 1st-person groups, one shipped preset
+   "CBBE (SFW)"), run once by Eli on Fenestrate with the chosen preset, gives meshes and .tri that
+   match each other; that output is a `local` row (hashes in the manifest, files in persist).
+   Reusing CBBE 2.0.3's folders 27 and 28 over SFW's prebuilt meshes is not a safe fallback: SFW's
+   body meshes are a different build from every 2.0.3 variant (none of the md5s match), and a .tri
+   whose vertex order differs from its mesh morphs garbage.
+
+What the SFW main file is, read from the archive: 00 Required (55 files, 22 meshes: the one body
+build, curvy per the author's note, with CBBE.esp); the installer's choices are Underwear or
+NeverNude meshes (30 Underwear, 31 Underwear Revealing, four colour folders), Vanilla Outfits (10
+Outfits, 1,373 prebuilt meshes), Face Pack (20, 28 files), Dirt to Beauty Marks and six brow
+options; no body-shape choice at all, a shape other than the shipped one is a BodySlide build.
+Beast races: 11 khajiit and argonian texture files.
 
 Two consequences for the lab. CBBE becomes a layer row (today it is one of the base image's
 "existing eight", laid by the plan above, outside the layer's lay record), so the base's 2,287
@@ -130,8 +140,9 @@ differ.
 2. The smooth faces: seen on Fenestrate, on a seat, or both?
 3. The sliders: on which machine, and which of (a) no CBBE category in the menu, (b) sliders move
    but the body does not, (c) the body changes and snaps back?
-4. SFW body shape: Slim, Curvy or Vanilla (the current seats are Vanilla shape, Slim required
-   files).
+4. Body shape under SFW: the archive ships one build (curvy); the seats today are 2.0.3's Vanilla
+   shape. Keep SFW's build as shipped, or have the BodySlide build (needed anyway for the morphs)
+   use a Vanilla-shape preset?
 5. Is BodySlide installed on Fenestrate (for one Batch Build with morphs, if the SFW archive ships
    none)?
 
