@@ -288,6 +288,15 @@ after destruction; two more falsifiers, a skip the count misses and a quit hang 
 write. A Frida check if the count needs one: follow the E9 at 18789+0x14A to the stub and attach at
 the detour's skip label, detour+0x2C, on a cold login.
 
+The first stage (layer-appearance 5a5facb2, 2026-11-06, with playtest 48 on it): both seats logged
+"Rotfern's Fixes 0-1-0-0 loading" and "terrain-overlay null check installed at SkyrimSE.exe+2AD22A (id
+18789+0x14A), runtime 1-6-1170-0" at every launch, about ten each (the smoke, five playtest-go runs,
+a relaunch, a restore); no Crash Logger file at +02AD242, +0x168 or +0x17C on either seat, both
+quits clean. No skip line was written, so the skip path never ran: the day shows "installed" and an
+absence of the race, which is what a day without the fix can show too (the baseline numidium's rule 2
+review warned of). 0.1.0 truncated its log at each launch; 0.1.1 appends with dated lines, so a skip
+in any session of a stage survives to be read.
+
 Either way the layer test is the signature: a run set on c1 with no
 +02AD242 fault across the containers gate.
 

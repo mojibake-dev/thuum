@@ -16,7 +16,8 @@ Fixes:
 Each fix checks the runtime (1.6.1170 only, ADR-022) and the bytes at its site and at its jump-back
 targets before writing, logs exactly one of `installed`, `wrong runtime`, `bytes mismatch`, and, when
 it skips work, a `skipped N ... so far` line every ten seconds the count moved, all to
-Documents\My Games\Skyrim Special Edition\SKSE\rotferns-fixes.log. Those words are a contract:
+Documents\My Games\Skyrim Special Edition\SKSE\rotferns-fixes.log, appended across launches with each line dated
+(since 0.1.1). Those words are a contract:
 a scenario may count them; the skip count is what proves a fix fired, since a rare crash's absence
 proves nothing by itself (numidium's rules review, 2026-11-06). The count is reported at most every ten
 seconds and not at quit, so a run reads it at least 11 s after the load-in. Rule 2 (docs/LAB.md): a site is a decompiler read until the run set

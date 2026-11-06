@@ -107,12 +107,14 @@ namespace
 			return;
 		}
 		*path /= "rotferns-fixes.log"sv;
-		auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true);
+		// appended, not truncated: a skip counted in one session survives the relaunches after it (numidium,
+		// playtest 48: the log held only the last of about ten launches); each line carries its date
+		auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), false);
 		auto log = std::make_shared<spdlog::logger>("global", std::move(sink));
 		log->set_level(spdlog::level::info);
 		log->flush_on(spdlog::level::info);
 		spdlog::set_default_logger(std::move(log));
-		spdlog::set_pattern("[%H:%M:%S.%e] [%l] %v"s);
+		spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] %v"s);
 	}
 
 	// the skip count, every ten seconds when it changed: the run set's evidence that the fix fired
@@ -163,7 +165,7 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
 {
 	SKSE::Init(a_skse);
 	InitLog();
-	SKSE::log::info("Rotfern's Fixes {} loading", REL::Version{ 0, 1, 0, 0 }.string());
+	SKSE::log::info("Rotfern's Fixes {} loading", REL::Version{ 0, 1, 1, 0 }.string());
 	// the detour assembles to about 70 bytes and write_branch<5> takes a 14-byte stub from the same
 	// trampoline (CommonLib Trampoline.cpp:141-161); 64 failed the allocation at every launch (the reviews)
 	SKSE::AllocTrampoline(128);
