@@ -9238,3 +9238,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   first: a declared wolf killed test 2 at load-in, then the check raised on an empty camp (9fbfd008). The new canonical
   world is playtest-canon-chars-20261106T220411Z (47's end with Ariadne's new look). Recorded in results/playtest-48/
   (20 cycles); the world saved as playtest-pt48-end-20261106T220409Z; the hold released.
+- m4-mp-host merged to fork canon f70bc16e (2026-11-06T22:39Z): R0 (ADR-053): T0 pipeline 5561 server-build 19588: 100%
+  tests passed, 0 tests failed out of 13, no lab gate (the nightly is its T3); T2 green on skymp-server:m4-mp-host-f70bc16e;
+  clones not promoted (no client change). The verb: Eli's in-game `mp host` (48: "you should make a console command i can
+  ask that with instead of you"), a player console command printing the caller's cell, its host, epoch, fresh or
+  inherited grant and the caller's role, in playtest-roles' words (thuum-cf). Merged from main's tree: apocrypha's staged
+  layer changes no file deploy-srv ships (server-settings.json identical, its plugins client-only).
