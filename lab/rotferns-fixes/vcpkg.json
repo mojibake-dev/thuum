@@ -1,0 +1,11 @@
+{
+  "name": "rotferns-fixes",
+  "version-string": "0.1.0",
+  "description": "Rotfern's Fixes: thuum's engine fixes for Skyrim SE 1.6.1170, one SKSE plugin (lab/rotferns-fixes/README.md)",
+  "dependencies": [
+    "vcpkg-cmake-config",
+    "spdlog",
+    "rapidcsv",
+    "xbyak"
+  ]
+}

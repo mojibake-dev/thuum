@@ -11,7 +11,7 @@
 # The GitLab merge request approval rule that names Eli as the required
 # approver for lab/scenarios/ is configured in the project settings, not here.
 
-stages: [lint, gate]
+stages: [lint, gate, windows]
 
 variables:
   GIT_SUBMODULE_STRATEGY: none
@@ -128,6 +128,65 @@ driver-build:
 # with any other path: on a merge request
 # the commits since its base, on a push to main the commits the push brought (the
 # repo commits straight to main, so until 2026-10-13 this gate never ran).
+# Rotfern's Fixes, the engine-fixes DLL (lab/rotferns-fixes, docs/research/terrain-upgrade-crash.md, ADR-069):
+# built on sky-build (VM 720, tag `windows`, the fork's shell runner with pwsh, the one Windows lane) with the
+# fork's client-build toolchain, so the layer row takes this job's artifact and never carries a DLL no
+# pipeline can rebuild. Its own last stage, so nothing in lint or gate waits on it or skips for it. On main
+# a push that changes the DLL's sources builds it; on any other branch it is offered as a manual job when
+# the branch differs from main there (compare_to), never queued by itself; schedules, web and API
+# pipelines never run it (numidium's rules review, 2026-11-06). ROTFERNS_FIXES_BUILD_WINDOWS=1 (core)
+# enables it. vcpkg is the fork's pinned commit in thuum's own clone, D:/thuum-vcpkg, re-cloned when a
+# clone never finished and re-bootstrapped when the pin moves; the fork's binary cache is read only, the
+# writable one is thuum's.
+rotferns-fixes-build:
+  stage: windows
+  tags: [windows]
+  timeout: 90m
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
+    GIT_SUBMODULE_PATHS: CommonLibSSE-NG
+    GIT_DEPTH: "1"
+    VCPKG_COMMIT: cb2981c4e03d421fa03b9bb5044cd1986180e7e4
+    VCPKG_BINARY_SOURCES: "clear;files,D:/vcpkg-bincache,read;files,D:/thuum-vcpkg-bincache,readwrite"
+    VCPKG_FEATURE_FLAGS: "manifests"
+  rules:
+    - if: $ROTFERNS_FIXES_BUILD_WINDOWS != "1"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes: [lab/rotferns-fixes/**/*, CommonLibSSE-NG]
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
+      changes:
+        paths: [lab/rotferns-fixes/**/*, CommonLibSSE-NG]
+        compare_to: refs/heads/main
+      when: manual
+      allow_failure: true
+  script:
+    - New-Item -ItemType Directory -Force D:/thuum-vcpkg-bincache | Out-Null
+    - |
+      if (-not (Test-Path D:/thuum-vcpkg/.thuum-clone-ok)) {
+        if (Test-Path D:/thuum-vcpkg) { Remove-Item -Recurse -Force D:/thuum-vcpkg }
+        git clone --quiet https://github.com/microsoft/vcpkg.git D:/thuum-vcpkg; if ($LASTEXITCODE) { exit 1 }
+        New-Item -ItemType File D:/thuum-vcpkg/.thuum-clone-ok | Out-Null
+      }
+      git -C D:/thuum-vcpkg fetch --quiet origin $env:VCPKG_COMMIT; if ($LASTEXITCODE) { exit 1 }
+      git -C D:/thuum-vcpkg checkout --quiet $env:VCPKG_COMMIT; if ($LASTEXITCODE) { exit 1 }
+      $boot = 'D:/thuum-vcpkg/.thuum-bootstrap-commit'
+      if (-not (Test-Path D:/thuum-vcpkg/vcpkg.exe) -or -not (Test-Path $boot) -or ((Get-Content $boot -Raw).Trim() -ne $env:VCPKG_COMMIT)) {
+        & D:/thuum-vcpkg/bootstrap-vcpkg.bat -disableMetrics; if ($LASTEXITCODE) { exit 1 }
+        Set-Content -Path $boot -Value $env:VCPKG_COMMIT
+      }
+    - |
+      cmake -S lab/rotferns-fixes -B lab/rotferns-fixes/build -G "Visual Studio 17 2022" -A x64 `
+        -DCMAKE_TOOLCHAIN_FILE=D:/thuum-vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows-static-md
+      if ($LASTEXITCODE) { exit 1 }
+    - cmake --build lab/rotferns-fixes/build --config Release; if ($LASTEXITCODE) { exit 1 }
+    - cmake --install lab/rotferns-fixes/build --config Release --prefix lab/rotferns-fixes/dist; if ($LASTEXITCODE) { exit 1 }
+    - Get-ChildItem -Recurse lab/rotferns-fixes/dist | ForEach-Object { "{0}`t{1}" -f $_.Length, $_.FullName }
+  artifacts:
+    name: rotferns-fixes
+    paths: [lab/rotferns-fixes/dist]
+    expire_in: 3 months
+
 scenario-gate:
   extends: .base
   stage: gate
