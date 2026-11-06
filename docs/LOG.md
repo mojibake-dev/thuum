@@ -9169,3 +9169,21 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   undeleted under Skyrim Souls RE's InventoryMenu, HYPOTHESIS, its read owed after 47). Declared for playtest 47: a plate may fire
   once as a player re-enters its cell (S10), the wire trap's break and dust missing on the seat that did not trip it (S11), rock
   0xb6d4d's hang. 746aff6c (the wire follower) waits for the prop-lease fix after 47. skymp pinned at canon 0f2f3c55.
+- 00:15 PST 2026-11-06 (08:15Z 11-06) (numidium): playtest 47 closed on canon 0f2f3c55 (lab/playtests/47.yaml; thuum-cf's
+  checklist, the results in docs/private/playtest-47-findings.md; the recorder's traces and both seats' consoles in
+  results/playtest-47/). The first session went wrong at the start: the camp inside the Temple's entrance (numidium's profile) was
+  in the entrance bandits' reach, and Prisoner died at load-in; both games crashed once (c1 in XAudio2, a new signature; c2 the
+  terrain race, its first). Its pillars, darts and the bandit's lever scene failed because a seat that logs in inside a cell gets
+  no OnCellLoad (thuum-cf's read, c1's console agreeing: its pillar's OnCellLoad came only at 06:48:10Z). Restarted at Eli's word
+  with the camp outside the entrance door (bf09017f), where both walked in. VERIFIED IN PLAY: lamps and pools from the guest,
+  spent on revisit; the plate and wall, each hit once in the hit player's own game; dodging for players; the pillars, the whale
+  included; the gate from the guest and the darts from either seat; the bandit's scene; the hand-off (playtest-relaunch c1,
+  Prisoner inheriting at epoch 2, both still turning); the claw door through the host (the guest's claw as declared); the webs;
+  the hanging blades. BROKEN: the login inside a cell; trap kills on NPCs refused (E_DEATH_UNCHECKED, the NPC walking on until a
+  player kills it) with the server VM lacking TrapHitBase for an unhosted cell; the lever's animation (FURN
+  LeverPushAnimatingNoPlayer, "occupant is another object"); after the hand-off the spider on the ground with its drop cue late,
+  and Arvel never falling from the web; a visible pillar reset at the hand-off. Open for Eli: the swing damage against Prisoner's
+  100 health; the non-host's pass-through of a trap on a host-simulated NPC. Test 2 is now Ariadne, a Khajiit OC Eli made in
+  RaceMenu, given rotfern's spells and items, with 60 iron arrows each. The world is saved as
+  playtest-pt47-end-ariadne-20261106T081423Z, the hold is released, and thuum-cf has the build list. Eli's appearance asks (an
+  additional-hairs mod, face textures, CBBE's sliders in the SFW version) went to apocrypha.
