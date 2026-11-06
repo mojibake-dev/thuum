@@ -11,7 +11,8 @@
 //              {kind: "spell", formId}: a spell's effects and their MGEFs as the server resolves them
 //              {kind: "cellHost", cell}: who hosts the cell on the server (docs/verbs/cell-host.md)
 //              {kind: "ref", actorId}: a reference's record by form id (a hosted NPC's position and health; a prop's position, its actor fields null;
-//                                       changeFormFnv and changeFormAt, the owner's latest change form's hash and arrival, 0 without one)
+//                                       changeFormFnv and changeFormAt, the owner's latest change form's hash and arrival, 0 without one;
+//                                       scriptStateFnv, scriptStateAt and scriptStateSeq, its latest script record's, 0 without one)
 //              {kind: "follow", actorId}: whether a game follows that actor out of its hosted cells (npc-handoff)
 //              {kind: "fate", actorId}: the server's roll for a game-file actor (npc-fate, ADR-046)
 //              {kind: "stream", profileId}: a player's stream counters by message type (npc-stream slice 4)
@@ -297,6 +298,26 @@ const state = {
         changeFormAt = 0;
       }
     }
+    // the reference's script record as the server keeps it (mp.get's scriptState, thuum ADR-068 rung 3, the script record;
+    // the fork's ScriptStateBinding): scriptStateFnv the owner's FNV-1a 32, scriptStateAt the wall-clock ms of its report and
+    // scriptStateSeq the object's sequence when the record was taken; 0, 0 and 0 without a record and from a server without
+    // the property (a record's own seq can be 0, so a claim reads its arrival in scriptStateAt). Asked of any reference: the
+    // property answers null for an actor and for a reference nobody reported, and a plain reference does not throw for it
+    let scriptStateFnv = 0;
+    let scriptStateAt = 0;
+    let scriptStateSeq = 0;
+    try {
+      const record = mp.get(actorId, "scriptState");
+      if (record && typeof record === "object") {
+        scriptStateFnv = Number(record.fnv1a) >>> 0;
+        scriptStateAt = Number(record.at) || 0;
+        scriptStateSeq = Number(record.seq) >>> 0;
+      }
+    } catch (e) {
+      scriptStateFnv = 0;
+      scriptStateAt = 0;
+      scriptStateSeq = 0;
+    }
     // the reference's items as the server records them, a chest's or a body's as an actor's
     // (lab-api's server.inventory(<ref>), the two-seat container claims of the root-cause plan's W4);
     // null where the record holds none or the API refuses the read
@@ -325,6 +346,9 @@ const state = {
       bodyRestAt,
       changeFormFnv,
       changeFormAt,
+      scriptStateFnv,
+      scriptStateAt,
+      scriptStateSeq,
     };
   },
 

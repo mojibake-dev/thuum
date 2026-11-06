@@ -143,7 +143,7 @@ client whose player's actorId (the `actor` kind's) is the holder, "" when none.
 Request: `{"payload": {"kind": "ref", "actorId": <int>}}`. Answer: `{"found":
 true, "actorId", "x", "y", "z", "rot", "cell", "isDead", "healthPercentage",
 "magickaPercentage", "staminaPercentage", "worn", "inventory", "bodyAtRest",
-"bodyRestAt", "changeFormFnv", "changeFormAt"}`, an actor's
+"bodyRestAt", "changeFormFnv", "changeFormAt", "scriptStateFnv", "scriptStateAt", "scriptStateSeq"}`, an actor's
 record by form id (a hosted NPC), the `actor` kind's fields without the
 appearance verdicts, or `{"found": false, "actorId"}` for a form the server
 holds no position for.
@@ -158,6 +158,11 @@ with both seats' `npc_state(<id>).x` once it is.
 keeps it (`mp.get(id, "changeFormRecord")`, docs/verbs/change-form.md, ADR-065): the record's FNV-1a 32 and the
 server's ms clock when it was recorded (0 without one; `null` from a server without the property). A scenario claims
 `server.ref(<id>).changeFormFnv != 0` after the owner's body came to rest.
+`scriptStateFnv`, `scriptStateAt` and `scriptStateSeq` are the owner's latest script record of the reference as the
+server keeps it (`mp.get(id, "scriptState")`, the fork's ScriptStateBinding, ADR-068 rung 3): the record's FNV-1a 32, the
+wall-clock ms of the owner's report and the object's sequence when it was taken; 0, 0 and 0 without a record and from a
+server without the property (a record's own seq can be 0, so its arrival reads in `scriptStateAt`). Asked of any reference,
+a plain one too. A scenario snapshots `server.ref(<id>).scriptStateAt` and claims it risen after the owner's turn.
 `worn` is the record's equipment (`mp.get(id, "equipment")`, read inside a try)
 as a seat's npc-state counts it: the ARMO and WEAP form ids marked worn in a
 slot or either hand, one per form, sorted, typed through the server's espm, so

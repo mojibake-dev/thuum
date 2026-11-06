@@ -68,7 +68,8 @@ class StepBoard:
         # seat's own engine state of that NPC (c.npc_state(id), docs/verbs/npc-puppet.md)
         self._npc_states: dict[str, dict[int, dict[str, Any]]] = {}
         # a script-state step's answers by the form id it named (or answered): a reference's attached scripts as that
-        # seat's own VM holds them, or the stack that held it busy (c.script_state(id), ADR-068 rung 3's read)
+        # seat's own VM holds them, the stack that held it busy, or the error a failed read answered, which replaces the
+        # earlier answer so a claim never reads past it (c.script_state(id), ADR-068 rung 3's read)
         self._script_states: dict[str, dict[int, dict[str, Any]]] = {}
         # a quest-stage step's answers by quest form id, merged across steps: {stage, running, done: stage (decimal)
         # -> done}, or None for a form that is no quest in that game (c.quest(id), docs/verbs/quest-stage.md)
@@ -154,14 +155,18 @@ class StepBoard:
                 key = 0
             if key:
                 self._npc_states.setdefault(step.client, {})[key] = body["data"]
-        if step.action == "script-state" and isinstance(body.get("data"), dict) and "error" not in body["data"]:
-            # a busy answer names no scripts but keeps its place: a later read of the same reference replaces it
+        if step.action == "script-state":
+            # every answer takes its reference's place, a busy one (no scripts) and an error one alike: the driver's
+            # error data (the native's refusal, a dist without it) or a step that failed outright (ok false), so the
+            # accessor raises on a failed read instead of reading the seat's last good answer (the fresh review of
+            # b-script-state-restart, note 1: a relaunched seat's failed read would have read its earlier game's)
+            data = body.get("data") if isinstance(body.get("data"), dict) else {"error": str(body.get("error") or "the step failed")}
             try:
-                key = int((step.args or {}).get("formId") or body["data"].get("formId"))
+                key = int((step.args or {}).get("formId") or data.get("formId"))
             except (TypeError, ValueError):
                 key = 0
             if key:
-                self._script_states.setdefault(step.client, {})[key] = body["data"]
+                self._script_states.setdefault(step.client, {})[key] = data
         if step.action == "quest-stage" and isinstance(body.get("data"), dict):
             for k, v in body["data"].items():
                 try:

@@ -42,6 +42,10 @@ the lab can grep (E_ASSERT_*).
   server.ref(<id>).changeFormFnv | .changeFormAt     the owner's latest change-form record of the actor
                                                      (change-form, ADR-065): its FNV-1a 32 and the server's
                                                      ms clock when it was recorded (0 without one)
+  server.ref(<id>).scriptStateFnv | .scriptStateAt | .scriptStateSeq
+                                                     the owner's latest script record of the reference
+                                                     (ADR-068 rung 3): its FNV-1a 32, the wall-clock ms of the
+                                                     owner's report, the object's sequence then (0 without one)
   snapshot("<name>").<field>                         a server fact a `server: snapshot {name, of}` step
                                                      kept earlier in the run (the freeze's evidence)
   <client>.state.gameHour | .gameDay | .gameMonth | .gameYear | .gameDaysPassed | .timeScale
@@ -90,7 +94,8 @@ the lab can grep (E_ASSERT_*).
                                                      one script's state and a variable of it (that type's, else the
                                                      only script's; .script("<type>") names one as well), names and
                                                      strings lowercased: a property by its own name, an int, a float
-                                                     or a bool as itself, an object as its form id, 0 for None
+                                                     or a bool as itself, an object as its form id, 0 for None; a last
+                                                     step that answered an error is a data error, never an older read
   <client>.node_scale()                              the engine's scale of the node its last node-scale
                                                      step read on its own player
   <client>.morph() | .morph_of(<client>)             a body morph its node-scale {morph} step read, the
@@ -911,6 +916,13 @@ class RefView:
     # server's ms clock when it was recorded (0 without one); None from a server without the property
     changeFormFnv: int | None = None
     changeFormAt: int | None = None
+    # the owner's latest script record of the reference (ADR-068 rung 3; the server's scriptState property, labState ref's
+    # three fields): its FNV-1a 32, the wall-clock ms of the owner's report and the object's sequence when it was taken
+    # (0, 0 and 0 without one; a record's own seq can be 0, so its arrival is read in scriptStateAt); None from a lab
+    # gamemode without the fields
+    scriptStateFnv: int | None = None
+    scriptStateAt: int | None = None
+    scriptStateSeq: int | None = None
 
 
 def _euler_xyz(a: tuple[float, float, float]) -> list[list[float]]:
@@ -1500,7 +1512,10 @@ class _ServerRef:
                            bodyAtRest=_opt_bool(d.get("bodyAtRest")),
                            bodyRestAt=_opt_int(d.get("bodyRestAt")),
                            changeFormFnv=_opt_int(d.get("changeFormFnv")),
-                           changeFormAt=_opt_int(d.get("changeFormAt")))
+                           changeFormAt=_opt_int(d.get("changeFormAt")),
+                           scriptStateFnv=_opt_int(d.get("scriptStateFnv")),
+                           scriptStateAt=_opt_int(d.get("scriptStateAt")),
+                           scriptStateSeq=_opt_int(d.get("scriptStateSeq")))
         except (KeyError, TypeError, ValueError) as e:
             raise AssertionData(f"{actor_id:#x}'s record lacks {e}") from e
 
@@ -1994,13 +2009,16 @@ class _ClientRef:
 
     def script_state(self, form_id: int, cls: str | None = None) -> ScriptStateView:
         """c.script_state(id[, "<type>"]): the seat's last script-state step for that reference (`script-state {formId}`),
-        read on one attached script when a type is named. No step, or a step whose answer was an error (the native's
-        refusal, a dist without it), is a data error, never a pass: the error stays in the step's note."""
+        read on one attached script when a type is named. No step, or a last step that answered an error (the native's
+        refusal, a dist without it, a step that failed: the board keeps it in the place of any earlier answer), is a data
+        error, never a pass."""
         fn = getattr(self._views, "script_state", None)
         data = fn(self.name, int(form_id)) if fn else None
         if not isinstance(data, dict):
-            raise AssertionData(f"{self.name} has not reported a script-state step for {int(form_id):#x} (an error answer "
-                                "is the step's note, not a read)")
+            raise AssertionData(f"{self.name} has not reported a script-state step for {int(form_id):#x}")
+        if "error" in data:
+            raise AssertionData(f"{self.name}'s last script-state step for {int(form_id):#x} answered an error: "
+                                f"{str(data['error'])[:200]}")
         view = ScriptStateView(self.name, int(form_id), data)
         return view.script(cls) if cls is not None else view
 
@@ -2299,7 +2317,7 @@ _ATTRS = {
     SpellView: {"magnitude", "overTime", "conditional", "effects"},
     HostView: {"hosted", "client", "epoch", "actorId"},
     RefView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "worn",
-              "bodyAtRest", "bodyRestAt", "changeFormFnv", "changeFormAt"},
+              "bodyAtRest", "bodyRestAt", "changeFormFnv", "changeFormAt", "scriptStateFnv", "scriptStateAt", "scriptStateSeq"},
     FigureSpellsView: {"count", "extra", "base"},
     FollowView: {"following", "client", "cell", "actorId"},
     FateView: {"fated", "baseId", "level", "raceId", "worn"},

@@ -28,7 +28,7 @@ class BoardTests(unittest.TestCase):
 
     def test_script_state_answers_are_kept_by_the_form_id_they_named(self):
         # ADR-068 rung 3's read (c.script_state(id)): a busy answer names no formId of its own and is kept by the step's;
-        # a later read of the same reference replaces it; the native's refusal is an error answer, no read
+        # a later read of the same reference replaces it; the native's refusal is an error answer, kept in its place
         from labapi.board import StepBoard
 
         board = StepBoard(clock=lambda: 100.0)
@@ -47,10 +47,32 @@ class BoardTests(unittest.TestCase):
         board.complete(refused.id, {"ok": True, "data": {"error": "SerializeScriptState refused 380b3 (answer \"\"; the seat's log says why)"}})
         self.assertTrue(board.script_state("c1", 0xAA8CB)["quiescent"])
         self.assertEqual(board.script_state("c1", 0xAA8C3)["fnv1a"], 9)
-        self.assertIsNone(board.script_state("c1", 0x380B3), "an error answer is no read")
+        self.assertIn("refused 380b3", board.script_state("c1", 0x380B3)["error"])
         self.assertIsNone(board.script_state("c2", 0xAA8CB))
         board.clear_views()
         self.assertIsNone(board.script_state("c1", 0xAA8CB))
+
+    def test_a_failed_script_state_read_takes_the_place_of_the_last_good_one(self):
+        # the fresh review of b-script-state-restart, note 1: a relaunched seat whose read fails must not be read as its
+        # earlier game's answer, so an error answer and a step that failed outright both replace it
+        from labapi.board import StepBoard
+
+        board = StepBoard(clock=lambda: 100.0)
+        good = board.enqueue("c1", "script-state", {"formId": 0xAA8CB})
+        board.poll("c1")
+        board.complete(good.id, {"ok": True, "data": {"formId": 0xAA8CB, "quiescent": True, "fnv1a": 7, "scripts": []}})
+        gone = board.enqueue("c1", "script-state", {"formId": 0xAA8CB})
+        board.poll("c1")
+        board.complete(gone.id, {"ok": True, "data": {"error": "no reference aa8cb in this game"}})
+        self.assertEqual(board.script_state("c1", 0xAA8CB), {"error": "no reference aa8cb in this game"})
+        again = board.enqueue("c1", "script-state", {"formId": 0xAA8CB})
+        board.poll("c1")
+        board.complete(again.id, {"ok": True, "data": {"formId": 0xAA8CB, "quiescent": True, "fnv1a": 8, "scripts": []}})
+        self.assertEqual(board.script_state("c1", 0xAA8CB)["fnv1a"], 8)
+        thrown = board.enqueue("c1", "script-state", {"formId": 0xAA8CB})
+        board.poll("c1")
+        board.complete(thrown.id, {"ok": False, "error": "TypeError: x is undefined"})
+        self.assertEqual(board.script_state("c1", 0xAA8CB), {"error": "TypeError: x is undefined"})
 
     def test_inventory_answers_are_kept_by_the_ref_they_named(self):
         # two chests read in one run stay apart (c.inventory(ref), the root-cause plan's W4)

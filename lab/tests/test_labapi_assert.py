@@ -1522,6 +1522,37 @@ class ScriptStateTests(unittest.TestCase):
         with self.assertRaises(AssertionData):
             Evaluator(RichServer(), NearViews(), ["c1", "c2"]).evaluate('c1.script_state(0xaa8cb).quiescent == true')  # no reads kept
 
+    def test_a_last_read_that_failed_is_a_data_error_never_an_older_answer(self):
+        # the board keeps an error answer in the place of the seat's last good one (b-script-state-restart's review,
+        # note 1), and the accessor raises on it, the error's text in the message
+        from labapi.assertions import AssertionData, Evaluator
+        views = ScriptStateViews()
+        views.answers["c1"][0xAA8CB] = {"error": "SerializeScriptState refused aa8cb (answer \"\"; the seat's log says why)"}
+        ev = Evaluator(RichServer(), views, ["c1", "c2"])
+        for expr in ('c1.script_state(0xaa8cb).quiescent == true', 'c1.script_state(0xaa8cb, "defaultPuzzlePillarScript").state == "position02"'):
+            with self.assertRaisesRegex(AssertionData, "answered an error: SerializeScriptState refused aa8cb", msg=expr):
+                ev.evaluate(expr)
+
+    def test_the_servers_script_record_of_a_reference(self):
+        # ADR-068 rung 3: labState ref's scriptStateFnv, scriptStateAt and scriptStateSeq (the server's scriptState
+        # property), 0 without a record; a lab gamemode without the fields is missing data, never a pass
+        from labapi.assertions import AssertionData, Evaluator
+        srv = RichServer()
+        refs = {0xAA8CB: {"found": True, "actorId": 0xAA8CB, "x": 5656.0, "y": -896.0, "z": -768.0, "cell": "371de:Skyrim.esm",
+                          "scriptStateFnv": 0x9DC5811C, "scriptStateAt": 1762430000123, "scriptStateSeq": 2},
+                0xAA8CC: {"found": True, "actorId": 0xAA8CC, "x": 5656.0, "y": -640.0, "z": -768.0, "cell": "371de:Skyrim.esm",
+                          "scriptStateFnv": 0, "scriptStateAt": 0, "scriptStateSeq": 0},
+                0xAA8CD: {"found": True, "actorId": 0xAA8CD, "x": 5656.0, "y": -384.0, "z": -768.0, "cell": "371de:Skyrim.esm"}}
+        srv.ref = lambda actor_id: refs.get(actor_id, {"found": False})
+        ev = Evaluator(srv, ScriptStateViews(), ["c1", "c2"], snapshots={"atBefore": 1762430000000})
+        for expr in ("server.ref(0xaa8cb).scriptStateFnv == 0x9dc5811c", "server.ref(0xaa8cb).scriptStateSeq == 2",
+                     'server.ref(0xaa8cb).scriptStateAt > snapshot("atBefore")', "server.ref(0xaa8cc).scriptStateAt == 0",
+                     "server.ref(0xaa8cb).scriptStateFnv == c1.script_state(0xaa8cb).fnv1a"):
+            with self.subTest(expr=expr):
+                self.assertTrue(ev.evaluate(expr))
+        with self.assertRaises(AssertionData):
+            ev.evaluate("server.ref(0xaa8cd).scriptStateFnv == 0")   # a gamemode without the fields
+
     def test_its_call_shapes_are_checked(self):
         from labapi.assertions import AssertionSyntax, Evaluator
         ev = Evaluator(RichServer(), ScriptStateViews(), ["c1", "c2"])
