@@ -15,7 +15,8 @@
 # 0x9b0dd 1,227 units off declared in camp.near, put test 2 in its bite at load-in: dead at 20:04Z before the go (numidium's).
 id: 48
 build: "canon 5186df39 (fork m4-traps-47 merged by verb-merge) under the layer stage of apocrypha/layer-appearance 5a5facb2"
-world: playtest-canon-chars-20261106T081837Z   # the canonical seats (Eli, 2026-11-06): rotfern and Ariadne at 200
+world: playtest-pt48-wire-reset-20261106T205808Z   # 48's own world at 20:55Z (new Ariadne saved in RaceMenu), the
+  # tripwire 0xb6d3f and its seven rocks moved aside (reset-embershard-wire-20261106T205808Z): the trap fresh, the rest as played
 hold:
   minutes: 120
   reason: "playtest 48: Embershard Mine's traps and the appearance layer"
@@ -27,9 +28,16 @@ server:
   perks: true
   leveling: true
 camp:
+  # the reset (Eli, 2026-11-06 12:5x PST: "let's reset to place them both at the inside of the dungeons start to fuck with
+  # the traps"): the game's landing of the main door 0xb6cce inside the mine (lab/esm.py door: (2479, 1366, 9254), rot 11.5),
+  # test 2 sixty units ahead; the tripwire about 2,100 units on
+  interior: "Eli's reset just inside Embershard's main door to trip the boulder trap; a login inside the cell is D-L1's case, but the Tripwire arms in OnLoad (thuum-cf), so a wire that never fires for a seat logged in inside is that read"
   teleports:
-    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [16198, -53980, 1349], rot: [0, 0, 240.6]}
-    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [16146, -54009, 1380], rot: [0, 0, 240.6]}
+    - {kind: teleport, profileId: 1, cell: "b6be6:Skyrim.esm", pos: [2479, 1366, 9254], rot: [0, 0, 11.5]}
+    - {kind: teleport, profileId: 2, cell: "b6be6:Skyrim.esm", pos: [2491, 1425, 9254], rot: [0, 0, 11.5]}
+  near:
+    - 0xb6ff7   # LvlBanditMeleeCommonerM, no server record in all of 48 (never streamed while the party crossed the mine), about 1,440 off
+    - 0xb6ff8   # LvlBanditMeleeNordM, the same, about 1,530 off
 seats:
   - profile: 1
     name: "test 1"
