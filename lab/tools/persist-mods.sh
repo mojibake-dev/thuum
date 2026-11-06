@@ -25,7 +25,8 @@
 #   loose out of the BSA (SkyUI's archive carries the same file and loads
 #   later as client-only; loose beats every archive).
 # - CBBE 2.0.3 is an essentials row since 2026-11-06 (D2 B, Eli: "yeah let's go with B. fire at will"):
-#   lab/layer/essentials.tsv cbbe-2.0.3@1.6.1170, the installer choices as folders (docs/MODS.md).
+#   lab/layer/essentials.tsv; since 2026-11-06 the SFW Edition (cbbe-sfw-1.1.4@1.6.1170) with 2.0.3's slider plugin and a
+#   BodySlide build for its morphs (docs/MODS.md).
 # - Lost Grimoire 1.6 (Eli, 2026-10-10: "i guess we're rolling in
 #   lostgrimoire as well"), for its Teleportation (docs/MODS.md): Nexus mod
 #   4455 file 746543, Fenestrate's version so Eli's own install matches the

@@ -520,6 +520,32 @@ check (docs/research/terrain-upgrade-crash.md); the run set reads rotferns-fixes
 after the load-in for "installed" and the skip count. A change to lab/rotferns-fixes builds on main by
 itself; the row then moves to that job.
 
+**CBBE SFW Edition replaces CBBE 2.0.3 (Eli, playtest 48, 2026-11-06: "now all we need is that sfw
+skin to come back in and we're good").** Three rows take the place of the 2.0.3 row.
+`cbbe-sfw-1.1.4@1.6.1170` is the SFW archive (Nexus 74257 file 790860) as its installer lays NeverNude
+and Vanilla Outfits (00 Required and 10 Outfits; the NeverNude body is 00 Required's own), without the
+Face Pack, the brow and dirt options, 11 Outfits BodySlide or 00 Required's CalienteTools. Its CBBE.esp is
+byte-identical to 2.0.3's. `cbbe-2.0.3-racemenu-morphs@1.6.1170` keeps CBBE 2.0.3's folder 26, the slider
+plugin RaceMenuMorphsCBBE.esp and its scripts, byte-identical, which SFW does not ship (its Q15).
+`cbbe-sfw-bodyslide-1.1.4@1.6.1170` is SFW's own BodySlide projects built with morph files: BodySlide and
+Outfit Studio 6.1.0 (Nexus 201 file 832109) run headless on sky-build with the shipped preset
+"CBBE (SFW)" and --trimorphs --quiet. That is the NeverNude body, feet, hands and beast hands, then the
+groups "CBBE Vanilla Outfits (SFW)" (the one group the Vanilla, Dawnguard, Dragonborn and Vanilla 1st
+Person files define), "CBBE Creation Club (SFW)" and "CBBE Creation Club 1st Person (SFW)". It produced
+1,369 meshes, each with a BODYTRI link to one of 686 .tri, laid over the prebuilt ones it rebuilds. The
+other 18 prebuilt meshes (the first-person body and hands, Astrid's body, a few first-person clothes)
+stay without morphs; the body project's three first-person sets can join the build later. The body's
+morphs now cover SFW's bra and panty shapes, so the underwear follows the sliders. The hand morphs carry
+one slider, still not VanillaSSEHi, so that slider still opens the wrists. A replay of the three rows
+against the host's manifest of the 2.0.3 stage: 441 files kept byte-identical, 867 changed (SFW's
+outfit meshes), 793 added (mostly SFW's Creation Club outfits), 984 gone. The gone files are nearly
+all the BodySlide project files the 2.0.3 row laid into Data from its 09 Outfits BodySlide, tooling that
+never belonged there, plus four .tri for meshes that no longer reference them; the clones' lay record
+prunes them by hash. Goam's row still wins femalebody_1_sk and femalehands_1_sk. The BodySlide row is
+`local`, the proof's output kept in lab/.cache/mods; a pipeline job that rebuilds it from the two
+archives on sky-build is the next step. Underwear choice: NeverNude, vanilla-styled; the modern style is
+the "CBBE Underwear (SFW)" set plus SFW's 30 Underwear textures, if Eli prefers it.
+
 **CBBE 2.0.3 becomes a row (D2 B, Eli, 2026-11-06: "yeah let's go with B. fire at will").** The
 render's own CBBE block (its FOMOD resolved each run with the choices Vanilla Shape, Vanilla Outfits,
 RaceMenu Morphs (BodyMorph), Morph Files (Outfits) and Face Pack) is gone; the row
