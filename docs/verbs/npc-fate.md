@@ -911,10 +911,13 @@ set no blame actor; Papyrus's akKiller is typed Actor; but a non-actor
 killer in the native event would make Skyrim
 Platform drop deathStart altogether, EventHandler.cpp L413-447, and the
 report would never leave the host: the lab's plate run decides, Arvel's
-plate in Bleak Falls Temple the natural read, x-npc-trap-report by path
-since 2026-10-24 22:50 and never run, its placeholders PLATE_REF,
-PLATE_X/Y/Z and the victim's id unfilled, so it cannot run as written until
-numidium's esm.py fills them); and the fall bound (200 units within 4 s is a
+plate in Bleak Falls Temple the natural read; superseded on 2026-11-06 by
+x-trap-npc-kill v1.1 (lab/.cache/probes, 99aa3bb3; a draugr held in the
+Temple wall's swing and a blade, the kill read through the server's own
+trap evidence, fork m4-traps-47 341c7389; its run in the stage of
+5186df39), the earlier draft x-npc-trap-report archived unrun, its
+placeholders PLATE_REF, PLATE_X/Y/Z and the victim's id never filled); and
+the fall bound (200 units within 4 s is a
 plausibility floor, not the engine's damage rule, which ran on the host;
 x-npc-fall-report reads a drop the engine kills at). MEASURED
 (x-npc-fall-report v3 20261025-012351 on 44 8efabb10, 18:26 PDT, numidium's
@@ -924,7 +927,7 @@ report went out, and the server took it by "a drop of 3813 units in the
 host's samples", killed the record and scheduled the 240 h reset; dead on
 the record and both seats; the bound of 200 held with room. Committed as
 lab/scenarios/b-npc-death-report.yaml (main 3c6c54e). The hazard's evidence
-is the trap half's open read above (x-npc-trap-report).
+is the trap half's read above (x-trap-npc-kill v1.1 since 2026-11-06).
 Nightly 20261025-124620 red on the roll, not the report (numidium's
 agent, 11:5x PDT): the subject 0x85547 came up a SKEEVER (EncSkeever
 0x23ab7, race 78337; the gate's green had EncWolf 0x23abe, 78346), one
@@ -1318,9 +1321,10 @@ the deferred kill did not hold.
   host's samples; the server records the death"). The NPC fight's reports
   read inside b-npc-death's and b-cell-host's runs (the log's "accepted" or
   "already dead" lines); a trap's death is the Server section's open trap
-  read (x-npc-trap-report) and no claim.
-  The trap read's probe, by path for the stage after playtest 34 (22:51
-  PDT, a research agent's draft): lab/.cache/probes/x-npc-trap-report.yaml,
+  read (x-trap-npc-kill v1.1 since 2026-11-06) and no claim.
+  The trap read's first probe (22:51 PDT, a research agent's draft, never
+  run and its placeholders never filled; superseded on 2026-11-06 by
+  x-trap-npc-kill v1.1 and archived): lab/.cache/probes/archive/x-npc-trap-report.yaml,
   Arvel the Swift's pressure plate and swinging spike wall in Bleak Falls
   Temple (0x371de; UESP's walkthrough lists no other plate in the zone; the
   lever puzzle's darts are a lever puller's activation, the blades and the
@@ -1339,7 +1343,7 @@ the deferred kill did not hold.
   loaded trigger raises OnTriggerEnter is undocumented (hence the walk
   first); the spike wall's leveled 75 damage against a level-1 bandit's 35
   health is a HYPOTHESIS on the roll, the probe's premise, read by its first
-  run (x-npc-trap-report has never run, its placeholders unfilled); a body
+  run (x-npc-trap-report never ran; x-trap-npc-kill v1.1 reads the kill); a body
   flung past 512 units reads E_DEATH_UNCHECKED.
 - T3 scenario id, the sketch: lab/scenarios/b-npc-fate.yaml (written by hand after the
   grammar lands, rule 13; the sketch): two seats under npcEnabled and
@@ -2743,7 +2747,7 @@ their deaths again" (break 2); c1 crashed in Sven's redress on an actor with no 
    (The roll, the death, the body's point, the respawn and the loot R0; the
    host's death report R1 since train-44, 2026-10-24: ActorDeath, checked by
    the server's own evidence; a hazard death's evidence the Server section's
-   open trap read (x-npc-trap-report), refused and counted until that run;
+   trap read (x-trap-npc-kill v1.1), refused and counted until fork 341c7389's trap evidence;
    the fall checked by the host's samples.)
 2. Does every address come from CommonLib, addrlib, or a Ghidra reference?
    (Headers by file:line; the roll site, the reset and the dead-at-load
