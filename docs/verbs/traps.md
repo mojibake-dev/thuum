@@ -1178,3 +1178,23 @@ The rocks' grant to the firing seat is among its premises. x-trap-boulders v1 cl
 b6d3f set moving by this seat.s script: claimed by impulse", c1's "trap body b6d3f followed"), which this rule makes false by
 design, so it moved to lab/.cache/probes/archive/x-trap-boulders-v1.yaml. Built, not yet staged: the train's pushed head is
 833d01b3, pipeline 5582 green.
+
+The second reset, read (17:06 PST 2026-11-06 (01:06Z 11-07), thuum-fa; a read-only agent over results/playtest-48's server.log
+and results/relaunch-logs/20261106T213326Z-c1-platform.log and -c2-platform.log, with traces trace-c1-14 and trace-c2-14). The
+earlier HYPOTHESIS (the host's figure crossed the thin trigger between two of the guest's position steps, so the guest's copy never
+fired) is refuted: c1's own copy fired. At 21:26:10.342Z the server granted c2 the wire as a trap body ("ff000001 claims prop
+b6d3f by touch 3: granted, epoch 1; 2 listener(s) told"); c1 set its follow ("setPropFollowed(b6d3f, true): followed set 1",
+13:26:09:248 on c1's clock, about 1.08 s behind the server's), and 156 ms later its own Tripwire ran its [Active] onBeginState
+("ObjectReference.SetMotionType on b6d3f, a trap body another seat streams: run with motion type 4 (Keyframed) for the script's 1,
+counted (followed)"). That SetMotionType(self, 1, true) is the state's first call in Tripwire, USSEP's and vanilla's alike, and
+"(followed)" counts a Papyrus script's call only (the platform's own calls are filtered before it); the rocks' own calls followed
+0.667 s later, the host's own gap being 0.648 s, so c1's chain fired through the linker 0xb6d3e. Ariadne's figure on c1 moved
+about 5.8 units a frame at the crossing (its largest single-frame move in the trace 13.5 units), so it never jumped the trigger.
+The second reset's taut string is therefore the third reset's: the guest's own rope ran Keyframed behind the host's claim, and the
+rule above (a trigger is never a trap body) covers both; the candidate fix "a copy which has not fired fires once when a live
+destroyed record arrives" would have changed nothing here and is not built. The host's unhurt player is a HYPOTHESIS, a near miss:
+trace-c2-14 holds her health at 200 with no hit taken, no god mode line anywhere, and she stood 48 to 85 units from the nearest
+rocks' fall lines as they landed, where the 21:44Z trip's two hurt players stood 7 to 25 units from one; the rocks' own positions
+on c2 are unread. A recording gap for the record: results/playtest-48's c1-console.log and c2-console.log cover 19:59Z to 20:00Z
+and c1.log and c2.log 21:53Z to 22:03Z, so skymp5-client's own trap lines ("fired here", "trap result") for the first three resets
+were never recorded; only the platform logs under results/relaunch-logs/ survive for that stretch.
