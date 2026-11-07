@@ -159,8 +159,9 @@ So the smallest set that keeps the sliders is three pieces:
    file in lab/.cache/mods: 2,940 files, zero .tri, no RaceMenu Morphs plugin, no scripts; its
    CBBE.esp is byte-identical to 2.0.3's). BodySlide's Batch Build with "Build Morphs" over the SFW
    projects (folder 11 Outfits BodySlide: 1,372 project files, groups CBBE (SFW), CBBE Vanilla
-   (SFW), Dawnguard, Dragonborn, Creation Club and the two 1st-person groups, one shipped preset
-   "CBBE (SFW)"), run once by Eli on Fenestrate with the chosen preset, gives meshes and .tri that
+   (SFW), Dawnguard, Dragonborn, Creation Club and the two 1st-person groups; one preset file,
+   "CBBE (SFW).xml", whose 14 presets all sit in the group "CBBE (SFW)", which is not itself a
+   preset), run once by Eli on Fenestrate with the chosen preset, gives meshes and .tri that
    match each other; that output is a `local` row (hashes in the manifest, files in persist).
    Reusing CBBE 2.0.3's folders 27 and 28 over SFW's prebuilt meshes is not a safe fallback: SFW's
    body meshes are a different build from every 2.0.3 variant (none of the md5s match), and a .tri
@@ -184,7 +185,7 @@ differ.
 
 Install CBBE SFW Edition in Vortex (NeverNude, Vanilla Outfits, no Face Pack) with BodySlide. In
 BodySlide: Outfit/Body "CBBE Body (SFW)" (or whatever the SFW body project is named in the list),
-Preset "CBBE (SFW)", tick "Build Morphs", then Batch Build with the groups CBBE (SFW), CBBE Vanilla
+Preset "CBBE Curvy (Outfit)" (the one SFW's prebuilt meshes match), tick "Build Morphs", then Batch Build with the groups CBBE (SFW), CBBE Vanilla
 (SFW), CBBE Dawnguard (SFW), CBBE Dragonborn (SFW), CBBE Creation Club (SFW) and the two 1st Person
 groups, all with Build Morphs on. The output (meshes and .tri, the body under character assets and
 every outfit) is the morph set; it lands in the layer as a `local` row beside the SFW row and the
@@ -197,7 +198,12 @@ and groups were used; the row records the hashes, the files stay out of the repo
 2. Answered: client 2 (the seats; the Face Pack, hash-confirmed on both).
 3. Answered: the skylab clients one and two; the seats lack the body .tri (case b).
 4. Answered: "keep the shipped sfw shape, but the sliders should work". So the BodySlide build uses
-   the shipped preset "CBBE (SFW)" and exists only to produce the morph files.
+   the preset SFW's prebuilt meshes are built with and exists only to produce the morph files. That
+   preset is "CBBE Curvy (Outfit)". Correction, 2026-11-07: this page first named "CBBE (SFW)", which is
+   the presets' group, not a preset. BodySlide 6.1.0 then builds at the projects' default sliders
+   without a warning, so every build up to job 19669 came out slimmer than SFW's. A sweep of the 14
+   presets on sky-build matched SFW's prebuilt femalebody_1.nif to CBBE Curvy (Outfit) alone (mean
+   0.0002 units), and lab/bodyslide/build.ps1 (layer-appearance 0ba2e76b) now names it.
 5. Answered: "bodyslide is probs on fenestrate". The SFW archive ships no morphs, so that one build
    is the SFW path's prerequisite.
 
