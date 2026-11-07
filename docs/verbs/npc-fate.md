@@ -3386,3 +3386,34 @@ review) and was restaged as v2, then v2.1.
 The limit: dressBody equips armor alone, so a worn weapon the body holds loose stays loose. Open, the root: why c1's engine dressed
 b6fe4 and b6dbb in pieces the record never held is unread; the fix makes the record's worn armor win on a body and explains nothing
 of the engine's extra pieces. A later probe reads the reconcile's dress path on a body the engine dressed itself.
+
+## The body's rest as a dwell (18:14 PST 2026-11-06 (02:14Z 11-07), thuum-fa; fork m4-train-48 75c134ad, pipeline 5592)
+
+Rung 3's merge gate 20261107-005511 went red on b-npc-death alone, three times (012944, 013340 relaunched, 013732 cold), each on
+step 44's fall-point bounds: the record after the restart 485 to 724 units from the "body" snapshot the server took 10 s after the
+kill. numidium's read (thuum LOG c6c1262a): not rung 3's (its record touched only the critter spawners 10c381 and 10c382) but the
+body's rest. The server called 85547 at rest after 2 or 3 samples, 212 to 307 ms after its death ("two samples in a row agree"),
+while c1's engine, and c2's with it, held the body 430 to 710 units on by step 18. c1's own lines in 012944 say why: the server's
+kill word landed at 01:31:19.029Z, the first dead sample went at 19.081, and "body 85547 at rest on this engine after 133 ms:
+(123467, -80355, 10662); 0 units from the first dead sample" at 19.209. The engine's reference held the death point for the first
+samples, so two agreeing samples called the rest there; the owner then stopped sampling (the server saw no sample of 85547 after
+it, no E_BODY_AT_REST line) and the record kept a place the ragdoll left. After the restart the same body re-settled over 11,473
+ms, 530 units from its first dead sample. The greens were not proof of the rule: 114524's 86112 rested at 191 ms on 2 samples too,
+and its owner's later refused samples put it some 2,000 units on; the scenario's claims never name it. This is the 11-03 fresh
+review's warning above ("the fix is a dwell held across samples spanning about 500 ms, not a count") met on the lab.
+
+The rule now, on both ends of the one sample stream: a body is at rest when its samples have held within 2 units and 2 degrees of
+the dwell's anchor (the last sample past those bounds) for the dwell, no sooner than the floor after the death; the 15 s window
+stays the backstop. The owner (skymp5-client sendInputsService's body sampling, changeFormService.ts CORPSE_REST_DWELL_MS 1000 and
+CORPSE_REST_MIN_MS 3000, the floor from its first dead sample) sends its ending sample reliably and then no more; the server
+(MpActor kBodyRestDwellMs 750 and kBodyRestMinMs 2500, the floor from its recorded death) runs the same test a margin below, so it
+rests at or before the owner's final sample and never waits on a sample the owner no longer sends (where it does, a dropped anchor
+or a late death acceptance, the window settles it at the last sample, the same place). The anchor also ends the creep the review
+named: two samples 1.5 units apart agreed, an anchor 3 units back does not. The log lines keep the patterns the probes match
+("settling under", "at rest at", "at rest on this engine after"); the reason reads "still for the dwell". R2 as before: the owner's
+ragdoll is recorded, not judged. HYPOTHESIS that the floor covers the reference's hold at the death point, read by the next
+b-npc-death (step 44's bounds green on its own runs, the server's and c1's rest lines naming one place). T0: ActorDeathTest's rest
+cases rewritten to the dwell (the death point's agreement inside the floor, the slide, a creep, two turns through the wrap, the
+dwell's end at 750 ms, a body still from its first sample resting at the floor), the owner's ending sample through the movement
+path (relayed reliably, every later report refused), the respawn case at rest by the dwell. Its gate is the 48 train's, with rung
+3 inside (fork 62f2038a merges m4-scripts-3-record 458a6930): one gate for rung 3, the 48 fixes and this.

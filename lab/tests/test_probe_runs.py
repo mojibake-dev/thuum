@@ -45,5 +45,28 @@ class ProbeRunsTest(unittest.TestCase):
         self.assertEqual(pr.docs_naming([], self.dir), [])
 
 
+    def test_a_version_with_a_point_is_still_a_promise(self):
+        d = self.doc("v", "x-trap-rock-hang v1.3 by path, with its trace.\n")
+        self.assertEqual(pr.unrun(d, set()), ["x-trap-rock-hang"])
+
+    def test_a_promise_naming_another_branch_is_that_branchs_to_hold(self):
+        # the canon merge of 0f2f3c55 (2026-11-05) was refused on probes for code on other branches
+        d = self.doc("v", "x-host-restart-follow by path for m3-follow-vouch, before that branch merges.\n"
+                          "x-prop-static (by path, for m4-props-rest) after its slice.\n"
+                          "x-untagged by path holds every merge.\n")
+        self.assertEqual(pr.unrun(d, set(), "m4-traps-47"), ["x-untagged"])
+        self.assertEqual(pr.unrun(d, set(), "m3-follow-vouch"), ["x-host-restart-follow", "x-untagged"])
+        self.assertEqual(pr.unrun(d, set()), ["x-host-restart-follow", "x-prop-static", "x-untagged"])
+
+    def test_the_gate_lists_read_as_verb_merge_reads_them(self):
+        g = self.dir / "gate.yaml"
+        g.write_text("# a comment\nalways: [smoke-two-players, a-restart-persistence]   # the floor\n"
+                     "watch:\n  - b-npc-death        # its item\n  - b-npc-caster\npending:\n  - b-push\n", encoding="utf-8")
+        lists = pr.gate_lists(g)
+        self.assertEqual(lists["always"], ["smoke-two-players", "a-restart-persistence"])
+        self.assertEqual(lists["watch"], ["b-npc-death", "b-npc-caster"])
+        self.assertEqual(lists["pending"], ["b-push"])
+
+
 if __name__ == "__main__":
     unittest.main()

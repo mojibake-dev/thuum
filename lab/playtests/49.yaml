@@ -1,0 +1,55 @@
+# Playtest 49 (numidium, 2026-11-06 ~19:20 PST): Embershard and the Temple, with scripts that survive a hand-off, on the
+# canonical seats. The build is fork m4-train-48 75c134ad (rung 3's script record 458a6930 merged in, the 48 fixes, the body's
+# rest as a dwell on both ends), pipeline 5592's server image and dist, staged by verb-stage over the layer stage of
+# apocrypha/layer-appearance 6bbdb751 (the SFW body built on CI, Rotfern's Fixes 0.1.1). thuum-fa's checklist is
+# docs/private/playtest-49.md (items 1 to 5; apocrypha's layer items 6 and 7; 8 anything else).
+# The world is the canonical one, playtest-canon-chars-20261106T224932Z (rotfern and Ariadne at 200, Ariadne's look from 48
+# and her clothes worn). Embershard Mine 0xb6be6 is untouched there: the wire 0xb6d3f and the platform 0xb6d47 hold no record
+# (the game files' state), the bandits are alive (read 2026-11-07 03:2xZ). The Temple 0x371de is as 47 left it.
+# The camp (thuum-fa: Embershard first, rotfern walking in through a door so she hosts the mine; outside the main door unless
+# a wolf is near it, else 48's back-door landing): the main door is out, lab/esm.py near on the players' Skyrim.esm placing the
+# lookout 0xb6ce1 (LvlBanditMelee1HAggro1024) 802 units from its landing (8849, -58120, 1446) and the wolf 0x992d8 at 2,216,
+# both alive in this world. So 48's second camp: the game's landing of the back door 0xb6f29 (lab/esm.py door 0xb6f24:
+# (16198, -53980, 1349)), nothing alive within 2,500 units, both seats facing the door 660 units off (heading 164.5; the
+# door at (16375, -54616)), test 2 on 48's tested spot beside test 1.
+id: 49
+build: "fork m4-train-48 75c134ad (rung 3, the 48 fixes, the body's rest) staged by verb-stage under the layer stage of apocrypha/layer-appearance 6bbdb751"
+world: playtest-canon-chars-20261106T224932Z   # the canonical seats (rotfern, Ariadne dressed); Embershard untouched
+hold:
+  minutes: 150
+  reason: "playtest 49: Embershard and the Temple, the 48 train and rung 3"
+server:
+  npcEnabled: true
+  gameHour: 12.0
+  locks: true   # every switch on, as the 44 baseline
+  weatherSync: true
+  perks: true
+  leveling: true
+camp:
+  # Embershard first (items 1 and 2). For the Temple (items 3 and 4), the camp moves to 48's fourth reset, the game's landing
+  # of the Temple's door 0x15da5, each seat walking into 0x371de by a real cell load, rotfern first:
+  #   - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [-2966, -43331, 6145], rot: [0, 0, 104.6]}
+  #   - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [-2908, -43346, 6145], rot: [0, 0, 104.6]}
+  teleports:
+    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [16198, -53980, 1349], rot: [0, 0, 164.5]}
+    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [16146, -54009, 1380], rot: [0, 0, 164.5]}
+seats:
+  - profile: 1
+    name: "test 1"
+    perks: [0x7934b]   # Overdraw40 through the server's AddPerk (284a4d51): the headshot rule's condition
+    spells: []
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]   # Survival off
+    values:
+      Marksman: 60
+    percentages: {health: 1, magicka: 1, stamina: 1}
+  - profile: 2
+    name: "test 2"
+    perks: []
+    spells: []
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]
+    percentages: {health: 1, magicka: 1, stamina: 1}
+streams:
+  test1: 48989
+  test2: 49989
+after:
+  readback: percentages

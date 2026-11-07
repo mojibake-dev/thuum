@@ -822,7 +822,7 @@ c2 watches. Expected on c2 with the gate: 35225 entered twice per line (type
 0 from 39643 inside the say task, type 1 from 37544 inside DriveVoice), no
 25616 and no 53997 after either, the BarterMenu shut. Falsified by a 53997 on
 c2 with no 35225 before it (another sender; gate at 25616) or by the menu
-opening with no 53997 at all. Probe x-npc-vendor by path: the same two
+opening with no 53997 at all. Probe x-npc-vendor (lab/.cache/probes, written, never run): the same two
 seats, claims c2.state.menuOpen("BarterMenu") false after the host's ask,
 c1's true, c2's log-count of the gate line >= 1.
 
@@ -2146,7 +2146,7 @@ re-analyst's read: how the engine advances an info's responses on the host
 SpeakSoundFunction is called per line; then either the puppet's voice drive
 (PuppetHooks DriveVoice) advancing the response at a line's end, or a
 per-line capture on the host with the puppet saying by response index.
-HYPOTHESIS until x-npc-voice-lines (by path 00:16 PDT 2026-10-28, unrun):
+HYPOTHESIS until x-npc-voice-lines runs (lab/.cache/probes, written 00:16 PDT 2026-10-28, never run):
 the trace x-voice-lines 20261028-131134 met single-line infos only and
 decided nothing; under play the continuation's say returned 'started' for
 the second response (playtest 37 findings 4 and 14) while Eli heard half,
