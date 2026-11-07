@@ -524,6 +524,43 @@ class NpcKillStep(unittest.TestCase):
                 load_scenario(head + bad + "\n")
         self.assertEqual(playtest_step("script-state {formId: 0xaa8c3}"), ("script-state", {"formId": 0xAA8C3}))
 
+    def test_alias_names_its_quest_and_the_quests_alias_id(self):
+        # ADR-068 rung 4's AliasFill read: a quest's reference alias on one seat (MS13 0x39645); alias 0 is an id like any
+        # other, a FormDesc quest passes as written for the runner to resolve, and a bare alias never reaches the driver
+        from labapi.scenario import load_scenario, playtest_step
+
+        head = "id: x-al\nclients: [c1, c2]\nsteps:\n  - c1: "
+        step = load_scenario(head + "alias {quest: 0x39645, alias: 0}\n").steps[0]
+        self.assertEqual((step.kind, step.client, step.action, step.args), ("client", "c1", "alias", {"quest": 0x39645, "alias": 0}))
+        self.assertEqual(load_scenario(head + 'alias {quest: "039645:Skyrim.esm", alias: 11}\n').steps[0].args,
+                         {"quest": "039645:Skyrim.esm", "alias": 11})
+        for bad in ("alias", "alias {}", "alias {quest: 0x39645}", "alias {alias: 1}", "alias {quest: 0, alias: 1}",
+                    "alias {quest: true, alias: 1}", 'alias {quest: "", alias: 1}', "alias {quest: 0x39645, alias: -1}",
+                    "alias {quest: 0x39645, alias: 0x10000}", 'alias {quest: 0x39645, alias: "1"}', "alias {quest: 0x39645, alias: true}",
+                    "alias {quest: 0x39645, alias: 1, ref: 0x39655}"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(head + bad + "\n")
+        self.assertEqual(playtest_step("alias {quest: 0x39645, alias: 1}"), ("alias", {"quest": 0x39645, "alias": 1}))
+
+    def test_factions_names_its_actor_and_the_factions_it_reads(self):
+        # ADR-068 rung 4's standing read: an actor's ranks and crime faction on one seat; factions by form id or FormDesc
+        from labapi.scenario import load_scenario, playtest_step
+
+        head = "id: x-st\nclients: [c1, c2]\nsteps:\n  - c2: "
+        step = load_scenario(head + 'factions {formId: 0x39655, factions: [0x5c84e, "000db1:Skyrim.esm"]}\n').steps[0]
+        self.assertEqual((step.kind, step.client, step.action, step.args),
+                         ("client", "c2", "factions", {"formId": 0x39655, "factions": [0x5C84E, "000db1:Skyrim.esm"]}))
+        for bad in ("factions", "factions {}", "factions {formId: 0x39655}", "factions {factions: [0x5c84e]}",
+                    "factions {formId: 0x39655, factions: []}", "factions {formId: 0x39655, factions: 0x5c84e}",
+                    "factions {formId: 0, factions: [0x5c84e]}", 'factions {formId: "0x39655", factions: [0x5c84e]}',
+                    "factions {formId: 0x39655, factions: [0]}", "factions {formId: 0x39655, factions: [true]}",
+                    "factions {formId: 0x39655, factions: [0x5c84e], crime: true}",
+                    "factions {formId: 0x39655, factions: [" + ", ".join(["0x5c84e"] * 33) + "]}"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(head + bad + "\n")
+        self.assertEqual(playtest_step("factions {formId: 0x39655, factions: [0x5c84e]}"),
+                         ("factions", {"formId": 0x39655, "factions": [0x5C84E]}))
+
     def test_transfer_stores_into_or_takes_from_one_container(self):
         # x-shared-chest-phantom's store and take without the menu's keys: an item and exactly one of to (from the
         # player into the chest) and from (from the chest into the player); both or neither never reaches the driver

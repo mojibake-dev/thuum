@@ -2153,7 +2153,8 @@ class Runner:
         recipe becomes the recipe's form id (its station passes through: a
         reference id, or a name a later refs table resolves), race-pick's
         race its form id, known's and held's ids theirs, inventory's ref its
-        form id, transfer's item and its to or from theirs, and a FormDesc in
+        form id, transfer's item and its to or from theirs, alias's quest and
+        each of factions' factions theirs (ADR-068 rung 4), and a FormDesc in
         braces inside console text the run's id in the console's hex
         ("player.equipspell {044d44:Apocalypse - Magic of Skyrim.esp} right"
         types 1a044d44 under the essentials layer)."""
@@ -2173,6 +2174,10 @@ class Runner:
                 out["ids"] = [self.tables.base_id(x) if isinstance(x, str) else x for x in out["ids"]]
             if action == "inventory" and isinstance(out.get("ref"), str):
                 out["ref"] = self.tables.base_id(out["ref"])
+            if action == "alias" and isinstance(out.get("quest"), str):
+                out["quest"] = self.tables.base_id(out["quest"])
+            if action == "factions" and isinstance(out.get("factions"), list):
+                out["factions"] = [self.tables.base_id(x) if isinstance(x, str) else x for x in out["factions"]]
             if action == "transfer":
                 for key in ("item", "to", "from"):
                     if isinstance(out.get(key), str):

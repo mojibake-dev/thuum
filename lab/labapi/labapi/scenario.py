@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field, field_validator
 # a managed guest, a client verb on an unmanaged one.
 # craft: lab-driver reproduces the crafting menu's inventory effect at a station
 # (UNCONFIRMED until a lab run); lab-api resolves the recipe name to its form id.
-CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "node-rotation", "script-state", "face-keyframes", "quest-stage", "set-stage", "draw-weapon", "anim-event", "figure-action", "repeat", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "allow-save", "set-av", "watch-start", "watch-stop", "markers", "known", "add-perks", "favorite", "favorites", "held", "inventory", "transfer", "globals", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "refs-near", "look", "solo-start", "place-npc", "place-ref", "npc-ai", "npc-hold", "npc-kill", "npc-state", "look-at", "npc-damage", "figure-spells", "npc-puppet", "npc-pose", "cell-events-start", "cell-events-stop", "play-idle", "combat-spell", "start-combat", "stop-combat", "papyrus-events", "papyrus-log", "quit"}
+CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "node-rotation", "script-state", "face-keyframes", "quest-stage", "set-stage", "alias", "draw-weapon", "anim-event", "figure-action", "repeat", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "allow-save", "set-av", "watch-start", "watch-stop", "markers", "known", "add-perks", "favorite", "favorites", "held", "inventory", "transfer", "globals", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "factions", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "refs-near", "look", "solo-start", "place-npc", "place-ref", "npc-ai", "npc-hold", "npc-kill", "npc-state", "look-at", "npc-damage", "figure-spells", "npc-puppet", "npc-pose", "cell-events-start", "cell-events-stop", "play-idle", "combat-spell", "start-combat", "stop-combat", "papyrus-events", "papyrus-log", "quit"}
 # Server-side verbs (rung R0) go to the labCommand RPC; CONTRACT.md lists them.
 SERVER_ACTIONS = {"teleport", "give", "set-appearance", "open-race-menu", "set-percentages", "kill", "respawn", "papyrus-av", "staff-rank", "learn-spell",
                   "kill-ref", "respawn-ref", "server-console"}
@@ -313,6 +313,45 @@ def _script_state_args(args: dict[str, Any]) -> dict[str, Any]:
     return dict(args)
 
 
+def _form_or_desc(v: Any) -> bool:
+    """A form id (a whole number above 0, a hex literal in the file) or a FormDesc or table name the runner resolves."""
+    return (isinstance(v, int) and not isinstance(v, bool) and 0 < v <= 0xFFFFFFFF) or (isinstance(v, str) and bool(v.strip()))
+
+
+def _alias_args(args: dict[str, Any]) -> dict[str, Any]:
+    """alias {quest, alias}: a quest's reference alias as the seat's own game holds it (lab-driver's Quest.GetAlias by the
+    alias's id, then ReferenceAlias.GetReference and Alias.GetName: ADR-068 rung 4's AliasFill, docs/research/
+    rung4-state-rows-2026-11-07.md 1(e)), kept per seat and per pair for c.alias(<quest>, <alias>).refr. The quest is a form id
+    (0x39645) or a FormDesc the runner resolves; the alias is the quest's own alias id, 0 to 0xFFFF (the wire's bound for
+    AliasFill 79). Without both the driver answers an error the run would take as a pass, as a bare inventory did."""
+    unknown = sorted(set(args) - {"quest", "alias"})
+    if unknown:
+        raise ValueError(f"alias takes quest and alias, not {unknown}")
+    if not _form_or_desc(args.get("quest")):
+        raise ValueError(f"alias's quest is a quest's form id (0x39645) or a FormDesc, got {args.get('quest')!r}")
+    aid = args.get("alias")
+    if isinstance(aid, bool) or not isinstance(aid, int) or not 0 <= aid <= 0xFFFF:
+        raise ValueError(f"alias's alias is the quest's alias id, a whole number from 0 to 0xFFFF, got {aid!r}")
+    return dict(args)
+
+
+def _factions_args(args: dict[str, Any]) -> dict[str, Any]:
+    """factions {formId, factions}: an actor's standing as the seat's own game holds it (lab-driver's Actor.GetFactionRank and
+    IsInFaction for each named faction, and GetCrimeFaction: ADR-068 rung 4's standing rows, docs/research/
+    rung4-state-rows-2026-11-07.md 1(e)), kept per seat and per actor for c.factions(<id>).rank(<faction>). The actor is a form
+    id (a hex literal); the factions are one to 32 form ids or FormDescs, which the runner resolves."""
+    unknown = sorted(set(args) - {"formId", "factions"})
+    if unknown:
+        raise ValueError(f"factions takes formId and factions, not {unknown}")
+    fid = args.get("formId")
+    if isinstance(fid, bool) or not isinstance(fid, int) or not 0 < fid <= 0xFFFFFFFF:
+        raise ValueError(f"factions' formId is an actor's form id (0x39655), got {fid!r}")
+    factions = args.get("factions")
+    if not isinstance(factions, list) or not 1 <= len(factions) <= 32 or not all(_form_or_desc(f) for f in factions):
+        raise ValueError(f"factions' factions is a list of one to 32 faction form ids or FormDescs, got {factions!r}")
+    return dict(args)
+
+
 def _inventory_args(args: dict[str, Any]) -> dict[str, Any]:
     """inventory {ref}: a container's items as the seat's own game holds them, a chest's or a body's, by its reference's
     form id (or a FormDesc or a table name, which lab-api resolves before the driver sees it), for
@@ -480,7 +519,7 @@ def _relaunch_args(args: dict[str, Any]) -> dict[str, Any]:
 # rhythm, and reads that change nothing (a node's scale, the state, the voice, the projectiles nearby, a global's
 # value), never a console line (a seat's setup is the server's, Eli 2026-10-13) nor a connect
 PLAYTEST_READS = {"node-scale", "node-rotation", "script-state", "face-keyframes", "dump-state", "head-parts", "voice", "held", "known", "projectiles", "graph-vars", "skills",
-                  "refs-near", "npc-state", "globals", "quest-stage"}
+                  "refs-near", "npc-state", "globals", "quest-stage", "alias", "factions"}
 # One lever on a world actor, for a live read Eli watches (playtest thirty's spinning wolves, 2026-10-21 16:5x, his
 # yes to the experiment): npc-ai switches one actor's engine AI off and back on through lab-driver (Actor.EnableAI);
 # start-combat and stop-combat open and end one named NPC's combat against that seat's player (Actor.StartCombat and
@@ -613,6 +652,10 @@ def parse_step(raw: Any, clients: list[str]) -> Step:
         args = _inventory_args(args)
     if action == "script-state":
         args = _script_state_args(args)
+    if action == "alias":
+        args = _alias_args(args)
+    if action == "factions":
+        args = _factions_args(args)
     if action == "transfer":
         args = _transfer_args(args)
     if action == "server-console":
