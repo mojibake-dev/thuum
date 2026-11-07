@@ -455,6 +455,18 @@ class NpcKillStep(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 load_scenario(f"id: x-l\nclients: [c1]\nserver: {{npcRollLevel: {bad}}}\nsteps:\n  - wait: 1\n")
 
+    def test_a_server_block_may_set_the_runs_world_globals(self):
+        # the worldGlobals server setting as the run's own (ADR-068 rung 4): true elects a world streamer; unnamed, the file's
+        from labapi.scenario import load_scenario
+
+        s = load_scenario("id: x-g\nclients: [c1]\nserver: {worldGlobals: true}\nsteps:\n  - wait: 1\n")
+        self.assertIs(s.server.worldGlobals, True)
+        self.assertIs(load_scenario("id: x-g\nclients: [c1]\nserver: {worldGlobals: false}\nsteps:\n  - wait: 1\n").server.worldGlobals, False)
+        self.assertIsNone(load_scenario("id: x-g\nclients: [c1]\nsteps:\n  - wait: 1\n").server.worldGlobals)
+        for bad in ("1", "0", "'true'", "[true]"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(f"id: x-g\nclients: [c1]\nserver: {{worldGlobals: {bad}}}\nsteps:\n  - wait: 1\n")
+
     def test_kill_ref_and_respawn_ref_take_a_form_id(self):
         # a game-file actor killed by the server (its killer a client of the scenario) or put up again at once
         from labapi.scenario import load_scenario

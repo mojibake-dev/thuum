@@ -498,7 +498,9 @@ class Runner:
         respawn = rec.scenario.server.npcRespawnHours
         settle = rec.scenario.server.handoffPassSettleMs
         roll = rec.scenario.server.npcRollLevel
-        if settings and (npc is not None or hour is not None or respawn is not None or settle is not None or roll is not None):
+        world_globals = rec.scenario.server.worldGlobals
+        if settings and (npc is not None or hour is not None or respawn is not None or settle is not None or roll is not None
+                         or world_globals is not None):
             # ADR-035 point 9: the run's own npcEnabled (and its game hour) over the version's
             # file, laid beside the world for this run alone, so no second file is kept in step
             try:
@@ -513,6 +515,8 @@ class Runner:
                 d["handoffPassSettleMs"] = settle
             if roll is not None:
                 d["npcRollLevel"] = roll
+            if world_globals is not None:
+                d["worldGlobals"] = world_globals
             if hour is not None:
                 # the clock is a pure function of the wall clock and the time block (wire-rules
                 # clock.rs): it reads start.hour at the epoch, so the run's start is the epoch

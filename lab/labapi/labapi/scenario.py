@@ -83,6 +83,11 @@ class ServerSpec(BaseModel):
     # party-min); a level-1 seat sees one pick in each of the Temple's bandit and draugr lists, so a respawn never swaps
     # its pick (x-fate-dress-bleak v5, 2026-11-03); None keeps the file's, and the server's own default, party-mean
     npcRollLevel: int | str | None = None
+    # the run's own world globals switch (the worldGlobals server setting, ScampServer.cpp, PartOne::SetWorldGlobalsEnabled:
+    # ADR-068 rung 4's WorldGlobal 80): true elects a world streamer, whose game's global changes the server records and
+    # serves (x-world-globals-rate, b-world-global); None keeps the file's, and the server's own default, false (nobody
+    # elected, every game's globals its own), so the lab's settings stay off
+    worldGlobals: bool | None = None
 
 
 class Step(BaseModel):
@@ -696,16 +701,19 @@ def _server_spec(server: dict[str, Any]) -> ServerSpec:
     if roll is not None and not ((isinstance(roll, int) and not isinstance(roll, bool) and 1 <= roll <= 255)
                                  or roll in ("loader", "party-mean", "party-min")):
         raise ValueError(f"server.npcRollLevel is a level from 1 to 255 or one of loader, party-mean, party-min, got {roll!r}")
+    world_globals = server.get("worldGlobals")
+    if world_globals is not None and not isinstance(world_globals, bool):
+        raise ValueError(f"server.worldGlobals is true or false, got {world_globals!r}")
     world = server.get("world")
     if world is None:
         return ServerSpec(snapshot=str(server.get("snapshot", "clean")), netem=netem, npcEnabled=npc, gameHour=hour,
-                          npcRespawnHours=respawn, handoffPassSettleMs=settle, npcRollLevel=roll)
+                          npcRespawnHours=respawn, handoffPassSettleMs=settle, npcRollLevel=roll, worldGlobals=world_globals)
     if "snapshot" in server:
         raise ValueError("server takes a snapshot or a world, not both")
     if not isinstance(world, str) or not _WORLD_NAME.fullmatch(world):
         raise ValueError(f"server.world names a directory under lab/fixtures/worlds, got {world!r}")
     return ServerSpec(world=world, netem=netem, npcEnabled=npc, gameHour=hour, npcRespawnHours=respawn,
-                      handoffPassSettleMs=settle, npcRollLevel=roll)
+                      handoffPassSettleMs=settle, npcRollLevel=roll, worldGlobals=world_globals)
 
 
 # every top-level key load_scenario reads. Any other key was dropped without a word before 2026-11-03: a top-level `asserts:`

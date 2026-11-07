@@ -2318,6 +2318,19 @@ class CellHostSteps(RunTests):
         self.assertEqual(laid["npcRollLevel"], 25)
         self.assertEqual(laid["npcEnabled"], False, "the version's file kept beside the knob")
 
+    def test_a_runs_world_globals_reach_the_server_through_the_overlay(self):
+        """ADR-068 rung 4's x-world-globals-rate and b-world-global: a world streamer elected for that run alone, the
+        version's own file (and so the lab's default, off) untouched."""
+        files = self._settings_files()
+        run_id, body = self._run("id: t-globals\nclients: [c1]\nserver: {worldGlobals: true}\nsteps:\n  - c1: connect\n")
+        self.assertEqual(body["verdict"], "green", body)
+        overlay = self.tmp / "server-settings-run.json"
+        self.assertEqual(self._up_env()["SERVER_SETTINGS"], str(overlay))
+        laid = json.loads(overlay.read_text())
+        self.assertIs(laid["worldGlobals"], True)
+        self.assertEqual(laid["npcEnabled"], False, "the version's file kept beside the knob")
+        self.assertNotIn("worldGlobals", json.loads(files["1.6.1170"].read_text()), "the version's own file is untouched")
+
     def test_a_runs_game_hour_starts_the_servers_clock_through_the_overlay(self):
         files = self._settings_files()
         run_id, body = self._run("id: t-hour\nclients: [c1]\nserver: {gameHour: 7.9}\nsteps:\n  - c1: connect\n")
