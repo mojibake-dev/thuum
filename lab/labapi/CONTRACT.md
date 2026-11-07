@@ -143,7 +143,8 @@ client whose player's actorId (the `actor` kind's) is the holder, "" when none.
 Request: `{"payload": {"kind": "ref", "actorId": <int>}}`. Answer: `{"found":
 true, "actorId", "x", "y", "z", "rot", "cell", "isDead", "healthPercentage",
 "magickaPercentage", "staminaPercentage", "worn", "inventory", "bodyAtRest",
-"bodyRestAt", "changeFormFnv", "changeFormAt", "scriptStateFnv", "scriptStateAt", "scriptStateSeq"}`, an actor's
+"bodyRestAt", "changeFormFnv", "changeFormAt", "scriptStateFnv", "scriptStateAt", "scriptStateSeq", "isDisabled",
+"isDeleted", "refStateSeq"}`, an actor's
 record by form id (a hosted NPC), the `actor` kind's fields without the
 appearance verdicts, or `{"found": false, "actorId"}` for a form the server
 holds no position for.
@@ -163,6 +164,13 @@ server keeps it (`mp.get(id, "scriptState")`, the fork's ScriptStateBinding, ADR
 wall-clock ms of the owner's report and the object's sequence when it was taken; 0, 0 and 0 without a record and from a
 server without the property (a record's own seq can be 0, so its arrival reads in `scriptStateAt`). Asked of any reference,
 a plain one too. A scenario snapshots `server.ref(<id>).scriptStateAt` and claims it risen after the owner's turn.
+`isDisabled`, `isDeleted` and `refStateSeq` are the reference's ref state as the server holds it (ADR-068 rung 4's RefState,
+docs/research/rung4-state-rows-2026-11-07.md 1(c)): `mp.get(id, "isDisabled")` (the server's IsDisabledBinding),
+`mp.get(id, "isDeleted")` and `mp.get(id, "refStateSeq")` (rung 4's bindings: the record's deleted mark, and the object's
+sequence when its owner's Enable, Disable or Delete was recorded, the property's null read as 0). Each is `null` from a
+server without the property and where the read throws, so a claim on a build before the rung is missing data, never a game
+file's state read as the record's. Asked of any reference. A scenario claims `server.ref(<id>).isDisabled == true` and
+`server.ref(<id>).refStateSeq > 0` after the owner's Disable, beside each seat's `c.refs_near().disabled_of(<id>)`.
 `worn` is the record's equipment (`mp.get(id, "equipment")`, read inside a try)
 as a seat's npc-state counts it: the ARMO and WEAP form ids marked worn in a
 slot or either hand, one per form, sorted, typed through the server's espm, so
@@ -188,6 +196,40 @@ and SkyMP message type) kept for that player's actor, or `{"found": false}`
 from a server without the property. Scenarios read
 `server.stream(c1).dropped(53) == 0` (HostedActorState is 53): each method sums
 that type's rows, 0 for a type the player never sent.
+
+### worldGlobals
+
+Request: `{"payload": {"kind": "worldGlobals"}}`. Answer: `{"found": true,
+"streamer": <the streaming player's actor id, 0 when none>, "epoch": <int, 0
+before the first election>, "entries": [{"global", "value"}]}`, the world's
+globals as the server records them (ADR-068 rung 4's WorldGlobal,
+docs/research/rung4-state-rows-2026-11-07.md 1(c)): `mp.get(0,
+"worldGlobals")`, the journal's values with the world streamer's election
+beside them, read from the property's `{streamer, epoch, entries}`. Each
+entry's `global` is as the server names it, a FormDesc's text
+(`"<hex id>:<file>"`, FormDesc::ToString) or a form id, and lab-api resolves
+either through the run's load order; `value` is a number. A server without
+the property answers `{"found": false, "error"}`. Scenarios read
+`server.world_globals().streamer == "c1"` (the run's client whose player's
+actorId is the streamer, as cellHost's `.client`), `.epoch`, and
+`.value("<hex id>:<plugin>")`, the recorded value beside each seat's
+`c.globalValue(...)`; a global the server records no value of is a data
+error.
+
+### aliasFills
+
+Request: `{"payload": {"kind": "aliasFills"}}`. Answer: `{"found": true,
+"fills": [{"quest", "alias", "refr", "created", "container", "added"}]}`, the
+server's record of quest aliases (ADR-068 rung 4's AliasFill, both halves):
+`mp.get(0, "aliasFills")`, the journal's rows. `quest` as the server names it
+(a FormDesc's text or a form id), `alias` the quest's alias id, `refr` the
+reference the alias holds (0 when cleared or never filled by one), `created`
+the item the server's read of the quest's ALCO creates for it and `container`
+the container it goes in (0 for none; a form named by FormDesc kept as its
+text), `added` whether the server has added that item. A server without the
+property answers `{"found": false, "error"}`. Scenarios read
+`server.alias_fill(0x39645, <alias id>).refr | .created | .container |
+.added`; a pair the server records nothing of is a data error.
 
 ## labCommand
 

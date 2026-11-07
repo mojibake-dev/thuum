@@ -12,10 +12,13 @@
 //              {kind: "cellHost", cell}: who hosts the cell on the server (docs/verbs/cell-host.md)
 //              {kind: "ref", actorId}: a reference's record by form id (a hosted NPC's position and health; a prop's position, its actor fields null;
 //                                       changeFormFnv and changeFormAt, the owner's latest change form's hash and arrival, 0 without one;
-//                                       scriptStateFnv, scriptStateAt and scriptStateSeq, its latest script record's, 0 without one)
+//                                       scriptStateFnv, scriptStateAt and scriptStateSeq, its latest script record's, 0 without one;
+//                                       isDisabled, isDeleted and refStateSeq, its ref state, null from a server without them)
 //              {kind: "follow", actorId}: whether a game follows that actor out of its hosted cells (npc-handoff)
 //              {kind: "fate", actorId}: the server's roll for a game-file actor (npc-fate, ADR-046)
 //              {kind: "stream", profileId}: a player's stream counters by message type (npc-stream slice 4)
+//              {kind: "worldGlobals"}: the world's recorded globals and their streamer (ADR-068 rung 4's WorldGlobal)
+//              {kind: "aliasFills"}: the server's record of quest aliases (ADR-068 rung 4's AliasFill)
 //   labCommand {kind: "teleport", profileId, cell, pos, rot?}
 //              {kind: "give", profileId, baseId, count}
 //              {kind: "open-race-menu", profileId}, and the others below
@@ -318,6 +321,30 @@ const state = {
       scriptStateAt = 0;
       scriptStateSeq = 0;
     }
+    // the reference's ref state as the server holds it (thuum ADR-068 rung 4's RefState, docs/research/
+    // rung4-state-rows-2026-11-07.md 1(c)): isDisabled (the server's isDisabled property, IsDisabledBinding), isDeleted and
+    // refStateSeq (rung 4's bindings: the record's deleted mark, and the object's sequence when its owner's Enable, Disable or
+    // Delete was recorded, 0 without one). Each null from a server without the property and where the read throws, so a claim
+    // on a build before the rung is missing data, never a game file's enabled state read as the record's
+    let isDisabled = null;
+    let isDeleted = null;
+    let refStateSeq = null;
+    try {
+      isDisabled = Boolean(mp.get(actorId, "isDisabled"));
+    } catch (e) {
+      isDisabled = null;
+    }
+    try {
+      isDeleted = Boolean(mp.get(actorId, "isDeleted"));
+    } catch (e) {
+      isDeleted = null;
+    }
+    try {
+      const seq = mp.get(actorId, "refStateSeq");
+      refStateSeq = seq === null || seq === undefined ? 0 : Number(seq) >>> 0;
+    } catch (e) {
+      refStateSeq = null;
+    }
     // the reference's items as the server records them, a chest's or a body's as an actor's
     // (lab-api's server.inventory(<ref>), the two-seat container claims of the root-cause plan's W4);
     // null where the record holds none or the API refuses the read
@@ -349,6 +376,61 @@ const state = {
       scriptStateFnv,
       scriptStateAt,
       scriptStateSeq,
+      isDisabled,
+      isDeleted,
+      refStateSeq,
+    };
+  },
+
+  // The world's globals as the server records them (thuum ADR-068 rung 4's WorldGlobal, docs/research/
+  // rung4-state-rows-2026-11-07.md 1(c) and 1(e)): mp.get(0, "worldGlobals"), the journal's values with the world streamer's
+  // election beside them, {streamer, epoch, entries: [{global, value}]}, answered as {found, streamer, epoch, entries}: the
+  // streaming player's actor id (0 when none), its election's epoch (0 before the first), and each entry's global as the server
+  // names it (a FormDesc's text "<hex id>:<file>", or a form id; lab-api resolves either through the run's load order) with its
+  // value. A server without the property answers found: false
+  worldGlobals() {
+    let record;
+    try {
+      record = mp.get(0, "worldGlobals");
+    } catch (e) {
+      return { found: false, error: String((e && e.message) || e) };
+    }
+    const r = record && typeof record === "object" ? record : {};
+    return {
+      found: true,
+      streamer: Number(r.streamer) || 0,
+      epoch: Number(r.epoch) || 0,
+      entries: (Array.isArray(r.entries) ? r.entries : [])
+        .filter((e) => e && (typeof e.global === "number" || typeof e.global === "string"))
+        .map((e) => ({ global: e.global, value: Number(e.value) })),
+    };
+  },
+
+  // The server's record of quest aliases (thuum ADR-068 rung 4's AliasFill, both halves): mp.get(0, "aliasFills"), the
+  // journal's rows, answered as {found, fills: [{quest, alias, refr, created, container, added}]}: the quest as the server names
+  // it (a FormDesc's text or a form id), the alias's id, the reference it holds (0 when cleared or never filled by one), the item
+  // the server's read of the quest creates for it and the container it goes in (0 for none; a form named by FormDesc kept as its
+  // text), and whether that item was added. A server without the property answers found: false
+  aliasFills() {
+    let rows;
+    try {
+      rows = mp.get(0, "aliasFills");
+    } catch (e) {
+      return { found: false, error: String((e && e.message) || e) };
+    }
+    const formOf = (v) => (typeof v === "string" ? v : Number(v) || 0);
+    return {
+      found: true,
+      fills: (Array.isArray(rows) ? rows : [])
+        .filter((r) => r && (typeof r.quest === "number" || typeof r.quest === "string"))
+        .map((r) => ({
+          quest: r.quest,
+          alias: Number(r.alias),
+          refr: formOf(r.refr),
+          created: formOf(r.created),
+          container: formOf(r.container),
+          added: Boolean(r.added),
+        })),
     };
   },
 

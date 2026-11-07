@@ -574,3 +574,63 @@ TURN_SIGN) that ramps lockAngle with the pick snapped: HYPOTHESIS that the menu'
   reported Trigger01 and Trigger03 alone; Call ran about 5,400 a second on six
   VM worker threads, 98.7% of it the platform's own. v2 reads each name to its
   NUL. 1.6.1170 only.
+- lever-furn-trace.js: what a player's pull of Bleak Falls Temple's puzzle lever 0xaa8c3
+  (FURN 0xb7db4 LeverPushAnimatingNoPlayer) does on the puller's seat and on the seat
+  that watches (docs/verbs/traps.md H-P1, the NoPlayer furniture; the static read
+  lab/.cache/drafts/fifty/lever-furn-static.md, the probe lab/.cache/drafts/fifty/
+  x-lever-furn.yaml, both in the thuum checkout). Attach only: TESObjectREFR::ActivateRef
+  19796 (the activator, a_defaultProcessingOnly and the lever's kBlockActivate),
+  TESFurniture::Activate 17420 (slot 0x37 of VTABLE_TESFurniture[0] 189309, checked live)
+  with the activator's sitSleepState, occupiedFurniture and furnitureIdle before and after,
+  the player's furniture use 40486 (expected silent for this keyword), the idle tree's pick
+  24602 for a lever source (the action, animEvent and the idle), every
+  IAnimationGraphManagerHolder::NotifyAnimationGraph 32901 to the lever with a backtrace and
+  to the player or a figure inside a lever window or within windowMs of one (the rest
+  counted per actor and event in the liveness row), the lever graph's own events back
+  through TESObjectREFR's BSAnimationGraphEvent sink 20102, and NativeFunctionBase::Call
+  104651 for natives on the lever or called from defaultPillarPuzzleLever. The ready row
+  carries the pid, each hook's live first bytes against Ghidra's, the vtable slot checks,
+  *(401069) against the player and the first bytes of the actor holders' slot-1 thunk
+  38048 (the platform's SendAnimation id, a JMP to 32901: H-LF6 reads whether the
+  platform's hook sits on 32901). LAB_PARAMS: refs, scripts, actorRows, windowMs, cap, bt,
+  natives. Ids by `just addr` on 2026-11-06; the roles past CommonLib are pyghidra-mcp's
+  static read of the same day (HYPOTHESIS). Written 2026-11-06; never run. 1.6.1170 only.
+- trigger-entry-trace.js: who the engine says entered a trigger, on one seat (ADR-068's D-W1 A and
+  D-C2 A, the engine read before the build; lab/.cache/drafts/fifty/trigger-entry-static.md and the
+  probe x-trigger-entry by path). Hooks the VM's SendEvent (104800) beside Skyrim Platform's gate and
+  keeps OnTriggerEnter and OnTriggerLeave alone (the name filtered in the hook): the receiving
+  handle, the actionRef read from the engine's own argument object (vtable 217161,
+  `anonymous namespace'::SingleObjectRefrHandleArgument, +0x08, never by calling its packer), its
+  form id, type, base, cell, position and life state; DispatchMethodCall1 (104804) inside that call,
+  so each attached script's class, state and the name the gate passed on ('' is its blank); the
+  argument's own packer (its vtable's slot 01), so the akActionRef the script receives; and the two
+  SkyrimVM trigger sinks (vtables 217143 and 217145), so every row names the event as raised. The
+  ready row checks the VM's slots 0x24 and 0x27, the argument class's RTTI (397003) and the sinks'
+  subobject offsets, and prints Main's thread and bhkCollisionFilter's triggerField (400562 +0x3D0)
+  with its layer names. Reads only, no engine call; a liveness row every 10 s with every hook's
+  count before its filter, a kernel32!Sleep pulse and emptyNames (above 0 says the hook runs after
+  the gate). Ids by `just addr`; the event and argument layouts are Ghidra's static read
+  (HYPOTHESIS until a run's rows agree). Written 2026-11-07; never run. 1.6.1170 only.
+- corpse-lay-heap.js: an ActorMediator sink add or remove against the engine heap's recent frees
+  through a corpse lay on a loaded leveled actor, for playtest 49's c1 crash (2026-11-06
+  22:20:47 PST: 70199+0x7 on the background loader cloning draugr 0x380b8's skeleton 54 ms after
+  c1 laid its corpse record, RCX VTABLE_ActorMediator; docs/private/playtest-49-c1-crash/) and
+  the re-analyst's static read of the same night (candidate (c): the lay's Set3D(nullptr) races
+  the engine's background reload, a mediator add or remove writes the singleton's address into a
+  freed sink array, a pool hands out the singleton's storage 504076). The heap side is a
+  CModule: MemoryManager::Allocate 68115, Reallocate 68116 and Deallocate 68117 keep a size
+  table, a free record (each block's last free, marked reused at its next allocation) and a ring
+  of the last 65,536 frees, with no row per call; BSTEventSource AddEventSink 20140 and
+  RemoveEventSink 38402 reach JavaScript only for the mediator's sink or a source whose arrays,
+  self or graph are freed. Rows: sinkAdd and sinkRemove with the thread (main or not), the three
+  arrays, notifying, the lock, the graph's holder and `fault: true` on a freed one; alloc with
+  `poisoned: true` when 68115 or 68116 returns the storage or VTABLE_ActorMediator 207706 and
+  `poisonedLink: true` when a handed-out block's first qword names either, each with a stack
+  scan; apply (35568), load3D (37177) and set3D (37178) stamps for the forms in refs (default
+  0x380b8) with their windows; a layWindow tally one second after each watched apply; exception
+  per first-chance fault; liveness every 10 s with each hook's count before its filter and a
+  kernel32!Sleep pulse. A critical row holds its thread flushMs (600) so the preamble's 250 ms
+  flush writes it before a crash. LAB_PARAMS: refs, cap, ttl, flushMs. Arm on the applying seat
+  before the kill (lab/.cache/drafts/fifty/x-corpse-lay-crash.yaml by path). Ids by `just addr`
+  on 2026-11-06; layouts CommonLib's (file:line in the header); the roles the report's static
+  read (HYPOTHESIS). Written 2026-11-06; never run. 1.6.1170 only.

@@ -4794,6 +4794,68 @@ stack waiting; if it fails, `nonLatent` stays and the served word corrects a gue
 80's streaming seat is elected from what ADR-066 decision 6 has built (cells.rs's stale and dead per player; the pause and load
 flags and OwnerAck are still absent), one seat at an epoch. W3 stands for ScriptPlacement and the standing.
 
+D-W1 and D-C2, a trigger volume's entry is its presser's owner's (ACCEPTED by Eli 23:1x PST 2026-11-06 (07:1xZ 11-07), in numidium's
+session through AskUserQuestion: D-W1 A, D-C2 A, and all of it in playtest 50 with no split; proposed by thuum-fa 23:0x PST the
+same night from playtest 49's breaks). Playtest 49 broke twice on who sees a trigger volume's entry. The spike wall fired a
+different number of times on each screen (numidium's count of 49's logs) while each game had its own body and its own NPCs on the
+plate, so D-S3's decision 1 (every seat fires for what it sees) gives as many firings as there are views; a figure does fire the
+other seat's copy (the tripwire's second reset, docs/verbs/traps.md: c1's own Tripwire fired as Ariadne's figure crossed it), but
+a body and an NPC are each game's own. And the Temple's cobwebs (0x3758c, 0x3758d and 0x37281 in 0x371de, FXtriggerAmbFX) never
+tore on the guest's screen: the guest's copy of a world script is blanked, and the host's copy did not tear for the guest's figure
+(whether its entry never arrives or the script compares its actionRef to the player is the read below). One rule answers both:
+the entry counts once, on the presser's owner (its own
+player's seat, the simulator of an NPC, the owner of a body), and it travels to the trigger script's owner.
+- D-W1 A, a trap family's trigger (TrapTriggerBase's chain, D-S3's family): the presser's owner fires its own copy and relays the
+  firing to the other seats as the trap's linked activation (RelayedActivation 70, reused), and their copies fire from the relay; a
+  seat ignores a press by an actor it does not own, through the script gate reading OnTriggerEnter's actionRef (the gate's
+  argument, Gum arg 3, an IFunctionArguments, never read until now: upstream's known issue #405). This amends D-S3's decision 1
+  ("a figure on a plate included" becomes the figure's own seat's press, relayed) and its decision 5 (the server relays a family
+  target's linked activation again, from the presser's owner alone). D-S3's decisions 2 to 4 stand: a hit on a player is its own
+  seat's, a single-use result is recorded once, a trap body is simulated by the firing seat.
+- D-C2 A, a world script's trigger (every other class, the cobwebs' FX trigger first): a guest's entry is relayed to the cell's
+  host, whose copy runs the script with the guest's figure as actionRef (rung 3's SendScriptEvent, given the event's argument);
+  its consequences cross as any host script's do (ScriptCall 75). Eli took A over the recommended B (cosmetic trigger scripts run
+  on every seat for its own player under the 11-05 rule), so one copy of the world script runs, the host's. If the script compares
+  its actionRef to Game.GetPlayer(), the relay needs rung 5's acting-player scope for that stack (finding 5); the read says.
+Engine reads first (rule 8), each one question: the gate's OnTriggerEnter argument on a seat for its own player, a puppet NPC, a
+figure and a body (the spike wall's plate and the cobweb trigger); the cobweb script's own code (its pex: does it compare
+to the player). The lever's FURN pull (H-P1) and c1's crash (the corpse lay against a background 3D load) are read beside them;
+all four ride rung 4's train into 50.
+
+D-L1 B, a login inside a cell sends that cell's entry events once (ACCEPTED by Eli 23:2x PST 2026-11-06 (07:2xZ 11-07), in
+numidium's session through AskUserQuestion; proposed by thuum-cf 00:51 PST 2026-11-06 in docs/verbs/traps.md, "The login inside a
+cell"). A seat that logs in inside a cell loads the template save rewritten with the server's cell and position, a save load that
+raises no OnCellLoad and no OnCellAttach for that cell's scripts (HYPOTHESIS H-L1), so playtest 47's pillars stayed in their
+empty state and the Temple's darts never armed until the seat walked out and back in. B over A (a neutral cell first and a move,
+one more loading screen at each login): after the login's load, the grant if there is one and the script records' apply, the seat
+sends OnCellAttach and then OnCellLoad once to each scripted reference of the cell it stands in, through rung 3's SendScriptEvent
+under the platform's mark (the lifecycle events a real load sends, which pass the gate everywhere), skipping a reference the
+engine already sent them to, since a second OnCellLoad can put a pillar's script back on its first side while its graph stays
+turned. The build was planned in docs/research/rung3-script-record-2026-11-06.md section 4 and never built before this answer;
+it rides rung 4's train into playtest 50, proven by x-login-in-cell (v1 reads the defect; its next version claims the fix) and
+its fresh review first. A stays the fallback if the read shows OnLoad or other entry events missing too.
+
+D-W2 A and D-C3 A (ACCEPTED by Eli 02:2x PST 2026-11-07 (10:2xZ), in this session, verbatim: "D-W2 A (provided it's not breaking
+what i verified DOES work, becuase last test did seem to work) and D-C3 A"; proposed by thuum-fa the same night from the fix
+probes' drafting and the pex reads).
+- D-W2 A, the trigger's own look on the watcher under D-W1: during a firing its presser's owner started, that seat owns the trap
+  family trigger's own calls on itself (a Tripwire's SetMotionType on its rope, a PressurePlate's 'Down' and 'Up' and its sound),
+  which cross the seam as action rows from the firing seat and play on every other seat; one firing, every screen. Why: under D-W1
+  A a watcher ignores a press by an actor it does not own, so its copy of the trigger's script never runs, and that script is what
+  drops the tripwire's rope (Tripwire's [Active] onBeginState, docs/verbs/traps.md) and moves the plate (PressurePlate's active
+  state, lab/.cache/drafts/fifty/trigger-entry-static.md section 5); without A the watcher's rope stays taut and its plate still.
+  Eli's condition is the proof's: playtest 49's VERIFIED IN PLAY trap items (the bone alarm from the seat that did not walk into
+  it; the tripwire snapping on both screens for the host's own trip and for bandits lured through it; the wall and blades killing
+  draugr) are claimed on both seats in the build's own stage before any playtest of it, with x-trap-wire-rope among them, and a red
+  there keeps D-S3's per-seat firing for that case rather than shipping the regression.
+- D-C3 A, the record's view carries a world object's animation variables: a host's SetAnimationVariableFloat, Bool and Int on a
+  world object are kept in the script record's view (the last value per variable, names compared case-blind as the engine's
+  BSFixedString compares them) beside its last animation event, served with the record and applied before the view's event, so a
+  seat that arrived later or was not listening shows the torn web (playtest 49: two of the Temple's three tears "relayed to 0
+  game(s)", the record's view ''). Amendment A's rule (the record carries its view) applied to the second way a script changes what
+  an object shows. Rule 6: the change form's graphVariables merge to canon only with a committed restart scenario (b-cobweb-view's
+  restart leg). Built ahead on m4-train-50 (S4, W1's graph_vars, C3), kept.
+
 ## ADR-069: Rotfern's Fixes: engine fixes ship to every player as one SKSE DLL, one detour per lab-read site, never as a lab-only patch
 
 Status: ACCEPTED 2026-11-06 by Eli, to apocrypha directly, after asking what the fixes are ("wait so what ARE the engine fixes???

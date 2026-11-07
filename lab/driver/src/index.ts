@@ -25,6 +25,7 @@ import {
   Cell,
   ConstructibleObject,
   Debug,
+  Faction,
   Form,
   Game,
   GlobalVariable,
@@ -42,6 +43,7 @@ import {
   Perk,
   Quest,
   Race,
+  ReferenceAlias,
   Shout,
   Spell,
   TESModPlatform,
@@ -2127,6 +2129,24 @@ function run(step: Step, player: Actor): unknown {
         );
       return DEFERRED;
     }
+    case "alias": {
+      // a quest's reference alias as this seat's game holds it (thuum ADR-068 rung 4's AliasFill, docs/research/
+      // rung4-state-rows-2026-11-07.md 1(e)): {quest, alias} answers the reference the alias holds (Papyrus Quest.GetAlias by
+      // the quest's own alias id, ReferenceAlias.GetReference; 0 when it holds none) and the alias's name (SKSE's
+      // Alias.GetName), for lab-api's c.alias(quest, alias).refr: where each seat's engine fills a template-run alias such
+      // as MS13's Golden Claw (H-AF1). A quest this game lacks, an alias id the quest lacks, or a location alias is the
+      // step's error, its data, and the run goes on (script-state's way)
+      const questId = num(a.quest);
+      const aliasId = num(a.alias, -1);
+      const q = questId ? Quest.from(Game.getFormEx(questId)) : null;
+      if (!q) return { error: `no quest ${questId.toString(16)} in this game` };
+      const held = aliasId >= 0 ? q.getAlias(aliasId) : null;
+      if (!held) return { error: `quest ${questId.toString(16)} has no alias ${aliasId}` };
+      const ref = ReferenceAlias.from(held);
+      if (!ref) return { error: `alias ${aliasId} of ${questId.toString(16)} is no reference alias`, name: held.getName() };
+      const refr = ref.getReference();
+      return { quest: questId, alias: aliasId, refr: refr ? refr.getFormID() : 0, name: held.getName() };
+    }
     case "face-keyframes": {
       // an actor's FaceGen keyframes as the engine animates its face (faceOf above): {formId}, else the placed npc;
       // {player: true} for the player. The phoneme set is the mouth: its values move while a lip-synced line plays.
@@ -2271,6 +2291,29 @@ function run(step: Step, player: Actor): unknown {
       if (!g) throw new Error(`no global ${num(a.form).toString(16)}${typeof a.file === "string" ? " in " + a.file : ""}`);
       if (a.value !== undefined) g.setValue(num(a.value));
       return { form: g.getFormID(), value: g.getValue() };
+    }
+    case "factions": {
+      // an actor's standing as this seat's game holds it (thuum ADR-068 rung 4's standing rows, docs/research/
+      // rung4-state-rows-2026-11-07.md 1(e)): {formId, factions: [faction id, ...]} answers per faction the engine's own
+      // rank (Papyrus Actor.GetFactionRank) and membership (Actor.IsInFaction), keyed by the faction's form id as decimal
+      // text (null for a form that is no faction in this game), and the actor's crime faction (Actor.GetCrimeFaction, 0 for
+      // none), for lab-api's c.factions(id).rank(f) and .member(f). The rank is the engine's number as it answers it, with
+      // membership read beside it, so no claim leans on the rank of an actor outside the faction (CommonLibSSE-NG relocates
+      // Actor::GetFactionRank, include/RE/A/Actor.h:544, and names no value for it). An id that is no actor in this game is
+      // the step's error, its data
+      const id = num(a.formId);
+      const actor = id ? Actor.from(Game.getFormEx(id)) : null;
+      if (!actor) return { error: `no actor ${id.toString(16)} in this game` };
+      const ids = Array.isArray(a.factions) ? (a.factions as unknown[]).map((x) => num(x)) : [];
+      const ranks: Record<string, number | null> = {};
+      const members: Record<string, boolean | null> = {};
+      for (const f of ids) {
+        const faction = Faction.from(Game.getFormEx(f));
+        ranks[String(f)] = faction ? actor.getFactionRank(faction) : null;
+        members[String(f)] = faction ? actor.isInFaction(faction) : null;
+      }
+      const crime = actor.getCrimeFaction();
+      return { formId: actor.getFormID(), ranks, members, crime: crime ? crime.getFormID() : 0 };
     }
     case "weather": {
       // the weather forced on this client (Weather.setActive, override and

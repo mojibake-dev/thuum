@@ -650,6 +650,12 @@ The caster's own game skips a form naming itself while the script's own copy sta
 places it as any server form. The removal is the usual DestroyActor 5 s after the cast's end. Fixtures
 33-CreateActor-0 and -1 carry the field; WireJsonContractTest reads them through CreateActorMessage.h.
 
+Since SCHEMA_VERSION 39 (fork m4-scripts-4-rows 77aaf7bb; ADR-068 rung 4's script set, W3) `placedBy` also names the reporter of a
+script's PlaceAtMe or PlaceActorAtMe, whose engine stood the new reference, so it pairs with STAT, NPC_ and the item types (AMMO,
+ARMO, BOOK, INGR, ALCH, SCRL, SLGM, WEAP, MISC, KEYM, LIGH) beside MSTT and ACTI; EXPL, HAZD, PROJ, CONT and FURN stay E_VAL_RANGE. A
+script set's form has no lifetime: it stands until a Delete row. Fixture 33-CreateActor-3 (an XMarker 0x3b placed at the cobweb,
+placedBy its reporter).
+
 ### PlacedRequest (t 61) and PlacedReport (t 62): the caster's engine names the pose (spell-placed-object, M3; ADR-057 shape A, D70)
 
 Shape C's fixed step fell at T3 (D70: the engine stands Raise Wall 206 ahead along a heading the record's yaw does not carry), so
@@ -758,6 +764,20 @@ cannot connect to a schema 37 server (netcode's protocol id carries the version)
 one tree. The same slice raises PropTransform's budget to 128 at once, then 96 a second (UNMEASURED: a firing streams up to eight
 trap bodies at 10 Hz).
 
+Since SCHEMA_VERSION 39 (fork m4-scripts-4-rows 77aaf7bb, 2026-11-06; ADR-068 rung 4 and its amendment B, read 7) the same word is
+also a reference's engine state, from the server alone: `{ refr, stage, destroyed, served, disabled?: bool, deleted?: bool, seq: u32
+}`. A host's scripted Enable, EnableNoWait, Disable, DisableNoWait or Delete travels as ScriptCall 75's record row (below), never as
+this message; the server moves the reference's ref state record (wire-rules ref_state; a call that changes nothing folds and writes
+and relays nothing), relays the word with the object's sequence in `seq` to the listeners the reference had before the change but
+the reporter, and serves it behind every later create word (`served` true). A word carrying neither field is a destruction word
+alone. From a client, `disabled`, `deleted` or a nonzero `seq` is E_VAL_RANGE, judged before the budget; the table row's byte cap
+rises from 16 to 32. A game-file world object whose ref state is recorded keeps its place on the grid while disabled, and PartOne's
+save loader keeps a deleted game-file record, so a scripted Delete stays deleted across a restart. A seat (RefStateService) applies
+a relayed word only above the object's last applied sequence and a served word always, through the platform's own enableNoWait and
+disableNoWait; it applies none for a reference in a cell it hosts, except in its grant's pass, after the cell's script records. Fixtures
+78-DestructionStage-2 (the cobweb 0x1fc43 served disabled at sequence 3) and -3 (a report carrying the server's words, refused from
+a client); 78-0 and 78-1 gain `seq` 0; the difftest session ref-state. R2 (rule 5): the host's engine's word, recorded, never judged.
+
 ### ScriptCall (t 75, wire id 83): a tabled native its subject's owner ran, read at the native boundary (ADR-068 rung 2)
 
 Fork m4-scripts-2-seam a2924a84 (2026-11-05, SCHEMA_VERSION 36; ADR-068 rung 2, docs/research/scripts-one-system-2026-11-05.md
@@ -796,6 +816,69 @@ actor nobody or another seat simulates, E_SCRIPTCALL_OWNER. It reads no epoch, t
 (30 s; docs/verbs/npc-fate.md, "Trap hits as death evidence"). R2, unvalidated (rule 5): the named trap is recorded as reported,
 never checked against the body's place, and the hit's numbers are never judged.
 
+Rung 4 (fork m4-scripts-4-rows, SCHEMA_VERSION 39; docs/research/rung4-state-rows-2026-11-07.md section 1(c)) adds the table's
+record channel, Keep::Record, beside Keep::Evidence, for three kinds of state row: RefState (ObjectReference.Enable, EnableNoWait,
+Disable, DisableNoWait, Delete), the standing (Actor.SetFactionRank, ModFactionRank, RemoveFromFaction, RemoveFromAllFactions,
+SetCrimeFaction, SetRelationshipRank) and the script set (ObjectReference.PlaceAtMe, PlaceActorAtMe; W3, mechanism only: no seat
+sends them this rung). The table holds forty-one rows, natives_table.rs and NativeRows.inc together. A record row spends its own
+budget, 128 at once then 32 a second per reporter (UNMEASURED), beside the 32 and 8 of the rest. Its owner step: RefState's subject
+is owned by its cell's host at the epoch for a world object and for an actor nobody simulates (so the host enables an ambush
+draugr the loader never held), and by its simulator for every other actor; the standing's is its NPC's simulator alone. An accepted row
+takes the object's next sequence and goes out as its record's own word: RefState as DestructionStage 78's ref state word, the
+standing as the same Actor native by SpSnippet 30 to the NPC's other listeners with that sequence (wire-rules standing; refusals
+E_STANDING_FACTION, E_STANDING_RANK, E_STANDING_OTHER), a late seat served the record's difference from the base with no sequence;
+the script set as PlacedRequest 61 to the reporter alone, whose PlacedReport 62 places the server's copy at the reported pose
+(within the spell band's farthest reach of the self, with no floor; a base of no placeable kind is E_PLACED_KIND). A seat coalesces
+its record rows per self and piece of state in one ordered queue with its actions, and sends none for its own player's actor. The
+quest rows ReferenceAlias.ForceRefTo and Clear are `everyone` rows and travel as AliasFill 79 (below). The difftest sessions
+ref-state, standing (its refusals alone: T2's settings hold no NPC) and script-placement.
+
+The 50 train (fork m4-fifty-server ec72568f and e232e437, m4-fifty-platform 244c9162 and e7f62114, m4-fifty-client eb226e5c,
+2d8743de, 7a870e66 and 468b1029, on m4-train-50 4bd07f33; ADR-068 D-W2 A; no schema change, SCHEMA_VERSION stays 40) adds the look
+channel: during a firing its presser's owner started (D-W1 A, RelayedActivation below), that seat owns the trap family trigger's own
+calls on itself (a Tripwire's SetMotionType on its rope, a PressurePlate's 'Down' and 'Up', the trigger's sound, a bone alarm's
+impulse and noise), which cross from the firing seat as ScriptCall 75 reports and play on every other seat. The wire carries no look
+kind. The platform batches such a call as kind "look" while the subject's firing window is open (TrapFamily::Firing, noted by the
+presser rule's owned branch for a family trigger, on an enter and on a leave alike, for LOOK_MS 10000, UNMEASURED) and its calling
+script's self is the subject; the client sends it as an action, its own player kept as 0x14 in an object argument (a server id at
+0xff000000 and up is the validator's E_VAL_RANGE). The server tells a look by the table's new look column (natives_table.rs and
+NativeRows.inc, forty-three rows): Look::Also on the six action rows (PlayAnimation, PlayAnimationAndWait, Debug.SendAnimationEvent,
+SetAnimationVariableBool, Int and Float), Look::Only on SetMotionType and ApplyHavokImpulse and on two appended rows,
+Sound.Play(akSource) (Subject::Arg0Method: its subject the source in the first argument, its self the Sound, carried to the relay)
+and ObjectReference.CreateDetectionEvent(akOwner, aiSoundLevel) (Audience::Host).
+
+Its owner step (look_owner) is wire-rules trigger_entry's firing_source over the call's own facts, judged per call and never by a
+window anchored on the firing's report (a Tripwire's and a bone alarm's motion calls come before their own Activate): the cell's
+host at the epoch, or a game with the cell loaded one of whose actors (its player, or an actor it simulates) stands within the
+subject's activation reach plus FIRING_SLACK 512 (UNMEASURED). From the cell's host at the epoch a Look::Also row takes its own
+channel, an ordinary action (its "animates" line and its kept lastAnimation or variable, as before); from any other seat it is a
+look. A Look::Only row is a look from either. A look spends its subject's look cap, LOOK_BURST 12 at once then LOOK_PER_SECOND 2 a
+second per subject (UNMEASURED; SoundTrap makes ten a pass, five on the enter and five again on the leave), beside the reporter's 32
+and 8, a refused look spending none. It goes to the subject's other listeners but the reporter as the row's relay native
+(PlayAnimationAndWait as PlayAnimation) or the call itself, with the subject's next sequence (none for Sound.Play, whose self, the
+Sound, many triggers share: sent by SpSnippet::Serve), and is kept nowhere (no lastAnimation, no variable, no "animates" line).
+CreateDetectionEvent goes to the subject's cell's host alone, never the reporter (so the host's own reaches nobody), and an object
+argument naming 0x14 in any look is relayed as the reporter's actor (figure_args): the host runs a guest's bone alarm's detection
+event with the walker's figure as akOwner, so that it wakes the NPCs the host simulates (no lab run has read the wake). Line:
+"[verb:traps] <reporter> reports <Class.Name> on <subject> in cell <c> (epoch <e>, from <caller>.<handler>): its firing seat's look,
+seq <n>|no seq, relayed to <k> game(s)[ (the cell's host alone)] as <relay>, kept nowhere (D-W2)". Refusals by name:
+E_SCRIPTCALL_OWNER (no host at the epoch and no game with the cell loaded, or the host reporting under another grant: the own
+channel's refusal stands, never a look, ADR-066 decision 4), E_SCRIPTCALL_FAR (new: a game with the cell loaded none of whose actors
+stands within the reach; a placement the server holds no reference for measures none, so only its host's word is taken),
+E_SCRIPTCALL_LOOK_RATE (new) and E_SCRIPTCALL_ROW (a look-only row on an actor, a door or a container, the reporter's own player
+among them).
+
+A receiving seat (SpSnippetService) plays a look on its copy of a trap family trigger under the platform's mark, never reported
+again and never a prop claim ("trigger look <id> <Class.Name> played here (seq <n>|no seq) (D-W2)"); the host runs a relayed
+CreateDetectionEvent on its copy with akOwner its copy of the figure and the level bounded to 0 to 100; and a SetMotionType,
+ApplyHavokImpulse or CreateDetectionEvent carrying a seq whose subject is no trap family trigger there is dropped ("trigger look
+<id> <Class.Name> dropped: no trap trigger here (seq <n>) (D-W2)", rule 5). R2, unvalidated past those bounds
+(docs/verbs/trigger-entry.md, "D-W2 A"): that the reporter's press fired the trigger is its word, as D-W1's firing is, and since the
+server reads no script archive it cannot tell a trigger from any other world object, so a modified seat within reach can play graph
+events on the other seats. No fixture (ScriptCall's shape is unchanged); the difftest session trigger-look (a guest's PlayAnimation
+on the ore vein 0x10e6c5 from the spawn, E_SCRIPTCALL_FAR with nothing sent; the same call on the vein, relayed to c1 as SpSnippet
+PlayAnimation with seq 1 and kept nowhere; c1, the host, under epoch 2, E_SCRIPTCALL_OWNER); T0 unit/ScriptCallLookTest.cpp.
+
 ### ScriptState (t 76, wire id 84) and ScriptStateApply (t 77, wire id 85): the script record (ADR-068 rung 3)
 
 Fork m4-scripts-3-record 4f525bad (12:49 PST 2026-11-06, SCHEMA_VERSION 38; ADR-068 rung 3,
@@ -821,6 +904,68 @@ count, kind and state against its own VM before writing). A schema 37 client can
 client and server build from one tree; fixtures 76-ScriptState-0 and -1 (the second refused: a kind 3 handle) and
 77-ScriptStateApply-0 and -1; the difftest session script-state.
 
+Since SCHEMA_VERSION 40 (fork m4-fifty-wire 547c4876, m4-fifty-server 439571f4, m4-fifty-client d25ce708 and 1149fd31, on
+m4-train-50 4bd07f33; ADR-068 D-C3 A, docs/verbs/papyrus-events.md "D-C3") the record's view also carries a world object's behavior
+graph variables: ScriptStateApply gains `graphVars?: [{ name, k: u8, i?: i32, f?: f32, b?: bool, seq: u32 }]` (wire-schema
+GraphVar), at most GRAPH_VARS 16 (UNMEASURED; an apply's 256 KiB kept, the largest record with sixteen full variables inside it),
+each a name of at most ANIM_EVENT 128 bytes, a kind of 3 (an int), 4 (a float) or 5 (a bool), ScriptVar's folded kinds, carrying
+that kind's one value, and the object's sequence at the call that set it; with none, no key renders. Validator (wire-validate
+check_graph_vars, under check_script_state_apply): a name empty, carrying a NUL or named twice, a kind outside 3 to 5 or a payload
+not exactly its kind's, a seq of 0 (E_VAL_RANGE); a float that is not finite is the apply's E_VAL_NONFINITE first. The server keeps
+the variable of each SetAnimationVariableBool, Int or Float call it takes on a world object it holds (a placement by its record
+keeps nothing) through ScriptCall 75's own channel (Keep::Variable, still relayed as an action; a look's is kept nowhere) on the
+reference's change form with the call's sequence: one per name, compared without case as the engine's BSFixedString compares; a call
+at or after the kept sequence replaces it and an earlier one is left; a new name past sixteen takes the oldest's place (wire-rules
+natives variable_slot); a name empty, past 128 bytes or carrying a NUL, or a value that is no finite number of its kind, is kept
+nowhere. The variables are saved under the change form's "graphVariables" key (an older record reads as none) and survive a restart.
+BuildScriptStateApply copies them as kept at the serve, never stamped at the record's take (a stack whose only act sets a variable
+takes no new record), leaving out any the serve could not carry, and builds nothing for a reference without a script record: the
+variables are served only beside a record, behind the reference's create word and ahead of a grant, and both serve lines end ", <n>
+graph variable(s)". A receiver (ScriptStateService) sets each served variable whose seq is above the one it holds for that reference
+and name, before the view's replay, and ObjectAnimationService sets it again at each 3D load. R2 (rule 5): the owner's engine's
+word, recorded, never judged. Fixtures 77-ScriptStateApply-2 (the web 0x3758c's record served with fToggleBlend, k 4, f 1.0, seq 1)
+and -3 (fToggleBlend twice, refused), with no LEGACY_ABSENT row (MsgType 77 is thuum's); the difftest session graph-vars (c1's
+SetAnimationVariableFloat after the record's take, served behind the vein's create word to c2 with fToggleBlend 1.0 at seq 1).
+
+### AliasFill (t 79, wire id 87): a quest's reference alias filled or cleared, the latest report recorded (ADR-068 rung 4)
+
+Fork m4-scripts-4-rows 77aaf7bb (2026-11-06, SCHEMA_VERSION 39; ADR-068 rung 4 and its amendment B, read 8): AliasFill (MsgType 79,
+wire id 87), both directions, reliable, R2: `{ quest: u32, alias: u32, refr: u32, served: bool }`. A quest is nobody's (D-F1 C), so
+every seat runs its scripts and each seat reports its own ReferenceAlias.ForceRefTo or Clear (`refr` 0 for a clear; `served` false),
+read at the native boundary as an `everyone` row with the alias's id from its handle (HYPOTHESIS H-AF3). The client keeps the last
+fill per (quest, alias) a frame and never reports its own player's actor or a server copy. The server (wire-rules alias_fills)
+records one fill per (quest, alias), the latest report winning and an equal one folded, for a QUST with a reference alias of that
+id, on the world's journal; a fill that moved the record is relayed to every other seat (`served` false) and the record is served
+at login (`served` true). A seat applies it with Quest.GetAlias, then ForceRefTo or Clear, parked while its quest is not running or
+its reference is not loaded (retried every 2 s, at a quest's start and at a cell's full load, let go after 120 s). The items an
+alias creates in another alias's inventory never travel here: the server derives them from the game files (the claw derivation,
+ALCO/ALCA, R0) and puts each into its container once. Validator: quest not 0 nor 0xff000000 and up, alias at most 0xFFFF, refr below
+0xff000000 (E_VAL_RANGE both ways), a client's `served` E_VAL_RANGE, 16 at once then 4 a second per sender (UNMEASURED). The
+server's refusals, logged by name: E_ALIASFILL_NO_QUEST, E_ALIASFILL_NO_ALIAS, E_ALIASFILL_REF, E_ALIASFILL_UNRESOLVED. Fixtures
+79-AliasFill-0 (MS13 0x39645's alias 10 forced to the web 0x1fc43, a relay), -1 (alias 3 served cleared) and -2 (refr 0xff000002,
+refused); the difftest session alias-fill. R2 (rule 5): the seat's engine's fill, recorded, never judged.
+
+### WorldGlobal (t 80, wire id 88): the globals every seat's scripts write, streamed by one seat at an epoch (ADR-068 rung 4)
+
+Fork m4-scripts-4-rows 77aaf7bb (2026-11-06, SCHEMA_VERSION 39; ADR-068 rung 4 and its amendment B): WorldGlobal (MsgType 80, wire
+id 88), both directions, reliable, R2: `{ epoch: u32, stream?: bool, entries: [{ global: u32, value: f32 }], served: bool }`. A GLOB is
+written by scripts every seat runs, so one seat streams: the server elects the world streamer (wire-rules world_streamer: a seat
+past its first movement report, not stale, not dead, the lowest player id at each election; an eligible streamer is never displaced
+by a newcomer) and tells it by the stream word (`stream` true at the new epoch, false to the seat whose stream ends, `entries`
+empty). The streamer's game diffs the GLOB array once a second (TESModPlatform.DiffWorldGlobals, constants skipped, the clock's six
+and the per-player globals excluded) and reports what moved under its epoch, at most 512 entries a message. The server judges the
+epoch first (ADR-066 decision 4: E_WORLDGLOBAL_EPOCH for a stale or future one, E_WORLDGLOBAL_OWNER from any seat but the streamer)
+and then each entry (wire-rules world_globals: E_WORLDGLOBAL_CLOCK, E_WORLDGLOBAL_PLAYER, E_WORLDGLOBAL_CONSTANT,
+E_WORLDGLOBAL_NO_GLOB), keeps the latest value per global on the world's journal, relays what moved to every other seat (`served`
+false) and serves the record at login (`served` true). A receiver sets each value through GlobalVariable.SetValue on the update, 32 an
+update, refusing an excluded id, a form that is no GlobalVariable there and a non-finite value. The whole channel is behind the
+server setting `worldGlobals` (false by default: nobody is elected, no stream word goes out, no record is served, and each seat's
+globals stay its own, as before rung 4). Validator: finite values (E_VAL_NONFINITE), at most 512 entries, each a GLOB id not 0 nor
+0xff000000 and up and named once, a stream word at an epoch above 0 (E_VAL_RANGE both ways); from a client, `stream`, `served` or
+epoch 0 is E_VAL_RANGE, judged before the budget of 4 at once then 1 a second (UNMEASURED: x-world-globals-rate v1 reads the rate).
+Fixtures 80-WorldGlobal-0 (a report at epoch 2 of DA04MinLevel 0xe316c), -1 (the stream word at epoch 3) and -2 (a global named
+twice, refused); the difftest session world-global. R2 (rule 5): the streamer's engine's values, recorded, never judged.
+
 ### RelayedActivation (t 70): a linked activation the cell's host reported, to the cell's other games (traps, M4)
 
 Since fork m4-traps (01:43 PST 2026-11-01, SCHEMA_VERSION 28): RelayedActivation (id 78, MsgType 70), server to client, reliable, to the
@@ -833,6 +978,52 @@ An actor target (ADR-068; fork m4-scripts-1-flip, 03714dc8 and 101705a8; docs/ve
 actor"): never relayed to the cell's other games and never recorded through Activate; dropped when the reporter or nobody
 simulates the actor, else sent to that one simulator's game alone, after the reporter hosting the trigger's cell and the actor's
 own XAPR naming the trigger, within the same budget. The shape is unchanged.
+
+Since SCHEMA_VERSION 40 (fork m4-train-50 4bd07f33, 2026-11-07; ADR-068 D-W1 A and D-C2 A, docs/verbs/trigger-entry.md) a trigger
+volume's entry counts once, on its presser's owner, by one rule (wire-rules trigger_entry; fork m4-fifty-server 3d916455). A trap
+family trigger's firing, its own activation or its first link, is taken by firing_source from the cell's host as before, or from a
+game with the cell loaded (PartOne::GetCellLoaders) one of whose actors, its player or an actor it simulates, stands within the
+trigger's activation reach plus FIRING_SLACK 512 (UNMEASURED; an actor inside the trigger's primitive stands at it), else
+E_TRAP_NOT_HOST (neither) or E_TRAP_FAR, each logged by name; the link (E_TRAP_UNLINKED) and the budget (E_TRAP_RATE) stay the
+handler's, and the relay to every listener but the reporter is unchanged, so the host plays a guest's root (f77c7342). A loader's
+pair reads "<trigger> activates <target> in cell <c> (<reporter> reports with the cell loaded, its firing): relayed to <n> game(s)"
+beside the host's line; an actor target goes to its simulator's game alone by the same rule (edd064d4). That half changes no shape.
+
+The other half is the shape's (fork m4-fifty-wire 547c4876 and a129da30): Activate (MsgType 6) and RelayedActivation gain an
+optional `entry: u8`, 1 OnTriggerEnter and 2 OnTriggerLeave (wire-schema ENTRY_ENTER and ENTRY_LEAVE), absent on every activation,
+where no key renders. On Activate it is the presser's owner's report that its actor entered or left a trigger whose world script
+runs on the cell's host: `caster` the presser (0x14 the sender's own player, or an actor its game simulates, by its server id) and
+`target` the trigger. Validator: check_activate (new; an Activate without entry keeps the checks every message shares) refuses an
+entry other than 1 or 2, a second activation, a caster of 0 or past 32 bits and a target of 0 or at 0xff000000 and up (E_VAL_RANGE),
+judged before the sender's entry_budget, 8 at once then 4 a second (UNMEASURED, E_VAL_RATE), which an Activate without entry never
+spends; check_relayed_activation adds an entry absent, 1 or 2 (E_VAL_RANGE). Activate's row stays 64 bytes (24 at the longest) and
+RelayedActivation's goes from 16 to 24 (13 at the longest), both pinned by the size tests; no new message, so the next free MsgType
+stays 81. A schema 39 client cannot connect to a schema 40 server (netcode's protocol id carries the version), so the train's client
+and server build from one tree.
+
+The server's rule (ActionListener::OnTriggerEntry, OnActivate's first branch: an Activate carrying entry never activates; wire-rules
+trigger_entry's entry, through PartOne's TriggerEntries), checked in order: the trigger a world object the server holds or places by
+its game-file record (E_ENTRY_NO_REF) and no actor (E_ENTRY_ACTOR); the presser the reporter's own actor or one its game simulates
+(E_ENTRY_PRESSER: an entry counts on its presser's owner alone); the reporter a loader of the trigger's cell (E_ENTRY_NOT_LOADER)
+that does not host it (E_ENTRY_HOST: its own engine ran the script); a host there with a game connected (E_ENTRY_NO_HOST: a host in
+its grace runs no script either); the presser within the trigger's activation reach (E_ENTRY_REACH, UNMEASURED; a presser inside the
+trigger's primitive stands at it). A leave pairs with its enter (0c760119, 5b200681): the server keeps each presser's accepted
+enters it has not seen left, by trigger (64 a presser, the oldest dropped past them, UNMEASURED; runtime only, so a disconnect
+forgets the player's and a restart forgets them all), and a leave that ends one is taken without the loader and the reach checks,
+every other check kept, since a guest that leaves by a teleport or a door reports its leave after the move, 1,500 to 2,000 units
+off, its game perhaps with the cell unloaded; a leave that ends none is E_ENTRY_UNPAIRED, before any other judgment. An accepted
+entry goes to the cell's host's game alone as RelayedActivation {target: the trigger, caster: the presser, entry}, and its engine
+sends that event to the trigger's scripts with the presser's figure as akActionRef (TESModPlatform.SendTriggerEvent,
+docs/NATIVES.md); nothing is recorded but the pairing. Lines: "[verb:traps] <reporter> reports <presser> entering|leaving <trigger>
+in cell <c> (its host <h>): relayed to the host" and "[verb:traps] E_ENTRY_<CODE>: <reporter> reports <presser> entering|leaving
+<trigger>: <why>; refused, <n> since the last line", once a minute per reporter and code; a refusal sends nothing. Fixtures
+06-Activate-2 (c2's own player entering Bleak Falls Temple's web 0x37281) and -3 (the same entry as a second activation, refused),
+70-RelayedActivation-2 (the entry to the host, caster 0xff000001) and -3 (entry 3, refused); wire-legacy's LEGACY_ABSENT
+("ActivateData", "entry") with a hand-built packet's test (RelayedActivation's entry takes no row: MsgType 70 is thuum's, and
+decode_packet reads SkyMP's 33 alone); the difftest session trigger-entry (c2's entry relayed to c1, the host, alone;
+E_ENTRY_PRESSER and E_ENTRY_HOST sending nothing); T0 unit/TriggerEntryTest.cpp. R2 (rule 5): the presser's owner's engine computed
+the entry, and a loader's firing is its word that its engine fired the trigger, bounded by the link, the reach, the loader test and
+the budgets; a leave is validated by its pairing.
 
 ### CreateActor's restrictedRaces and permittedRaces (character-creation, the permit; M5)
 
@@ -858,6 +1049,27 @@ reference at 8 a second (E_OBJANIM_RATE), writes the event as the reference's la
 replays it) and relays the same message to the cell's other listeners, whose engines run no world script under ADR-059's
 hosted-cell gate and play it through PlayAnimation. Fixtures 71-ObjectAnimation-0 and -1; WireJsonContractTest reads them
 through ObjectAnimationMessage.h. No difftest session triggers it yet (the fake clients host no cell).
+
+The 50 train (fork m4-fifty-server 8773f4ad, m4-fifty-platform d658e6b2 and m4-fifty-client cb2e2dca, on m4-train-50 4bd07f33; H-P1,
+docs/verbs/furniture.md; no schema change) moves the owner rule into Rust (wire-rules object_animation): the owner of a world
+object's graph event is the engine that drives its graph. A furniture's (a FURN base's) while it is used is its recorded occupant's
+owner's, MpObjectReference::GetOccupant naming the occupant ProcessActivateNormal's FURN branch records: a player's own seat, or an
+NPC's simulator by WorldState::HostOf. Anything else, and a furniture nobody uses, is the cell's host's, as before (ADR-059 decision
+3). E_OBJANIM_NOT_USER (new) refuses a furniture in use whose user is not the reporter's; E_OBJANIM_NOT_HOST keeps its line for
+everything else; the shape's checks, the actor, door and container skips and the reference's 8 a second (E_OBJANIM_RATE) stay the
+core's. A furniture's event is relayed to its other listeners and kept nowhere, from its user or its host (a kept lastAnimation is
+served behind every create word and played again at each 3D load, so a lever back at rest would push again at every late join and
+every reload; HYPOTHESIS H-LF7); every other world object's last event is kept as before. Lines, each keeping the "<refr> animates
+<refr>" head: "(its user <u> reports): relayed to <n> game(s), not kept", "(its user <npc>'s simulator <s> reports): relayed to <n>
+game(s), not kept", "(its host <h> reports): relayed to <n> game(s), not kept" for a furniture nobody uses, and the host's
+"recorded" line for the rest, unchanged. The reporter: the platform's furniture branch in the animation hook raises
+furnitureAnimation {refrId, event, took} for a FURN's event on its own graph, under the process-wide Override too (the NoPlayer
+lever's 'Lever_PlayerPush' is sent inside the client's own activate(player, true), where the hook's handlers return), behind
+setFurnitureAnimation and the client setting furnitureAnimation (on unless false); ObjectAnimationService reports it for this seat's
+use, or for an NPC's use in a cell this seat hosts ("object animation <refr> <event> reported (furniture, this seat's use)" or
+"(furniture, cell hosted here)", else "... dropped: furniture not used or hosted here"), and keeps no FURN's play. R2: the owner's
+engine computed the event; the server checks who reports it and relays it. Fixtures unchanged (71-ObjectAnimation-0 and -1); T0
+unit/ObjectAnimationOwnerTest.cpp.
 
 ### TrapHit (t 72): the host's report of a trap's hit on another player's body (traps, M4; ADR-059 decision 4)
 

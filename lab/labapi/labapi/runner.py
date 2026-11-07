@@ -498,7 +498,9 @@ class Runner:
         respawn = rec.scenario.server.npcRespawnHours
         settle = rec.scenario.server.handoffPassSettleMs
         roll = rec.scenario.server.npcRollLevel
-        if settings and (npc is not None or hour is not None or respawn is not None or settle is not None or roll is not None):
+        world_globals = rec.scenario.server.worldGlobals
+        if settings and (npc is not None or hour is not None or respawn is not None or settle is not None or roll is not None
+                         or world_globals is not None):
             # ADR-035 point 9: the run's own npcEnabled (and its game hour) over the version's
             # file, laid beside the world for this run alone, so no second file is kept in step
             try:
@@ -513,6 +515,8 @@ class Runner:
                 d["handoffPassSettleMs"] = settle
             if roll is not None:
                 d["npcRollLevel"] = roll
+            if world_globals is not None:
+                d["worldGlobals"] = world_globals
             if hour is not None:
                 # the clock is a pure function of the wall clock and the time block (wire-rules
                 # clock.rs): it reads start.hour at the epoch, so the run's start is the epoch
@@ -2153,7 +2157,8 @@ class Runner:
         recipe becomes the recipe's form id (its station passes through: a
         reference id, or a name a later refs table resolves), race-pick's
         race its form id, known's and held's ids theirs, inventory's ref its
-        form id, transfer's item and its to or from theirs, and a FormDesc in
+        form id, transfer's item and its to or from theirs, alias's quest and
+        each of factions' factions theirs (ADR-068 rung 4), and a FormDesc in
         braces inside console text the run's id in the console's hex
         ("player.equipspell {044d44:Apocalypse - Magic of Skyrim.esp} right"
         types 1a044d44 under the essentials layer)."""
@@ -2173,6 +2178,10 @@ class Runner:
                 out["ids"] = [self.tables.base_id(x) if isinstance(x, str) else x for x in out["ids"]]
             if action == "inventory" and isinstance(out.get("ref"), str):
                 out["ref"] = self.tables.base_id(out["ref"])
+            if action == "alias" and isinstance(out.get("quest"), str):
+                out["quest"] = self.tables.base_id(out["quest"])
+            if action == "factions" and isinstance(out.get("factions"), list):
+                out["factions"] = [self.tables.base_id(x) if isinstance(x, str) else x for x in out["factions"]]
             if action == "transfer":
                 for key in ("item", "to", "from"):
                     if isinstance(out.get(key), str):

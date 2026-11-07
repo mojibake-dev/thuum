@@ -1,7 +1,8 @@
 # Playtest 49 (numidium, 2026-11-06 ~19:20 PST): Embershard and the Temple, with scripts that survive a hand-off, on the
 # canonical seats. The build is fork m4-train-48 75c134ad (rung 3's script record 458a6930 merged in, the 48 fixes, the body's
 # rest as a dwell on both ends), pipeline 5592's server image and dist, staged by verb-stage over the layer stage of
-# apocrypha/layer-appearance 6bbdb751 (the SFW body built on CI, Rotfern's Fixes 0.1.1). thuum-fa's checklist is
+# apocrypha/layer-appearance b2bcc92d (the SFW body in SFW's own shape, BodySlide's CBBE Curvy (Outfit) on CI job 19760,
+# restaged over the train's stage 03:58Z to 04:17Z; Rotfern's Fixes 0.1.1). thuum-fa's checklist is
 # docs/private/playtest-49.md (items 1 to 5; apocrypha's layer items 6 and 7; 8 anything else).
 # The world is the canonical one, playtest-canon-chars-20261106T224932Z (rotfern and Ariadne at 200, Ariadne's look from 48
 # and her clothes worn). Embershard Mine 0xb6be6 is untouched there: the wire 0xb6d3f and the platform 0xb6d47 hold no record
@@ -13,8 +14,12 @@
 # (16198, -53980, 1349)), nothing alive within 2,500 units, both seats facing the door 660 units off (heading 164.5; the
 # door at (16375, -54616)), test 2 on 48's tested spot beside test 1.
 id: 49
-build: "fork m4-train-48 75c134ad (rung 3, the 48 fixes, the body's rest) staged by verb-stage under the layer stage of apocrypha/layer-appearance 6bbdb751"
-world: playtest-canon-chars-20261106T224932Z   # the canonical seats (rotfern, Ariadne dressed); Embershard untouched
+build: "fork m4-train-48 75c134ad (rung 3, the 48 fixes, the body's rest) staged by verb-stage under the layer stage of apocrypha/layer-appearance b2bcc92d"
+world: playtest-pt49-temple-20261107T055758Z   # the second reset (Eli: "drop off outside bleakfalls to test - pillars - blades
+  # - spike wall - arvel"): 49's world after the host's trip at Embershard (055647Z, Ariadne's Orc 05 look and its preset as
+  # recovered), with Arvel 0x39655 (dead since 47) moved aside into snapshot-backups/ so he is the game files' again; the
+  # pillars 0xaa8cb to 0xaa8cd, the chain 0xfda45 and its blades, the wall 0x54b15 and its plate 0x567f2 hold no state; the
+  # six ambush draugr 0x380b3 to 0x380bb are alive
 hold:
   minutes: 150
   reason: "playtest 49: Embershard and the Temple, the 48 train and rung 3"
@@ -26,13 +31,11 @@ server:
   perks: true
   leveling: true
 camp:
-  # Embershard first (items 1 and 2). For the Temple (items 3 and 4), the camp moves to 48's fourth reset, the game's landing
-  # of the Temple's door 0x15da5, each seat walking into 0x371de by a real cell load, rotfern first:
-  #   - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [-2966, -43331, 6145], rot: [0, 0, 104.6]}
-  #   - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [-2908, -43346, 6145], rot: [0, 0, 104.6]}
+  # the second reset: 48's fourth reset at the game's landing of the Temple's door 0x15da5 (lab/playtests/47.yaml), each seat
+  # walking into 0x371de by a real cell load, rotfern first (she hosts); the bandits 0x29600 and 0x29602 there are dead
   teleports:
-    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [16198, -53980, 1349], rot: [0, 0, 164.5]}
-    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [16146, -54009, 1380], rot: [0, 0, 164.5]}
+    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [-2966, -43331, 6145], rot: [0, 0, 104.6]}
+    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [-2908, -43346, 6145], rot: [0, 0, 104.6]}
 seats:
   - profile: 1
     name: "test 1"

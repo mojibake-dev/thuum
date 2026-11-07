@@ -1563,6 +1563,179 @@ class ScriptStateTests(unittest.TestCase):
                 ev.evaluate(expr)
 
 
+class SlotServer(RichServer):
+    """A ServerFacade that resolves FormDescs through a fixed load order, as the runner's tables do (guests.py base_id):
+    Skyrim.esm in slot 0, Apocalypse in slot 0x1a (the essentials layer's, as the console's comment in runner.py names it)."""
+
+    SLOTS = {"skyrim.esm": 0x00, "apocalypse - magic of skyrim.esp": 0x1A}
+
+    def base_id(self, spec):
+        s = spec.strip()
+        if ":" in s and not s.lower().startswith("skyrim.esm:"):
+            local, _, plugin = s.partition(":")
+            if plugin.lower() not in self.SLOTS:
+                raise KeyError(f"{plugin} is not in the running load order")
+            return (self.SLOTS[plugin.lower()] << 24) | int(local, 16)
+        return super().base_id(s)
+
+
+class RungFourViews(NearViews):
+    """Each seat's alias and factions reads (ADR-068 rung 4's grammar), in lab-driver's answer shapes: c1 read an alias that
+    holds Arvel's placement and one that holds nothing; c2's read of a quest it lacks answered an error; c1's standing read of
+    Arvel names two factions, one it is in and one it is not, and one form that is no faction in its game. Alias ids, the
+    Apocalypse forms and 0x12345 are the fixture's own, not the game files'."""
+
+    def __init__(self):
+        super().__init__()
+        self.aliases = {
+            "c1": {(0x39645, 0): {"quest": 0x39645, "alias": 0, "refr": 0x39655, "name": "Arvel"},
+                   (0x39645, 1): {"quest": 0x39645, "alias": 1, "refr": 0, "name": "Empty"},
+                   (0x1A0A0001, 2): {"quest": 0x1A0A0001, "alias": 2, "refr": 0x14, "name": "Caster"}},
+            "c2": {(0x39645, 0): {"error": "no quest 39645 in this game"}},
+        }
+        self.standing = {
+            "c1": {0x39655: {"formId": 0x39655, "ranks": {str(0xDB1): 0, str(0x5C84E): -1, str(0x12345): None},
+                             "members": {str(0xDB1): True, str(0x5C84E): False, str(0x12345): None}, "crime": 0},
+                   0x14: {"formId": 0x14, "ranks": {str(0x1A0B0002): 2}, "members": {str(0x1A0B0002): True}, "crime": 0xDB1}},
+            "c2": {0x39655: {"error": "no actor 39655 in this game"}},
+        }
+
+    def alias(self, observer, quest, alias):
+        return self.aliases.get(observer, {}).get((quest, alias))
+
+    def factions(self, observer, form_id):
+        return self.standing.get(observer, {}).get(form_id)
+
+
+@needs_deps
+class RungFourTests(unittest.TestCase):
+    """ADR-068 rung 4's grammar (docs/research/rung4-state-rows-2026-11-07.md 1(e)): the two seat reads, the ref's state on the
+    server, the world's globals with their streamer, the alias fills."""
+
+    def test_a_seats_alias_reads_its_reference_and_name(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(SlotServer(), RungFourViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c1.alias(0x39645, 0).refr == 0x39655"))
+        self.assertTrue(ev.evaluate('c1.alias(0x39645, 0).name == "Arvel" and c1.alias(0x39645, 1).refr == 0'))
+        self.assertTrue(ev.evaluate('c1.alias("0a0001:Apocalypse - Magic of Skyrim.esp", 2).refr == 0x14'))  # a FormDesc quest
+        self.assertEqual(ev.readings[f"c1.alias({0x39645}, 0).refr"], 0x39655)
+        for expr in ('c2.alias(0x39645, 0).refr == 0',          # its last read answered an error
+                     'c1.alias(0x39645, 7).refr == 0',          # never read on c1
+                     'c2.alias(0x39645, 1).refr == 0',
+                     'c1.alias("0a0001:NoSuch.esp", 2).refr == 0'):
+            with self.assertRaises(AssertionData, msg=expr):
+                ev.evaluate(expr)
+        with self.assertRaisesRegex(AssertionData, "answered an error: no quest 39645"):
+            ev.evaluate('c2.alias(0x39645, 0).refr == 0')
+
+    def test_a_seats_standing_reads_ranks_membership_and_the_crime_faction(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(SlotServer(), RungFourViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c1.factions(0x39655).rank(0xdb1) == 0 and c1.factions(0x39655).member(0xdb1) == true"))
+        self.assertTrue(ev.evaluate("c1.factions(0x39655).member(0x5c84e) == false and c1.factions(0x39655).rank(0x5c84e) == -1"))
+        self.assertTrue(ev.evaluate('c1.factions(0x39655).rank("000db1:Skyrim.esm") == 0'))
+        self.assertTrue(ev.evaluate('c1.factions(0x14).rank("0b0002:Apocalypse - Magic of Skyrim.esp") == 2'))
+        self.assertTrue(ev.evaluate("c1.factions(0x39655).crime == 0 and c1.factions(0x14).crime == 0xdb1"))
+        for expr in ("c1.factions(0x39655).rank(0x99999) == 0",     # a faction the step did not name
+                     "c1.factions(0x39655).rank(0x12345) == 0",     # no faction of that id in c1's game
+                     "c1.factions(0x39655).member(0x12345) == false",
+                     "c2.factions(0x39655).crime == 0",             # its last read answered an error
+                     "c1.factions(0x13485).crime == 0"):            # never read
+            with self.assertRaises(AssertionData, msg=expr):
+                ev.evaluate(expr)
+
+    def test_the_servers_ref_state_of_a_reference(self):
+        # labState ref's isDisabled, isDeleted and refStateSeq; a gamemode without the fields is missing data, never a pass
+        from labapi.assertions import AssertionData, Evaluator
+        srv = SlotServer()
+        refs = {0x3AC73: {"found": True, "actorId": 0x3AC73, "x": 1211.0, "y": 1084.0, "z": -212.0, "cell": "371de:Skyrim.esm",
+                          "isDisabled": True, "isDeleted": False, "refStateSeq": 3},
+                0x17037: {"found": True, "actorId": 0x17037, "x": 6867.0, "y": -5874.0, "z": -1687.0, "cell": "371de:Skyrim.esm",
+                          "isDisabled": False, "isDeleted": False, "refStateSeq": 0},
+                0x1FC43: {"found": True, "actorId": 0x1FC43, "x": 3918.0, "y": -3314.0, "z": -1779.0, "cell": "371de:Skyrim.esm"}}
+        srv.ref = lambda actor_id: refs.get(actor_id, {"found": False})
+        ev = Evaluator(srv, RungFourViews(), ["c1", "c2"])
+        for expr in ("server.ref(0x3ac73).isDisabled == true", "server.ref(0x3ac73).refStateSeq > 0",
+                     "server.ref(0x3ac73).isDeleted == false", "server.ref(0x17037).isDisabled == false",
+                     "server.ref(0x17037).refStateSeq == 0"):
+            with self.subTest(expr=expr):
+                self.assertTrue(ev.evaluate(expr))
+        for expr in ("server.ref(0x1fc43).isDisabled == false", "server.ref(0x1fc43).refStateSeq == 0",
+                     "server.ref(0x1fc43).isDeleted == false"):
+            with self.assertRaises(AssertionData, msg=expr):
+                ev.evaluate(expr)
+
+    def test_the_worlds_globals_and_their_streamer(self):
+        # labState worldGlobals: the streamer as the run's client by its actor id, the epoch, and values keyed by FormDesc
+        # text or form id, either resolved through the run's load order
+        from labapi.assertions import AssertionData, Evaluator
+        srv = SlotServer()
+        srv.actors["c1"]["actorId"] = 0xFF000000
+        srv.actors["c2"]["actorId"] = 0xFF000001
+        record = {"found": True, "streamer": 0xFF000000, "epoch": 2,
+                  "entries": [{"global": "0a6ec2:Apocalypse - Magic of Skyrim.esp", "value": 7.0},
+                              {"global": 0x1A0A6EC3, "value": 9.5},
+                              {"global": "000999:NoSuch.esp", "value": 1.0}]}
+        srv.world_globals = lambda: record
+        ev = Evaluator(srv, RungFourViews(), ["c1", "c2"])
+        for expr in ('server.world_globals().streamer == "c1"', "server.world_globals().epoch == 2",
+                     "server.world_globals().actorId == 0xff000000",
+                     'server.world_globals().value("0a6ec2:Apocalypse - Magic of Skyrim.esp") == 7',
+                     "server.world_globals().value(0x1a0a6ec2) == 7",
+                     'server.world_globals().value("0a6ec3:Apocalypse - Magic of Skyrim.esp") == 9.5'):
+            with self.subTest(expr=expr):
+                self.assertTrue(ev.evaluate(expr))
+        with self.assertRaisesRegex(AssertionData, "no world value of 0a6ec4.*1 entries did not resolve"):
+            ev.evaluate('server.world_globals().value("0a6ec4:Apocalypse - Magic of Skyrim.esp") == 7')
+        record["streamer"] = 0
+        self.assertTrue(ev.evaluate('server.world_globals().streamer == ""'))
+        record["streamer"] = 0xFF000005                                         # a player outside the run
+        self.assertTrue(ev.evaluate('server.world_globals().streamer == "" and server.world_globals().actorId == 0xff000005'))
+        srv.world_globals = lambda: None                                        # a server without the kind
+        with self.assertRaises(AssertionData):
+            ev.evaluate('server.world_globals().streamer == "c1"')
+
+    def test_the_servers_alias_fills(self):
+        # labState aliasFills: a ref half's row and a created half's row; quests and forms by form id or FormDesc text
+        from labapi.assertions import AssertionData, Evaluator
+        srv = SlotServer()
+        fills = {"found": True, "fills": [
+            {"quest": 0x39645, "alias": 0, "refr": 0x39655, "created": 0, "container": 0, "added": False},
+            {"quest": "039645:Skyrim.esm", "alias": 1, "refr": 0, "created": "039647:Skyrim.esm", "container": 0x39655, "added": True},
+            {"quest": "0a0001:Apocalypse - Magic of Skyrim.esp", "alias": 2, "refr": 0x14, "created": 0, "container": 0, "added": False}]}
+        srv.alias_fills = lambda: fills
+        ev = Evaluator(srv, RungFourViews(), ["c1", "c2"])
+        for expr in ("server.alias_fill(0x39645, 0).refr == 0x39655", "server.alias_fill(0x39645, 0).added == false",
+                     "server.alias_fill(0x39645, 1).created == 0x39647", "server.alias_fill(0x39645, 1).container == 0x39655",
+                     "server.alias_fill(0x39645, 1).added == true and server.alias_fill(0x39645, 1).refr == 0",
+                     'server.alias_fill("039645:Skyrim.esm", 0).refr == c1.alias(0x39645, 0).refr',
+                     'server.alias_fill("0a0001:Apocalypse - Magic of Skyrim.esp", 2).refr == 0x14'):
+            with self.subTest(expr=expr):
+                self.assertTrue(ev.evaluate(expr))
+        with self.assertRaisesRegex(AssertionData, "records no fill of 0x39645 alias 9"):
+            ev.evaluate("server.alias_fill(0x39645, 9).refr == 0")
+        srv.alias_fills = lambda: None
+        with self.assertRaises(AssertionData):
+            ev.evaluate("server.alias_fill(0x39645, 0).refr == 0")
+
+    def test_its_call_shapes_are_checked(self):
+        from labapi.assertions import AssertionSyntax, Evaluator
+        srv = SlotServer()
+        # each read answers, so a shape is judged on a view that exists (the Evaluator reads the view before its attribute)
+        srv.world_globals = lambda: {"found": True, "streamer": 0, "epoch": 1, "entries": []}
+        srv.alias_fills = lambda: {"found": True, "fills": [{"quest": 0x39645, "alias": 0, "refr": 0x39655, "added": False}]}
+        srv.ref = lambda actor_id: {"found": True, "actorId": actor_id, "x": 0.0, "y": 0.0, "z": 0.0, "cell": "", "isDisabled": True}
+        ev = Evaluator(srv, RungFourViews(), ["c1", "c2"])
+        for expr in ("c1.alias(0x39645).refr == 0", "c1.alias(0x39645, 0, 1).refr == 0", 'c1.alias(0x39645, "0").refr == 0',
+                     "c1.alias(true, 0).refr == 0", "c1.alias(0x39645, 0).quest == 0", "c1.factions().crime == 0",
+                     'c1.factions("0x39655").crime == 0', "c1.factions(0x39655).rank() == 0", "c1.factions(0x39655).ranks == 0",
+                     "server.world_globals(c1).epoch == 0", "server.world_globals().entries == 0", "server.world_globals().value() == 0",
+                     "server.alias_fill(0x39645).refr == 0", "server.alias_fill(0x39645, 0).quest == 0",
+                     "server.ref(0x3ac73).disabled == true"):
+            with self.assertRaises(AssertionSyntax, msg=expr):
+                ev.evaluate(expr)
+
+
 @needs_deps
 class NodeScaleTests(unittest.TestCase):
     def test_own_and_figure_scales_read_the_last_node_scale_steps(self):

@@ -475,6 +475,81 @@ could too); H-R10 (the stack ZeroFunctionArguments' re-sends ran, no fault). Unr
 scripted objects beyond the pillars (the Temple's 6a9e2, 67dcc, 3c5a9, 375a1, 375a2, 375ad), applied as guests with their handles
 resolved, the system's own reach rather than a pillar case. The T3 box stays open on H-R9 to H-R12.
 
+## Playtest 49 (21:13 to 22:57 PST 2026-11-06, 05:13Z to 06:57Z 11-07; fork m4-train-48 75c134ad under apocrypha's layer b2bcc92d)
+
+Rung 3's record (458a6930, inside the train) in play at Bleak Falls Temple 0x371de; test 1 rotfern on c1 (ff000000), test 2
+Ariadne on c2 (ff000001). The record: results/playtest-49/, and c1's console after its relaunch in
+docs/private/playtest-49-c1-console-0614.log, stamped by c1's own clock; the server's times are UTC.
+
+The pillars through a hand-off and a late arrival: VERIFIED IN PLAY. Eli: "alright pillars looked great". rotfern, hosting, set
+all three to the whale; numidium relaunched c1 at 06:09:51Z; the records were served to Ariadne ahead of her grant (06:10:13Z,
+epoch 2); c1, back in as a guest, applied all three and played each view from its record (H-R8's case: "object animation aa8cb
+Trigger03 played (the script record, taken, after StartState03 taken)"); rotfern then turned 0xaa8cb as the guest at 06:11:23Z,
+the host's RotatePillarToState relayed at seq 8.
+
+The restart leg: BROKEN on the guest. Eli: "ohooooo interesting. for ariadne the pillars are accurate, but for rotfern they're
+reset". The server restarted at 06:13:13Z and both seats were back online by 06:13:39Z; numidium teleported both out to the Temple
+door's camp at 06:14:04Z and back to their spots in 0x371de at 06:14:24Z. c1's console at the reconnect (06:13:30.739, its apply
+"at the grant of 371de"): "script state aa8cd: nothing blanked; view Trigger01 to play (seq 4, none here), +23 ms", aa8cc's
+Trigger01 at seq 3 and aa8cb's trigger02 at seq 8 the same. After the teleport back (06:14:25.802, "applied as a guest", Ariadne
+hosting): "script state aa8cd: blanked OnLoad and OnCellLoad re-sent; view Trigger01 current (seq 4), +1653 ms", and "current" for
+the other two. The apply judged each view current from the 06:13:30 bookkeeping and played nothing, while the teleport out had
+unloaded the 3D and it loaded again at its default faces; c1's two later loads of the cell (06:14:33 and 06:15:04Z) brought no
+pillar apply line. Later relayed presses played on c1 ("object animation aa8cb Trigger03 played (relayed, taken, after
+StartState03 taken)"). The cause, read from these lines: the "current" mark survives a 3D unload. The host's side held
+(VERIFIED IN PLAY, "for ariadne the pillars are accurate"): rotfern's next press (06:15:15Z) turned 0xaa8cb from 'trigger02' to
+'Trigger03' at seq 9, the turn from the record's side (numidium's notes, docs/private/playtest-49-findings.md).
+
+The fix: fork m4-scripts-4-view b86884a5 (local, from m4-scripts-4-rows 10b3edcb). ObjectAnimationService keeps each world
+object's last animation, the record's view or the newest relay, whichever has the higher sequence; a 3D unload drops the shown
+mark, and a seat that does not host the reference's cell plays it again at every 3D load, with the line "[verb:scripts] object
+animation <id> <event> re-applied at a 3D load (seq <n>)". HYPOTHESIS until a lab run reads the guest's pillar nodes equal to the
+host's after a teleport out and back.
+
+The Temple's cobwebs, the other world script 49 broke, and D-C2 A (a guest's trigger entry relayed to the cell's host through rung
+3's SendScriptEvent, given the event's argument) are in traps.md's Playtest 49 section.
+
+## D-C3, the record's view carries a world object's graph variables (ACCEPTED as A by Eli 02:2x PST 2026-11-07, thuum 2774cfb4; built on fork m4-train-50 b5e466a2)
+
+The question (playtest 49; docs/verbs/traps.md "Playtest 49"): a script record's view carries a world object's last animation
+event alone (rung 3's amendment A), and FXtriggerAmbFX tears a web with SetAnimationVariableFloat("fToggleBlend", 1.0) on itself,
+no animation event, so each web's record reads view '' and a seat arriving after a tear, or one whose 3D reloads, gets the web
+whole. (This D-C3 is the cobweb view's; docs/private/container-hold-scope.md's D-C3 is another memo's.) Eli's answer, verbatim:
+"D-W2 A (provided it's not breaking what i verified DOES work, becuase last test did seem to work) and D-C3 A", with the decision's
+rule 6 line: the change form's graphVariables merge to canon only with a committed restart scenario (b-cobweb-view's restart leg).
+The build plan docs/research/fifty-fixes-2026-11-07.md's option A, as built (S4 439571f4, W1's graph_vars, C3 d25ce708 and
+1149fd31):
+
+- Server (S4): the three SetAnimationVariable rows (natives_table.rs:28-30 at the train's base 1acb834f, Keep::Nothing there; 39-41
+  at fork m4-train-50 4bd07f33) take a new Keep::Variable, still relayed as actions, which keeps the call's (name, value) on its
+  subject with the call's sequence (ScriptCallVerdict's keep_var); MpChangeFormREFR gains graphVariables, at most 16 per reference
+  (a new name past that replaces the oldest), saved under the key "graphVariables" (an absent key reads as none and formVersion is
+  kept, the fork's migration for a new field); BuildScriptStateApply copies the reference's current variables into the served apply,
+  so a variable set after the record's take is served too (the plan's read 7: an owner reports a record only at a stack's end that
+  moved the scripts' hash, and a stack whose only act is the set takes no new record). Graph variables are served only when the
+  reference has a script record: BuildScriptStateApply returns false without one (its first test, the change form's scriptState),
+  and both serves, behind a create word and ahead of a grant, ask for a record first, so a variable kept on a reference no owner
+  ever recorded is relayed live by its call and saved, but never served to a late seat or a new host.
+- Wire (W1, with SCHEMA_VERSION 40): ScriptStateApply 77 gains graph_vars, each {name, k (3 int, 4 float, 5 bool, ScriptVar's
+  kinds), its one value, seq}, cap 16 (UNMEASURED); check_script_state_apply refuses an empty, NUL-carrying or repeated name, a k
+  outside 3 to 5 or a payload not its k's, a seq of 0 (E_VAL_RANGE) and a float that is not finite (E_VAL_NONFINITE).
+- Client (C3): ScriptStateService sets each served variable whose seq is above this seat's kept seq for (reference, name), through
+  the platform's own setAnimationVariable calls, before the view's replay; ObjectAnimationService keeps the variables beside the
+  last animation and sets them again at each 3D load; SpSnippetService routes a relayed SetAnimationVariable call with a seq on a
+  game-file reference through the same keep.
+- The hypotheses: H-C3a, a SetAnimationVariableFloat("fToggleBlend", 1.0) on a guest's untouched web shows it torn (HYPOTHESIS;
+  x-trigger-entry v1's W2 screenshots, then x-cobweb-view v1); H-C3b, a graph variable goes with its 3D and needs setting again at
+  the next load (HYPOTHESIS; x-cobweb-view v1's reload leg).
+- The proof: x-cobweb-view v1 (lab/.cache/drafts/fifty: a seat that missed a tear sees the record's variable set when it arrives
+  and again after it leaves and comes back) and b-cobweb-view v1's legs 2 and 3 (the late arrival, then rule 6's restart for the
+  "graphVariables" key). The value a seat's engine holds is recorded, not claimed, until lab-api grows a view of the graph-vars step;
+  the claims read the server's serve line (its variable count) and C3's two lines below.
+- The built lines the probes count (x-cobweb-view v1.1, b-cobweb-view v1.1): the serve's "... view '<e>', <n> graph variable(s)"
+  (PartOne.cpp), C3's "[verb:scripts] script state <id>: <n> graph variable(s), <set> set, <waiting> kept for its 3D, <current>
+  current" at a record's apply, and its "[verb:scripts] object animation <id> <name> <value> re-applied at a 3D load (graph
+  variable, seq <s>)" at a waiting variable's 3D load; x-cobweb-view's own proposed line was not the one built, so v1.1 counts
+  these.
+
 ## Status
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared

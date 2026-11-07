@@ -137,6 +137,18 @@ class ServerState:
         body = self._backend.rpc("labState", {"kind": "ref", "actorId": int(actor_id)})
         return body if body.get("found") else None
 
+    def world_globals(self) -> dict[str, Any] | None:
+        """The world's globals as the server records them (labState kind worldGlobals, ADR-068 rung 4's WorldGlobal):
+        {found, streamer, epoch, entries: [{global, value}]}, or None from a server without them."""
+        body = self._backend.rpc("labState", {"kind": "worldGlobals"})
+        return body if body.get("found") else None
+
+    def alias_fills(self) -> dict[str, Any] | None:
+        """The server's record of quest aliases (labState kind aliasFills, ADR-068 rung 4's AliasFill): {found, fills:
+        [{quest, alias, refr, created, container, added}]}, or None from a server without them."""
+        body = self._backend.rpc("labState", {"kind": "aliasFills"})
+        return body if body.get("found") else None
+
     def spell(self, form_id: int) -> dict[str, Any] | None:
         """A spell's effects and their MGEFs as the server's espm resolves them
         (labState kind spell), or None for a form the server does not load."""

@@ -82,6 +82,8 @@ class Doubles:
         self.chests: dict[str, dict[int, dict[int, int]]] = {}  # the containers a client's inventory reads: ref -> base id -> count
         self.carried: dict[str, dict[int, int]] = {}  # the items a client's player carries for transfer: base id -> count
         self.stuck: set[str] = set()  # the clients whose engine moves nothing on a transfer (the driver's after-count throw)
+        self.aliases: dict[str, dict[tuple[int, int], int]] = {}  # the references a client's alias reads: (quest, alias) -> refr
+        self.standing: dict[str, dict[int, dict[int, int]]] = {}  # the ranks a client's factions read: actor -> faction -> rank
 
     def turn(self):
         for name in self.names:
@@ -160,6 +162,18 @@ class Doubles:
                 data = {"item": item, ("to" if "to" in a else "from"): ref, "count": count,
                         "player": {"before": before["player"], "after": pack[item]},
                         "container": {"before": before["container"], "after": chest[item]}}
+            elif step["action"] == "alias":
+                # the driver's contract: the quest as a form id (lab-api resolves a FormDesc or a table name first)
+                q, al = step["args"].get("quest"), step["args"].get("alias")
+                assert isinstance(q, int) and not isinstance(q, bool), step["args"]
+                held = (self.aliases.get(name) or {}).get((q, al))
+                data = {"quest": q, "alias": al, "refr": held, "name": "Fixture"} if held is not None else {"error": f"no quest {q:x} in this game"}
+            elif step["action"] == "factions":
+                fs, actor = step["args"].get("factions"), step["args"].get("formId")
+                assert all(isinstance(f, int) and not isinstance(f, bool) for f in fs), step["args"]
+                ranks = (self.standing.get(name) or {}).get(actor)
+                data = ({"formId": actor, "ranks": {str(f): ranks.get(f, -2) for f in fs}, "members": {str(f): f in ranks for f in fs}, "crime": 0}
+                        if ranks is not None else {"error": f"no actor {actor:x} in this game"})
             elif step["action"] == "av-table":
                 data = {"ids": list(range(1000, 1164))}
             elif step["action"] == "add-perks":
@@ -1703,6 +1717,59 @@ class InventorySteps(RunTests):
         self.assertFalse([a for _, a, _ in self.doubles.seen if a == "inventory"], "the driver never saw the step")
 
 
+RUNG_FOUR = """
+id: t-rung4
+clients: [c1, c2]
+steps:
+  - c1: connect
+  - c2: connect
+  - c1: alias {quest: 0x39645, alias: 0}
+  - c2: alias {quest: 0x39645, alias: 0}
+  - c1: factions {formId: 0x39655, factions: [0xdb1, "rotfern.esp:rotfern"]}
+  - assert:
+      - c1.alias(0x39645, 0).refr == 0x39655
+      - c2.alias(0x39645, 0).refr == c1.alias(0x39645, 0).refr
+      - server.alias_fill(0x39645, 0).refr == c1.alias(0x39645, 0).refr
+      - server.alias_fill(0x39645, 1).created == 0x39647 and server.alias_fill(0x39645, 1).added == true
+      - c1.factions(0x39655).rank(0xdb1) == 0 and c1.factions(0x39655).member(0x800aa00) == false
+      - server.ref(0x3ac73).isDisabled == true and server.ref(0x3ac73).refStateSeq == 3
+      - server.world_globals().streamer == "c1" and server.world_globals().value(0x1a0a6ec2) == 7
+"""
+
+
+@needs_deps
+class RungFourSteps(RunTests):
+    def test_the_seats_reads_and_the_servers_records_meet_in_one_claim_block(self):
+        """ADR-068 rung 4's grammar end to end: the alias and factions steps reach the driver with form ids (a table name
+        resolved; the table here holds a race, which the fake driver takes as any id), the board keeps each answer, and
+        the claims read them beside labState's ref state, alias fills and world globals."""
+        from labapi.fakes import FakeActor
+
+        self.doubles.aliases = {"c1": {(0x39645, 0): 0x39655}, "c2": {(0x39645, 0): 0x39655}}
+        self.doubles.standing = {"c1": {0x39655: {0xDB1: 0}}}
+        self.state.refs[0x3AC73] = FakeActor(1211.0, 1084.0, -212.0, "371de:Skyrim.esm", isDisabled=True, isDeleted=False, refStateSeq=3)
+        self.state.alias_fills = [{"quest": 0x39645, "alias": 0, "refr": 0x39655, "created": 0, "container": 0, "added": False},
+                                  {"quest": 0x39645, "alias": 1, "refr": 0, "created": 0x39647, "container": 0x39655, "added": True}]
+        self.state.world_globals = {"streamer": 0xFF000001, "epoch": 1, "entries": [{"global": 0x1A0A6EC2, "value": 7.0}]}
+        run_id, body = self._run(RUNG_FOUR)
+        self.assertEqual(body["verdict"], "green", json.dumps(body, indent=1))
+        sent = [(c, a) for c, act, a in self.doubles.seen if act in ("alias", "factions")]
+        self.assertEqual(sent, [("c1", {"quest": 0x39645, "alias": 0}), ("c2", {"quest": 0x39645, "alias": 0}),
+                                ("c1", {"formId": 0x39655, "factions": [0xDB1, 0x0800AA00]})])
+
+    def test_a_server_without_the_kinds_is_red_on_data_never_green(self):
+        self.doubles.aliases = {"c1": {(0x39645, 0): 0x39655}, "c2": {(0x39645, 0): 0x39655}}
+        self.doubles.standing = {"c1": {0x39655: {0xDB1: 0}}}
+        run_id, body = self._run(RUNG_FOUR)
+        self.assertEqual(body["verdict"], "red", body)
+        # the seats' claims hold; each claim on a record the server lacks is a data failure of its own
+        self.assertEqual({f["kind"] for f in body["failures"]}, {"assertion-data"}, body["failures"])
+        errors = sorted(set(f["error"] for f in body["failures"]))
+        self.assertEqual(errors, ["server has no alias fills to read (no AliasFill: a server before ADR-068 rung 4)",
+                                  "server has no world globals to read (no WorldGlobal: a server before ADR-068 rung 4)",
+                                  "server holds no record for 0x3ac73"])
+
+
 CHEST_MOVES = """
 id: chest-moves
 clients: [c1, c2]
@@ -2250,6 +2317,19 @@ class CellHostSteps(RunTests):
         laid = json.loads((self.tmp / "server-settings-run.json").read_text())
         self.assertEqual(laid["npcRollLevel"], 25)
         self.assertEqual(laid["npcEnabled"], False, "the version's file kept beside the knob")
+
+    def test_a_runs_world_globals_reach_the_server_through_the_overlay(self):
+        """ADR-068 rung 4's x-world-globals-rate and b-world-global: a world streamer elected for that run alone, the
+        version's own file (and so the lab's default, off) untouched."""
+        files = self._settings_files()
+        run_id, body = self._run("id: t-globals\nclients: [c1]\nserver: {worldGlobals: true}\nsteps:\n  - c1: connect\n")
+        self.assertEqual(body["verdict"], "green", body)
+        overlay = self.tmp / "server-settings-run.json"
+        self.assertEqual(self._up_env()["SERVER_SETTINGS"], str(overlay))
+        laid = json.loads(overlay.read_text())
+        self.assertIs(laid["worldGlobals"], True)
+        self.assertEqual(laid["npcEnabled"], False, "the version's file kept beside the knob")
+        self.assertNotIn("worldGlobals", json.loads(files["1.6.1170"].read_text()), "the version's own file is untouched")
 
     def test_a_runs_game_hour_starts_the_servers_clock_through_the_overlay(self):
         files = self._settings_files()

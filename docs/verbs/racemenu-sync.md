@@ -851,3 +851,28 @@ whole (d83c68c8): no load had taken a copy of her tints and hair color in that g
 nothing has read RaceMenu's script state at such a login. x-racemenu-login-look v1 (lab/.cache/probes, c6c093d7) reads it: when a
 game stops with the race menu open, so that the record keeps isRaceMenuOpen true, does the next login open the menu on the
 recorded look, so that closing it leaves the record as it was? Built, not yet staged.
+
+## Playtest 49 (21:13 to 22:57 PST 2026-11-06, 05:13Z to 06:57Z 11-07; fork m4-train-48 75c134ad under apocrypha's layer b2bcc92d)
+
+Ariadne on c2 (test 2). The record: results/playtest-49/ and numidium's notes, docs/private/playtest-49-findings.md. In passing,
+apocrypha's layer item: Eli on the CBBE body sliders, "the sliders work".
+
+Ariadne's face, BROKEN in play; its root is a world composition of numidium's. RaceMenu's first close (21:42:02 PST) recorded a
+face with a wide mouth (f30aacd898); the second open (21:43:09 PST) showed it (Eli: "woah wtf when race menu opened again her face
+was horrifying its back, idk whats up but her mouth is wide open"), and so did the login after c2's relaunch with the menu open
+(Eli: "wide mouth"). numidium's canonical worlds 220411Z and 224932Z paired 48's look (bb02fb009c, Dark Elf 03) with 47's
+raceMenuPreset (2de06f03b3, 6863 bytes, Orc 05, weight 50), copying the look alone; the login's preset echo (ADR-026) put the Orc
+hair on, and the first close blended them. Eli: "honestly let her keep the orc hair i liked it better". The new canonical world
+playtest-canon-chars-20261107T064547Z takes her look as one unit: appearanceDump, appearanceForms and raceMenuPreset from one save
+(the server rebuilds the head parts from appearanceForms at load, ADR-043). Owed: a server line when a look and its preset
+disagree (not built).
+
+The login wait (above, fork m4-48-racemenu): the login after that relaunch opened the menu on her recorded look, not the race's
+default (numidium's notes). VERIFIED IN PLAY on a broken look: the face Eli called "wide mouth" is the recorded one.
+
+Eli's ask: "do racemenu", then "at next playtest make sure the command is implemented so i can". `mp racemenu` is built on fork
+m4-mp-racemenu 0498a2f0 (server-only, R0 under ADR-053; pipeline 5609 green): the console's table at 42 rows, and
+ExecuteMpRacemenu beside mp host, calling SetRaceMenuOpen(caller, true), which replies "the race menu opens; closing it records
+your look (a race change resets the face)" and, with the menu open already, "the race menu is open already; close it to keep your
+look". Folded into rung 4's train (m4-scripts-4-rows merge 80424914, pipeline 5614 green with its unit case), so the train's T2
+and stage carry it into playtest 50 (numidium: no separate R0 merge). MECHANISM ONLY until Eli runs it.

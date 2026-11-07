@@ -1499,6 +1499,15 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   b-npc-death to pending instead is Eli's call). Alongside: the layer restage of apocrypha/layer-appearance (the SFW body
   built on CI, Rotfern's Fixes 0.1.1) with main merged in; then playtest 49. The canonical world is now
   playtest-canon-chars-20261106T224932Z (220411Z with Ariadne dressed as at 48's end).
+- STATE 2026-11-07 12:23 PST (numidium): canon fast-forwarded to fork 75c134ad, thuum-fa's 48 train (rung 3's script record
+  inside it, the 48 fixes, the body's rest as a dwell), by verb-merge's fresh gate 20261107-073600 (17 green) with thuum-fa's T2;
+  clones promoted. Playtest 49 played it under apocrypha's b2bcc92d layer (LOG): verified the tripwire from the host and lured
+  NPCs, bone chimes, the SFW sliders, looted bodies dressed, the pillars through a hand-off, NPC kills by the wall and blades;
+  Eli's breaks the spike wall and the pillars (the guest after a restart). The canonical world is
+  playtest-canon-chars-20261107T064547Z (canon Ariadne). Eli's calls for 50: D-W1 A, D-C2 A, D-C3 A, D-W2 A (provided 49's
+  verified traps still work), D-L1 B, all fixes in 50. Next: rung 4's stage (fork m4-scripts-4-rows 1acb834f, LABAPI 5612),
+  whose x-trigger-entry and x-lever-furn gate the 50 train (fork m4-train-50 4bd07f33); layer-merge for
+  apocrypha/layer-appearance; three claim rewrites for Eli (b-object-anim, b-bleak-traps, x-trap-wire-rope v2).
 
 ### M5: Progression (4 to 8 weeks, Class A/B). Started 2026-10-31 (the weekend pass)
 

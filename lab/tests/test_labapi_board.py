@@ -113,6 +113,39 @@ class BoardTests(unittest.TestCase):
         board.clear_views()
         self.assertIsNone(board.quests("c2"))
 
+    def test_alias_and_factions_answers_are_kept_by_what_they_named(self):
+        # ADR-068 rung 4's reads: an alias answer by its (quest, alias) pair, alias 0 included; a factions answer by its
+        # actor; an error answer and a failed step take the key's place, as script-state's do (the alias ids and names are
+        # the fixture's own, not MS13's)
+        from labapi.board import StepBoard
+
+        board = StepBoard(clock=lambda: 100.0)
+
+        def answer(client, action, args, body):
+            step = board.enqueue(client, action, args)
+            board.poll(client)
+            board.complete(step.id, body)
+
+        answer("c1", "alias", {"quest": 0x39645, "alias": 0}, {"ok": True, "data": {"quest": 0x39645, "alias": 0, "refr": 0x39655, "name": "Arvel"}})
+        answer("c1", "alias", {"quest": 0x39645, "alias": 11}, {"ok": True, "data": {"quest": 0x39645, "alias": 11, "refr": 0, "name": "Empty"}})
+        self.assertEqual(board.alias("c1", 0x39645, 0)["refr"], 0x39655)
+        self.assertEqual(board.alias("c1", 0x39645, 11)["refr"], 0)
+        answer("c1", "alias", {"quest": 0x39645, "alias": 0}, {"ok": True, "data": {"error": "quest 39645 has no alias 0"}})
+        self.assertEqual(board.alias("c1", 0x39645, 0), {"error": "quest 39645 has no alias 0"})
+        answer("c1", "alias", {"quest": 0x39645, "alias": 11}, {"ok": False, "error": "TypeError: x is undefined"})
+        self.assertEqual(board.alias("c1", 0x39645, 11), {"error": "TypeError: x is undefined"})
+        self.assertIsNone(board.alias("c2", 0x39645, 0))
+
+        answer("c2", "factions", {"formId": 0x39655, "factions": [0x5C84E]},
+               {"ok": True, "data": {"formId": 0x39655, "ranks": {str(0x5C84E): -1}, "members": {str(0x5C84E): False}, "crime": 0}})
+        self.assertEqual(board.factions("c2", 0x39655)["ranks"], {str(0x5C84E): -1})
+        answer("c2", "factions", {"formId": 0x39655, "factions": [0x5C84E]}, {"ok": True, "data": {"error": "no actor 39655 in this game"}})
+        self.assertIn("no actor", board.factions("c2", 0x39655)["error"])
+        self.assertIsNone(board.factions("c1", 0x39655))
+        board.clear_views()
+        self.assertIsNone(board.alias("c1", 0x39645, 0))
+        self.assertIsNone(board.factions("c2", 0x39655))
+
     def test_a_seats_kept_perks_go_again_after_a_heartbeat_gap(self):
         from labapi.board import PERK_GAP_S, StepBoard
 
