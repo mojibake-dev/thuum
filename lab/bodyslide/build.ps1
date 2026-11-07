@@ -2,7 +2,12 @@
 # morph files (lab/bodyslide/README.md). The inputs are the two Nexus archives inputs.tsv names, checked by md5; everything else is
 # here: BodySlide 6.1.0's tree and SFW's two BodySlide trees laid into one Data\CalienteTools as a mod manager lays them, BodySlide's
 # config preset for Skyrim SE with its dialogs off (a headless run has no one to answer them), then two batch builds with the
-# shipped preset "CBBE (SFW)" (Eli's call) and --trimorphs: the NeverNude body, feet, hands and beast hands, then every outfit group.
+# preset SFW's own prebuilt meshes are built with, "CBBE Curvy (Outfit)" (Eli's call: "keep the shipped sfw shape"), and
+# --trimorphs: the NeverNude body, feet, hands and beast hands, then every outfit group. "CBBE (SFW)" is the group SFW's 14
+# presets belong to, not a preset: named on the command line, BodySlide 6.1.0 builds at the projects' default sliders without
+# a word (SliderManager::GetBigPresetValue falls back), which jobs 19669 and before did. A sweep of the 14 on sky-build
+# (2026-11-07) matched SFW's prebuilt femalebody_1.nif to CBBE Curvy (Outfit) alone (mean 0.0002, max 0.018 units), so the
+# preset is named here and checked against the preset files before anything is built.
 # Out receives Data-layout meshes, each with a BODYTRI link to its .tri; the run fails when one is missing or a build hangs.
 param([Parameter(Mandatory)][string]$Inputs, [Parameter(Mandatory)][string]$Work, [Parameter(Mandatory)][string]$Out, [Parameter(Mandatory)][string]$SevenZip)
 $ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue'
@@ -36,7 +41,11 @@ function Build([string[]]$a, [string]$what) {
   if ($p.ExitCode -ne 0) { throw "$what exit $($p.ExitCode)" }
   "$what ok after " + [int]((Get-Date) - $t0).TotalSeconds + " s"
 }
-$common = @('--preset', '"CBBE (SFW)"', '--targetdir', "`"$Out`"", '--trimorphs', '--quiet')
+$preset = 'CBBE Curvy (Outfit)'
+$known = @(Get-ChildItem (Join-Path $bsdir 'SliderPresets') -Filter *.xml -File | ForEach-Object {
+    ([xml](Get-Content -Raw -LiteralPath $_.FullName)).SliderPresets.Preset | ForEach-Object { $_.name } })
+if ($known -notcontains $preset) { throw "preset '$preset' is in no SliderPresets file (BodySlide would build at default sliders)" }
+$common = @('--preset', "`"$preset`"", '--targetdir', "`"$Out`"", '--trimorphs', '--quiet')
 # the body group also holds the Underwear body, which writes the same files; NeverNude (vanilla-styled) by name
 Build (@('--build', '"CBBE Feet (SFW),CBBE Hands (SFW),CBBE Hands Beast (SFW),CBBE NeverNude (SFW)"') + $common) 'body build'
 # the group names the files define, not their titles: Vanilla, Dawnguard, Dragonborn and Vanilla 1st Person are all "CBBE Vanilla Outfits (SFW)"

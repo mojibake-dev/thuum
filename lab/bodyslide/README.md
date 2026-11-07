@@ -3,8 +3,12 @@
 CBBE SFW Edition (Nexus 74257) ships its body and outfit meshes without the morph files RaceMenu's body sliders
 need, and its page says so ("RaceMenu Morphs plugin not included. Morph files can still be built in BodySlide").
 Eli wants the SFW body with working sliders, in its shipped shape (2026-11-06). This folder is that build: SFW's
-own BodySlide projects run through BodySlide and Outfit Studio 6.1.0 (Nexus 201) with the shipped preset
-"CBBE (SFW)" and morph output, headless on sky-build.
+own BodySlide projects run through BodySlide and Outfit Studio 6.1.0 (Nexus 201) with the preset SFW's own
+prebuilt meshes are built with, "CBBE Curvy (Outfit)", and morph output, headless on sky-build. "CBBE (SFW)" is
+the group SFW's 14 presets belong to, not a preset; jobs up to 19669 passed it, so BodySlide built at the projects'
+default sliders, a slimmer shape than SFW's. A sweep of the 14 on sky-build (2026-11-07) matched SFW's prebuilt
+femalebody_1.nif to CBBE Curvy (Outfit) alone (mean 0.0002 units over its 13,966 vertices), and build.ps1 now
+refuses a preset name that no SliderPresets file defines.
 
 - `inputs.tsv`: the two archives, by Nexus id, file name and md5. They are licensed mod files and live only in the
   Mac's lab/.cache/mods and sky-build's D:\thuum-inputs, never in this repo or an artifact that leaves the estate.
