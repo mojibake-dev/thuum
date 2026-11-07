@@ -4834,3 +4834,24 @@ engine already sent them to, since a second OnCellLoad can put a pillar's script
 turned. The build was planned in docs/research/rung3-script-record-2026-11-06.md section 4 and never built before this answer;
 it rides rung 4's train into playtest 50, proven by x-login-in-cell (v1 reads the defect; its next version claims the fix) and
 its fresh review first. A stays the fallback if the read shows OnLoad or other entry events missing too.
+
+D-W2 A and D-C3 A (ACCEPTED by Eli 02:2x PST 2026-11-07 (10:2xZ), in this session, verbatim: "D-W2 A (provided it's not breaking
+what i verified DOES work, becuase last test did seem to work) and D-C3 A"; proposed by thuum-fa the same night from the fix
+probes' drafting and the pex reads).
+- D-W2 A, the trigger's own look on the watcher under D-W1: during a firing its presser's owner started, that seat owns the trap
+  family trigger's own calls on itself (a Tripwire's SetMotionType on its rope, a PressurePlate's 'Down' and 'Up' and its sound),
+  which cross the seam as action rows from the firing seat and play on every other seat; one firing, every screen. Why: under D-W1
+  A a watcher ignores a press by an actor it does not own, so its copy of the trigger's script never runs, and that script is what
+  drops the tripwire's rope (Tripwire's [Active] onBeginState, docs/verbs/traps.md) and moves the plate (PressurePlate's active
+  state, lab/.cache/drafts/fifty/trigger-entry-static.md section 5); without A the watcher's rope stays taut and its plate still.
+  Eli's condition is the proof's: playtest 49's VERIFIED IN PLAY trap items (the bone alarm from the seat that did not walk into
+  it; the tripwire snapping on both screens for the host's own trip and for bandits lured through it; the wall and blades killing
+  draugr) are claimed on both seats in the build's own stage before any playtest of it, with x-trap-wire-rope among them, and a red
+  there keeps D-S3's per-seat firing for that case rather than shipping the regression.
+- D-C3 A, the record's view carries a world object's animation variables: a host's SetAnimationVariableFloat, Bool and Int on a
+  world object are kept in the script record's view (the last value per variable, names compared case-blind as the engine's
+  BSFixedString compares them) beside its last animation event, served with the record and applied before the view's event, so a
+  seat that arrived later or was not listening shows the torn web (playtest 49: two of the Temple's three tears "relayed to 0
+  game(s)", the record's view ''). Amendment A's rule (the record carries its view) applied to the second way a script changes what
+  an object shows. Rule 6: the change form's graphVariables merge to canon only with a committed restart scenario (b-cobweb-view's
+  restart leg). Built ahead on m4-train-50 (S4, W1's graph_vars, C3), kept.
