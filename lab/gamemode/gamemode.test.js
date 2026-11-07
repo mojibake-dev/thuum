@@ -613,3 +613,96 @@ test("labState ref carries the corpse's rest (bodyAtRest, bodyRestAt), null with
   const legacy = mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0xff000a03 });
   assert.deepStrictEqual([legacy.found, legacy.bodyAtRest, legacy.bodyRestAt], [true, null, null]);
 });
+
+test("labState ref reads a reference's ref state (isDisabled, isDeleted, refStateSeq), null without the properties", () => {
+  // thuum ADR-068 rung 4's RefState: the server's isDisabled property and rung 4's isDeleted and refStateSeq, for a plain
+  // reference (Bleak Falls Temple's setStage trigger 0x3ac73, disabled by its own script) and one nobody recorded
+  global.mp = fakeMp();
+  mp.set(0x3ac73, "locationalData", { cellOrWorldDesc: "371de:Skyrim.esm", pos: [1211, 1084, -212], rot: [0, 0, 0] });
+  mp.set(0x3ac73, "type", "MpObjectReference");
+  mp.set(0x3ac73, "isDisabled", true);
+  mp.set(0x3ac73, "isDeleted", false);
+  mp.set(0x3ac73, "refStateSeq", 3);
+  mp.set(0x17037, "locationalData", { cellOrWorldDesc: "371de:Skyrim.esm", pos: [6867, -5874, -1687], rot: [0, 0, 0] });
+  mp.set(0x17037, "type", "MpObjectReference");
+  mp.set(0x17037, "isDisabled", false);
+  mp.set(0x17037, "isDeleted", false);
+  mp.set(0x17037, "refStateSeq", null);
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  const held = mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0x3ac73 });
+  assert.deepStrictEqual([held.found, held.isDisabled, held.isDeleted, held.refStateSeq], [true, true, false, 3]);
+  // a reference with no recorded ref state: the property's null reads as 0
+  const unrecorded = mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0x17037 });
+  assert.deepStrictEqual([unrecorded.isDisabled, unrecorded.isDeleted, unrecorded.refStateSeq], [false, false, 0]);
+  // a server without rung 4's two properties: null for them, the long-standing isDisabled still read
+  const get = mp.get;
+  mp.get = (id, k) => {
+    if (k === "isDeleted" || k === "refStateSeq") throw new Error(`Property '${k}' doesn't exist`);
+    return get(id, k);
+  };
+  const legacy = mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0x3ac73 });
+  assert.deepStrictEqual([legacy.found, legacy.isDisabled, legacy.isDeleted, legacy.refStateSeq], [true, true, null, null]);
+  // a read that throws for the form is null, never a false
+  mp.get = (id, k) => {
+    if (k === "isDisabled") throw new Error("Specified Form is not an ObjectReference");
+    return get(id, k);
+  };
+  assert.strictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0x3ac73 }).isDisabled, null);
+});
+
+test("labState worldGlobals reads the world's recorded globals and their streamer, found: false without the property", () => {
+  // thuum ADR-068 rung 4's WorldGlobal: mp.get(0, "worldGlobals"), a global named by FormDesc text or by form id
+  global.mp = fakeMp();
+  mp.set(0, "worldGlobals", {
+    streamer: 0xff000001,
+    epoch: 2,
+    entries: [{ global: "a6ec2:Apocalypse - Magic of Skyrim.esp", value: 7 }, { global: 0x1a0a6ec3, value: 9.5 }, { value: 1 }, null],
+  });
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "worldGlobals" }), {
+    found: true,
+    streamer: 0xff000001,
+    epoch: 2,
+    entries: [{ global: "a6ec2:Apocalypse - Magic of Skyrim.esp", value: 7 }, { global: 0x1a0a6ec3, value: 9.5 }],
+  });
+  // nothing recorded yet and no streamer elected
+  mp.set(0, "worldGlobals", null);
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "worldGlobals" }), { found: true, streamer: 0, epoch: 0, entries: [] });
+  const get = mp.get;
+  mp.get = (id, k) => {
+    if (k === "worldGlobals") throw new Error("Property 'worldGlobals' doesn't exist");
+    return get(id, k);
+  };
+  const legacy = mp.onHttpRpcRunAttempt("labState", { kind: "worldGlobals" });
+  assert.strictEqual(legacy.found, false);
+  assert.match(legacy.error, /worldGlobals/);
+});
+
+test("labState aliasFills reads the server's alias rows, found: false without the property", () => {
+  // thuum ADR-068 rung 4's AliasFill: mp.get(0, "aliasFills"), a ref half's row and a created half's row
+  global.mp = fakeMp();
+  mp.set(0, "aliasFills", [
+    { quest: 0x39645, alias: 0, refr: 0x39655, added: false },
+    { quest: "39645:Skyrim.esm", alias: 1, created: "39647:Skyrim.esm", container: 0x39655, added: true },
+    { alias: 2, refr: 0x14 },
+  ]);
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "aliasFills" }), {
+    found: true,
+    fills: [
+      { quest: 0x39645, alias: 0, refr: 0x39655, created: 0, container: 0, added: false },
+      { quest: "39645:Skyrim.esm", alias: 1, refr: 0, created: "39647:Skyrim.esm", container: 0x39655, added: true },
+    ],
+  });
+  mp.set(0, "aliasFills", undefined);
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "aliasFills" }), { found: true, fills: [] });
+  const get = mp.get;
+  mp.get = (id, k) => {
+    if (k === "aliasFills") throw new Error("Property 'aliasFills' doesn't exist");
+    return get(id, k);
+  };
+  assert.strictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "aliasFills" }).found, false);
+});

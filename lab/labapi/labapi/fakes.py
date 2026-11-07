@@ -238,6 +238,10 @@ class FakeActor:
     magickaPercentage: float = 1.0
     staminaPercentage: float = 1.0
     worn: list[int] | None = None  # a record's worn armor and weapons (labState ref's worn); None reads unreported
+    # a reference's ref state (labState ref's isDisabled, isDeleted, refStateSeq: ADR-068 rung 4); None reads unreported
+    isDisabled: bool | None = None
+    isDeleted: bool | None = None
+    refStateSeq: int | None = None
     appearance: dict[str, Any] | None = None
     race_menu_open: bool = False
     # (raceId, allowed) per UpdateAppearance the server judged
@@ -266,6 +270,10 @@ class FakeState:
         # form id -> a non-player actor's record (labState kind ref): a hosted NPC, or a chest with its inventory
         self.refs: dict[int, FakeActor] = {}
         self.stream_rows: dict[int, list[dict[str, int]]] | None = None  # by profile id; None answers found: false
+        # ADR-068 rung 4's journal reads (labState kinds worldGlobals and aliasFills): {streamer, epoch, entries} and the
+        # rows [{quest, alias, refr, created, container, added}], as the gamemode answers them; None answers found: false
+        self.world_globals: dict[str, Any] | None = None
+        self.alias_fills: list[dict[str, Any]] | None = None
 
     def spawn(self, profile_id: int, x: float = 0.0, y: float = 0.0, z: float = 0.0, cell: str = "lab-spawn") -> FakeActor:
         a = FakeActor(x, y, z, cell)
@@ -287,6 +295,15 @@ class FakeState:
                 if self.stream_rows is None:
                     return {"found": False, "error": "no such property"}
                 return {"found": True, "actorId": 0xFF000000 + pid, "rows": list(self.stream_rows.get(pid, []))}
+            if payload.get("kind") == "worldGlobals":
+                if self.world_globals is None:
+                    return {"found": False, "error": "no such property"}
+                return {"found": True, "streamer": int(self.world_globals.get("streamer", 0)), "epoch": int(self.world_globals.get("epoch", 0)),
+                        "entries": list(self.world_globals.get("entries", []))}
+            if payload.get("kind") == "aliasFills":
+                if self.alias_fills is None:
+                    return {"found": False, "error": "no such property"}
+                return {"found": True, "fills": list(self.alias_fills)}
             if payload.get("kind") == "ref":
                 ref_id = int(payload.get("actorId", -1))
                 ref = self.refs.get(ref_id)
@@ -295,6 +312,7 @@ class FakeState:
                 return {"found": True, "actorId": ref_id, "x": ref.x, "y": ref.y, "z": ref.z, "rot": [0, 0, 0], "cell": ref.cell,
                         "isDead": ref.isDead, "healthPercentage": ref.healthPercentage,
                         "magickaPercentage": ref.magickaPercentage, "staminaPercentage": ref.staminaPercentage, "worn": ref.worn,
+                        "isDisabled": ref.isDisabled, "isDeleted": ref.isDeleted, "refStateSeq": ref.refStateSeq,
                         # the record's items, the gamemode's mp.get(id, "inventory") entries (server.inventory(<ref>))
                         "inventory": [{"baseId": b, "count": c} for b, c in sorted(ref.inventory.items())]}
             actor = self.actors.get(int(payload.get("profileId", -1)))
