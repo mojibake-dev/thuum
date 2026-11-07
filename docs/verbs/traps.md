@@ -1139,3 +1139,62 @@ activation found the lever free ("no occupant (activationSource = ff000001)") an
 object and is nearby" for either player, no E_ACTIVATE_REACH. A dead occupant no longer holds the furniture. Recorded as the probe
 said: neither seat was seated in the use (no "to be false" line) and no seat saw the lever move ("aa8c3 animates" 0, no "object
 animation aa8c3"), so the lever's motion under a player is the second fault, H-P1's NoPlayer furniture, still open.
+
+### A trap's trigger is never a trap body (16:29 PST 2026-11-06 (00:29Z 11-07), thuum-cf; fork m4-48-rope 08adc7b0 and 8d7704a3, on the train m4-train-48)
+
+Playtest 48's third reset (21:38Z, the camp outside Embershard's main door, rotfern walking in first and hosting b6be6 at epoch 4):
+"tripped the trap, got hurt, but the string stayed", and the taut string was the guest's ("rotfern was hosting, ariadne didn't see
+it go"). The server granted the host the wire ("ff000000 claims prop b6d3f by touch 3: granted, epoch 1"); the guest followed it
+("setPropFollowed(b6d3f, true): followed set 1"), ran its own Tripwire state's SetMotionType as Keyframed
+("ObjectReference.SetMotionType on b6d3f, a trap body another seat streams: run with motion type 4 (Keyframed) for the script's 1")
+and fired its own copy, and that follow never ended (numidium's trip3-712.log has no setPropFollowed(b6d3f, false), against one per rock). The cause,
+read in the code: claimTrapMotions took any trap family reference its own script set moving as a trap body, and the Tripwire
+(USSEP's winning copy, extending TrapTriggerBase) opens its [Active] state's onBeginState with SetMotionType(self, 1, true). The
+mesh says what the string is: TrapTripwire01.nif (Meshes1.bsa) is a Havok rope, 13 bhkRigidBody in two
+bhkBallSocketConstraintChain meeting at RopeBreakPoint01 plus one bhkSimpleShapePhantom (the trigger volume), with no animation
+controller and no skin. The snap is Havok freeing the chains: cosmetic on every seat, and never streamable (the stream carries one
+transform per reference). The guest's rope hung Keyframed behind a stream that never started.
+
+The rule: a trap's trigger is never a trap body. The platform's getTrapRole answers `trigger`, true when a script attached to the
+reference reaches TrapTriggerBase in its parent chain (the plates, the tripwire, the bone alarms' SoundTrap, the linkers and the
+trigger boxes), read in the role's one walk with each class's trigger verdict cached beside its family verdict (rule 9; the ready
+line names the trigger's root). skymp5-client then makes no body and no claim from a trigger's own motion calls, never follows an
+owner word on one (a follow already up ends the way a word naming this seat ends one) and never places one from its record, said
+once per reference ("trap trigger b6d3f moved by its own script: its own seat's, never a trap body"). Each seat's own copy drops its
+own rope, and the rocks (PhysicsTrap and PhysicsTrapHit, no trigger) stay the firing seat's streamed bodies. A platform without the
+field keeps the rule before. Eli's 11-05 rule, applied: one owner for the consequences (the rocks, their hits, the destroyed
+record), cosmetic copies anywhere.
+
+The census (the train's fresh review): 22 Papyrus classes reach TrapTriggerBase, and 5 of them move something. The Tripwire,
+SoundTrap and DLC1TrapInfectedBones move only their own cosmetic Havok; TrapRiggedBeam and SpringTrap have no placed reference. None
+moves a body the other player depends on. The bone alarm (TrapBoneAlarmBHavok.nif, 8 rigid bodies on one chain) has the rope's
+shape, so each seat rattles its own. Playtest 48 saw it work from the guest that walked into it ("bone alarm worked for the
+guest"); playtest 49 checks it from the seat that did not.
+
+The probes: x-trap-wire-rope v1 (lab/.cache/probes, b468c143; new, so its fresh review under ADR-064 amendment A before its first
+run) asks one question: when the cell's host trips the wire after a real cell load, is the guest's wire its own (claimed by no seat,
+never followed on the guest, the guest's own SetMotionType left to run) while the seven rocks stay the tripper's streamed bodies?
+The rocks' grant to the firing seat is among its premises. x-trap-boulders v1 claimed the wire as a streamed body (c2's "trap body
+b6d3f set moving by this seat.s script: claimed by impulse", c1's "trap body b6d3f followed"), which this rule makes false by
+design, so it moved to lab/.cache/probes/archive/x-trap-boulders-v1.yaml. Built, not yet staged: the train's pushed head is
+833d01b3, pipeline 5582 green.
+
+The second reset, read (17:06 PST 2026-11-06 (01:06Z 11-07), thuum-fa; a read-only agent over results/playtest-48's server.log
+and results/relaunch-logs/20261106T213326Z-c1-platform.log and -c2-platform.log, with traces trace-c1-14 and trace-c2-14). The
+earlier HYPOTHESIS (the host's figure crossed the thin trigger between two of the guest's position steps, so the guest's copy never
+fired) is refuted: c1's own copy fired. At 21:26:10.342Z the server granted c2 the wire as a trap body ("ff000001 claims prop
+b6d3f by touch 3: granted, epoch 1; 2 listener(s) told"); c1 set its follow ("setPropFollowed(b6d3f, true): followed set 1",
+13:26:09:248 on c1's clock, about 1.08 s behind the server's), and 156 ms later its own Tripwire ran its [Active] onBeginState
+("ObjectReference.SetMotionType on b6d3f, a trap body another seat streams: run with motion type 4 (Keyframed) for the script's 1,
+counted (followed)"). That SetMotionType(self, 1, true) is the state's first call in Tripwire, USSEP's and vanilla's alike, and
+"(followed)" counts a Papyrus script's call only (the platform's own calls are filtered before it); the rocks' own calls followed
+0.667 s later, the host's own gap being 0.648 s, so c1's chain fired through the linker 0xb6d3e. Ariadne's figure on c1 moved
+about 5.8 units a frame at the crossing (its largest single-frame move in the trace 13.5 units), so it never jumped the trigger.
+The second reset's taut string is therefore the third reset's: the guest's own rope ran Keyframed behind the host's claim, and the
+rule above (a trigger is never a trap body) covers both; the candidate fix "a copy which has not fired fires once when a live
+destroyed record arrives" would have changed nothing here and is not built. The host's unhurt player is a HYPOTHESIS, a near miss:
+trace-c2-14 holds her health at 200 with no hit taken, no god mode line anywhere, and she stood 48 to 85 units from the nearest
+rocks' fall lines as they landed, where the 21:44Z trip's two hurt players stood 7 to 25 units from one; the rocks' own positions
+on c2 are unread. A recording gap for the record: results/playtest-48's c1-console.log and c2-console.log cover 19:59Z to 20:00Z
+and c1.log and c2.log 21:53Z to 22:03Z, so skymp5-client's own trap lines ("fired here", "trap result") for the first three resets
+were never recorded; only the platform logs under results/relaunch-logs/ survive for that stretch.

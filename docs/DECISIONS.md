@@ -4769,6 +4769,31 @@ for the form is behind the record's. The re-send stays, for handlers that do ren
 leaves the load handler alone. Built on rung 3's branch (docs/research/rung3-script-record-2026-11-06.md), read by x-puzzle-late-join
 v1 (H-R8: c2's Pillar01 within 5.7 degrees of c1's after the apply).
 
+Amendment B to decision 9's rung 4 and the consequences paragraph, three premises corrected by the tree (thuum-fa, 17:25 PST
+2026-11-06 (01:25Z 11-07); recorded, not a new decision: rung 4's intent, every state a script changes on its owner's engine reaching
+every other seat, a late joiner and a restarted server, is unchanged; the build plan is docs/research/rung4-state-rows-2026-11-07.md,
+its reads 1 to 12, against fork 458a6930). (1) The ref state has a record and no carrier. MpChangeFormREFR keeps isDisabled,
+isDeleted and the destruction record and saves them (server MpChangeForms.h:127, :129, :286), so the ladder's ref-state migrations
+need no value keys; but the server serves a disable only from its own VM (script_classes/PapyrusObjectReference.cpp:59-81), and the
+client never applies the one CreateActor carries: it reads `props['disabled']` where the server sends `isDisabled` (skymp5-client
+remoteServer.ts:555; server CreateActorMessage.h:95), and two of its applies enable a reference the engine holds disabled
+(view/modelApplyUtils.ts:84-95, and the harvested apply's non-flora branch, :131-146), so today a host's scripted Disable of a held
+reference is undone on every seat at its next create word. RefState therefore takes no message of its own: DestructionStage 78
+widens to the reference's engine state (disabled and deleted beside the stage and destroyed, with the object's sequence), one S2C
+word for a reference's state, and the owner's report is ScriptCall 75 as a batched state row with its arguments (Kill's and
+ProcessTrapHit's shape). (2) Most subjects of a scripted Disable are references the server never loads (the loader skips markers,
+initially disabled references and those an enable parent disables, server WorldState.cpp:458-548), so a reference with a recorded
+ref state is attached by its record, through the deferred change form path that exists (:61, :286, :755-760), and held and unheld
+subjects share one path. (3) AliasFill's created items are the game files' (libespm parses QUST's ALCO, ALCA, ALFR and ALUA,
+QUST.h:150-170): the server adds each created item once to its alias's container, R0 from the record, and no seat reports it (MS13's claw
+is its ALCO 0x39647 on a start-game-enabled quest that fills from its template; H-AF0 until a T0 read of Skyrim.esm resolves the
+container to Arvel 0x39655); AliasFill 79 carries the reference half alone (ForceRefTo and Clear, nobody's under D-F1 C). Two
+mechanisms beside, inside the decision: the non-owner lever gains `recorded`, which also skips the latent record rows (Enable,
+Disable, Delete) on a seat that does not own the subject (H-F2: a skipped latent row returned as completed with its None leaves no
+stack waiting; if it fails, `nonLatent` stays and the served word corrects a guest's own Disable, a flash declared); and WorldGlobal
+80's streaming seat is elected from what ADR-066 decision 6 has built (cells.rs's stale and dead per player; the pause and load
+flags and OwnerAck are still absent), one seat at an epoch. W3 stands for ScriptPlacement and the standing.
+
 ## ADR-069: Rotfern's Fixes: engine fixes ship to every player as one SKSE DLL, one detour per lab-read site, never as a lab-only patch
 
 Status: ACCEPTED 2026-11-06 by Eli, to apocrypha directly, after asking what the fixes are ("wait so what ARE the engine fixes???

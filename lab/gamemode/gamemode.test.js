@@ -447,6 +447,29 @@ test("labState ref reads the owner's change-form record as its hash and arrival,
   assert.deepStrictEqual([bare.found, bare.changeFormFnv, bare.changeFormAt], [true, 0, 0]);
 });
 
+test("labState ref reads a reference's script record as its hash, arrival and sequence, 0 without one", () => {
+  // thuum ADR-068 rung 3 (the script record): the server's scriptState property carries the owner's FNV-1a 32, the
+  // wall-clock ms of its report and the object's sequence when it was taken, for a plain reference (a puzzle pillar)
+  global.mp = fakeMp();
+  mp.set(0xaa8cb, "locationalData", { cellOrWorldDesc: "371de:Skyrim.esm", pos: [5656, -896, -768], rot: [0, 0, 270] });
+  mp.set(0xaa8cb, "type", "MpObjectReference");
+  mp.set(0xaa8cb, "scriptState", { fnv1a: 0x9dc5811c, at: 1762430000123, epoch: 3, sender: 0xff000001, seq: 2, event: "Trigger01", scripts: 1 });
+  mp.set(0xaa8cc, "locationalData", { cellOrWorldDesc: "371de:Skyrim.esm", pos: [5656, -640, -768], rot: [0, 0, 270] });
+  mp.set(0xaa8cc, "type", "MpObjectReference");
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  const recorded = mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0xaa8cb });
+  assert.deepStrictEqual([recorded.found, recorded.scriptStateFnv, recorded.scriptStateAt, recorded.scriptStateSeq], [true, 0x9dc5811c, 1762430000123, 2]);
+  // a reference nobody reported (the property's null)
+  const none = mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0xaa8cc });
+  assert.deepStrictEqual([none.found, none.scriptStateFnv, none.scriptStateAt, none.scriptStateSeq], [true, 0, 0, 0]);
+  // a server without the property answers 0, 0 and 0, not an error
+  const get = mp.get;
+  mp.get = (id, k) => { if (k === "scriptState") throw new Error("Property 'scriptState' doesn't exist"); return get(id, k); };
+  const bare = mp.onHttpRpcRunAttempt("labState", { kind: "ref", actorId: 0xaa8cb });
+  assert.deepStrictEqual([bare.found, bare.scriptStateFnv, bare.scriptStateAt, bare.scriptStateSeq], [true, 0, 0, 0]);
+});
+
 test("labState ref reads the record's worn armor and weapons, as a seat's npc-state counts them", () => {
   // npc-stream slice 3: a hosted actor's equipment follows its host's engine, and a claim compares the record's
   // hands with both seats' npc-state worn lists; the record marks ammo and a torch worn too, which those lists omit

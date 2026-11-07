@@ -1492,6 +1492,13 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   owes go to thuum-cf (the loot strip, the guest's rope, the blade kill past the window, the RaceMenu flag, the bow) and
   apocrypha (the SFW body, the four hair excludes); `mp host` (fork m4-mp-host f70bc16e) and rung 3 (m4-scripts-3-record)
   are built and wait for their stages. The new canonical world: playtest-canon-chars-20261106T220411Z.
+- STATE 2026-11-06 17:58 PST (numidium): rung 3 (fork m4-scripts-3-record 458a6930) not merged. Its gate 20261107-005511 read
+  10 green and b-npc-death red three times on a real npc-fate fault, not the rung's: the server calls a sliding body at rest
+  after 2 or 3 samples and its record stays behind while both engines' bodies slide on (LOG). Canon stays f70bc16e. Proposed
+  to thuum-fa: the settle fix as the next head of m4-train-48, the train taking rung 3 in, one gate for both (a carry of
+  b-npc-death to pending instead is Eli's call). Alongside: the layer restage of apocrypha/layer-appearance (the SFW body
+  built on CI, Rotfern's Fixes 0.1.1) with main merged in; then playtest 49. The canonical world is now
+  playtest-canon-chars-20261106T224932Z (220411Z with Ariadne dressed as at 48's end).
 
 ### M5: Progression (4 to 8 weeks, Class A/B). Started 2026-10-31 (the weekend pass)
 

@@ -545,3 +545,20 @@ sent a host near a player's shot one ArrowShot per NPC it hosted among the
 shooter's listeners; the loop is now every listener with a user but the
 sender. The scenario b-marksman stays as it is; b-npc-archer (train 53's)
 reads the hosted shot.
+
+## Playtest 48's first draw (16:29 PST 2026-11-06 (00:29Z 11-07), thuum-cf; fork m4-48-bow f8bbf504 and c34d0c66, on m4-train-48)
+
+Playtest 48's fourth reset, in numidium's record: "Rotfern had to re-equip her bow again". Her first draw after a relaunch nocked no arrow until her own
+unequip and re-equip of the bow (iRightHandType 7, 0, 7 in trace-c1-1), the third time after playtest 34 and 38's finding 68. Finding
+68's fix (the hands pass of m3-hands 6b4da374, "The cause read" above) ran after the wrong apply: the one with the server's rows,
+which carry no worn flag. The fix: the player's hands pass follows a login's last inventory apply, with that login's equipment and a
+fresh equip. The apply's report names every base id it added or removed, and a pass runs when one of them is a hand's item; each
+login wipe leaves its equipment for the loop's next apply (10 s at most), and that pass, as applyEquipment's own, takes the right
+hand's weapon off and equips it again 0.1 s later and equips the ammo without the isEquipped check (HYPOTHESIS: SetInventory equips
+the ammo into the RightHand slot, so isEquipped reads true with nothing to nock). A weapon already drawn stays in the hand
+(c34d0c66: the pass comes about 5 s after the login, and taking a drawn bow off would end a draw the player began that early); the
+ammo is still equipped without the check. In play the pass takes only the ammo this engine had equipped among the changed ids, its
+isEquipped check kept, never the login's equipment. tsc and webpack clean. HYPOTHESIS whole until x-hands-relaunch v2
+(lab/.cache/probes, cd5c02c3; v1 archived) reads it: after a relaunch's login, the first draw of the bow the record's hands hold
+nocks and looses an arrow the server accepts, with no equip between the login and the draw. Open, LATER: the platform's
+SetInventory and its ammo slot, read before any change to them.

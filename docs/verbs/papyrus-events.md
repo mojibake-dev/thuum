@@ -442,6 +442,39 @@ x-script-state-read v1, x-puzzle-handoff v3, x-puzzle-late-join v1 and the resta
 H-R2 to H-R9 and H-L1 are the plan's section 5. D-L1 B rides the same native (SendScriptEvent) as an optional slice, built ahead of
 Eli's answer and never merged before it.
 
+The integrated rung and its review (13:23 PST 2026-11-06 (21:23Z 11-06), thuum-cf): fork m4-scripts-3-record 4f525bad merges the
+three layer branches (wire and server 91142e67, 85e2b60f, 47cae74c; platform 5b57999e, d008e0ca; client e008ad5f, 74cc6d07,
+3e668eed) and one test fix; fork-lint, cargo (557) and the client's tsc and webpack green, the server-only pipeline 5559 green
+(T0). Its fresh review: NO-GO until three fixes land (the client's login reset on its own CreateActor wiped records the server
+sent first; a guest's give-up lost the load events the gate blanked; the platform's busy answer could not name the stack H-R2
+reads), with notes; the fixes are on their layer branches now and the rung is merged again before its stage. Authority (rule 5),
+declared here: a record's values are the owner's engine's word, R2, recorded and never judged; the server validates their shape
+only (the wire's kinds, caps, handles and the sender's ownership at the epoch), and a receiving seat checks each script's class,
+variable count, kinds and state against its own VM before it writes anything. Declared limit, from the review's note 9: at a grant
+the server serves the records of the references the new host's game subscribes to (its emitters), so in an exterior or a large
+interior a recorded reference beyond that subscription is not served at the grant; the puzzle room and the probes' rooms are
+inside it. A late joiner is served behind each reference's create word, so the limit is the new host's alone; the follow-up is an
+index of recorded references by cell served at the grant, after the rung's proof.
+
+Rung 3's stage (16:01 PST 2026-11-06 (00:01Z 11-07), thuum-cf's read of numidium's stage of fork m4-scripts-3-record 458a6930 over
+the SFW layer 9be64991): nine green of nine. The probes: x-script-state-read v1.1 20261106-231640, x-puzzle-handoff v6.1 232042,
+x-puzzle-late-join v1.1 232435; the restart scenario b-script-state-restart 232737 (committed on main 32985845); the regressions
+b-puzzle-relay 233336, b-object-anim 233708, b-bleak-traps 234432, b-trap-record-restart 235245 and a-restart-persistence 235718.
+The hypotheses they settle: H-R2 CONFIRMED (a pillar mid-turn reads quiescent false with a state-3 stack, x-script-state-read's
+busyState 3); H-R3 CONFIRMED by trace (script-state-trace.js on the late joiner: "stateEvents": 0, no onBeginState or onEndState
+dispatched on the four watched objects across the applies); H-R4 CONFIRMED by run (every apply in three runs "stacks 0", the locks
+held 15 to 157 us); H-R5 CONFIRMED for the pillars (the inherited host's next press was the server's 'Trigger02', the turn from
+the record's side, and after a server restart 'Trigger03'); H-R6 CONFIRMED for kind 0 (every one of the trace's 457,391
+FindBoundObject handles was kind 0, every record's object variables resolved, 0 seat-local; kinds 1 and 2 never met in these
+rooms, still unread); H-R7 CONFIRMED (the late joiner's gate blanked OnLoad and OnCellLoad four times, "to aa8c[bc] blanked: its
+script record pending", so the record arrived before the engine's load events, and the trace's sendEvent counts show each blanked
+event sent once more after the apply); H-R8 CONFIRMED (the late joiner's views played, "Trigger02 played (the script record" and
+"Trigger03 played (the script record, taken", both pillars' Pillar01 at 0.0 rad of the host's). Supported, not isolated: H-R9 (the
+lever's record was sent once more after a pull that changed no pillar, which its callerSelf touch makes due, though the 30 s sweep
+could too); H-R10 (the stack ZeroFunctionArguments' re-sends ran, no fault). Unread: H-R11 and H-R12. The records also carried
+scripted objects beyond the pillars (the Temple's 6a9e2, 67dcc, 3c5a9, 375a1, 375a2, 375ad), applied as guests with their handles
+resolved, the system's own reach rather than a pillar case. The T3 box stays open on H-R9 to H-R12.
+
 ## Status
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared

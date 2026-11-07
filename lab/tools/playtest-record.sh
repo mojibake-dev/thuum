@@ -211,15 +211,24 @@ for pair in c1:711 c2:712; do
       | python3 -c 'import json,sys; sys.stdout.write(json.load(sys.stdin).get("content",""))' > "$tmp/$name" 2>/dev/null
     ssh_srv "cat > $out/$name" < "$tmp/$name" && note "$name: $(wc -l < "$tmp/$name" | tr -d ' ') lines"
   done
-  # the console tee, where the client's own lines are (an inventory apply, the hands' re-equip, a say's verdict): its
+  # the client's console, where skymp5-client's own lines are (an inventory apply, the hands' re-equip, a say's verdict,
+  # a trap's "fired here"): the game's lab-console-logs.txt for this launch, and the lab's console tee beside it, which only
+  # a lab run writes (playtest 48's tee held the layer smoke's minute and its game console was never fetched). Each its
   # last 60,000 lines, so one file-read stays well under the guest agent's 16 MiB cap (playtest 44, 2026-11-03: the
-  # arrows' re-equip could not be read, the recorder kept no console)
-  name="$c-console.log"; copy="C:\\sky-lab\\playtest-$n-$name"
-  ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 60 -- powershell -NoProfile -Command \"Get-Content -LiteralPath 'C:\\sky-lab\\$c-console.log' -Tail 60000 | Set-Content -LiteralPath '$copy' -Encoding utf8\"" > /dev/null 2>&1
-  ssh -o BatchMode=yes "$jump" "pvesh get /nodes/core/qemu/$vmid/agent/file-read --file '$copy' --output-format json" 2>/dev/null \
-    | python3 -c 'import json,sys; sys.stdout.write(json.load(sys.stdin).get("content",""))' > "$tmp/$name" 2>/dev/null
-  ssh_srv "cat > $out/$name" < "$tmp/$name" && note "$name: $(wc -l < "$tmp/$name" | tr -d ' ') lines (the tee's last 60,000)"
+  # arrows' re-equip could not be read, the recorder kept no console). Earlier launches' consoles are kept at each
+  # relaunch (playtest-relaunch.sh, relaunch-logs/), listed below.
+  for spec in "$c-console.log|(Join-Path (Get-Content -LiteralPath 'C:\\sky-lab\\game-dir.txt' -Raw).Trim() 'Data\\Platform\\Logs\\lab-console-logs.txt')" \
+              "$c-console-tee.log|'C:\\sky-lab\\$c-console.log'"; do
+    name=${spec%%|*}; src=${spec#*|}; copy="C:\\sky-lab\\playtest-$n-$name"
+    ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 60 -- powershell -NoProfile -Command \"Get-Content -LiteralPath $src -Tail 60000 | Set-Content -LiteralPath '$copy' -Encoding utf8\"" > /dev/null 2>&1
+    ssh -o BatchMode=yes "$jump" "pvesh get /nodes/core/qemu/$vmid/agent/file-read --file '$copy' --output-format json" 2>/dev/null \
+      | python3 -c 'import json,sys; sys.stdout.write(json.load(sys.stdin).get("content",""))' > "$tmp/$name" 2>/dev/null
+    ssh_srv "cat > $out/$name" < "$tmp/$name" && note "$name: $(wc -l < "$tmp/$name" | tr -d ' ') lines (its last 60,000)"
+  done
 done
+# every launch the session relaunched away from: its platform, driver and console logs as playtest-relaunch.sh kept them
+kept=$(ssh_srv "ls /srv/lab/results/relaunch-logs/ 2>/dev/null" | awk -v s="$(date -u -d "$started" +%Y%m%dT%H%M%SZ 2>/dev/null || date -u -j -f %Y-%m-%dT%H:%M:%SZ "$started" +%Y%m%dT%H%M%SZ)" '$0 >= s' | tr '\n' ' ')
+note "earlier launches' logs (results/relaunch-logs/): ${kept:-none}"
 for c in c1 c2; do
   # a game whose log stops while the playtest goes on is a finding (ADR-033): the log's last line, then the
   # other seat's spell actions after it (its own trace, each placed on the clock by its watch's start, 5 s

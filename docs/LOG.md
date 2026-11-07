@@ -9244,3 +9244,26 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   ask that with instead of you"), a player console command printing the caller's cell, its host, epoch, fresh or
   inherited grant and the caller's role, in playtest-roles' words (thuum-cf). Merged from main's tree: apocrypha's staged
   layer changes no file deploy-srv ships (server-settings.json identical, its plugins client-only).
+
+### 2026-11-07
+
+- 17:58 PST 2026-11-06 (01:58Z 11-07) (numidium): rung 3 (fork m4-scripts-3-record 458a6930) not merged. verb-merge's second call
+  (from 00:22:34Z, the server pinned to SERVER_TAG=m4-scripts-3-record-458a6930 after its image was proven the bare tag's; the
+  first call died in its T2 with numidium's session, no containers left) ran T2 green, then the gate went red: run set
+  20261107-005511-merge-m4-scripts-3-record, 10 green and b-npc-death red in all three runs (012944, 013340 relaunched, 013732
+  cold) on step 44's fall-point bounds alone, the record after the restart 485 to 724 units from the body snapshot taken at
+  the kill. Canon stays f70bc16e. The cause (numidium's read of the four reds against the greens), not the rung's: the server
+  called the body at rest after 2 or 3 samples, 212 to 307 ms after the death ([verb:npc-fate] "two samples in a row agree"),
+  while it was still sliding down the slope where 85547 died fighting c2's player, and the record kept that point. At step 18,
+  right after the kill snapshot and before any restart, c1's own engine already held the body 430 to 710 units on, and c2's
+  agreed with it; c1's first record after the restart was the real resting place. The trap slice's red 20261106-014505 (580
+  units in x; 217 ms, 2 samples) has the same shape. In the greens the body really was at rest: 114524 took 1310 ms over 10
+  samples, with the server's record and both engines equal to the unit at every step, and 014916's NPC died elsewhere with
+  no fight. The script record touched only the critter spawners 10c381 and 10c382, never 85547. So the four bounds caught a
+  real fault of the record (a body's place left behind by an early rest call, H-54e's neighbour in npc-fate.md) and stay as
+  asserted. Next: the settle fix as the next head of thuum-fa's m4-train-48, the train taking rung 3 in, one gate for both;
+  carrying b-npc-death to pending instead is Eli's call (ADR-042b). Also, the canonical world is now
+  playtest-canon-chars-20261106T224932Z: 220411Z with Ariadne's equipmentDump and inventory copied from 48's end
+  (playtest-pt48-ariadne-dressed-20261106T224844Z), six worn items with her three clothes and the cloak; Eli at 14:49 PST:
+  "cause of the racemenu stuff ariadne wasn't wearing clothes lol, she is now. pls make sure that takes upon subsequent
+  playtest relaunches".

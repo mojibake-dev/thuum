@@ -509,6 +509,21 @@ class NpcKillStep(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 load_scenario(head + bad + "\n")
 
+    def test_script_state_names_its_reference(self):
+        # ADR-068 rung 3's read: a reference's attached scripts on one seat; a bare script-state would reach the driver as
+        # "no reference 0" and pass, as a bare inventory did
+        from labapi.scenario import load_scenario, playtest_step
+
+        head = "id: x-ss\nclients: [c1, c2]\nsteps:\n  - c1: "
+        step = load_scenario(head + "script-state {formId: 0xaa8cb}\n").steps[0]
+        self.assertEqual((step.kind, step.client, step.action, step.args), ("client", "c1", "script-state", {"formId": 0xAA8CB}))
+        for bad in ("script-state", "script-state {}", "script-state {formId: 0}", "script-state {formId: true}",
+                    'script-state {formId: "0xaa8cb"}', "script-state {formId: 0x1ffffffff}", "script-state {formId: 0xaa8cb, label: a}",
+                    "script-state {ref: 0xaa8cb}"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(head + bad + "\n")
+        self.assertEqual(playtest_step("script-state {formId: 0xaa8c3}"), ("script-state", {"formId": 0xAA8C3}))
+
     def test_transfer_stores_into_or_takes_from_one_container(self):
         # x-shared-chest-phantom's store and take without the menu's keys: an item and exactly one of to (from the
         # player into the chest) and from (from the chest into the player); both or neither never reaches the driver

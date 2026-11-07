@@ -835,3 +835,19 @@ retrying over the next updates until it lands. Probe: x-head-scale (1.6 on
 the head, a teleport into Bleak Falls and back, a relaunch into it, c2's
 figure read at the end).
 
+## The login wait (16:29 PST 2026-11-06 (00:29Z 11-07), thuum-cf; playtest 48's item 7; fork m4-48-racemenu 29059a14 and d83c68c8, on m4-train-48)
+
+Playtest 48: c2 crashed in RaceMenu flipping hairs on Ariadne (20:38:26Z, an access violation in FaceGen; apocrypha's read is four
+remade hair meshes keeping a vanilla .tri, excluded from apocrypha/layer-appearance 3ef308fe). The crash left isRaceMenuOpen true in
+her record, so the 20:40Z relaunch logged her in to the creation menu on the race's default face (Eli: "now ALL ariadne's stuff is
+gone, she looks default"), her appearanceDump d8a9225f98 intact on the server. numidium saved the world
+(playtest-pt48-ariadne-look-20261106T204410Z), set the flag false in that copy and restored it at 20:44Z, and RaceMenu reopened on
+her own face. Had she closed the default-faced menu, its close would have recorded the race's defaults over her look.
+
+The fix: a race menu a login finds open in a recorded character's record opens once RaceMenuService has put the server's look on
+the player (a pass after its apply, or after 10 s of the player's world up with no look on). A new character (no appearance) still
+opens at once on the race's defaults, and the lab's open-race-menu is unchanged. Why the menu showed the default face is HYPOTHESIS
+whole (d83c68c8): no load had taken a copy of her tints and hair color in that game, so the menu put the race's defaults back;
+nothing has read RaceMenu's script state at such a login. x-racemenu-login-look v1 (lab/.cache/probes, c6c093d7) reads it: when a
+game stops with the race menu open, so that the record keeps isRaceMenuOpen true, does the next login open the menu on the
+recorded look, so that closing it leaves the record as it was? Built, not yet staged.

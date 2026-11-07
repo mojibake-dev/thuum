@@ -745,7 +745,8 @@ E_WORDWALL_NO_REF, E_WORDWALL_NOT_A_WALL, E_WORDWALL_CELL, E_WORDWALL_REACH; a w
 ### DestructionStage (t 78, wire id 86): a single-use trap's result, recorded once from whoever caused it (traps, ADR-068 D-S3)
 
 Fork m4-scripts-2b-traps (2026-11-05, SCHEMA_VERSION 37): DestructionStage (id 86 by ADR-019's MsgType plus 8; ids 84 and 85
-hold two reserved, never-sent rows for ADR-068's ScriptState and ScriptStateApply, MsgType 76 and 77), both directions,
+held two reserved, never-sent rows for ADR-068's ScriptState and ScriptStateApply, MsgType 76 and 77, real messages since
+SCHEMA_VERSION 38, below), both directions,
 reliable: `{ refr: u32, stage: u8, destroyed: bool, served: bool }`. C2S: a seat reports a trap-family or destructible reference's
 stage rise or its destruction, the cause or the first seat that saw it (served false). S2C: the server relays a newly recorded
 step to the reference's other listeners (served false) and serves the record to a late subscriber right after its create word and
@@ -756,6 +757,69 @@ does not have the cell loaded), _RANGE. The value is the reporter's word (R2, ru
 cannot connect to a schema 37 server (netcode's protocol id carries the version), so the slice's client and server are built from
 one tree. The same slice raises PropTransform's budget to 128 at once, then 96 a second (UNMEASURED: a firing streams up to eight
 trap bodies at 10 Hz).
+
+### ScriptCall (t 75, wire id 83): a tabled native its subject's owner ran, read at the native boundary (ADR-068 rung 2)
+
+Fork m4-scripts-2-seam a2924a84 (2026-11-05, SCHEMA_VERSION 36; ADR-068 rung 2, docs/research/scripts-one-system-2026-11-05.md
+6.4); the rung merged without this contract row, written 2026-11-06 with the 48 train. ScriptCall (MsgType 75, wire id 83), client
+to server, reliable, R2: `{ epoch: u32, selfId: u32, cls, fn, args: [SnippetArg | null], caller, handler, latent: bool }`. The
+platform's one hook on NativeFunctionBase::Call reads a tabled native's typed frame on the engine that owns the call's subject, and
+the client reports the call as it ran: the subject (a method native's self, a static native's first argument; a form of the shared
+load order, or 0x14 for the sender's own player), the native's Papyrus class and name, its arguments in order by their declared
+types (an object as `{ formId, type }`, null for one the boundary could not read), the calling script's type and function (for the
+server's log), and whether the native is latent. The epoch is the cell's host epoch of HostGrant for a world object (ADR-066
+decision 3); an actor's owner is its simulator, so an actor's epoch is unread. Caps: class, function, caller and handler 128 bytes,
+at most 11 arguments (the engine's own limit for a native, CommonLibSSE-NG src/RE/N/NativeFunctionBase.cpp:15), a string argument
+16 KiB, 180 KiB a message. Validator (wire-validate check_script_call): class and function not empty, the subject and every object
+argument below 0xff000000 (E_VAL_RANGE: the server names those, its own forms and the players' figures), every number finite
+(E_VAL_NONFINITE). The server's rule (wire-rules natives.rs, over the table in natives_table.rs) judges the shape and never a value
+(ADR-062's amendment), in two steps. The shape step comes before the core reads anything of the subject: the reporter within its
+budget, 32 at once then 8 a second (UNMEASURED), a token spent by every call that reaches the step (E_SCRIPTCALL_RATE); the pair a
+tabled row the server relays or keeps (E_SCRIPTCALL_ROW); the arguments the row's count and kinds, and the subject one the reporter
+may name (E_SCRIPTCALL_ARGS). The owner step reads the facts the core gathers for the subject: a world object whose cell the
+reporter hosts at the reported epoch (E_SCRIPTCALL_OWNER), held by the server or placed by its game-file record; a door's or a
+container's call dropped quietly (its open is Activate's isOpen); an actor's refused (E_SCRIPTCALL_ROW: an action row is local for
+an actor, whose animations the streams carry). Each refusal is logged by name and never answered. An accepted action takes its
+subject's next sequence (one per object, owned by the server) and goes to the subject's other listeners as SpSnippet 30 with that
+sequence in SpSnippet's `seq` (absent on every other snippet), as the row's relay native: PlayAnimationAndWait relays as
+PlayAnimation(args[0]), so no receiver waits on a latent call. A receiver applies one subject's relays in sequence and drops one at
+or below the last it applied. Fixtures 75-ScriptCall-0 (a pillar's latent turn) and -1 (Debug.SendAnimationEvent on a world
+object), and -2 and -3, refused at the wire (an object argument, then a subject, at 0xff000002: E_VAL_RANGE); the difftest session
+script-call.
+
+The 48 train (fork m4-48-trapevidence cfe92340, 93b634ce and 30d890c9, on m4-train-48; no schema change) passes one state row:
+ProcessTrapHit's, which the table keeps as evidence (Keep::Evidence). Its call spends the shape step's budget like any other. Its
+owner step takes an actor the reporter simulates now (the death report's own rule); a subject that is no actor, or the reporter's
+own player, is E_SCRIPTCALL_ROW (a player's trap hit counts on its own seat alone), and a reference the server does not hold, or an
+actor nobody or another seat simulates, E_SCRIPTCALL_OWNER. It reads no epoch, takes no sequence and relays to no seat
+(Verdict::Kept): the core notes the hit, with the trap its first argument names, as that actor's death evidence for the trap window
+(30 s; docs/verbs/npc-fate.md, "Trap hits as death evidence"). R2, unvalidated (rule 5): the named trap is recorded as reported,
+never checked against the body's place, and the hit's numbers are never judged.
+
+### ScriptState (t 76, wire id 84) and ScriptStateApply (t 77, wire id 85): the script record (ADR-068 rung 3)
+
+Fork m4-scripts-3-record 4f525bad (12:49 PST 2026-11-06, SCHEMA_VERSION 38; ADR-068 rung 3,
+docs/research/rung3-script-record-2026-11-06.md): the two reserved rows of 37 become real messages in place. ScriptState (MsgType
+76, wire id 84), client to server, reliable, R2: `{ epoch: u32, formId: u32, fnv1a: u32, scripts: [{ type, state, flags: u8, vars:
+[ScriptVar] }] }`, the owner's read of a world object's attached scripts through TESModPlatform.SerializeScriptState (each script
+object's type, Papyrus state, the flags Object::Save writes, its variables in positional order with their folded kinds: k 0 None,
+1 an object as `o` {kind, mid, form, type}, 2 `s`, 3 `i`, 4 `f`, 5 `b`, 10 to 15 an array as `a` with `elem` on 11; a None array
+is its kind with no payload). ScriptStateApply (MsgType 77, wire id 85), server to client, reliable: `{ formId, fnv1a, seq: u32,
+event?: String, scripts }`, the record served to a new host ahead of its HostGrant for each recorded reference in the cell and to
+a late subscriber behind the reference's create word, carrying the reference's last animation event and the object's sequence at
+the moment the record was taken (ADR-068 amendment A: the record carries its view). Caps (UNMEASURED): 16 scripts, 512 variables a
+script, strings of 1024, arrays of 128, 192 KiB a ScriptState and 256 KiB an apply. Validator (wire-validate): formId not 0 and
+below 0xff000000, 1 to 16 scripts with a type, flags with constructed (0x01) and initialized (0x08) and without a held lock
+(0x04), each kind in 0 to 5 or 10 to 15 with the payload its kind names, a handle's kind in 0 to 2 and its form neither 0x14 nor
+0xff000000 and up (E_VAL_RANGE), finite floats (E_VAL_NONFINITE), 64 at once then 8 a second per sender. The server's rule
+(wire-rules script_state.rs): the reference a game-file world object the server holds, no actor, the sender the cell's host at the
+cell's epoch, checked epoch first (ADR-066 decision 4), or the host just released at its own epoch while the cell is unhosted (the
+release read); refusals E_SCRIPTSTATE_NO_REF, _KIND, _EPOCH, _OWNER, logged by name and never answered. The record lives on the
+reference's change form (MpChangeFormREFR's scriptState, saved under a "scriptState" key; an older record reads as none) and
+survives a restart. The value is the owner's engine's word (R2, rule 5: recorded, never judged; a seat's apply checks each class,
+count, kind and state against its own VM before writing). A schema 37 client cannot connect to a schema 38 server, so the rung's
+client and server build from one tree; fixtures 76-ScriptState-0 and -1 (the second refused: a kind 3 handle) and
+77-ScriptStateApply-0 and -1; the difftest session script-state.
 
 ### RelayedActivation (t 70): a linked activation the cell's host reported, to the cell's other games (traps, M4)
 
