@@ -8,7 +8,8 @@
 #   1b. that head's GitHub "Formatting check" (upstream's linter) waited for, and a red
 #      one stops the stage: parity would carry it to every branch after it (50 of 66 runs
 #      red from 10-15 to 10-17 on two faults that sat on parity; `just fork-lint <tree>`
-#      runs its two checks locally before a push);
+#      runs its two checks locally before a push); FORMAT=local runs fork-lint on the head
+#      instead, for a head GitHub never started a run for (75c134ad, 2026-11-07);
 #   2. the fork pipeline of that head waited for (skymp-server:<branch>-<sha8>);
 #   3. with LABAPI=<thuum pipeline id>, that pipeline too (a lab-api image);
 #   4. an idle lab (no run, no run set);
@@ -20,7 +21,7 @@
 #   8. both clones snapshotted as clean-m1-next;
 #   9. the probes named (scenario ids or paths), each through `just lab-run`.
 # Stops at the first failure; nothing is snapshotted over a clone whose dist did
-# not land. Never opens a Moonlight stream (Eli's seats are his).
+# not land. Never opens a Moonlight stream (Eli's seats are its own).
 # Runs from the main checkout, or from a worktree of a thuum branch whose lab
 # tree the verb needs (ghostwalk's settings), with FORK_DIR naming the fork
 # checkout; either way the tree must contain origin/main, since step 5's
@@ -149,17 +150,28 @@ done
 [ "${st:-}:${con:-}" = completed:success ] || { echo "== the Windows build did not finish in time" >&2; exit 1; }
 
 echo "== 1b. the Formatting check of $sha8"
-fline=""
-for _ in $(seq 1 40); do
-  fline=$(gh run list -R mojibake-dev/skymp --workflow "Formatting check" --branch "$branch" --limit 10 \
-            --json headSha,status,conclusion --jq ".[] | select(.headSha==\"$sha\") | \"\(.status) \(.conclusion)\"" | head -1)
-  case "$fline" in
-    "completed success") echo "   Formatting check ok $(date +%H:%M:%S)"; break;;
-    "completed "*) echo "== the Formatting check of $sha8 ended ${fline#completed }: \`just fork-lint\` on the branch's tree names the files" >&2; exit 1;;
-  esac
-  sleep 30
-done
-[ "$fline" = "completed success" ] || { echo "== no Formatting check of $sha8 finished (${fline:-none found})" >&2; exit 1; }
+if [ "${FORMAT:-github}" = local ]; then
+  # the same two checks on a worktree of the head (lab/tools/fork-lint.sh): GitHub started no workflow for 75c134ad's
+  # push at 02:13:55Z, nor for the branch re-created at that sha at 03:11:14Z, with every workflow active
+  lintwt=$(mktemp -d)/head
+  git -C "$fork" worktree add -q --detach "$lintwt" "$sha"
+  if lab/tools/fork-lint.sh "$lintwt"; then lint=ok; else lint=red; fi
+  git -C "$fork" worktree remove --force "$lintwt"
+  [ "$lint" = ok ] || { echo "== fork-lint of $sha8 is red (above, the files it names)" >&2; exit 1; }
+  echo "   fork-lint of $sha8 ok $(date +%H:%M:%S) (FORMAT=local)"
+else
+  fline=""
+  for _ in $(seq 1 40); do
+    fline=$(gh run list -R mojibake-dev/skymp --workflow "Formatting check" --branch "$branch" --limit 10 \
+              --json headSha,status,conclusion --jq ".[] | select(.headSha==\"$sha\") | \"\(.status) \(.conclusion)\"" | head -1)
+    case "$fline" in
+      "completed success") echo "   Formatting check ok $(date +%H:%M:%S)"; break;;
+      "completed "*) echo "== the Formatting check of $sha8 ended ${fline#completed }: \`just fork-lint\` on the branch's tree names the files" >&2; exit 1;;
+    esac
+    sleep 30
+  done
+  [ "$fline" = "completed success" ] || { echo "== no Formatting check of $sha8 finished (${fline:-none found}); FORMAT=local lints it here" >&2; exit 1; }
+fi
 
 pipeline_status() { # <project id> <sha or pipeline id>: the newest pipeline's status for a sha, or a pipeline's
   python3 - "$1" "$2" <<'PY'
