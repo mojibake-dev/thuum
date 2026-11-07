@@ -4800,9 +4800,10 @@ same night from playtest 49's breaks). Playtest 49 broke twice on who sees a tri
 different number of times on each screen (numidium's count of 49's logs) while each game had its own body and its own NPCs on the
 plate, so D-S3's decision 1 (every seat fires for what it sees) gives as many firings as there are views; a figure does fire the
 other seat's copy (the tripwire's second reset, docs/verbs/traps.md: c1's own Tripwire fired as Ariadne's figure crossed it), but
-a body and an NPC are each game's own. And the Embershard cobwebs never tore on the guest's screen: the guest's copy of a world
-script is blanked, and the host's copy did not tear for the guest's figure (whether its entry never arrives or the script compares
-its actionRef to the player is the read below). One rule answers both: the entry counts once, on the presser's owner (its own
+a body and an NPC are each game's own. And the Temple's cobwebs (0x3758c, 0x3758d and 0x37281 in 0x371de, FXtriggerAmbFX) never
+tore on the guest's screen: the guest's copy of a world script is blanked, and the host's copy did not tear for the guest's figure
+(whether its entry never arrives or the script compares its actionRef to the player is the read below). One rule answers both:
+the entry counts once, on the presser's owner (its own
 player's seat, the simulator of an NPC, the owner of a body), and it travels to the trigger script's owner.
 - D-W1 A, a trap family's trigger (TrapTriggerBase's chain, D-S3's family): the presser's owner fires its own copy and relays the
   firing to the other seats as the trap's linked activation (RelayedActivation 70, reused), and their copies fire from the relay; a
