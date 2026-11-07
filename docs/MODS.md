@@ -531,8 +531,8 @@ Face Pack, the brow and dirt options, 11 Outfits BodySlide or 00 Required's Cali
 byte-identical to 2.0.3's. `cbbe-2.0.3-racemenu-morphs@1.6.1170` keeps CBBE 2.0.3's folder 26, the slider
 plugin RaceMenuMorphsCBBE.esp and its scripts, byte-identical, which SFW does not ship (its Q15).
 `cbbe-sfw-bodyslide-1.1.4@1.6.1170` is SFW's own BodySlide projects built with morph files: BodySlide and
-Outfit Studio 6.1.0 (Nexus 201 file 832109) run headless on sky-build with the shipped preset
-"CBBE (SFW)" and --trimorphs --quiet. That is the NeverNude body, feet, hands and beast hands, then the
+Outfit Studio 6.1.0 (Nexus 201 file 832109) run headless on sky-build with the preset SFW's prebuilt
+meshes are built with, "CBBE Curvy (Outfit)", and --trimorphs --quiet. That is the NeverNude body, feet, hands and beast hands, then the
 groups "CBBE Vanilla Outfits (SFW)" (the one group the Vanilla, Dawnguard, Dragonborn and Vanilla 1st
 Person files define), "CBBE Creation Club (SFW)" and "CBBE Creation Club 1st Person (SFW)". It produced
 1,369 meshes, each with a BODYTRI link to one of 686 .tri, laid over the prebuilt ones it rebuilds. The
@@ -545,11 +545,18 @@ outfit meshes), 793 added (mostly SFW's Creation Club outfits), 984 gone. The go
 all the BodySlide project files the 2.0.3 row laid into Data from its 09 Outfits BodySlide, tooling that
 never belonged there, plus four .tri for meshes that no longer reference them; the clones' lay record
 prunes them by hash. Goam's row still wins femalebody_1_sk and femalehands_1_sk. The BodySlide row is
-of source `ci`: `thuum/19669` (cbbe-sfw-bodyslide-build, pipeline 5577, commit 16f631e0) and
+of source `ci`: `thuum/19760` (cbbe-sfw-bodyslide-build, pipeline 5596, commit 0ba2e76b) and
 its lab/bodyslide/dist, built on sky-build by lab/bodyslide/build.ps1 from the two archives
 lab/bodyslide/inputs.tsv names by md5, which lab/tools/bodyslide-inputs.sh places in D:\thuum-inputs
-(licensed files, never the repo or an artifact). The job's tree equals the hand proof's file for file,
-so the row's tree hash did not move; the artifact is kept. Main's rebuild of the same source when the
+(licensed files, never the repo or an artifact). 1,367 of its 1,369 meshes match SFW's prebuilt copy
+vertex for vertex (max 0.029 units); the Blind Moth Priest robes (Dawnguard, both weights) differ in
+the robe shape alone (mean 0.78 units), at any preset: SFW's project for that robe is not the one its
+prebuilt robe was made from. The artifact is kept. The first builds, the hand
+proof and job 19669, passed "CBBE (SFW)", which is the group of SFW's 14 presets and not a preset:
+BodySlide 6.1.0 then builds at the projects' default sliders without a warning, a shape slimmer than
+SFW's (its body's chest 8.15 units forward against SFW's 10.38). A sweep of the 14 on sky-build
+(2026-11-07) matched SFW's prebuilt body to CBBE Curvy (Outfit) alone, and build.ps1 now refuses a
+preset name that no SliderPresets file defines. Main's rebuild of the same source when the
 layer merges does not move the row. Underwear choice: NeverNude, vanilla-styled; the modern style is
 the "CBBE Underwear (SFW)" set plus SFW's 30 Underwear textures, if Eli prefers it.
 
