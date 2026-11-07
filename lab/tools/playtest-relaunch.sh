@@ -8,9 +8,11 @@
 # the server's online list again. The session's own logs are kept first: the
 # game rewrites its Skyrim Platform log at the next start and a rollback erases
 # the clone's files (playtest 44's crash sessions were lost so), so its Skyrim
-# Platform and lab-driver logs go to the results site's relaunch-logs/ as
-# <stamp>-<client>-platform.log and -driver.log; a log that cannot be kept is
-# said and the relaunch goes on.
+# Platform, lab-driver and client console logs go to the results site's
+# relaunch-logs/ as <stamp>-<client>-platform.log, -driver.log and -console.log
+# (the console is lab-console-logs.txt, where skymp5-client's own lines go:
+# playtest 48 kept none and lost three resets' trap lines); a log that cannot
+# be kept is said and the relaunch goes on.
 set -euo pipefail
 client=${1:?client: c1 or c2}
 case "$client" in c1) vmid=711; profile=1;; c2) vmid=712; profile=2;; *) echo "unknown client $client" >&2; exit 2;; esac
@@ -40,7 +42,8 @@ keep() {  # the logs of the session the stop ends, off the clone, copied first a
   stamp=$(date -u +%Y%m%dT%H%M%SZ); tmp=$(mktemp)
   ssh -o BatchMode=yes -J "$jump" "$srv" 'sudo mkdir -p /srv/lab/results/relaunch-logs && sudo chown eli:eli /srv/lab/results/relaunch-logs' 2>/dev/null \
     || { echo "could not reach the results site: $client's logs not kept" >&2; rm -f "$tmp"; return 0; }
-  for spec in "platform|'$spl'" "driver|(Join-Path (Get-Content -LiteralPath 'C:\\sky-lab\\game-dir.txt' -Raw).Trim() 'Data\\Platform\\Logs\\lab-driver-logs.txt')"; do
+  for spec in "platform|'$spl'" "driver|(Join-Path (Get-Content -LiteralPath 'C:\\sky-lab\\game-dir.txt' -Raw).Trim() 'Data\\Platform\\Logs\\lab-driver-logs.txt')" \
+              "console|(Join-Path (Get-Content -LiteralPath 'C:\\sky-lab\\game-dir.txt' -Raw).Trim() 'Data\\Platform\\Logs\\lab-console-logs.txt')"; do
     kind=${spec%%|*}; src=${spec#*|}; name=$stamp-$client-$kind.log; copy="C:\\sky-lab\\relaunch-$name"
     # copied, then cut to its first 2,000 and last 8,000 lines when longer, so one file-read through the guest agent
     # stays far under the answer size that killed sky-c1's agent once (~5.6 MB; playtest 45's c1 log ran to 25k error lines)
