@@ -9307,3 +9307,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   was canned until the alternate start (Eli: "i thought we fixed this, that new characters shouldnt start with helmets"):
   ADR-055's D7 startingKit (the prisoner's rags worn, a server setting) was decided on 10-28 and never built, and D8 (Live
   Another Life) is apocrypha's. The gate resumed at 06:57:51Z.
+- m4-train-48 merged to fork canon 75c134ad (2026-11-07T08:42Z): the gate 20261107-073600-merge-m4-train-48, 20261107-073600-smoke-two-players to 20261107-083750-b-npc-caster (17 runs); T2 skip on skymp-server:m4-train-48; clones promoted.
+  Verbs: thuum-fa's 48 train: ADR-068 rung 3, the script record (fork 458a6930 merged in; its own stage read 9 of 9 on
+  11-06), the 48 fixes (a trap's trigger never a trap body, so the guest's rope snaps; a trap's kill taken on the host's
+  hit whenever it lands; a looted body keeps its worn armor; RaceMenu's login waits for the recorded look; the bow's hands
+  pass after a login) and the body's rest as a dwell on both ends (75c134ad, after rung 3's red b-npc-death). The T2 is
+  thuum-fa's on skymp-server:m4-train-48-75c134ad (42 sessions identical apart from the declared divergences). Its stage
+  (verb-stage FORMAT=local) read 6 green of 8, the two reds premise misses, then x-trap-npc-kill-late v1.2 (041717) and v1.3
+  (073104) green: v1.3 read the draugr at 50 health and DamageResist 2 and one 30-damage hit took 29, so the "fifth of trap
+  damage" was numidium's misreading of v1.2's health steps plus v1's draugr blocking in combat, withdrawn. This gate is the
+  fresh one: the cited 20261107-042109 (17 green, parked for playtest 49 and resumed) was refused on gate-cite's check 3,
+  its runs having recorded the label numidium's b2bcc92d layer restage gave the snapshots; both clones' clean-m1-next held
+  75c134ad's client all along (SkyrimPlatformImpl 2deca2f105ac14cb read on both), their labels were corrected to name it,
+  and layer-stage now keeps a staged train's client in the label (7c6a2f96). Playtest 49 played this build. b-body-loot
+  read green three times on it (035635, 044818, 080607), so gate.yaml's pending line for it comes out (its DDO premise is
+  main's since 43a2513f).
