@@ -475,6 +475,40 @@ could too); H-R10 (the stack ZeroFunctionArguments' re-sends ran, no fault). Unr
 scripted objects beyond the pillars (the Temple's 6a9e2, 67dcc, 3c5a9, 375a1, 375a2, 375ad), applied as guests with their handles
 resolved, the system's own reach rather than a pillar case. The T3 box stays open on H-R9 to H-R12.
 
+## Playtest 49 (21:13 to 22:57 PST 2026-11-06, 05:13Z to 06:57Z 11-07; fork m4-train-48 75c134ad under apocrypha's layer b2bcc92d)
+
+Rung 3's record (458a6930, inside the train) in play at Bleak Falls Temple 0x371de; test 1 rotfern on c1 (ff000000), test 2
+Ariadne on c2 (ff000001). The record: results/playtest-49/, and c1's console after its relaunch in
+docs/private/playtest-49-c1-console-0614.log, stamped by c1's own clock; the server's times are UTC.
+
+The pillars through a hand-off and a late arrival: VERIFIED IN PLAY. Eli: "alright pillars looked great". rotfern, hosting, set
+all three to the whale; numidium relaunched c1 at 06:09:51Z; the records were served to Ariadne ahead of her grant (06:10:13Z,
+epoch 2); c1, back in as a guest, applied all three and played each view from its record (H-R8's case: "object animation aa8cb
+Trigger03 played (the script record, taken, after StartState03 taken)"); rotfern then turned 0xaa8cb as the guest at 06:11:23Z,
+the host's RotatePillarToState relayed at seq 8.
+
+The restart leg: BROKEN on the guest. Eli: "ohooooo interesting. for ariadne the pillars are accurate, but for rotfern they're
+reset". The server restarted at 06:13:13Z and both seats were back online by 06:13:39Z; numidium teleported both out to the Temple
+door's camp at 06:14:04Z and back to their spots in 0x371de at 06:14:24Z. c1's console at the reconnect (06:13:30.739, its apply
+"at the grant of 371de"): "script state aa8cd: nothing blanked; view Trigger01 to play (seq 4, none here), +23 ms", aa8cc's
+Trigger01 at seq 3 and aa8cb's trigger02 at seq 8 the same. After the teleport back (06:14:25.802, "applied as a guest", Ariadne
+hosting): "script state aa8cd: blanked OnLoad and OnCellLoad re-sent; view Trigger01 current (seq 4), +1653 ms", and "current" for
+the other two. The apply judged each view current from the 06:13:30 bookkeeping and played nothing, while the teleport out had
+unloaded the 3D and it loaded again at its default faces; c1's two later loads of the cell (06:14:33 and 06:15:04Z) brought no
+pillar apply line. Later relayed presses played on c1 ("object animation aa8cb Trigger03 played (relayed, taken, after
+StartState03 taken)"). The cause, read from these lines: the "current" mark survives a 3D unload. The host's side held
+(VERIFIED IN PLAY, "for ariadne the pillars are accurate"): rotfern's next press (06:15:15Z) turned 0xaa8cb from 'trigger02' to
+'Trigger03' at seq 9, the turn from the record's side (numidium's notes, docs/private/playtest-49-findings.md).
+
+The fix: fork m4-scripts-4-view b86884a5 (local, from m4-scripts-4-rows 10b3edcb). ObjectAnimationService keeps each world
+object's last animation, the record's view or the newest relay, whichever has the higher sequence; a 3D unload drops the shown
+mark, and a seat that does not host the reference's cell plays it again at every 3D load, with the line "[verb:scripts] object
+animation <id> <event> re-applied at a 3D load (seq <n>)". HYPOTHESIS until a lab run reads the guest's pillar nodes equal to the
+host's after a teleport out and back.
+
+The Temple's cobwebs, the other world script 49 broke, and D-C2 A (a guest's trigger entry relayed to the cell's host through rung
+3's SendScriptEvent, given the event's argument) are in traps.md's Playtest 49 section.
+
 ## Status
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared

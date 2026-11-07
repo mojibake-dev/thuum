@@ -1121,3 +1121,19 @@ while. Not a loosening candidate: the bound stays, the watch closes on a green g
   ChangeFormGuard marks a skipped edit, MpObjectReference::FlushUnsavedEdit, WorldState::FlushSaveStorage drains the storage within a
   budget, PartOne::FlushSaves, the addon's flushSaves, index.ts's SIGTERM and SIGINT handlers with a 5 s flush; SaveStorageTest's case).
   c-riverwood is pended in lab/gate.yaml until the fix is on parity and a gate plays it.
+
+## Playtest 49 (21:13 to 22:57 PST 2026-11-06, 05:13Z to 06:57Z 11-07; fork m4-train-48 75c134ad under apocrypha's layer b2bcc92d)
+
+The world bloat on a plain restart, BROKEN in 49. The world held 1,542 records before numidium's
+`docker compose restart skymp-server` at 06:13:13Z (playtest-pt49-before-restart-20261107T061305Z) and 15,393 at the next save
+(playtest-pt49-before-final-racemenu-20261107T062947Z): 13,851 new, 12,559 of them in Tamriel 0x3c, nearly all TREE flora with
+isHarvested false (the commonest bases b91f8 TreeFloraMountainFlower02Purple 625, bcf3e 499, b91f0 TreeFloraThistle01 496).
+playtest-go's restores, which also restart the server but with the world replaced, did not do it.
+
+The cause, read in the code: since 6f39d9a7 (the records flushed on a graceful stop, the open question above) ChangeFormGuard
+marked every NoRequestSave edit unsaved, an attach's Init included, so the stop's flush wrote a record for every reference the
+session had loaded. The fix: fork m4-scripts-4-rows 10b3edcb (server-only): Mode::Deferred, the movement sample inside
+IsLocationSavingNeeded's 30 s, is the only edit that marks a record, and NoRequestSave keeps its meaning from before 6f39d9a7 (a
+load's apply, an attach's Init and the rest: no save, no mark); its unit case (SaveStorageTest: a flower the loader attaches
+carries no unsaved edit) fixed in 30f8a947, the first one having named a flower the unit world does not load. MECHANISM ONLY until
+a restart in play shows no growth.

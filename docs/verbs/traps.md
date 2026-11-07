@@ -1198,3 +1198,74 @@ rocks' fall lines as they landed, where the 21:44Z trip's two hurt players stood
 on c2 are unread. A recording gap for the record: results/playtest-48's c1-console.log and c2-console.log cover 19:59Z to 20:00Z
 and c1.log and c2.log 21:53Z to 22:03Z, so skymp5-client's own trap lines ("fired here", "trap result") for the first three resets
 were never recorded; only the platform logs under results/relaunch-logs/ survive for that stretch.
+
+### Playtest 49 (21:13 to 22:57 PST 2026-11-06, 05:13Z to 06:57Z 11-07; fork m4-train-48 75c134ad under apocrypha's layer b2bcc92d)
+
+Embershard Mine 0xb6be6 first, then Bleak Falls Temple 0x371de from the second reset (playtest-pt49-temple-20261107T055758Z);
+test 1 rotfern on c1 (ff000000), test 2 Ariadne on c2 (ff000001). The record: results/playtest-49/ (20 cycles), with c2's Temple
+session in c2-temple-session-console.log and c2-temple-session-platform.log (21:58 to 22:51 PST). The server's times below are
+UTC.
+
+Embershard (Eli, 21:5x PST): "so far regarding embershard - bone chimes work - trip wire worked when luring bandits through,
+snapped for both." VERIFIED IN PLAY: a bone alarm from the seat that did not walk into it (the check 48 left open, above), and the
+tripwire 0xb6d3f with bandits lured through it, snapped on both screens. The first reset
+(playtest-pt49-wire-reset-20261107T055310Z: the wire and its seven rocks moved aside, the camp outside the main door) was set up
+for the players to trip it themselves; its restore at 21:53:45 PST relaunched both seats where they stood, inside the mine, and
+rotfern, hosting, walked into the fresh wire before the camp step moved them out (21:55:33 PST). Eli: "host just triggered the
+tripwire! looks good on both, but you dropped them outside again and the wire was already spent". VERIFIED IN PLAY (numidium's
+notes, docs/private/playtest-49-findings.md): the host's own trip on both screens, the case 48's third reset broke (the guest's
+string stayed taut).
+
+The Temple's cobwebs, BROKEN for the guest. Eli: "ariadne walked through and nothing happened. or rather maybe was walking through
+what wasn't there but never got the anim". rotfern, the host of 0x371de at epoch 1, walked through 0x3758c, 0x3758d and 0x37281 at
+06:06:01 to 06:06:18Z, and the server took each web's call from her engine: "ff000000 reports
+ObjectReference.SetAnimationVariableFloat on 3758c in cell 371de (epoch 1, from FXtriggerAmbFX.OnTriggerEnter): seq 1, relayed to
+0 game(s)" (3758d the same, 37281 relayed to 1), then each web's script state recorded at seq 1 with view ''. Ariadne's pass left
+nothing on the server from either game (numidium's live filter on the six cobweb ids and FXtriggerAmbFX). Two gaps. Her entry
+reached no script: a guest's copy of a world script is blanked, and on the host either the engine sent no OnTriggerEnter for her
+figure or FXtriggerAmbFX's OnTriggerEnter compares its actionRef to the player (HYPOTHESIS, both unread). And a record's view
+carries animation events only, never SetAnimationVariableFloat (the view '' above), so a seat arriving after a web tore gets it
+whole (unread in play). Decided since: D-C2 A (DECISIONS.md, ADR-068's "D-W1 and D-C2", thuum main d5850a9d, the webs' place corrected in a3ff1cd7): a guest's
+trigger entry is relayed to the cell's host, whose copy runs the script with the guest's figure as actionRef (rung 3's
+SendScriptEvent given the event's argument). The read x-trigger-entry comes first (rule 8).
+
+The puzzle lever, BROKEN on the other screen: H-P1, now read in play. Eli: "lever anim only plays on one screen though, whoever
+flips it". 0xaa8c3 is a FURN (LeverPushAnimatingNoPlayer, above). The server's lines: "ff000000 activates aa8c3 ... relayed to 1
+other game(s)" and "ProcessActivate aa8c3 - occupant is already this object (activationSource = ff000000). Blocking because it's
+FURN", ff000001's activations at 06:11:36 and 06:11:39Z the same; the host's "aa8c3 activates 2ad43" and "2ad49" (the gate)
+relayed at 06:11:17Z. The pull's linked activations crossed; nothing carries the occupant's furniture pull or the lever's arm to
+the other seat. Next: the read x-lever-furn (rule 8), then the fix, for playtest 50.
+
+The Temple's wall and blades: VERIFIED IN PLAY that they kill draugr. Eli: "the wall and blades were for sure killing draugr. it
+just looks like the timing". With Ariadne hosting 0x371de, the server took the deaths of 0x380b5, 0x380b9 and 0x380b3 on her
+engine's wall hits (06:18:48 to 06:18:54Z, "a trap's evidence beside the body (54b15, 304 ms before)" and the like).
+
+The wall's firings per engine, BROKEN: 48's declared shape, now Eli's complaint (earlier in the session: "im still having the
+spike wall only fire on rotferns screen"). c2, the host, logged "trap 54b15 fired here by 567f2" five times in 06:18:32 to
+06:18:53Z; c1 eleven times in 06:18:32 to 06:19:26Z, one of them hitting rotfern (06:18:33Z). HYPOTHESIS for the count (the
+reading D-W1 rests on, unread per firing): D-S3's decision 1 fires each seat's copy for what that seat sees, and each game has its
+own bodies and its own NPCs on the plate. Decided since: D-W1 A (the same entry): a trap family's press fires on the presser's
+owner and is relayed as the trap's linked activation (RelayedActivation 70); a seat ignores a press by an actor it does not own,
+through the gate's OnTriggerEnter argument; this amends D-S3's decisions 1 and 5. The read x-trigger-entry comes first (rule 8).
+
+Withdrawn after 49: the train's stage had read NPCs taking about a fifth of a trap's damage (a basic draugr losing 0.12 of its
+health a blade hit, against 0.6 on canon 5186df39 before the layer, 20261106-193605). x-trap-npc-kill-late v1.3 (lab/.cache/probes,
+cc1698f3) read it whole, green 20261107-073104 on the same train and layer: 0x380b5 at health 50 (base, current and maximum) and
+DamageResist 2 before any hit; after its move onto 0x3ac35, the first native ProcessTrapHit at 07:33:03.771 (c1's clock) took its
+health from 1.000 to 0.419 at 07:33:04.212 (about 29 of 50: a whole 30-point hit less the resistance), the second at 07:33:04.719 to 0.000,
+the late kill taken again. v1.2's 0.6 was that same single hit, its natives' times misread as five; the fifth rested on v1 (033003)
+alone, where 0x380b5 fought c1 with its combat AI on (0.12 a hit across four hits, most likely blocked with its shield:
+HYPOTHESIS). No damage fault in the train or the layer.
+
+The pillars (rung 3's record through a hand-off, a late arrival and a server restart) are in papyrus-events.md's Playtest 49
+section.
+
+D-L1 B's build (00:2x PST 2026-11-07 (08:2xZ), thuum-fa; fork m4-scripts-4-login d236164e and its review's notes, Eli's D-L1 B in
+DECISIONS.md): skymp5-client's LoginCellService sends OnCellAttach and then OnCellLoad once to each scripted reference of the cell
+a seat logs in inside, after the grant's gate (or 10 s after the report when no grant comes, as a walked-in guest's lifecycle
+events would), through SendScriptEvent with unseenOnly, and logs "[verb:scripts] login cell <c>: OnCellAttach and OnCellLoad sent
+once to <n>, <m> already seen" (<m> is H-L1's read). Two known limits, narrower than the decision's "each scripted reference of the
+cell" (the fresh review's note 5): it acts for an interior login cell alone (an exterior login is left as before), and it skips
+actors (their scripts' entry events stay the engine's own). The client setting loginCellEvents false turns it off. The proof is
+x-login-in-cell v2.1 (lab/.cache/drafts/fifty, 7b6203d0): pillar one's script on its first side before the press, after a login
+inside the Temple.

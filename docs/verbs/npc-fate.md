@@ -3417,3 +3417,25 @@ cases rewritten to the dwell (the death point's agreement inside the floor, the 
 dwell's end at 750 ms, a body still from its first sample resting at the floor), the owner's ending sample through the movement
 path (relayed reliably, every later report refused), the respawn case at rest by the dwell. Its gate is the 48 train's, with rung
 3 inside (fork 62f2038a merges m4-scripts-3-record 458a6930): one gate for rung 3, the 48 fixes and this.
+
+## Playtest 49 (21:13 to 22:57 PST 2026-11-06, 05:13Z to 06:57Z 11-07; fork m4-train-48 75c134ad under apocrypha's layer b2bcc92d)
+
+Embershard Mine, then Bleak Falls Temple 0x371de; test 1 rotfern on c1, test 2 Ariadne on c2. The record: results/playtest-49/;
+c1's crash in docs/private/playtest-49-c1-crash/ (CrashLogger's crash-47.log and crash-48.log, with c1's console) and
+relaunch-logs/20261107T062241Z-c1-{platform,driver,console}.log.
+
+The loot strip (above, fork m4-48-loot on the train): VERIFIED IN PLAY. Eli: "bandits clothes dont unequip".
+
+c1's crash at 22:20:47 PST (06:20:47Z), BROKEN. CrashLogger: EXCEPTION_ACCESS_VIOLATION at SkyrimSE.exe+0D18207 (70199+0x7,
+`mov dword ptr [rcx+0x08], 0x00`) on the background loader's thread, cloning the 3D of the leveled draugr archer corpse 0x380b8 (a
+temporary base, 0xff000d2c, likely from its re-roll at 22:10:35 PST: c1's "late fate for 380b8: engine re-roll or redress
+queued"), with SPID's OutfitManager and po3's ReapplySpellsOnLoad Load3D hooks on the stack; a second log 867 ms later executed
+address 0 with 0x380b7's graph. c1's console ends on that corpse's lay: "changeform 380b8: apply queued to the main thread (at its
+arrival)" at 06:20:47.170 by c1's clock, then "corpse 380b8 applied from the record" at .225. c1 relaunched at 06:22:40Z.
+
+The cause, HYPOTHESIS (a re-analyst's static read, medium confidence): heap corruption. thuum's corpse lay of 0x380b8 (the
+ChangeForm apply through 35568 at 22:20:47.173 PST, whose leveled-creature block calls Set3D(nullptr) on a loaded leveled actor)
+raced the background loader's rebuild of the same corpse's 3D; an ActorMediator sink add or remove (20140, 38402) wrote into a
+freed sink array and poisoned a pool free list, so MemoryManager::Allocate (68115) returned the ActorMediator singleton's storage
+(504076). The Frida read x-corpse-lay-crash (lab/frida/corpse-lay-heap.js) comes first (rule 8). The fix direction: the lay waits
+until the actor has no queued background load.
