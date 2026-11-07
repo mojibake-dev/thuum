@@ -9267,3 +9267,43 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (playtest-pt48-ariadne-dressed-20261106T224844Z), six worn items with her three clothes and the cloak; Eli at 14:49 PST:
   "cause of the racemenu stuff ariadne wasn't wearing clothes lol, she is now. pls make sure that takes upon subsequent
   playtest relaunches".
+- 22:58 PST 2026-11-06 (06:58Z 11-07) (numidium): the evening after rung 3's red gate, then playtest 49.
+  The layer restaged twice over the 48 train: apocrypha/layer-appearance 6bbdb751 (main merged; DECISIONS' conflict resolved
+  in number order, Amendment B inside ADR-068, then ADR-069), smoke green 20261107-021320 and 021617, Rotfern's Fixes 0.1.1
+  "installed" with dated lines on two launches; then b2bcc92d, apocrypha's SFW preset fix (BodySlide had built every mesh at
+  the projects' default sliders: build.ps1 named the group "CBBE (SFW)", not a preset; now "CBBE Curvy (Outfit)", job 19760,
+  1,367 of 1,369 meshes matching SFW's prebuilt to 0.029 units), smoke green 20261107-041425, the lay as predicted (1,315
+  fetched, pruned 0). GitHub Actions started no workflow on mojibake-dev/skymp for 75c134ad's push (02:13:55Z) or for the
+  branch re-created at that sha (03:11:14Z; a zsh slip of numidium's left it absent from GitHub for about 10 s), every
+  workflow active, no incident; verb-stage gained FORMAT=local (4936f8f8: fork-lint on a worktree of the head) and Eli
+  re-enabled Actions later. The 48 train's stage (fork m4-train-48 75c134ad, pipeline 5592: rung 3 inside it, the 48 fixes,
+  the body's rest as a dwell on both ends) read 6 green of 8 (x-trap-wire-rope 032511, x-racemenu-login-look 033254,
+  x-hands-relaunch 034138, b-npc-death 034610 with the server's rest and c1's own equal to the unit, b-script-state-restart
+  035113, b-body-loot 035635, its pending reason stale); the two reds were premise misses (x-trap-npc-kill-late 033003: a
+  draugr survived four blade hits; x-body-open-worn 033747: H1 false, no strip staged). x-trap-npc-kill-late v1.2 green
+  (041717): a trap's kill 39 s after its trigger taken on the host's hit 486 ms before the report. Open: NPCs take about a
+  fifth of trap damage on this build (6 of a 30 hit on a 50-health draugr against 30 on canon 5186df39 at 20261106-193605),
+  both static reads clean (the train's call path, the layer's records), v1.3 (cc1698f3, Health and DamageResist read first)
+  after the merge. The merge gate 20261107-042109-merge-m4-train-48 (T2=skip on thuum-fa's T2 of
+  skymp-server:m4-train-48-75c134ad, 42 sessions) read 13 green (a-racemenu red once at step 32, 045624, green on its relaunched
+  rerun 045904) and was stopped before b-script-state-restart for playtest 49 on Eli's go (21:07 PST, "ready").
+  Playtest 49 (lab/playtests/49.yaml, thuum-fa's and apocrypha's checklist; recorded in results/playtest-49/, 20 cycles,
+  with c2-temple-session-console.log added): verified in play, the bone chimes, the tripwire tripped by lured bandits and by
+  the host (snapped on both screens), the SFW body's sliders, bodies keeping their clothes when looted, the pillars through
+  a hand-off and a late arrival (rung 3), NPC kills by the wall and the blades. Broken: Ariadne's face after a RaceMenu close
+  ("her mouth is wide open"), numidium's own fault: a look is three change-form fields (appearanceDump, appearanceForms,
+  raceMenuPreset; the server rebuilds the head parts from appearanceForms at load and the seat echoes the preset at login),
+  and the 48 composition of the canonical world copied the dump alone, so every load swapped her hair; the cobwebs from the
+  guest (no trigger entry reaches the host's script, the record's view empty); the puzzle lever's pull on one screen (H-P1,
+  the NoPlayer furniture fault); the spike wall's firings per engine (48's shape); the pillars reset on the guest after a
+  server restart (c1's console: "view Trigger01 current (seq 4)" judged from bookkeeping the teleport's 3D unload had made
+  stale; thuum-fa's fix, the view replayed at every 3D load on a non-owner, rides rung 4); c1 crashed at 22:20:47 PST (heap
+  corruption, thuum's corpse lay on a loaded leveled draugr racing its background 3D load, the re-analyst's HYPOTHESIS, a
+  Frida plan for later); a plain server restart wrote 13,851 flora change forms (ChangeFormGuard's NoRequestSave marking
+  load-time applies unsaved since 6f39d9a7; thuum-fa's R0 fix next). Unread: Arvel (his web recorded destroyed since 47).
+  Eli's summary: "the breaks from this playtest were the spike wall, and the pillars". The canonical world is now
+  playtest-canon-chars-20261107T064547Z: 224932Z with Ariadne's look as one unit (Orc 05 hair; Eli: "ok ariadne is present.
+  thats who she is now") and the Shrouded set (DBArmor 0xd2844 and its cowl, gloves and boots). A new character on profile 3
+  was canned until the alternate start (Eli: "i thought we fixed this, that new characters shouldnt start with helmets"):
+  ADR-055's D7 startingKit (the prisoner's rags worn, a server setting) was decided on 10-28 and never built, and D8 (Live
+  Another Life) is apocrypha's. The gate resumed at 06:57:51Z.
