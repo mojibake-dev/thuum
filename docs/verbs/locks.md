@@ -222,7 +222,7 @@ the console log when a landing is slow.
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
 
-- Frida script: none. The reads are Skyrim Platform events on a lab seat: x-lockpick-read by path, c1 at a locked
+- Frida script: none. The reads are Skyrim Platform events on a lab seat, in a probe not yet written (x-lockpick-read): c1 at a locked
   chest with five Lockpicks: the menu opened by an activation, the lab's mouse turning the pick, tap-key for the
   turn, the events logged (lockChanged, containerChanged's shape at a broken pick, menuClose), the reference's
   isLocked and getLockLevel before and after; a second leg on a "requires key" door (the message box, no menu); a
