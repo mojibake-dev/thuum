@@ -44,7 +44,7 @@ TrapTriggerBase as USSEP ships it, Tripwire, FXtriggerAmbFX) and the XAPR links 
 | --- | --- | --- |
 | one press of the Temple's plate 0x567f2 by the guest, by the host, by an NPC the host simulates (each seat's path) | x-trigger-owner v1, legs A, B, C | |
 | the guest through Embershard's tripwire 0xb6d3f: one root crosses, the nine children fire once on each seat | x-trigger-owner v1, leg D | |
-| two owners on one plate in turn (c1 on, c2 on, c1 off, c2 off, c1 again) | x-trigger-owner v1, leg M (recorded, H-W2) | |
+| two owners on one plate in turn (c1 on, c2 on, c1 off, c2 off, c1 again) | x-trigger-owner v2.2, leg M (recorded, NOT READ for H-W2: the wall shoves each presser off within 1.1 to 3.2 s, x-trigger-entry 20261107-205945) | |
 | a guest's walk into an unfired web, twice (two webs) | x-cobweb-relay v1 | |
 | a late joiner to a torn web, after a reload, after a server restart | x-cobweb-view v1, b-cobweb-view v1 (D-C3 A, pending) | |
 | the gate set's plate legs under the rule | b-object-anim v6, b-bleak-traps v4 (drafts, Eli first) | |
@@ -170,9 +170,11 @@ presser (declared).
   SoundTrap's [DoNothing] OnTriggerLeave goes back to 'active' and fires again on a leave (the plan's section 7.1, read 1(b)). And
   H-W2's own pex read (2026-11-07; the lab's winning copies, USSEP's TrapTriggerBase, sha1 12971d31, and vanilla PressurePlate, sha1
   a0bc199e): with StoredTriggerType 1 ("hold") the last leave fires Activate(self), and the Temple plate 0x567f2 sets none. So a
-  non-owned leave stays blanked, and a plate whose last occupant is an ignored presser can lose its owner's next press: OPEN, read
-  by x-trigger-owner v2.1's leg M (recorded; lab/.cache/drafts/fifty, 6a17c24f). With D-W2 a watcher's plate follows the last look
-  relayed (cosmetic, declared in the plan's section 7.6) whatever its own count holds.
+  non-owned leave stays blanked, and a plate whose last occupant is an ignored presser can lose its owner's next press: OPEN, with
+  no reader yet. x-trigger-owner v2.2's leg M still runs (recorded) but cannot read it: it needs both seats on the plate at once,
+  and the wall shoves each presser off within 1.1 to 3.2 s (x-trigger-entry 20261107-205945's traces; the fresh reader of that run's
+  call). With D-W2 a watcher's plate follows the last look relayed (cosmetic, declared in the plan's section 7.6) whatever its own
+  count holds.
 
 ## Message contract
 
@@ -263,7 +265,7 @@ presser (declared).
 | H-TE2 | a figure and a puppet press a non-owner's copy | enter rows naming the figure and the puppet on the watcher | x-trigger-entry v1 (recorded) |
 | H-TE3 | the host's engine delivers a guest's figure into the host's web | c1's rows for 0x37281 in leg W1 | x-trigger-entry v1 (recorded; sets x-cobweb-relay's claim 6) |
 | H-W1 | the press mark, or the trigger's own activation, reaches the client before its first link | per leg, the trigger's own activation before the pair's O line; no "a later link" for a root | x-trigger-owner v1 (claim 8) |
-| H-W2 | a plate last left by an ignored presser stays in DoNothing until an owned press counts again | leg M's second press by c1, fired or not (the pex read is done: a non-owned leave stays blanked, Suppress above) | x-trigger-owner v2.1 (recorded) |
+| H-W2 | a plate last left by an ignored presser stays in DoNothing until an owned press counts again | two owners on the plate at once, then the owner's next press, fired or not (the pex read is done: a non-owned leave stays blanked, Suppress above) | none yet: x-trigger-owner v2.2's leg M cannot hold both seats on the plate (the wall shoves each presser off within 1.1 to 3.2 s, x-trigger-entry 20261107-205945) |
 | H-W3 | FunctionArguments<TESObjectREFR*> packs as the engine's own argument | the host's pack row under the relay, agree true, arg0's handle the figure's | x-cobweb-relay v1 (recorded) |
 | H-C2a | the host's FXtriggerAmbFX tears a web for a relayed entry | the host's SetAnimationVariableFloat report from FXtriggerAmbFX.OnTriggerEnter, relayed to 1, and its broken 2 | x-cobweb-relay v1 (claims 4 and 5) |
 
