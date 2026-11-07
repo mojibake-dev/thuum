@@ -650,6 +650,12 @@ The caster's own game skips a form naming itself while the script's own copy sta
 places it as any server form. The removal is the usual DestroyActor 5 s after the cast's end. Fixtures
 33-CreateActor-0 and -1 carry the field; WireJsonContractTest reads them through CreateActorMessage.h.
 
+Since SCHEMA_VERSION 39 (fork m4-scripts-4-rows 77aaf7bb; ADR-068 rung 4's script set, W3) `placedBy` also names the reporter of a
+script's PlaceAtMe or PlaceActorAtMe, whose engine stood the new reference, so it pairs with STAT, NPC_ and the item types (AMMO,
+ARMO, BOOK, INGR, ALCH, SCRL, SLGM, WEAP, MISC, KEYM, LIGH) beside MSTT and ACTI; EXPL, HAZD, PROJ, CONT and FURN stay E_VAL_RANGE. A
+script set's form has no lifetime: it stands until a Delete row. Fixture 33-CreateActor-3 (an XMarker 0x3b placed at the cobweb,
+placedBy its reporter).
+
 ### PlacedRequest (t 61) and PlacedReport (t 62): the caster's engine names the pose (spell-placed-object, M3; ADR-057 shape A, D70)
 
 Shape C's fixed step fell at T3 (D70: the engine stands Raise Wall 206 ahead along a heading the record's yaw does not carry), so
@@ -758,6 +764,20 @@ cannot connect to a schema 37 server (netcode's protocol id carries the version)
 one tree. The same slice raises PropTransform's budget to 128 at once, then 96 a second (UNMEASURED: a firing streams up to eight
 trap bodies at 10 Hz).
 
+Since SCHEMA_VERSION 39 (fork m4-scripts-4-rows 77aaf7bb, 2026-11-06; ADR-068 rung 4 and its amendment B, read 7) the same word is
+also a reference's engine state, from the server alone: `{ refr, stage, destroyed, served, disabled?: bool, deleted?: bool, seq: u32
+}`. A host's scripted Enable, EnableNoWait, Disable, DisableNoWait or Delete travels as ScriptCall 75's record row (below), never as
+this message; the server moves the reference's ref state record (wire-rules ref_state; a call that changes nothing folds and writes
+and relays nothing), relays the word with the object's sequence in `seq` to the listeners the reference had before the change but
+the reporter, and serves it behind every later create word (`served` true). A word carrying neither field is a destruction word
+alone. From a client, `disabled`, `deleted` or a nonzero `seq` is E_VAL_RANGE, judged before the budget; the table row's byte cap
+rises from 16 to 32. A game-file world object whose ref state is recorded keeps its place on the grid while disabled, and PartOne's
+save loader keeps a deleted game-file record, so a scripted Delete stays deleted across a restart. A seat (RefStateService) applies
+a relayed word only above the object's last applied sequence and a served word always, through the platform's own enableNoWait and
+disableNoWait; it applies none for a reference in a cell it hosts, except in its grant's pass, after the cell's script records. Fixtures
+78-DestructionStage-2 (the cobweb 0x1fc43 served disabled at sequence 3) and -3 (a report carrying the server's words, refused from
+a client); 78-0 and 78-1 gain `seq` 0; the difftest session ref-state. R2 (rule 5): the host's engine's word, recorded, never judged.
+
 ### ScriptCall (t 75, wire id 83): a tabled native its subject's owner ran, read at the native boundary (ADR-068 rung 2)
 
 Fork m4-scripts-2-seam a2924a84 (2026-11-05, SCHEMA_VERSION 36; ADR-068 rung 2, docs/research/scripts-one-system-2026-11-05.md
@@ -796,6 +816,23 @@ actor nobody or another seat simulates, E_SCRIPTCALL_OWNER. It reads no epoch, t
 (30 s; docs/verbs/npc-fate.md, "Trap hits as death evidence"). R2, unvalidated (rule 5): the named trap is recorded as reported,
 never checked against the body's place, and the hit's numbers are never judged.
 
+Rung 4 (fork m4-scripts-4-rows, SCHEMA_VERSION 39; docs/research/rung4-state-rows-2026-11-07.md section 1(c)) adds the table's
+record channel, Keep::Record, beside Keep::Evidence, for three kinds of state row: RefState (ObjectReference.Enable, EnableNoWait,
+Disable, DisableNoWait, Delete), the standing (Actor.SetFactionRank, ModFactionRank, RemoveFromFaction, RemoveFromAllFactions,
+SetCrimeFaction, SetRelationshipRank) and the script set (ObjectReference.PlaceAtMe, PlaceActorAtMe; W3, mechanism only: no seat
+sends them this rung). The table holds forty-one rows, natives_table.rs and NativeRows.inc together. A record row spends its own
+budget, 128 at once then 32 a second per reporter (UNMEASURED), beside the 32 and 8 of the rest. Its owner step: RefState's subject
+is owned by its cell's host at the epoch for a world object and for an actor nobody simulates (so the host enables an ambush
+draugr the loader never held), and by its simulator for every other actor; the standing's is its NPC's simulator alone. An accepted row
+takes the object's next sequence and goes out as its record's own word: RefState as DestructionStage 78's ref state word, the
+standing as the same Actor native by SpSnippet 30 to the NPC's other listeners with that sequence (wire-rules standing; refusals
+E_STANDING_FACTION, E_STANDING_RANK, E_STANDING_OTHER), a late seat served the record's difference from the base with no sequence;
+the script set as PlacedRequest 61 to the reporter alone, whose PlacedReport 62 places the server's copy at the reported pose
+(within the spell band's farthest reach of the self, with no floor; a base of no placeable kind is E_PLACED_KIND). A seat coalesces
+its record rows per self and piece of state in one ordered queue with its actions, and sends none for its own player's actor. The
+quest rows ReferenceAlias.ForceRefTo and Clear are `everyone` rows and travel as AliasFill 79 (below). The difftest sessions
+ref-state, standing (its refusals alone: T2's settings hold no NPC) and script-placement.
+
 ### ScriptState (t 76, wire id 84) and ScriptStateApply (t 77, wire id 85): the script record (ADR-068 rung 3)
 
 Fork m4-scripts-3-record 4f525bad (12:49 PST 2026-11-06, SCHEMA_VERSION 38; ADR-068 rung 3,
@@ -820,6 +857,45 @@ survives a restart. The value is the owner's engine's word (R2, rule 5: recorded
 count, kind and state against its own VM before writing). A schema 37 client cannot connect to a schema 38 server, so the rung's
 client and server build from one tree; fixtures 76-ScriptState-0 and -1 (the second refused: a kind 3 handle) and
 77-ScriptStateApply-0 and -1; the difftest session script-state.
+
+### AliasFill (t 79, wire id 87): a quest's reference alias filled or cleared, the latest report recorded (ADR-068 rung 4)
+
+Fork m4-scripts-4-rows 77aaf7bb (2026-11-06, SCHEMA_VERSION 39; ADR-068 rung 4 and its amendment B, read 8): AliasFill (MsgType 79,
+wire id 87), both directions, reliable, R2: `{ quest: u32, alias: u32, refr: u32, served: bool }`. A quest is nobody's (D-F1 C), so
+every seat runs its scripts and each seat reports its own ReferenceAlias.ForceRefTo or Clear (`refr` 0 for a clear; `served` false),
+read at the native boundary as an `everyone` row with the alias's id from its handle (HYPOTHESIS H-AF3). The client keeps the last
+fill per (quest, alias) a frame and never reports its own player's actor or a server copy. The server (wire-rules alias_fills)
+records one fill per (quest, alias), the latest report winning and an equal one folded, for a QUST with a reference alias of that
+id, on the world's journal; a fill that moved the record is relayed to every other seat (`served` false) and the record is served
+at login (`served` true). A seat applies it with Quest.GetAlias, then ForceRefTo or Clear, parked while its quest is not running or
+its reference is not loaded (retried every 2 s, at a quest's start and at a cell's full load, let go after 120 s). The items an
+alias creates in another alias's inventory never travel here: the server derives them from the game files (the claw derivation,
+ALCO/ALCA, R0) and puts each into its container once. Validator: quest not 0 nor 0xff000000 and up, alias at most 0xFFFF, refr below
+0xff000000 (E_VAL_RANGE both ways), a client's `served` E_VAL_RANGE, 16 at once then 4 a second per sender (UNMEASURED). The
+server's refusals, logged by name: E_ALIASFILL_NO_QUEST, E_ALIASFILL_NO_ALIAS, E_ALIASFILL_REF, E_ALIASFILL_UNRESOLVED. Fixtures
+79-AliasFill-0 (MS13 0x39645's alias 10 forced to the web 0x1fc43, a relay), -1 (alias 3 served cleared) and -2 (refr 0xff000002,
+refused); the difftest session alias-fill. R2 (rule 5): the seat's engine's fill, recorded, never judged.
+
+### WorldGlobal (t 80, wire id 88): the globals every seat's scripts write, streamed by one seat at an epoch (ADR-068 rung 4)
+
+Fork m4-scripts-4-rows 77aaf7bb (2026-11-06, SCHEMA_VERSION 39; ADR-068 rung 4 and its amendment B): WorldGlobal (MsgType 80, wire
+id 88), both directions, reliable, R2: `{ epoch: u32, stream?: bool, entries: [{ global: u32, value: f32 }], served: bool }`. A GLOB is
+written by scripts every seat runs, so one seat streams: the server elects the world streamer (wire-rules world_streamer: a seat
+past its first movement report, not stale, not dead, the lowest player id at each election; an eligible streamer is never displaced
+by a newcomer) and tells it by the stream word (`stream` true at the new epoch, false to the seat whose stream ends, `entries`
+empty). The streamer's game diffs the GLOB array once a second (TESModPlatform.DiffWorldGlobals, constants skipped, the clock's six
+and the per-player globals excluded) and reports what moved under its epoch, at most 512 entries a message. The server judges the
+epoch first (ADR-066 decision 4: E_WORLDGLOBAL_EPOCH for a stale or future one, E_WORLDGLOBAL_OWNER from any seat but the streamer)
+and then each entry (wire-rules world_globals: E_WORLDGLOBAL_CLOCK, E_WORLDGLOBAL_PLAYER, E_WORLDGLOBAL_CONSTANT,
+E_WORLDGLOBAL_NO_GLOB), keeps the latest value per global on the world's journal, relays what moved to every other seat (`served`
+false) and serves the record at login (`served` true). A receiver sets each value through GlobalVariable.SetValue on the update, 32 an
+update, refusing an excluded id, a form that is no GlobalVariable there and a non-finite value. The whole channel is behind the
+server setting `worldGlobals` (false by default: nobody is elected, no stream word goes out, no record is served, and each seat's
+globals stay its own, as before rung 4). Validator: finite values (E_VAL_NONFINITE), at most 512 entries, each a GLOB id not 0 nor
+0xff000000 and up and named once, a stream word at an epoch above 0 (E_VAL_RANGE both ways); from a client, `stream`, `served` or
+epoch 0 is E_VAL_RANGE, judged before the budget of 4 at once then 1 a second (UNMEASURED: x-world-globals-rate v1 reads the rate).
+Fixtures 80-WorldGlobal-0 (a report at epoch 2 of DA04MinLevel 0xe316c), -1 (the stream word at epoch 3) and -2 (a global named
+twice, refused); the difftest session world-global. R2 (rule 5): the streamer's engine's values, recorded, never judged.
 
 ### RelayedActivation (t 70): a linked activation the cell's host reported, to the cell's other games (traps, M4)
 
