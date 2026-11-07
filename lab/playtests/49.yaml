@@ -15,7 +15,12 @@
 # door at (16375, -54616)), test 2 on 48's tested spot beside test 1.
 id: 49
 build: "fork m4-train-48 75c134ad (rung 3, the 48 fixes, the body's rest) staged by verb-stage under the layer stage of apocrypha/layer-appearance b2bcc92d"
-world: playtest-canon-chars-20261106T224932Z   # the canonical seats (rotfern, Ariadne dressed); Embershard untouched
+world: playtest-pt49-wire-reset-20261107T055310Z   # the first reset (Eli 21:5x PST: "will need a reset just outside
+  # enterance to check it"): 49's world at 21:53 (055308Z) with Embershard's wire 0xb6d3f and its seven rocks (0xb6d45,
+  # 0xb6d48 to 0xb6d4d) moved aside into snapshot-backups/, and Ariadne's look and RaceMenu preset taken together from
+  # 052214Z (Eli: "honestly let her keep the orc hair i liked it better"), isRaceMenuOpen false. The canonical worlds
+  # 220411Z and 224932Z paired 48's look with 47's preset (numidium's 48 composition copied the look alone), so 49's login
+  # echoed 47's preset and ADR-026 put the Orc 05 hair on; the first RaceMenu close then recorded a broken face (f30aacd898)
 hold:
   minutes: 150
   reason: "playtest 49: Embershard and the Temple, the 48 train and rung 3"
@@ -27,13 +32,18 @@ server:
   perks: true
   leveling: true
 camp:
-  # Embershard first (items 1 and 2). For the Temple (items 3 and 4), the camp moves to 48's fourth reset, the game's landing
-  # of the Temple's door 0x15da5, each seat walking into 0x371de by a real cell load, rotfern first:
+  # the first reset: outside Embershard's main door at the game's landing of its exterior door 0xb6cce (lab/esm.py door
+  # 0xb6ccd: (8849, -58120, 1446)), 48's third reset's tested spots, so rotfern walks into 0xb6be6 first (she hosts) by a real
+  # cell load; the lookout 0xb6ce1 is dead in this world. For the Temple (items 3 and 4), 48's fourth reset at the game's
+  # landing of the Temple's door 0x15da5, rotfern first:
   #   - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [-2966, -43331, 6145], rot: [0, 0, 104.6]}
   #   - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [-2908, -43346, 6145], rot: [0, 0, 104.6]}
   teleports:
-    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [16198, -53980, 1349], rot: [0, 0, 164.5]}
-    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [16146, -54009, 1380], rot: [0, 0, 164.5]}
+    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [8849, -58120, 1446], rot: [0, 0, 149]}
+    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [8811, -58073, 1470], rot: [0, 0, 149]}
+  near:
+    - 0x992d8   # EncWolf, no server record in 48 or in 49 (never streamed), about 2,200 units off; declared as in 48's third
+                # reset, where it never came (a declared wolf killed test 2 at 48's first camp: watch the load-in)
 seats:
   - profile: 1
     name: "test 1"
