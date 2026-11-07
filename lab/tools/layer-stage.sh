@@ -114,8 +114,16 @@ sys.exit(0 if all(p in got for p in want) else 1)' "${plugins[@]}"; then ok=1; b
 done
 
 echo "== 6. snapshots clean-m1-next $(date +%H:%M:%S)"
-for c in c2 c1; do
-  just client-snapshot "$c" clean-m1-next "$branch layer $sha8, $(date +%F)" 2>&1 | tail -1 | cut -c1-120
+for pair in c2:712 c1:711; do
+  c=${pair%%:*}; v=${pair#*:}
+  # a fork train staged before this layer stays named: its "<fork branch> client <sha8>" is what gate-cite's check 3
+  # reads, and this snapshot holds that client still (the 48 train's citation refused on check 3, 2026-11-07, after the
+  # b2bcc92d restage described the clones by the layer alone)
+  kept=$(ssh -o BatchMode=yes root@core.gaussing.tv "qm listsnapshot $v" 2>/dev/null | grep -- '-> clean-m1-next ' \
+           | grep -o -E '[A-Za-z0-9._/-]+ client [0-9a-f]{8}' | head -1 || true)
+  desc="$branch layer $sha8, $(date +%F)"
+  [ -n "$kept" ] && desc="$kept, then $desc"
+  just client-snapshot "$c" clean-m1-next "$desc" 2>&1 | tail -1 | cut -c1-120
 done
 
 curl -fsS -m 15 -X POST "$api/release" >/dev/null 2>&1 || true
