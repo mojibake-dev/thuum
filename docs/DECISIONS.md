@@ -4793,3 +4793,30 @@ Disable, Delete) on a seat that does not own the subject (H-F2: a skipped latent
 stack waiting; if it fails, `nonLatent` stays and the served word corrects a guest's own Disable, a flash declared); and WorldGlobal
 80's streaming seat is elected from what ADR-066 decision 6 has built (cells.rs's stale and dead per player; the pause and load
 flags and OwnerAck are still absent), one seat at an epoch. W3 stands for ScriptPlacement and the standing.
+
+D-W1 and D-C2, a trigger volume's entry is its presser's owner's (ACCEPTED by Eli 23:1x PST 2026-11-06 (07:1xZ 11-07), in numidium's
+session through AskUserQuestion: D-W1 A, D-C2 A, and all of it in playtest 50 with no split; proposed by thuum-fa 23:0x PST the
+same night from playtest 49's breaks). Playtest 49 broke twice on who sees a trigger volume's entry. The spike wall fired a
+different number of times on each screen (numidium's count of 49's logs) while each game had its own body and its own NPCs on the
+plate, so D-S3's decision 1 (every seat fires for what it sees) gives as many firings as there are views; a figure does fire the
+other seat's copy (the tripwire's second reset, docs/verbs/traps.md: c1's own Tripwire fired as Ariadne's figure crossed it), but
+a body and an NPC are each game's own. And the Embershard cobwebs never tore on the guest's screen: the guest's copy of a world
+script is blanked, and the host's copy did not tear for the guest's figure (whether its entry never arrives or the script compares
+its actionRef to the player is the read below). One rule answers both: the entry counts once, on the presser's owner (its own
+player's seat, the simulator of an NPC, the owner of a body), and it travels to the trigger script's owner.
+- D-W1 A, a trap family's trigger (TrapTriggerBase's chain, D-S3's family): the presser's owner fires its own copy and relays the
+  firing to the other seats as the trap's linked activation (RelayedActivation 70, reused), and their copies fire from the relay; a
+  seat ignores a press by an actor it does not own, through the script gate reading OnTriggerEnter's actionRef (the gate's
+  argument, Gum arg 3, an IFunctionArguments, never read until now: upstream's known issue #405). This amends D-S3's decision 1
+  ("a figure on a plate included" becomes the figure's own seat's press, relayed) and its decision 5 (the server relays a family
+  target's linked activation again, from the presser's owner alone). D-S3's decisions 2 to 4 stand: a hit on a player is its own
+  seat's, a single-use result is recorded once, a trap body is simulated by the firing seat.
+- D-C2 A, a world script's trigger (every other class, the cobwebs' FX trigger first): a guest's entry is relayed to the cell's
+  host, whose copy runs the script with the guest's figure as actionRef (rung 3's SendScriptEvent, given the event's argument);
+  its consequences cross as any host script's do (ScriptCall 75). Eli took A over the recommended B (cosmetic trigger scripts run
+  on every seat for its own player under the 11-05 rule), so one copy of the world script runs, the host's. If the script compares
+  its actionRef to Game.GetPlayer(), the relay needs rung 5's acting-player scope for that stack (finding 5); the read says.
+Engine reads first (rule 8), each one question: the gate's OnTriggerEnter argument on a seat for its own player, a puppet NPC, a
+figure and a body (the spike wall's plate and the cobweb trigger); the cobweb script's own code (its pex: does it compare
+to the player). The lever's FURN pull (H-P1) and c1's crash (the corpse lay against a background 3D load) are read beside them;
+all four ride rung 4's train into 50.
