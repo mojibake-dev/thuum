@@ -4820,3 +4820,16 @@ Engine reads first (rule 8), each one question: the gate's OnTriggerEnter argume
 figure and a body (the spike wall's plate and the cobweb trigger); the cobweb script's own code (its pex: does it compare
 to the player). The lever's FURN pull (H-P1) and c1's crash (the corpse lay against a background 3D load) are read beside them;
 all four ride rung 4's train into 50.
+
+D-L1 B, a login inside a cell sends that cell's entry events once (ACCEPTED by Eli 23:2x PST 2026-11-06 (07:2xZ 11-07), in
+numidium's session through AskUserQuestion; proposed by thuum-cf 00:51 PST 2026-11-06 in docs/verbs/traps.md, "The login inside a
+cell"). A seat that logs in inside a cell loads the template save rewritten with the server's cell and position, a save load that
+raises no OnCellLoad and no OnCellAttach for that cell's scripts (HYPOTHESIS H-L1), so playtest 47's pillars stayed in their
+empty state and the Temple's darts never armed until the seat walked out and back in. B over A (a neutral cell first and a move,
+one more loading screen at each login): after the login's load, the grant if there is one and the script records' apply, the seat
+sends OnCellAttach and then OnCellLoad once to each scripted reference of the cell it stands in, through rung 3's SendScriptEvent
+under the platform's mark (the lifecycle events a real load sends, which pass the gate everywhere), skipping a reference the
+engine already sent them to, since a second OnCellLoad can put a pillar's script back on its first side while its graph stays
+turned. The build was planned in docs/research/rung3-script-record-2026-11-06.md section 4 and never built before this answer;
+it rides rung 4's train into playtest 50, proven by x-login-in-cell (v1 reads the defect; its next version claims the fix) and
+its fresh review first. A stays the fallback if the read shows OnLoad or other entry events missing too.
