@@ -1,7 +1,8 @@
 # Playtest 49 (numidium, 2026-11-06 ~19:20 PST): Embershard and the Temple, with scripts that survive a hand-off, on the
 # canonical seats. The build is fork m4-train-48 75c134ad (rung 3's script record 458a6930 merged in, the 48 fixes, the body's
 # rest as a dwell on both ends), pipeline 5592's server image and dist, staged by verb-stage over the layer stage of
-# apocrypha/layer-appearance 6bbdb751 (the SFW body built on CI, Rotfern's Fixes 0.1.1). thuum-fa's checklist is
+# apocrypha/layer-appearance b2bcc92d (the SFW body in SFW's own shape, BodySlide's CBBE Curvy (Outfit) on CI job 19760,
+# restaged over the train's stage 03:58Z to 04:17Z; Rotfern's Fixes 0.1.1). thuum-fa's checklist is
 # docs/private/playtest-49.md (items 1 to 5; apocrypha's layer items 6 and 7; 8 anything else).
 # The world is the canonical one, playtest-canon-chars-20261106T224932Z (rotfern and Ariadne at 200, Ariadne's look from 48
 # and her clothes worn). Embershard Mine 0xb6be6 is untouched there: the wire 0xb6d3f and the platform 0xb6d47 hold no record
@@ -13,7 +14,7 @@
 # (16198, -53980, 1349)), nothing alive within 2,500 units, both seats facing the door 660 units off (heading 164.5; the
 # door at (16375, -54616)), test 2 on 48's tested spot beside test 1.
 id: 49
-build: "fork m4-train-48 75c134ad (rung 3, the 48 fixes, the body's rest) staged by verb-stage under the layer stage of apocrypha/layer-appearance 6bbdb751"
+build: "fork m4-train-48 75c134ad (rung 3, the 48 fixes, the body's rest) staged by verb-stage under the layer stage of apocrypha/layer-appearance b2bcc92d"
 world: playtest-canon-chars-20261106T224932Z   # the canonical seats (rotfern, Ariadne dressed); Embershard untouched
 hold:
   minutes: 150
