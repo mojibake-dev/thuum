@@ -8,8 +8,12 @@ pillar view fix bb24886d, mp racemenu 0498a2f0; SCHEMA_VERSION 39). It makes con
    travels to the trigger script's owner.
 2. The puzzle lever's motion (0xaa8c3, a NoPlayer FURN): the toucher's engine's event on the furniture's own graph crosses to the
    furniture's other listeners, as a rule over furniture.
-3. D-C3, PENDING ELI, planned as option A: the script record's view carries a world object's graph variables beside its last
-   animation event. (This D-C3 is the cobweb view question; docs/private/container-hold-scope.md's D-C3 is another memo's.)
+3. D-C3, planned as option A: the script record's view carries a world object's graph variables beside its last animation
+   event. (This D-C3 is the cobweb view question; docs/private/container-hold-scope.md's D-C3 is another memo's.) ACCEPTED
+   as A by Eli 02:2x PST 2026-11-07 (docs/DECISIONS.md, "D-W2 A and D-C3 A", thuum 2774cfb4) and built as planned on fork
+   m4-train-50 b5e466a2; the PENDING ELI marks below are kept as written and read ACCEPTED.
+4. D-W2 A (Eli, the same answer): under D-W1 the seat whose owned press fired a trap family trigger owns that trigger's own
+   calls during the firing, which cross the seam to every other seat. Section 7, the addendum.
 
 Inputs: the static reads lab/.cache/drafts/fifty/trigger-entry-static.md and lever-furn-static.md (re-read at 00:43 PST, after
 their last edits), their probes x-trigger-entry v1 (sha1 68b5fc15) and x-lever-furn v1 (sha1 3e693ed6), both drafts awaiting
@@ -519,14 +523,18 @@ The scenarios, each its own commit:
 - D-C2 and D-C3 stay at T0 and T2, MECHANISM ONLY, for the next train.
 - Proven by x-trigger-owner v1, x-lever-relay v1, b-lever-relay v1 and the two rewrites. Cost: 2 stage slots.
 
-**Estimate:**
-- Agent work, in parallel: wire 1 half-day; server 2; platform 2; client 2; lab and docs 1. About 2 half-days of wall time, then
-  one Windows head (about 40 minutes on the one runner) and its fresh review.
-- Stage slots: 3, plus 1 for a FIX FIRST (ADR-053):
-  1. The premises (x-trigger-entry v1, x-lever-furn v1) on the current train, the 11-07 morning slot, before P1 and P2 land.
+**Estimate** (updated 2026-11-07 for D-W2 A, section 7; sections 1 to 5 are built on fork m4-train-50 b5e466a2):
+- Agent work, in parallel: wire 1 half-day; server 2; platform 2; client 2; lab and docs 1 (done). D-W2 adds platform 0.5,
+  server 0.5, client 0.25 and lab 0.5: about 1 half-day of wall time, then a second Windows head (about 40 minutes on the
+  one runner) and its fresh review.
+- Stage slots: 4, plus 1 for a FIX FIRST (ADR-053):
+  1. The premises (x-trigger-entry v1, x-lever-furn v1), the 11-07 morning slot, read with the train's switches off
+     (triggerPresser and furnitureAnimation false) or on m4-scripts-4-rows 42f40f84, as the probes' headers ask.
   2. The fix probes on 4c plus 4d.
-  3. The gate set with the rewrites and the two new scenarios.
-- Playtest 50 at the earliest at slot 3, the 11-08 morning slot, with no FIX FIRST.
+  3. D-W2's proof, Eli's condition: playtest 49's verified trap items claimed on both seats (section 7), before any playtest
+     of it.
+  4. The gate set with the rewrites and the three new scenarios (b-lever-relay, b-cobweb-view, b-trap-look).
+- Playtest 50 at the earliest at slot 4, the 11-08 evening slot (it was the morning slot), with no FIX FIRST.
 
 **Layer split** (five agents, the interfaces in section 1 the contract between them, integrated on m4-scripts-4-rows):
 - wire: W1's schema half and WIRE.md's rows.
@@ -543,6 +551,198 @@ The scenarios, each its own commit:
 - W/skymp-wire/crates/wire-schema/src/skymp.rs
 - W/skymp5-client/src/services/services/activationService.ts
 - W/skymp5-client/src/services/services/objectAnimationService.ts
+
+## 7. D-W2 A, the trigger's own calls from its firing seat
+
+Eli, 02:2x PST 2026-11-07 (10:2xZ), verbatim: "D-W2 A (provided it's not breaking what i verified DOES
+work, becuase last test did seem to work) and D-C3 A" (docs/DECISIONS.md:4838-4857 at thuum 2774cfb4). D-W2 A: during a firing
+its presser's owner started, that seat owns the trap family trigger's own calls on itself (a Tripwire's SetMotionType on its rope,
+a PressurePlate's 'Down' and 'Up' and its sound), which cross the seam as action rows from the firing seat and play on every other
+seat. It moves two things of this plan into playtest 50: the rung table's row "The trigger's own Down, Up and sound ... R3,
+declared" becomes R2 from the firing seat, and section 6's risk "The plate on the other screens" (OnFamilyCall's owner, left for
+T4) is built. The condition is the proof's: playtest 49's VERIFIED IN PLAY trap items claimed on both seats in the build's own
+stage before any playtest of it, x-trap-wire-rope among them, and a red keeps D-S3's per-seat firing for that case. Read against
+fork m4-train-50 b5e466a2 (sections 1 to 5 integrated; D-C3 A as built, unchanged).
+
+### 7.1 Reads
+
+1. **The trigger's own calls, per class, and their order** (CONFIRMED-STATIC by pex: the scratchpad's
+   trapread/disasm/tripwire.txt, SoundTrap.txt and PressurePlate.txt, lab/pex.py over the winning copies, 2026-11-04; the
+   census rows in docs/research/trap-census-2026-11-05.md).
+   - Tripwire (USSEP): [Active] onBeginState is SetMotionType(self, 1, True) at op 0, TriggerSound.Play(self) at op 2,
+     Activate(self) at op 5 and PlayAnimation('Trigger') at op 7; [DoNothing] onBeginState is SetDestroyed(True); OnLoad sets
+     motion type 4.
+   - SoundTrap (USSEP; the bone alarms 0x10481e and 0x10481f): [active] onBeginState is GotoState('DoNothing') at op 0,
+     SetMotionType(self, 1, True) at op 1, Activate(self, False) at op 8, TriggerSound.Play(self) at op 11, PlaceAtMe(havokNudge)
+     at op 15, CreateDetectionEvent(lastTriggerRef, soundLevel) at op 23, ApplyHavokImpulse(0, 0, -1, 15) at op 25 and
+     PlayAnimation('trigger01') at op 26. Its [DoNothing] OnTriggerLeave, ops 0 to 11, goes back to 'active': it fires again on
+     a leave.
+   - PressurePlate (vanilla): [active] onBeginState is Activate(self) (op 8 or 12), TriggerSound.Play(self) at op 14 and
+     PlayAnimation('Down') at op 15, with 'Up' at ops 19 and 20 when the count is already 0; [DoNothing] and [active]
+     OnTriggerLeave read GetTriggerObjectCount, then go to 'Inactive' and play 'Up' (ops 6 and 7).
+   - So: (a) two look calls come BEFORE the trigger's own activation (the Tripwire's ops 0 and 2, SoundTrap's op 1), and a server
+     window anchored on the firing's report would refuse them; (b) a family trigger fires on a leave (SoundTrap), so the
+     presser rule must keep judging leaves, and the plan's H-W2 mitigation (pass a non-owned leave) is ruled out; (c) the
+     sound is Sound.Play, a method on the Sound whose subject is the source in its first argument: no row has that shape
+     (natives_table.rs, forty-one rows; NativeRows.inc; the seam's NativeSubject is Self, Arg0 or None, ScriptNatives.cpp:98);
+     (d) CreateDetectionEvent has no row either.
+2. **The seam on the train.**
+   - OnFamilyCall (ScriptNatives.cpp:975-1012) runs a family reference's action row under the action mark and queues nothing,
+     and queues the three kTrapRows as kind "state": SetDestroyed for DestructionStage, SetMotionType and ApplyHavokImpulse for
+     the prop stream, whose trigger rule makes no body of a trigger (propService.ts:1534, trapBodyRole; the 48 rule).
+   - The platform's own call returns at OnCall's step (b) before any family test (ScriptNatives.cpp:1073-1102: a direct call
+     under PlatformCall's Scope, or a latent one with a live VmCallback). A relayed SetMotionType, latent (the client's own call
+     returns a promise, propService.ts:744), is counted " (platform)" there and never queued, never neutralized.
+3. **The server's seam rule on the train** (wire-rules natives.rs).
+   - channel_of (:630) refuses a state row without a record channel (E_SCRIPTCALL_ROW).
+   - The owner step (:887) takes an action row on a world object from the cell's host at the epoch alone (hosts_at_epoch, :687).
+   - OnScriptCall relays the arguments as they came (ActionListener.cpp:4307, ScriptArgOf): no 0x14 is mapped to a figure.
+   - S2 already gathers a trigger's firing facts and judges them (GatherFiringFacts, ActionListener.cpp:2135; trigger_firing_source
+     at :2258, :5182 and :5266): the look rule asks the same judgment.
+4. **The client on the train.**
+   - ScriptCallService.onCalls (scriptCallService.ts:106-163) sends kind "action" as ScriptCall 75 (send, :360-385) and hands
+     SetMotionType and ApplyHavokImpulse to PropService.noteTrapMotion by their names, whatever the kind (:141).
+   - SpSnippetService intercepts PlayAnimation and, since C3, the graph variables; every other relayed method runs by runMethod
+     (spSnippetService.ts:288), under the platform's mark. Its seq is keyed by the snippet's selfId (subjectOf, :167-173).
+5. **What 49 showed, and why a relayed SetMotionType matches it.**
+   - Under D-S3 the watcher's own Tripwire ran its [Active] state, whose first call is SetMotionType(self, 1, true): docs/verbs/
+     traps.md's second-reset read ("the state's first call in Tripwire, USSEP's and vanilla's alike"). The 48 rule left that call
+     to run ("trap trigger b6d3f moved by its own script"), and in 49 the rope snapped on both screens.
+   - D-W2 runs the same native with the same arguments on the same Keyframed copy, an RTT later, from the firing seat's report.
+     Both times the fall is the watcher's own Havok: TrapTripwire01.nif is 13 rigid bodies in two constraint chains and a phantom,
+     with no graph and no controller (traps.md, "A trap's trigger is never a trap body").
+   - What differs: the watcher's script stays in its first state (its press ignored), and its spent flag comes from the record
+     (DestructionStage, D-S3 decision 3). The bone alarm is the same shape (8 rigid bodies on one chain; "each seat rattles its
+     own"), with ApplyHavokImpulse beside it.
+
+### 7.2 Interfaces, fixed up front
+
+**(a) Platform: the look window and what it reports.**
+- The window: TrapFamily::Firing (new, TrapFamily.h, Hosted.h's idiom, cleared at a load).
+  - Note(formId, nowMs) is written by the presser rule's owned branch for a family reference (FridaHooks.cpp:668-693 on the
+    train), on an enter and on a leave alike, so the plate's 'Up' after its owner's leave is inside.
+  - Open(formId, nowMs) is true within LOOK_MS = 10000 (UNMEASURED) of the reference's last note.
+- What it reports: OnFamilyCall gains a first branch. When the switch is on, the window is open for the subject, the calling
+  script's self (CallerRefOf, ScriptNatives.cpp:576) is the subject, and the row is a look row, the call is queued as kind "look"
+  (QueueFromFrame) and still runs here: an action row under the action mark, a motion row as the script wrote it (a trigger is
+  never Followed, so never neutralized).
+- The look rows:
+  - the six action rows;
+  - SetMotionType and ApplyHavokImpulse;
+  - a new row, `{ "Sound", "Play", NativeKind::Action, NativeSubject::Arg0Method, "same" }`. Arg0Method is new: the subject is
+    argument 0 (the source) and the queued call's self is the frame's own (the Sound). The row is look-only: outside a look
+    branch it is counted local and never queued, so a hosted world script's sound stays local as today.
+- Not reported: Activate (D-W1's root crosses), SetDestroyed (DestructionStage, as built), PlaceAtMe (W3), CreateDetectionEvent
+  and every untabled native, and any call on another reference (a linked trap's own calls run on every seat from the relayed
+  root).
+- The switch: `setTriggerLook(bool)` in PuppetApi.cpp beside the presser rule's export, off by default; the client's setting
+  `triggerLook` (default true). It acts only with the presser rule on.
+- The fallback lever: `setTriggerPresserExempt(classes)`, the decision's "keeps D-S3's per-seat firing for that case".
+  - The presser rule passes a non-owned press to a family reference one of whose classes it names: chain-matched without case,
+    the gate's admitted-script walk.
+  - Empty by default; a list, the design law's debt, used only on a red and retired when that case's missing piece lands.
+- Lines: "[verb:traps] <Class.Name> on <id>: its firing seat's look, queued (D-W2) (<n> so far)", the first three and every
+  hundredth; the census's suffix " (look)".
+- NATIVES.md: Sound.Play's line (rule 10; R2, traps).
+
+**(b) Server: the look channel.**
+- The table (natives_table.rs) gains a `look` column:
+  - Look::Also on the six action rows: their own channel first, then, from a seat that does not host the cell, the look channel;
+  - Look::Only on SetMotionType, ApplyHavokImpulse and the new Sound.Play row (forty-two rows; its NativeRows.inc line in the
+    same commit for the parity test).
+- natives.rs gains Subject::Arg0Method (the subject is args[0]; selfId is the method's own self, carried to the relay) and
+  Channel::Look.
+- The owner rule is S1's firing_source over the call's own facts: OnScriptCall gathers GatherFiringFacts for the subject, as S2
+  does for a firing.
+  - Host (at the epoch) or Loader (one of its actors within firing_reach) is accepted.
+  - It is the call's own judgment, never a window anchored on the firing's report, because of read 1(a). The window is the
+    platform's; the server bounds it by the reach and the budget.
+- Relay:
+  - the row's relay native where it has one (PlayAnimationAndWait's twin), else the call itself, to the subject's other
+    listeners;
+  - kept nowhere: no lastAnimation, no graph variable; a firing's look is a one-shot;
+  - with the subject's next seq. Sound.Play's relay goes without a seq: its self is the Sound, shared by many triggers, and
+    SpSnippetService.takeSeq passes a snippet without one.
+- Budget: the reporter's action budget, unchanged (32 at once, then 8 a second, natives.rs:773-776), and a look cap per subject,
+  8 at once then 2 a second (UNMEASURED; each firing read makes 3 or 4 look calls).
+- Refusals, logged by name:
+  - E_SCRIPTCALL_OWNER, kept: neither the cell's host nor a game with the cell loaded, so not its firing source.
+  - E_SCRIPTCALL_FAR, new: a loader none of whose actors stands within firing_reach.
+  - E_SCRIPTCALL_LOOK_RATE, new: the subject's cap spent.
+  - E_SCRIPTCALL_ROW: a look-only row on an actor, a door or a container, or the reporter's own player as Sound.Play's source.
+- R2: that the reporter's press fired the trigger is its word, as D-W1's firing is.
+
+**(c) Client: the report and the watcher's play.**
+- The report: ScriptCallService.onCalls sends kind "look" exactly as an action (ScriptCall 75: selfId the call's self, which for
+  Sound.Play is the Sound; the arguments; the epoch HostService holds). It still hands SetMotionType and ApplyHavokImpulse to
+  PropService.noteTrapMotion by name, whose trigger rule logs its line and makes no body (the 48 rule, unchanged). Line:
+  "trigger look <id> <Class.Name> reported (D-W2)".
+- The watcher plays the relay as it plays any snippet, under the platform's mark:
+  - PlayAnimation through ObjectAnimationService.play, never kept for a family reference (keepsFor);
+  - the motion rows and Sound.Play through runMethod.
+  - The seam counts the play " (platform)" and queues nothing (read 2), so the play is never re-reported, never reaches
+    PropService and is never a prop claim.
+  - Line: "trigger look <id> <Class.Name> played here (seq <n>|no seq) (D-W2)".
+- Settings: `triggerLook` (default true) and `triggerPresserExempt` (default empty). The batch's kind gains "look" in
+  clientListener.ts's typing and Definitions.txt.
+
+**(d) Wire: none.**
+- ScriptCall 75 carries every look call: its selfId is "a method native's self" (docs/WIRE.md's ScriptCall section), the Sound for
+  Sound.Play, whose subject the server takes from its arguments.
+- SpSnippet 30 carries the relay, its seq already optional.
+- No field, no message, no bump: SCHEMA_VERSION stays 40. WIRE.md's ScriptCall section gains the look channel's paragraph.
+
+### 7.3 Commits
+
+| # | Layer | What | Proof |
+| --- | --- | --- | --- |
+| S5 | server | The look column, Sound.Play's row and its NativeRows.inc line, Arg0Method, Channel::Look, the look cap and refusals, OnScriptCall's look facts and relay | T0 ScriptCallLookTest; crate tests and proptests; T2 difftest script-call grows a guest's look and its E_SCRIPTCALL_FAR |
+| P3 | platform | TrapFamily::Firing, the presser rule's note, OnFamilyCall's look branch, Arg0Method, the look-only row, setTriggerLook and setTriggerPresserExempt, Sound.Play's NATIVES.md line | T1 Windows build |
+| C4 | client | The "look" kind's report and line, the watcher's play line, the two settings, the typing | tsc and webpack |
+| L5 | lab | b-trap-look v1 (new scenario: the watcher's look in both dungeons; its own commit, Eli's review) | T3 |
+| D2 | docs | trigger-entry.md's look rows (R2 from the firing seat), WIRE.md's paragraph, NATIVES.md by `just ledger` | review |
+
+That is one more commit each for server, platform, client, lab and docs: 20 commits in all. S5 is server-only and merges on T0
+and T2 (an old client sends no look). P3 and C4 make one more Windows head, with its fresh review (ADR-064 rule A).
+
+### 7.4 The proof: playtest 49's verified items on both seats
+
+| 49's item (docs/verbs/traps.md, "Playtest 49") | Probe | Claimed |
+| --- | --- | --- |
+| The bone alarm from the seat that did not walk into it ("bone chimes work") | x-trap-look-both v1 (new), legs B1 (c2 walks into 0x10481e, c1 watches) and B2 (c1 into 0x10481f, c2 watches) | The walker's four look reports (SetMotionType, ApplyHavokImpulse, Sound.Play, PlayAnimation); the server's four look relays, each "relayed to 1 game(s)"; the watcher's four "played here" lines; the watcher's gate "not this seat's presser, ignored (D-W1)"; no "claims prop 10481e" anywhere; no E_SCRIPTCALL_ refusal. Recorded: each seat's bone nodes before and after (node-rotation toward the root, x-trap-wire-rope's read) and screenshots; a claim on the nodes waits for one run (the new-lab-fact rule) |
+| The tripwire snapping on both screens for the host's own trip | x-trap-wire-rope v2 | v1's premises and its no-claim, no-follow claims kept. c2's "trap b6d3e fired here by b6d3f" kept (now the relay's play). The seven rock grants to c1 kept. v1's claim at :153, c2's "moved by its own script", becomes c2's "trigger look b6d3f ObjectReference.SetMotionType played here"; that rewrite goes to Eli first, since it encodes D-S3's decision 1. c2's rope vector recorded |
+| The tripwire with bandits lured through it | x-trap-wire-lure v1 (new) | npcEnabled true; the bandit 0xb6ff7 (the census's table C) moved by the server's MoveTo across the wire at (2786.6, 3441.2, 8612.3) on its simulator c1 (x-trigger-entry's leg C shape). c1's "OnTriggerEnter to b6d3f by b6ff7: this seat's presser"; c2's "... ignored (D-W1)"; c2's SetMotionType look played; the rocks granted to c1; no claim of b6d3f |
+| The wall killing draugr | x-trap-look-both v1, legs P1 and P2 | P1: 0x380b5 moved onto 0x567f2 on c1; the server's "death report: 380b5 died of" with the wall's evidence (54b15), as 49 read it; c2's 'Down' from the look; c2's wall from the relayed root ("the relay's own play"). P2: c2 on and off the plate; c1 plays 'Down' and then 'Up' from c2's look |
+| The blades killing draugr | x-trap-npc-kill-late v1.3, rerun unchanged | Its claims as they stand: the chain 0xfda45 is a mechanism and the host's, and neither D-W1 nor D-W2 touches its pull or the blades' hits |
+
+All five sit in slot 3 of section 6's estimate, before any playtest of D-W2. A red keeps D-S3 for that case: the lab's settings
+name its class in triggerPresserExempt, and playtest 50 runs the A/B's off side for it, never the regression.
+
+### 7.5 Hypotheses
+
+| id | Claim | Read by |
+| --- | --- | --- |
+| H-LK1 | The relayed SetMotionType(self, 1, true) drops the watcher's rope as its own script's did in 49 (read 5) | x-trap-wire-rope v2: c2's rope vector, the screenshots |
+| H-LK2 | A trigger's look calls fall inside LOOK_MS of the owned trigger event that started them (the Tripwire's and SoundTrap's run in one onBeginState; the plate's 'Up' follows its owner's leave) | x-trap-look-both v1: the look lines' times against the presser rule's lines |
+| H-LK3 | A relayed Sound.Play(source) plays the trigger's sound at the watcher's copy (runMethod on the Sound form) | the watcher's "played here" lines; Eli's ear at T4 |
+| H-LK4 | The watcher's bones, from SetMotionType(1, true) and ApplyHavokImpulse(0, 0, -1, 15), rattle as a seat's own script's did in 48 and 49 | x-trap-look-both v1: the nodes (recorded), the screenshots; T4 |
+
+### 7.6 Risks
+
+- **The watcher's rope and bones are its own Havok:** they land where the watcher's physics puts them, an RTT after the firing
+  seat's (cosmetic copies under Eli's 11-05 rule, as in 49). The firing's consequences (the rocks, the hits, the spent record)
+  keep their single owners (D-S3 decisions 2 to 4).
+- **CreateDetectionEvent is not carried.**
+  - Under D-W1 a guest's bone alarm wakes no NPC the host simulates: SoundTrap's op 23 runs on the firing seat, whose NPCs are
+    puppets. Under D-S3 the host's own copy fired for the guest's figure and woke them.
+  - 49 verified the chimes, not the wake.
+  - Carrying it is one more row: CreateDetectionEvent relayed to the cell's host alone, with its owner argument mapped from 0x14
+    to the reporter's figure, since OnScriptCall relays arguments as they came. Named for Eli's T4 call; not built.
+- **SoundTrap's PlaceAtMe(havokNudge)** stays the firing seat's (W3): the watcher's bones take the impulse instead.
+- **Two owners on one plate:** each seat's plate follows the last look relayed (cosmetic), with H-W2's stuck count.
+- **A long Wait inside a firing:** a look call later than LOOK_MS after its last owned event shows on the firing seat alone.
+- **A late joiner** gets no look: the look is a one-shot. It sees a spent wire as its own OnLoad leaves it, as today.
+- **The exemption lever is a list:** debt, used only on a red.
 
 ## Outside sources
 

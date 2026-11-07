@@ -509,6 +509,47 @@ host's after a teleport out and back.
 The Temple's cobwebs, the other world script 49 broke, and D-C2 A (a guest's trigger entry relayed to the cell's host through rung
 3's SendScriptEvent, given the event's argument) are in traps.md's Playtest 49 section.
 
+## D-C3, the record's view carries a world object's graph variables (ACCEPTED as A by Eli 02:2x PST 2026-11-07, thuum 2774cfb4; built on fork m4-train-50 b5e466a2)
+
+The question (playtest 49; docs/verbs/traps.md "Playtest 49"): a script record's view carries a world object's last animation
+event alone (rung 3's amendment A), and FXtriggerAmbFX tears a web with SetAnimationVariableFloat("fToggleBlend", 1.0) on itself,
+no animation event, so each web's record reads view '' and a seat arriving after a tear, or one whose 3D reloads, gets the web
+whole. (This D-C3 is the cobweb view's; docs/private/container-hold-scope.md's D-C3 is another memo's.) Eli's answer, verbatim:
+"D-W2 A (provided it's not breaking what i verified DOES work, becuase last test did seem to work) and D-C3 A", with the decision's
+rule 6 line: the change form's graphVariables merge to canon only with a committed restart scenario (b-cobweb-view's restart leg).
+The build plan docs/research/fifty-fixes-2026-11-07.md's option A, as built (S4 439571f4, W1's graph_vars, C3 d25ce708 and
+1149fd31):
+
+- Server (S4): the three SetAnimationVariable rows (natives_table.rs:28-30 at the train's base 1acb834f, Keep::Nothing there; 39-41
+  at fork m4-train-50 4bd07f33) take a new Keep::Variable, still relayed as actions, which keeps the call's (name, value) on its
+  subject with the call's sequence (ScriptCallVerdict's keep_var); MpChangeFormREFR gains graphVariables, at most 16 per reference
+  (a new name past that replaces the oldest), saved under the key "graphVariables" (an absent key reads as none and formVersion is
+  kept, the fork's migration for a new field); BuildScriptStateApply copies the reference's current variables into the served apply,
+  so a variable set after the record's take is served too (the plan's read 7: an owner reports a record only at a stack's end that
+  moved the scripts' hash, and a stack whose only act is the set takes no new record). Graph variables are served only when the
+  reference has a script record: BuildScriptStateApply returns false without one (its first test, the change form's scriptState),
+  and both serves, behind a create word and ahead of a grant, ask for a record first, so a variable kept on a reference no owner
+  ever recorded is relayed live by its call and saved, but never served to a late seat or a new host.
+- Wire (W1, with SCHEMA_VERSION 40): ScriptStateApply 77 gains graph_vars, each {name, k (3 int, 4 float, 5 bool, ScriptVar's
+  kinds), its one value, seq}, cap 16 (UNMEASURED); check_script_state_apply refuses an empty, NUL-carrying or repeated name, a k
+  outside 3 to 5 or a payload not its k's, a seq of 0 (E_VAL_RANGE) and a float that is not finite (E_VAL_NONFINITE).
+- Client (C3): ScriptStateService sets each served variable whose seq is above this seat's kept seq for (reference, name), through
+  the platform's own setAnimationVariable calls, before the view's replay; ObjectAnimationService keeps the variables beside the
+  last animation and sets them again at each 3D load; SpSnippetService routes a relayed SetAnimationVariable call with a seq on a
+  game-file reference through the same keep.
+- The hypotheses: H-C3a, a SetAnimationVariableFloat("fToggleBlend", 1.0) on a guest's untouched web shows it torn (HYPOTHESIS;
+  x-trigger-entry v1's W2 screenshots, then x-cobweb-view v1); H-C3b, a graph variable goes with its 3D and needs setting again at
+  the next load (HYPOTHESIS; x-cobweb-view v1's reload leg).
+- The proof: x-cobweb-view v1 (lab/.cache/drafts/fifty: a seat that missed a tear sees the record's variable set when it arrives
+  and again after it leaves and comes back) and b-cobweb-view v1's legs 2 and 3 (the late arrival, then rule 6's restart for the
+  "graphVariables" key). The value a seat's engine holds is recorded, not claimed, until lab-api grows a view of the graph-vars step;
+  the claims read the server's serve line (its variable count) and C3's two lines below.
+- The built lines the probes count (x-cobweb-view v1.1, b-cobweb-view v1.1): the serve's "... view '<e>', <n> graph variable(s)"
+  (PartOne.cpp), C3's "[verb:scripts] script state <id>: <n> graph variable(s), <set> set, <waiting> kept for its 3D, <current>
+  current" at a record's apply, and its "[verb:scripts] object animation <id> <name> <value> re-applied at a 3D load (graph
+  variable, seq <s>)" at a waiting variable's 3D load; x-cobweb-view's own proposed line was not the one built, so v1.1 counts
+  these.
+
 ## Status
 
 - [x] doc complete, inventory listed with a disposition per row, rung declared

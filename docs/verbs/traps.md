@@ -1234,7 +1234,10 @@ flips it". 0xaa8c3 is a FURN (LeverPushAnimatingNoPlayer, above). The server's l
 other game(s)" and "ProcessActivate aa8c3 - occupant is already this object (activationSource = ff000000). Blocking because it's
 FURN", ff000001's activations at 06:11:36 and 06:11:39Z the same; the host's "aa8c3 activates 2ad43" and "2ad49" (the gate)
 relayed at 06:11:17Z. The pull's linked activations crossed; nothing carries the occupant's furniture pull or the lever's arm to
-the other seat. Next: the read x-lever-furn (rule 8), then the fix, for playtest 50.
+the other seat. Next: the read x-lever-furn (rule 8), then the fix, for playtest 50. H-P1 moves to docs/verbs/furniture.md
+(2026-11-07): the toucher's engine's event on the furniture's own graph, reported by the use's owner as ObjectAnimation 71 and
+played on every other copy ("Playtest 50's fixes" below); built on fork m4-train-50, MECHANISM ONLY until x-lever-furn and
+x-lever-relay read green and Eli sees the lever move on both screens.
 
 The Temple's wall and blades: VERIFIED IN PLAY that they kill draugr. Eli: "the wall and blades were for sure killing draugr. it
 just looks like the timing". With Ariadne hosting 0x371de, the server took the deaths of 0x380b5, 0x380b9 and 0x380b3 on her
@@ -1269,3 +1272,34 @@ cell" (the fresh review's note 5): it acts for an interior login cell alone (an 
 actors (their scripts' entry events stay the engine's own). The client setting loginCellEvents false turns it off. The proof is
 x-login-in-cell v2.1 (lab/.cache/drafts/fifty, 7b6203d0): pillar one's script on its first side before the press, after a login
 inside the Temple.
+
+### Playtest 50's fixes: where they live (2026-11-07 PST, the r50 lab layer)
+
+The build plan is docs/research/fifty-fixes-2026-11-07.md (against fork m4-scripts-4-rows 42f40f84; the fifty train is 1acb834f
+plus its 4c and 4d layers). Two of its fixes are verbs of their own now; this doc keeps the traps' history.
+
+- The trigger entry rule, D-W1 A and D-C2 A as one rule (a trigger volume's entry counts once, on its presser's owner, and travels
+  to the trigger script's owner): docs/verbs/trigger-entry.md. It amends D-S3's decisions 1 and 5 above (a figure's press on a
+  plate becomes its own seat's, relayed; the server relays a family target's root again, from the presser's owner alone);
+  decisions 2 to 4 stand. Its probes are x-trigger-owner v1 and x-cobweb-relay v1 (lab/.cache/drafts/fifty, by path), after the
+  premise read x-trigger-entry v1. The gate set's plate legs change with it: b-object-anim v6 and b-bleak-traps v4, drafts in the
+  same folder with every changed claim old and new in their headers, to Eli first (ADR-064 decision 4), one at a time.
+- H-P1, the NoPlayer furniture ("The puzzle lever's two faults", "The lever's release read" and Playtest 49's lever above): CLOSED
+  into docs/verbs/furniture.md. Its read is x-lever-furn v1, its fix probe x-lever-relay v1, its T3 the draft b-lever-relay v1.
+- D-C3, the record's view carrying a world object's graph variables (a late joiner's torn web): ACCEPTED by Eli (thuum 2774cfb4)
+  and built on fork m4-train-50 b5e466a2; papyrus-events.md's "D-C3" section, its probe x-cobweb-view v1.1 and the restart legs of
+  the draft b-cobweb-view v1.1.
+- D-W2 A (Eli, thuum 2774cfb4): under D-W1 the firing seat owns the trap family trigger's own calls during its firing (the
+  tripwire's rope, the plate's Down and Up, the bone alarm's clatter), which play on every other seat: trigger-entry.md's "D-W2 A"
+  section, with Eli's condition ("provided it's not breaking what i verified DOES work") and its regression list, playtest 49's
+  verified traps claimed on both seats before any playtest of it (the bone alarm, the tripwire for the host's own trip and for a
+  lured NPC, the wall and the blades killing draugr).
+
+Two consequences for this doc's own traps, both since settled. A watcher's tripwire: under D-W1 alone the watcher's gate ignores
+the tripper's figure and the relay plays the linker, not the wire, so the watcher's own Tripwire never runs its Active state and its
+rope would hang taut (playtest 48's "ariadne didn't see it go"); D-W2 A carries the firing seat's SetMotionType to the watcher, and
+x-trigger-owner v2, x-trap-wire-rope v2 and x-trap-wire-lure v1 claim each watcher's rope dropping (HYPOTHESIS H-LK1 until their
+runs). The watcher's record still ends "applied after <ms> ms, this seat's own copy unfired", which x-trap-wire-follower v1.1
+claimed at 0 under D-S3: by design now, so that probe leaves the stage. And b-bleak-traps' leg E (the puzzle lever's darts): the
+train's client review (fork 118b92af, note 1) kept D-S3 point 5's caster test in the root rule's step 3, so the darts stay the
+cell host's to report and leg E holds as v3 wrote it.
