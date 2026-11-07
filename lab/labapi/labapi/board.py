@@ -74,6 +74,13 @@ class StepBoard:
         # a quest-stage step's answers by quest form id, merged across steps: {stage, running, done: stage (decimal)
         # -> done}, or None for a form that is no quest in that game (c.quest(id), docs/verbs/quest-stage.md)
         self._quests: dict[str, dict[int, dict[str, Any] | None]] = {}
+        # an alias step's answers by the (quest, alias) pair it named: the reference the seat's game holds in that alias and
+        # the alias's name, or the error a failed read answered, which replaces the pair's earlier answer as a script-state
+        # error does (c.alias(quest, alias), ADR-068 rung 4's AliasFill)
+        self._aliases: dict[str, dict[tuple[int, int], dict[str, Any]]] = {}
+        # a factions step's answers by the actor it named: {formId, ranks, members, crime} or the error, which replaces the
+        # actor's earlier answer (c.factions(id), ADR-068 rung 4's standing)
+        self._factions: dict[str, dict[int, dict[str, Any]]] = {}
         # a figure-spells step's answer: {formId, name, base, added, equipped, extra} (ADR-046)
         self._figure_spells: dict[str, dict[str, Any]] = {}
         # a log-count step's answers: the regex -> how many lines of the seat's Skyrim Platform log matched
@@ -174,6 +181,22 @@ class StepBoard:
                 except (TypeError, ValueError):
                     continue
                 self._quests.setdefault(step.client, {})[key] = v if isinstance(v, dict) else None
+        if step.action in ("alias", "factions"):
+            # every answer takes its key's place, an error one and a step that failed outright alike, so the accessor
+            # raises on a failed read instead of reading the seat's last good answer (script-state's rule)
+            data = body.get("data") if isinstance(body.get("data"), dict) else {"error": str(body.get("error") or "the step failed")}
+            args = step.args or {}
+            try:
+                if step.action == "alias":
+                    pair = (int(args.get("quest") or data.get("quest")), int(args.get("alias", data.get("alias"))))
+                    if pair[0]:
+                        self._aliases.setdefault(step.client, {})[pair] = data
+                else:
+                    key = int(args.get("formId") or data.get("formId"))
+                    if key:
+                        self._factions.setdefault(step.client, {})[key] = data
+            except (TypeError, ValueError):
+                pass
         if step.action == "poisons" and isinstance(body.get("data"), dict):
             self._poisons[step.client] = body["data"]
         if step.action == "figure-spells" and isinstance(body.get("data"), dict) and "error" not in body["data"]:
@@ -309,6 +332,12 @@ class StepBoard:
     def quests(self, observer: str) -> dict[int, dict[str, Any] | None] | None:
         return self._quests.get(observer)
 
+    def alias(self, observer: str, quest: int, alias: int) -> dict[str, Any] | None:
+        return (self._aliases.get(observer) or {}).get((int(quest), int(alias)))
+
+    def factions(self, observer: str, form_id: int) -> dict[str, Any] | None:
+        return (self._factions.get(observer) or {}).get(int(form_id))
+
     def poisons(self, observer: str) -> dict[str, Any] | None:
         return self._poisons.get(observer)
 
@@ -359,6 +388,8 @@ class StepBoard:
         self._npc_states.clear()
         self._script_states.clear()
         self._quests.clear()
+        self._aliases.clear()
+        self._factions.clear()
         self._figure_spells.clear()
         self._log_counts.clear()
         self._poisons.clear()

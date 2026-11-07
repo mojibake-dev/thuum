@@ -25,6 +25,15 @@ the lab can grep (E_ASSERT_*).
                                                      that seat's game's quest: its current stage, whether stage n is
                                                      done (n among the step's stages), whether it runs; from its last
                                                      quest-stage {quests, stages} step naming it (ADR-056)
+  <client>.alias(<quest>, <alias>).refr | .name    that seat's game's reference alias, from its last alias {quest,
+                                                     alias} step naming the pair: the reference it holds (0 for none)
+                                                     and the alias's name (ADR-068 rung 4's AliasFill); a last step
+                                                     that answered an error is a data error, never an older read
+  <client>.factions(<id>).rank(<faction>) | .member(<faction>) | .crime
+                                                     an actor's standing in that seat's game, from its last factions
+                                                     {formId, factions} step naming it (ADR-068 rung 4's standing):
+                                                     the engine's own rank and its membership for a faction the step
+                                                     named, by form id or FormDesc, and its crime faction (0 for none)
   <client>.refs_near().runtime_of(<base id>)         references of that base with a runtime id (a copy), from refs-near
   <client>.watched_id(<id>).turns | .headingAtStop   the watched actor's net rotation in turns and its last heading
     | .turned | .endX | .endY | .endZ                 the same rotation signed, in degrees, and where it stood at the
@@ -46,7 +55,27 @@ the lab can grep (E_ASSERT_*).
                                                      the owner's latest script record of the reference
                                                      (ADR-068 rung 3): its FNV-1a 32, the wall-clock ms of the
                                                      owner's report, the object's sequence then (0 without one)
-  snapshot("<name>").<field>                         a server fact a `server: snapshot {name, of}` step
+  server.ref(<id>).isDisabled | .isDeleted | .refStateSeq
+                                                     the reference's ref state as the server holds it (ADR-068
+                                                     rung 4's RefState): disabled, deleted, and the object's
+                                                     sequence when its owner's Enable, Disable or Delete was
+                                                     recorded (0 without one); a gamemode or a server without
+                                                     the fields is missing data, never a pass
+  server.world_globals().streamer | .epoch | .value("<hex id>:<plugin>")
+                                                     the world's globals as the server records them (ADR-068
+                                                     rung 4's WorldGlobal): the run's client that streams them
+                                                     ("" when none or a player outside the run), the streamer's
+                                                     epoch, and one global's recorded value by its FormDesc or
+                                                     form id (a global the server holds no value of is a data
+                                                     error)
+  server.alias_fill(<quest>, <alias>).refr | .created | .container | .added
+                                                     the server's record of a quest's alias (ADR-068 rung 4's
+                                                     AliasFill): the reference it holds (0 when cleared or never
+                                                     filled by one), the item the server's read of the quest
+                                                     creates in it and the container it goes in (0 for none),
+                                                     whether that item was added; a pair with no record is a
+                                                     data error
+  snapshot("<name>").<field>                        a server fact a `server: snapshot {name, of}` step
                                                      kept earlier in the run (the freeze's evidence)
   <client>.state.gameHour | .gameDay | .gameMonth | .gameYear | .gameDaysPassed | .timeScale
                                                      that client's time globals, from its dump-state
@@ -187,6 +216,8 @@ class ServerFacade(Protocol):
     def follow(self, actor_id: int) -> dict[str, Any] | None: ...
     def fate(self, actor_id: int) -> dict[str, Any] | None: ...
     def stream(self, client: str) -> dict[str, Any] | None: ...
+    def world_globals(self) -> dict[str, Any] | None: ...
+    def alias_fills(self) -> dict[str, Any] | None: ...
 
 
 class ViewsFacade(Protocol):
@@ -203,6 +234,8 @@ class ViewsFacade(Protocol):
     def npc_state(self, observer: str, form_id: int) -> dict[str, Any] | None: ...
     def script_state(self, observer: str, form_id: int) -> dict[str, Any] | None: ...
     def quests(self, observer: str) -> dict[int, dict[str, Any] | None] | None: ...
+    def alias(self, observer: str, quest: int, alias: int) -> dict[str, Any] | None: ...
+    def factions(self, observer: str, form_id: int) -> dict[str, Any] | None: ...
     def poisons(self, observer: str) -> dict[str, Any] | None: ...
     def figure_spells(self, observer: str) -> dict[str, Any] | None: ...
     def log_count(self, observer: str, pattern: str) -> int | None: ...
@@ -923,6 +956,107 @@ class RefView:
     scriptStateFnv: int | None = None
     scriptStateAt: int | None = None
     scriptStateSeq: int | None = None
+    # the reference's ref state as the server holds it (ADR-068 rung 4's RefState; labState ref's three fields, the server's
+    # isDisabled, isDeleted and refStateSeq properties): disabled, deleted, and the object's sequence when its owner's Enable,
+    # Disable or Delete was recorded (0 without one, a game file's state); None from a lab gamemode or a server without them,
+    # so a claim on a build before the rung is missing data, never a pass
+    isDisabled: bool | None = None
+    isDeleted: bool | None = None
+    refStateSeq: int | None = None
+
+
+@dataclass(frozen=True)
+class AliasView:
+    """c.alias(quest, alias): a quest's reference alias as that seat's own game held it at its last `alias {quest, alias}` step
+    naming the pair (lab-driver's Quest.GetAlias, ReferenceAlias.GetReference and Alias.GetName: ADR-068 rung 4's AliasFill,
+    docs/research/rung4-state-rows-2026-11-07.md 1(e)): refr the reference it holds, 0 for none; name the alias's own name."""
+
+    refr: int
+    name: str | None = None
+
+
+class FactionsView:
+    """c.factions(id): an actor's standing as that seat's own game held it at its last `factions {formId, factions}` step
+    naming it (lab-driver's Actor.GetFactionRank, IsInFaction and GetCrimeFaction: ADR-068 rung 4's standing rows).
+    rank(f) is the engine's own number for a faction the step named and member(f) whether the actor is in it, so a claim
+    never leans on what rank the engine answers for an actor outside a faction; a faction the step did not name, or one
+    that is no faction in that game, is a data error. crime is the crime faction's form id, 0 for none."""
+
+    def __init__(self, client: str, form_id: int, data: dict[str, Any], resolver: Any):
+        self._client = client
+        self._id = int(form_id)
+        self._data = data
+        self._resolve = resolver
+        crime = data.get("crime")
+        self.crime = crime if isinstance(crime, int) and not isinstance(crime, bool) else None
+
+    def _read(self, field: str, spec: Any, kind: type) -> Any:
+        try:
+            faction = int(self._resolve(spec)) if isinstance(spec, str) else int(spec)
+        except KeyError as e:
+            raise AssertionData(str(e)) from e
+        table = self._data.get(field)
+        if not isinstance(table, dict) or str(faction) not in table:
+            raise AssertionData(f"{self._client}'s factions step for {self._id:#x} did not read faction {faction:#x}")
+        v = table[str(faction)]
+        if v is None:
+            raise AssertionData(f"{self._client}'s game holds no faction {faction:#x}")
+        if not isinstance(v, kind) or (kind is int and isinstance(v, bool)):
+            raise AssertionData(f"{self._client}'s factions step for {self._id:#x} has a malformed {field} of {faction:#x}: {v!r}")
+        return v
+
+    def rank(self, spec: Any) -> int:
+        return self._read("ranks", spec, int)
+
+    def member(self, spec: Any) -> bool:
+        return self._read("members", spec, bool)
+
+
+@dataclass(frozen=True)
+class AliasFillView:
+    """server.alias_fill(quest, alias): the server's record of a quest's alias (labState kind aliasFills, the world journal's
+    aliasFills: ADR-068 rung 4's AliasFill, both halves). refr is the reference the alias holds, 0 when cleared or never
+    filled by a reference (a created-only row); created the item the server's read of the quest's ALCO creates for it and
+    container the container it goes in, 0 for none; added whether the server has added that item (the journal's mark)."""
+
+    refr: int
+    created: int
+    container: int
+    added: bool
+
+
+class WorldGlobalsView:
+    """server.world_globals(): the world's globals as the server records them (labState kind worldGlobals: ADR-068 rung 4's
+    WorldGlobal). streamer is the run's client whose player streams the GLOB array's diff ("" when none or a player outside
+    the run), actorId that player's actor (0 when none, as HostView's) and epoch the streamer's epoch (0 before the first
+    election); value(desc) the recorded value of one global, by
+    its FormDesc ("<hex id>:<plugin>", c.globalValue's form) or a form id, both sides resolved through the run's load order,
+    so a server that keeps FormDescs and one that answers form ids read alike; a global the server holds no value of is a
+    data error, never the record's default."""
+
+    def __init__(self, streamer: str, epoch: int, actor_id: int, entries: tuple[tuple[Any, float], ...], resolver: Any):
+        self.streamer = streamer
+        self.epoch = epoch
+        self.actorId = actor_id
+        self._entries = entries
+        self._resolve = resolver
+
+    def value(self, spec: Any) -> float:
+        try:
+            want = int(self._resolve(spec)) if isinstance(spec, str) else int(spec)
+        except KeyError as e:
+            raise AssertionData(str(e)) from e
+        unresolved: list[str] = []
+        for g, v in self._entries:
+            try:
+                gid = int(self._resolve(g)) if isinstance(g, str) else int(g)
+            except KeyError:
+                unresolved.append(str(g))
+                continue
+            if gid == want:
+                return float(v)
+        extra = f" ({len(unresolved)} entries did not resolve: {', '.join(unresolved[:3])})" if unresolved else ""
+        raise AssertionData(f"the server records no world value of {spec}{extra}")
 
 
 def _euler_xyz(a: tuple[float, float, float]) -> list[list[float]]:
@@ -1398,6 +1532,15 @@ class _ServerRef:
         self._clients = list(clients or [])
         self._views = views
 
+    def _client_of(self, actor_id: int) -> str:
+        """The run's client whose player's actor (the actor kind's actorId) is that one, "" when none is."""
+        if actor_id:
+            for c in self._clients:
+                a = self._f.actor(c)
+                if a and int(a.get("actorId") or 0) == actor_id:
+                    return c
+        return ""
+
     def log_count(self, pattern: str) -> int:
         """server.log_count("<regex>"): the lines of the run's server log matching the regex at its last
         `server: log-count {pattern}` step of that same pattern (x-host-quit: the leave's own line)."""
@@ -1451,14 +1594,7 @@ class _ServerRef:
         if not d or not d.get("found"):
             raise AssertionData(f"server has no host table to read {cell:#x} from (no cell hosting)")
         holder = int(d.get("actorId") or 0)
-        client = ""
-        if holder:
-            for c in self._clients:
-                a = self._f.actor(c)
-                if a and int(a.get("actorId") or 0) == holder:
-                    client = c
-                    break
-        return HostView(bool(d.get("hosted")), client, int(d.get("epoch") or 0), holder)
+        return HostView(bool(d.get("hosted")), self._client_of(holder), int(d.get("epoch") or 0), holder)
 
     def fate(self, spec) -> FateView:
         actor_id = self._f.base_id(spec) if isinstance(spec, str) else int(spec)
@@ -1487,14 +1623,7 @@ class _ServerRef:
         if not d or not d.get("found"):
             raise AssertionData(f"server has no follow table to read {actor_id:#x} from (no npc-handoff follow)")
         holder = int(d.get("player") or 0)
-        client = ""
-        if holder:
-            for c in self._clients:
-                a = self._f.actor(c)
-                if a and int(a.get("actorId") or 0) == holder:
-                    client = c
-                    break
-        return FollowView(bool(d.get("following")), client, int(d.get("cell") or 0), holder)
+        return FollowView(bool(d.get("following")), self._client_of(holder), int(d.get("cell") or 0), holder)
 
     def ref(self, spec) -> RefView:
         actor_id = self._f.base_id(spec) if isinstance(spec, str) else int(spec)
@@ -1515,9 +1644,55 @@ class _ServerRef:
                            changeFormAt=_opt_int(d.get("changeFormAt")),
                            scriptStateFnv=_opt_int(d.get("scriptStateFnv")),
                            scriptStateAt=_opt_int(d.get("scriptStateAt")),
-                           scriptStateSeq=_opt_int(d.get("scriptStateSeq")))
+                           scriptStateSeq=_opt_int(d.get("scriptStateSeq")),
+                           isDisabled=_opt_bool(d.get("isDisabled")),
+                           isDeleted=_opt_bool(d.get("isDeleted")),
+                           refStateSeq=_opt_int(d.get("refStateSeq")))
         except (KeyError, TypeError, ValueError) as e:
             raise AssertionData(f"{actor_id:#x}'s record lacks {e}") from e
+
+    def world_globals(self) -> WorldGlobalsView:
+        """server.world_globals(): the world's globals as the server records them (labState kind worldGlobals, ADR-068 rung
+        4's WorldGlobal), read when the assert runs: the streamer as the run's client, its epoch, and the recorded values."""
+        fn = getattr(self._f, "world_globals", None)
+        d = fn() if fn else None
+        if not d or not d.get("found"):
+            raise AssertionData("server has no world globals to read (no WorldGlobal: a server before ADR-068 rung 4)")
+        try:
+            entries = tuple((e["global"], float(e["value"])) for e in d.get("entries") or [] if isinstance(e, dict))
+            holder = int(d.get("streamer") or 0)
+            return WorldGlobalsView(self._client_of(holder), int(d.get("epoch") or 0), holder, entries, self._f.base_id)
+        except (KeyError, TypeError, ValueError) as e:
+            raise AssertionData(f"the server's world globals lack {e}") from e
+
+    def alias_fill(self, quest, alias: int) -> AliasFillView:
+        """server.alias_fill(quest, alias): the server's record of one quest alias (labState kind aliasFills, ADR-068 rung 4's
+        AliasFill), the quest by form id or FormDesc, read when the assert runs. Each row's quest resolves through the run's
+        load order as the claim's does, so a server that keeps FormDescs and one that answers form ids read alike."""
+        try:
+            want = self._f.base_id(quest) if isinstance(quest, str) else int(quest)
+        except KeyError as e:
+            raise AssertionData(str(e)) from e
+        fn = getattr(self._f, "alias_fills", None)
+        d = fn() if fn else None
+        if not d or not d.get("found"):
+            raise AssertionData("server has no alias fills to read (no AliasFill: a server before ADR-068 rung 4)")
+        def form(v: Any) -> int:
+            return int(self._f.base_id(v)) if isinstance(v, str) else int(v or 0)
+
+        for row in d.get("fills") or []:
+            if not isinstance(row, dict):
+                continue
+            try:
+                if form(row["quest"]) != want or int(row["alias"]) != int(alias):
+                    continue
+            except (KeyError, TypeError, ValueError):
+                continue
+            try:
+                return AliasFillView(form(row.get("refr")), form(row.get("created")), form(row.get("container")), bool(row.get("added")))
+            except (KeyError, TypeError, ValueError) as e:
+                raise AssertionData(f"the server's fill of {want:#x} alias {int(alias)} is malformed: {e}") from e
+        raise AssertionData(f"the server records no fill of {want:#x} alias {int(alias)}")
 
     def spell(self, spec) -> SpellView:
         form_id = self._f.base_id(spec) if isinstance(spec, str) else int(spec)
@@ -2055,6 +2230,39 @@ class _ClientRef:
             raise AssertionData(f"{self.name}'s game holds no quest {int(form_id):#x}")
         return QuestView(self.name, int(form_id), q)
 
+    def alias(self, quest, alias: int) -> AliasView:
+        """c.alias(quest, alias): that quest's reference alias in that client's game at its last `alias {quest, alias}` step
+        naming the pair (the quest by form id or FormDesc). No step, or a last step that answered an error (no such quest or
+        alias in that game, a location alias, a step that failed), is a data error, never a pass."""
+        try:
+            q = self._server.base_id(quest) if isinstance(quest, str) else int(quest)
+        except KeyError as e:
+            raise AssertionData(str(e)) from e
+        fn = getattr(self._views, "alias", None)
+        data = fn(self.name, q, int(alias)) if fn else None
+        label = f"{self.name}'s alias step for {q:#x} alias {int(alias)}"
+        if not isinstance(data, dict):
+            raise AssertionData(f"{self.name} has not reported an alias step for {q:#x} alias {int(alias)}")
+        if "error" in data:
+            raise AssertionData(f"{label} answered an error: {str(data['error'])[:200]}")
+        refr = data.get("refr")
+        if isinstance(refr, bool) or not isinstance(refr, int):
+            raise AssertionData(f"{label} read no reference: {data!r:.200}")
+        name = data.get("name")
+        return AliasView(refr, name if isinstance(name, str) else None)
+
+    def factions(self, form_id: int) -> FactionsView:
+        """c.factions(id): that actor's standing in that client's game at its last `factions {formId, factions}` step naming
+        it. No step, or a last step that answered an error (no such actor in that game, a step that failed), is a data
+        error, never a pass."""
+        fn = getattr(self._views, "factions", None)
+        data = fn(self.name, int(form_id)) if fn else None
+        if not isinstance(data, dict):
+            raise AssertionData(f"{self.name} has not reported a factions step for {int(form_id):#x}")
+        if "error" in data:
+            raise AssertionData(f"{self.name}'s last factions step for {int(form_id):#x} answered an error: {str(data['error'])[:200]}")
+        return FactionsView(self.name, int(form_id), data, self._server.base_id)
+
     def refs_near(self) -> RefsNearView:
         """c.refs_near(): what stood near that client's player (or its figure
         of the other player, with the step's {from: other}) at its last
@@ -2317,7 +2525,12 @@ _ATTRS = {
     SpellView: {"magnitude", "overTime", "conditional", "effects"},
     HostView: {"hosted", "client", "epoch", "actorId"},
     RefView: {"x", "y", "z", "cell", "isDead", "healthPercentage", "magickaPercentage", "staminaPercentage", "worn",
-              "bodyAtRest", "bodyRestAt", "changeFormFnv", "changeFormAt", "scriptStateFnv", "scriptStateAt", "scriptStateSeq"},
+              "bodyAtRest", "bodyRestAt", "changeFormFnv", "changeFormAt", "scriptStateFnv", "scriptStateAt", "scriptStateSeq",
+              "isDisabled", "isDeleted", "refStateSeq"},
+    AliasView: {"refr", "name"},
+    FactionsView: {"crime"},
+    AliasFillView: {"refr", "created", "container", "added"},
+    WorldGlobalsView: {"streamer", "epoch", "actorId"},
     FigureSpellsView: {"count", "extra", "base"},
     FollowView: {"following", "client", "cell", "actorId"},
     FateView: {"fated", "baseId", "level", "raceId", "worn"},
@@ -2337,7 +2550,7 @@ _NUMBER_METHODS = {
 }
 # Methods that take a form id: c.marker(0x00016223)
 _ID_METHODS = {
-    _ClientRef: {"marker", "known", "favorite", "held", "projectile", "poison", "watched_id", "npc_state", "quest"},
+    _ClientRef: {"marker", "known", "favorite", "held", "projectile", "poison", "watched_id", "npc_state", "quest", "factions"},
     RefsNearView: {"has", "distance", "runtime_of", "pos", "disabled", "listed", "pos_of", "disabled_of"},
 }
 # Methods that take a form id as a number or a string: c2.watched(c1).launched("0x3f9eb")
@@ -2346,6 +2559,13 @@ _FORM_SPEC_METHODS = {
     SelfWatchView: {"launched"},
     _ServerRef: {"spell", "host", "ref", "follow", "fate", "inventory"},  # inventory: a client name or a ref
     _ClientRef: {"inventory"},  # a ref: the container as that seat's own game holds it
+    FactionsView: {"rank", "member"},  # a faction by form id or FormDesc
+    WorldGlobalsView: {"value"},  # a global by its FormDesc ("<hex id>:<plugin>") or form id
+}
+# Methods that take a quest (a form id or a FormDesc) and one of its alias ids: c1.alias(0x39645, 11), server.alias_fill(...)
+_QUEST_ALIAS_METHODS = {
+    _ServerRef: {"alias_fill"},
+    _ClientRef: {"alias"},
 }
 # Methods that take a form id and a string, then optionally a second: c2.node_rotation(0xaa8cb, "Pillar01", "before")
 _ID_STRING_METHODS = {
@@ -2370,14 +2590,17 @@ _STRING_NUMBER_METHODS = {
 }
 # Methods that take no argument: server.time()
 _NULLARY = {
-    _ServerRef: {"time"},
+    _ServerRef: {"time", "world_globals"},
     _ClientRef: {"level", "node_scale", "morph", "head_parts", "watched_self", "av", "refs_near", "figure_spells", "weather"},
     QuestView: {"stage", "running"},
 }
 _METHODS = {
-    _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref", "follow", "fate", "log_count", "stream"},
-    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "inventory", "globalValue", "projectile", "poison", "skill", "level", "weather", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near", "node_rotation", "script_state"},
+    _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref", "follow", "fate", "log_count", "stream",
+                 "world_globals", "alias_fill"},
+    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "inventory", "globalValue", "projectile", "poison", "skill", "level", "weather", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near", "node_rotation", "script_state", "alias", "factions"},
     NodeRotationView: {"angle_to", "local_angle_to"},
+    FactionsView: {"rank", "member"},
+    WorldGlobalsView: {"value"},
     ScriptStateView: {"script", "variable"},
     InventoryView: {"count"},
     RefsNearView: {"count", "has", "distance", "runtime_of", "pos", "disabled", "listed", "pos_of", "disabled_of"},
@@ -2535,6 +2758,11 @@ class Evaluator:
                 if node.func.attr in _PAIR_METHODS.get(type(obj), set()):
                     if len(args) != 2 or not isinstance(args[0], SelfWatchView) or not isinstance(args[1], str):
                         raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes a client's watched_self() and a string")
+                    return self._read(node, getattr(obj, node.func.attr)(args[0], args[1]))
+                if node.func.attr in _QUEST_ALIAS_METHODS.get(type(obj), set()):
+                    if (len(args) != 2 or isinstance(args[0], bool) or not isinstance(args[0], (int, str))
+                            or isinstance(args[1], bool) or not isinstance(args[1], int)):
+                        raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes a quest (0x39645 or \"0x39645\") and an alias id")
                     return self._read(node, getattr(obj, node.func.attr)(args[0], args[1]))
                 if node.func.attr in _FORM_SPEC_METHODS.get(type(obj), set()):
                     if len(args) != 1 or isinstance(args[0], bool) or not isinstance(args[0], (int, str)):
