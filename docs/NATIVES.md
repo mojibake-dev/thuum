@@ -1101,7 +1101,7 @@ Status meanings:
 | `ObjectReference.PlaySyncedAnimationAndWaitSS` (method, latent) | missing |  |  |  |
 | `ObjectReference.PlaySyncedAnimationSS` (method) | missing |  |  |  |
 | `ObjectReference.PlayTerrainEffect` (method) | missing |  |  |  |
-| `ObjectReference.ProcessTrapHit` (method) | missing | R1 | a client native, never the server VM's; the seam's table row (ADR-068 D-S3, fork m4-scripts-2b-traps): its self is the hit actor, owned on that actor's own seat alone (the player's, an NPC's simulator), so a non-owner's copy skips it (scriptNonOwnerSkip nonLatent) and a hit counts once, judged by what the hit seat saw | traps |
+| `ObjectReference.ProcessTrapHit` (method) | missing | R1 on the hit's own seat; R2 its report as evidence | a client native, never the server VM's; the seam's table row (ADR-068 D-S3, fork m4-scripts-2b-traps): its self is the hit actor, owned on that actor's own seat alone (the player's, an NPC's simulator), so a non-owner's copy skips it (scriptNonOwnerSkip nonLatent) and a hit counts once, judged by what the hit seat saw; since the 48 train (fork m4-48-trapevidence cfe92340 and 93b634ce, on m4-train-48) an NPC's simulator reports each hit as ScriptCall 75 and the server keeps it as that NPC's death evidence for the trap window (wire-rules natives Keep::Evidence, relayed to no seat; the trap named never checked against the body's place, R2 unvalidated); a player's own hits are never sent | traps, npc-fate |
 | `ObjectReference.PushActorAway` (method) | missing |  |  |  |
 | `ObjectReference.RemoveAllInventoryEventFilters` (method) | missing |  |  |  |
 | `ObjectReference.RemoveAllItems` (method) | implemented |  | [skymp5-server/cpp/server_guest_lib/script_classes/PapyrusObjectReference.cpp:1053] |  |

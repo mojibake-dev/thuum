@@ -3321,3 +3321,68 @@ evidence counted a server teleport's height change as a drop (observed: the acce
 which samples the death report compared is unread), a cause mislabel with no wrong death in it; and 380b5's body, teleported onto
 the blade's origin at the floor's height, fell through the world after its death ("body 380b5 at rest at (6256, -7493, -6882)"), a
 lab artifact of a server teleport into geometry.
+
+## Trap hits as death evidence (16:29 PST 2026-11-06 (00:29Z 11-07), thuum-cf; playtest 48's blade kill; fork m4-48-trapevidence cfe92340, 93b634ce and 30d890c9, on m4-train-48)
+
+Playtest 48's fourth reset (Bleak Falls Temple, rotfern hosting 371de) read the trap window in play. The wall took 380b5, 380b3 and
+380b7 (21:57:01 to 21:57:27Z) and the blades 380bb and 380b8 (21:59:24 and 21:59:25Z), each death accepted on the trap's own
+evidence, so 47's E_DEATH_UNCHECKED is gone. Then E_DEATH_UNCHECKED on draugr 800a6 at 22:00:54Z, 106 s after the box 0x86018
+fired, while the blades still swung: dead on the host's screen, alive in the record and on the guest's, and the host's copy then
+streamed it back at full health. The trap notes are the trigger's firings, kept 30 s (kDeathTrapWindow), and a blade swings long
+after its trigger's note, so the server's evidence ran out while the cause was still in play.
+
+The fix takes the host's own word that a trap hit the NPC. ProcessTrapHit joins the platform's batched state rows (its self the hit
+actor, owned on its simulator alone, ADR-068 D-S3 point 2; only counted before this), and ScriptCallService sends each hit on an NPC
+this seat simulates as the seam's ScriptCall (docs/WIRE.md, the ScriptCall section), once an actor a second (UNMEASURED) and never
+for the player's own actor, at the update and, from DeathReportService, right before any death report. The server keeps the call as
+evidence (wire-rules natives Keep::Evidence: an actor the reporter simulates now, never its own player, no epoch, no sequence,
+relayed to nobody), and OnScriptCall notes the hit with the trap its first argument names (NoteTrapHit, beside the trap notes: 30
+s, at most 256 kept). OnActorDeath reads it for that actor as an unnamed cause's last evidence, after the place's notes and the
+reanimation's end (30d890c9, the train review's note 1, applied as written), so every death today's rules already explain keeps its
+own line, and a death the hit alone explains logs "a trap's evidence beside the body (<trap> hit it <n> ms before, its host's
+word)". The window now runs from the hit, whenever the trigger fired.
+
+Order: the server has to read the hit before the death it explains. The platform raises a pending batch on the update's queue ahead
+of a death's event (ScriptNatives::FlushAheadOnUpdate in the TESDeathEvent sink), so the hit reaches JS before deathStart in the
+same update whatever the frame's order of tick and update, and DeathReportService sends a pending hit right before the death report
+(HYPOTHESIS either way, unread). The same flush moves a script's Kill behind a death (cause 3's evidence, rung 2's state row) ahead
+of deathStart too, so the client's death report finds it in that update's batch however the frame was ordered (HYPOTHESIS, the same
+read).
+
+Rule 5: R2, unvalidated. The server records the simulator's word that a named trap hit an actor it simulates; the trap is never
+checked against the body's place and the hit's numbers are never judged. Under ADR-063 that is the owner's call: the simulator owns
+the NPC's death, and the server checks consistency (the reporter simulating the actor, the window) only. T0: unit/TrapKillTest.cpp
+(the box's notes 40 s old, the host's hit report taken through OnScriptCall and the death on it; a hit on another draugr and one 40
+s old refused, one 10 s old taken; a linked report's note keeping its line beside a hit; a guest's report and the reporter's own
+player refused; a reanimated body with a blade's hit 5 s old logging the reanimation's end and no hit line), with wire-rules and
+wire-bridge cases. Probe: x-trap-npc-kill-late v1 (lab/.cache/probes, 4e156b7a) asks whether the server takes the host's death
+report on its report of the trap's hit when the blades kill an NPC after the trigger's notes lapsed, so the NPC dies on the other
+seat too. Built, not yet staged: cfe92340 and 93b634ce are in the train's pushed head (833d01b3, pipeline 5582 green); 30d890c9
+rides its next push.
+
+## The loot strip (16:29 PST 2026-11-06 (00:29Z 11-07), thuum-cf; playtest 48's item 4; fork m4-48-loot 243e39c0, 6be381de and 91ac31a7, on m4-train-48)
+
+Eli: "when i activate the person their armor is unequipped in their inventory stripping them naked lol. humorous but a bug";
+"ariadne looted the stripped bandit" (c2, the cell's host from 20:24:35Z after a hand-off). The body opens: b6fdb at 20:27:33 and
+20:27:54Z, b6fe4 at 20:27:42 and 20:27:50Z, b6dbb from 20:28:28 to 20:31:38Z. Two writers put a body's armor back unworn:
+- H2, the server's take: TakeItemEvent removed the inventory row and left the equipment's worn entry, so FateOf kept naming the
+  taken piece and a seat's reconcile added it back. 48's world keeps such entries: b6fdb's shield 12eb6 is worn in its record and
+  gone from its inventory after the 20:27Z opens.
+- H1, the client's apply: addItemEx's removal goes with no extra list, so the engine may take the worn stack beside a loose copy.
+And c1's engine wore pieces the record lacked (13911 on b6fe4, 10594f on b6dbb), so after the next host's lay the reconcile took
+such a worn piece and added the record's own unworn.
+
+The fixes: a take from a body drops the record's worn entry it empties, an unworn copy leaving first, and a body's fate names a worn
+piece only while its inventory holds it (243e39c0; R0, the server's inventory transfer); a dead copy's reconcile moves its unworn
+stacks first and equips the record's worn armor it holds unworn, through the new platform export dressBody (6be381de: EquipObject
+with the queue off and applied now, armor alone); and the client's apply of a dead body's list calls dressBody after its diff, so the
+record's worn armor the body holds unworn is worn again instead of left loose, each removal of an item the body wears said in the
+log (91ac31a7). T0: NpcFateTest's take case (a helmet of two keeps the worn one, the worn boots' entry leaves with them, a stale worn
+entry left out of a later player's fate). HYPOTHESIS until x-body-open-worn v2.1 (lab/.cache/probes, fe5c0317) reads it: when a
+seat opens a body whose copy holds a loose copy of a piece it wears beyond the record's count, the body stays dressed in the
+record's worn set on both seats, at the host's open and at the watcher's. Its v1 could not fail on the bug (a NO-GO at its fresh
+review) and was restaged as v2, then v2.1.
+
+The limit: dressBody equips armor alone, so a worn weapon the body holds loose stays loose. Open, the root: why c1's engine dressed
+b6fe4 and b6dbb in pieces the record never held is unread; the fix makes the record's worn armor win on a body and explains nothing
+of the engine's extra pieces. A later probe reads the reconcile's dress path on a body the engine dressed itself.
