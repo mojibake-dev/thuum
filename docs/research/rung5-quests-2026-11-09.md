@@ -617,3 +617,47 @@ D-W3: an entry held at a cell's load (risk c), asked only after x-trigger-preloa
 - W/skyrim-platform/src/platform_se/skyrim_platform/CallNative.cpp
 - W/skyrim-platform/src/platform_se/skyrim_platform/FridaHooks.cpp
 - W/skymp-wire/crates/wire-schema/src/skymp.rs
+
+## 7. The static censuses' results (2026-11-09, read-only on sky-srv)
+
+Run by a read-only agent over the five masters and `Skyrim - Misc.bsa` (14,026 scripts, the four DLCs inside), each form's
+winning override taken, through lab/esm.py, lab/pex.py and lab/tools/bsa-extract.py as modules. Tools and the derived key table
+are kept in lab/.cache/census/r5/ (gitignored) until rung 5's lab layer (L1) commits ctda-vars.py and quest-census.py after a
+review. The masters' formats are UESP's "Skyrim Mod:Mod File Format" pages (CTDA Field, VMAD Field, QUST, DIAL, SCEN, TES4) and
+"Compiled Script File Format". Static tracing: typed method calls followed to a fixpoint, no casts to unrelated types, no
+callers outside vanilla; the lab's mods, USSEP and Survival's archive unread.
+
+- H-CV1 (decides D-V1): 770 condition-read keys (736 by 629, 34 by 630; CommonLibSSE-NG TESCondition.h:762-763), read by 5,667
+  INFO and SCEN conditions. CIS2 holds the variable name alone (`::pTG01SmashUrn_var`), so the script is the form's VMAD script
+  whose chain declares it. Writers by origin (a quest-script method only TIF fragments call counts as TIF): 458 keys have a TIF
+  writer and 310 only TIF writers (by the writing line alone, 395 and 295); 101 keys are written only where every seat runs (QF
+  or the quest's own script); 504 have no QF or quest-script writer; 14 no vanilla writer. H-CV1 FAILS: one streaming seat would
+  miss the talker's writes. By section 6's rule D-V1 is B (every seat reports a listed variable it changes, the latest write
+  winning per key with the server's sequence). Examples, only-TIF: BYOHRelationshipAdoption 0x030042b4 ::numchildrenadopted_var
+  (52 conditions), MG01 0x1f251 ::niryaskillvar_var (17), DialogueRiften 0x368d8 ::pmjollopinion_var (16), TG02 0x2154e
+  ::ptg02dia_var (14), DB01 0x1ea50 ::grelodthreatened_var (11).
+- A Lovely Letter (0x74a83): stages 310 (Fragment_22) and 320 (Fragment_24) each call `Game.GetPlayer().AddItem(Gold, 25,
+  False)` (Gold a MiscObject property, 0xf) and SetRelationshipRank on the letter's sender (Faendal, Sven), so x-acting-frame's N
+  is 310 or 320 and its gold claim reads 25. Its 19 INFOs carry no 629 or 630 condition: b-quest-stage-two-seats' variable claim
+  needs another key. No Riverwood quest has a QF-only key (MS13's ::camillaescort_var is SF and TIF, ::scenetriggers_var SF; the
+  Lucan's Dry Goods scene 0x26e4c's ::sale_var TIF); 84 keys are QF-only, none in Riverwood (TGRShell's ::ptgrvexrunning_var
+  read by 231 INFOs). Under D-V1 B a TIF-written key is a valid claim too (the talker's seat reports it).
+- Risk (c), the three trigger scripts: defaultActivateSelf (0x3809c, 0x383f9, 0x38098's base) reacts to the player only on these
+  placements (playerOnly's default True; the VMAD sets only the two factions and packages); MS13ArvelTriggerScript (0x4940d)
+  player only, starting the scene ArvelShout 0x49410; MS13TriggerArvelRunSceneScript (0x38098) reacts to Arvel alone (MS13 alias
+  1) and sets pMS13QuestScript.ArvelCombat = 1, read by no condition (its script readers unchecked). So read 10's ignored entries
+  (the ambush draugr 0x380b7, 0x380b9, 0x383ec, 0x383f7 and Arvel 0x39655) are harmless but one: Arvel inside 0x38098 at the
+  host's load, whose held or dropped entry would lose ArvelCombat. D-W3's stakes are that case and its kind until
+  x-trigger-preload v1 reads H-TP2.
+- Finding 5's sizes: over 2,898 distinct scripts (2,396 quest-attached with QF and alias scripts, 502 world-trigger), (i) 1,280
+  call Game.GetPlayer; (ii) 14 hold an Actor or ObjectReference property valued 0x14 (2 quest, 12 trigger); (iii) 12 of those
+  compare it. (ii)/(i) is 0.011: the declared PlayerRef miss is about one script in ninety, and the GetPlayer swap covers the
+  rest. 647 scripts compare a GetPlayer result or a 0x14 property (cmp_eq; `!=` compiles to cmp_eq then not), which the swap
+  keeps true for the acting figure. 146 quest scripts hold a ReferenceAlias property to a player-filled alias (113 aliases by
+  ALFR 0x14, 33 by ALUA 0x7): fix (a) is their path.
+- H-QS2 HOLDS statically: PlayerVampireQuest 0xeafd5 has no alias, and all 21 vanilla call sites (16 scripts) of
+  PlayerVampireQuestScript's state natives (SetRace, RemoveSpell, AddSpell, EquipSpell, the faction and attack calls) pass
+  Game.GetPlayer(). H-QS1 holds under the rule's ALUA clause, not ALFR: the werewolf quest's alias 0 `Player` is filled by ALUA
+  0x7 (the player's actor base) with no ALFR, so QuestScopeTest reads ALUA 0x7 as the player. PlayerWerewolfChangeScript's actor
+  natives all target the player but Feed()'s `BleedingFXSpell.Cast(victim, victim)`. Both QUST winners are Dawnguard.esm
+  overrides agreeing with Skyrim.esm's aliases and scripts.
