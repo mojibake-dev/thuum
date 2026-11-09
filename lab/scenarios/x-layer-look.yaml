@@ -1,9 +1,9 @@
-# x-layer-look v1.1 (apocrypha, 2026-11-09): the appearance layer's reads that playtest 49 left unread
+# x-layer-look v1.2 (apocrypha, 2026-11-09): the appearance layer's reads that playtest 49 left unread
 # (docs/private/playtest-49.md items 6 and 7), taken on the clean world's lab characters and never on Eli's.
 # numidium asked for it as a probe by path, with the seats on a cold rollback at both ends, so nothing a
 # race menu close writes reaches the canonical world's profiles 1 and 2.
 #
-# The layer under test is apocrypha/layer-appearance c3d387b8, laid as b2bcc92d: CBBE SFW Edition's body
+# The layer under test is apocrypha/layer-appearance c407d1fa, laid as b2bcc92d: CBBE SFW Edition's body
 # and outfits, built with morph files in SFW's own shape "CBBE Curvy (Outfit)" (CI job 19760, docs/MODS.md).
 # The clean world's two lab characters are men, so c1 becomes a woman of its own race through the console's
 # sexchange, then undresses through unequipall.
@@ -11,15 +11,20 @@
 # Read 1, SFW's body and not a bare one: the NeverNude body's two underwear shapes, "Bra" and "Panty", are in
 # c1's own 3D. A missing node reads 0 (NetImmerse.GetNodeScale). The same holds for c2's figure of c1 once the
 # race menu's close has sent the look, the path a-racemenu reads.
-# Read 2, the seams with VanillaSSEHi at 0: screenshots only, because a person judges a seam. c2 looks at c1
-# from 250 units and from 90. Then VanillaSSEHi goes to 0.21, Ariadne's old value from playtest 48, for
-# comparison. That value opens the wrists by design: SFW's hand morph files carry no such slider (declared
-# in 49). It goes back to 0 before read 3.
+# Read 2, the seams with VanillaSSEHi at 0: photographs only, because a person judges a seam. Then VanillaSSEHi
+# goes to 0.21, Ariadne's old value from playtest 48, for comparison. That value opens the wrists by design:
+# SFW's hand morph files carry no such slider (declared in 49). It goes back to 0 before read 3.
 # Read 3, the Shrouded Robes (DBClothesRobes 0xcf8a0, DBClothesHandWraps 0xcf8a9, DBClothesShoes 0xcf89f,
 # rotfern's set) on that woman: the robe's shape "DBbody3rdPerson" is drawn on c1 and on c2's figure of c1,
-# and screenshots show the fit. rotfern's own fit is x-rotfern-robe's read, on a copy of the canonical world
-# where c1 is rotfern. v1 put her look on c1 through set-appearance rotfern-eli-2, but that preset stores a
-# runtime race id with 10-07's plugin index baked in (numidium, 2026-11-09), so it would not give rotfern's race.
+# and photographs show the fit. rotfern's own fit is x-rotfern-robe's read.
+#
+# The photos, as of v1.2. v1.1's run 20261109-125738 was at night, and its 90-unit shots framed only the head:
+# the first-person view does not take look's pitch, as the driver's look-at note warns. So the run's clock
+# starts at 13:00, and the framing comes from distance and eye height, not pitch. c2 shoots from 250 units
+# standing (the whole figure), from 170 standing (head to hips, the wrists at the hands' level), and from 90
+# sneaking (Left Ctrl, scan code 29, lowers the eye to the waist; the neck sits near the frame's top and the
+# wrists near its middle). The sneaking shot turns c2 15 degrees right, so c1 stands left of the crosshair and
+# no "Talk" prompt covers it. Every photo is c2's view of c1, so it also shows the look as the other seat draws it.
 #
 # Not read here: the four hairs behind playtest 48's RaceMenu crash (HairKhajiitFemale05, HairFemaleDremora01
 # and 02, HairLineFemaleNord04). They are still in RaceMenu's list; the layer only dropped the remake's meshes
@@ -33,14 +38,15 @@ clients: [c1, c2]
 server:
   snapshot: clean
   netem: null
-timeout_s: 900
+  gameHour: 13.0
+timeout_s: 1200
 steps:
   - c1: connect
   - c2: connect
   - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}
   - c2: teleport {cell: lab-spawn, x: 0, y: -250, z: 0}
   - wait: 5
-  # c1 faces south, toward c2, so c2's photos show its front
+  # c1 faces south, toward c2
   - c1: look {heading: 180, pitch: 0}
   # read 1: c1 becomes a woman and undresses
   - c1: console {text: "player.sexchange"}
@@ -58,24 +64,32 @@ steps:
   - wait: 6
   - c1: close-menu {name: "RaceSex Menu"}
   - wait: 8
-  - c2: look {heading: 0, pitch: 5}
+  - c2: look {heading: 0, pitch: 0}
   - c2: node-scale {other: true, node: Bra}
   - assert:
       - c2.node_scale_of(c1) > 0
-  # read 2: the seams at VanillaSSEHi 0, full figure and close
+  # read 2: the seams at VanillaSSEHi 0, at 250 and 170 standing, then at 90 sneaking
+  - c2: screenshot
+  - c2: teleport {cell: lab-spawn, x: 0, y: -170, z: 0}
+  - wait: 4
+  - c2: look {heading: 0, pitch: 0}
   - c2: screenshot
   - c2: teleport {cell: lab-spawn, x: 0, y: -90, z: 0}
   - wait: 4
-  - c2: look {heading: 0, pitch: 12}
+  - c2: look {heading: 15, pitch: 0}
+  - c2: tap-key {code: 29}
+  - wait: 3
   - c2: screenshot
-  # VanillaSSEHi 0.21 for comparison: the wrists open by design
+  # VanillaSSEHi 0.21 for comparison, the same close shot: the wrists open by design
   - c1: body-morph {name: VanillaSSEHi, value: 0.21}
   - c1: open-race-menu
   - wait: 6
   - c1: close-menu {name: "RaceSex Menu"}
   - wait: 8
-  - c2: look {heading: 0, pitch: 12}
+  - c2: look {heading: 15, pitch: 0}
   - c2: screenshot
+  - c2: tap-key {code: 29}
+  - wait: 2
   - c1: body-morph {name: VanillaSSEHi, value: 0}
   - c1: node-scale {morph: VanillaSSEHi}
   - assert:
@@ -101,10 +115,17 @@ steps:
       - c2.node_scale_of(c1) > 0
   - c2: teleport {cell: lab-spawn, x: 0, y: -250, z: 0}
   - wait: 4
-  - c2: look {heading: 0, pitch: 5}
+  - c2: look {heading: 0, pitch: 0}
+  - c2: screenshot
+  - c2: teleport {cell: lab-spawn, x: 0, y: -170, z: 0}
+  - wait: 4
+  - c2: look {heading: 0, pitch: 0}
   - c2: screenshot
   - c2: teleport {cell: lab-spawn, x: 0, y: -90, z: 0}
   - wait: 4
-  - c2: look {heading: 0, pitch: 12}
+  - c2: look {heading: 15, pitch: 0}
+  - c2: tap-key {code: 29}
+  - wait: 3
   - c2: screenshot
+  - c2: tap-key {code: 29}
 artifacts: [server.log, c1.log, c2.log, screenshots, world-diff]

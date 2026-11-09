@@ -1,4 +1,4 @@
-# x-rotfern-robe v1 (apocrypha, 2026-11-09): rotfern's Shrouded Robes under the appearance layer, the read
+# x-rotfern-robe v1.1 (apocrypha, 2026-11-09): rotfern's Shrouded Robes under the appearance layer, the read
 # playtest 49's item 6 left unread for her. It is x-layer-look's read 3 on rotfern herself.
 #
 # Since the layer swapped CBBE 2.0.3 for CBBE SFW Edition, the robes' female meshes come from SFW's outfit
@@ -12,8 +12,11 @@
 # morph: she carries none, by design, and the read only checks that the morph under "thuum" is 0.
 # The robes, DBClothesRobes 0xcf8a0, DBClothesHandWraps 0xcf8a9 and DBClothesShoes 0xcf89f, are given and
 # equipped, in case the world's rotfern wears something else. Their shape "DBbody3rdPerson" must be drawn on
-# her own game and on c2's figure of her. A missing node reads 0. c2 photographs her from 250 units and from
-# 90 for a person to judge the fit.
+# her own game and on c2's figure of her. A missing node reads 0. c2 photographs her for a person to judge the fit.
+# v1.1: v1's run 20261109-130150 was at night, and its 90-unit shot framed her head only, because she is
+# shorter than the eye of a standing adult and the first-person view does not take look's pitch. So the clock
+# starts at 13:00 and c2 shoots from 250 units standing, then from 150 and from 90 sneaking (Left Ctrl, scan
+# code 29, the eye at her waist). Those two shots turn c2 15 degrees right, so no "Talk" prompt covers her.
 id: x-rotfern-robe
 milestone: M4
 game: 1.6.1170
@@ -21,6 +24,7 @@ clients: [c1, c2]
 server:
   snapshot: playtest-canon-chars-20261107T064547Z
   netem: null
+  gameHour: 13.0
 timeout_s: 600
 steps:
   - c1: connect
@@ -44,13 +48,24 @@ steps:
   - c1: node-scale {node: DBbody3rdPerson}
   - assert:
       - c1.node_scale() > 0
-  - c2: look {heading: 0, pitch: 5}
+  - c2: look {heading: 0, pitch: 0}
   - c2: node-scale {other: true, node: DBbody3rdPerson}
   - assert:
       - c2.node_scale_of(c1) > 0
   - c2: screenshot
+  - c2: teleport {cell: lab-spawn, x: 0, y: -150, z: 0}
+  - wait: 4
+  - c2: look {heading: 15, pitch: 0}
+  - c2: tap-key {code: 29}
+  - wait: 3
+  - c2: screenshot
+  - c2: tap-key {code: 29}
+  - wait: 2
   - c2: teleport {cell: lab-spawn, x: 0, y: -90, z: 0}
   - wait: 4
-  - c2: look {heading: 0, pitch: 8}
+  - c2: look {heading: 15, pitch: 0}
+  - c2: tap-key {code: 29}
+  - wait: 3
   - c2: screenshot
+  - c2: tap-key {code: 29}
 artifacts: [server.log, c1.log, c2.log, screenshots, world-diff]
