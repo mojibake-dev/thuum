@@ -223,6 +223,8 @@ answered "Unknown command".
 | Enable | R0 | admin | yes | references (as Disable: what the server made, and actors) |
 | mp list (SkyMP's mp, TES3MP's /list) | R0 | player | yes | the server's players online, by number |
 | mp tp, mp tpto (TES3MP's /teleport, /teleportto) | R0 | moderator | yes | position: the server's teleport, wherever the two players are |
+| mp host | R0 | player | yes (2026-11-06, fork f70bc16e) | the server's cells table: who hosts the cell the caller stands in (Eli in playtest 48) |
+| mp racemenu | R0 | player | yes (2026-11-07, fork 0498a2f0 on m4-train-50) | the caller's own race menu opened by the server's word (PartOne::SetRaceMenuOpen); closing it records the look (racemenu-sync; Eli in playtest 49), MECHANISM ONLY until Eli runs it |
 | mp, any other (SkyMP's own: mp disable) | R0 | admin | yes | references |
 | MoveTo, SetPos, SetAngle | R0 | moderator | yes | position: an actor through the server's teleport, any other reference through the Papyrus natives |
 | CenterOnCell (COC) | R1 | admin (Eli, 2026-10-08) | yes | position: the caller's own game (Debug.CenterOnCell by SpSnippet), the server's movement rule taking that one jump into the named cell; the map-markers verb then judges discoveries where the player really is |

@@ -1,0 +1,213 @@
+# GREEN 20261109-104037-b-lever-relay on the 50 build (fork m4-train-50 ce0d2664), by path from lab/.cache/drafts/fifty (sha1
+# 9af23363). The lever's furniture rule (playtest 49's lever, H-P1; docs/verbs/furniture.md): the puller's engine's
+# Lever_PlayerPush on the lever's own graph, reported by the use's owner as ObjectAnimation 71 and played on the watcher, both
+# ways. Built from green parts (ADR-064 amendment B): x-lever-furn v1.1 (20261107-210822) and x-lever-relay v1.2
+# (20261109-093824); reviewed as a draft (50's probe review), v1.2 a step change (x-lever-relay v1.2's waits). Its own commit
+# (rule 13).
+# b-lever-relay v1.2 DRAFT (r50 lab layer, 2026-11-09): x-lever-relay v1.2's step change, the same here (drafts, sha1 ea4aea47,
+# GREEN 20261109-093824): each leg waits 0.75 s after its until, so every arm sample after a pull (A1, A2, W1A to W3A and A3; B1,
+# B2, W1B to W3B and B3) lands mid-swing; x-lever-relay v1.1's red (20261107-232906) was samples at rest. A step change alone:
+# every claim is v1.1's, byte for byte. Steps and claims are x-lever-relay v1.2's verbatim again, the id alone changed, so its
+# green run is this scenario's part (ADR-064 amendment B).
+# b-lever-relay v1.1 DRAFT (r50 lab layer, 2026-11-07): x-lever-relay v1.1's changes, the same here (the furniture switch premise;
+# the patterns checked against fork m4-train-50 b5e466a2). v1 follows.
+# b-lever-relay v1 DRAFT (r50 lab layer, 2026-11-07; L3 of docs/research/fifty-fixes-2026-11-07.md section 2): furniture.md's T3
+# scenario (CLAUDE.md rule 3), a puzzle lever's pull shown on the other screen. A draft, kept outside lab/scenarios: a scenario
+# commits alone and after its review (rule 13, ADR-009), and ADR-064 amendment B assembles a gate scenario only from parts already
+# green, so this waits for x-lever-relay v1 (this folder) to read green on the fifty train, then its own fresh review, then its own
+# commit. It is x-lever-relay v1's steps and claims verbatim, the id alone changed, so its promotion is that probe's green run
+# cited here and nothing else; a step or claim the probe's review changes is changed here the same way before the commit.
+# BUILD: the fifty train (fork m4-scripts-4-rows 1acb834f plus the 4c and 4d layers) on the server and both seats.
+# ONE QUESTION: when one seat pulls the Temple's puzzle lever 0xaa8c3, does the other seat's copy of the lever move? Both pullers,
+# the host's pull watched by the guest and the guest's watched by the host. Claims as x-lever-relay v1's header lists them: the
+# server's user line for each pull's event (relayed to 1, not kept), each watcher's arm off its own pose before the pull by more
+# than 5 degrees over its three samples, each watcher's relayed play and no report from it, each puller's own arm as the control,
+# no E_OBJANIM_ line; premises: c1 hosts, god mode on both, each pull reached the server with the lever free, each puller's
+# platform noted its own event. Not here, later versions after a probe reads each: a late joiner's lever at rest (the plan's read
+# 8: a furniture's event is kept nowhere, which rests on H-LF7), an NPC's use of a FURN with a graph (H-F2), a FURN without the
+# NoPlayer keyword (a chair: F4, parked behind H-LF3). No restart leg: the rule changes no saved state (rule 6 does not apply).
+# Assertions are evaluated by lab-api only (ADR-009).
+id: b-lever-relay
+milestone: M4
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: false
+  gameHour: 7.9
+timeout_s: 900
+artifacts: [server.log, c1.log, c2.log, c1-console.log, c2-console.log, screenshots]
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  # c1 first into the Temple's puzzle room by a real cell load (the host), then c2 (the guest)
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 5300, y: -1200, z: -768, rot: [0, 0, 315]}
+  - until: {within: 30, every: 1, expect: ['server.host(0x371de).client == "c1"']}
+  - c2: teleport {cell: "371de:Skyrim.esm", x: 5400, y: -900, z: -768, rot: [0, 0, 270]}
+  - wait: 10
+  # each seat's arm before leg A, two steps a read (the second returns the first's poll), and the graph's IsReady
+  - c1: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "restA"}
+  - c2: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "restA"}
+  - wait: 1
+  - c1: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "restA"}
+  - c2: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "restA"}
+  - c1: graph-vars {formId: 0xaa8c3, bools: ["IsReady"]}
+  - c2: graph-vars {formId: 0xaa8c3, bools: ["IsReady"]}
+  - c1: screenshot
+  - c2: screenshot
+  - c1: log-count {pattern: "setFurnitureAnimation.true.: a furniture.s own graph event crosses as furnitureAnimation"}
+  - c2: log-count {pattern: "setFurnitureAnimation.true.: a furniture.s own graph event crosses as furnitureAnimation"}
+  # A's baselines: the puller's P2 line, the watcher's plays and reports, the puller's reports
+  - c1: log-count {pattern: "aa8c3 .[A-Za-z_]+. to its own graph .taken"}
+  - server: snapshot {name: c1Furn0A, of: 'c1.log_count("aa8c3 .[A-Za-z_]+. to its own graph .taken")'}
+  - c2: log-count {pattern: "object animation aa8c3 [A-Za-z_]+ played"}
+  - server: snapshot {name: c2Played0A, of: 'c2.log_count("object animation aa8c3 [A-Za-z_]+ played")'}
+  - c2: log-count {pattern: "object animation aa8c3 [A-Za-z_]+ reported"}
+  - server: snapshot {name: c2Rep0A, of: 'c2.log_count("object animation aa8c3 [A-Za-z_]+ reported")'}
+
+  # A. the host pulls, the guest watches. The reply leaves the server with the until's line; the puller's default-only
+  # activation follows it by about RTT plus 0.1 s (remoteServer.ts:299) and its event reaches the watcher one relay hop
+  # later, so the puller's samples are A1 and A2 (x-lever-furn's) and the watcher's W1A, W2A and W3A, about 0.2, 1.0 and
+  # 1.8 s after the reply
+  - c1: activate {refId: 0xaa8c3}
+  - until: {within: 10, every: 0.25, expect: ['server.log_count("ProcessActivate aa8c3 - no occupant .activationSource = ff000000.") >= 1']}
+  # v1.2: x-lever-furn v1.1's 0.75 s wait: A1 lands about 0.9 s into the push (the arm's first excursion, 88.7 degrees off rest
+  # at about +0.91 s in v1.1's run) and A2 about 1.95 s in (its second, 43.8 at about +1.95 s); the watcher's W1A, W2A and W3A
+  # about 0.9, 1.95 and 2.8 s into its own play
+  - wait: 0.75
+  - c1: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "A1"}
+  - c2: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "W1A"}
+  - wait: 0.5
+  - c1: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "A1"}
+  - c2: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "W1A"}
+  - c1: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "A2"}
+  - c2: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "W2A"}
+  - wait: 0.5
+  - c1: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "A2"}
+  - c2: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "W2A"}
+  - c2: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "W3A"}
+  - wait: 0.5
+  - c2: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "W3A"}
+  - c1: screenshot
+  - c2: screenshot
+  # recorded (H-LF7): both arms about 4 s on, against each seat's own pose before the pull
+  - wait: 2
+  - c1: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "A3"}
+  - c2: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "A3"}
+  - wait: 0.5
+  - c1: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "A3"}
+  - c2: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "A3"}
+  - c1: graph-vars {formId: 0xaa8c3, bools: ["IsReady"]}
+  - c2: graph-vars {formId: 0xaa8c3, bools: ["IsReady"]}
+  # the host's closing activation releases the lever (the NoPlayer furniture seats nobody: the 15 s give-up)
+  - until: {within: 25, every: 1, expect: ['c1.log_count("onOpenContainerMesage - sent ActivateMessage") >= 1']}
+  - wait: 3
+  # A's counts, and B's baselines: the guest's P2 line before its own pull, the host's plays and reports
+  - c1: log-count {pattern: "aa8c3 .[A-Za-z_]+. to its own graph .taken"}
+  - server: snapshot {name: c1FurnA, of: 'c1.log_count("aa8c3 .[A-Za-z_]+. to its own graph .taken")'}
+  - c2: log-count {pattern: "object animation aa8c3 [A-Za-z_]+ played"}
+  - server: snapshot {name: c2PlayedA, of: 'c2.log_count("object animation aa8c3 [A-Za-z_]+ played")'}
+  - c2: log-count {pattern: "object animation aa8c3 [A-Za-z_]+ reported"}
+  - server: snapshot {name: c2RepA, of: 'c2.log_count("object animation aa8c3 [A-Za-z_]+ reported")'}
+  - c2: log-count {pattern: "aa8c3 .[A-Za-z_]+. to its own graph .taken"}
+  - server: snapshot {name: c2Furn0B, of: 'c2.log_count("aa8c3 .[A-Za-z_]+. to its own graph .taken")'}
+  - c1: log-count {pattern: "object animation aa8c3 [A-Za-z_]+ played"}
+  - server: snapshot {name: c1Played0B, of: 'c1.log_count("object animation aa8c3 [A-Za-z_]+ played")'}
+  - c1: log-count {pattern: "object animation aa8c3 [A-Za-z_]+ reported"}
+  - server: snapshot {name: c1Rep0B, of: 'c1.log_count("object animation aa8c3 [A-Za-z_]+ reported")'}
+  # each seat's arm before leg B (the puller's lever may end off its first pose)
+  - c1: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "restB"}
+  - c2: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "restB"}
+  - wait: 1
+  - c1: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "restB"}
+  - c2: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "restB"}
+
+  # B. the guest pulls, the host watches (the mirror; on the host, C2's owner test passes the cell-hosted branch, so the
+  # self-played mark alone keeps the host's play of the relay from going back out)
+  - c2: activate {refId: 0xaa8c3}
+  - until: {within: 10, every: 0.25, expect: ['server.log_count("ProcessActivate aa8c3 - no occupant .activationSource = ff000001.") >= 1']}
+  # v1.2: as leg A's (v1.1's B1 and B2 polls fell about +0.15 and +1.19 s after c2's notify, 0.33 and 0.35 degrees; the second
+  # steps' polls the labels discard read 88.7 at about +0.91 s and 43.8 at about +1.95 s)
+  - wait: 0.75
+  - c2: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "B1"}
+  - c1: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "W1B"}
+  - wait: 0.5
+  - c2: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "B1"}
+  - c1: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "W1B"}
+  - c2: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "B2"}
+  - c1: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "W2B"}
+  - wait: 0.5
+  - c2: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "B2"}
+  - c1: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "W2B"}
+  - c1: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "W3B"}
+  - wait: 0.5
+  - c1: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "W3B"}
+  - c1: screenshot
+  - c2: screenshot
+  - wait: 2
+  - c2: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "B3"}
+  - c1: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "B3"}
+  - wait: 0.5
+  - c2: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "B3"}
+  - c1: node-rotation {formId: 0xaa8c3, nodes: ["Lever01", "RuinsLever"], label: "B3"}
+  - c1: graph-vars {formId: 0xaa8c3, bools: ["IsReady"]}
+  - c2: graph-vars {formId: 0xaa8c3, bools: ["IsReady"]}
+  # the guest's closing activation, so its give-up line is in its log before the counts
+  - until: {within: 25, every: 1, expect: ['c2.log_count("onOpenContainerMesage - sent ActivateMessage") >= 1']}
+  - wait: 2
+  - c2: log-count {pattern: "aa8c3 .[A-Za-z_]+. to its own graph .taken"}
+  - server: snapshot {name: c2FurnB, of: 'c2.log_count("aa8c3 .[A-Za-z_]+. to its own graph .taken")'}
+  - c1: log-count {pattern: "object animation aa8c3 [A-Za-z_]+ played"}
+  - server: snapshot {name: c1PlayedB, of: 'c1.log_count("object animation aa8c3 [A-Za-z_]+ played")'}
+  - c1: log-count {pattern: "object animation aa8c3 [A-Za-z_]+ reported"}
+  - server: snapshot {name: c1RepB, of: 'c1.log_count("object animation aa8c3 [A-Za-z_]+ reported")'}
+
+  # RECORDED, all before the claims so a red keeps them
+  - c1: log-count {pattern: "object animation aa8c3 [A-Za-z_]+ dropped as self-played"}
+  - c1: log-count {pattern: "verb:furniture. aa8c3"}
+  - c1: log-count {pattern: "Sent activation for caster= 14 and target= aa8c3"}
+  - c1: log-count {pattern: "onOpenContainerMesage - gave up waiting for .getFurnitureReference not null. after 15000 ms"}
+  - c1: log-count {pattern: "relayed activation (39fdd|3720f|2ad49|2ad43) by aa8c3"}
+  - c1: log-count {pattern: "relayed activation aa8c3 by ff00000[01]"}
+  - c2: log-count {pattern: "object animation aa8c3 [A-Za-z_]+ dropped as self-played"}
+  - c2: log-count {pattern: "verb:furniture. aa8c3"}
+  - c2: log-count {pattern: "Sent activation for caster= 14 and target= aa8c3"}
+  - c2: log-count {pattern: "onOpenContainerMesage - gave up waiting for .getFurnitureReference not null. after 15000 ms"}
+  - c2: log-count {pattern: "relayed activation (39fdd|3720f|2ad49|2ad43) by aa8c3"}
+  - c2: log-count {pattern: "relayed activation aa8c3 by ff00000[01]"}
+  - server: log-count {pattern: "aa8c3 activates (39fdd|3720f|2ad49|2ad43) in cell 371de"}
+  - server: log-count {pattern: "aa8c3 animates"}
+  - server: log-count {pattern: "E_OBJANIM_[A-Z_]+: [0-9a-f]+ reports .* on aa8c3"}
+  - server: log-count {pattern: "ProcessActivate aa8c3 - occupant is"}
+  - server: log-count {pattern: "E_ACTIVATE_REACH: [0-9a-f]+ activates aa8c3"}
+  - c1: dump-state
+  - c2: dump-state
+  - assert:
+      # the premises
+      - server.host(0x371de).client == "c1"
+      - 'server.log_count("ConsoleCommands: ff00000[01] god mode on") == 2'
+      - 'server.log_count("ProcessActivate aa8c3 - no occupant .activationSource = ff000000.") >= 1'
+      - 'server.log_count("ProcessActivate aa8c3 - no occupant .activationSource = ff000001.") >= 1'
+      - 'snapshot("c1FurnA") > snapshot("c1Furn0A")'
+      - 'snapshot("c2FurnB") > snapshot("c2Furn0B")'
+      - 'c1.log_count("setFurnitureAnimation.true.: a furniture.s own graph event crosses as furnitureAnimation") >= 1'
+      - 'c2.log_count("setFurnitureAnimation.true.: a furniture.s own graph event crosses as furnitureAnimation") >= 1'
+      # A: the host pulls; its user line, the guest's arm, the guest's play and no report from it, the host's own arm
+      - 'server.log_count("aa8c3 animates aa8c3 .[A-Za-z_]+. in cell 371de .its user ff000000 reports.: relayed to 1 game.s., not kept") >= 1'
+      - 'c2.node_rotation(0xaa8c3, "Lever01", "W1A").local_angle_to(c2.node_rotation(0xaa8c3, "Lever01", "restA")) + c2.node_rotation(0xaa8c3, "RuinsLever", "W1A").local_angle_to(c2.node_rotation(0xaa8c3, "RuinsLever", "restA")) + c2.node_rotation(0xaa8c3, "Lever01", "W2A").local_angle_to(c2.node_rotation(0xaa8c3, "Lever01", "restA")) + c2.node_rotation(0xaa8c3, "RuinsLever", "W2A").local_angle_to(c2.node_rotation(0xaa8c3, "RuinsLever", "restA")) + c2.node_rotation(0xaa8c3, "Lever01", "W3A").local_angle_to(c2.node_rotation(0xaa8c3, "Lever01", "restA")) + c2.node_rotation(0xaa8c3, "RuinsLever", "W3A").local_angle_to(c2.node_rotation(0xaa8c3, "RuinsLever", "restA")) > 5'
+      - 'snapshot("c2PlayedA") > snapshot("c2Played0A")'
+      - 'snapshot("c2RepA") == snapshot("c2Rep0A")'
+      - 'c1.node_rotation(0xaa8c3, "Lever01", "A1").local_angle_to(c1.node_rotation(0xaa8c3, "Lever01", "restA")) + c1.node_rotation(0xaa8c3, "RuinsLever", "A1").local_angle_to(c1.node_rotation(0xaa8c3, "RuinsLever", "restA")) + c1.node_rotation(0xaa8c3, "Lever01", "A2").local_angle_to(c1.node_rotation(0xaa8c3, "Lever01", "restA")) + c1.node_rotation(0xaa8c3, "RuinsLever", "A2").local_angle_to(c1.node_rotation(0xaa8c3, "RuinsLever", "restA")) > 5'
+      # B: the guest pulls; the mirror
+      - 'server.log_count("aa8c3 animates aa8c3 .[A-Za-z_]+. in cell 371de .its user ff000001 reports.: relayed to 1 game.s., not kept") >= 1'
+      - 'c1.node_rotation(0xaa8c3, "Lever01", "W1B").local_angle_to(c1.node_rotation(0xaa8c3, "Lever01", "restB")) + c1.node_rotation(0xaa8c3, "RuinsLever", "W1B").local_angle_to(c1.node_rotation(0xaa8c3, "RuinsLever", "restB")) + c1.node_rotation(0xaa8c3, "Lever01", "W2B").local_angle_to(c1.node_rotation(0xaa8c3, "Lever01", "restB")) + c1.node_rotation(0xaa8c3, "RuinsLever", "W2B").local_angle_to(c1.node_rotation(0xaa8c3, "RuinsLever", "restB")) + c1.node_rotation(0xaa8c3, "Lever01", "W3B").local_angle_to(c1.node_rotation(0xaa8c3, "Lever01", "restB")) + c1.node_rotation(0xaa8c3, "RuinsLever", "W3B").local_angle_to(c1.node_rotation(0xaa8c3, "RuinsLever", "restB")) > 5'
+      - 'snapshot("c1PlayedB") > snapshot("c1Played0B")'
+      - 'snapshot("c1RepB") == snapshot("c1Rep0B")'
+      - 'c2.node_rotation(0xaa8c3, "Lever01", "B1").local_angle_to(c2.node_rotation(0xaa8c3, "Lever01", "restB")) + c2.node_rotation(0xaa8c3, "RuinsLever", "B1").local_angle_to(c2.node_rotation(0xaa8c3, "RuinsLever", "restB")) + c2.node_rotation(0xaa8c3, "Lever01", "B2").local_angle_to(c2.node_rotation(0xaa8c3, "Lever01", "restB")) + c2.node_rotation(0xaa8c3, "RuinsLever", "B2").local_angle_to(c2.node_rotation(0xaa8c3, "RuinsLever", "restB")) > 5'
+      # through the run, no object animation refused
+      - 'server.log_count("E_OBJANIM_") == 0'

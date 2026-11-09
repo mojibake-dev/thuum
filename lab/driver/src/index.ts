@@ -2135,17 +2135,40 @@ function run(step: Step, player: Actor): unknown {
       // the quest's own alias id, ReferenceAlias.GetReference; 0 when it holds none) and the alias's name (SKSE's
       // Alias.GetName), for lab-api's c.alias(quest, alias).refr: where each seat's engine fills a template-run alias such
       // as MS13's Golden Claw (H-AF1). A quest this game lacks, an alias id the quest lacks, or a location alias is the
-      // step's error, its data, and the run goes on (script-state's way)
+      // step's error, its data, and the run goes on (script-state's way); every answer says whether the quest is running.
+      // GetAlias's None is told apart before the step blames the quest: Skyrim Platform hands JS no Alias at all
+      // (CallNative.cpp's GetSingleObjectPtr resolves a returned handle only as a form type below RE::FormType::Max, 0x8A in
+      // CommonLibSSE-NG include/RE/F/FormTypes.h:279, and the alias family's VM type ids are 139 to 141,
+      // include/RE/B/BGSBaseAlias.h:15, BGSRefAlias.h:18, BGSLocAlias.h:13), which read None for MS13's aliases 1 and 11 on a
+      // running MS13 (x-alias-premise 20261107-204449) and for 0xb6fef's 9 and 10 (x-skip-latent 20261107-204227), all four
+      // in Skyrim.esm (lab/esm.py). SKSE's Quest.GetNumAliases is an Int and crosses: a quest counting aliases whose first
+      // by index (SKSE's GetNthAlias) is None too is the platform's None; else the error lists the quest's ids (Alias.GetID)
       const questId = num(a.quest);
       const aliasId = num(a.alias, -1);
       const q = questId ? Quest.from(Game.getFormEx(questId)) : null;
       if (!q) return { error: `no quest ${questId.toString(16)} in this game` };
-      const held = aliasId >= 0 ? q.getAlias(aliasId) : null;
-      if (!held) return { error: `quest ${questId.toString(16)} has no alias ${aliasId}` };
+      if (aliasId < 0) return { error: "no {alias}: the quest's own alias id" };
+      const running = q.isRunning();
+      const state = running ? "running" : "not running";
+      const held = q.getAlias(aliasId);
+      if (!held) {
+        const count = q.getNumAliases();
+        const first = count > 0 ? q.getNthAlias(0) : null;
+        if (count > 0 && !first) {
+          return { error: `the platform hands JS no Alias (quest ${questId.toString(16)} ${state}, ${count} aliases, its first by index None too): alias ${aliasId} unread here`, running, aliases: count };
+        }
+        const ids: number[] = [];
+        for (let i = 0; i < count; i++) {
+          const nth = i === 0 ? first : q.getNthAlias(i);
+          if (nth) ids.push(nth.getID());
+        }
+        ids.sort((x, y) => x - y);
+        return { error: `quest ${questId.toString(16)} (${state}) has no alias ${aliasId}; its ids: ${ids.join(", ") || "none"}`, running, aliases: count, ids };
+      }
       const ref = ReferenceAlias.from(held);
-      if (!ref) return { error: `alias ${aliasId} of ${questId.toString(16)} is no reference alias`, name: held.getName() };
+      if (!ref) return { error: `alias ${aliasId} of ${questId.toString(16)} (${state}) is no reference alias`, name: held.getName(), running };
       const refr = ref.getReference();
-      return { quest: questId, alias: aliasId, refr: refr ? refr.getFormID() : 0, name: held.getName() };
+      return { quest: questId, alias: aliasId, refr: refr ? refr.getFormID() : 0, name: held.getName(), running };
     }
     case "face-keyframes": {
       // an actor's FaceGen keyframes as the engine animates its face (faceOf above): {formId}, else the placed npc;

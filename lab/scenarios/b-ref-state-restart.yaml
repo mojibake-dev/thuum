@@ -1,0 +1,218 @@
+# b-ref-state-restart v1.1 (2026-11-09; a step change alone, ADR-064 amendment A, no review; no claim changed): the five
+# refs-near reads of the marker 0x17037 widen from radius 2000 to 4000. The merge gate's red 20261109-122025 (step 34; its
+# lone-red rerun 122230 green) had c1 at (7719.7, -4093.5, -2056.7) after its 3.5 s walk east, 2,009 units from the marker at
+# (6867.4, -5874.1, -1686.7) (lab/esm.py ref), just past the radius: the step listed 1,914 statics in 0x371de and not the
+# marker. 20261109-102129 was red at the same step; 105707 and 122230 green, their walks ending nearer. The read spot (7040,
+# -4096) stands 1,786 units off, inside but near the edge. The marker is in c1's cell (one interior), so the lever is the
+# radius, not a move: refs-near's ids search answers no disabled flag, and a computed spot near the marker risks the void.
+# GREEN 20261109-105707-b-ref-state-restart on the 50 build (fork m4-train-50 ce0d2664), by path from lab/.cache/probes (sha1
+# f630490a, unchanged). ADR-068 rung 4's RefState, rule 6's restart scenario: a host's scripted Disable reaches a late joiner
+# and survives a server restart. Its earlier reds: 20261107-211516 on rung 4's build (a trigger with an XPRM box got no create
+# word, so its ref state was never served; fixed by fork e4752b05, served at its subscribe) and 20261109-102129 (step 34's
+# refs-near premise: the observer landed outside the reference's cell; the same steps read green in 105707). Reviewed before
+# its first run (rung 4's review B). Its own commit (rule 13).
+# Review B of rung 4's proofs (2026-11-06), notes 1 to 4: notes applied as written.
+# b-ref-state-restart v1 DRAFT (rung 4's lab layer, 2026-11-06). A draft, kept outside lab/scenarios: a scenario commits alone and
+# after its review (CLAUDE.md rule 13, ADR-009), and ADR-064 amendment B assembles a gate scenario only from parts already green, so
+# this waits for x-skip-latent v1 and x-bleak-scripts v4 to read green on the rung's build, then its own fresh review, then
+# numidium's approval. ADR-068 rung 4's T3 slot 3 (docs/research/rung4-state-rows-2026-11-07.md section 2's T3 slots and section 5;
+# section 4's H-RS4 claimed, H-RS5 claimed on its state and recorded on its lines): rule 6's restart-persistence scenario for A3's
+# record keys (refStateSeq on a reference's change form, the attach by record), run beside b-trap-record-restart,
+# b-script-state-restart, b-player-globals, b-global-default, b-container-rest, b-locks, b-prop-push and b-bleak-traps unweakened.
+# For fork m4-scripts-4-rows at B2's Windows head or later on both seats and the server (the integrator pins the sha), lab-api and
+# lab-driver from thuum r4-lab 1e886c93 or later (server.ref(id).isDisabled and .refStateSeq).
+# ONE QUESTION: does a host's scripted ref state (a Disable and an Enable of world objects in its hosted cell) survive a server
+# restart and reach every seat that loads the cell after it, for a reference the server held and for one it attached only by the
+# record the change made?
+# THE SUBJECTS, a read that changed the plan: the plan named a cobweb's #19 Disable and the XMarker 0x17037 (section 5). The cobweb's
+# #19 disables the activator its own PlaceAtMe made, a host-local runtime reference (FXtriggerAmbFX.pex, lab/pex.py disasm; see
+# x-bleak-scripts v4's header), so the held subject is the Temple's setStage trigger 0x3ac73 instead: base 0x33f50
+# defaultSetStageTRIG (ACTI, flags 0x0, the server holds it), at (1210.9, 1083.9, -211.7) rot z 180 with XPRM box (129.4, 335.4,
+# 229.0), whose USSEP defaultsetStageTrigSCRIPT.onTriggerEnter sets MS13BleakFallsBarrowLeverScene 0x3ac44 stage 10 and ends with
+# Disable(self, False) for the host's own player. The attached subject is the plan's: the XMarker 0x17037 (STAT 0x3b, flags 0xc00:
+# persistent and initially disabled, so AttachEspmRecord skips it, read 2), enabled by the encounter trigger 0x17038 (base 0xf4a31
+# defaultEnableEncLinkedRef, at (7361.9, -3986.4, -1804.9) rot 0, XPRM box (124.3, 365.7, 386.6), XLKR 0x17037) when the host's
+# player of level LevelGateIceWraith 0xfc4e2 or above (10.0) walks in; its enable children are the ambush draugr ACHR 0x800a3 and
+# 0x800a9. Every fact: lab/esm.py over the lab's 1.6.1170 load order, 2026-11-06, and the earlier read's disassembly.
+# Premises, each claimed: c1's level 10 by the server's word (the console's SetLevel, b-perk-pick's) read back by its engine
+# (c1.level(), the skills step); c1 hosts 0x371de; before each walk the subject reads as the game files have it on c1 (the trigger
+# enabled, held by the server and enabled there; the marker disabled, not held).
+# CLAIMED, the answer: (1) after the walks, before the restart: the record holds the trigger disabled and the marker attached and
+# enabled, each with a refStateSeq above 0, and c1's engine reads both; (2) the late joiner: c2, entering the Temple after both
+# walks, reads the trigger disabled and the marker enabled, and its client applied both from the serve behind each create word
+# (H-RS4: "ref state <id> applied (served)", the client's line, section 1(d)); (3) after the restart: the record holds both as before
+# (the change form's keys, A3's migration), the Temple unhosted; c2, relaunched after the restart so the first host is a fresh game
+# (the grant-time apply, which no other leg reaches), back in first, and c1, a fresh game after a relaunch, each read both as
+# before.
+# RECORDED, NOT CLAIMED: H-RS5's lines, each seat's count of "ref state 3ac73 applied" and "ref state 17037 applied" lines after its
+# fresh load (one apply from the serve and none after the cell's 3D is the hypothesis; the state claims above carry the answer);
+# c1's batched call lines ("native ObjectReference.Disable on 3ac73 state latent", "... Enable on 17037 state latent"); the server's
+# "sets <id>" lines; the ambush draugr as each seat's engine holds them after the marker's enable (npc-state of 0x800a3 and 0x800a9:
+# children of a marker the server attached, which the server itself holds no record of, the plan's widening risk, section 6); the
+# E_SCRIPTCALL_ count.
+# How to read it: green, the ref state is the world's, across a restart and a fresh game. Red on (1) at the marker with the trigger
+# green: the attach by record did not run (no server.ref(0x17037) at all: A3's LoadForm path or AttachForRecord) or the encounter
+# never fired on c1 (the level premise, or c1's walk missed the box: its screenshot). Red on (2): the serve (no applied line: the
+# server's onSubscribe 78 block) or the apply (the line present, the engine's flag not: RefStateService's disableNoWait). Red on
+# (3) with (1) green: the record's keys did not round-trip (A3's ChangeFormTest cases) or the restart's serve did not run.
+# Spots: c1's two walks start 137 units west of the setStage box at the XMarkerHeading 0x1ae40's spot (944, 1084, -250) and 197
+# units west of the encounter box on the catacomb hall's ramp NorCatHallBg1wayRamp256 0x380e3 (7040, -4096, -1780), both facing
+# east (the walk toggle, then W for 2.5 s, about 250 units: x-trap-wire-rope's; W for 3.5 s at the encounter box, 249 units deep,
+# which a 250-unit walk enters by only about 52); the late joiner reads from the ramp, 1786 units
+# from the marker and 7800 from the trigger, one listing each (the board keeps a seat's last listing), and so does the fresh c1 after
+# the restart while c2, the host, stands at the walk's start; lab-spawn's origin and (0, -120, 0) outside (b-script-state-restart).
+# God mode on both. Assertions are evaluated by lab-api only (ADR-009).
+id: b-ref-state-restart
+milestone: M4
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 1800
+artifacts: [server.log, c1.log, c2.log, c1-console.log, c2-console.log, screenshots, world-diff]
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  # the encounter's level gate, by the server's word
+  - c1: server-console {name: SetLevel, args: [0x14, 10]}
+  - wait: 6
+  - c1: skills {names: ["OneHanded"]}
+  - assert:
+      - c1.level() >= 10
+  # c2 outside until the late join; c1 hosts the Temple by a real cell load
+  - c2: teleport {cell: lab-spawn, x: 0, y: -120, z: 0}
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 944, y: 1084, z: -250, rot: [0, 0, 90]}
+  - until: {within: 30, every: 1, expect: ['server.host(0x371de).client == "c1"']}
+  - wait: 8
+
+  # 1. the walks: the held trigger disables itself, the encounter enables the marker the server never held
+  - c1: refs-near {radius: 600, formTypes: [24]}
+  - assert:
+      - server.host(0x371de).client == "c1"
+      - c1.refs_near().disabled_of(0x3ac73) == false
+      - server.ref(0x3ac73).isDisabled == false
+  - c1: tap-key {code: 58}
+  - wait: 1
+  - c1: hold-key {code: 17, ms: 2500}
+  - until: {within: 15, every: 1, expect: [server.ref(0x3ac73).isDisabled == true]}
+  - c1: tap-key {code: 58}
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 7040, y: -4096, z: -1780, rot: [0, 0, 90]}
+  - wait: 8
+  - c1: refs-near {radius: 4000, formTypes: [34]}
+  - assert:
+      - c1.refs_near().disabled_of(0x17037) == true
+  - c1: tap-key {code: 58}
+  - wait: 1
+  - c1: hold-key {code: 17, ms: 3500}
+  - until: {within: 15, every: 1, expect: [server.ref(0x17037).isDisabled == false]}
+  - c1: tap-key {code: 58}
+  - wait: 5
+  - c1: screenshot
+  - c1: refs-near {radius: 4000, formTypes: [34]}
+  - assert:
+      # (1) the record and the host's engine, the marker
+      - c1.refs_near().disabled_of(0x17037) == false
+      - server.ref(0x17037).isDisabled == false
+      - server.ref(0x17037).refStateSeq > 0
+  - c1: refs-near {radius: 10000, formTypes: [24]}
+  - c1: log-count {pattern: "native ObjectReference.Disable on 3ac73 state latent"}
+  - c1: log-count {pattern: "native ObjectReference.Enable on 17037 state latent"}
+  - server: log-count {pattern: "sets 3ac73 disabled"}
+  - server: log-count {pattern: "sets 17037 enabled"}
+  - assert:
+      # (1) the trigger
+      - c1.refs_near().disabled_of(0x3ac73) == true
+      - server.ref(0x3ac73).isDisabled == true
+      - server.ref(0x3ac73).refStateSeq > 0
+  - server: snapshot {name: seqTrigger, of: "server.ref(0x3ac73).refStateSeq"}
+  - server: snapshot {name: seqMarker, of: "server.ref(0x17037).refStateSeq"}
+
+  # 2. the late joiner: c2 enters the Temple by a real cell load, on the ramp beside the encounter
+  - c2: teleport {cell: "371de:Skyrim.esm", x: 7040, y: -4096, z: -1780, rot: [0, 0, 90]}
+  - wait: 15
+  - c2: screenshot
+  - c2: npc-state {formId: 0x800a3}
+  - c1: npc-state {formId: 0x800a3}
+  - c2: refs-near {radius: 4000, formTypes: [34]}
+  - c2: log-count {pattern: "ref state 17037 applied .served"}
+  - assert:
+      # (2) H-RS4: the marker, attached by its record, served and found by the guest's engine
+      - c2.refs_near().disabled_of(0x17037) == false
+      - 'c2.log_count("ref state 17037 applied .served") >= 1'
+  - c2: refs-near {radius: 10000, formTypes: [24]}
+  - c2: log-count {pattern: "ref state 3ac73 applied .served"}
+  - assert:
+      # (2) the trigger, held, served behind its create word
+      - c2.refs_near().disabled_of(0x3ac73) == true
+      - 'c2.log_count("ref state 3ac73 applied .served") >= 1'
+
+  # 3. the restart; c1 logs in again by itself and c2 is relaunched (a fresh game as the first host after the restart: the
+  #    grant-time apply), both out, then c2 back in first and the Temple's host by a real load
+  - wait: 5
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - c2: relaunch
+  - wait: 15
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -120, z: 0}
+  - until: {within: 30, every: 1, expect: ['server.host(0x371de).hosted == false']}
+  - assert:
+      # (3) the record as before, from the database
+      - server.ref(0x3ac73).isDisabled == true
+      - server.ref(0x3ac73).refStateSeq == snapshot("seqTrigger")
+      - server.ref(0x17037).isDisabled == false
+      - server.ref(0x17037).refStateSeq == snapshot("seqMarker")
+  - c2: teleport {cell: "371de:Skyrim.esm", x: 7040, y: -4096, z: -1780, rot: [0, 0, 90]}
+  - until: {within: 30, every: 1, expect: ['server.host(0x371de).client == "c2"']}
+  - wait: 15
+  - c2: screenshot
+  - c2: refs-near {radius: 4000, formTypes: [34]}
+  - assert:
+      - c2.refs_near().disabled_of(0x17037) == false
+  - c2: refs-near {radius: 10000, formTypes: [24]}
+  - assert:
+      - c2.refs_near().disabled_of(0x3ac73) == true
+
+  # 4. c1 relaunched at lab-spawn, a fresh game with no state of its own, then in as a guest on the ramp (c2, the host, moves to
+  #    the setStage walk's start first)
+  - c1: relaunch {until: gone}
+  - c1: connect
+  - wait: 15
+  - c1: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: teleport {cell: "371de:Skyrim.esm", x: 944, y: 1084, z: -250, rot: [0, 0, 90]}
+  - wait: 5
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 7040, y: -4096, z: -1780, rot: [0, 0, 90]}
+  - wait: 15
+  - c1: screenshot
+  - c1: refs-near {radius: 4000, formTypes: [34]}
+  - assert:
+      - server.host(0x371de).client == "c2"
+      # (3) the fresh game reads the attached marker enabled
+      - c1.refs_near().disabled_of(0x17037) == false
+  - c1: refs-near {radius: 10000, formTypes: [24]}
+  - assert:
+      # (3) and the held trigger disabled
+      - c1.refs_near().disabled_of(0x3ac73) == true
+  # recorded: H-RS5's apply counts on both fresh loads, the draugr, the refusals
+  - c1: log-count {pattern: "ref state 3ac73 applied"}
+  - c1: log-count {pattern: "ref state 17037 applied"}
+  - c2: log-count {pattern: "ref state 3ac73 applied"}
+  - c2: log-count {pattern: "ref state 17037 applied"}
+  - c1: npc-state {formId: 0x800a3}
+  - c2: npc-state {formId: 0x800a3}
+  - server: log-count {pattern: "E_SCRIPTCALL_[A-Z_]+"}
+  - c1: dump-state
+  - c2: dump-state

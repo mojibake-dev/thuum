@@ -1,0 +1,151 @@
+# b-login-in-cell (2026-11-09; the id alone, ADR-064 amendment A, no review): the scenario's id is its own, b-login-in-cell, where the
+# promotion kept the probe's (x-login-in-cell), so its runs were named by the probe. No step or claim changed.
+# b-login-in-cell: promoted from the probe x-login-in-cell v2.1 (lab/.cache/probes, sha1 7b6203d0), GREEN twice:
+# 20261107-213324 on rung 4's build (fork m4-scripts-4-rows 1acb834f) and 20261108-001509 on the 50 build (m4-train-50 4bd07f33).
+# ADR-068's D-L1 B (Eli 2026-11-06): a seat that logs in inside a cell gets that cell's OnCellAttach and OnCellLoad once (fork
+# a7a3854c); the committed scenario that guards it. Reviewed with the fix (its v2.1 rewrite the reviewer's call before its first
+# green); claims as v2.1's. Its own commit (rule 13).
+# x-login-in-cell v2.1, the fresh review's rewrite (ADR-064 d4, amendment A): the question is read on pillar one's script
+# before the press; '0 already seen' reads H-L1 only under H-R12 (ScriptState.cpp:85-87). v1 never ran green and is in no gate
+# set, so the claim change is the reviewer's call: v1's "from defaultPuzzlePillarScript.OnCellLoad" line reads red on a rung 3
+# build with the fix working (aa8cc's record restores doOnce; aa8cb, face 1, makes no tabled call). Red without the fix: aa8cb's
+# state reads "" with doOnce false, the fix's line is absent, and the three press claims fail. The darts (0x39fdd's script
+# state) are recorded, not claimed, until isLoaded's value at a teleport entry is read in a run (v3).
+# x-login-in-cell v2 (D-L1 B's build, fork m4-scripts-4-login d236164e, 2026-11-06; Eli's D-L1 B, docs/DECISIONS.md): ADDED,
+# never weakened. The fix's own line is claimed in the last block beside the question,
+# 'c2.log_count("login cell 371de: OnCellAttach and OnCellLoad sent once to [1-9][0-9]*, [0-9]+ already seen; after its grant") == 1'
+# (skymp5-client LoginCellService: the login's arrival, the cell HostService reported without its load event, its walk begun
+# after the grant's gate opened, so owned and after the script records; one line per login), counted with v1's other leg-B reads
+# 20 s after the grant. Recorded, not claimed: H-L1's read, the same line with "0 already seen" (1 when the save load served
+# neither event to any reference; an event the engine did serve is skipped by unseenOnly and counted), and the walk's coverage
+# trace ("<n> reference(s) walked ..., <s> scripted"). Every v1 step and claim is unchanged. A read for the reviewer, not a
+# change: v1 was written against canon 0f2f3c55, before rung 3's script record (ScriptStateService, fork 74cc6d07). On a rung 3
+# build leg A leaves a record of each pillar whose OnCellLoad jumps (aa8cc's StartState03 PlayAnimation is a tabled action row,
+# so the pillar is due for a read), and leg B's grant applies it, doOnce true, before the gate opens; the fix's OnCellLoad then
+# runs only GetLinkedRef on it (no tabled row, so no "from defaultPuzzlePillarScript.OnCellLoad" line) while the record's view
+# replay turns its graph. aa8cb (initial face 1) makes no tabled call in its OnCellLoad, so it has no record and the fix's
+# OnCellLoad is what puts its script on position01 for the press. On this train the question can therefore read red with the
+# fix working and the press green; its rewrite is Eli's (ADR-064 d4), so v2 keeps it as v1 wrote it. v1's header follows.
+# x-login-in-cell v1 (the login-in-cell read for thuum-cf, 2026-11-06; playtest 47's BROKEN "login inside a cell"; ONE question:
+# does a seat that logs in inside Bleak Falls Temple 0x371de get its pillars' OnCellLoad?). A fresh game reaches its server
+# position through the template save (remoteServer.ts:899-915 loadGame from the main menu's ticks; LoadGameApi.cpp:170-202 and
+# LoadGame.cpp:91-123 write the server's cell and position into assets/template.ess and load it), not through a MoveTo, while the
+# lab's scenarios and every verified pillar run enter by teleport from lab-spawn (remoteServer.ts:481-526, MoveTo_Impl,
+# PapyrusTESModPlatform.cpp:147-159). In playtest 47 c1 logged in inside the Temple at 06:28:12Z ("locationChanged actor 14 old
+# none new 18ee9" at the load), hosted it, and its pillars sat in defaultPuzzlePillarScript's empty state: its presses at
+# 06:35:14Z reached the engine ("the engine's own activation of aa8cd in a hosted cell") and turned nothing, and the record's
+# StartState03 was skipped on it ("object animation aa8cc StartState03 not replayed: hosted here", 06:30:03Z), until it
+# re-entered by a move at 06:48:09Z (after its death and respawn outside), when the line came. The event gate admits lifecycle
+# events for a world object in any cell (FridaHooks.cpp:159-171, :370-400), c1's platform log (relaunch-logs
+# 20261106T071754Z-c1) shows no record-death or record-apply blank at the login, and the engine's own sinks relay
+# unconditionally (the VM's TESCellFullyLoadedEvent and TESCellAttachDetachEvent sinks at SkyrimVM+0x38 and +0x30, Ghidra
+# FUN_1409c3f50 and FUN_1409c3d70 on 1.6.1170): HYPOTHESIS H-L1, the save load attaches the player's cell without raising
+# either event to a bound script.
+# Shape: c1 waits at lab-spawn so c2 is the Temple's only loader. A) the control: c2 enters by the lab's teleport and its host's
+# pillar logs the line (the seam prints it for an OWNED call only, scriptCallService.ts:66-78, ScriptNatives.cpp:866-882, so the
+# OnCellLoad must land after c2's grant, as a teleport's does: 11-05 23:26:20Z, the grant then the line 90 ms later). c2 then
+# stands in the puzzle room (b-puzzle-relay's guest spot, every pillar in reach), which the server keeps as its position.
+# B) the login inside: c2 relaunched, logging in there through the save load ("loading game in world/cell 371de"), host again.
+# C) c1 enters as the guest by teleport; the host c2 presses pillar one (initial face 1, Trigger01).
+# Expected on canon 0f2f3c55: A and B's premises green, the last assert RED on the question (no OnCellLoad line on c2 after its
+# login) and on the press (no report, no record, no play: the script has no onActivate in its empty state). GREEN needs: c2's
+# pillar OnCellLoad after its login delivered once, after its grant (owned, so its StartState03 jump is reported), and the press
+# turning on both seats: the host's report, the server's "aa8cb animates aa8cb", the guest's play. A fix that delivers the event
+# before the grant reads red on the line and green on the press: a finding for that fix (the jump unreported, the guests' record
+# stale), never a reason to loosen the line. Recorded, not claimed: the record's skip on the host, the census's "(not hosted)"
+# PlayAnimation row (a pre-grant OnCellLoad would show there), both seats' pillar faces (aa8cc stands on Side01 on the host and
+# on its initial face 3 on the guest when the defect holds). Assertions are evaluated by lab-api only (ADR-009); its own commit
+# (rule 13).
+id: b-login-in-cell
+milestone: M4
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: false
+  gameHour: 7.9
+timeout_s: 900
+artifacts: [server.log, c1.log, c2.log, c1-console.log, c2-console.log, screenshots]
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  # c1 stays outside the Temple until leg C, so the seat that logs in inside is the cell's first and only loader
+  - c1: teleport {cell: lab-spawn, x: 0, y: -300, z: 0, rot: [0, 0, 0]}
+  # A. the control: a teleport entry (a real cell load) gives the host's pillar its OnCellLoad line on this build
+  - c2: teleport {cell: "371de:Skyrim.esm", x: -4100, y: 850, z: 650, rot: [0, 0, 90]}
+  - until: {within: 60, every: 1, expect: ['server.host(0x371de).client == "c2"']}
+  - until: {within: 30, every: 1, expect: ['c2.log_count("from defaultPuzzlePillarScript.OnCellLoad") >= 1']}
+  - c2: teleport {cell: "371de:Skyrim.esm", x: 5400, y: -900, z: -768, rot: [0, 0, 90]}
+  - wait: 15
+  - c2: script-state {formId: 0x39fdd}
+  - assert:
+      - server.actor(c2).cell == "371de:Skyrim.esm"
+      - server.host(0x371de).client == "c2"
+  # B. the login inside: the relaunched game loads the template save at the server's position for c2, in the puzzle room
+  - c2: relaunch {until: gone}
+  - c2: connect
+  - wait: 15
+  - c2: close-menu {name: MessageBoxMenu}
+  - c2: server-console {name: TGM}
+  - until: {within: 90, every: 1, expect: ['server.host(0x371de).client == "c2"']}
+  - wait: 20
+  - c2: log-count {pattern: "loading game in world/cell 371de"}
+  - c2: log-count {pattern: "from defaultPuzzlePillarScript.OnCellLoad"}
+  - c2: log-count {pattern: "object animation aa8cc StartState03 not replayed: hosted here"}
+  - c2: log-count {pattern: "census ObjectReference.PlayAnimation .not hosted. [0-9]+ in 30 s"}
+  # v2: the fix's line (D-L1 B), once after the grant's gate; H-L1's read (0 already seen) and the walk's coverage, recorded
+  - c2: log-count {pattern: "login cell 371de: OnCellAttach and OnCellLoad sent once to [1-9][0-9]*, [0-9]+ already seen; after its grant"}
+  - c2: log-count {pattern: "login cell 371de: OnCellAttach and OnCellLoad sent once to [0-9]+, 0 already seen"}
+  - c2: log-count {pattern: "login cell 371de: [0-9]+ reference.s. walked"}
+  - c2: log-count {pattern: "script state aa8cb applied"}
+  - c2: log-count {pattern: "own cell 371de reported without its load event"}
+  - c2: log-count {pattern: "login cell 371de"}
+  - c2: script-state {formId: 0xaa8cb}
+  - c2: script-state {formId: 0x39fdd}
+  - c2: look-at {formId: 0xaa8cc}
+  - wait: 1
+  - c2: screenshot
+  - assert:
+      # premises: c2 came back inside the Temple through the save load, and hosts it
+      - server.actor(c2).cell == "371de:Skyrim.esm"
+      - server.host(0x371de).client == "c2"
+      - 'c2.log_count("loading game in world/cell 371de") >= 1'
+  # C. the guest enters by teleport (its own real cell load); the host turns pillar one
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 5300, y: -1200, z: -768, rot: [0, 0, 90]}
+  - wait: 20
+  - c1: look-at {formId: 0xaa8cc}
+  - wait: 1
+  - c1: screenshot
+  - assert:
+      - server.host(0x371de).client == "c2"
+  - c2: look-at {formId: 0xaa8cb}
+  - wait: 1
+  - c2: activate {refId: 0xaa8cb}
+  - wait: 6
+  - c1: screenshot
+  - c2: screenshot
+  - c2: log-count {pattern: "the engine.s own activation of aa8cb in a hosted cell"}
+  - c2: log-count {pattern: "object animation aa8cb .* reported"}
+  - c1: log-count {pattern: "object animation aa8cb .* played"}
+  - c2: log-count {pattern: "the engine.s own load event came [0-9]+ ms after"}
+  - assert:
+      # premise: the press reached the host's engine
+      - 'c2.log_count("the engine.s own activation of aa8cb in a hosted cell") >= 1'
+      # THE QUESTION (v2.1, the fresh review's rewrite): the login inside left pillar one's script on its first side, read before the press
+      - c2.script_state(0xaa8cb).state == "position01"
+      - c2.script_state(0xaa8cb).variable("doOnce") == true
+      - 'c2.log_count("script state aa8cb applied") == 0'
+      - 'c2.log_count("the engine.s own load event came [0-9]+ ms after") == 0'
+      # v2, ADDED: the fix sent the login cell's entry events once, after its grant's gate (owned, after the records)
+      - 'c2.log_count("login cell 371de: OnCellAttach and OnCellLoad sent once to [1-9][0-9]*, [0-9]+ already seen; after its grant") == 1'
+      # its consequence, the press turning on both seats: the host's report, the server's record and relay, the guest's play
+      - 'c2.log_count("object animation aa8cb .* reported") >= 1'
+      - 'server.log_count("aa8cb animates aa8cb") >= 1'
+      - 'c1.log_count("object animation aa8cb .* played") >= 1'
+  - c1: dump-state
+  - c2: dump-state

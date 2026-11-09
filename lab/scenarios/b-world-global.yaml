@@ -1,0 +1,141 @@
+# b-world-global v1.1, committed after its green: 20261107-214047-b-world-global on rung 4's stage (fork m4-scripts-4-rows
+# 1acb834f, LABAPI 5612), by path from lab/.cache/drafts/fifty (sha1 8237152b). v1 reviewed before its first run (rung 4's review
+# B); v1.1 a step and premise change only (ADR-064 amendment A): the login race's winner recorded and handed to c1 by c2's
+# relaunch. Rule 6's restart scenario for WorldGlobal 80. Its own commit (rule 13).
+# b-world-global v1.1 DRAFT (2026-11-07), after its first run 20261107-211737 on rung 4's stage (fork m4-scripts-4-rows
+# 1acb834f, lab-api from thuum pipeline 5612, main 2276dda2): red at step 8, `server.world_globals().streamer == "c1"` false
+# for 30 s with the read c2 at every poll. The knob reached the server (its "[verb:world-globals] world globals on" at its
+# start) and the read is right (user 2 from 10.10.70.22, sky-c2, loaded ff000001, the streamer the server named at
+# 21:18:14.230). v1's premise was the fault: "c1, logged in first, is the streamer" is a race, not an order. Both seats log
+# in by themselves at the rollback's relaunch, before step 0 (connect only waits for that login: both "online after 0.0s",
+# the logins 0.19 s apart), so v1's connect order and its 10 s between them ordered nothing; and wire-rules world_streamer.rs
+# elects the first seat past its first own movement report and never displaces it, so the two loads' jitter decides: c2's
+# report came first in 211737 (ff000001 from epoch 1 at 21:18:14.230, c1's first cell load at 21:18:14.388), c1's in
+# x-world-globals-rate 20261107-204642 with a 0.9 s login lead (ff000000 from epoch 1 at 20:47:19.058; that probe names no
+# streamer, so its green stands). v1.1 settles the premise by the rule's own hand-off, b-cell-host's and b-weather's idiom:
+# c2's relaunch {until: gone} hands the stream to c1 when c2 won the race (its leave, or its stale first: c1 the only
+# eligible seat left) and changes nothing when c1 holds it, and c2's new game never displaces an eligible streamer. Every
+# claim stands as v1 wrote it; the premise is claimed after c2's leave and again after the teleports, the race's winner
+# recorded. The restart leg's claims name no streamer (the reconnects race again, recorded), and a seat ends its stream and
+# its epoch fence at each new connection (worldGlobalService.ts, onConnectionAccepted), so that leg reads alike whoever wins.
+# Review B of rung 4's proofs (2026-11-06), notes 1 to 3: notes applied as written.
+# b-world-global v1 DRAFT (rung 4's lab layer, 2026-11-06). A draft, kept outside lab/scenarios: a scenario commits alone and after
+# its review (CLAUDE.md rule 13, ADR-009), and ADR-064 amendment B assembles a gate scenario only from parts already green, so this
+# waits for x-world-globals-rate v1 to read green on the rung's build, then its own fresh review, then numidium's approval. ADR-068
+# rung 4's T3 slot 3 (docs/research/rung4-state-rows-2026-11-07.md section 2's T3 slots and section 5; section 4's H-WG2 claimed):
+# rule 6's restart-persistence scenario for A3's journal key worldGlobals, run beside b-player-globals and b-global-default
+# unweakened. For fork m4-scripts-4-rows at B2's Windows head or later on both seats and the server (A2's world_streamer.rs and
+# world_globals.rs, A5's WorldGlobal 80 and its stream word, B1's TESModPlatform.DiffWorldGlobals, B2's WorldGlobalService; the
+# integrator pins the sha), lab-api and lab-driver from thuum r4-lab 74cc52bd or later (server.world_globals() and the
+# worldGlobals knob).
+# ONE QUESTION: does the world streamer's write of a global reach every seat, survive a server restart, and stay unmoved by a write
+# another seat makes in its own game?
+# THE GLOBAL, the plan's UNKNOWN settled (section 5 left G to `esm.py find Skyrim.esm GLOB` and the census): G is
+# "084aaa:Apocalypse - Magic of Skyrim.esp", WB_AlterationTelekinesis_Global_DropZone_Record, header flags 0 (not constant), FNAM
+# 's', FLTV 0: one of the plugin's 16 GLOBs that nothing in the plugin references (no VMAD property, no CTDA comparison or
+# GetGlobalValue parameter, no other field; a raw 4-byte scan of every record agrees), so no script of the lab's content reads or
+# writes it and the test's writes change nothing a seat plays; not on server-settings.json's playerGlobals list, not one of the
+# clock's six (lab/esm.py over the lab's 1.6.1170 load order, 2026-11-06; scratchpad r4-reads/esm, q5.json). Not read: a script's
+# Game.GetFormFromFile with its literal id, which the record scan cannot see (the player-globals census's disassembly of the
+# plugin's 206 scripts counted 19 unused globals, docs/verbs/player-globals.md:31, a superset of these 16 by its count).
+# Premises, each claimed: the server's worldGlobals on (the server block's per-run knob; the lab's default, off, elects nobody);
+# c1 is the streamer, by c2's leave and not by the logins' order (v1.1: the first seat past its first movement report streams
+# and an eligible streamer is never displaced, the lowest actor id only breaking a tie, section 1(c); c2's leave leaves c1 the
+# only eligible seat); both seats read G at its record's 0 before any write; c2's own write of 9 took in c2's game (else
+# "unmoved" proves nothing).
+# CLAIMED, the answer: the server records c1's 7 within 10 s and c2 reads 7; 60 s later c2 still reads 7 (H-WG2, the receiver's
+# GlobalVariable.setValue holds for the session); after c2's write of 9 the server and c1 still read 7; after a restart and both
+# reconnects the server and both seats read 7 (the journal's worldGlobals back from its change form, served at each login after
+# the player globals); no per-entry refusal of any global (E_WORLDGLOBAL_CLOCK, _PLAYER, _CONSTANT, _NO_GLOB: the codes appear
+# only in the streamer's summary line, which names no global, so the claim covers every global, not G alone) and none of c2 as
+# a non-owner (E_WORLDGLOBAL_OWNER).
+# RECORDED, NOT CLAIMED: the relaunch race's winner and its epoch (v1.1: streamerAtLogin, epochAtLogin), the epoch after c2's
+# leave (epochBefore: 1 when c1 won the race, 2 after a hand-off), the streamer and its epoch after the restart (snapshots; the
+# election runs again at the reconnects); c1's 30 s summaries; E_WORLDGLOBAL_EPOCH (a stale epoch at an election is refused by
+# design).
+# How to read it: green, a world global is the world's. Red on c2's 7 with the server at 7: the relay or the receiver's apply
+# (WorldGlobalService's 32 a update). Red on the server's 7: c1's diff never reported (its summary's sent count) or was refused (an
+# E_WORLDGLOBAL_ line). Red after c2's write: a non-streamer's write moved the world (c2's report refused by the server would be
+# an E_WORLDGLOBAL_OWNER line; one taken, no line). Red after the restart: the journal key (A3) or the login serve.
+# Spots: lab-spawn's origin and (0, -120, 0) (b-script-state-restart); globals need no cell. Assertions are evaluated by lab-api
+# only (ADR-009).
+id: b-world-global
+milestone: M4
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  worldGlobals: true
+timeout_s: 900
+artifacts: [server.log, c1.log, c2.log, c1-console.log, c2-console.log, world-diff]
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  # v1.1: the relaunch race's winner, recorded; then c2's leave settles the stream on c1, whoever won
+  - until: {within: 30, every: 1, expect: ['server.world_globals().epoch > 0']}
+  - server: snapshot {name: streamerAtLogin, of: "server.world_globals().streamer"}
+  - server: snapshot {name: epochAtLogin, of: "server.world_globals().epoch"}
+  - c2: relaunch {until: gone}
+  - until: {within: 10, every: 0.5, expect: ['server.world_globals().streamer == "c1"']}
+  - c2: connect
+  - wait: 15
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -120, z: 0}
+  # c2's new game, past its first movement report, displaces nobody
+  - until: {within: 30, every: 1, expect: ['server.world_globals().streamer == "c1"']}
+  - server: snapshot {name: epochBefore, of: "server.world_globals().epoch"}
+  - c1: globals {forms: ["084aaa:Apocalypse - Magic of Skyrim.esp"]}
+  - c2: globals {forms: ["084aaa:Apocalypse - Magic of Skyrim.esp"]}
+  - assert:
+      - c1.globalValue("084aaa:Apocalypse - Magic of Skyrim.esp") == 0
+      - c2.globalValue("084aaa:Apocalypse - Magic of Skyrim.esp") == 0
+
+  # 1. the streamer writes 7, as a script of its game would
+  - c1: global {form: 0x084aaa, file: "Apocalypse - Magic of Skyrim.esp", value: 7}
+  - until: {within: 10, every: 0.5, expect: ['server.world_globals().value("084aaa:Apocalypse - Magic of Skyrim.esp") == 7']}
+  - wait: 3
+  - c2: globals {forms: ["084aaa:Apocalypse - Magic of Skyrim.esp"]}
+  - assert:
+      - c2.globalValue("084aaa:Apocalypse - Magic of Skyrim.esp") == 7
+  # H-WG2: the receiver's value holds for the session
+  - wait: 60
+  - c2: globals {forms: ["084aaa:Apocalypse - Magic of Skyrim.esp"]}
+  - assert:
+      - c2.globalValue("084aaa:Apocalypse - Magic of Skyrim.esp") == 7
+
+  # 2. a non-streamer's own write moves nothing outside its game
+  - c2: global {form: 0x084aaa, file: "Apocalypse - Magic of Skyrim.esp", value: 9}
+  - wait: 5
+  - c1: globals {forms: ["084aaa:Apocalypse - Magic of Skyrim.esp"]}
+  - c2: globals {forms: ["084aaa:Apocalypse - Magic of Skyrim.esp"]}
+  - assert:
+      - c2.globalValue("084aaa:Apocalypse - Magic of Skyrim.esp") == 9
+      - c1.globalValue("084aaa:Apocalypse - Magic of Skyrim.esp") == 7
+      - server.world_globals().value("084aaa:Apocalypse - Magic of Skyrim.esp") == 7
+
+  # 3. the restart; both log in again, the journal's value served at each login
+  - wait: 5
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - c2: reconnect
+  - wait: 15
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: globals {forms: ["084aaa:Apocalypse - Magic of Skyrim.esp"]}
+  - c2: globals {forms: ["084aaa:Apocalypse - Magic of Skyrim.esp"]}
+  - server: log-count {pattern: "E_WORLDGLOBAL_(CLOCK|PLAYER|CONSTANT|NO_GLOB)"}
+  - server: log-count {pattern: "E_WORLDGLOBAL_OWNER"}
+  - server: log-count {pattern: "E_WORLDGLOBAL_EPOCH"}
+  - c1: log-count {pattern: "world globals: [0-9]+ changed, [0-9]+ sent"}
+  - assert:
+      - server.world_globals().value("084aaa:Apocalypse - Magic of Skyrim.esp") == 7
+      - c1.globalValue("084aaa:Apocalypse - Magic of Skyrim.esp") == 7
+      - c2.globalValue("084aaa:Apocalypse - Magic of Skyrim.esp") == 7
+      - 'server.log_count("E_WORLDGLOBAL_(CLOCK|PLAYER|CONSTANT|NO_GLOB)") == 0'
+      - 'server.log_count("E_WORLDGLOBAL_OWNER") == 0'
+  - server: snapshot {name: streamerAfter, of: "server.world_globals().actorId"}
+  - server: snapshot {name: epochAfter, of: "server.world_globals().epoch"}

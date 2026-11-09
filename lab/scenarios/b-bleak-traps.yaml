@@ -1,3 +1,97 @@
+# GREEN 20261109-092946-b-bleak-traps on the 50 build (fork m4-train-50 4bd07f33), by path from lab/.cache/drafts/fifty
+# (sha1 b2aa1094). v4, the claim rewrite Eli approved (2026-11-07 in numidium's session; ADR-064 decision 4) for ADR-068's
+# D-W1 A. Its green parts (amendment B): x-trigger-owner v2.4 GREEN 20261109-102632 (the firing claims), and the watcher's wall
+# damage claims read by v4's own green 092946 on the 50 build, assembled, which covers the pattern-only x-trap-wall-both rerun
+# the header below names as owed (never drafted). Committed alone (rule 13).
+# APPROVED: Eli approved this claim rewrite (12:49 PST 2026-11-07, in numidium's session through AskUserQuestion; ADR-064 decision 4).
+# It still commits alone, after its own green run and its fresh review (rule 13).
+# b-bleak-traps v4 DRAFT, header note of 2026-11-07 (no step or claim changed since the version Eli has not yet reviewed): the
+# fifty train is built, fork m4-train-50 b5e466a2, and every pattern below matches its code as written. LEG E'S CAVEAT BELOW IS
+# RESOLVED: the train's client review (fork 118b92af, note 1, "the root rule's step (3) had dropped D-S3 point 5's caster test, so
+# a mechanism activating a family target was reported by nobody") put the caster test back, `role !== null && role.family &&
+# ObjectReferenceEx.isTrapFamily(target)`, so the puzzle lever's darts fall to rule 4, the cell host's report, and leg E holds as
+# v3 wrote it. D-W2 A (Eli, thuum 2774cfb4) makes the plate's own 'Down' and 'Up' cross as looks; no claim here reads them
+# (b-trap-look v1 does). Its damage claims still wait for x-trap-wall-both's pattern-only rerun, below.
+# For the train plus D-W2's head (S5, P3, C4).
+# b-bleak-traps v4 DRAFT (r50 lab layer, 2026-11-07; L2 of docs/research/fifty-fixes-2026-11-07.md section 2, after L1's
+# b-object-anim v6; for Eli's review before any commit: a claim rewrite of a scenario that has run green and sits in the gate set,
+# ADR-064 decision 4, then its own commit, rule 13). ADR-068 D-W1 A (docs/DECISIONS.md, "D-W1 and D-C2", Eli 23:1x PST
+# 2026-11-06) amends D-S3's decision 1 (a figure's press is its own seat's, relayed) and decision 5 (the server relays a family
+# target's linked activation again, from the presser's owner alone). Legs A and B claim D-S3's firing path through snapshots (the
+# plan's read 6), so those claims change; it is a change of pattern, not of outcome: each seat still fires the wall, both players
+# in its path are still hit on their own engines, and no claim is dropped. For the fifty train (fork m4-scripts-4-rows 1acb834f
+# plus the 4c and 4d layers) on both seats and the server.
+# BUILT FROM GREEN PARTS (ADR-064 amendment B), and one part still owed: the firing claims are x-trigger-owner v1's (this folder),
+# committed only after its green run, cited in the commit. The damage claims rest on the watcher's wall, now fired from the relay
+# one hop after the stepper's, still meeting the bystander at (8589, -5538) in its swing: x-trigger-owner runs in god mode and
+# never reads a hit, so no fix probe reads that yet. x-trap-wall-both v1.2 (lab/.cache/probes, 51484945; GREEN 56 of 56 at
+# 20261105-224256 on D-S3's build) is that read, and its rerun on the fifty train with its fired patterns renamed as this draft
+# renames them (a pattern-only v1.3) is the green part this version waits for before its commit.
+# Steps changed (no claim of their own): every log-count and snapshot of D-S3's tail,
+# "trap 54b15 fired here by 567f2: every seat fires the trap family itself", which C1 no longer prints, now counts the head
+# "trap 54b15 fired here by 567f2", which every tail D-W1 prints shares (the presser's owner's firing, the relay's own play, a
+# later link); A's and B's walk baselines and ends gain each seat's own firings, both seats' reports and relayed plays and the
+# server's two relay lines; B gains c2's report count and c1's relayed play count. Legs D and E and every other step are v3's byte
+# for byte.
+# CLAIMS CHANGED, old and new and why:
+# Unchanged text, new pattern underneath: A's 'snapshot("c1Fired0A") == snapshot("c1FiredEntryA")' and its c2 twin, A's
+#    'snapshot("c1FiredA") > snapshot("c1Fired0A")' and its c2 twin, and B's four like them ('snapshot("c1Fired0B") ==
+#    snapshot("c1FiredStageB")', 'snapshot("c1FiredB") > snapshot("c1Fired0B")' and the c2 twins). why: the snapshots now count
+#    the head, so the premises keep their meaning (no firing of any kind on that seat between the settle and the walk) and the
+#    rises keep theirs (each seat fired the wall in the walk), the plan's read 6.
+# A old 'c1.log_count("Sent a linked activation of  54b15 by 567f2") == 0'
+#   new 'c1.log_count("Sent a linked activation of  54b15 by 567f2") > snapshot("c1Linked0A")'
+#   why: D-W1 amends D-S3's decision 5: the stepper's seat, the presser's owner, reports the root, so v3's 0 is false by design.
+#   Counted over the walk (its baseline beside c1Fired0A) so a firing at the cell's entry stays out, as v3 kept it out of the
+#   fired claims.
+# A old 'c2.log_count("relayed activation 54b15 by 567f2") == 0'
+#   new 'c2.log_count("relayed activation 54b15 by 567f2") > snapshot("c2Relayed0A")'
+#   why: the bystander's seat plays the relayed root (RelayedActivation 70).
+# A old 'server.log_count("567f2 activates 54b15") == 0'
+#   new 'server.log_count("567f2 activates 54b15 in cell 371de .its host ff000000 reports.: relayed to 1 game.s.") > snapshot("srvHost0A")'
+#   why: the server relays the host's root again.
+# A NEW 'snapshot("c1OwnA") > snapshot("c1Own0A")'
+#   why: the head's rise alone does not say the stepper's seat fired as the presser's owner; this does.
+# B old 'c1.log_count("Sent a linked activation of  54b15 by 567f2") == 0'
+#   new 'c2.log_count("Sent a linked activation of  54b15 by 567f2") > snapshot("c2Linked0B")'
+#   why: in B the guest is the presser's owner and reports the root (a loader's firing).
+# B old 'c2.log_count("relayed activation 54b15 by 567f2") == 0'
+#   new 'c1.log_count("relayed activation 54b15 by 567f2") > snapshot("c1Relayed0B")'
+#   why: the host, the bystander in B, plays the guest's relayed root.
+# B old 'server.log_count("567f2 activates 54b15") == 0'
+#   new 'server.log_count("567f2 activates 54b15 in cell 371de .ff000001 reports with the cell loaded, its firing.: relayed to 1 game.s.") > snapshot("srvLoad0B")'
+#   why: a loader's firing, relayed (trigger_entry.rs's firing_source: a game with the cell loaded whose player stands within the
+#   trigger's reach).
+# B NEW 'snapshot("c2OwnB") > snapshot("c2Own0B")': A's, mirrored.
+# NOT CLAIMED HERE, and why (recorded instead, each snapshot kept): the bystander's side of D-W1, that its own seat never fired
+#   for the stepper's figure, its report count unchanged, the other relay line unchanged and the stepper's seat playing no relay.
+#   Both players stand in the wall's path by design (Eli's D-T2 outcome: "a swinging wall should hit BOTH players in its path"),
+#   and a body the wall carries across its own plate fires that copy (docs/engine/scripts.md S9, CONFIRMED by log timing; v1.2's
+#   c2 fired 2 to 4 times in leg B): under D-W1 that is the bystander's own seat pressing its own plate as its presser's owner,
+#   reported and relayed like any root, so each of those claims would read a legitimate firing as the defect. They are claimed
+#   where the watcher stands out of the panel's reach: b-object-anim v6's legs A and B and x-trigger-owner v1. This is v3's own
+#   reading carried on, not a weakening: v3's "== 0" claims are false by design under D-W1, and their replacements are the
+#   rises above.
+# KEPT as v3 wrote them: every damage claim of A and B (each player's drop, record, figure of the other, one or two hits and its
+# census rows, no " (not hosted)" row), every other premise (the lever line, the family's ready line, the multipliers line, the
+# god mode counts, the bases, the records, the spots, the walk), 'server.log_count("E_TRAP_") == 0' in both legs (now also: the
+# root not refused, no E_TRAP_NOT_HOST or E_TRAP_FAR), and legs D and E whole. What becomes of v3's three "== 0" claims per leg,
+# exactly: each is false by design under D-W1 (the root crosses). In A each is replaced by its rise on the same seat. In B two of
+# them named a seat that is now the bystander (c1's report, c2's relayed play), so their replacements are the rises on the other
+# seat (c2's report, c1's relayed play), and their own content in D-W1's form, the bystander adding nothing in B, can only be
+# dropped from this scenario (the S9 reason above); b-object-anim v6's leg B claims it (the host's own firing and its relay line
+# unchanged, with the host out of reach). The third, the server's line, becomes the loader line's rise.
+# LEG E'S CAVEAT, for C1's author and the review: leg E's eight dart claims ('server.log_count("aa8c3 activates 39fdd in cell
+# 371de") == 1', c2's "relayed activation 39fdd by aa8c3" == 1, and the three darts like them) hold only if C1's rule 3 keeps
+# today's condition (activationService.ts's point 5: a pair whose caster is a family trigger AND whose target is in the family
+# goes unreported). The plan's (d) words rule 3 as "a target in the family: not reported", and the puzzle lever 0xaa8c3 runs
+# defaultPillarPuzzleLever alone (its TrapLever removed by the reference's VMAD, status 3), so it is no family trigger while its
+# darts (DartTrap) are family targets: read literally, the host stops reporting the darts, the until on "aa8c3 activates" >= 4
+# times out and leg E is red. The watcher's darts would still fire, from its own lever script under the relayed press's Override
+# (x-puzzle-handoff v4's note), which also ends today's double dart firing on the watcher. Which rule 3 C1 builds is a design call
+# for C1 and Eli, not this rewrite's: if the literal one, leg E's claims are rewritten in their own version with that reason.
+# x-lever-relay v1 records the darts' relays, so its run says which rule shipped.
+# The headers below are the previous versions'.
 # b-bleak-traps v3 (thuum-cf, 2026-11-05 22:5xZ; D-T2, Eli's outcome: "a player steps on a plate, that wall moves in both games,
 # and does damage in both"; "a swinging wall should hit BOTH players in its path, not just the person who triggered it";
 # ADR-068 D-S3, traps follow the interaction; for fork m4-scripts-2b-traps ece35376 or later on both seats and the server,
@@ -105,10 +199,10 @@ steps:
   - c2: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5538, z: -2044, rot: [0, 0, 0]}
   - wait: 8
   # v1.2: the fired counts once both have settled at their spots, against the walk's baseline
-  - c1: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
-  - server: snapshot {name: c1FiredEntryA, of: 'c1.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
-  - c2: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
-  - server: snapshot {name: c2FiredEntryA, of: 'c2.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - c1: log-count {pattern: "trap 54b15 fired here by 567f2"}
+  - server: snapshot {name: c1FiredEntryA, of: 'c1.log_count("trap 54b15 fired here by 567f2")'}
+  - c2: log-count {pattern: "trap 54b15 fired here by 567f2"}
+  - server: snapshot {name: c2FiredEntryA, of: 'c2.log_count("trap 54b15 fired here by 567f2")'}
   - c1: log-count {pattern: "scriptNonOwnerSkip nonLatent: a non-owned state row"}
   - c2: log-count {pattern: "scriptNonOwnerSkip nonLatent: a non-owned state row"}
   - c1: log-count {pattern: "trap family ready: [0-9]+ root"}
@@ -132,10 +226,25 @@ steps:
   - server: snapshot {name: c2Hp0A, of: "c2.av().healthCurrent"}
   - server: snapshot {name: c1Rec0A, of: "server.actor(c1).healthPercentage"}
   - server: snapshot {name: c2Rec0A, of: "server.actor(c2).healthPercentage"}
-  - c1: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
-  - server: snapshot {name: c1Fired0A, of: 'c1.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
-  - c2: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
-  - server: snapshot {name: c2Fired0A, of: 'c2.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - c1: log-count {pattern: "trap 54b15 fired here by 567f2"}
+  - server: snapshot {name: c1Fired0A, of: 'c1.log_count("trap 54b15 fired here by 567f2")'}
+  - c2: log-count {pattern: "trap 54b15 fired here by 567f2"}
+  - server: snapshot {name: c2Fired0A, of: 'c2.log_count("trap 54b15 fired here by 567f2")'}
+  # v4 (D-W1): each seat's own firings, the host's report, the guest's relayed play and the server's two relay lines, counted
+  # with the walk's baseline so a firing at the cell's entry (docs/engine/scripts.md S10) stays out of the claims; the
+  # bystander's own firings and the loader line are RECORDED (the header says why)
+  - c1: log-count {pattern: "trap 54b15 fired here by 567f2: the presser.s owner.s firing"}
+  - server: snapshot {name: c1Own0A, of: 'c1.log_count("trap 54b15 fired here by 567f2: the presser.s owner.s firing")'}
+  - c2: log-count {pattern: "trap 54b15 fired here by 567f2: the presser.s owner.s firing"}
+  - server: snapshot {name: c2Own0A, of: 'c2.log_count("trap 54b15 fired here by 567f2: the presser.s owner.s firing")'}
+  - c1: log-count {pattern: "Sent a linked activation of  54b15 by 567f2"}
+  - server: snapshot {name: c1Linked0A, of: 'c1.log_count("Sent a linked activation of  54b15 by 567f2")'}
+  - c2: log-count {pattern: "relayed activation 54b15 by 567f2"}
+  - server: snapshot {name: c2Relayed0A, of: 'c2.log_count("relayed activation 54b15 by 567f2")'}
+  - server: log-count {pattern: "567f2 activates 54b15 in cell 371de .its host ff000000 reports.: relayed to 1 game.s."}
+  - server: snapshot {name: srvHost0A, of: 'server.log_count("567f2 activates 54b15 in cell 371de .its host ff000000 reports.: relayed to 1 game.s.")'}
+  - server: log-count {pattern: "567f2 activates 54b15 in cell 371de .ff000001 reports with the cell loaded, its firing.: relayed to 1 game.s."}
+  - server: snapshot {name: srvLoad0A, of: 'server.log_count("567f2 activates 54b15 in cell 371de .ff000001 reports with the cell loaded, its firing.: relayed to 1 game.s.")'}
   - c1: log-count {pattern: "census ObjectReference.ProcessTrapHit [0-9]+ in 30 s"}
   - server: snapshot {name: c1Bare0A, of: 'c1.log_count("census ObjectReference.ProcessTrapHit [0-9]+ in 30 s")'}
   - c1: log-count {pattern: "census ObjectReference.ProcessTrapHit 1 in 30 s"}
@@ -180,10 +289,14 @@ steps:
   - server: snapshot {name: c2EndA, of: "server.actor(c2)"}
   - c1: screenshot
   - c2: screenshot
-  - c1: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
-  - server: snapshot {name: c1FiredA, of: 'c1.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
-  - c2: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
-  - server: snapshot {name: c2FiredA, of: 'c2.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - c1: log-count {pattern: "trap 54b15 fired here by 567f2"}
+  - server: snapshot {name: c1FiredA, of: 'c1.log_count("trap 54b15 fired here by 567f2")'}
+  - c2: log-count {pattern: "trap 54b15 fired here by 567f2"}
+  - server: snapshot {name: c2FiredA, of: 'c2.log_count("trap 54b15 fired here by 567f2")'}
+  - c1: log-count {pattern: "trap 54b15 fired here by 567f2: the presser.s owner.s firing"}
+  - server: snapshot {name: c1OwnA, of: 'c1.log_count("trap 54b15 fired here by 567f2: the presser.s owner.s firing")'}
+  - c2: log-count {pattern: "trap 54b15 fired here by 567f2: the presser.s owner.s firing"}
+  - server: snapshot {name: c2OwnA, of: 'c2.log_count("trap 54b15 fired here by 567f2: the presser.s owner.s firing")'}
   # the census's two windows (the platform's 30 s flush, then the client's 30 s summary)
   - wait: 70
   - c1: log-count {pattern: "census ObjectReference.ProcessTrapHit [0-9]+ in 30 s"}
@@ -231,10 +344,13 @@ steps:
       - 'snapshot("c1Y1A") < -5300'
       - 'snapshot("c1FiredA") > snapshot("c1Fired0A")'
       - 'snapshot("c2FiredA") > snapshot("c2Fired0A")'
-      # D-S3: each seat fired the wall itself, and the pair went nowhere: no report from the host, no relay, no relayed play
-      - 'c1.log_count("Sent a linked activation of  54b15 by 567f2") == 0'
-      - 'c2.log_count("relayed activation 54b15 by 567f2") == 0'
-      - 'server.log_count("567f2 activates 54b15") == 0'
+      # v4 (D-W1): c1, the stepper, fired its own copy as the presser's owner and reported the pair; the server relayed the
+      # host's root; c2, the bystander, played it (its own firings are recorded: the swing may carry its body across its own
+      # plate, S9, a firing of its own under D-W1)
+      - 'snapshot("c1OwnA") > snapshot("c1Own0A")'
+      - 'c1.log_count("Sent a linked activation of  54b15 by 567f2") > snapshot("c1Linked0A")'
+      - 'c2.log_count("relayed activation 54b15 by 567f2") > snapshot("c2Relayed0A")'
+      - 'server.log_count("567f2 activates 54b15 in cell 371de .its host ff000000 reports.: relayed to 1 game.s.") > snapshot("srvHost0A")'
       - 'server.log_count("E_TRAP_") == 0'
       # the damage: c1 stepped, c2 stood in the path; both hit once (or twice, the return swing), each on its own engine,
       # the record carrying each to the other game
@@ -259,15 +375,15 @@ steps:
   - c2: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -6038, z: -1999, rot: [0, 0, 0]}
   - wait: 5
   # any stray firing ends and the wall comes to rest: the counts before and after the wait RECORDED, not claimed
-  - c1: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
-  - server: snapshot {name: c1FiredPreStageB, of: 'c1.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
-  - c2: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
-  - server: snapshot {name: c2FiredPreStageB, of: 'c2.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - c1: log-count {pattern: "trap 54b15 fired here by 567f2"}
+  - server: snapshot {name: c1FiredPreStageB, of: 'c1.log_count("trap 54b15 fired here by 567f2")'}
+  - c2: log-count {pattern: "trap 54b15 fired here by 567f2"}
+  - server: snapshot {name: c2FiredPreStageB, of: 'c2.log_count("trap 54b15 fired here by 567f2")'}
   - wait: 20
-  - c1: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
-  - server: snapshot {name: c1FiredStageB, of: 'c1.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
-  - c2: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
-  - server: snapshot {name: c2FiredStageB, of: 'c2.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - c1: log-count {pattern: "trap 54b15 fired here by 567f2"}
+  - server: snapshot {name: c1FiredStageB, of: 'c1.log_count("trap 54b15 fired here by 567f2")'}
+  - c2: log-count {pattern: "trap 54b15 fired here by 567f2"}
+  - server: snapshot {name: c2FiredStageB, of: 'c2.log_count("trap 54b15 fired here by 567f2")'}
   # into place from the south along x 8589: the stepper first (its figure is placed, passing the empty bystander spot, and
   # stops about 37 units short of the plate's trigger, 77 short of its top), then the bystander (its figure stops 78 units south
   # of the stepper); no figure's
@@ -287,10 +403,28 @@ steps:
   - server: snapshot {name: c2Hp0B, of: "c2.av().healthCurrent"}
   - server: snapshot {name: c1Rec0B, of: "server.actor(c1).healthPercentage"}
   - server: snapshot {name: c2Rec0B, of: "server.actor(c2).healthPercentage"}
-  - c1: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
-  - server: snapshot {name: c1Fired0B, of: 'c1.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
-  - c2: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
-  - server: snapshot {name: c2Fired0B, of: 'c2.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - c1: log-count {pattern: "trap 54b15 fired here by 567f2"}
+  - server: snapshot {name: c1Fired0B, of: 'c1.log_count("trap 54b15 fired here by 567f2")'}
+  - c2: log-count {pattern: "trap 54b15 fired here by 567f2"}
+  - server: snapshot {name: c2Fired0B, of: 'c2.log_count("trap 54b15 fired here by 567f2")'}
+  # v4 (D-W1): B's baselines, as A's, both seats' reports and relayed plays (each seat is either now); the bystander's own
+  # firings, its report, the stepper's relayed plays and the host line are RECORDED (the header says why)
+  - c1: log-count {pattern: "trap 54b15 fired here by 567f2: the presser.s owner.s firing"}
+  - server: snapshot {name: c1Own0B, of: 'c1.log_count("trap 54b15 fired here by 567f2: the presser.s owner.s firing")'}
+  - c2: log-count {pattern: "trap 54b15 fired here by 567f2: the presser.s owner.s firing"}
+  - server: snapshot {name: c2Own0B, of: 'c2.log_count("trap 54b15 fired here by 567f2: the presser.s owner.s firing")'}
+  - c1: log-count {pattern: "Sent a linked activation of  54b15 by 567f2"}
+  - server: snapshot {name: c1Linked0B, of: 'c1.log_count("Sent a linked activation of  54b15 by 567f2")'}
+  - c2: log-count {pattern: "Sent a linked activation of  54b15 by 567f2"}
+  - server: snapshot {name: c2Linked0B, of: 'c2.log_count("Sent a linked activation of  54b15 by 567f2")'}
+  - c1: log-count {pattern: "relayed activation 54b15 by 567f2"}
+  - server: snapshot {name: c1Relayed0B, of: 'c1.log_count("relayed activation 54b15 by 567f2")'}
+  - c2: log-count {pattern: "relayed activation 54b15 by 567f2"}
+  - server: snapshot {name: c2Relayed0B, of: 'c2.log_count("relayed activation 54b15 by 567f2")'}
+  - server: log-count {pattern: "567f2 activates 54b15 in cell 371de .its host ff000000 reports.: relayed to 1 game.s."}
+  - server: snapshot {name: srvHost0B, of: 'server.log_count("567f2 activates 54b15 in cell 371de .its host ff000000 reports.: relayed to 1 game.s.")'}
+  - server: log-count {pattern: "567f2 activates 54b15 in cell 371de .ff000001 reports with the cell loaded, its firing.: relayed to 1 game.s."}
+  - server: snapshot {name: srvLoad0B, of: 'server.log_count("567f2 activates 54b15 in cell 371de .ff000001 reports with the cell loaded, its firing.: relayed to 1 game.s.")'}
   - c1: settings {gmst: [fDiffMultHPToPCVE, fDiffMultHPToPCE, fDiffMultHPToPCN, fDiffMultHPToPCH, fDiffMultHPToPCVH, fDiffMultHPToPCL]}
   - c2: settings {gmst: [fDiffMultHPToPCVE, fDiffMultHPToPCE, fDiffMultHPToPCN, fDiffMultHPToPCH, fDiffMultHPToPCVH, fDiffMultHPToPCL]}
   # v1.2: each player where its spot is, read on its own seat, right before the walk
@@ -326,10 +460,14 @@ steps:
   - server: snapshot {name: c2EndB, of: "server.actor(c2)"}
   - c1: screenshot
   - c2: screenshot
-  - c1: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
-  - server: snapshot {name: c1FiredB, of: 'c1.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
-  - c2: log-count {pattern: "trap 54b15 fired here by 567f2: every seat fires the trap family itself"}
-  - server: snapshot {name: c2FiredB, of: 'c2.log_count("trap 54b15 fired here by 567f2: every seat fires the trap family itself")'}
+  - c1: log-count {pattern: "trap 54b15 fired here by 567f2"}
+  - server: snapshot {name: c1FiredB, of: 'c1.log_count("trap 54b15 fired here by 567f2")'}
+  - c2: log-count {pattern: "trap 54b15 fired here by 567f2"}
+  - server: snapshot {name: c2FiredB, of: 'c2.log_count("trap 54b15 fired here by 567f2")'}
+  - c1: log-count {pattern: "trap 54b15 fired here by 567f2: the presser.s owner.s firing"}
+  - server: snapshot {name: c1OwnB, of: 'c1.log_count("trap 54b15 fired here by 567f2: the presser.s owner.s firing")'}
+  - c2: log-count {pattern: "trap 54b15 fired here by 567f2: the presser.s owner.s firing"}
+  - server: snapshot {name: c2OwnB, of: 'c2.log_count("trap 54b15 fired here by 567f2: the presser.s owner.s firing")'}
   - wait: 70
   - c1: log-count {pattern: "census ObjectReference.ProcessTrapHit [0-9]+ in 30 s"}
   - c1: log-count {pattern: "census ObjectReference.ProcessTrapHit 1 in 30 s"}
@@ -351,6 +489,8 @@ steps:
   - server: snapshot {name: c2SkippedB, of: 'c2.log_count("census ObjectReference.ProcessTrapHit .skipped. [0-9]+ in 30 s")'}
   - c1: log-count {pattern: "Sent a linked activation of  54b15 by 567f2"}
   - c2: log-count {pattern: "relayed activation 54b15 by 567f2"}
+  - c2: log-count {pattern: "Sent a linked activation of  54b15 by 567f2"}
+  - c1: log-count {pattern: "relayed activation 54b15 by 567f2"}
   - assert:
       - server.host(0x371de).client == "c1"
       - 'server.log_count("ConsoleCommands: ff00000[01] god mode off") == 2'
@@ -369,10 +509,12 @@ steps:
       - 'snapshot("c2Y1B") < -5300'
       - 'snapshot("c1FiredB") > snapshot("c1Fired0B")'
       - 'snapshot("c2FiredB") > snapshot("c2Fired0B")'
-      # D-S3: each seat fired again; still nothing reported or relayed
-      - 'c1.log_count("Sent a linked activation of  54b15 by 567f2") == 0'
-      - 'c2.log_count("relayed activation 54b15 by 567f2") == 0'
-      - 'server.log_count("567f2 activates 54b15") == 0'
+      # v4 (D-W1): the mirror: c2, the stepper, fired its own copy and reported the pair as a loader's firing; the server relayed
+      # it; c1, the bystander and the host, played it (its own firings recorded, as A's bystander's)
+      - 'snapshot("c2OwnB") > snapshot("c2Own0B")'
+      - 'c2.log_count("Sent a linked activation of  54b15 by 567f2") > snapshot("c2Linked0B")'
+      - 'c1.log_count("relayed activation 54b15 by 567f2") > snapshot("c1Relayed0B")'
+      - 'server.log_count("567f2 activates 54b15 in cell 371de .ff000001 reports with the cell loaded, its firing.: relayed to 1 game.s.") > snapshot("srvLoad0B")'
       - 'server.log_count("E_TRAP_") == 0'
       # the damage: the mirror (c2 stepped, c1, the host, stood in the path), the census rows risen from A's
       - 'snapshot("c2Hp0B") - snapshot("c2HpB") >= 45'

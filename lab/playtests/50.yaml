@@ -1,0 +1,62 @@
+# Playtest 50 (numidium, 2026-11-09 03:22 PST): the Temple on both screens, then Embershard, on the canonical seats. The build is fork
+# canon at m4-train-50 ce0d2664 after its merge gate (ADR-068 rung 4's state rows and all of 49's fixes, one train): the
+# server image skymp-server:m4-train-50-ce0d2664, the client of gitlab build 19859 at 43a00a18 (SkyrimPlatformImpl
+# f2e56ff71f518605; the train's commits since are the server's), re-staged by verb-stage at ce0d2664 under the layer 49
+# played: apocrypha/layer-appearance as laid at b2bcc92d (the SFW body, Rotfern's Fixes 0.1.1), unchanged since (its head
+# c3d387b8 merges main alone; its layer inputs diff to zero against b2bcc92d, apocrypha 2026-11-09). thuum-fa's checklist is
+# docs/private/playtest-50.md (items 1 to 8, the Temple's in walking order; no layer items).
+# The world is the canonical one, playtest-canon-chars-20261107T064547Z, as it stands, read 2026-11-09 against thuum-fa's
+# premises (lab/esm.py and the snapshot's change forms on sky-srv): in the Temple 0x371de the webs 0x3758c, 0x3758d and
+# 0x37281, the lever 0xaa8c3, the wall 0x54b15, its plate 0x567f2, the chain 0xfda45 and the swinging blades 0x3ac33,
+# 0x3ac35 and 0x3ac37 hold no record; the pillars 0xaa8cb to 0xaa8cd and the puzzle's gate 0x3b9f1 (NorPortcullisLarge01)
+# hold placement-only records (position and rotation equal Skyrim.esm's, no script state, no animation), so the gate is
+# shut and the pillars show the game files' faces; the ambush draugr 0x380b3 to 0x380bb are alive (six recorded at full
+# health, three unrecorded); Arvel 0x39655 is dead, as 47 left him (49 met him alive only in its second reset's world). In
+# Embershard 0xb6be6 the wire 0xb6d3f and the bone alarms 0x10481e and 0x10481f hold no record and every recorded actor is
+# alive. The camp (thuum-fa): the Temple's door landing first (49's second reset, 48's fourth), each seat walking into
+# 0x371de by a real cell load, rotfern first so she hosts; the bandits 0x29600 and 0x29602 there are dead in this world.
+# Embershard is the second camp, a server-side teleport of both seats mid-playtest (no world reset): the main door's
+# lookout 0xb6ce1 is alive in this world, so 49's first camp, the game's landing of the back door 0xb6f29:
+#   - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [16198, -53980, 1349], rot: [0, 0, 164.5]}
+#   - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [16146, -54009, 1380], rot: [0, 0, 164.5]}
+# Inside items: 3, rotfern's relaunch alone while Ariadne stands outside (b-login-in-cell's shape); 4, a server restart,
+# then both moved out of the pillar room and back (b-pillar-reentry's shape); 8, the world's record count before and after
+# that restart (10b3edcb).
+id: 50
+build: "fork canon m4-train-50 ce0d2664 (rung 4's state rows, 49's fixes) re-staged by verb-stage under apocrypha/layer-appearance as laid at b2bcc92d"
+world: playtest-canon-chars-20261107T064547Z
+hold:
+  minutes: 150
+  reason: "playtest 50: the Temple on both screens, then Embershard, the 50 train"
+server:
+  npcEnabled: true
+  gameHour: 12.0
+  locks: true   # every switch on, as the 44 baseline
+  weatherSync: true
+  perks: true
+  leveling: true
+camp:
+  # the Temple's door landing, the game's landing of the door 0x15da5 (lab/playtests/47.yaml), rotfern first
+  teleports:
+    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [-2966, -43331, 6145], rot: [0, 0, 104.6]}
+    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [-2908, -43346, 6145], rot: [0, 0, 104.6]}
+seats:
+  - profile: 1
+    name: "test 1"
+    perks: [0x7934b]   # Overdraw40 through the server's AddPerk (284a4d51): the headshot rule's condition
+    spells: []
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]   # Survival off
+    values:
+      Marksman: 60
+    percentages: {health: 1, magicka: 1, stamina: 1}
+  - profile: 2
+    name: "test 2"
+    perks: []
+    spells: []
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]
+    percentages: {health: 1, magicka: 1, stamina: 1}
+streams:
+  test1: 48989
+  test2: 49989
+after:
+  readback: percentages
