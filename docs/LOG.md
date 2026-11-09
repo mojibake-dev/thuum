@@ -9356,3 +9356,21 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   2,000 radius, thuum-fa's read) and green on the lone-red rerun (122230); its v1.1 widens the radius to 4,000. No
   b-standing: the standing is W3, mechanism only, guarded by T0 and x-standing's 20261107-205305 (papyrus-events.md).
   Next: playtest 50 (lab/playtests/50.yaml, the canonical world as it stands, the Temple first) on Eli's go.
+- Playtest 50 (2026-11-09 13:40 to 14:38 PST; lab/playtests/50.yaml, thuum-fa's checklist docs/private/playtest-50.md, recorded
+  in results/playtest-50/ in 10 cycles, numidium's findings docs/private/playtest-50-findings.md) on canon ce0d2664 under
+  apocrypha/layer-appearance as laid at b2bcc92d, the canonical world restored by playtest-go (every check ok). Verified in
+  play: the guest's cobwebs; the lever on the other screen; a login inside the Temple (rotfern's game relaunched in the pillar
+  room with Ariadne outside: the Temple granted to her fresh at epoch 3, her pillars right, a press turning on both screens);
+  the spike wall and the blades on both screens (49's break); Embershard's bone alarms and tripwire; mp host. Measured: a plain
+  restart grew the world from 1,398 to 1,425 records (+27; 49's from 1,542 to 15,393). Broken, in Eli's words: Embershard's
+  bandits undressed on both screens ("they do have their armor just not worn"; the host's equipment reports lacked their worn
+  items at its load and the server kept its roll); a bandit immune to rotfern's bow (Katria's Bow 0x200cfb6: no hit of hers
+  reached the server while it logged "Expected record 0x200db5a to be ENCH, but found REFR" about once a shot; Ariadne's Flames
+  killed it); and mp racemenu opening on reset colors and markings. Also noted: the pillars desynced after a restart plus a
+  trip out and back, corrected at the next press (Eli: "a transient issue only showing up in edge cases that auto resolves");
+  a weaponless draugr sliding on the guest's screen after `mp tp 2` moves. thuum-fa's read-only agents read the bandits and the
+  bow. Beside it: apocrypha's x-layer-look v1.2 (20261109-131056) and x-rotfern-robe v1.1 (131438) settled 49's layer items 6
+  and 7, and b-ref-state-restart v1.1's first run read green (130522). Two live steps got recipes first: playtest-restart
+  (a21e46b1; its online wait reads through lab-api's 502 since 12fdb86c) and playtest-teleport (1bacb4d8). Eli: "seems like
+  playtest 51 should new rung 4 stuff and those fixes"; rung 4 shipped in this build, so the new work for 51 is rung 5, quests
+  (thuum-fa's plan docs/research/rung5-quests-2026-11-09.md), waiting on Eli's W1, D-Q2 and D-Q3 (D-V1 decided B by its census).

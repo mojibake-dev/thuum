@@ -1516,6 +1516,13 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   as it stands, the Temple first, then Embershard), then apocrypha's layer-merge sweep of apocrypha/layer-appearance
   (c3d387b8, main merged in first); later, the gate log cap per trigger, c1's corpse-lay crash read, D7's startingKit and D8's
   alternate start.
+- STATE 2026-11-09 14:40 PST (numidium): playtest 50 closed on canon ce0d2664. VERIFIED IN PLAY: the guest's cobwebs, the lever on
+  both screens, a login inside a cell (D-L1 B), the spike wall and the blades on both screens, Embershard's bone alarms and
+  tripwire, mp host; a plain restart grew the world by 27 records. BROKEN: Embershard's bandits undressed at the host's load
+  (both screens), a bandit immune to Katria's Bow (the server's ENCH lookup error at each shot), mp racemenu's reset tints and
+  warpaint; the pillars after a restart and a trip out (Eli: a transient edge case). Next: thuum-fa's reads and fixes for the
+  three; rung 5 (quests) for 51 once Eli gives W1, D-Q2 and D-Q3; apocrypha's layer-merge sweep of
+  apocrypha/layer-appearance c407d1fa on the free lab.
 
 ### M5: Progression (4 to 8 weeks, Class A/B). Started 2026-10-31 (the weekend pass)
 
