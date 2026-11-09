@@ -1508,6 +1508,14 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   verified traps still work), D-L1 B, all fixes in 50. Next: rung 4's stage (fork m4-scripts-4-rows 1acb834f, LABAPI 5612),
   whose x-trigger-entry and x-lever-furn gate the 50 train (fork m4-train-50 4bd07f33); layer-merge for
   apocrypha/layer-appearance; three claim rewrites for Eli (b-object-anim, b-bleak-traps, x-trap-wire-rope v2).
+- STATE 2026-11-09 04:59 PST (numidium): canon fast-forwarded to fork ce0d2664, thuum-fa's 50 train (ADR-068 rung 4's state rows;
+  49's fixes: D-W1 A, D-C2 A, D-W2 A, D-C3 A, D-L1 B, the lever's furniture rule, the stop's flush, the pillar view after a 3D
+  unload; mp racemenu), by verb-merge's fresh gate 20261109-111327 (24 green; b-ref-state-restart's one red a radius
+  premise, its v1.1 next) with thuum-fa's T2; clones promoted. AliasFill MECHANISM ONLY (the platform hands JS no Alias, a
+  fix after 50); the standing MECHANISM ONLY (W3). Next: playtest 50 on Eli's go (lab/playtests/50.yaml: the canonical world
+  as it stands, the Temple first, then Embershard), then apocrypha's layer-merge sweep of apocrypha/layer-appearance
+  (c3d387b8, main merged in first); later, the gate log cap per trigger, c1's corpse-lay crash read, D7's startingKit and D8's
+  alternate start.
 
 ### M5: Progression (4 to 8 weeks, Class A/B). Started 2026-10-31 (the weekend pass)
 

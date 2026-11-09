@@ -9322,3 +9322,37 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   and layer-stage now keeps a staged train's client in the label (7c6a2f96). Playtest 49 played this build. b-body-loot
   read green three times on it (035635, 044818, 080607), so gate.yaml's pending line for it comes out (its DDO premise is
   main's since 43a2513f).
+
+### 2026-11-09
+
+- m4-train-50 merged to fork canon ce0d2664 (2026-11-09T12:57Z): the gate 20261109-111327-merge-m4-train-50, 20261109-111327-smoke-two-players to 20261109-125306-b-npc-caster (25 runs); T2 skip on skymp-server:m4-train-50; clones promoted.
+  Verbs: thuum-fa's 50 train, playtest 49's fixes and ADR-068 rung 4 in one. Rung 4's state rows (fork m4-scripts-4-rows
+  1acb834f, SCHEMA_VERSION 39): a reference's ref state through the widened DestructionStage 78, AliasFill 79, WorldGlobal 80,
+  the standing and the script set through ScriptCall 75; with them the stop's flush writing only the edits the saving policy
+  deferred (10b3edcb, after 49's plain restart wrote 13,851 flora change forms), the pillar view replayed at every 3D load on
+  a non-owner (bb24886d, 49's pillars reset on the guest), D-L1 B (a login inside a cell sends that cell's entry events,
+  a7a3854c), the console's mp racemenu (0498a2f0) and libespm's faction rank read at SNAM's offset 4 (f9e09f01). The fifty
+  fixes (SCHEMA_VERSION 40): D-W1 A (a trap trigger's firing is its presser's owner's, fired there and relayed), D-C2 A (the
+  guest's trigger entry relayed to the host, its leave paired with the enter), D-W2 A (the trigger's own calls from its
+  firing seat, CreateDetectionEvent to the cell's host; Eli's condition, 49's verified traps, read green as
+  x-trap-bone-alarm, x-trap-wire-lure, x-trap-wall-kill, x-trap-npc-kill-late and x-trap-wire-rope), D-C3 A (a world
+  object's graph variables in the script record), the lever's furniture rule (H-P1), and e4752b05 (a primitive's records
+  served at its subscribe). AliasFill is mechanism only: Skyrim Platform's CallNative hands JS no Alias (the alias family's
+  VM type ids sit at or above FormType::Max), a platform fix after 50. Rung 4's stage (11-07, 1acb834f) read 18 of 23
+  scenarios green at least once; the five not were x-skip-latent and x-alias-premise (that Alias), b-ref-state-restart (the
+  primitive's records, e4752b05), b-container-rest (Souls RE's 400-unit close) and b-quest-stage (its login line). The 50
+  stage (4bd07f33, 11-07 22:52Z to 11-08 00:15Z) read 14 of 22: its reds four probes (x-trigger-owner, x-trap-wire-lure,
+  x-cobweb-relay, x-lever-relay, green on 11-09 as v2.4, v1.4, v1.5 and v1.2) and four claims Eli approved rewriting
+  (b-object-anim v6 and b-bleak-traps v4 for D-W1's firing, b-container-rest v3 for Souls RE's close, b-quest-stage's login
+  line), green 091605 to 092946. numidium sat 34 h behind its own blocking question (11-07 22:45Z to 11-09 09:11Z). With
+  the server on ce0d2664 (pinned 10:21Z): b-ref-state-restart red once on step 34 (102129) and green unchanged (105707);
+  x-trap-wire-lure v1.4, x-trigger-owner v2.4, x-cobweb-relay v1.5, b-lever-relay v1.2, b-trap-look v1.3 and b-cobweb-view
+  v1.4 green. thuum-fa committed the four b- scenarios alone and promoted x-pillar-reentry and x-login-in-cell to
+  b-pillar-reentry and b-login-in-cell (their ids still the probes', so the gate's runs carry x- names; an id-only fix
+  next). The T2 is thuum-fa's on skymp-server:m4-train-50-ce0d2664 (fakeclient ok, 50 of 50 difftest sessions
+  identical). The re-stage at ce0d2664 (REUSE_DIST=1: gitlab build 19859 at 43a00a18, the client every probe ran,
+  SkyrimPlatformImpl f2e56ff71f518605 on both) named the head on both clones for gate-cite's check 3. In the gate,
+  b-ref-state-restart's step 34 went red again (122025: c1's walk ended 2,009 units from the marker 0x17037, past the read's
+  2,000 radius, thuum-fa's read) and green on the lone-red rerun (122230); its v1.1 widens the radius to 4,000. No
+  b-standing: the standing is W3, mechanism only, guarded by T0 and x-standing's 20261107-205305 (papyrus-events.md).
+  Next: playtest 50 (lab/playtests/50.yaml, the canonical world as it stands, the Temple first) on Eli's go.
