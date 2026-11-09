@@ -557,6 +557,12 @@ playtest-switch n key state:
 playtest-restart n:
     @uv run --project lab/labapi python lab/tools/playtest_setup.py restart {{n}}
 
+# In a playtest, one seat moved by the server, the camp's own step (the gamemode's labCommand teleport; a cell is
+# <form id hex>:<plugin>, rot its heading in degrees): `just playtest-teleport 1 371de:Skyrim.esm 5520 -896 -768 90`
+# (50's item 4: both out of the pillar room and back after the restart, so the Temple's 3D unloads and loads again).
+playtest-teleport profile cell x y z rot="0":
+    @python3 -c 'import json, sys; p, c, x, y, z, r = sys.argv[1:7]; print(json.dumps({"payload": {"kind": "teleport", "profileId": int(p), "cell": c, "pos": [float(x), float(y), float(z)], "rot": [0, 0, float(r)]}}))' {{profile}} {{cell}} {{x}} {{y}} {{z}} {{rot}} | curl -fsS -m 30 -X POST "{{lab_api}}/state/rpc/labCommand" -H 'content-type: application/json' --data-binary @-; echo
+
 playtest-relaunch client:
     @lab/tools/playtest-relaunch.sh {{client}}
 
