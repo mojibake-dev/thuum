@@ -1,3 +1,19 @@
+# GREEN 20261109-091807-b-container-rest on the 50 build (fork m4-train-50 4bd07f33), by path from lab/.cache/drafts/fifty
+# (sha1 61b29016). v3, the claim rewrite Eli approved (2026-11-09 ~01:1x PST in numidium's session, option A; ADR-064 decision
+# 4): the out-of-reach take is sent without the menu (the driver's inventory then transfer steps, a forged message), since
+# Skyrim Souls RE, in main's mod layer since 11-04 (32459beb), closes a container menu past 400 units, inside the server's
+# 524 reach (v2's reds 20261107-221540, 223516 and 223900). Committed alone (rule 13).
+# b-container-rest v3 (drafted 2026-11-07 from the reds 20261107-221540, 223516 and 223900 on rung 4's stage, fork m4-scripts-4-rows
+# 1acb834f; a step and premise change, every assertion as v2 wrote it): claim 2's take from afar is the driver's transfer (a Papyrus
+# RemoveItem out of the chest, which the client's ContainersService sends as the menu's TakeItem), not R in an open menu. Since main's
+# layer took Skyrim Souls RE 3.2.0 (32459beb, 2026-11-04; v1's last green 20261102-080532 and x-container-hold 20261104-003449 ran
+# without it), its auto-close (SkyrimSoulsRE.ini [AUTOCLOSE] bAutoCloseMenus true, fAutoCloseDistance 400, the gap between the two
+# bounding boxes; its AutoCloseManager::CheckAutoClose) shuts the ContainerMenu once the chest is 400 units off, inside the server's
+# reach of 524: all three reds read c2's SkyrimSoulsRE.log "Closing ContainerMenu: Target moved out of range." and its console
+# "onOpenContainerMesage - menu closed" 0.17 to 0.21 s after the teleport, the closing activation shutting the chest (the second
+# "shut with 0 occupant"), so the tap of R met no menu and no TakeItem reached the server. A playing seat can no longer hold the menu
+# open past the reach; the reach rule guards the forged message alone, and that is the take claim 2 now makes. Claim 3's close is
+# the auto-close's (its close-menu kept, closing nothing, as in v1's green after R); its assertions read the same lines.
 # b-container-rest v2 (thuum-cf, 2026-11-03; ADR-067 decisions 1 and 6, Eli's word: one occupant per container, no live view; fork
 # m3-turbo3-sys2-container): claim 2 is rewritten from the shared view (two occupants, D52) to the hold: c2's activation while c1 is in
 # the chest is REFUSED (the server's E_CONTAINER_BUSY line once, c2's ContainerMenu closed, c1's open), c1 closes (the first shut), c2
@@ -10,16 +26,18 @@
 # SetOpen, "<player> released from 371e9 by its disconnect", "371e9 saved open came back shut at load", "E_CONTAINER_REACH: <player>
 # takes 371e9" at a take from beyond the occupation reach; the client's: "container 371e9 lid Open played for the server's isOpen"
 # and "lid Close played" on a change of the applied state. server.ref carries no open state, so the claims read the lines; the lids
-# are in the screenshots. The lab's teleport is the server's and the engine's menu stays open through it, so the walk off with the
-# menu open is a teleport of 100 units past the reach.
+# are in the screenshots. The lab's teleport is the server's; under Skyrim Souls RE the engine's menu closes at a landing more than
+# 400 units off (v3), so the take from beyond the reach is the driver's transfer after a teleport of 100 units past the reach.
 # Claims (the verb doc's Tests), each with what it proves:
 # 1. c1 opens: its ContainerMenu, the server's "open with 1 occupant", no reach refusal, c2's "lid Open played" once within 3 s: the
 #    open is the server's state and the watcher's engine plays it (R0 the state, the lid native from the property).
 # 2. c2's E while c1 is in the chest is refused (ADR-067 decision 6): "E_CONTAINER_BUSY: <c2> activates 371e9 held by <c1>; refused"
 #    once, c2's ContainerMenu closed, c1's still open, no "doesn't occupy" line; c1 closes ("shut with 0 occupant" once), c2 opens
-#    alone ("open with 1 occupant" a second time); c2 moved 100 units off with its menu open takes all (R, DIK 19): the take is
-#    refused from beyond the reach (E_CONTAINER_REACH), the chest's items stay.
-# 3. c2 closes: the server's second "shut with 0 occupant" and c2's "lid Close played" within 3 s: the lid follows the occupant out.
+#    alone ("open with 1 occupant" a second time); c2 moved 100 units past the reach (its menu shut there by the auto-close, v3)
+#    takes one of the chest's gold without the menu (transfer, v3): the take is refused from beyond the reach (E_CONTAINER_REACH),
+#    the chest's items stay.
+# 3. c2's menu is closed (by the auto-close at claim 2's move, v3): the server's second "shut with 0 occupant" and c2's "lid Close
+#    played": the lid follows the occupant out.
 # 4. c1 opens and relaunches with its menu open: the disconnect releases it ("released from 371e9 by its disconnect"), the chest shuts,
 #    c2's lid Close line again within 5 s.
 # 5. c1 back and the chest open again, the server restarted (5 s after the open, past the save tick): "saved open came back shut at
@@ -101,16 +119,20 @@ steps:
       - 'c2.state.menuOpen("ContainerMenu") == true'
       - 'server.log_count("371e9 open with 1 occupant") == 2'
       - 'server.log_count("doesn.t occupy") == 0'
+  # v3: the move past the reach; Skyrim Souls RE's auto-close shuts c2's menu at the landing and the closing activation releases
+  # the hold. Then the take from afar without the menu (the forged message's path, the reach check before the occupant's), c2's
+  # own copy of the chest read first (recorded, not claimed)
   - c2: teleport {cell: "371de:Skyrim.esm", x: -4200, y: 850, z: 650, rot: [0, 0, 90]}
   - wait: 2
-  - c2: tap-key {code: 19}
+  - c2: inventory {ref: 0x371e9}
+  - c2: transfer {from: 0x371e9, item: 0xf, count: 1}
   - wait: 3
   - c2: screenshot
   - c1: screenshot
   - c2: dump-state
   - assert:
       - 'server.log_count("E_CONTAINER_REACH: ff[0-9a-f]+ takes 371e9") >= 1'
-  # 3. c2 closes: the lid follows the occupant out
+  # 3. c2's menu closed (the auto-close at claim 2's move, v3; this close-menu closes nothing): the lid follows the occupant out
   - c2: close-menu {name: ContainerMenu}
   - wait: 3
   - c2: log-count {pattern: "container 371e9 lid Close played"}
