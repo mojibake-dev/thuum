@@ -4874,11 +4874,11 @@ questions are docs/research/rung5-quests-2026-11-09.md section 6):
   target the player, which closes the vampire quest's no-alias gap: H-QS2 holds statically), measured against today's allowed and
   denied lists by its census and one lab read before it acts, then acting; and IsSeatsOwnQuest's start-game-enabled rule retired
   in the same rung. No measuring-only interim and no later rung for the refinement. The plan's section 8 amends rung 5's scope,
-  its proofs and its estimate. Read as the plan's: "the full build needed for it" also carries the two transformations a
-  per-player quest drives, the vampire stage and the werewolf's beast form, proven on two seats in rung 5 (the ladder's rung 6
-  had x-vampire-stage): one feature, its dependencies in one rung. Eli may narrow that to the classification alone.
-- D-V1 B, ACCEPTED as read: Eli's "yes, rung 5 is what i meant" (~14:5x PST) answered numidium's "Is that a yes for B?" beside
-  the rung reading, and numidium read the yes as B's too, leaving Eli room to correct it. H-CV1 fails (458 of
+  its proofs and its estimate. "The full build needed for it" carries the two transformations a per-player quest drives, the
+  vampire's stages and the werewolf's beast form, proven on two seats in rung 5 (the ladder's rung 6 had x-vampire-stage): one
+  feature, its dependencies in one rung (Eli ~15:0x PST in numidium's session, verbatim: "b5 for d-v1, and yes full
+  transformation").
+- D-V1 B, built in rung 5 (ACCEPTED by Eli ~15:0x PST, the same words: "b5 for d-v1"). H-CV1 fails (458 of
   770 condition-read keys have a topic-info fragment writer, 310 only such writers), so every seat reports a listed variable it
   changes and the latest write wins per key with the server's sequence (AliasFill 79's shape), relayed to the others; D-F1 C's one
   streaming seat would overwrite the talker's writes.
