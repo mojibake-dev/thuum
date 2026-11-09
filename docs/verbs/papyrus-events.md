@@ -566,3 +566,21 @@ The build plan docs/research/fifty-fixes-2026-11-07.md's option A, as built (S4 
 
 Play: BROKEN, playtest 41 (2026-11-02, LOG 16:53): at Bleak Falls the world scripts the layer's host row did not name never ran
 (six the row lacked): the spider froze, Arvel never fell, the draugr waited to be hit; ADR-062's slices replace the row.
+
+## The committed scenarios of rung 4 and the 50 train (02:59 PST 2026-11-09, thuum-fa)
+
+Each committed alone after its own green (rule 13), each named here so the gate's touched set finds its verb:
+- b-world-global (thuum daf97fe2): rung 4's WorldGlobal 80, rule 6's restart scenario: the elected streamer's write reaches every
+  seat, survives a restart, and another seat's write does not move it. Green 20261107-214047 (v1.1, the login race's winner
+  handed to c1 by c2's relaunch).
+- b-ref-state-restart: rung 4's RefState, rule 6's restart scenario: a host's scripted Disable reaches a late joiner and a
+  restarted server (its served word behind the create word, and since fork e4752b05 at a primitive's subscribe). Red
+  20261107-211516 on the gap e4752b05 fixes (a trigger with an XPRM box got no create word, so no serve); its rerun on
+  m4-train-50 ce0d2664 decides; committed when green.
+- b-pillar-reentry (thuum 21e1d72a, promoted from x-pillar-reentry v1.1): playtest 49's restart break, the guest's pillars after
+  a server restart and a teleport out and back (the view re-applied at every 3D load on a non-owner, fork bb24886d). Green
+  20261107-212822 and 20261108-000917.
+- b-login-in-cell (thuum 15608f42, promoted from x-login-in-cell v2.1): ADR-068's D-L1 B, a login inside a cell gets that
+  cell's OnCellAttach and OnCellLoad once (fork a7a3854c). Green 20261107-213324 and 20261108-001509.
+- b-cobweb-view (thuum a4b5fb05): D-C3 A, rule 6's restart scenario for graphVariables (also named under D-C3 above).
+Their verbs' others: b-trap-look in trigger-entry.md, b-lever-relay in furniture.md.
