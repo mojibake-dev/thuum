@@ -1,3 +1,5 @@
+# b-pillar-reentry (2026-11-09; the id alone, ADR-064 amendment A, no review): the scenario's id is its own, b-pillar-reentry, where the
+# promotion kept the probe's (x-pillar-reentry), so its runs were named by the probe. No step or claim changed.
 # b-pillar-reentry: promoted from the probe x-pillar-reentry v1.1 (lab/.cache/probes, sha1 071a24a7), GREEN twice:
 # 20261107-212822 on rung 4's build (fork m4-scripts-4-rows 1acb834f) and 20261108-000917 on the 50 build (m4-train-50 4bd07f33).
 # Playtest 49's restart break (the guest's pillars reset after a restart and a teleport out and back: the view's "current" mark
@@ -96,7 +98,7 @@
 # (docs/LAB.md's summit note). Ids from the profiles' records: c1 ff000000, c2 ff000001. God mode set again after the reconnect
 # (session state). The presses go by the driver's activate, the host engine's own activation (ADR-062's flip). All three pillars
 # share the base 0xaa8ce NorDefaultPuzzlePillar01 (docs/research/trap-census-2026-11-05.md), so each is read at Pillar01.
-id: x-pillar-reentry
+id: b-pillar-reentry
 milestone: M4
 clients: [c1, c2]
 server:
