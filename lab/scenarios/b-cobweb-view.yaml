@@ -1,0 +1,287 @@
+# GREEN 20261109-105034-b-cobweb-view on the 50 build (fork m4-train-50 ce0d2664), by path from lab/.cache/drafts/fifty (sha1
+# bd586007). ADR-068's D-C3 A (Eli 2026-11-07): the record's view carries a world object's animation variables, so a seat that
+# missed the tear and a restarted server show the torn web; rule 6's restart scenario for graphVariables. Built from green parts
+# (amendment B): x-cobweb-relay v1.5 (20261109-103725), x-cobweb-view v1.2 (20261107-232334); fresh-reviewed v1.3's claim
+# changes, v1.4 the review's notes as written. Its own commit (rule 13).
+# b-cobweb-view v1.4 DRAFT (r50 lab layer, 2026-11-09): v1.3's fresh review (GO WITH NOTES), its notes 1 to 4 applied as written
+# (ADR-064 amendment A, so no second review). Note 1: the 800-unit reason was false (the grant serves the host's emitters,
+# PartOne.cpp:2109, a 3x3 of 4096-unit squares, MpObjectReference.cpp:178 and Grid.h:91, and the viewing spot and both webs
+# share square (0, 0)), so 0x37281's restart is recorded for want of a green part alone, and HOW TO READ A RED reads a missing
+# serve as a lost or unsaved record. Note 2: ONE QUESTION reworded. Note 3: leg 1's relayed-entry count and claim take the part's
+# pattern (the bare head also counts "not sent"). Note 4: leg 1's recorded claim 6 says no claim goes red if the gate passed
+# the figure. No other step changes.
+# b-cobweb-view v1.3 DRAFT (r50 lab layer, 2026-11-09): aligned with its parts for the merge gate (amendment B: assembled from
+# green parts). (1) x-cobweb-relay v1.5's change (drafts, sha1 8e6084ef): its claim 6, c1's gate ignoring the figure's own entry,
+# is RECORDED, since the gate's ignored line prints for the first three ignored events on one counter and the host spends them at
+# its own Temple load (x-cobweb-relay v1.3's red 20261107-232023); leg 1's copy of it moves to RECORDED the same way, its count
+# step kept. (2) The restart, leg 3: x-cobweb-view v1.2 (drafts, sha1 ce5072d5) read it GREEN on the 50 stage for 0x3758c
+# (20261107-232334, its leg 4, the same steps as leg 3 here), so leg 3 claims 0x3758c alone, as that leg does; 0x37281's restart
+# claims (its serve ahead of c2's grant and behind c1's create word, both applies, both variable lines, both broken reads) move to
+# RECORDED: no green part reads them. Their steps stay, as recorded reads. Rule 6's restart leg
+# for the change form's "graphVariables" key is 0x3758c's. CLAIM CHANGES before any green: a fresh review before the first run
+# (ADR-064 amendment A). Every step is v1.2's.
+# b-cobweb-view v1.2 DRAFT (r50 lab layer, 2026-11-07): the fresh review of the fifty drafts (against fork m4-train-50 d28749af),
+# notes 1 and 7 applied as written (ADR-064 amendment A). Note 1: leg 1's "E_ENTRY_ == 0", mid-run, went red on a correct build
+# (c2's teleport out of the web is reported 1,500 to 2,000 units off it and refused E_ENTRY_REACH, and the run would end before
+# rule 6's restart leg), so it names the entries alone, 'server.log_count("E_ENTRY_[A-Z_]+: ff000001 reports ff000001
+# entering") == 0'. Note 7: leg 3 had no green part; x-cobweb-view v1.2 carries it now (its leg 4, the restart for 0x3758c).
+# b-cobweb-view v1.1 DRAFT (r50 lab layer, 2026-11-07; never reviewed or run). v1.1: D-C3 A is ACCEPTED (Eli, docs/DECISIONS.md
+# "D-W2 A and D-C3 A", thuum 2774cfb4: "Rule 6: the change form's graphVariables merge to canon only with a committed restart
+# scenario (b-cobweb-view's restart leg)") and built on fork m4-train-50 b5e466a2, so legs 2 and 3 stand and their PENDING marks
+# below read ACCEPTED; C3's lines are the built ones, x-cobweb-view v1.1's (each variable claim counts C3's "<n> graph
+# variable(s), 1 set" line and its 3D-load re-apply line together: either sets it from the record). v1 follows.
+# b-cobweb-view v1 DRAFT (r50 lab layer, 2026-11-07; L4 of docs/research/fifty-fixes-2026-11-07.md section 2): the T3 scenario
+# of docs/verbs/trigger-entry.md (D-C2 A, a guest's entry into a world trigger relayed to the cell's host) and of the record's
+# graph variables (D-C3 A, PENDING ELI), with CLAUDE.md rule 6's restart leg for the change form's new "graphVariables" key. A
+# draft, kept outside lab/scenarios: a scenario commits alone and after its review (rule 13, ADR-009), and ADR-064 amendment B
+# assembles a gate scenario only from parts already green, so this waits for x-cobweb-relay v1 (leg 1's claims, its trace left
+# out) and x-cobweb-view v1 (leg 2's) to read green on the fifty train, then its own fresh review, then its own commit.
+# PENDING ELI: legs 2 and 3 are D-C3 A's. If Eli's answer is not A, they go (the plan: W1 drops graph_vars, S4 and C3 park) and
+# this scenario is leg 1 alone, which changes no saved state, so no restart leg is owed (rule 6 then does not apply).
+# BUILD: the fifty train with D-C3 A on the server and both seats (fork m4-scripts-4-rows 1acb834f plus the 4c layer with S4, and
+# the 4d layer with W1's graph_vars and C3).
+# ONE QUESTION: does a guest's walk tear an unfired web on its host, and does a web torn while a seat was away show torn on its
+# arrival and after a restart?
+# LEG 1, x-cobweb-relay v1's claims for 0x37281 (the guest c2 walks into an unfired web while c1 hosts from the hall): c2's entry
+# line; the server's relay line to the host; c1's "relayed entry 37281 by ff000001"; the host's SetAnimationVariableFloat report
+# from FXtriggerAmbFX.OnTriggerEnter, relayed to 1 game, exactly once; the host's broken 2; c1's gate ignoring the figure's own
+# entry (claimed only where x-cobweb-relay's claim 6 stood, H-TE3 read delivered by x-trigger-entry; else that claim is dropped
+# here as there, said in the version that drops it); no E_ENTRY_ line.
+# LEG 2, x-cobweb-view v1's arrival claims for 0x3758c: c2 out to lab-spawn; c1 tears 0x3758c (relayed to 0 games) and its script
+# ends (broken 2); c2 arrives at the viewing spot; the serve behind its create word carries 1 graph variable, c2 applies the
+# record and sets fToggleBlend from it (C3's proposed line, x-cobweb-view's header).
+# LEG 3, the restart (rule 6; b-script-state-restart's shape): the server restarts and both seats log in again; both go out to
+# lab-spawn and the Temple goes unhosted; c1 relaunches (a fresh game whose engine never held a torn web); c2 goes back in first
+# and is granted the Temple, so both webs' records are served ahead of its grant, each with 1 graph variable, from the database
+# alone, and c2 applies each and sets each web's variable; then c1 goes in as a guest and the same holds behind each create word.
+# (Since v1.3 the claims below are 0x3758c's alone, x-cobweb-view v1.2's green leg 4; 0x37281's are recorded.) Every count is
+# claimed risen over a snapshot taken right before that seat's entry (the server's log spans the restart, and a
+# seat's console log can span its relaunch), and each web's script state stands at broken 2 on both seats after its apply.
+# NOT CLAIMED, as in the probes: each seat's fToggleBlend value (lab-api has no graph-vars view yet; recorded by graph-vars steps
+# and screenshots from the viewing spot). The cell buffer: c2 reconnects without a relaunch, so its engine may still hold the
+# Temple's 3D from before the restart (Skyrim keeps recent interiors loaded); its recorded values read the record only on c1's
+# fresh game, while every line claim reads the record on both.
+# HOW TO READ A RED in leg 3: a missing serve for either web is a lost or unsaved record. A serve line present with 0 graph
+# variables: the database kept the script state and not the "graphVariables" key (S4's save), rule 6's own defect.
+# Spots (navfloor.py over the local Skyrim.esm, 10 units over the floor): the hall (-3350, 820) and (-3500, 850); 0x37281's slab
+# (-1496, 1000); 0x3758c's slab (-2021, 1105); the viewing spot (-2300, 1105), 280 units west of 0x3758c and facing it.
+# Assertions are evaluated by lab-api only (ADR-009).
+id: b-cobweb-view
+milestone: M4
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: false
+  gameHour: 7.9
+timeout_s: 1800
+artifacts: [server.log, c1.log, c2.log, c1-console.log, c2-console.log, screenshots]
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c1: teleport {cell: "371de:Skyrim.esm", x: -3350, y: 820, z: 582, rot: [0, 0, 90]}
+  - until: {within: 30, every: 1, expect: ['server.host(0x371de).client == "c1"']}
+  - c2: teleport {cell: "371de:Skyrim.esm", x: -3500, y: 850, z: 589, rot: [0, 0, 90]}
+  - wait: 6
+  # the premises: both webs unfired on the host's copy, nothing reported for either
+  - c1: script-state {formId: 0x37281}
+  - c1: script-state {formId: 0x3758c}
+  - server: log-count {pattern: "reports ObjectReference.SetAnimationVariableFloat on 37281 in cell 371de"}
+  - server: log-count {pattern: "reports ObjectReference.SetAnimationVariableFloat on 3758c in cell 371de"}
+  - assert:
+      - server.host(0x371de).client == "c1"
+      - 'server.log_count("ConsoleCommands: ff00000[01] god mode on") == 2'
+      - 'c1.script_state(0x37281).variable("broken") == 0'
+      - 'c1.script_state(0x3758c).variable("broken") == 0'
+      - 'server.log_count("reports ObjectReference.SetAnimationVariableFloat on 37281 in cell 371de") == 0'
+      - 'server.log_count("reports ObjectReference.SetAnimationVariableFloat on 3758c in cell 371de") == 0'
+
+  # 1. the guest walks into the unfired 0x37281 while c1 hosts from the hall (x-cobweb-relay v1's claims for the web)
+  - c2: teleport {cell: "371de:Skyrim.esm", x: -1496, y: 1000, z: -5, rot: [0, 0, 90]}
+  - wait: 3
+  - c1: screenshot
+  - c2: screenshot
+  - c2: graph-vars {formId: 0x37281, floats: ["fToggleBlend"]}
+  - wait: 3
+  - c2: graph-vars {formId: 0x37281, floats: ["fToggleBlend"]}
+  - c2: teleport {cell: "371de:Skyrim.esm", x: -3500, y: 850, z: 589, rot: [0, 0, 90]}
+  - wait: 16
+  - c1: script-state {formId: 0x37281}
+  - c2: log-count {pattern: "trigger entry 37281 by [0-9a-f]+ .enter.: relayed to the cell.s host .D-C2."}
+  - c1: log-count {pattern: "relayed entry 37281 by ff000001: OnTriggerEnter sent to [1-9][0-9]* script.s."}
+  - c1: log-count {pattern: "OnTriggerEnter to 37281 by ff[0-9a-f]+: not this seat.s presser, ignored .D-W1."}
+  - assert:
+      - 'c2.log_count("trigger entry 37281 by [0-9a-f]+ .enter.: relayed to the cell.s host .D-C2.") >= 1'
+      - 'server.log_count("ff000001 reports ff000001 entering 37281 in cell 371de .its host ff000000.: relayed to the host") >= 1'
+      - 'c1.log_count("relayed entry 37281 by ff000001: OnTriggerEnter sent to [1-9][0-9]* script.s.") >= 1'
+      - 'server.log_count("ff000000 reports ObjectReference.SetAnimationVariableFloat on 37281 in cell 371de .epoch [0-9]+, from FXtriggerAmbFX.OnTriggerEnter.: seq [0-9]+, relayed to 1 game.s.") == 1'
+      - 'c1.script_state(0x37281).variable("broken") == 2'
+      # (v1.3) x-cobweb-relay's claim 6 is RECORDED (x-cobweb-relay v1.5: the gate's ignored line is capped and spent at the
+      # host's load), so c1's gate line for the figure is counted above and claimed nowhere; while recorded, no claim goes red if
+      # c1's gate passed the figure (x-cobweb-relay v1.5's N1)
+      - 'server.log_count("E_ENTRY_[A-Z_]+: ff000001 reports ff000001 entering") == 0'
+
+  # 2. (D-C3 A, PENDING ELI) the late arrival: c2 out, c1 tears 0x3758c while c2 is away, c2 arrives at the viewing spot
+  - c2: teleport {cell: lab-spawn, x: 0, y: -120, z: 0}
+  - wait: 5
+  - c1: teleport {cell: "371de:Skyrim.esm", x: -2021, y: 1105, z: 124, rot: [0, 0, 90]}
+  - wait: 3
+  - c1: screenshot
+  - c1: graph-vars {formId: 0x3758c, floats: ["fToggleBlend"]}
+  - c1: teleport {cell: "371de:Skyrim.esm", x: -3350, y: 820, z: 582, rot: [0, 0, 90]}
+  - wait: 16
+  - c1: script-state {formId: 0x3758c}
+  - server: log-count {pattern: "script state 3758c served to ff000001 after its create word: .*, 1 graph variable.s."}
+  - server: snapshot {name: served2Before, of: 'server.log_count("script state 3758c served to ff000001 after its create word: .*, 1 graph variable.s.")'}
+  - c2: log-count {pattern: "script state 3758c applied as a guest"}
+  - server: snapshot {name: applied2Before, of: 'c2.log_count("script state 3758c applied as a guest")'}
+  - c2: log-count {pattern: "script state 3758c: 1 graph variable.s., 1 set"}
+  - server: snapshot {name: varSet2Before, of: 'c2.log_count("script state 3758c: 1 graph variable.s., 1 set")'}
+  - c2: log-count {pattern: "object animation 3758c fToggleBlend 1 re-applied at a 3D load .graph variable"}
+  - server: snapshot {name: varLoad2Before, of: 'c2.log_count("object animation 3758c fToggleBlend 1 re-applied at a 3D load .graph variable")'}
+  - c2: teleport {cell: "371de:Skyrim.esm", x: -2300, y: 1105, z: 249, rot: [0, 0, 90]}
+  - wait: 5
+  - c2: graph-vars {formId: 0x3758c, floats: ["fToggleBlend"]}
+  - c2: screenshot
+  - wait: 5
+  - c2: graph-vars {formId: 0x3758c, floats: ["fToggleBlend"]}
+  - server: log-count {pattern: "script state 3758c served to ff000001 after its create word: .*, 1 graph variable.s."}
+  - server: snapshot {name: served2After, of: 'server.log_count("script state 3758c served to ff000001 after its create word: .*, 1 graph variable.s.")'}
+  - c2: log-count {pattern: "script state 3758c applied as a guest"}
+  - server: snapshot {name: applied2After, of: 'c2.log_count("script state 3758c applied as a guest")'}
+  - c2: log-count {pattern: "script state 3758c: 1 graph variable.s., 1 set"}
+  - server: snapshot {name: varSet2After, of: 'c2.log_count("script state 3758c: 1 graph variable.s., 1 set")'}
+  - c2: log-count {pattern: "object animation 3758c fToggleBlend 1 re-applied at a 3D load .graph variable"}
+  - server: snapshot {name: varLoad2After, of: 'c2.log_count("object animation 3758c fToggleBlend 1 re-applied at a 3D load .graph variable")'}
+  - assert:
+      - 'server.log_count("ff000000 reports ObjectReference.SetAnimationVariableFloat on 3758c in cell 371de .epoch [0-9]+, from FXtriggerAmbFX.OnTriggerEnter.: seq [0-9]+, relayed to 0 game.s.") >= 1'
+      - 'c1.script_state(0x3758c).variable("broken") == 2'
+      - 'snapshot("served2After") > snapshot("served2Before")'
+      - 'snapshot("applied2After") > snapshot("applied2Before")'
+      - 'snapshot("varSet2After") + snapshot("varLoad2After") > snapshot("varSet2Before") + snapshot("varLoad2Before")'
+
+  # 3. (D-C3 A, PENDING ELI; rule 6) the restart; both log in again by themselves, both out, the Temple unhosted
+  - wait: 5
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - c2: reconnect
+  - wait: 15
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -120, z: 0}
+  - until: {within: 30, every: 1, expect: ['server.host(0x371de).hosted == false']}
+  # c1 relaunched at lab-spawn: a fresh game whose engine never held a torn web (b-script-state-restart's leg 3)
+  - c1: relaunch {until: gone}
+  - c1: connect
+  - wait: 15
+  - c1: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  # c2 back in first, granted the Temple: both records served ahead of its grant, from the database alone
+  - server: log-count {pattern: "script state 37281 served to ff000001 ahead of its grant of cell 371de: .*, 1 graph variable.s."}
+  - server: snapshot {name: grant37281Before, of: 'server.log_count("script state 37281 served to ff000001 ahead of its grant of cell 371de: .*, 1 graph variable.s.")'}
+  - c2: log-count {pattern: "script state 37281 applied at the grant of 371de"}
+  - server: snapshot {name: c2Applied37281Before, of: 'c2.log_count("script state 37281 applied at the grant of 371de")'}
+  - c2: log-count {pattern: "script state 37281: 1 graph variable.s., 1 set"}
+  - server: snapshot {name: c2VarSet37281Before, of: 'c2.log_count("script state 37281: 1 graph variable.s., 1 set")'}
+  - c2: log-count {pattern: "object animation 37281 fToggleBlend 1 re-applied at a 3D load .graph variable"}
+  - server: snapshot {name: c2VarLoad37281Before, of: 'c2.log_count("object animation 37281 fToggleBlend 1 re-applied at a 3D load .graph variable")'}
+  - server: log-count {pattern: "script state 3758c served to ff000001 ahead of its grant of cell 371de: .*, 1 graph variable.s."}
+  - server: snapshot {name: grant3758cBefore, of: 'server.log_count("script state 3758c served to ff000001 ahead of its grant of cell 371de: .*, 1 graph variable.s.")'}
+  - c2: log-count {pattern: "script state 3758c applied at the grant of 371de"}
+  - server: snapshot {name: c2Applied3758cBefore, of: 'c2.log_count("script state 3758c applied at the grant of 371de")'}
+  - c2: log-count {pattern: "script state 3758c: 1 graph variable.s., 1 set"}
+  - server: snapshot {name: c2VarSet3758cBefore, of: 'c2.log_count("script state 3758c: 1 graph variable.s., 1 set")'}
+  - c2: log-count {pattern: "object animation 3758c fToggleBlend 1 re-applied at a 3D load .graph variable"}
+  - server: snapshot {name: c2VarLoad3758cBefore, of: 'c2.log_count("object animation 3758c fToggleBlend 1 re-applied at a 3D load .graph variable")'}
+  - c2: teleport {cell: "371de:Skyrim.esm", x: -2300, y: 1105, z: 249, rot: [0, 0, 90]}
+  - until: {within: 30, every: 1, expect: ['server.host(0x371de).client == "c2"']}
+  - wait: 15
+  - c2: script-state {formId: 0x37281}
+  - c2: script-state {formId: 0x3758c}
+  - c2: graph-vars {formId: 0x37281, floats: ["fToggleBlend"]}
+  - c2: graph-vars {formId: 0x3758c, floats: ["fToggleBlend"]}
+  - c2: screenshot
+  - server: log-count {pattern: "script state 37281 served to ff000001 ahead of its grant of cell 371de: .*, 1 graph variable.s."}
+  - server: snapshot {name: grant37281After, of: 'server.log_count("script state 37281 served to ff000001 ahead of its grant of cell 371de: .*, 1 graph variable.s.")'}
+  - c2: log-count {pattern: "script state 37281 applied at the grant of 371de"}
+  - server: snapshot {name: c2Applied37281After, of: 'c2.log_count("script state 37281 applied at the grant of 371de")'}
+  - c2: log-count {pattern: "script state 37281: 1 graph variable.s., 1 set"}
+  - server: snapshot {name: c2VarSet37281After, of: 'c2.log_count("script state 37281: 1 graph variable.s., 1 set")'}
+  - c2: log-count {pattern: "object animation 37281 fToggleBlend 1 re-applied at a 3D load .graph variable"}
+  - server: snapshot {name: c2VarLoad37281After, of: 'c2.log_count("object animation 37281 fToggleBlend 1 re-applied at a 3D load .graph variable")'}
+  - server: log-count {pattern: "script state 3758c served to ff000001 ahead of its grant of cell 371de: .*, 1 graph variable.s."}
+  - server: snapshot {name: grant3758cAfter, of: 'server.log_count("script state 3758c served to ff000001 ahead of its grant of cell 371de: .*, 1 graph variable.s.")'}
+  - c2: log-count {pattern: "script state 3758c applied at the grant of 371de"}
+  - server: snapshot {name: c2Applied3758cAfter, of: 'c2.log_count("script state 3758c applied at the grant of 371de")'}
+  - c2: log-count {pattern: "script state 3758c: 1 graph variable.s., 1 set"}
+  - server: snapshot {name: c2VarSet3758cAfter, of: 'c2.log_count("script state 3758c: 1 graph variable.s., 1 set")'}
+  - c2: log-count {pattern: "object animation 3758c fToggleBlend 1 re-applied at a 3D load .graph variable"}
+  - server: snapshot {name: c2VarLoad3758cAfter, of: 'c2.log_count("object animation 3758c fToggleBlend 1 re-applied at a 3D load .graph variable")'}
+  # c1 in as a guest: both records served behind their create words
+  - server: log-count {pattern: "script state 37281 served to ff000000 after its create word: .*, 1 graph variable.s."}
+  - server: snapshot {name: create37281Before, of: 'server.log_count("script state 37281 served to ff000000 after its create word: .*, 1 graph variable.s.")'}
+  - c1: log-count {pattern: "script state 37281 applied as a guest"}
+  - server: snapshot {name: c1Applied37281Before, of: 'c1.log_count("script state 37281 applied as a guest")'}
+  - c1: log-count {pattern: "script state 37281: 1 graph variable.s., 1 set"}
+  - server: snapshot {name: c1VarSet37281Before, of: 'c1.log_count("script state 37281: 1 graph variable.s., 1 set")'}
+  - c1: log-count {pattern: "object animation 37281 fToggleBlend 1 re-applied at a 3D load .graph variable"}
+  - server: snapshot {name: c1VarLoad37281Before, of: 'c1.log_count("object animation 37281 fToggleBlend 1 re-applied at a 3D load .graph variable")'}
+  - server: log-count {pattern: "script state 3758c served to ff000000 after its create word: .*, 1 graph variable.s."}
+  - server: snapshot {name: create3758cBefore, of: 'server.log_count("script state 3758c served to ff000000 after its create word: .*, 1 graph variable.s.")'}
+  - c1: log-count {pattern: "script state 3758c applied as a guest"}
+  - server: snapshot {name: c1Applied3758cBefore, of: 'c1.log_count("script state 3758c applied as a guest")'}
+  - c1: log-count {pattern: "script state 3758c: 1 graph variable.s., 1 set"}
+  - server: snapshot {name: c1VarSet3758cBefore, of: 'c1.log_count("script state 3758c: 1 graph variable.s., 1 set")'}
+  - c1: log-count {pattern: "object animation 3758c fToggleBlend 1 re-applied at a 3D load .graph variable"}
+  - server: snapshot {name: c1VarLoad3758cBefore, of: 'c1.log_count("object animation 3758c fToggleBlend 1 re-applied at a 3D load .graph variable")'}
+  - c1: teleport {cell: "371de:Skyrim.esm", x: -2300, y: 1105, z: 249, rot: [0, 0, 90]}
+  - wait: 15
+  - c1: script-state {formId: 0x37281}
+  - c1: script-state {formId: 0x3758c}
+  - c1: graph-vars {formId: 0x37281, floats: ["fToggleBlend"]}
+  - c1: graph-vars {formId: 0x3758c, floats: ["fToggleBlend"]}
+  - c1: screenshot
+  - server: log-count {pattern: "script state 37281 served to ff000000 after its create word: .*, 1 graph variable.s."}
+  - server: snapshot {name: create37281After, of: 'server.log_count("script state 37281 served to ff000000 after its create word: .*, 1 graph variable.s.")'}
+  - c1: log-count {pattern: "script state 37281 applied as a guest"}
+  - server: snapshot {name: c1Applied37281After, of: 'c1.log_count("script state 37281 applied as a guest")'}
+  - c1: log-count {pattern: "script state 37281: 1 graph variable.s., 1 set"}
+  - server: snapshot {name: c1VarSet37281After, of: 'c1.log_count("script state 37281: 1 graph variable.s., 1 set")'}
+  - c1: log-count {pattern: "object animation 37281 fToggleBlend 1 re-applied at a 3D load .graph variable"}
+  - server: snapshot {name: c1VarLoad37281After, of: 'c1.log_count("object animation 37281 fToggleBlend 1 re-applied at a 3D load .graph variable")'}
+  - server: log-count {pattern: "script state 3758c served to ff000000 after its create word: .*, 1 graph variable.s."}
+  - server: snapshot {name: create3758cAfter, of: 'server.log_count("script state 3758c served to ff000000 after its create word: .*, 1 graph variable.s.")'}
+  - c1: log-count {pattern: "script state 3758c applied as a guest"}
+  - server: snapshot {name: c1Applied3758cAfter, of: 'c1.log_count("script state 3758c applied as a guest")'}
+  - c1: log-count {pattern: "script state 3758c: 1 graph variable.s., 1 set"}
+  - server: snapshot {name: c1VarSet3758cAfter, of: 'c1.log_count("script state 3758c: 1 graph variable.s., 1 set")'}
+  - c1: log-count {pattern: "object animation 3758c fToggleBlend 1 re-applied at a 3D load .graph variable"}
+  - server: snapshot {name: c1VarLoad3758cAfter, of: 'c1.log_count("object animation 3758c fToggleBlend 1 re-applied at a 3D load .graph variable")'}
+  # recorded: every serve of either web after the restart, and the refusals
+  - server: log-count {pattern: "script state (37281|3758c) served to ff00000[01]"}
+  - server: log-count {pattern: "E_SCRIPTSTATE_[A-Z_]+"}
+  - c1: log-count {pattern: "script state (37281|3758c) given up"}
+  - c2: log-count {pattern: "script state (37281|3758c) given up"}
+  - assert:
+      - server.host(0x371de).client == "c2"
+      # (v1.3) 0x37281's restart is RECORDED: its counts above, read by hand (no green part reads them)
+      # 0x3758c: from the database to the new host, then to the fresh guest
+      - 'snapshot("grant3758cAfter") > snapshot("grant3758cBefore")'
+      - 'snapshot("c2Applied3758cAfter") > snapshot("c2Applied3758cBefore")'
+      - 'snapshot("c2VarSet3758cAfter") + snapshot("c2VarLoad3758cAfter") > snapshot("c2VarSet3758cBefore") + snapshot("c2VarLoad3758cBefore")'
+      - 'c2.script_state(0x3758c).variable("broken") == 2'
+      - 'snapshot("create3758cAfter") > snapshot("create3758cBefore")'
+      - 'snapshot("c1Applied3758cAfter") > snapshot("c1Applied3758cBefore")'
+      - 'snapshot("c1VarSet3758cAfter") + snapshot("c1VarLoad3758cAfter") > snapshot("c1VarSet3758cBefore") + snapshot("c1VarLoad3758cBefore")'
+      - 'c1.script_state(0x3758c).variable("broken") == 2'
+  - c1: dump-state
+  - c2: dump-state
