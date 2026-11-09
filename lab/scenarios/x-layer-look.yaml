@@ -1,0 +1,127 @@
+# x-layer-look v1 (apocrypha, 2026-11-09): the appearance layer's reads that playtest 49 left unread
+# (docs/private/playtest-49.md items 6 and 7), taken on the clean world's lab characters and never on Eli's.
+# numidium asked for it as a probe by path, with the seats on a cold rollback at both ends, so nothing a
+# race menu close writes reaches the canonical world's profiles 1 and 2.
+#
+# The layer under test is apocrypha/layer-appearance c3d387b8, laid as b2bcc92d: CBBE SFW Edition's body
+# and outfits, built with morph files in SFW's own shape "CBBE Curvy (Outfit)" (CI job 19760, docs/MODS.md).
+# The clean world's two lab characters are men, so c1 becomes a woman of its own race through the console's
+# sexchange, then undresses through unequipall.
+#
+# Read 1, SFW's body and not a bare one: the NeverNude body's two underwear shapes, "Bra" and "Panty", are in
+# c1's own 3D. A missing node reads 0 (NetImmerse.GetNodeScale). The same holds for c2's figure of c1 once the
+# race menu's close has sent the look, the path a-racemenu reads.
+# Read 2, the seams with VanillaSSEHi at 0: screenshots only, because a person judges a seam. c2 looks at c1
+# from 250 units and from 90. Then VanillaSSEHi goes to 0.21, Ariadne's old value from playtest 48, for
+# comparison. That value opens the wrists by design: SFW's hand morph files carry no such slider (declared
+# in 49). It goes back to 0 before read 3.
+# Read 3, the Shrouded Robes (DBClothesRobes 0xcf8a0, DBClothesHandWraps 0xcf8a9, DBClothesShoes 0xcf89f,
+# rotfern's set): first on that woman, then on rotfern's look (set-appearance rotfern-eli-2, recorded from a
+# real client; the lab's server permits profile 1 the race). The robe's shape "DBbody3rdPerson" is drawn on
+# c1 and on c2's figure of c1, and screenshots show the fit. No body morph is ever set on rotfern: she carries
+# none, by design, and c1's morph reads 0 before her look goes on.
+#
+# Not read here: the four hairs the layer keeps vanilla (HairKhajiitFemale05, HairFemaleDremora01 and 02,
+# HairLineFemaleNord04; playtest 48's RaceMenu crash). Changing a head part needs a driver action the lab
+# does not have: RaceMenu's lists do not move on key presses (20261007-140054-a-rotfern). A later version
+# adds it.
+id: x-layer-look
+milestone: M4
+game: 1.6.1170
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+timeout_s: 900
+steps:
+  - c1: connect
+  - c2: connect
+  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -250, z: 0}
+  - wait: 5
+  # read 1: c1 becomes a woman and undresses
+  - c1: console {text: "player.sexchange"}
+  - wait: 6
+  - c1: console {text: "player.unequipall"}
+  - wait: 5
+  - c1: node-scale {node: Bra}
+  - assert:
+      - c1.node_scale() > 0
+  - c1: node-scale {node: Panty}
+  - assert:
+      - c1.node_scale() > 0
+  # the race menu's close sends the look; c2's figure of c1 then carries SFW's body too
+  - c1: open-race-menu
+  - wait: 6
+  - c1: close-menu {name: "RaceSex Menu"}
+  - wait: 8
+  - c2: look {heading: 0, pitch: 5}
+  - c2: node-scale {other: true, node: Bra}
+  - assert:
+      - c2.node_scale_of(c1) > 0
+  # read 2: the seams at VanillaSSEHi 0, full figure and close
+  - c2: screenshot
+  - c2: teleport {cell: lab-spawn, x: 0, y: -90, z: 0}
+  - wait: 4
+  - c2: look {heading: 0, pitch: 12}
+  - c2: screenshot
+  # VanillaSSEHi 0.21 for comparison: the wrists open by design
+  - c1: body-morph {name: VanillaSSEHi, value: 0.21}
+  - c1: open-race-menu
+  - wait: 6
+  - c1: close-menu {name: "RaceSex Menu"}
+  - wait: 8
+  - c2: look {heading: 0, pitch: 12}
+  - c2: screenshot
+  - c1: body-morph {name: VanillaSSEHi, value: 0}
+  - c1: node-scale {morph: VanillaSSEHi}
+  - assert:
+      - abs(c1.morph()) < 0.001
+  - c1: open-race-menu
+  - wait: 6
+  - c1: close-menu {name: "RaceSex Menu"}
+  - wait: 8
+  # read 3: the Shrouded Robes on the woman
+  - c1: give {item: "0xcf8a0", count: 1}
+  - c1: give {item: "0xcf8a9", count: 1}
+  - c1: give {item: "0xcf89f", count: 1}
+  - wait: 3
+  - c1: equip {formId: 0xcf8a0}
+  - c1: equip {formId: 0xcf8a9}
+  - c1: equip {formId: 0xcf89f}
+  - wait: 6
+  - c1: node-scale {node: DBbody3rdPerson}
+  - assert:
+      - c1.node_scale() > 0
+  - c2: node-scale {other: true, node: DBbody3rdPerson}
+  - assert:
+      - c2.node_scale_of(c1) > 0
+  - c2: teleport {cell: lab-spawn, x: 0, y: -250, z: 0}
+  - wait: 4
+  - c2: look {heading: 0, pitch: 5}
+  - c2: screenshot
+  - c2: teleport {cell: lab-spawn, x: 0, y: -90, z: 0}
+  - wait: 4
+  - c2: look {heading: 0, pitch: 12}
+  - c2: screenshot
+  # read 3 on rotfern's look: the same robes, no morph
+  - c1: node-scale {morph: VanillaSSEHi}
+  - assert:
+      - abs(c1.morph()) < 0.001
+  - c1: set-appearance {preset: rotfern-eli-2}
+  - wait: 12
+  - c1: node-scale {node: DBbody3rdPerson}
+  - assert:
+      - c1.node_scale() > 0
+  - c2: node-scale {other: true, node: DBbody3rdPerson}
+  - assert:
+      - c2.node_scale_of(c1) > 0
+  - c2: teleport {cell: lab-spawn, x: 0, y: -250, z: 0}
+  - wait: 4
+  - c2: look {heading: 0, pitch: 5}
+  - c2: screenshot
+  - c2: teleport {cell: lab-spawn, x: 0, y: -90, z: 0}
+  - wait: 4
+  - c2: look {heading: 0, pitch: 8}
+  - c2: screenshot
+artifacts: [server.log, c1.log, c2.log, screenshots, world-diff]
