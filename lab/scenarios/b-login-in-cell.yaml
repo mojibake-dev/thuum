@@ -1,3 +1,5 @@
+# b-login-in-cell (2026-11-09; the id alone, ADR-064 amendment A, no review): the scenario's id is its own, b-login-in-cell, where the
+# promotion kept the probe's (x-login-in-cell), so its runs were named by the probe. No step or claim changed.
 # b-login-in-cell: promoted from the probe x-login-in-cell v2.1 (lab/.cache/probes, sha1 7b6203d0), GREEN twice:
 # 20261107-213324 on rung 4's build (fork m4-scripts-4-rows 1acb834f) and 20261108-001509 on the 50 build (m4-train-50 4bd07f33).
 # ADR-068's D-L1 B (Eli 2026-11-06): a seat that logs in inside a cell gets that cell's OnCellAttach and OnCellLoad once (fork
@@ -54,7 +56,7 @@
 # PlayAnimation row (a pre-grant OnCellLoad would show there), both seats' pillar faces (aa8cc stands on Side01 on the host and
 # on its initial face 3 on the guest when the defect holds). Assertions are evaluated by lab-api only (ADR-009); its own commit
 # (rule 13).
-id: x-login-in-cell
+id: b-login-in-cell
 milestone: M4
 clients: [c1, c2]
 server:
