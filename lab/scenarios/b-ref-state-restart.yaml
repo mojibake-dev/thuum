@@ -1,3 +1,10 @@
+# b-ref-state-restart v1.1 (2026-11-09; a step change alone, ADR-064 amendment A, no review; no claim changed): the five
+# refs-near reads of the marker 0x17037 widen from radius 2000 to 4000. The merge gate's red 20261109-122025 (step 34; its
+# lone-red rerun 122230 green) had c1 at (7719.7, -4093.5, -2056.7) after its 3.5 s walk east, 2,009 units from the marker at
+# (6867.4, -5874.1, -1686.7) (lab/esm.py ref), just past the radius: the step listed 1,914 statics in 0x371de and not the
+# marker. 20261109-102129 was red at the same step; 105707 and 122230 green, their walks ending nearer. The read spot (7040,
+# -4096) stands 1,786 units off, inside but near the edge. The marker is in c1's cell (one interior), so the lever is the
+# radius, not a move: refs-near's ids search answers no disabled flag, and a computed spot near the marker risks the void.
 # GREEN 20261109-105707-b-ref-state-restart on the 50 build (fork m4-train-50 ce0d2664), by path from lab/.cache/probes (sha1
 # f630490a, unchanged). ADR-068 rung 4's RefState, rule 6's restart scenario: a host's scripted Disable reaches a late joiner
 # and survives a server restart. Its earlier reds: 20261107-211516 on rung 4's build (a trigger with an XPRM box got no create
@@ -98,7 +105,7 @@ steps:
   - c1: tap-key {code: 58}
   - c1: teleport {cell: "371de:Skyrim.esm", x: 7040, y: -4096, z: -1780, rot: [0, 0, 90]}
   - wait: 8
-  - c1: refs-near {radius: 2000, formTypes: [34]}
+  - c1: refs-near {radius: 4000, formTypes: [34]}
   - assert:
       - c1.refs_near().disabled_of(0x17037) == true
   - c1: tap-key {code: 58}
@@ -108,7 +115,7 @@ steps:
   - c1: tap-key {code: 58}
   - wait: 5
   - c1: screenshot
-  - c1: refs-near {radius: 2000, formTypes: [34]}
+  - c1: refs-near {radius: 4000, formTypes: [34]}
   - assert:
       # (1) the record and the host's engine, the marker
       - c1.refs_near().disabled_of(0x17037) == false
@@ -133,7 +140,7 @@ steps:
   - c2: screenshot
   - c2: npc-state {formId: 0x800a3}
   - c1: npc-state {formId: 0x800a3}
-  - c2: refs-near {radius: 2000, formTypes: [34]}
+  - c2: refs-near {radius: 4000, formTypes: [34]}
   - c2: log-count {pattern: "ref state 17037 applied .served"}
   - assert:
       # (2) H-RS4: the marker, attached by its record, served and found by the guest's engine
@@ -171,7 +178,7 @@ steps:
   - until: {within: 30, every: 1, expect: ['server.host(0x371de).client == "c2"']}
   - wait: 15
   - c2: screenshot
-  - c2: refs-near {radius: 2000, formTypes: [34]}
+  - c2: refs-near {radius: 4000, formTypes: [34]}
   - assert:
       - c2.refs_near().disabled_of(0x17037) == false
   - c2: refs-near {radius: 10000, formTypes: [24]}
@@ -190,7 +197,7 @@ steps:
   - c1: teleport {cell: "371de:Skyrim.esm", x: 7040, y: -4096, z: -1780, rot: [0, 0, 90]}
   - wait: 15
   - c1: screenshot
-  - c1: refs-near {radius: 2000, formTypes: [34]}
+  - c1: refs-near {radius: 4000, formTypes: [34]}
   - assert:
       - server.host(0x371de).client == "c2"
       # (3) the fresh game reads the attached marker enabled
