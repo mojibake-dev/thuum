@@ -1,0 +1,357 @@
+# GREEN 20261109-104402-b-trap-look on the 50 build (fork m4-train-50 ce0d2664), by path from lab/.cache/drafts/fifty (sha1
+# 454cbc9b). ADR-068's D-W2 A (Eli 2026-11-07): the firing seat's trap family trigger's own look calls (the rope, the plate's
+# Down and Up, its sound, CreateDetectionEvent) played on the watcher. Built from green parts (amendment B): x-trigger-owner
+# v2.4 (20261109-102632), x-trap-bone-alarm v1.1 (20261107-230354), x-trap-wire-rope v2.1 (20261107-231631); fresh-reviewed
+# v1.2's claim changes, v1.3 the review's notes as written. Its own commit (rule 13).
+# b-trap-look v1.3 DRAFT (r50 lab layer, 2026-11-09): v1.2's fresh review (GO WITH NOTES), its notes 1 and 2 applied as written
+# (ADR-064 amendment A, so no second review): the red cited is x-trigger-owner v2.2's, and E1's part keeps the strict form. No
+# step or claim changes.
+# b-trap-look v1.2 DRAFT (r50 lab layer, 2026-11-09): x-trigger-owner v2.4's gate-line change (drafts, sha1 902018cb), taken where
+# this scenario shares its lines, for the merge gate (amendment B: assembled from green parts). The gate's "ignored" line prints for
+# the first three ignored events of the game's life on one counter, and a host spends its three at its own load (x-trigger-owner
+# v2.2's red 20261107-225201, x-cobweb-relay v1.3's 20261107-232023), so E1's two watcher gate claims read x-trigger-owner's
+# escape: 'snapshot("B1Gate") > snapshot("B1Gate0") or snapshot("B1GateAll0") >= 2', and B2's alike over B2GateAll0, each a new
+# count of every ignored line on the watcher before its leg. skymp5-client logs no line for an ignored press (its triggerEntry line,
+# activationService.ts:326, is an owned press's), so the escape is the only claim of it. A CLAIM CHANGE before any green: a fresh
+# review before the first run (ADR-064 amendment A). No NPC is lured here, so x-trap-wire-lure v1.4's 0xb6fe4 fix does not apply.
+# E1's part x-trap-bone-alarm v1.1 keeps the strict form, green in 20261107-230354; where an escape holds, the leg's D-W1 falsifier
+# is its WatcherOwn claim. Every other step and claim is v1.1's.
+# b-trap-look v1.1 DRAFT (r50 lab layer, 2026-11-07): the fresh review of the fifty drafts (against fork m4-train-50 d28749af),
+# notes 3, 4 and 7 applied as written (ADR-064 amendment A), with its code review's note 4 on a host's walk and press. Note 3: the
+# look switch is a premise on both seats. Note 4: Sound.Play's lines name the trigger, 10481e in B1 and 10481f in B2. Note 7: E2's
+# D-W1 counts (c1's own firing once, c2's none, c2's relay play once, the host's root relayed once) had no green part; the first
+# option, x-trap-wire-rope v2.1 now claims them (Eli's to review with its rewrite). The code review's note 4: where the cell's host
+# walks in or presses (B2, TB), its own calls on the six animation rows go out as ordinary actions, the server's "animates" lines,
+# so B2 claims three looks and one "animates" line, and TB the server's 'Down' and 'Up' "animates" lines and the guest's plays of
+# them, in place of the host's PlayAnimation looks.
+# b-trap-look v1 DRAFT (r50 lab layer, 2026-11-07; L5 of docs/research/fifty-fixes-2026-11-07.md section 7.3): the watcher's look
+# in both dungeons, ADR-068 D-W2 A's T3 scenario (docs/DECISIONS.md, "D-W2 A and D-C3 A", thuum 2774cfb4: the firing seat owns a
+# trap family trigger's own calls during its firing, and they play on every other seat). A draft, kept outside lab/scenarios: a
+# scenario commits alone, after its review and Eli's (rule 13, ADR-009, the plan's L5), and ADR-064 amendment B assembles a gate
+# scenario only from parts already green, so this waits for its three parts to read green on the fifty train's D-W2 build:
+#   leg E1, the bone alarms both ways: x-trap-bone-alarm v1's legs B1 and B2, steps and claims verbatim;
+#   leg E2, the host's own trip of Embershard's wire: x-trap-wire-rope v2's walk (c1 hosting walks north from c2start through the
+#   wire, c2 at the ramp), with its claims in D-W1's and D-W2's words (c1 fired it once as its own presser's owner, c2 played the
+#   root once and fired nothing itself, the host's root relayed once, c1's rope look reported and played on c2, both ropes'
+#   break points more than 20 degrees off their reads before, the rocks c1's, no prop wire, no look refused): the regression
+#   guard for playtest 49's "snapped for both" on the host's trip;
+#   leg T, the Temple's plate both ways: x-trigger-owner v2's legs A and B, their look claims alone (the presser's plate look
+#   reported; the watcher played 'Down' and then 'Up' through the look), with the same spots and moves.
+# Eli's condition, verbatim: "provided it's not breaking what i verified DOES work, becuase last test did seem to work"; this
+# scenario keeps the look's part of playtest 49's verified trap items in the gate set from the build's merge on.
+# BUILD: fork m4-train-50 b5e466a2 plus D-W2's S5, P3 and C4 (section 7.3) on the server and both seats. npcEnabled false.
+# ONE QUESTION: when a trap family trigger fires on one seat, does every other seat show the trigger's own movement (the bones'
+# clatter, the rope's drop, the plate's Down and Up) from the firing seat's look?
+# Not here, as in its parts: the bones' nodes (owed: the NIF's node names), the server's look relay lines (unnamed in section 7.2,
+# recorded), a lured NPC's trip (x-trap-wire-lure v1, a probe in the stage: one wire a run), the guest's trip (x-trigger-owner v2's
+# leg D), CreateDetectionEvent (declared, the plan's section 7.6).
+# Assertions are evaluated by lab-api only (ADR-009).
+id: b-trap-look
+milestone: M4
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: false
+  gameHour: 7.9
+timeout_s: 1500
+artifacts: [server.log, c1.log, c2.log, c1-console.log, c2-console.log, screenshots]
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  # c1 first into the cell by a real cell load (its host), then c2
+  - c1: teleport {cell: "b6be6:Skyrim.esm", x: -5500, y: 2446, z: 8839, rot: [0, 0, 270]}
+  - until: {within: 30, every: 1, expect: ['server.host(0xb6be6).client == "c1"']}
+  - c2: teleport {cell: "b6be6:Skyrim.esm", x: -5647, y: 2296, z: 8846, rot: [0, 0, 0]}
+  - wait: 8
+  - c1: log-count {pattern: "trap family ready: [0-9]+ root"}
+  - c1: log-count {pattern: "setTriggerPresserRule.true.: a trigger entry counts on its presser.s owner alone .D-W1."}
+  - c2: log-count {pattern: "trap family ready: [0-9]+ root"}
+  - c2: log-count {pattern: "setTriggerPresserRule.true.: a trigger entry counts on its presser.s owner alone .D-W1."}
+  - c1: log-count {pattern: "setTriggerLook.true.: a family trigger.s own calls on itself"}
+  - c2: log-count {pattern: "setTriggerLook.true.: a family trigger.s own calls on itself"}
+  - assert:
+      - server.host(0xb6be6).client == "c1"
+      - 'server.log_count("ConsoleCommands: ff00000[01] god mode on") == 2'
+      - 'c1.log_count("trap family ready: [0-9]+ root") >= 1'
+      - 'c1.log_count("setTriggerPresserRule.true.: a trigger entry counts on its presser.s owner alone .D-W1.") >= 1'
+      - 'c2.log_count("trap family ready: [0-9]+ root") >= 1'
+      - 'c2.log_count("setTriggerPresserRule.true.: a trigger entry counts on its presser.s owner alone .D-W1.") >= 1'
+      # (the fifty review's note 3) the look switch on both seats
+      - 'c1.log_count("setTriggerLook.true.: a family trigger.s own calls on itself") >= 1'
+      - 'c2.log_count("setTriggerLook.true.: a family trigger.s own calls on itself") >= 1'
+
+  # E1. the bone alarms both ways (x-trap-bone-alarm v1's B1 and B2)
+  # B1. c2 walks north through the bone alarm 0x10481e; c1 watches
+  - c2: log-count {pattern: "trap 10481e fired here by 10481e: its own activation, reported .D-W1."}
+  - server: snapshot {name: B1Own0, of: 'c2.log_count("trap 10481e fired here by 10481e: its own activation, reported .D-W1.")'}
+  - c2: log-count {pattern: "trigger look 10481e ObjectReference.SetMotionType reported .D-W2."}
+  - server: snapshot {name: B1Rep0SetMotionType, of: 'c2.log_count("trigger look 10481e ObjectReference.SetMotionType reported .D-W2.")'}
+  - c1: log-count {pattern: "trigger look 10481e ObjectReference.SetMotionType played here"}
+  - server: snapshot {name: B1Play0SetMotionType, of: 'c1.log_count("trigger look 10481e ObjectReference.SetMotionType played here")'}
+  - c2: log-count {pattern: "trigger look 10481e ObjectReference.ApplyHavokImpulse reported .D-W2."}
+  - server: snapshot {name: B1Rep0ApplyHavokImpulse, of: 'c2.log_count("trigger look 10481e ObjectReference.ApplyHavokImpulse reported .D-W2.")'}
+  - c1: log-count {pattern: "trigger look 10481e ObjectReference.ApplyHavokImpulse played here"}
+  - server: snapshot {name: B1Play0ApplyHavokImpulse, of: 'c1.log_count("trigger look 10481e ObjectReference.ApplyHavokImpulse played here")'}
+  - c2: log-count {pattern: "trigger look 10481e ObjectReference.PlayAnimation reported .D-W2."}
+  - server: snapshot {name: B1Rep0PlayAnimation, of: 'c2.log_count("trigger look 10481e ObjectReference.PlayAnimation reported .D-W2.")'}
+  - c1: log-count {pattern: "trigger look 10481e ObjectReference.PlayAnimation played here"}
+  - server: snapshot {name: B1Play0PlayAnimation, of: 'c1.log_count("trigger look 10481e ObjectReference.PlayAnimation played here")'}
+  - c2: log-count {pattern: "trigger look 10481e Sound.Play reported .D-W2."}
+  - server: snapshot {name: B1Rep0Sound, of: 'c2.log_count("trigger look 10481e Sound.Play reported .D-W2.")'}
+  - c1: log-count {pattern: "trigger look 10481e Sound.Play played here"}
+  - server: snapshot {name: B1Play0Sound, of: 'c1.log_count("trigger look 10481e Sound.Play played here")'}
+  - c1: log-count {pattern: "OnTriggerEnter to 10481e by ff[0-9a-f]+: not this seat.s presser, ignored .D-W1."}
+  - server: snapshot {name: B1Gate0, of: 'c1.log_count("OnTriggerEnter to 10481e by ff[0-9a-f]+: not this seat.s presser, ignored .D-W1.")'}
+  # (v1.2) every ignored line on c1 before B1, x-trigger-owner v2.4's escape (the line's three can be spent at c1's load)
+  - c1: log-count {pattern: "not this seat.s presser, ignored .D-W1."}
+  - server: snapshot {name: B1GateAll0, of: 'c1.log_count("not this seat.s presser, ignored .D-W1.")'}
+  - c1: log-count {pattern: "trap 10481e fired here by 10481e: its own activation, reported .D-W1."}
+  - server: snapshot {name: B1WatcherOwn0, of: 'c1.log_count("trap 10481e fired here by 10481e: its own activation, reported .D-W1.")'}
+  - c2: tap-key {code: 58}
+  - wait: 1
+  - c2: hold-key {code: 17, ms: 2500}
+  - wait: 10
+  - c1: screenshot
+  - c2: screenshot
+  - c2: log-count {pattern: "trap 10481e fired here by 10481e: its own activation, reported .D-W1."}
+  - server: snapshot {name: B1Own, of: 'c2.log_count("trap 10481e fired here by 10481e: its own activation, reported .D-W1.")'}
+  - c2: log-count {pattern: "trigger look 10481e ObjectReference.SetMotionType reported .D-W2."}
+  - server: snapshot {name: B1RepSetMotionType, of: 'c2.log_count("trigger look 10481e ObjectReference.SetMotionType reported .D-W2.")'}
+  - c1: log-count {pattern: "trigger look 10481e ObjectReference.SetMotionType played here"}
+  - server: snapshot {name: B1PlaySetMotionType, of: 'c1.log_count("trigger look 10481e ObjectReference.SetMotionType played here")'}
+  - c2: log-count {pattern: "trigger look 10481e ObjectReference.ApplyHavokImpulse reported .D-W2."}
+  - server: snapshot {name: B1RepApplyHavokImpulse, of: 'c2.log_count("trigger look 10481e ObjectReference.ApplyHavokImpulse reported .D-W2.")'}
+  - c1: log-count {pattern: "trigger look 10481e ObjectReference.ApplyHavokImpulse played here"}
+  - server: snapshot {name: B1PlayApplyHavokImpulse, of: 'c1.log_count("trigger look 10481e ObjectReference.ApplyHavokImpulse played here")'}
+  - c2: log-count {pattern: "trigger look 10481e ObjectReference.PlayAnimation reported .D-W2."}
+  - server: snapshot {name: B1RepPlayAnimation, of: 'c2.log_count("trigger look 10481e ObjectReference.PlayAnimation reported .D-W2.")'}
+  - c1: log-count {pattern: "trigger look 10481e ObjectReference.PlayAnimation played here"}
+  - server: snapshot {name: B1PlayPlayAnimation, of: 'c1.log_count("trigger look 10481e ObjectReference.PlayAnimation played here")'}
+  - c2: log-count {pattern: "trigger look 10481e Sound.Play reported .D-W2."}
+  - server: snapshot {name: B1RepSound, of: 'c2.log_count("trigger look 10481e Sound.Play reported .D-W2.")'}
+  - c1: log-count {pattern: "trigger look 10481e Sound.Play played here"}
+  - server: snapshot {name: B1PlaySound, of: 'c1.log_count("trigger look 10481e Sound.Play played here")'}
+  - c1: log-count {pattern: "OnTriggerEnter to 10481e by ff[0-9a-f]+: not this seat.s presser, ignored .D-W1."}
+  - server: snapshot {name: B1Gate, of: 'c1.log_count("OnTriggerEnter to 10481e by ff[0-9a-f]+: not this seat.s presser, ignored .D-W1.")'}
+  - c1: log-count {pattern: "trap 10481e fired here by 10481e: its own activation, reported .D-W1."}
+  - server: snapshot {name: B1WatcherOwn, of: 'c1.log_count("trap 10481e fired here by 10481e: its own activation, reported .D-W1.")'}
+  # B2. c1 walks north through the bone alarm 0x10481f; c2 watches
+  - c1: teleport {cell: "b6be6:Skyrim.esm", x: -5391, y: 2480, z: 8839, rot: [0, 0, 0]}
+  - c2: teleport {cell: "b6be6:Skyrim.esm", x: -5540, y: 2631, z: 8843, rot: [0, 0, 90]}
+  - wait: 8
+  - c1: log-count {pattern: "trap 10481f fired here by 10481f: its own activation, reported .D-W1."}
+  - server: snapshot {name: B2Own0, of: 'c1.log_count("trap 10481f fired here by 10481f: its own activation, reported .D-W1.")'}
+  - c1: log-count {pattern: "trigger look 10481f ObjectReference.SetMotionType reported .D-W2."}
+  - server: snapshot {name: B2Rep0SetMotionType, of: 'c1.log_count("trigger look 10481f ObjectReference.SetMotionType reported .D-W2.")'}
+  - c2: log-count {pattern: "trigger look 10481f ObjectReference.SetMotionType played here"}
+  - server: snapshot {name: B2Play0SetMotionType, of: 'c2.log_count("trigger look 10481f ObjectReference.SetMotionType played here")'}
+  - c1: log-count {pattern: "trigger look 10481f ObjectReference.ApplyHavokImpulse reported .D-W2."}
+  - server: snapshot {name: B2Rep0ApplyHavokImpulse, of: 'c1.log_count("trigger look 10481f ObjectReference.ApplyHavokImpulse reported .D-W2.")'}
+  - c2: log-count {pattern: "trigger look 10481f ObjectReference.ApplyHavokImpulse played here"}
+  - server: snapshot {name: B2Play0ApplyHavokImpulse, of: 'c2.log_count("trigger look 10481f ObjectReference.ApplyHavokImpulse played here")'}
+  - c1: log-count {pattern: "trigger look 10481f ObjectReference.PlayAnimation reported .D-W2."}
+  - server: snapshot {name: B2Rep0PlayAnimation, of: 'c1.log_count("trigger look 10481f ObjectReference.PlayAnimation reported .D-W2.")'}
+  - c2: log-count {pattern: "trigger look 10481f ObjectReference.PlayAnimation played here"}
+  - server: snapshot {name: B2Play0PlayAnimation, of: 'c2.log_count("trigger look 10481f ObjectReference.PlayAnimation played here")'}
+  - c1: log-count {pattern: "trigger look 10481f Sound.Play reported .D-W2."}
+  - server: snapshot {name: B2Rep0Sound, of: 'c1.log_count("trigger look 10481f Sound.Play reported .D-W2.")'}
+  - c2: log-count {pattern: "trigger look 10481f Sound.Play played here"}
+  - server: snapshot {name: B2Play0Sound, of: 'c2.log_count("trigger look 10481f Sound.Play played here")'}
+  - server: log-count {pattern: "10481f animates 10481f .[Tt]rigger01. in cell b6be6 .its host ff000000 reports"}
+  - server: snapshot {name: B2Anim0, of: 'server.log_count("10481f animates 10481f .[Tt]rigger01. in cell b6be6 .its host ff000000 reports")'}
+  - c2: log-count {pattern: "OnTriggerEnter to 10481f by ff[0-9a-f]+: not this seat.s presser, ignored .D-W1."}
+  - server: snapshot {name: B2Gate0, of: 'c2.log_count("OnTriggerEnter to 10481f by ff[0-9a-f]+: not this seat.s presser, ignored .D-W1.")'}
+  # (v1.2) every ignored line on c2 before B2, the same escape
+  - c2: log-count {pattern: "not this seat.s presser, ignored .D-W1."}
+  - server: snapshot {name: B2GateAll0, of: 'c2.log_count("not this seat.s presser, ignored .D-W1.")'}
+  - c2: log-count {pattern: "trap 10481f fired here by 10481f: its own activation, reported .D-W1."}
+  - server: snapshot {name: B2WatcherOwn0, of: 'c2.log_count("trap 10481f fired here by 10481f: its own activation, reported .D-W1.")'}
+  - c1: tap-key {code: 58}
+  - wait: 1
+  - c1: hold-key {code: 17, ms: 2500}
+  - wait: 10
+  - c1: screenshot
+  - c2: screenshot
+  - c1: log-count {pattern: "trap 10481f fired here by 10481f: its own activation, reported .D-W1."}
+  - server: snapshot {name: B2Own, of: 'c1.log_count("trap 10481f fired here by 10481f: its own activation, reported .D-W1.")'}
+  - c1: log-count {pattern: "trigger look 10481f ObjectReference.SetMotionType reported .D-W2."}
+  - server: snapshot {name: B2RepSetMotionType, of: 'c1.log_count("trigger look 10481f ObjectReference.SetMotionType reported .D-W2.")'}
+  - c2: log-count {pattern: "trigger look 10481f ObjectReference.SetMotionType played here"}
+  - server: snapshot {name: B2PlaySetMotionType, of: 'c2.log_count("trigger look 10481f ObjectReference.SetMotionType played here")'}
+  - c1: log-count {pattern: "trigger look 10481f ObjectReference.ApplyHavokImpulse reported .D-W2."}
+  - server: snapshot {name: B2RepApplyHavokImpulse, of: 'c1.log_count("trigger look 10481f ObjectReference.ApplyHavokImpulse reported .D-W2.")'}
+  - c2: log-count {pattern: "trigger look 10481f ObjectReference.ApplyHavokImpulse played here"}
+  - server: snapshot {name: B2PlayApplyHavokImpulse, of: 'c2.log_count("trigger look 10481f ObjectReference.ApplyHavokImpulse played here")'}
+  - c1: log-count {pattern: "trigger look 10481f ObjectReference.PlayAnimation reported .D-W2."}
+  - server: snapshot {name: B2RepPlayAnimation, of: 'c1.log_count("trigger look 10481f ObjectReference.PlayAnimation reported .D-W2.")'}
+  - c2: log-count {pattern: "trigger look 10481f ObjectReference.PlayAnimation played here"}
+  - server: snapshot {name: B2PlayPlayAnimation, of: 'c2.log_count("trigger look 10481f ObjectReference.PlayAnimation played here")'}
+  - c1: log-count {pattern: "trigger look 10481f Sound.Play reported .D-W2."}
+  - server: snapshot {name: B2RepSound, of: 'c1.log_count("trigger look 10481f Sound.Play reported .D-W2.")'}
+  - c2: log-count {pattern: "trigger look 10481f Sound.Play played here"}
+  - server: snapshot {name: B2PlaySound, of: 'c2.log_count("trigger look 10481f Sound.Play played here")'}
+  - server: log-count {pattern: "10481f animates 10481f .[Tt]rigger01. in cell b6be6 .its host ff000000 reports"}
+  - server: snapshot {name: B2Anim, of: 'server.log_count("10481f animates 10481f .[Tt]rigger01. in cell b6be6 .its host ff000000 reports")'}
+  - c2: log-count {pattern: "OnTriggerEnter to 10481f by ff[0-9a-f]+: not this seat.s presser, ignored .D-W1."}
+  - server: snapshot {name: B2Gate, of: 'c2.log_count("OnTriggerEnter to 10481f by ff[0-9a-f]+: not this seat.s presser, ignored .D-W1.")'}
+  - c2: log-count {pattern: "trap 10481f fired here by 10481f: its own activation, reported .D-W1."}
+  - server: snapshot {name: B2WatcherOwn, of: 'c2.log_count("trap 10481f fired here by 10481f: its own activation, reported .D-W1.")'}
+
+  # E2. the host's own trip (x-trap-wire-rope v2's walk): c1 to c2start, c2 to the ramp
+  - c1: teleport {cell: "b6be6:Skyrim.esm", x: 2787, y: 3300, z: 8637, rot: [0, 0, 0]}
+  - c2: teleport {cell: "b6be6:Skyrim.esm", x: 2760, y: 3150, z: 8692, rot: [0, 0, 0]}
+  - wait: 8
+  - c1: log-count {pattern: "trap b6d3e fired here by b6d3f"}
+  - server: snapshot {name: wireH0c1, of: 'c1.log_count("trap b6d3e fired here by b6d3f")'}
+  - c2: log-count {pattern: "trap b6d3e fired here by b6d3f"}
+  - server: snapshot {name: wireH0c2, of: 'c2.log_count("trap b6d3e fired here by b6d3f")'}
+  - c1: node-rotation {formId: 0xb6d3f, nodes: ["RopeBreakPoint01", "TrapTripwire01"], toward: "TrapTripwire01", label: "before"}
+  - c2: node-rotation {formId: 0xb6d3f, nodes: ["RopeBreakPoint01", "TrapTripwire01"], toward: "TrapTripwire01", label: "before"}
+  - wait: 1
+  - c1: node-rotation {formId: 0xb6d3f, nodes: ["RopeBreakPoint01", "TrapTripwire01"], toward: "TrapTripwire01", label: "before"}
+  - c2: node-rotation {formId: 0xb6d3f, nodes: ["RopeBreakPoint01", "TrapTripwire01"], toward: "TrapTripwire01", label: "before"}
+  # c1's walk toggle is already off from B2's walk, so W walks it north through the wire
+  - c1: hold-key {code: 17, ms: 2500}
+  - wait: 20
+  - c1: screenshot
+  - c2: screenshot
+  - c1: node-rotation {formId: 0xb6d3f, nodes: ["RopeBreakPoint01", "TrapTripwire01"], toward: "TrapTripwire01", label: "after"}
+  - c2: node-rotation {formId: 0xb6d3f, nodes: ["RopeBreakPoint01", "TrapTripwire01"], toward: "TrapTripwire01", label: "after"}
+  - wait: 1
+  - c1: node-rotation {formId: 0xb6d3f, nodes: ["RopeBreakPoint01", "TrapTripwire01"], toward: "TrapTripwire01", label: "after"}
+  - c2: node-rotation {formId: 0xb6d3f, nodes: ["RopeBreakPoint01", "TrapTripwire01"], toward: "TrapTripwire01", label: "after"}
+  - c1: log-count {pattern: "trap b6d3e fired here by b6d3f: the presser.s owner.s firing"}
+  - c1: log-count {pattern: "trap b6d3e fired here by b6d3f: the relay.s own play"}
+  - c2: log-count {pattern: "trap b6d3e fired here by b6d3f: the presser.s owner.s firing"}
+  - c2: log-count {pattern: "trap b6d3e fired here by b6d3f: the relay.s own play"}
+  - c1: log-count {pattern: "trigger look b6d3f ObjectReference.SetMotionType reported .D-W2."}
+  - c2: log-count {pattern: "trigger look b6d3f ObjectReference.SetMotionType played here"}
+
+  # T. the Temple: c1 first (its host) at away2, c2 at away1, both south of the plate and out of the wall's reach
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 8500, y: -6038, z: -1995, rot: [0, 0, 0]}
+  - until: {within: 30, every: 1, expect: ['server.host(0x371de).client == "c1"']}
+  - c2: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -6038, z: -1999, rot: [0, 0, 0]}
+  - wait: 12
+  # TA. c2 onto the plate and back; c1 watches from its spot south of the plate, out of the wall's reach
+  - c2: log-count {pattern: "trigger look 567f2 ObjectReference.PlayAnimation reported .D-W2."}
+  - server: snapshot {name: TARep0, of: 'c2.log_count("trigger look 567f2 ObjectReference.PlayAnimation reported .D-W2.")'}
+  - c1: log-count {pattern: "object animation 567f2 Down played"}
+  - server: snapshot {name: TADown0, of: 'c1.log_count("object animation 567f2 Down played")'}
+  - c1: log-count {pattern: "object animation 567f2 Up played"}
+  - server: snapshot {name: TAUp0, of: 'c1.log_count("object animation 567f2 Up played")'}
+  - c1: log-count {pattern: "trigger look 567f2 ObjectReference.PlayAnimation played here"}
+  - server: snapshot {name: TAPlay0, of: 'c1.log_count("trigger look 567f2 ObjectReference.PlayAnimation played here")'}
+  - c2: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5338, z: -2042, rot: [0, 0, 0]}
+  - wait: 5
+  - c1: screenshot
+  - c2: screenshot
+  - c2: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -6038, z: -1999, rot: [0, 0, 0]}
+  - wait: 12
+  - c2: log-count {pattern: "trigger look 567f2 ObjectReference.PlayAnimation reported .D-W2."}
+  - server: snapshot {name: TARep, of: 'c2.log_count("trigger look 567f2 ObjectReference.PlayAnimation reported .D-W2.")'}
+  - c1: log-count {pattern: "object animation 567f2 Down played"}
+  - server: snapshot {name: TADown, of: 'c1.log_count("object animation 567f2 Down played")'}
+  - c1: log-count {pattern: "object animation 567f2 Up played"}
+  - server: snapshot {name: TAUp, of: 'c1.log_count("object animation 567f2 Up played")'}
+  - c1: log-count {pattern: "trigger look 567f2 ObjectReference.PlayAnimation played here"}
+  - server: snapshot {name: TAPlay, of: 'c1.log_count("trigger look 567f2 ObjectReference.PlayAnimation played here")'}
+  # TB. c1 onto the plate and back; c2 watches from its spot south of the plate, out of the wall's reach
+  - c1: log-count {pattern: "trigger look 567f2 ObjectReference.PlayAnimation reported .D-W2."}
+  - server: snapshot {name: TBRep0, of: 'c1.log_count("trigger look 567f2 ObjectReference.PlayAnimation reported .D-W2.")'}
+  - c2: log-count {pattern: "object animation 567f2 Down played"}
+  - server: snapshot {name: TBDown0, of: 'c2.log_count("object animation 567f2 Down played")'}
+  - c2: log-count {pattern: "object animation 567f2 Up played"}
+  - server: snapshot {name: TBUp0, of: 'c2.log_count("object animation 567f2 Up played")'}
+  - c2: log-count {pattern: "trigger look 567f2 ObjectReference.PlayAnimation played here"}
+  - server: snapshot {name: TBPlay0, of: 'c2.log_count("trigger look 567f2 ObjectReference.PlayAnimation played here")'}
+  - server: log-count {pattern: "567f2 animates 567f2 .Down. in cell 371de .its host ff000000 reports"}
+  - server: snapshot {name: TBAnimDown0, of: 'server.log_count("567f2 animates 567f2 .Down. in cell 371de .its host ff000000 reports")'}
+  - server: log-count {pattern: "567f2 animates 567f2 .Up. in cell 371de .its host ff000000 reports"}
+  - server: snapshot {name: TBAnimUp0, of: 'server.log_count("567f2 animates 567f2 .Up. in cell 371de .its host ff000000 reports")'}
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 8589, y: -5338, z: -2042, rot: [0, 0, 0]}
+  - wait: 5
+  - c1: screenshot
+  - c2: screenshot
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 8500, y: -6038, z: -1995, rot: [0, 0, 0]}
+  - wait: 12
+  - c1: log-count {pattern: "trigger look 567f2 ObjectReference.PlayAnimation reported .D-W2."}
+  - server: snapshot {name: TBRep, of: 'c1.log_count("trigger look 567f2 ObjectReference.PlayAnimation reported .D-W2.")'}
+  - c2: log-count {pattern: "object animation 567f2 Down played"}
+  - server: snapshot {name: TBDown, of: 'c2.log_count("object animation 567f2 Down played")'}
+  - c2: log-count {pattern: "object animation 567f2 Up played"}
+  - server: snapshot {name: TBUp, of: 'c2.log_count("object animation 567f2 Up played")'}
+  - c2: log-count {pattern: "trigger look 567f2 ObjectReference.PlayAnimation played here"}
+  - server: snapshot {name: TBPlay, of: 'c2.log_count("trigger look 567f2 ObjectReference.PlayAnimation played here")'}
+  - server: log-count {pattern: "567f2 animates 567f2 .Down. in cell 371de .its host ff000000 reports"}
+  - server: snapshot {name: TBAnimDown, of: 'server.log_count("567f2 animates 567f2 .Down. in cell 371de .its host ff000000 reports")'}
+  - server: log-count {pattern: "567f2 animates 567f2 .Up. in cell 371de .its host ff000000 reports"}
+  - server: snapshot {name: TBAnimUp, of: 'server.log_count("567f2 animates 567f2 .Up. in cell 371de .its host ff000000 reports")'}
+  # RECORDED, all before the claims
+  - c1: log-count {pattern: "its firing seat.s look, queued .D-W2."}
+  - c2: log-count {pattern: "its firing seat.s look, queued .D-W2."}
+  - server: log-count {pattern: "E_SCRIPTCALL_[A-Z_]+"}
+  - c1: dump-state
+  - c2: dump-state
+  - assert:
+      # B1: c2's own alarm fired (the premise) and its four looks were reported; c1 ignored the figure, fired
+      # nothing of its own, and played all four
+      - 'snapshot("B1Own") > snapshot("B1Own0")'
+      - 'snapshot("B1RepSetMotionType") > snapshot("B1Rep0SetMotionType")'
+      - 'snapshot("B1PlaySetMotionType") > snapshot("B1Play0SetMotionType")'
+      - 'snapshot("B1RepApplyHavokImpulse") > snapshot("B1Rep0ApplyHavokImpulse")'
+      - 'snapshot("B1PlayApplyHavokImpulse") > snapshot("B1Play0ApplyHavokImpulse")'
+      - 'snapshot("B1RepPlayAnimation") > snapshot("B1Rep0PlayAnimation")'
+      - 'snapshot("B1PlayPlayAnimation") > snapshot("B1Play0PlayAnimation")'
+      - 'snapshot("B1RepSound") > snapshot("B1Rep0Sound")'
+      - 'snapshot("B1PlaySound") > snapshot("B1Play0Sound")'
+      - 'snapshot("B1WatcherOwn") == snapshot("B1WatcherOwn0")'
+      # (v1.2) c1's gate line for the figure, or two or more of its lines spent before B1 (x-trigger-owner v2.4's escape)
+      - 'snapshot("B1Gate") > snapshot("B1Gate0") or snapshot("B1GateAll0") >= 2'
+      # B2: c1's own alarm fired (the premise); as the cell's host its PlayAnimation went out as an action (the
+      # server's 'animates' line, the code review's note 4) and its three other calls as looks; c2 ignored the
+      # figure, fired nothing of its own, and played the three looks
+      - 'snapshot("B2Own") > snapshot("B2Own0")'
+      - 'snapshot("B2RepSetMotionType") > snapshot("B2Rep0SetMotionType")'
+      - 'snapshot("B2PlaySetMotionType") > snapshot("B2Play0SetMotionType")'
+      - 'snapshot("B2RepApplyHavokImpulse") > snapshot("B2Rep0ApplyHavokImpulse")'
+      - 'snapshot("B2PlayApplyHavokImpulse") > snapshot("B2Play0ApplyHavokImpulse")'
+      - 'snapshot("B2Anim") > snapshot("B2Anim0")'
+      - 'snapshot("B2RepSound") > snapshot("B2Rep0Sound")'
+      - 'snapshot("B2PlaySound") > snapshot("B2Play0Sound")'
+      - 'snapshot("B2WatcherOwn") == snapshot("B2WatcherOwn0")'
+      # (v1.2) c2's gate line for the figure, or two or more of its lines spent before B2
+      - 'snapshot("B2Gate") > snapshot("B2Gate0") or snapshot("B2GateAll0") >= 2'
+      - 'server.log_count("claims prop 1048(1e|1f) by touch") == 0'
+      - 'server.log_count("E_SCRIPTCALL_(OWNER|FAR|ROW): ff00000[01] reports [A-Za-z]+.[A-Za-z]+ on (1048(1e|1f))") == 0'
+      # the wire: c1's own player fired it on c1 (the host) once; c2 played the root once and its own copy fired nothing; the
+      # host's root relayed once; c1's rope look reported and played on c2; both ropes dropped; the rocks c1's; no prop wire
+      - 'snapshot("wireH0c1") == 0'
+      - 'snapshot("wireH0c2") == 0'
+      - 'c1.log_count("trap b6d3e fired here by b6d3f: the presser.s owner.s firing") == 1'
+      - 'c2.log_count("trap b6d3e fired here by b6d3f: the presser.s owner.s firing") == 0'
+      - 'c2.log_count("trap b6d3e fired here by b6d3f: the relay.s own play") == 1'
+      - 'server.log_count("b6d3f activates b6d3e in cell b6be6 .its host ff000000 reports.: relayed to 1 game.s.") == 1'
+      - 'c1.log_count("trigger look b6d3f ObjectReference.SetMotionType reported .D-W2.") >= 1'
+      - 'c2.log_count("trigger look b6d3f ObjectReference.SetMotionType played here") >= 1'
+      - 'c1.node_rotation(0xb6d3f, "RopeBreakPoint01", "after").angle_to(c1.node_rotation(0xb6d3f, "RopeBreakPoint01", "before")) > 20'
+      - 'c2.node_rotation(0xb6d3f, "RopeBreakPoint01", "after").angle_to(c2.node_rotation(0xb6d3f, "RopeBreakPoint01", "before")) > 20'
+      - 'server.log_count("ff000000 claims prop b6d4[589abcd] by touch 3: granted") >= 7'
+      - 'server.log_count("claims prop b6d3f by touch") == 0'
+      - 'server.log_count("E_SCRIPTCALL_(OWNER|FAR|LOOK_RATE|ROW): ff00000[01] reports [A-Za-z]+.[A-Za-z]+ on b6d3f") == 0'
+      # TA: c2's plate look reported; c1 played its Down and then its Up through the look
+      - 'snapshot("TARep") > snapshot("TARep0")'
+      - 'snapshot("TADown") > snapshot("TADown0")'
+      - 'snapshot("TAUp") > snapshot("TAUp0")'
+      - 'snapshot("TAPlay") > snapshot("TAPlay0")'
+      # TB: c1, the cell's host, pressed: its PlayAnimation calls went out as actions (the server's 'animates'
+      # lines, the code review's note 4); c2 played its Down and then its Up
+      - 'snapshot("TBAnimDown") > snapshot("TBAnimDown0")'
+      - 'snapshot("TBAnimUp") > snapshot("TBAnimUp0")'
+      - 'snapshot("TBDown") > snapshot("TBDown0")'
+      - 'snapshot("TBUp") > snapshot("TBUp0")'
