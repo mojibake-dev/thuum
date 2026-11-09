@@ -4868,8 +4868,8 @@ questions are docs/research/rung5-quests-2026-11-09.md section 6):
   runs fragments under the acting player's scope. The ladder's deletion of the 53987 skip narrows to the live path: the sink
   replacement and its two natives stay for the replay, which QuestStage 57's `served` names.
 - D-Q2 is none of its three options: the per-player quests' full build lands in ONE rung, not split across rungs. Eli's "rung 4"
-  is read as the rung being built for playtest 51, rung 5 (rung 4 shipped in 50, and Eli called 51's new work "rung 4 stuff"
-  that day; numidium told Eli so, and Eli may correct it). So inside rung 5: D-Q1's derivation whole (the alias half, every alias
+  is the rung being built for playtest 51, rung 5 (rung 4 shipped in 50; Eli confirmed ~14:5x PST, verbatim: "yes, rung 5 is
+  what i meant"). So inside rung 5: D-Q1's derivation whole (the alias half, every alias
   the player by ALFR 0x14 or ALUA 0x7 or in the player's inventory, and the refinement, a quest whose scripts' state natives all
   target the player, which closes the vampire quest's no-alias gap: H-QS2 holds statically), measured against today's allowed and
   denied lists by its census and one lab read before it acts, then acting; and IsSeatsOwnQuest's start-game-enabled rule retired
@@ -4877,7 +4877,8 @@ questions are docs/research/rung5-quests-2026-11-09.md section 6):
   its proofs and its estimate. Read as the plan's: "the full build needed for it" also carries the two transformations a
   per-player quest drives, the vampire stage and the werewolf's beast form, proven on two seats in rung 5 (the ladder's rung 6
   had x-vampire-stage): one feature, its dependencies in one rung. Eli may narrow that to the classification alone.
-- D-V1 B, PROPOSED by the plan's rule on the census and presented in the same memo, Eli's explicit word open: H-CV1 fails (458 of
+- D-V1 B, ACCEPTED as read: Eli's "yes, rung 5 is what i meant" (~14:5x PST) answered numidium's "Is that a yes for B?" beside
+  the rung reading, and numidium read the yes as B's too, leaving Eli room to correct it. H-CV1 fails (458 of
   770 condition-read keys have a topic-info fragment writer, 310 only such writers), so every seat reports a listed variable it
   changes and the latest write wins per key with the server's sequence (AliasFill 79's shape), relayed to the others; D-F1 C's one
   streaming seat would overwrite the talker's writes.
