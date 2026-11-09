@@ -4855,3 +4855,29 @@ probes' drafting and the pex reads).
   game(s)", the record's view ''). Amendment A's rule (the record carries its view) applied to the second way a script changes what
   an object shows. Rule 6: the change form's graphVariables merge to canon only with a committed restart scenario (b-cobweb-view's
   restart leg). Built ahead on m4-train-50 (S4, W1's graph_vars, C3), kept.
+
+Rung 5's words, W1 B, D-Q3 A and D-Q2 replaced by one rung's full build (ACCEPTED by Eli 14:4x PST 2026-11-09 (22:4xZ), in
+numidium's session, verbatim: "go with recommended the first and the third. for the vapirism/lycanthropy one, ammend the rungs to
+just include the full build needed for it in rung 4 instead of spitting up feature dependencies across rungs."; the memo's three
+questions are docs/research/rung5-quests-2026-11-09.md section 6):
+- W1 B: b-quest-stage-restart v2 is approved now for its additions only (the runs-replay line for both seats, a relaunched c2
+  reading 0x10d3bb running at its login, the refusal claim tightened to "E_QUEST_" == 0); b-quest-rumor v2's rewrite is approved
+  once x-quest-runs v1 names the vampire castle controller's lines inside its window (ADR-064 decision 4). Each its own commit.
+- D-Q3 A, the login replay skips fragments: a replay is a load (a save load restores done stages without fragments), and the
+  record (ref states, alias fills, script records, world globals, condition variables) carries the world effects; the live relay
+  runs fragments under the acting player's scope. The ladder's deletion of the 53987 skip narrows to the live path: the sink
+  replacement and its two natives stay for the replay, which QuestStage 57's `served` names.
+- D-Q2 is none of its three options: the per-player quests' full build lands in ONE rung, not split across rungs. Eli's "rung 4"
+  is read as the rung being built for playtest 51, rung 5 (rung 4 shipped in 50, and Eli called 51's new work "rung 4 stuff"
+  that day; numidium told Eli so, and Eli may correct it). So inside rung 5: D-Q1's derivation whole (the alias half, every alias
+  the player by ALFR 0x14 or ALUA 0x7 or in the player's inventory, and the refinement, a quest whose scripts' state natives all
+  target the player, which closes the vampire quest's no-alias gap: H-QS2 holds statically), measured against today's allowed and
+  denied lists by its census and one lab read before it acts, then acting; and IsSeatsOwnQuest's start-game-enabled rule retired
+  in the same rung. No measuring-only interim and no later rung for the refinement. The plan's section 8 amends rung 5's scope,
+  its proofs and its estimate. Read as the plan's: "the full build needed for it" also carries the two transformations a
+  per-player quest drives, the vampire stage and the werewolf's beast form, proven on two seats in rung 5 (the ladder's rung 6
+  had x-vampire-stage): one feature, its dependencies in one rung. Eli may narrow that to the classification alone.
+- D-V1 B, PROPOSED by the plan's rule on the census and presented in the same memo, Eli's explicit word open: H-CV1 fails (458 of
+  770 condition-read keys have a topic-info fragment writer, 310 only such writers), so every seat reports a listed variable it
+  changes and the latest write wins per key with the server's sequence (AliasFill 79's shape), relayed to the others; D-F1 C's one
+  streaming seat would overwrite the talker's writes.
