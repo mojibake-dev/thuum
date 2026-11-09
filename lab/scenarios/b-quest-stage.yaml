@@ -1,3 +1,10 @@
+# GREEN 20261109-091605-b-quest-stage on the 50 build (fork m4-train-50 4bd07f33), by path from lab/.cache/drafts/fifty (sha1
+# 9fc6f693); Eli's approval of the rewrite as above; committed alone (rule 13).
+# b-quest-stage, the claim rewrite Eli approved (2026-11-09 ~01:1x PST in numidium's session; ADR-064 decision 4): the step 9
+# claim's pattern matches the server's real login line, "QuestStage: actor <id> sent mode 1 with <n> denied quests" (fmt prints
+# the uint8_t mode as its number; the pattern "sent .* mode all", a claim since 521cba05 on 11-02, never ran before
+# 20261107-222054), for both seats (>= 2, from >= 1). Every other claim unchanged. Commits alone after its green and its
+# fresh review (rule 13).
 # b-quest-stage (thuum-magnus, 2026-10-30; docs/verbs/quest-stage.md, ADR-056, D58 B and D62; fork m3-quest-mode inside the union
 # m3-pass-train-3-win e8a89384; promoted from x-quest-mode v6, whose v5 ran GREEN through the relay at the union's stage on 2026-10-30
 # with lab/frida/quest-stage-chain.js reading the engine's chain): sharedQuestsMode {mode: all, denied: [...]} makes every
@@ -37,8 +44,9 @@ steps:
       - c2.quest(0x10d3bb).stageDone(10) == false
       - 'c1.log_count("the server shares .* mode all") >= 1'
       - 'c2.log_count("the server shares .* mode all") >= 1'
-      # the sending seat's stage reaches the server in mode all: a claim, not a read (the gate audit, 2026-11-02)
-      - 'server.log_count("QuestStage: actor ff[0-9a-f]+ sent .* mode all") >= 1'
+      # the server's login send in mode all (mode 1, with its denied list) to both seats: a claim, not a read (the gate audit,
+      # 2026-11-02; the pattern fixed to the server's real line, 20261107-222054, which prints the mode's number)
+      - 'server.log_count("QuestStage: actor ff[0-9a-f]+ sent mode 1 with [0-9]+ denied quests") >= 2'
   # an undeclared quest's stage is the world's in mode all
   # v3: the game's own console (setstage, 22151 over the setter): the driver's Papyrus Quest.Start then SetCurrentStageID answered
   # false to both on MS13Intro in 131512 (started false, ok false; no setter, no stage event, nothing to report)
