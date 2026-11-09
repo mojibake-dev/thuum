@@ -1,0 +1,317 @@
+# b-pillar-reentry: promoted from the probe x-pillar-reentry v1.1 (lab/.cache/probes, sha1 071a24a7), GREEN twice:
+# 20261107-212822 on rung 4's build (fork m4-scripts-4-rows 1acb834f) and 20261108-000917 on the 50 build (m4-train-50 4bd07f33).
+# Playtest 49's restart break (the guest's pillars reset after a restart and a teleport out and back: the view's "current" mark
+# survived a 3D unload), fixed by fork bb24886d; the committed scenario that guards it. Reviewed as a probe; claims as v1.1's.
+# Its own commit (rule 13).
+# x-pillar-reentry v1.1 DRAFT (2026-11-07; its fresh review GO WITH NOTES, nothing required before the first run; notes 6 and 7
+# applied as written, so no second review under ADR-064 amendment A). (6) Claim (4) moved to RECORDED: it cannot fail on the
+# defect it names, since pollOne returns at kept.shown before it reaches the owner test (objectAnimationService.ts:774-777) and
+# c2's grant play keeps shown true on a loaded 3D (:413). (7) The how-to-read's cut: the pending hold blanks only OnLoad and
+# OnCellLoad (ScriptState.cpp:1577-1582), so "not on" always survives the 128-byte cut; only a refused re-send's reason text
+# (scriptStateService.ts:436) can push it out. Both applied in place below; no other step or claim changed. v1 follows.
+# x-pillar-reentry v1 DRAFT (2026-11-06 PST, playtest 49's pillar finding, drafted for playtest 50's lane). New, so its own fresh
+# review under ADR-064 amendment A before its first lab run. By path (lab/.cache/drafts/fifty); assertions are evaluated by lab-api
+# only (ADR-009).
+# BUILD: fork m4-scripts-4-rows with m4-scripts-4-view bb24886d merged (b86884a5, the kept last animation and its re-apply at a 3D
+# load, plus its review's four notes: the server's DestroyActor drops the kept animation, the poll's owner test is
+# HostService.epochForActor, the trap family test is read again at the play, the mechanism follows the client setting
+# scriptRecord) on both seats and the server; lab-api and lab-driver as b-script-state-restart runs them (script-state,
+# c.script_state, node-rotation's deferred read).
+# ONE QUESTION (ADR-064 amendment B): after a server restart, does the guest's view of the Bleak Falls Temple pillars 0xaa8cb,
+# 0xaa8cc and 0xaa8cd (cell 0x371de) survive its 3D being unloaded and loaded again, so its faces equal the host's?
+# WHY (playtest 49; Eli: "for ariadne the pillars are accurate, but for rotfern they're reset"): the server restarted at 06:13:13Z;
+# c1 (rotfern) applied each record at its reconnect, which raised its seq to the record's ("script state aa8cd: nothing blanked;
+# view Trigger01 to play (seq 4, none here), +23 ms", 06:13:30.739); both seats went out to the Temple door's camp and back
+# (06:14:04, 06:14:24), c2 (Ariadne) hosting on the way back; c1's apply at 06:14:25.802 judged "view Trigger01 current (seq 4)"
+# from its play before it left, and its 3D came back at the default faces. b-script-state-restart (green at 48's merge gate,
+# 20261107-035113) cannot see it: its c1 relaunches before re-entering, so its seq starts over and the seq-only test plays anyway.
+# THE FIX'S GREEN: at the guest's re-entry each pillar's apply says "to play (seq N, N here, not on this 3D)" (the seq is the
+# record's, 49's state, and the 3D now loaded has not shown the kept view), never "current"; the view then plays ("played (the
+# script record", or the re-apply line where the view found no 3D in its window); the guest's three faces stand within 5.7 degrees
+# of the host's. FALSIFIED by any of: a "view <event> current (seq" line on c1 after its entry (49's fault back: the shown mark
+# outlived the unload); a pillar with neither play line; a face off the host's.
+# Legs:
+# 1. before: c1 hosts the Temple and from (5520, -896) turns aa8cb twice (Trigger01, Trigger02: position03, its record's view
+#    Trigger02, a jump view), aa8cc twice (Trigger03, Trigger01: position02, view Trigger01, no jump) and aa8cd once (Trigger01:
+#    position02, view Trigger01, 49's own kind); c2 watches as a guest from (5400, -900). Every record's side differs from Side01,
+#    the side a reloaded 3D shows with nothing played (H-49a), so every face claim can fail. c1's faces read (label pre). New
+#    here: aa8cc's second turn and aa8cd's turn from c1's spot (x-puzzle-late-join turned aa8cc once from it, x-puzzle-handoff
+#    aa8cd once from the lever's); each press waits on its own animates line, so one that does not take stops the run there.
+# 2. the restart, b-script-state-restart's leg 2: both games log in again in place (a running game's re-login moves its player
+#    with no save load, so each engine keeps its scripts) and c1 applies each record at its reconnect: 49's state.
+# 3. both out to lab-spawn, the Temple unhosted, c2 back in first and granted it (49: c2 hosted on the way back); c2's faces read
+#    15 s after its grant (label host).
+# 4. c1 back in with its game kept (49's c1, no relaunch): its leave's unsubscribe (DestroyActor) dropped what it kept, its create
+#    word subscribes it again and the record served behind the word is applied; both seats' faces read 15 s after the landing
+#    (label reentry), past the author's 4 s after the load. Every count is baselined right before the entry.
+# CLAIMS, one assert step per block so a red names its step; a red step ends the run (runner.py's step loop), so leg 4's counts
+# are all taken before its first block and every number is in the run's notes whichever block stops it:
+# - leg 1 (premise): c1 hosts; c1's own states position03, position02, position02; a recorded line per pillar.
+# - leg 2's until (premise): the server's process started again (its "Server resources folder is listening on" line, printed once
+#   a start at skymp5-server ts/ui.ts:131 and :137, over its count before the restart), and c1's "to play (seq" line per pillar
+#   over its count before the restart (the reconnect's apply, which raises c1's seq; it also shows scriptRecord on: bb24886d's note
+#   4 keeps and applies nothing with it off).
+# - leg 3 (premise): c2 hosts, and each of its faces stands within 5.7 degrees of c1's pre read (the host's side, what (3) reads
+#   the guest against).
+# - leg 4, the guest (premise): c2 still hosts; each record served to ff000000 (c1) after its create word since the entry; c1
+#   applied at least three records as a guest since the entry.
+# - (3), the answer: each pillar's Pillar01 local rotation on c1 within 5.7 degrees (0.1 rad, the pillar probes' bound) of c2's.
+#   Placed before (1) because the faces are the question.
+# - (1), the fix's decision, since the entry: no "view <event> current (seq" line on c1 for the three; per pillar its "to play
+#   (seq N, N here, not on" line, the fix's added reason, so the entry met 49's state (a build without the fix prints "current"
+#   there); per pillar "played (the script record" or the re-apply line. The pattern stops at "not on": the console tee cuts a
+#   printed string at 128 bytes (skyrim-platform InGameConsolePrinter.cpp:26-30), and with 49's "blanked OnLoad and OnCellLoad
+#   re-sent" the reason reads "not on this 3" at a two-digit seq and "not on this" at three.
+# NOT BUILT, the author's claim (2) (the re-apply line at least once per pillar after a 3D reload with no new create word, a
+#   disable then enable on the guest): no step does that on one seat. The console step's typed disable and enable never reach
+#   the engine: skymp5-client's ConsoleCommandsService gives both a schema (consoleCommandsService.ts:41 and :63), replaces their
+#   execute (:108) with a ConsoleCommand to the server that returns false (:184), and Skyrim Platform runs a replaced command's
+#   own handler only when execute returns true (the note at :113-118), so the typed pair is a server command on the record, not a
+#   reload in one engine; server-console is the server's too, and the driver only reads a reference's enabled state (isDisabled).
+#   The leg waits for a driver step that disables and enables one reference in its seat's own engine, and that step's own probe.
+# HYPOTHESIS (ADR-064 amendment C), H-49a: a guest's pillar 3D reloaded by a teleport out and back shows the graph's default side
+#   (Side01) until something plays. Read in play at 49 (c1's faces, Eli's word), never in a lab run. The face claims' power
+#   against a build without the fix rests on it; (1)'s "current" and "not on" claims fail on such a build whatever the faces do.
+#   The host's face through the same trip is lab-read for aa8cb alone (b-script-state-restart 20261107-035113 step 51, 0.0); leg
+#   3's claim reads all three.
+# How to read it: green, the record's apply at the re-entry replays the view on the guest and its faces stand on the host's. Red
+#   at leg 3: the host's own faces are off after its grant (the author's open note: under b86884a5 a new owner's grant plays the
+#   view once, "which may show one extra turn of aa8cb"), so (3) has nothing to read against. Red at the guest premise: the
+#   record never reached c1 behind its create word, or c1 applied at a grant (c1 hosted: the frame). Red at (3) with (1)'s lines
+#   in the notes: the play was taken late or refused (the refused count below); an angle near 120 or 240 degrees is one or two
+#   faces off; aa8cc or aa8cd alone off with a refused Trigger01 is H-V1's declared risk (a Trigger01 view has no jump, and a graph
+#   off Side01 refuses it), not the keep. Red at (1)'s "current": the shown mark survived the unload, unless the served count rose
+#   by two for that pillar (a second serve applied after the play, rightly current). Red at (1)'s "not on" with a
+#   "to play (seq N, M here" or "none here" line in its place: c1's seq was not the record's at the entry, so the run missed 49's
+#   state and an unfixed build would have played too (the frame). The pending hold blanks only OnLoad and OnCellLoad
+#   (ScriptState.cpp:1577-1582), so "not on" always survives the 128-byte cut; only a refused re-send's reason text
+#   (scriptStateService.ts:436) can push it out: read the line by hand.
+# RECORDED, NOT CLAIMED: (4), the author's host-gate count (v1.1 note 6): c2's re-apply lines after the entry against their count
+#   at its grant (snapshot reapplyC2Grant); c1's give-up lines ("from the record: its view ... not played, no 3D"), refused plays
+#   and re-applies, remoteServer's old lastAnimation replay ("played (the record,"), the platform's blanked lines on both seats
+#   (H-R7), c2's own branch at its grant ("current" or "to play") and its grant applies, the serves to c2 ahead of its grants, the
+#   server's refusal codes, both seats' script states after the entry, screenshots.
+# Spots, each a green run's: c1 (5520, -896, -768) facing east and c2 (5400, -900, -768) in the puzzle room
+# (b-script-state-restart 20261107-035113, x-puzzle-late-join); lab-spawn's strip, c1 at the origin and c2 at (0, -120)
+# (docs/LAB.md's summit note). Ids from the profiles' records: c1 ff000000, c2 ff000001. God mode set again after the reconnect
+# (session state). The presses go by the driver's activate, the host engine's own activation (ADR-062's flip). All three pillars
+# share the base 0xaa8ce NorDefaultPuzzlePillar01 (docs/research/trap-census-2026-11-05.md), so each is read at Pillar01.
+id: x-pillar-reentry
+milestone: M4
+clients: [c1, c2]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: false
+  gameHour: 7.9
+timeout_s: 1200
+artifacts: [server.log, c1.log, c2.log, c1-console.log, c2-console.log, screenshots]
+steps:
+  - c1: connect
+  - c2: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 5520, y: -896, z: -768, rot: [0, 0, 90]}
+  - until: {within: 30, every: 1, expect: ['server.host(0x371de).client == "c1"']}
+  - c2: teleport {cell: "371de:Skyrim.esm", x: 5400, y: -900, z: -768, rot: [0, 0, 90]}
+  - wait: 10
+
+  # 1. the host's five turns, 4 s apart after each report: aa8cb twice (side 1 to 3), aa8cc twice (side 3 to 1 to 2), aa8cd once
+  #    (side 1 to 2)
+  - c1: activate {refId: 0xaa8cb}
+  - until: {within: 8, every: 0.5, expect: ['server.log_count("aa8cb animates aa8cb .[Tt]rigger01.") >= 1']}
+  - wait: 4
+  - c1: activate {refId: 0xaa8cb}
+  - until: {within: 8, every: 0.5, expect: ['server.log_count("aa8cb animates aa8cb .[Tt]rigger02.") >= 1']}
+  - wait: 4
+  - c1: activate {refId: 0xaa8cc}
+  - until: {within: 8, every: 0.5, expect: ['server.log_count("aa8cc animates aa8cc .[Tt]rigger03.") >= 1']}
+  - wait: 4
+  - c1: activate {refId: 0xaa8cc}
+  - until: {within: 8, every: 0.5, expect: ['server.log_count("aa8cc animates aa8cc .[Tt]rigger01.") >= 1']}
+  - wait: 4
+  - c1: activate {refId: 0xaa8cd}
+  - until: {within: 8, every: 0.5, expect: ['server.log_count("aa8cd animates aa8cd .[Tt]rigger01.") >= 1']}
+  # the records: a read a second at most per reference, a busy one retried every 250 ms, then sent
+  - wait: 8
+  - c1: script-state {formId: 0xaa8cb}
+  - c1: script-state {formId: 0xaa8cc}
+  - c1: script-state {formId: 0xaa8cd}
+  - c1: node-rotation {formId: 0xaa8cb, nodes: ["Pillar01"], label: "pre"}
+  - c1: node-rotation {formId: 0xaa8cc, nodes: ["Pillar01"], label: "pre"}
+  - c1: node-rotation {formId: 0xaa8cd, nodes: ["Pillar01"], label: "pre"}
+  - wait: 1
+  - c1: node-rotation {formId: 0xaa8cb, nodes: ["Pillar01"], label: "pre"}
+  - c1: node-rotation {formId: 0xaa8cc, nodes: ["Pillar01"], label: "pre"}
+  - c1: node-rotation {formId: 0xaa8cd, nodes: ["Pillar01"], label: "pre"}
+  - c1: screenshot
+  - c2: screenshot
+  - assert:
+      - server.host(0x371de).client == "c1"
+      - c1.script_state(0xaa8cb).state == "position03"
+      - c1.script_state(0xaa8cc).state == "position02"
+      - c1.script_state(0xaa8cd).state == "position02"
+      - 'server.log_count("script state aa8cb recorded from") >= 1'
+      - 'server.log_count("script state aa8cc recorded from") >= 1'
+      - 'server.log_count("script state aa8cd recorded from") >= 1'
+
+  # 2. the restart: the baselines (the server's start line; c1's apply lines, its game logs live through the reconnect), then both
+  #    games log in again by themselves, in place
+  - server: log-count {pattern: "Server resources folder is listening on"}
+  - server: snapshot {name: serverStarts0, of: 'server.log_count("Server resources folder is listening on")'}
+  - c1: log-count {pattern: "script state aa8cb: .*view [A-Za-z0-9]+ to play .seq"}
+  - server: snapshot {name: reconnectCb0, of: 'c1.log_count("script state aa8cb: .*view [A-Za-z0-9]+ to play .seq")'}
+  - c1: log-count {pattern: "script state aa8cc: .*view [A-Za-z0-9]+ to play .seq"}
+  - server: snapshot {name: reconnectCc0, of: 'c1.log_count("script state aa8cc: .*view [A-Za-z0-9]+ to play .seq")'}
+  - c1: log-count {pattern: "script state aa8cd: .*view [A-Za-z0-9]+ to play .seq"}
+  - server: snapshot {name: reconnectCd0, of: 'c1.log_count("script state aa8cd: .*view [A-Za-z0-9]+ to play .seq")'}
+  - wait: 5
+  - server: restart
+  - wait: 20
+  - c1: reconnect
+  - c2: reconnect
+  - wait: 15
+  - c1: close-menu {name: MessageBoxMenu}
+  - c2: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  - c2: server-console {name: TGM}
+  # the restart happened, and c1 applied each record at its reconnect (its seq raised to the record's) before it leaves
+  - until:
+      within: 45
+      every: 1
+      expect:
+        - 'server.log_count("Server resources folder is listening on") > snapshot("serverStarts0")'
+        - 'c1.log_count("script state aa8cb: .*view [A-Za-z0-9]+ to play .seq") > snapshot("reconnectCb0")'
+        - 'c1.log_count("script state aa8cc: .*view [A-Za-z0-9]+ to play .seq") > snapshot("reconnectCc0")'
+        - 'c1.log_count("script state aa8cd: .*view [A-Za-z0-9]+ to play .seq") > snapshot("reconnectCd0")'
+
+  # 3. both out to lab-spawn, the Temple unhosted, then c2 back in first: the Temple's host
+  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -120, z: 0}
+  - until: {within: 30, every: 1, expect: ['server.host(0x371de).hosted == false']}
+  - wait: 5
+  - c2: teleport {cell: "371de:Skyrim.esm", x: 5400, y: -900, z: -768, rot: [0, 0, 90]}
+  - until: {within: 30, every: 1, expect: ['server.host(0x371de).client == "c2"']}
+  # (4)'s baseline, taken at the grant (recorded since v1.1's note 6)
+  - c2: log-count {pattern: "object animation aa8c[bcd] [A-Za-z0-9]+ re-applied at a 3D load .seq [0-9]+."}
+  - server: snapshot {name: reapplyC2Grant, of: 'c2.log_count("object animation aa8c[bcd] [A-Za-z0-9]+ re-applied at a 3D load .seq [0-9]+.")'}
+  - wait: 15
+  - c2: script-state {formId: 0xaa8cb}
+  - c2: script-state {formId: 0xaa8cc}
+  - c2: script-state {formId: 0xaa8cd}
+  - c2: node-rotation {formId: 0xaa8cb, nodes: ["Pillar01"], label: "host"}
+  - c2: node-rotation {formId: 0xaa8cc, nodes: ["Pillar01"], label: "host"}
+  - c2: node-rotation {formId: 0xaa8cd, nodes: ["Pillar01"], label: "host"}
+  - wait: 1
+  - c2: node-rotation {formId: 0xaa8cb, nodes: ["Pillar01"], label: "host"}
+  - c2: node-rotation {formId: 0xaa8cc, nodes: ["Pillar01"], label: "host"}
+  - c2: node-rotation {formId: 0xaa8cd, nodes: ["Pillar01"], label: "host"}
+  - c2: screenshot
+  - assert:
+      - server.host(0x371de).client == "c2"
+      - 'c2.node_rotation(0xaa8cb, "Pillar01", "host").local_angle_to(c1.node_rotation(0xaa8cb, "Pillar01", "pre")) < 5.7'
+      - 'c2.node_rotation(0xaa8cc, "Pillar01", "host").local_angle_to(c1.node_rotation(0xaa8cc, "Pillar01", "pre")) < 5.7'
+      - 'c2.node_rotation(0xaa8cd, "Pillar01", "host").local_angle_to(c1.node_rotation(0xaa8cd, "Pillar01", "pre")) < 5.7'
+
+  # 4. c1 back in, its game kept: every count it is claimed on baselined right before the entry
+  - c1: log-count {pattern: "script state aa8c[bcd]: .*view [A-Za-z0-9]+ current .seq"}
+  - c1: log-count {pattern: "script state aa8cb: .*view [A-Za-z0-9]+ to play .seq [0-9]+, [0-9]+ here, not on"}
+  - c1: log-count {pattern: "script state aa8cc: .*view [A-Za-z0-9]+ to play .seq [0-9]+, [0-9]+ here, not on"}
+  - c1: log-count {pattern: "script state aa8cd: .*view [A-Za-z0-9]+ to play .seq [0-9]+, [0-9]+ here, not on"}
+  - c1: log-count {pattern: "object animation aa8cb [A-Za-z0-9]+ played .the script record"}
+  - c1: log-count {pattern: "object animation aa8cc [A-Za-z0-9]+ played .the script record"}
+  - c1: log-count {pattern: "object animation aa8cd [A-Za-z0-9]+ played .the script record"}
+  - c1: log-count {pattern: "object animation aa8cb [A-Za-z0-9]+ re-applied at a 3D load .seq [0-9]+."}
+  - c1: log-count {pattern: "object animation aa8cc [A-Za-z0-9]+ re-applied at a 3D load .seq [0-9]+."}
+  - c1: log-count {pattern: "object animation aa8cd [A-Za-z0-9]+ re-applied at a 3D load .seq [0-9]+."}
+  - c1: log-count {pattern: "script state aa8c[bcd] applied as a guest"}
+  - server: log-count {pattern: "script state aa8cb served to ff000000 after its create word"}
+  - server: log-count {pattern: "script state aa8cc served to ff000000 after its create word"}
+  - server: log-count {pattern: "script state aa8cd served to ff000000 after its create word"}
+  - server: snapshot {name: currentC1a, of: 'c1.log_count("script state aa8c[bcd]: .*view [A-Za-z0-9]+ current .seq")'}
+  - server: snapshot {name: notOnCb0, of: 'c1.log_count("script state aa8cb: .*view [A-Za-z0-9]+ to play .seq [0-9]+, [0-9]+ here, not on")'}
+  - server: snapshot {name: notOnCc0, of: 'c1.log_count("script state aa8cc: .*view [A-Za-z0-9]+ to play .seq [0-9]+, [0-9]+ here, not on")'}
+  - server: snapshot {name: notOnCd0, of: 'c1.log_count("script state aa8cd: .*view [A-Za-z0-9]+ to play .seq [0-9]+, [0-9]+ here, not on")'}
+  - server: snapshot {name: playedCb0, of: 'c1.log_count("object animation aa8cb [A-Za-z0-9]+ played .the script record")'}
+  - server: snapshot {name: playedCc0, of: 'c1.log_count("object animation aa8cc [A-Za-z0-9]+ played .the script record")'}
+  - server: snapshot {name: playedCd0, of: 'c1.log_count("object animation aa8cd [A-Za-z0-9]+ played .the script record")'}
+  - server: snapshot {name: reapplyCb0, of: 'c1.log_count("object animation aa8cb [A-Za-z0-9]+ re-applied at a 3D load .seq [0-9]+.")'}
+  - server: snapshot {name: reapplyCc0, of: 'c1.log_count("object animation aa8cc [A-Za-z0-9]+ re-applied at a 3D load .seq [0-9]+.")'}
+  - server: snapshot {name: reapplyCd0, of: 'c1.log_count("object animation aa8cd [A-Za-z0-9]+ re-applied at a 3D load .seq [0-9]+.")'}
+  - server: snapshot {name: guestC1a, of: 'c1.log_count("script state aa8c[bcd] applied as a guest")'}
+  - server: snapshot {name: servedCb0, of: 'server.log_count("script state aa8cb served to ff000000 after its create word")'}
+  - server: snapshot {name: servedCc0, of: 'server.log_count("script state aa8cc served to ff000000 after its create word")'}
+  - server: snapshot {name: servedCd0, of: 'server.log_count("script state aa8cd served to ff000000 after its create word")'}
+  - c1: teleport {cell: "371de:Skyrim.esm", x: 5520, y: -896, z: -768, rot: [0, 0, 90]}
+  - wait: 15
+  - c1: node-rotation {formId: 0xaa8cb, nodes: ["Pillar01"], label: "reentry"}
+  - c2: node-rotation {formId: 0xaa8cb, nodes: ["Pillar01"], label: "reentry"}
+  - c1: node-rotation {formId: 0xaa8cc, nodes: ["Pillar01"], label: "reentry"}
+  - c2: node-rotation {formId: 0xaa8cc, nodes: ["Pillar01"], label: "reentry"}
+  - c1: node-rotation {formId: 0xaa8cd, nodes: ["Pillar01"], label: "reentry"}
+  - c2: node-rotation {formId: 0xaa8cd, nodes: ["Pillar01"], label: "reentry"}
+  - wait: 1
+  - c1: node-rotation {formId: 0xaa8cb, nodes: ["Pillar01"], label: "reentry"}
+  - c2: node-rotation {formId: 0xaa8cb, nodes: ["Pillar01"], label: "reentry"}
+  - c1: node-rotation {formId: 0xaa8cc, nodes: ["Pillar01"], label: "reentry"}
+  - c2: node-rotation {formId: 0xaa8cc, nodes: ["Pillar01"], label: "reentry"}
+  - c1: node-rotation {formId: 0xaa8cd, nodes: ["Pillar01"], label: "reentry"}
+  - c2: node-rotation {formId: 0xaa8cd, nodes: ["Pillar01"], label: "reentry"}
+  - c1: screenshot
+  - c2: screenshot
+  - c1: script-state {formId: 0xaa8cb}
+  - c1: script-state {formId: 0xaa8cc}
+  - c1: script-state {formId: 0xaa8cd}
+  - c2: script-state {formId: 0xaa8cb}
+  - c2: script-state {formId: 0xaa8cc}
+  - c2: script-state {formId: 0xaa8cd}
+  # the entry's counts, each claimed pattern byte for byte as its baseline
+  - c1: log-count {pattern: "script state aa8c[bcd]: .*view [A-Za-z0-9]+ current .seq"}
+  - c1: log-count {pattern: "script state aa8cb: .*view [A-Za-z0-9]+ to play .seq [0-9]+, [0-9]+ here, not on"}
+  - c1: log-count {pattern: "script state aa8cc: .*view [A-Za-z0-9]+ to play .seq [0-9]+, [0-9]+ here, not on"}
+  - c1: log-count {pattern: "script state aa8cd: .*view [A-Za-z0-9]+ to play .seq [0-9]+, [0-9]+ here, not on"}
+  - c1: log-count {pattern: "object animation aa8cb [A-Za-z0-9]+ played .the script record"}
+  - c1: log-count {pattern: "object animation aa8cc [A-Za-z0-9]+ played .the script record"}
+  - c1: log-count {pattern: "object animation aa8cd [A-Za-z0-9]+ played .the script record"}
+  - c1: log-count {pattern: "object animation aa8cb [A-Za-z0-9]+ re-applied at a 3D load .seq [0-9]+."}
+  - c1: log-count {pattern: "object animation aa8cc [A-Za-z0-9]+ re-applied at a 3D load .seq [0-9]+."}
+  - c1: log-count {pattern: "object animation aa8cd [A-Za-z0-9]+ re-applied at a 3D load .seq [0-9]+."}
+  - c1: log-count {pattern: "script state aa8c[bcd] applied as a guest"}
+  - c2: log-count {pattern: "object animation aa8c[bcd] [A-Za-z0-9]+ re-applied at a 3D load .seq [0-9]+."}
+  # recorded, not claimed: the give-ups, the refused plays and re-applies, remoteServer's old replay, the platform's blanks (H-R7),
+  # c2's own branch and applies at its grant, the serves to c2, the refusal codes
+  - c1: log-count {pattern: "script state aa8c[bcd] from the record: its view"}
+  - c1: log-count {pattern: "object animation aa8c[bcd] [A-Za-z0-9]+ (played .the script record, |re-applied at a 3D load .seq [0-9]+.; )refused"}
+  - c1: log-count {pattern: "object animation aa8c[bcd] [A-Za-z0-9]+ played .the record,"}
+  - c1: log-count {pattern: "to aa8c[bcd] blanked: its script record pending"}
+  - c2: log-count {pattern: "to aa8c[bcd] blanked: its script record pending"}
+  - c2: log-count {pattern: "script state aa8c[bcd]: .*view [A-Za-z0-9]+ (current|to play) .seq"}
+  - c2: log-count {pattern: "script state aa8c[bcd] applied at the grant of 371de"}
+  - server: log-count {pattern: "script state aa8c[bcd] served to ff000001 ahead of its grant"}
+  - server: log-count {pattern: "E_SCRIPTSTATE_[A-Z]+"}
+  # the guest is the guest, and the record reached it behind its create word
+  - assert:
+      - server.host(0x371de).client == "c2"
+      - 'server.log_count("script state aa8cb served to ff000000 after its create word") > snapshot("servedCb0")'
+      - 'server.log_count("script state aa8cc served to ff000000 after its create word") > snapshot("servedCc0")'
+      - 'server.log_count("script state aa8cd served to ff000000 after its create word") > snapshot("servedCd0")'
+      - 'c1.log_count("script state aa8c[bcd] applied as a guest") >= snapshot("guestC1a") + 3'
+  # (3) the answer: the guest's faces on the host's
+  - assert:
+      - 'c1.node_rotation(0xaa8cb, "Pillar01", "reentry").local_angle_to(c2.node_rotation(0xaa8cb, "Pillar01", "reentry")) < 5.7'
+      - 'c1.node_rotation(0xaa8cc, "Pillar01", "reentry").local_angle_to(c2.node_rotation(0xaa8cc, "Pillar01", "reentry")) < 5.7'
+      - 'c1.node_rotation(0xaa8cd, "Pillar01", "reentry").local_angle_to(c2.node_rotation(0xaa8cd, "Pillar01", "reentry")) < 5.7'
+  # (1) the fix's decision at the entry: never current, to play on 49's seq, then the view's play (or its re-apply at the 3D load)
+  - assert:
+      - 'c1.log_count("script state aa8c[bcd]: .*view [A-Za-z0-9]+ current .seq") == snapshot("currentC1a")'
+      - 'c1.log_count("script state aa8cb: .*view [A-Za-z0-9]+ to play .seq [0-9]+, [0-9]+ here, not on") > snapshot("notOnCb0")'
+      - 'c1.log_count("script state aa8cc: .*view [A-Za-z0-9]+ to play .seq [0-9]+, [0-9]+ here, not on") > snapshot("notOnCc0")'
+      - 'c1.log_count("script state aa8cd: .*view [A-Za-z0-9]+ to play .seq [0-9]+, [0-9]+ here, not on") > snapshot("notOnCd0")'
+      - '(c1.log_count("object animation aa8cb [A-Za-z0-9]+ played .the script record") > snapshot("playedCb0")) or (c1.log_count("object animation aa8cb [A-Za-z0-9]+ re-applied at a 3D load .seq [0-9]+.") > snapshot("reapplyCb0"))'
+      - '(c1.log_count("object animation aa8cc [A-Za-z0-9]+ played .the script record") > snapshot("playedCc0")) or (c1.log_count("object animation aa8cc [A-Za-z0-9]+ re-applied at a 3D load .seq [0-9]+.") > snapshot("reapplyCc0"))'
+      - '(c1.log_count("object animation aa8cd [A-Za-z0-9]+ played .the script record") > snapshot("playedCd0")) or (c1.log_count("object animation aa8cd [A-Za-z0-9]+ re-applied at a 3D load .seq [0-9]+.") > snapshot("reapplyCd0"))'
+  - c1: dump-state
+  - c2: dump-state
