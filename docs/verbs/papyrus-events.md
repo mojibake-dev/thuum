@@ -584,3 +584,7 @@ Each committed alone after its own green (rule 13), each named here so the gate'
   cell's OnCellAttach and OnCellLoad once (fork a7a3854c). Green 20261107-213324 and 20261108-001509.
 - b-cobweb-view (thuum a4b5fb05): D-C3 A, rule 6's restart scenario for graphVariables (also named under D-C3 above).
 Their verbs' others: b-trap-look in trigger-entry.md, b-lever-relay in furniture.md.
+Not a committed scenario, by W3: the standing (rung 4's faction rows, MECHANISM ONLY until content presses it) and the
+libespm fix its base reads (fork f9e09f01: an NPC's faction rank at SNAM's offset 4, not 0) are guarded by T0 (StandingTest,
+and EspmTest's rank guard on 0x1000ef) and read on the lab by the probe x-standing v1 (5fbfa28e), GREEN 20261107-205305 on
+rung 4's stage; a b-standing is promoted when content presses the standing.
