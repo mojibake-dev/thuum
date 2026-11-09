@@ -1,0 +1,56 @@
+# x-rotfern-robe v1 (apocrypha, 2026-11-09): rotfern's Shrouded Robes under the appearance layer, the read
+# playtest 49's item 6 left unread for her. It is x-layer-look's read 3 on rotfern herself.
+#
+# Since the layer swapped CBBE 2.0.3 for CBBE SFW Edition, the robes' female meshes come from SFW's outfit
+# build: robedarkbrotherhood/female/dbtorso_0 and _1, CI job 19760, in SFW's own shape. rotfern wears adult
+# female meshes for vanilla clothes, because rotfern.esp's races use DefaultRace as their armor race. So her
+# robes changed shape with the swap. apocrypha's vertex read puts them flatter than the 2.0.3 robes she wore
+# from October: the chest 11.36 units forward against 13.09.
+#
+# The server plays a copy of the canonical world, where c1 is rotfern (profile 1) and c2 is Ariadne. The
+# snapshot file itself is untouched (numidium, 2026-11-09). There is no race menu, no sex change and no body
+# morph: she carries none, by design, and the read only checks that the morph under "thuum" is 0.
+# The robes, DBClothesRobes 0xcf8a0, DBClothesHandWraps 0xcf8a9 and DBClothesShoes 0xcf89f, are given and
+# equipped, in case the world's rotfern wears something else. Their shape "DBbody3rdPerson" must be drawn on
+# her own game and on c2's figure of her. A missing node reads 0. c2 photographs her from 250 units and from
+# 90 for a person to judge the fit.
+id: x-rotfern-robe
+milestone: M4
+game: 1.6.1170
+clients: [c1, c2]
+server:
+  snapshot: playtest-canon-chars-20261107T064547Z
+  netem: null
+timeout_s: 600
+steps:
+  - c1: connect
+  - c2: connect
+  - c1: teleport {cell: lab-spawn, x: 0, y: 0, z: 0}
+  - c2: teleport {cell: lab-spawn, x: 0, y: -250, z: 0}
+  - wait: 5
+  # rotfern faces south, toward c2
+  - c1: look {heading: 180, pitch: 0}
+  - c1: node-scale {morph: VanillaSSEHi}
+  - assert:
+      - abs(c1.morph()) < 0.001
+  - c1: give {item: "0xcf8a0", count: 1}
+  - c1: give {item: "0xcf8a9", count: 1}
+  - c1: give {item: "0xcf89f", count: 1}
+  - wait: 3
+  - c1: equip {formId: 0xcf8a0}
+  - c1: equip {formId: 0xcf8a9}
+  - c1: equip {formId: 0xcf89f}
+  - wait: 6
+  - c1: node-scale {node: DBbody3rdPerson}
+  - assert:
+      - c1.node_scale() > 0
+  - c2: look {heading: 0, pitch: 5}
+  - c2: node-scale {other: true, node: DBbody3rdPerson}
+  - assert:
+      - c2.node_scale_of(c1) > 0
+  - c2: screenshot
+  - c2: teleport {cell: lab-spawn, x: 0, y: -90, z: 0}
+  - wait: 4
+  - c2: look {heading: 0, pitch: 8}
+  - c2: screenshot
+artifacts: [server.log, c1.log, c2.log, screenshots, world-diff]
