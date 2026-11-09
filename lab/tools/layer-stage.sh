@@ -35,7 +35,7 @@
 # server's load order reverts under clones that keep the plugin. thuum main
 # takes docs all evening, so merge main into the branch just before staging
 # (step 0 refuses a branch without it: its deploy-srv would revert main's lab
-# tree on sky-srv). Never opens a Moonlight stream (Eli's seats are his).
+# tree on sky-srv). Never opens a Moonlight stream (Eli's seats are its own).
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 branch=${1:?thuum branch}; shift
