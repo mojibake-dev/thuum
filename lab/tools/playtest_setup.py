@@ -32,6 +32,7 @@ import re
 import subprocess
 import sys
 import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -993,7 +994,10 @@ def restart(n: int) -> int:
     want = sorted(s["profile"] for s in p["seats"])
     online: list[int] = []
     for _ in range(60):
-        online = sorted(x.get("profileId") for x in state({"kind": "online"}).get("players", []))
+        try:  # lab-api answers 502 while the restarted server's gamemode comes up (playtest 50, 22:11Z): read again
+            online = sorted(x.get("profileId") for x in state({"kind": "online"}).get("players", []))
+        except (urllib.error.URLError, OSError, ValueError):
+            online = []
         if online == want:
             break
         time.sleep(3)
