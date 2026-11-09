@@ -551,6 +551,12 @@ playtest-profile-check n:
 playtest-switch n key state:
     @uv run --project lab/labapi python lab/tools/playtest_setup.py switch {{n}} {{key}} {{state}}
 
+# In a playtest, a plain server restart with no relaunch (the seats reconnect by themselves; 50's item 4): the mount
+# checked, the restart's listen line awaited, the live world's record count before and after (10b3edcb: a restart must
+# not grow the world), both profiles awaited online again.
+playtest-restart n:
+    @uv run --project lab/labapi python lab/tools/playtest_setup.py restart {{n}}
+
 playtest-relaunch client:
     @lab/tools/playtest-relaunch.sh {{client}}
 

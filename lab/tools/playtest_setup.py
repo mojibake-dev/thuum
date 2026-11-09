@@ -961,6 +961,46 @@ def switch(n: int, key: str, on: bool) -> int:
     return rc
 
 
+def _records() -> int:
+    """The live world's change forms on the lab server (the directory a restart flushes into)."""
+    out = _srv("ls /srv/lab/server/world/changeForms | wc -l").strip()
+    return int(out) if out.isdigit() else -1
+
+
+def restart(n: int) -> int:
+    """A plain server restart in a running playtest, no relaunch: the seats reconnect by themselves (49's item and 50's
+    item 4, the pillars through a restart; the restart scenarios' shape). Gated as switch is (the mount, the restart's
+    listen line), with the live world's record count before and after (10b3edcb: a plain restart must not grow the
+    world; 49's grew from 1,542 to 15,393 records) and both profiles awaited online again."""
+    p = load_profile(n)
+    mount = _mounted_settings()
+    if mount != OVERLAY:
+        print(f"== the server runs on {mount or 'no settings mount'}, not {OVERLAY}: no restart", flush=True)
+        return 1
+    before = _records()
+    print(f"== playtest {n}: the server restarted {time.strftime('%H:%M:%S')}; the world holds {before} records", flush=True)
+    since = _srv("date -u +%Y-%m-%dT%H:%M:%SZ").strip()
+    _srv("cd /srv/lab && docker compose restart skymp-server", timeout=240)
+    for _ in range(60):
+        if _srv(f"docker logs --since {since} lab-skymp-server-1 2>&1 | grep -c 'listening on' || true").strip() not in ("", "0"):
+            break
+        time.sleep(2)
+    else:
+        print(f"== no listen line within 120 s of the restart at {since}", flush=True)
+        return 1
+    after = _records()
+    print(f"   listening again {time.strftime('%H:%M:%S')}; the world holds {after} records ({after - before:+d})", flush=True)
+    want = sorted(s["profile"] for s in p["seats"])
+    online: list[int] = []
+    for _ in range(60):
+        online = sorted(x.get("profileId") for x in state({"kind": "online"}).get("players", []))
+        if online == want:
+            break
+        time.sleep(3)
+    print(f"   {'ok' if online == want else 'FAIL'} online {online} (wanted {want}) {time.strftime('%H:%M:%S')}", flush=True)
+    return 0 if online == want else 1
+
+
 def main(argv: list[str]) -> int:
     if len(argv) == 4 and argv[0] == "switch" and argv[1].isdigit() and argv[3] in ("on", "off"):
         try:
@@ -968,8 +1008,8 @@ def main(argv: list[str]) -> int:
         except ProfileError as e:
             print(f"== profile {argv[1]}: {e}", file=sys.stderr)
             return 2
-    if len(argv) != 2 or argv[0] not in ("setup", "ready", "check", "go", "roles", "streams") or not argv[1].isdigit():
-        print("usage: playtest_setup.py go|setup|ready|check|roles|streams <n> | switch <n> <" + "|".join(SWITCHES) + "> on|off", file=sys.stderr)
+    if len(argv) != 2 or argv[0] not in ("setup", "ready", "check", "go", "roles", "streams", "restart") or not argv[1].isdigit():
+        print("usage: playtest_setup.py go|setup|ready|check|roles|streams|restart <n> | switch <n> <" + "|".join(SWITCHES) + "> on|off", file=sys.stderr)
         return 2
     n = int(argv[1])
     try:
@@ -977,7 +1017,7 @@ def main(argv: list[str]) -> int:
             p = load_profile(n)
             print(f"profile {n} ok: {len(p['seats'])} seats, {sum(len(seat_commands(s)) for s in p['seats'])} sets, world {p['world']}")
             return 0
-        return {"go": go, "setup": setup, "ready": ready, "roles": roles, "streams": streams}[argv[0]](n)
+        return {"go": go, "setup": setup, "ready": ready, "roles": roles, "streams": streams, "restart": restart}[argv[0]](n)
     except ProfileError as e:
         print(f"== profile {n}: {e}", file=sys.stderr)
         return 2
