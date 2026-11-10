@@ -2076,7 +2076,7 @@ function run(step: Step, player: Actor): unknown {
       return { node, ...scales(near[0]), all };
     }
     case "quest-stage": {
-      // quests' stages as this seat's game holds them (Papyrus Quest.GetCurrentStageID, IsStageDone, IsRunning;
+      // quests' stages as this seat's game holds them (Papyrus Quest.GetCurrentStageID, IsStageDone, IsRunning, IsCompleted;
       // skyrimPlatform.ts's Quest): {quests: [formId, ...], stages?: [n, ...]} answers per quest its current stage,
       // whether it runs, and which of the named stages are done, keyed by the quest's form id as decimal text
       // (docs/verbs/quest-stage.md, memo D55 B: one seat sets a shared quest's stage, the other reads it)
@@ -2091,7 +2091,9 @@ function run(step: Step, player: Actor): unknown {
         }
         const done: Record<string, boolean> = {};
         for (const n of stages) done[String(n)] = q.isStageDone(n);
-        out[String(id)] = { stage: q.getCurrentStageID(), running: q.isRunning(), done };
+        // completed: Quest.IsCompleted, the flag a stage marked Complete Quest sets (thuum D-E1's script reads it; whether a
+        // served, fragment-suppressed SetStage sets it is what x-rotfern-eyes' premise reads)
+        out[String(id)] = { stage: q.getCurrentStageID(), running: q.isRunning(), completed: q.isCompleted(), done };
       }
       return out;
     }
@@ -2333,6 +2335,14 @@ function run(step: Step, player: Actor): unknown {
         const part = base.getNthHeadPart(i);
         if (part) parts.push({ id: part.getFormID(), type: part.getType(), name: part.getPartName() });
       }
+      // the overlay parts the engine lays over the base's own (SKSE ActorBase.GetNumOverlayHeadParts and
+      // GetNthOverlayHeadPart, none while the engine's TESNPC::HasOverlays is false): an overlay race's part of a
+      // type replaces the base's (CommonLibSSE-NG TESNPC.cpp:94-96), so thuum D-E1 A' reads rotfernRaceVampire's here
+      const overlays: { id: number; type: number; name: string }[] = [];
+      for (let i = 0; i < base.getNumOverlayHeadParts(); ++i) {
+        const part = base.getNthOverlayHeadPart(i);
+        if (part) overlays.push({ id: part.getFormID(), type: part.getType(), name: part.getPartName() });
+      }
       const tints: { type: number; argb: number; texture: string }[] = [];
       if (!a.other) {
         for (let i = 0; i < Game.getNumTintMasks(); ++i) {
@@ -2344,7 +2354,7 @@ function run(step: Step, player: Actor): unknown {
       // appearance apply sets the base's; the two can differ until a reload
       const actorRace = target.getRace(); const baseRace = base.getRace();
       return { actor: target.getFormID(), base: base.getFormID(), weight: base.getWeight(),
-        actorRace: actorRace ? actorRace.getFormID() : 0, baseRace: baseRace ? baseRace.getFormID() : 0, parts, tints };
+        actorRace: actorRace ? actorRace.getFormID() : 0, baseRace: baseRace ? baseRace.getFormID() : 0, parts, overlays, tints };
     }
     case "global": {
       // a global variable set on this client (GlobalVariable.setValue) and

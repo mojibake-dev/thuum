@@ -21,9 +21,10 @@ the lab can grep (E_ASSERT_*).
                                                      is its head node's world position (headZ - z tells a body lying
                                                      from one upright), scene the scene that game runs it in (0 for none),
                                                      faceNode whether its copy holds the facegen head (npc-fate 1e)
-  <client>.quest(<id>).stage() | .stageDone(<n>) | .running()
+  <client>.quest(<id>).stage() | .stageDone(<n>) | .running() | .completed()
                                                      that seat's game's quest: its current stage, whether stage n is
-                                                     done (n among the step's stages), whether it runs; from its last
+                                                     done (n among the step's stages), whether it runs, whether the
+                                                     game holds it completed (Quest.IsCompleted); from its last
                                                      quest-stage {quests, stages} step naming it (ADR-056)
   <client>.quest(<id>).objectiveDisplayed(<i>) | .objectiveCompleted(<i>)
                                                      whether that seat's game shows objective i of the quest, and
@@ -175,6 +176,9 @@ the lab can grep (E_ASSERT_*).
                                                      figure its last dump-state matched to that client
   <client>.head_part(<type>)                         the form id of the part of that HDPT type (2 eyes, 1 face,
   <client>.head_part_of(<client>, <type>)            3 hair, 6 brows) in the same two reads, 0 for none
+  <client>.overlay_part(<type>)                      the same in the overlay parts its last head-parts step read on
+                                                     its player (SKSE's overlay list: an overlay race's parts, each
+                                                     replacing the base's of its type), 0 for none
   <client>.printed("<text>")                         true when a line the console printed during its last
                                                      console step contains the text (the server's
                                                      ConsoleOutput as skymp5-client prints it)
@@ -1323,7 +1327,8 @@ class QuestView:
     `quest-stage {quests, stages}` step naming it (Papyrus Quest.GetCurrentStageID,
     IsStageDone and IsRunning; docs/verbs/quest-stage.md): stage() its current
     stage, stageDone(n) whether stage n is done, for an n among the step's
-    stages, running() whether it runs. objectiveDisplayed(i) and
+    stages, running() whether it runs, completed() whether the game holds it
+    completed (Quest.IsCompleted; thuum D-E1). objectiveDisplayed(i) and
     objectiveCompleted(i) read its last `quest-objectives {quest, objectives}`
     step instead (Quest.IsObjectiveDisplayed and IsObjectiveCompleted, ADR-068
     rung 5), for an i among that step's; either step alone makes the view."""
@@ -1370,6 +1375,12 @@ class QuestView:
         v = self._data.get("running")
         if not isinstance(v, bool):
             raise AssertionData(f"{self._client}'s quest-stage step read no running state of {self._id:#x}")
+        return v
+
+    def completed(self) -> bool:
+        v = self._data.get("completed")
+        if not isinstance(v, bool):
+            raise AssertionData(f"{self._client}'s quest-stage step read no completed state of {self._id:#x} (a driver before IsCompleted's read)")
         return v
 
 
@@ -2168,9 +2179,13 @@ class _ClientRef:
             raise AssertionData(f"server has no actor for {other}")
         absolute = target.get("absolute") or target
         origin = self._origin("desc", absolute.get("cell"))
-        best: dict[str, Any] | None = None
-        best_d = 0.0
-        for e in entries:
+        found = self._within(absolute, entries, pos_of)
+        return (found[0] if found else None), origin
+
+    def _within(self, absolute: dict[str, Any], entries: list[Any], pos_of: Any) -> list[dict[str, Any]]:
+        """Every entry within SEE_RADIUS of an absolute position, nearest first (the first of equals as listed)."""
+        found: list[tuple[float, int, dict[str, Any]]] = []
+        for i, e in enumerate(entries):
             try:
                 pos = pos_of(e)
                 dx = float(pos[0]) - float(absolute["x"])
@@ -2179,9 +2194,10 @@ class _ClientRef:
             except (KeyError, IndexError, TypeError, ValueError):
                 continue
             d = (dx * dx + dy * dy + dz * dz) ** 0.5
-            if d <= self.SEE_RADIUS and (best is None or d < best_d):
-                best, best_d = e, d
-        return best, origin
+            if d <= self.SEE_RADIUS:
+                found.append((d, i, e))
+        found.sort(key=lambda f: (f[0], f[1]))
+        return [e for _, _, e in found]
 
     def sees(self, other: str) -> bool:
         return self._seen(other)[0] is not None
@@ -2625,9 +2641,25 @@ class _ClientRef:
         data = fn(self.name) if fn else None
         if not isinstance(data, dict) or not isinstance(data.get("parts"), list):
             raise AssertionData(f"{self.name} has not reported a head-parts {{other: true}} step yet")
-        seen, _ = self._seen(other)
+        dump = self._dump()
+        if isinstance(dump.get("sees"), dict):
+            seen = dump["sees"].get(other)
+        else:
+            target = self._server.actor(other)
+            if not target or not target.get("found", True):
+                raise AssertionData(f"server has no actor for {other}")
+            near = self._within(target.get("absolute") or target, dump.get("near") or [], lambda n: n["pos"])
+            if len(near) > 1:
+                ids = ", ".join(f"{int(n.get('formId') or 0):x}" for n in near)
+                raise AssertionData(f"{self.name} has {len(near)} actors where the server has {other} ({ids}); its head-parts {{other: true}} read names no one figure")
+            seen = near[0] if near else None
         if not seen:
             raise AssertionData(f"{self.name} does not see {other}")
+        # a SkyMP figure's base is given the player's form id for its tints (skymp5-client appearance.ts applyTints,
+        # setFormIdUnsafe), so its base reads as the reading seat's own player: such a read is that seat's parts
+        # (docs/verbs/racemenu-sync.md, thuum-fa's fresh review of 67413f63)
+        if int(data.get("base") or 0) == 0x7:
+            raise AssertionData(f"{self.name}'s head-parts {{other: true}} read the base 0x7, its own player's parts, not its figure of {other}'s")
         try:
             read, figure = int(data["actor"]), int(seen["formId"])
             ids = [int(p["id"]) for p in data["parts"]]
@@ -2649,9 +2681,19 @@ class _ClientRef:
         self.head_parts_of(other)  # the same data errors and the same figure check
         return self._part_of_type(self._views.head_parts_other(self.name), kind)
 
-    def _part_of_type(self, data: dict[str, Any], kind: int) -> int:
+    def overlay_part(self, kind: int) -> int:
+        """c.overlay_part(t): the form id of the overlay part of HDPT type t on that client's player, from its last
+        `head-parts` step (SKSE ActorBase.GetNthOverlayHeadPart; 0 when none), so thuum D-E1 A' is claimed at run time:
+        a vampire rotfern holds no overlay eyes, c1.overlay_part(2) == 0."""
+        self.head_parts()  # the same data errors
+        data = self._views.head_parts(self.name)
+        if not isinstance(data.get("overlays"), list):
+            raise AssertionData(f"{self.name}'s head-parts step read no overlay list (a driver before the overlay read)")
+        return self._part_of_type(data, kind, "overlays")
+
+    def _part_of_type(self, data: dict[str, Any], kind: int, field: str = "parts") -> int:
         try:
-            found = [int(p["id"]) for p in data["parts"] if int(p["type"]) == int(kind)]
+            found = [int(p["id"]) for p in data[field] if int(p["type"]) == int(kind)]
         except (KeyError, TypeError, ValueError) as e:
             raise AssertionData(f"{self.name}'s head-parts step lacks {e}") from e
         if len(found) > 1:
@@ -2860,7 +2902,10 @@ _NUMBER_METHODS = {
     StreamView: {"accepted", "dropped", "foreign"},
     QuestView: {"stageDone", "objectiveDisplayed", "objectiveCompleted"},
     QuestRecordView: {"stageDone"},
-    _ClientRef: {"head_part"},  # an HDPT type
+}
+# Methods that take an integer: c1.head_part(2), an HDPT type
+_INT_METHODS = {
+    _ClientRef: {"head_part", "overlay_part"},
 }
 # Methods that take a client and a number: c2.head_part_of(c1, 2)
 _CLIENT_NUMBER_METHODS = {
@@ -2914,12 +2959,12 @@ _STRING_NUMBER_METHODS = {
 _NULLARY = {
     _ServerRef: {"time", "world_globals", "script_variables"},
     _ClientRef: {"level", "node_scale", "morph", "head_parts", "watched_self", "av", "refs_near", "figure_spells", "weather"},
-    QuestView: {"stage", "running"},
+    QuestView: {"stage", "running", "completed"},
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref", "follow", "fate", "log_count", "stream",
                  "world_globals", "alias_fill", "quest_runs", "quest_record", "script_variables"},
-    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "inventory", "globalValue", "projectile", "poison", "skill", "level", "weather", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "head_parts_of", "head_part", "head_part_of", "refs_near", "node_rotation", "script_state", "alias", "factions", "script_vars"},
+    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "inventory", "globalValue", "projectile", "poison", "skill", "level", "weather", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "head_parts_of", "head_part", "head_part_of", "overlay_part", "refs_near", "node_rotation", "script_state", "alias", "factions", "script_vars"},
     NodeRotationView: {"angle_to", "local_angle_to"},
     FactionsView: {"rank", "member"},
     WorldGlobalsView: {"value"},
@@ -2934,7 +2979,7 @@ _METHODS = {
     SelfWatchView: {"saw", "ever", "drops", "rises", "launched"},
     StateView: {"menuOpen"},
     StreamView: {"accepted", "dropped", "foreign"},
-    QuestView: {"stage", "stageDone", "running", "objectiveDisplayed", "objectiveCompleted"},
+    QuestView: {"stage", "stageDone", "running", "completed", "objectiveDisplayed", "objectiveCompleted"},
 }
 _CMP = {
     ast.Eq: operator.eq, ast.NotEq: operator.ne, ast.Lt: operator.lt,
@@ -3098,10 +3143,14 @@ class Evaluator:
                     if len(args) != 1 or isinstance(args[0], bool) or not isinstance(args[0], (int, str)):
                         raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes one form id, 0x3f9eb or \"0x3f9eb\"")
                     return self._read(node, getattr(obj, node.func.attr)(args[0]))
+                if node.func.attr in _INT_METHODS.get(type(obj), set()):
+                    if len(args) != 1 or isinstance(args[0], bool) or not isinstance(args[0], int):
+                        raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes one integer")
+                    return self._read(node, getattr(obj, node.func.attr)(args[0]))
                 if node.func.attr in _CLIENT_NUMBER_METHODS.get(type(obj), set()):
-                    if (len(args) != 2 or not isinstance(args[0], str) or args[0] not in self._names
+                    if (len(args) != 2 or not isinstance(args[0], str) or not isinstance(self._names.get(args[0]), _ClientRef)
                             or isinstance(args[1], bool) or not isinstance(args[1], int)):
-                        raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes a client and a number")
+                        raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes a client and an integer")
                     return self._read(node, getattr(obj, node.func.attr)(args[0], args[1]))
                 if node.func.attr in _STRING_NUMBER_METHODS.get(type(obj), set()):
                     if not 1 <= len(args) <= 2 or not isinstance(args[0], str) or any(
