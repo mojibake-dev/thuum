@@ -241,7 +241,17 @@ set to nonLatent in thuum's skymp5-client-settings.txt (18eaf29e, 12:15Z) all fa
 The Papyrus gate itself passes the script (FridaHooks.cpp:922-932, an active effect whose caster is the player). If H1 holds,
 the class is wider than this spell: the seam judges a call by the object it is called on, not by who cast the calling effect,
 against ADR-068 decision 6 (the player's effects belong to the player's seat), so every effect script that places a helper on
-its target fails the same way on a figure. H2, the weak alternative: OnEffectStart never ran on the figure. The read: probe
-x-second-hand-read v1 (lab/.cache/drafts/rung5, by path, after rung 5's stage 2), b-second-hand's steps with c1's platform log
-kept and the 30 s census after the cast: an "ObjectReference.PlaceAtMe" census row marked skipped confirms H1; no PlaceAtMe row
-of any kind refutes it and leaves H2.
+its target fails the same way on a figure. H2, the weak alternative: OnEffectStart never ran on the figure.
+
+H1's skip CONFIRMED from the sweep's own artifacts (read 2026-11-10 by a drafting agent, no new run): the same sweep's two
+further reds, 20261110-043108 and 062541, kept c1.log (042731's and 042924's copies failed, "being used by another process"),
+and each holds the seam's line 0.2 s after c1's cast release, "[verb:scripts] ObjectReference.PlaceAtMe on ff000923: skipped, not
+hosted here (nonLatent)" (043108; 062541 on ff00082f), each self the run's "test 2" figure of c2 (its trace-c1.json), beside the
+lever logged nonLatent and PlaceAtMe's row "4 parameter(s), not latent"; all four reds carry the bolt's one hit and no proc line on
+the server, against 50 in the 11-02 green. H2 is refuted. The chain from that skip to the missing proc keeps two HYPOTHESIS links:
+the call order inside WB_CrackleNew_Script's OnEffectStart (numidium's read of the pex; no disassembly in the tree) and the skipped
+call's None return (H-F1, marked so in the code, ScriptNatives.cpp:2223-2240 at fork f6ca339d). The read probe drafted for this
+(x-second-hand-read v1) is not run: it would re-read the same line. The fix is owed to a later train (platform C++, a Windows
+build): a call made inside an active effect whose caster is the seat's own player counts as that seat's (ADR-068 decision 6) in
+the seam's owner test (OwnedHere, ScriptNatives.cpp:585-596 at f6ca339d), with the placed helper's record (ScriptPlacement, W3's
+mechanism-only row) settled in its design; b-second-hand stays pending until that fix reads green.
