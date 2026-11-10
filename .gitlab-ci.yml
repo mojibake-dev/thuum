@@ -219,6 +219,87 @@ cbbe-sfw-bodyslide-build:
     paths: [lab/bodyslide/dist]
     expire_in: never
 
+# rotfern's eyes (thuum D-E1, lab/rotfern-eyes): the companion plugin, then its script compiled with the Creation Kit's own
+# PapyrusCompiler.exe. The plugin is Python's (build_esp.py, the same bytes every run), so the Linux lane writes it; the Windows
+# job takes it by `needs`, compiles RotfernEyesAlias.psc and publishes both as one artifact, which the layer's ci row names. The
+# compiler's inputs are licensed or third-party and come from core's /persist/ck (sky-build's address only, MANUAL-STEPS 14e),
+# checked against its SHA256SUMS: the CK's Papyrus Compiler, Bethesda's own Scripts.zip and SKSE64 2.2.6's script sources. SKSE's
+# come first on the import path, since HeadPart, Actor.ChangeHeadPart and ActorBase.GetNthHeadPart are declared only there (core,
+# 2026-11-09). They are unpacked in D:\thuum-papyrus-work, outside the checkout, so they never reach an artifact, and removed after.
+# The Windows job is enabled by the project variable ROTFERN_EYES_BUILD_WINDOWS=1 (core).
+rotfern-eyes-esp:
+  extends: .base
+  stage: lint
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes: [lab/rotfern-eyes/**/*]
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
+      changes:
+        paths: [lab/rotfern-eyes/**/*]
+        compare_to: refs/heads/main
+  script:
+    - python3 lab/rotfern-eyes/build_esp.py lab/rotfern-eyes/dist/RotfernEyes.esp
+  artifacts:
+    name: rotfern-eyes-esp
+    paths: [lab/rotfern-eyes/dist]
+    expire_in: 1 week
+
+rotfern-eyes-build:
+  extends: .thuum-windows
+  variables:
+    GIT_SUBMODULE_STRATEGY: none
+  needs:
+    - job: rotfern-eyes-esp
+      artifacts: true
+  rules:
+    - if: $ROTFERN_EYES_BUILD_WINDOWS != "1"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes: [lab/rotfern-eyes/**/*]
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
+      changes:
+        paths: [lab/rotfern-eyes/**/*]
+        compare_to: refs/heads/main
+      when: manual
+      allow_failure: true
+  script:
+    - |
+      $work = 'D:\thuum-papyrus-work'
+      if (Test-Path $work) { Remove-Item -Recurse -Force $work }
+      New-Item -ItemType Directory -Force $work | Out-Null
+      $base = 'https://thuum.gaussing.tv/persist/ck'
+      & curl.exe -sS -f -o "$work\SHA256SUMS" "$base/SHA256SUMS"; if ($LASTEXITCODE) { exit 1 }
+      $want = @{}
+      foreach ($line in Get-Content "$work\SHA256SUMS") { if ($line.Trim()) { $h, $n = $line.Trim() -split '\s+', 2; $want[$n.TrimStart('*')] = $h.ToLower() } }
+      foreach ($n in @('papyrus-compiler-ck.zip', 'vanilla-scripts.zip', 'skse64-2.2.6-scripts-source.zip')) {
+        if (-not $want.ContainsKey($n)) { throw "SHA256SUMS names no $n" }
+        & curl.exe -sS -f -o "$work\$n" "$base/$n"; if ($LASTEXITCODE) { exit 1 }
+        $got = (Get-FileHash -Algorithm SHA256 "$work\$n").Hash.ToLower()
+        if ($got -ne $want[$n]) { throw "$n sha256 $got is not $($want[$n])" }
+        "input ok: $n"
+      }
+      $sevenZip = (& D:/thuum-vcpkg/vcpkg.exe fetch 7zip | Select-Object -Last 1).Trim(); if (-not (Test-Path $sevenZip)) { exit 1 }
+      foreach ($pair in @(@('papyrus-compiler-ck.zip', 'ck'), @('vanilla-scripts.zip', 'vanilla'), @('skse64-2.2.6-scripts-source.zip', 'skse'))) {
+        & $sevenZip x -y "-o$work\$($pair[1])" "$work\$($pair[0])" | Out-Null; if ($LASTEXITCODE) { throw "7z $($pair[0]) $LASTEXITCODE" }
+      }
+      $compiler = "$work\ck\Papyrus Compiler\PapyrusCompiler.exe"
+      if (-not (Test-Path $compiler)) { throw "no PapyrusCompiler.exe in the CK archive" }
+      Copy-Item "$work\ck\TESV_Papyrus_Flags.flg" "$work\vanilla\Source\Scripts\"
+      $out = "$PWD\lab\rotfern-eyes\dist\Scripts"
+      New-Item -ItemType Directory -Force $out | Out-Null
+      $imports = "$work\skse\Source\Scripts;$work\vanilla\Source\Scripts;$PWD\lab\rotfern-eyes\src"
+      & $compiler 'RotfernEyesAlias.psc' "-f=TESV_Papyrus_Flags.flg" "-i=$imports" "-o=$out"
+      $code = $LASTEXITCODE
+      Remove-Item -Recurse -Force $work
+      if ($code) { throw "PapyrusCompiler exit $code" }
+      foreach ($f in @("$out\RotfernEyesAlias.pex", "$PWD\lab\rotfern-eyes\dist\RotfernEyes.esp")) { if (-not (Test-Path $f)) { throw "no $f" } }
+      Get-ChildItem -Recurse -File lab/rotfern-eyes/dist | ForEach-Object { "{0}`t{1}`t{2}" -f $_.Length, (Get-FileHash -Algorithm SHA256 $_.FullName).Hash.ToLower(), $_.FullName }
+  artifacts:
+    name: rotfern-eyes
+    paths: [lab/rotfern-eyes/dist]
+    # the layer's ci row names this job, so its artifact must outlive the default
+    expire_in: never
+
 scenario-gate:
   extends: .base
   stage: gate
