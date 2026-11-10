@@ -202,3 +202,19 @@ Rate limit / bounds: one report per wall per player; a budget of 2 then 1 a seco
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [x] ledger and suppression registry updated (NATIVES.md: Game.TeachWord, Game.UnlockWord, Game.IsWordUnlocked, Actor.AddShout implemented, R0, verb word-wall)
+
+## b-word-wall's guest in apocrypha's layer sweep (22:13 PST 2026-11-09 (06:13Z 11-10), thuum-fa; run set 20261109-225901)
+
+Red three of three on canon ce0d2664 under apocrypha's layer, 20261110-052247, 052523 and the cold-rollback 052756, all at step
+30: server.actor("c2").wordsKnown "" against "0x13e22", c1's 0x13e22, and server.log_count("learns word 13e22 at wall 709d2") 1
+against 2. Its last green was 20261102-115520. The runs' directories hold result.json, screenshots and c1's relaunch logs alone
+(no server or c2 log), so the read is the steps': c1 walks into the Sanctum wall's trigger 0x709d2, reports ("word wall 709d2
+reported") and learns (step 15), relaunches and keeps it (step 24); then c2 teleports in as the cell's guest and walks the same
+trigger (steps 25 to 27) and never learns. Placed canon's, HYPOTHESIS by the code: since the 50 train's D-C2 A (fork m4-train-50,
+in canon since ce0d2664), a guest's entry into a world trigger is relayed to the cell's host and runs the host's copy of the
+trigger's script with the guest's figure, where D-S3 had each seat fire its own; the word wall's learning is the presser's own
+player's (the WordWall verb's player row), so the host's run teaches nobody and the guest's own game never runs it. The fix is the
+trigger entry rule's, docs/verbs/trigger-entry.md: a trigger whose script is a player row (the word wall's, Survival's) stays its
+presser's own seat's, or rung 5's acting scope carries the guest's learning to the guest (its SendTriggerEvent arm names the
+guest's figure as Game.GetPlayer() on the host, and the word's report then names the guest). Pending in lab/gate.yaml, named here,
+until that fix reads green on a guest.
