@@ -12,7 +12,11 @@ set -euo pipefail
 vmid=${1:?vmid}; name=${2:?task name}; ps=${3:?powershell}; minutes=${4:-30}
 jump=${JUMP_HOST:-root@core.gaussing.tv}
 enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
-run() { ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 120 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$1")" | python3 -c 'import sys,json; d=json.load(sys.stdin); print((d.get("out-data") or "").strip()); sys.exit(0 if d.get("exitcode")==0 else 1)'; }
+# the PowerShell goes through the agent's stdin (input-data, up to 1 MiB) behind a short fixed decoder on the command
+# line: an -EncodedCommand of the whole script hit Windows' 32,767-character command line once add-mods.ps1 passed about
+# 8.5 KB (the layer tidy's 9,163 bytes made 34,960 characters and every start failed, 2026-11-10)
+decoder='$s=[Console]::In.ReadToEnd(); Invoke-Expression ([Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($s.Trim())))'
+run() { printf '%s' "$1" | base64 | tr -d '\n' | ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 120 --pass-stdin 1 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$decoder")" | python3 -c 'import sys,json; d=json.load(sys.stdin); print((d.get("out-data") or "").strip()); sys.exit(0 if d.get("exitcode")==0 else 1)'; }
 script="C:\\sky-lab\\task-$name.ps1"; out="C:\\sky-lab\\$name.out"
 # the command goes to the clone as a script file, so it needs no quoting
 # inside the task's argument line
