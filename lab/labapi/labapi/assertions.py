@@ -171,14 +171,14 @@ the lab can grep (E_ASSERT_*).
   server.actor(<client>).headParts                   the appearance's head parts, "0x..,0x.." sorted
   <client>.head_parts()                              the parts on its player's base from its last head-parts
                                                      step, the same form (thuum ADR-026: the two agree)
-  <client>.head_parts_of(<client>)                   the same on its figure of the other client (head-parts
-                                                     {other: true}), counted only when the actor read is the
-                                                     figure its last dump-state matched to that client
   <client>.head_part(<type>)                         the form id of the part of that HDPT type (2 eyes, 1 face,
-  <client>.head_part_of(<client>, <type>)            3 hair, 6 brows) in the same two reads, 0 for none
+                                                     3 hair, 6 brows) in that read, 0 for none; a SkyMP figure's
+                                                     parts are read by node (node-scale {other, node}), since a
+                                                     head-parts {other: true} read of one lists the seat's own
   <client>.overlay_part(<type>)                      the same in the overlay parts its last head-parts step read on
-                                                     its player (SKSE's overlay list: an overlay race's parts, each
-                                                     replacing the base's of its type), 0 for none
+                                                     its player (SKSE's overlay natives read the engine's per-NPC
+                                                     overlay map, not HasOverlays; which parts the face takes from
+                                                     it is HYPOTHESIS), 0 for none
   <client>.printed("<text>")                         true when a line the console printed during its last
                                                      console step contains the text (the server's
                                                      ConsoleOutput as skymp5-client prints it)
@@ -291,7 +291,6 @@ class ViewsFacade(Protocol):
     def presets(self, observer: str) -> dict[str, Any] | None: ...
     def consoles(self, observer: str) -> dict[str, Any] | None: ...
     def head_parts(self, observer: str) -> dict[str, Any] | None: ...
-    def head_parts_other(self, observer: str) -> dict[str, Any] | None: ...
 
 
 def _opt_float(v: Any) -> float | None:
@@ -2632,59 +2631,17 @@ class _ClientRef:
             raise AssertionData(f"{self.name}'s head-parts step lacks {e}") from e
         return _parts(ids) or ""
 
-    def head_parts_of(self, other: str) -> str:
-        """c.head_parts_of(o): the head parts on that client's figure of client o, as its last `head-parts {other:
-        true}` step read them, in the form server.actor(o).headParts takes (thuum D-E1: rotfern's eyes on the other
-        seat). The step reads the nearest other actor, so the read counts only when that actor is the figure the
-        client's last dump-state matched to where the server has o."""
-        fn = getattr(self._views, "head_parts_other", None)
-        data = fn(self.name) if fn else None
-        if not isinstance(data, dict) or not isinstance(data.get("parts"), list):
-            raise AssertionData(f"{self.name} has not reported a head-parts {{other: true}} step yet")
-        dump = self._dump()
-        if isinstance(dump.get("sees"), dict):
-            seen = dump["sees"].get(other)
-        else:
-            target = self._server.actor(other)
-            if not target or not target.get("found", True):
-                raise AssertionData(f"server has no actor for {other}")
-            near = self._within(target.get("absolute") or target, dump.get("near") or [], lambda n: n["pos"])
-            if len(near) > 1:
-                ids = ", ".join(f"{int(n.get('formId') or 0):x}" for n in near)
-                raise AssertionData(f"{self.name} has {len(near)} actors where the server has {other} ({ids}); its head-parts {{other: true}} read names no one figure")
-            seen = near[0] if near else None
-        if not seen:
-            raise AssertionData(f"{self.name} does not see {other}")
-        # a SkyMP figure's base is given the player's form id for its tints (skymp5-client appearance.ts applyTints,
-        # setFormIdUnsafe), so its base reads as the reading seat's own player: such a read is that seat's parts
-        # (docs/verbs/racemenu-sync.md, thuum-fa's fresh review of 67413f63)
-        if int(data.get("base") or 0) == 0x7:
-            raise AssertionData(f"{self.name}'s head-parts {{other: true}} read the base 0x7, its own player's parts, not its figure of {other}'s")
-        try:
-            read, figure = int(data["actor"]), int(seen["formId"])
-            ids = [int(p["id"]) for p in data["parts"]]
-        except (KeyError, TypeError, ValueError) as e:
-            raise AssertionData(f"{self.name}'s head-parts {{other: true}} step lacks {e}") from e
-        if read != figure:
-            raise AssertionData(f"{self.name}'s head-parts {{other: true}} read actor {read:x}, not its figure of {other} ({figure:x})")
-        return _parts(ids) or ""
-
     def head_part(self, kind: int) -> int:
         """c.head_part(t): the form id of the part of HDPT type t on that client's player's base, from its last
         `head-parts` step (0 when none), so a claim names one part: c1.head_part(2) == form("19d09:rotfern.esp")."""
         self.head_parts()  # the same data errors
         return self._part_of_type(self._views.head_parts(self.name), kind)
 
-    def head_part_of(self, other: str, kind: int) -> int:
-        """c.head_part_of(o, t): the same on that client's figure of client o, the read judged as head_parts_of
-        judges it."""
-        self.head_parts_of(other)  # the same data errors and the same figure check
-        return self._part_of_type(self._views.head_parts_other(self.name), kind)
-
     def overlay_part(self, kind: int) -> int:
         """c.overlay_part(t): the form id of the overlay part of HDPT type t on that client's player, from its last
-        `head-parts` step (SKSE ActorBase.GetNthOverlayHeadPart; 0 when none), so thuum D-E1 A' is claimed at run time:
-        a vampire rotfern holds no overlay eyes, c1.overlay_part(2) == 0."""
+        `head-parts` step (SKSE ActorBase.GetNthOverlayHeadPart; 0 when none). SKSE's overlay natives read the engine's
+        per-NPC overlay map, not HasOverlays; which parts the face takes from it is HYPOTHESIS (thuum-fa's delta review of
+        9f7f6426). thuum D-E1 A' reads c1.overlay_part(2) == 0 beside a nonzero c1.overlay_part(1)."""
         self.head_parts()  # the same data errors
         data = self._views.head_parts(self.name)
         if not isinstance(data.get("overlays"), list):
@@ -2783,7 +2740,15 @@ class _ClientRef:
             raise AssertionData(f"{self.name} has not reported a {step} step yet")
         if other is not None:
             live = [n for n in read.get("all") or [] if isinstance(n, dict) and n.get("enabled") and n.get("loaded")]
-            read, _ = self._nearest(other, live, lambda n: n["pos"])
+            target = self._server.actor(other)
+            if not target or not target.get("found", True):
+                raise AssertionData(f"server has no actor for {other}")
+            near = self._within(target.get("absolute") or target, live, lambda n: n["pos"])
+            if len(near) > 1:
+                # two live figures where the server has o name no one figure (thuum-fa's delta review of 9f7f6426)
+                ids = ", ".join(f"{int(n.get('actor') or 0):x}" for n in near)
+                raise AssertionData(f"{self.name} read {len(near)} live actors with 3D where the server has {other} ({ids}); its node-scale {{other: true}} names no one figure")
+            read = near[0] if near else None
             if read is None:
                 raise AssertionData(f"{self.name} read no enabled actor with 3D where the server has {other}")
         try:
@@ -2907,10 +2872,6 @@ _NUMBER_METHODS = {
 _INT_METHODS = {
     _ClientRef: {"head_part", "overlay_part"},
 }
-# Methods that take a client and a number: c2.head_part_of(c1, 2)
-_CLIENT_NUMBER_METHODS = {
-    _ClientRef: {"head_part_of"},
-}
 # Methods that take a form id: c.marker(0x00016223)
 _ID_METHODS = {
     _ClientRef: {"marker", "known", "favorite", "held", "projectile", "poison", "watched_id", "npc_state", "quest", "factions"},
@@ -2964,7 +2925,7 @@ _NULLARY = {
 _METHODS = {
     _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref", "follow", "fate", "log_count", "stream",
                  "world_globals", "alias_fill", "quest_runs", "quest_record", "script_variables"},
-    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "inventory", "globalValue", "projectile", "poison", "skill", "level", "weather", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "head_parts_of", "head_part", "head_part_of", "overlay_part", "refs_near", "node_rotation", "script_state", "alias", "factions", "script_vars"},
+    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "inventory", "globalValue", "projectile", "poison", "skill", "level", "weather", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "head_part", "overlay_part", "refs_near", "node_rotation", "script_state", "alias", "factions", "script_vars"},
     NodeRotationView: {"angle_to", "local_angle_to"},
     FactionsView: {"rank", "member"},
     WorldGlobalsView: {"value"},
@@ -3147,11 +3108,6 @@ class Evaluator:
                     if len(args) != 1 or isinstance(args[0], bool) or not isinstance(args[0], int):
                         raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes one integer")
                     return self._read(node, getattr(obj, node.func.attr)(args[0]))
-                if node.func.attr in _CLIENT_NUMBER_METHODS.get(type(obj), set()):
-                    if (len(args) != 2 or not isinstance(args[0], str) or not isinstance(self._names.get(args[0]), _ClientRef)
-                            or isinstance(args[1], bool) or not isinstance(args[1], int)):
-                        raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes a client and an integer")
-                    return self._read(node, getattr(obj, node.func.attr)(args[0], args[1]))
                 if node.func.attr in _STRING_NUMBER_METHODS.get(type(obj), set()):
                     if not 1 <= len(args) <= 2 or not isinstance(args[0], str) or any(
                             isinstance(a, bool) or not isinstance(a, (int, float)) or a < 0 for a in args[1:]):
@@ -3181,8 +3137,7 @@ def clients_needing_views(expr: str, clients: list[str]) -> set[str]:
         return set()
     needed: set[str] = set()
     for node in ast.walk(tree):
-        # head_parts_of and head_part_of judge their read against the figure the observer's dump-state matched
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr in ("sees", "view", "head_parts_of", "head_part_of"):
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr in ("sees", "view"):
             base = node.func.value
             if isinstance(base, ast.Name) and base.id in clients:
                 needed.add(base.id)

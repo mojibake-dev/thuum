@@ -282,7 +282,8 @@ class BoardTests(unittest.TestCase):
             board.poll("c1")
             board.complete(save.id, {"ok": True, "data": {"saved": "own-before", "bytes": 2932, "sha256": "54d2"}})
             self.assertEqual(board.presets("c1")["own-before"]["bytes"], 2932)
-            # a head-parts step on the client's own player and its {other: true} one are kept apart (thuum D-E1)
+            # a head-parts step on the client's own player is kept; a {other: true} one (a SkyMP figure's read lists the seat's
+            # own base) is not (thuum D-E1, thuum-fa's delta review of 9f7f6426)
             mine = board.enqueue("c2", "head-parts", {})
             board.poll("c2")
             board.complete(mine.id, {"ok": True, "data": {"actor": 0x14, "parts": [{"id": 0x5162F, "type": 1, "name": "x"}]}})
@@ -290,7 +291,6 @@ class BoardTests(unittest.TestCase):
             board.poll("c2")
             board.complete(theirs.id, {"ok": True, "data": {"actor": 0xFF000001, "parts": [{"id": 0x19D09, "type": 2, "name": "e"}]}})
             self.assertEqual(board.head_parts("c2")["actor"], 0x14)
-            self.assertEqual(board.head_parts_other("c2")["actor"], 0xFF000001)
             board.clear_views()
             self.assertIsNone(board.node_rotations("c2"))
             self.assertIsNone(board.held("c1"))
@@ -301,7 +301,6 @@ class BoardTests(unittest.TestCase):
             self.assertIsNone(board.node_scales("c1"))
             self.assertIsNone(board.presets("c1"))
             self.assertIsNone(board.head_parts("c2"))
-            self.assertIsNone(board.head_parts_other("c2"))
             # a timed-out step is cancelled and a late result is ignored
             late = board.enqueue("c1", "connect")
             board.poll("c1")

@@ -2335,9 +2335,9 @@ function run(step: Step, player: Actor): unknown {
         const part = base.getNthHeadPart(i);
         if (part) parts.push({ id: part.getFormID(), type: part.getType(), name: part.getPartName() });
       }
-      // the overlay parts the engine lays over the base's own (SKSE ActorBase.GetNumOverlayHeadParts and
-      // GetNthOverlayHeadPart, none while the engine's TESNPC::HasOverlays is false): an overlay race's part of a
-      // type replaces the base's (CommonLibSSE-NG TESNPC.cpp:94-96), so thuum D-E1 A' reads rotfernRaceVampire's here
+      // the overlay parts (SKSE ActorBase.GetNumOverlayHeadParts and GetNthOverlayHeadPart): SKSE's overlay natives read
+      // the engine's per-NPC overlay map, not HasOverlays; which parts the face takes from it is HYPOTHESIS (thuum-fa's
+      // delta review of 9f7f6426; thuum D-E1 A' reads rotfernRaceVampire's here)
       const overlays: { id: number; type: number; name: string }[] = [];
       for (let i = 0; i < base.getNumOverlayHeadParts(); ++i) {
         const part = base.getNthOverlayHeadPart(i);

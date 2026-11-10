@@ -237,8 +237,6 @@ class EvaluatorTests(unittest.TestCase):
         from labapi.assertions import clients_needing_views
 
         self.assertEqual(clients_needing_views("abs(c2.view(c1).x - server.actor(c1).x) < 50", ["c1", "c2"]), {"c2"})
-        self.assertEqual(clients_needing_views("c2.head_part_of(c1, 2) == c1.head_part(2)", ["c1", "c2"]), {"c2"})
-        self.assertEqual(clients_needing_views('c2.head_parts_of(c1) == ""', ["c1", "c2"]), {"c2"})
         self.assertEqual(clients_needing_views("c1.sees(c2) == true and c2.sees(c1) == true", ["c1", "c2"]), {"c1", "c2"})
         self.assertEqual(clients_needing_views('server.actor(c1).cell == "x"', ["c1", "c2"]), set())
 
@@ -1327,7 +1325,7 @@ class PartsServer(RichServer):
 
 
 class PartsViews(NearViews):
-    """c1's last head-parts step on its own player; c2 read only c1's figure, 0xff000001 in its near list."""
+    """c1's last head-parts step on its own player, with the overlay parts beside its base's."""
 
     def __init__(self):
         super().__init__()
@@ -1335,15 +1333,9 @@ class PartsViews(NearViews):
                                                     {"id": 0x51631, "type": 0, "name": "y"},
                                                     {"id": 0x51505, "type": 3, "name": "z"}],
                              "overlays": [{"id": 0x2E116, "type": 1, "name": "head"}, {"id": 0x2E117, "type": 0, "name": "mouth"}]}}
-        self.other = {"c2": {"actor": 0xFF000001, "parts": [{"id": 0x51505, "type": 3, "name": "z"},
-                                                         {"id": 0x5162F, "type": 1, "name": "x"},
-                                                         {"id": 0x51631, "type": 0, "name": "y"}]}}
 
     def head_parts(self, observer):
         return self.read.get(observer)
-
-    def head_parts_other(self, observer):
-        return self.other.get(observer)
 
 
 @needs_deps
@@ -1360,62 +1352,27 @@ class HeadPartTests(unittest.TestCase):
         with self.assertRaises(AssertionData):
             ev.evaluate('c2.head_parts() == ""')
 
-    def test_a_figure_s_parts_count_when_the_actor_read_is_the_matched_figure(self):
-        """thuum D-E1: the other seat's view of rotfern's eyes, c2.head_parts_of(c1) against the server's look"""
+    def test_one_part_by_its_type_on_the_base_and_in_the_overlay_list(self):
+        """thuum D-E1: rotfern's eyes by HDPT type 2 on her base, and the overlay parts beside them (A': no overlay eyes)"""
         from labapi.assertions import Evaluator
         ev = Evaluator(PartsServer(), PartsViews(), ["c1", "c2"])
-        self.assertTrue(ev.evaluate('c2.head_parts_of(c1) == server.actor(c1).headParts'))
-        self.assertTrue(ev.evaluate('c2.head_parts_of(c1) == c1.head_parts()'))
-        # one part by its HDPT type, on the player and on the figure; a type the read lacks is 0
         self.assertTrue(ev.evaluate('c1.head_part(1) == 0x5162f'))
-        self.assertTrue(ev.evaluate('c2.head_part_of(c1, 3) == 0x51505'))
         self.assertTrue(ev.evaluate('c1.head_part(2) == 0'))
-        # the overlay list beside the base's: a head and a mouth laid over, no eyes (D-E1 A')
         self.assertTrue(ev.evaluate('c1.overlay_part(1) == 0x2e116'))
         self.assertTrue(ev.evaluate('c1.overlay_part(2) == 0'))
 
-    def test_another_actor_or_no_read_is_a_data_error(self):
-        from labapi.assertions import AssertionData, Evaluator
-        views = PartsViews()
-        views.other["c2"]["actor"] = 0xFF000009  # the guard 4,800 units off, not c1's figure
-        ev = Evaluator(PartsServer(), views, ["c1", "c2"])
-        with self.assertRaises(AssertionData):
-            ev.evaluate('c2.head_parts_of(c1) == ""')
-        with self.assertRaises(AssertionData):
-            ev.evaluate('c1.head_parts_of(c2) == ""')  # c1 read no other actor
-        with self.assertRaises(AssertionData):
-            ev.evaluate('c2.head_part_of(c1, 2) == 0')  # the same figure check
-
-    def test_the_local_player_s_base_two_candidates_and_no_figure_are_data_errors(self):
-        """a SkyMP figure's base reads as the reading seat's player (skymp5-client applyTints), so a read of base 0x7 is
-        refused; so is a read when two actors stand where the server has the other client, and one with none there"""
-        from labapi.assertions import AssertionData, Evaluator
-        views = PartsViews()
-        views.other["c2"]["base"] = 0x7
-        with self.assertRaises(AssertionData):
-            Evaluator(PartsServer(), views, ["c1", "c2"]).evaluate('c2.head_parts_of(c1) == ""')
-        views = PartsViews()
-        views.data["c2"]["near"].append(dict(views.data["c2"]["near"][0], formId=0xFF000005, pos=[300.0, 0.0, 0.0]))
-        with self.assertRaisesRegex(AssertionData, "ff000001, ff000005"):
-            Evaluator(PartsServer(), views, ["c1", "c2"]).evaluate('c2.head_parts_of(c1) == ""')
-        views = PartsViews()
-        views.data["c2"]["near"] = [n for n in views.data["c2"]["near"] if n["formId"] != 0xFF000001]
-        with self.assertRaisesRegex(AssertionData, "does not see c1"):
-            Evaluator(PartsServer(), views, ["c1", "c2"]).evaluate('c2.head_parts_of(c1) == ""')
-
-    def test_two_parts_of_one_type_and_bad_arguments(self):
+    def test_two_parts_of_one_type_no_overlay_list_and_bad_arguments(self):
         from labapi.assertions import AssertionData, AssertionSyntax, Evaluator
         views = PartsViews()
-        views.other["c2"]["parts"].append({"id": 0x51506, "type": 3, "name": "z2"})
+        views.read["c1"]["parts"].append({"id": 0x51506, "type": 3, "name": "z2"})
         ev = Evaluator(PartsServer(), views, ["c1", "c2"])
         with self.assertRaisesRegex(AssertionData, "2 parts of type 3"):
-            ev.evaluate('c2.head_part_of(c1, 3) == 0')
+            ev.evaluate('c1.head_part(3) == 0')
         del views.read["c1"]["overlays"]
         with self.assertRaisesRegex(AssertionData, "no overlay list"):
             ev.evaluate('c1.overlay_part(2) == 0')
         for expr in ('c1.head_part(2.0) == 0', 'c1.head_part(true) == 0', 'c1.head_part() == 0', 'c1.overlay_part(1.5) == 0',
-                     'c2.head_part_of(server, 2) == 0', 'c2.head_part_of(true, 2) == 0', 'c2.head_part_of(c1, 2.5) == 0',
-                     'c2.head_part_of(c1) == 0', 'c2.head_part_of("x", 2) == 0'):
+                     'c1.head_part(c2) == 0'):
             with self.subTest(expr=expr), self.assertRaises(AssertionSyntax):
                 ev.evaluate(expr)
 
@@ -1976,6 +1933,15 @@ class NodeScaleTests(unittest.TestCase):
             ev.evaluate("c2.node_scale() > 1")
         with self.assertRaises(AssertionData):
             ev.evaluate("c1.node_scale_of(c2) > 1")
+
+    def test_two_live_figures_where_the_server_has_the_client_are_a_data_error(self):
+        """thuum-fa's delta review of 9f7f6426: node_scale_of names no one figure when two live actors stand there"""
+        from labapi.assertions import AssertionData, Evaluator
+        views = NodeScaleViews()
+        views.read["c2"]["other"]["all"].append({"actor": 0xFF0008DE, "engine": 1.0, "raceMenu": 1.0, "enabled": True, "loaded": True,
+                                                 "pos": [295.0, 2.0, 0.0]})
+        with self.assertRaisesRegex(AssertionData, "ff0008dd, ff0008de"):
+            Evaluator(RichServer(), views, ["c1", "c2"]).evaluate("c2.node_scale_of(c1) > 0")
 
 
 @needs_deps
