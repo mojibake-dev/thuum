@@ -4952,6 +4952,11 @@ B 4. B is fine. 5. A 6. B"):
   rotfernRaceVampire's lists, both sexes (the head and mouth overlays stay), so her own eyes show and her script decides
   all four cases. Either way the change is a build-time row in lab/layer/plugin-patches.tsv on rotfern.esp (rotfern.esp's
   file untouched), static until a rotfern seat's vampire turn is traced. The build waits for Eli's A or A'.
+  A' ACCEPTED (Eli 02:51 PST 2026-11-10, in thuum-fa's session, verbatim "the male list is irrelevant male rotfern will never be
+  picked and is a fully abandoned branch. as long as A' gets the placement right then roll with it."): the eye entry leaves
+  rotfernRaceVampire's FEMALE list (the male list is an abandoned branch, left as it is); the head and mouth overlays stay;
+  her own eyes, set by her script, show in all four cases. Eli's condition is the placement: the T3 beside the eyes T3 claims
+  her eyes sit right in the vampire head (screenshots on both seats, before and after DLC2MQ06), not only which part shows.
 - ADR-067 decision 7 amended, the order: ADR-068 rungs 5 and 6, then physics objects (props and bodies, Eli's two tests: a dragged
   body, Hailstone at a cabbage cart), then rung 7 (the chaff). Physics no longer waits for the cleanup.
 
