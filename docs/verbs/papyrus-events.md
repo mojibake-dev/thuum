@@ -588,3 +588,79 @@ Not a committed scenario, by W3: the standing (rung 4's faction rows, MECHANISM 
 libespm fix its base reads (fork f9e09f01: an NPC's faction rank at SNAM's offset 4, not 0) are guarded by T0 (StandingTest,
 and EspmTest's rank guard on 0x1000ef) and read on the lab by the probe x-standing v1 (5fbfa28e), GREEN 20261107-205305 on
 rung 4's stage; a b-standing is promoted when content presses the standing.
+
+## ADR-068 rung 5, D-R1 C: a script's grant to its own player is the seat's own record (Eli 2026-11-10; fork m4-scripts-5-rewards 1bc4059b, on m4-scripts-5-second 685f6a24)
+
+Eli's word (docs/DECISIONS.md, rung 5's stage-eve words, verbatim for this item "im thinking C because it's the most likely to
+fire every time"): a script's AddItem or RemoveItem on the seat's own player is recorded into the player's inventory as the seat
+reports it, with no property bound, because it fires every time (a bound would refuse a leveled reward or an item a script
+computes at run time). Found by x-acting-frame 20261110-072506: A Lovely Letter's 25 gold (Gold 0xf) undone about 2.4 s after the
+grant by the client's 5 s inventory apply, since nothing told the server of it.
+
+- The rows: the flip's ObjectReference.AddItem and RemoveItem keep their places with Owner::Player and Keep::Record(PlayerOwn)
+  (natives_table.rs:62-63; NativeRows.inc:30-31 unchanged, having no owner or keep column), so a player's own rows are nine
+  (wire-rules player_own's ROWS, the two first). On any other subject neither has a channel (record_owner's E_SCRIPTCALL_ROW).
+- The judgment, no bound (player_own.rs:387-427): the form an item of libespm's item types (E_SCRIPTCALL_ARGS otherwise: a
+  FormList, a reference); a leveled list's add refused by name (E_SCRIPTCALL_LEVELED: what landed is the engine's roll, which the
+  report does not carry, so the record never holds the list's form); the count, aiCount, a whole number from 1 to 2147483647, a
+  Papyrus Int above zero (item_count :133-146, E_SCRIPTCALL_ARGS otherwise); an add recorded whole, at most to the record's u32
+  bound over the form's stacks; a removal at most what the record holds, one of what it lacks folding, the open race overlay's
+  item first (the werewolf's RemoveItem of WolfSkinFXArmor ahead of its race's return), and folding into a container the player
+  holds open (that container's PutItem moves the item, both sides).
+- The core (ActionListener.cpp RecordPlayerOwn :4710, its inventory branch :4863-4893): reads no attachment for the two, gathers
+  the facts (LVLI by the record type, Inventory::GetItemCount, the second argument, MpObjectReference::IsContainerOccupant of the
+  fourth) and writes MpObjectReference::AddItem, or RemoveItems over StacksToRemove (:4634-4664: the plain stack first, each stack
+  as the record holds it, so RemoveItems never throws), whose SendInventoryUpdate sends the player its inventory at the tick;
+  nobody else hears it. Line: "[verb:quest-stage] <player>'s own ObjectReference.AddItem <form> (from <caller>.<handler>): <n>
+  added to its inventory as its seat reported it (D-R1 C, R2), <m> held now".
+- The platform: the two are batched on the seat's own player alone (ScriptNatives.cpp kBatchedStateRows :222-223, the batch's
+  test :1905-1906), and the recorded lever keeps their latent rule (SkipsBody :918-933), so a non-owned call on a container, an
+  NPC or a figure runs its body as before; inside another player's acting scope the self is that player's figure by step (0),
+  never 0x14, so a relayed fragment's grant crosses once, from the acting seat.
+- The client: ScriptCallService sends them as the seven go (its own family, selfId 0x14, unfolded) and holds each item's base
+  against remoteServer.ts's 5 s inventory apply from the call's arrival in JS until 10 s past its send (scriptCallService.ts
+  holdOwnItem :342-357; remoteServer.ts holdPcInventoryBase :93-120, keepSurplus for an add and keepDeficit for a removal), so no
+  apply undoes a grant before the server's SetInventory carries it into pcInv; a leveled list's id names no inventory entry and
+  holds nothing.
+
+**R2, unvalidated (rule 5), declared here:** the seat's word that its script made the call. The server checks the kind, the
+count's bound, the record's room and, for a removal, what the record holds and whether the other container is held open, and
+nothing else: no bound, by Eli's choice, so a modified seat can add any item of any count to its own player by reporting a call,
+and nobody else hears it (a player's inventory goes to its own game alone). Named gaps: a leveled reward (refused by name, its
+roll reverted at the next apply as before); AddItem of a reference or a FormList and RemoveItem of a FormList (no item record,
+E_SCRIPTCALL_ARGS); a removal's receiving side (the container or the NPC); and a reward a giver moves into the player (RemoveItem
+on the giver: the giver's row, no player's own). T0 player_own's cases (the count's bound, a grant as reported with no bound, the
+u32 room, the leveled, kind and count refusals, the removal's clamp, the held-open fold, the skin taken from the overlay) and
+unit/PlayerOwnTest.cpp's four (0xf x25 recorded once and heard by its own game alone; LItemFoodCabbage75 0x10bf6a
+E_SCRIPTCALL_LEVELED; the chest 0x20570 held open folds, shut records).
+
+**The leveled gap's Dynamic plan (rule 8; before anyone builds over E_SCRIPTCALL_LEVELED).** ONE QUESTION: when a script's
+AddItem on the player names a leveled list, does the rolled item reach the player through a TESContainerChangedEvent fired
+synchronously inside SkyrimScript::AddItemFunctor's operator(), carrying the same stack id as the call the seam recorded? The
+latent native queues the functor, and the engine rolls the list later, in it, outside the call the seam hooks; a match of the
+container events to the call by time alone could catch a flora harvest. The join the builder proposes is the functor itself:
+hook its operator() and collect the container events with newContainer 0x14 inside it.
+- Frida script: lab/frida/additem-functor.js (thuum main c031c55d, its README entry), attach only (Interceptor.attach, no
+  replace, no engine call from a listener): NativeFunctionBase::Call filtered to ObjectReference.AddItem and Activate by the bound
+  IFunction's own class and name; AddItemFunctor's operator(), its vtable's slot 01 read live at load and checked against the
+  type's RTTI; the VM's own TESContainerChangedEvent sink and the platform's, its sink found at the VM sink's first event. Every
+  id in its header comes from `just addr` and CommonLibSSE-NG, never from memory.
+- The probe: x-additem-functor v2 by path (lab/.cache/drafts/rung5), c1 alone at Riverwood's landing: leg 0, a flora harvest
+  (recorded only: the engine's own add outside any functor, which also primes the platform sink's discovery); leg A, the
+  question, MS01 0x18b4b's stages 39 and 49, each fragment's Game.GetPlayer().AddItem(LvlQuestReward02Medium 0xc0405, 1, False),
+  set through the driver's set-stage; leg B, the control, FreeformStonehillsA 0x64958's stage 20 (Gold001 0xf, the
+  FavorRewardGoldSmall global's 25).
+- Expected observations: per leg A set, an addItemCall row from QF_MS01_00018B4B.Fragment_56 (Fragment_62 for 49), one
+  functorEnter and one functorLeave whose stack id is the call's, and inside that window, on its thread, a container event with
+  newContainer 0x14 naming a member of the list (Gold001), none naming the list itself; leg B the same with the event's count equal
+  to the call's. Recorded beside them: the operator()'s thread, its calling convention (rax equal to the entry's rdx, the return
+  buffer a detour needs), the functor's raw bytes. If the events fire elsewhere, the gap stays named and the join goes to the
+  re-analyst as a Dynamic section.
+- Owner: the agent (the probe; the trace and the probe fresh-reviewed together 2026-11-10, their notes applied; the probe
+  runnable once `just deploy-srv` ships the trace).
+
+HYPOTHESIS H-RW1: the client's hold keeps a grant: holding the item's base until 10 s past the report's send keeps the 5 s
+inventory apply from undoing it before the server's SetInventory carries it into pcInv, and an apply that ran in the frame before
+the hold is healed by that echo (A Lovely Letter's 25 gold kept on the acting seat reads it). HYPOTHESIS H-RW2: a leveled list's
+roll lands through a TESContainerChangedEvent inside AddItemFunctor's operator(), on its thread, with the stack id the seam
+recorded at the call (the plan above reads it); until it holds, E_SCRIPTCALL_LEVELED stands.

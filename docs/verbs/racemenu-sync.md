@@ -876,3 +876,39 @@ ExecuteMpRacemenu beside mp host, calling SetRaceMenuOpen(caller, true), which r
 your look (a race change resets the face)" and, with the menu open already, "the race menu is open already; close it to keep your
 look". Folded into rung 4's train (m4-scripts-4-rows merge 80424914, pipeline 5614 green with its unit case), so the train's T2
 and stage carry it into playtest 50 (numidium: no separate R0 merge). MECHANISM ONLY until Eli runs it.
+
+## D-E1 A's head part row and the stored look: the rotfern-eyes review's two fixes (fork m4-scripts-5-rewards 922d881e, on m4-scripts-5-second 685f6a24)
+
+Rotfern's eyes are set by her own script through Actor.ChangeHeadPart, a player's own row since Eli's D-E1 A (docs/NATIVES.md;
+docs/WIRE.md, ScriptCall's player's own rows): R1 on the seat's word that its script ran, the part one the calling script's live
+attachments name and one her recorded race may wear (its HDPT's valid-race FormList, RNAM). A fresh review of the slot found two
+gaps in the own-row code, both fixed on 922d881e with no wire change.
+
+- F2, the stored look follows a recorded head-part swap. The row wrote the appearance alone, while the server hands every figure,
+  and the owner after a login, the stored RaceMenu look, whose load replaces the base's head parts by type (x-head-parts
+  20261007-133253, the Observe section above), so the old eyes came back at each figure's rebuild. PartOne::RecordHeadPart
+  (PartOne.cpp:4569-4585) is now the swap's write: the look wears the part (WearHeadPart), and the stored look names it in place of
+  its part of that HDPT type (WearHeadPartInLook :4525-4567, each listed part's PNAM read from its record; the JSON rewrite is
+  wire-rules racemenu::with_head_part, racemenu.rs:109-125: "<plugin>|<six hex digits>" in the first entry of the type with its
+  other fields kept, a later one of the type dropped; nothing when the look names no part of the type or names it already, and
+  nothing past the wire's preset cap). RecordPlayerOwn sends the rewritten look as RaceMenuPreset to every game that sees the
+  player ahead of the appearance (SendRaceMenuPresetToOthers, ActionListener.cpp:1337-1356, the one OnRaceMenuPreset now shares),
+  so a figure's rebuild takes the new look; a fold, the look wearing the part already, still brings a stored look naming another
+  part of the type to it. The look and its preset stay one authority (ADR-026).
+- F1, alias scripts count as their quest's attachments for the R1 bound. The server never indexed an alias's script, so an own row
+  an alias script called found no attachment: RotfernEyes.esp (apocrypha/rotfern-eyes 833b5452's build_esp.py) carries
+  RotfernEyesAlias on its player alias alone, refused E_SCRIPTCALL_UNNAMED with "the class has 0 attachment(s), 0 live for this
+  player". libespm's GetScriptData now reads a QUST's VMAD past its primary scripts into ScriptData::aliases (UESP's "Skyrim
+  Mod:Mod File Format/VMAD Field": the Fragments Section, then the Alias Scripts Section), every read bounded by the field's end
+  through a reader that stops short and never throws; ScriptAttachmentIndexOf (PartOne.cpp:3864-3924) takes each alias script as
+  an attachment of its quest, live as the quest is, its properties named as the quest's own scripts' are. The layout read whole
+  across the 1,255 scripted QUSTs of the lab's cached Skyrim.esm, Dawnguard.esm and Dragonborn.esm (698 with alias scripts, eight
+  with alias scripts alone, RotfernEyesQuest's shape).
+- T0: EspmTest's alias section over RotfernEyesQuest's bytes as build_esp.py writes them; PlayerOwnTest's two (Dragonborn's
+  alias-only DLC2BloodskalBladeQST 27282:Dragonborn.esm, its alias script the quest's attachment, an AddSpell from it refused
+  while the quest is not live and recorded once it runs; RecordHeadPart over vanilla eyes, MaleEyesHumanBrown 0x51632 to
+  MaleEyesHumanIceBlue 0x24244 beside HairMaleNord01 0x51507: the look and the stored look both swapped, a second swap moving
+  nothing, a stale stored look healed while the look folds); racemenu's three cases and the bridge's. No vanilla script or
+  FormList names an HDPT (805 HDPTs, 1,745 scripted QUSTs and MGEFs read with their alias scripts), so no vanilla call reaches the
+  recorded swap through the bound: RotfernEyes.esp's run at T3 is the end to end (D-E1 A's: the swap seen on the other seat and
+  kept across a relaunch).
