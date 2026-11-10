@@ -3,7 +3,8 @@ ScriptName RotfernEyesAlias extends ReferenceAlias
 hermaeus moras champion is when she gets the eyes"). Her usual eyes, or the Mora eyes once DLC2MQ06 is completed, each in its
 vampire variant while her race is rotfern's vampire race. The alias is the player (unique actor 0x7), so every seat runs this
 for its own player; for any race but rotfern's two it does nothing. The four eye head parts and both races live in rotfern.esp,
-which this plugin only reads.}
+which this plugin only reads. Each change it makes writes one line to the Papyrus log,
+"RotfernEyesAlias: <event>: eyes set to <part>"; a T3 scenario counts those lines, so their words are a contract.}
 
 Race Property RotfernRace Auto
 {rotfern.esp 0xAA00: the usual eyes and the Mora eyes are valid for it (FLST RotfernEyesRaces)}
@@ -21,24 +22,24 @@ Quest Property DLC2MQ06 Auto
 {Dragonborn.esm 0x0179D7, "At the Summit of Apocrypha": stage 550, its one Complete Quest entry, is Miraak's death}
 
 Event OnInit()
-	UpdateEyes()
+	UpdateEyes("OnInit")
 EndEvent
 
 Event OnPlayerLoadGame()
-	UpdateEyes()
+	UpdateEyes("OnPlayerLoadGame")
 EndEvent
 
 Event OnRaceSwitchComplete()
 	; a vampire's turn or cure: the engine's race switch drops eyes not valid for the new race to its default, so set them
-	UpdateEyes()
+	UpdateEyes("OnRaceSwitchComplete")
 EndEvent
 
 Event OnLocationChange(Location akOldLoc, Location akNewLoc)
 	; the questline ends inside Apocrypha, so the next change of location after it applies the Mora eyes
-	UpdateEyes()
+	UpdateEyes("OnLocationChange")
 EndEvent
 
-Function UpdateEyes()
+Function UpdateEyes(String why)
 	Actor player = GetActorReference()
 	If !player
 		Return
@@ -73,4 +74,5 @@ Function UpdateEyes()
 		Return
 	EndIf
 	player.ChangeHeadPart(want)
+	Debug.Trace("RotfernEyesAlias: " + why + ": eyes set to " + want.GetPartName())
 EndFunction
