@@ -9374,3 +9374,29 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (a21e46b1; its online wait reads through lab-api's 502 since 12fdb86c) and playtest-teleport (1bacb4d8). Eli: "seems like
   playtest 51 should new rung 4 stuff and those fixes"; rung 4 shipped in this build, so the new work for 51 is rung 5, quests
   (thuum-fa's plan docs/research/rung5-quests-2026-11-09.md), waiting on Eli's W1, D-Q2 and D-Q3 (D-V1 decided B by its census).
+
+### 2026-11-10
+
+- apocrypha/layer-appearance (a mod layer) merged to main e90ff6e0 by fast-forward (2026-11-10T06:17Z): the full sweep 20261109-225901-layer-apocrypha-layer-appearance (cited with m4-train-50, ADR-042a; the layer's own run 20261109-225547-smoke-two-players), 20261109-225901-a-activation-reach to 20261110-061018-t2-fakeclient-restart (145 runs); both clones promoted.
+  Plugins: the appearance layer as laid at b2bcc92d (CBBE SFW Edition's body and outfits built in SFW's own shape on CI job
+  19760, Rotfern's Fixes 0.1.1), its inputs byte-identical through 2eec913d and e90ff6e0, which merge main alone. The sweep
+  read 122 green of 128; its six reds are canon's, each pending at the merge with its verb doc: b-npc-body-release and
+  c-dungeon-enemies (50's D-C2 A direct open of a blocked body logs neither of D71's lines; npc-fate.md:3443; v4 at aca69db8
+  takes the open line, the close line next), b-npc-stream-equipment (an unrecorded NPC's inventory built without its outfit,
+  E_EQUIP_REFUSED; npc-stream.md:2378), b-quest-rumor (the dead "mode all" pattern, W1; quest-stage.md:408), b-second-hand
+  (no proc ticks streamed after the bolt's hit; second-hand.md:216) and b-word-wall (the guest's relayed trigger entry
+  teaches nobody; word-wall.md:206). Four lone reds read green on their reruns: b-duel's Flames flake, b-lever-relay's sample
+  window (c2's graph took the relayed pull, thuum-fa from c2.log), b-npc-handoff-cross, and b-npc-talk on its cold third
+  try. The merge stopped once at 06:14Z on a docs/DECISIONS.md conflict (main's ADR-068 rung 5 amendments and D-E1 A against
+  the branch's ADR-069) until apocrypha merged main 0292261b in (e90ff6e0); the citation's eight checks held both times.
+- m4-fix-50 merged to fork canon 862b9375 (2026-11-10T06:17Z): R0 (ADR-053): T0 pipeline 5671 server-build 20059: 100% tests passed, 0 tests failed out of 13, no lab gate (the nightly is its T3); T2 skip on skymp-server:m4-fix-50; clones not promoted.
+  Verbs: playtest 50's two server breaks and a log line: e2595d14 Inventory::AddItems adds every item of a call (the naked
+  bandits: a re-roll over a held inventory stopped at the first merged stack, so the worn set named pieces the inventory
+  lacked), c3045a1b a worn armor's EITM and its effect ids converted through the armor's own file's masters, an unresolved
+  enchantment adding 0 with a warning (the invincible bandit: b6fe4's WIC cloak's raw 0x0200db5a resolved to Dawnguard's
+  REFR and threw the whole weapon hit; 985 of the load order's 5,284 enchanted ARMO winners), and 862b9375 mp racemenu's open
+  logged. The T2 is thuum-fa's on skymp-server:m4-fix-50-862b9375 (fakeclient ok, 50 of 50 difftest sessions identical). The
+  lab's server is pinned to skymp-server:m4-fix-50-862b9375 since 06:17:53Z, so the nightly is its T3. On the fixed server
+  b-npc-stream-equipment still reads E_EQUIP_REFUSED (20261110-062127: 1348c lacking 0x6c1d9 and 0x209a5 with no record at
+  the run's start, the clean world holding the two lab characters alone), so e2595d14 doesn't reach that path; its line
+  stays pending.
