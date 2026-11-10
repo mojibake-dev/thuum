@@ -84,6 +84,8 @@ class Doubles:
         self.stuck: set[str] = set()  # the clients whose engine moves nothing on a transfer (the driver's after-count throw)
         self.aliases: dict[str, dict[tuple[int, int], int]] = {}  # the references a client's alias reads: (quest, alias) -> refr
         self.standing: dict[str, dict[int, dict[int, int]]] = {}  # the ranks a client's factions read: actor -> faction -> rank
+        self.script_vars: dict[str, dict[int, dict[str, int]]] = {}  # the ints a client's script-vars reads: form -> "<script>::<var>" -> value
+        self.objectives: dict[str, dict[int, set[int]]] = {}  # the objectives a client's game shows: quest -> displayed indices
 
     def turn(self):
         for name in self.names:
@@ -174,6 +176,23 @@ class Doubles:
                 ranks = (self.standing.get(name) or {}).get(actor)
                 data = ({"formId": actor, "ranks": {str(f): ranks.get(f, -2) for f in fs}, "members": {str(f): f in ranks for f in fs}, "crime": 0}
                         if ranks is not None else {"error": f"no actor {actor:x} in this game"})
+            elif step["action"] == "script-vars":
+                # the driver's contract: the form as a form id (lab-api resolves a FormDesc first), the keys as written
+                form, keys = step["args"].get("form"), step["args"].get("keys")
+                assert isinstance(form, int) and not isinstance(form, bool), step["args"]
+                held = (self.script_vars.get(name) or {}).get(form)
+                rows = []
+                for k in keys:
+                    script, _, var = k.partition("::")
+                    rows.append({"form": form, "script": script, "var": var, "k": 3, "i": held[k]} if held and k in held
+                                else {"form": form, "script": script, "var": var, "reason": "no such variable"})
+                data = {"form": form, "vars": rows} if held is not None else {"error": f"no form {form:x} in this game"}
+            elif step["action"] == "quest-objectives":
+                q, wanted = step["args"].get("quest"), step["args"].get("objectives")
+                assert isinstance(q, int) and not isinstance(q, bool), step["args"]
+                shown = (self.objectives.get(name) or {}).get(q)
+                data = ({"quest": q, "running": True, "objectives": {str(i): {"displayed": i in shown, "completed": False} for i in wanted}}
+                        if shown is not None else {"error": f"no quest {q:x} in this game"})
             elif step["action"] == "av-table":
                 data = {"ids": list(range(1000, 1164))}
             elif step["action"] == "add-perks":
@@ -1770,6 +1789,64 @@ class RungFourSteps(RunTests):
                                   "server holds no record for 0x3ac73"])
 
 
+RUNG_FIVE = """
+id: t-rung5
+clients: [c1, c2]
+steps:
+  - c1: connect
+  - c2: connect
+  - c2: script-vars {form: 0xeafd5, keys: ["PlayerVampireQuestScript::::VampireStatus_var"]}
+  - c2: quest-objectives {quest: 0x74a83, objectives: [10, 20]}
+  - assert:
+      - c2.script_vars(0xeafd5).value("::VampireStatus_var") == 0
+      - server.script_variables().value(0xeafd5, "::VampireStatus_var") == c2.script_vars(0xeafd5).value("::VampireStatus_var")
+      - c2.quest(0x74a83).objectiveDisplayed(10) and not c2.quest(0x74a83).objectiveDisplayed(20)
+      - server.quest_runs(0x74a83).running and server.quest_runs(0x74a83).seq == 2
+      - server.quest_record(0x74a83).stageDone(10) and server.quest_record(0x2ba16).count == 0
+"""
+
+
+@needs_deps
+class RungFiveSteps(RunTests):
+    def test_the_seats_reads_and_the_servers_records_meet_in_one_claim_block(self):
+        """ADR-068 rung 5's grammar end to end: the script-vars and quest-objectives steps reach the driver with their form
+        ids, the board keeps each answer, and the claims read them beside labState's quest runs, stage record and script
+        variables."""
+        self.doubles.script_vars = {"c2": {0xEAFD5: {"PlayerVampireQuestScript::::VampireStatus_var": 0}}}
+        self.doubles.objectives = {"c2": {0x74A83: {10}}}
+        self.state.quest_runs = [{"quest": 0x74A83, "running": True, "seq": 2}]
+        self.state.quest_stages = [{"quest": 0x74A83, "stage": 10}]
+        self.state.script_variables = [{"form": 0xEAFD5, "script": "PlayerVampireQuestScript", "var": "::VampireStatus_var",
+                                        "k": 3, "value": 0, "seq": 1}]
+        run_id, body = self._run(RUNG_FIVE)
+        self.assertEqual(body["verdict"], "green", json.dumps(body, indent=1))
+        sent = [(c, a) for c, act, a in self.doubles.seen if act in ("script-vars", "quest-objectives")]
+        self.assertEqual(sent, [("c2", {"form": 0xEAFD5, "keys": ["PlayerVampireQuestScript::::VampireStatus_var"]}),
+                                ("c2", {"quest": 0x74A83, "objectives": [10, 20]})])
+
+    def test_a_server_without_the_kinds_is_red_on_data_never_green(self):
+        self.doubles.script_vars = {"c2": {0xEAFD5: {"PlayerVampireQuestScript::::VampireStatus_var": 0}}}
+        self.doubles.objectives = {"c2": {0x74A83: {10}}}
+        run_id, body = self._run(RUNG_FIVE)
+        self.assertEqual(body["verdict"], "red", body)
+        self.assertEqual({f["kind"] for f in body["failures"]}, {"assertion-data"}, body["failures"])
+        errors = sorted(set(f["error"] for f in body["failures"]))
+        tail = "found nothing: a server before ADR-068 rung 5, or an answer the gamemode refused)"
+        self.assertEqual(errors, [f"server has no quest runs to read (labState questRuns {tail}",
+                                  f"server has no quest stages to read (labState questStages {tail}",
+                                  f"server has no script variables to read (labState scriptVariables {tail}"])
+
+    def test_a_formdesc_form_or_quest_reaches_the_driver_as_its_id(self):
+        # the runner resolves script-vars' form and quest-objectives' quest through the run's load order, alias's way
+        self.services.runner.tables.slots.update({"skyrim.esm": (False, 0), "dawnguard.esm": (False, 2)})
+        runner = self.services.runner
+        self.assertEqual(runner._client_args("script-vars", {"form": "0eafd5:Skyrim.esm", "keys": ["A::b"]}),
+                         {"form": 0xEAFD5, "keys": ["A::b"]})
+        self.assertEqual(runner._client_args("quest-objectives", {"quest": "71d0:Dawnguard.esm", "objectives": [1]}),
+                         {"quest": 0x020071D0, "objectives": [1]})
+        self.assertEqual(runner._client_args("script-vars", {"form": 0x74A83, "keys": ["A::b"]})["form"], 0x74A83)
+
+
 CHEST_MOVES = """
 id: chest-moves
 clients: [c1, c2]
@@ -2330,6 +2407,64 @@ class CellHostSteps(RunTests):
         self.assertIs(laid["worldGlobals"], True)
         self.assertEqual(laid["npcEnabled"], False, "the version's file kept beside the knob")
         self.assertNotIn("worldGlobals", json.loads(files["1.6.1170"].read_text()), "the version's own file is untouched")
+
+    def test_a_runs_time_scale_and_cures_reach_the_server_through_the_overlay(self):
+        """ADR-068 rung 5's vampire probes (8(b)): the run's own clock rate from an epoch of its own, kept through a restart
+        inside the run (a rate multiplies all the time since the epoch, so the file's would jump the calendar), and the
+        run's own cure list, [] lifting every cure (D-T3 B); the version's own file untouched."""
+        files = self._settings_files()
+        ticks = iter(range(1_800_000_000, 1_800_000_100, 7))
+        self.services.runner._wall = lambda: float(next(ticks))
+        run_id, body = self._run("id: t-vamp\nclients: [c1]\nserver: {timeScale: 1440, cureSpells: []}\nsteps:\n  - c1: connect\n")
+        self.assertEqual(body["verdict"], "green", body)
+        overlay = self.tmp / "server-settings-run.json"
+        self.assertEqual(self._up_env()["SERVER_SETTINGS"], str(overlay))
+        laid = json.loads(overlay.read_text())
+        self.assertEqual(laid["cureSpells"], [])
+        self.assertEqual(laid["time"]["timeScale"], 1440.0)
+        self.assertRegex(laid["time"]["epoch"], r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$")
+        self.assertNotIn("start", laid["time"], "the file's start date, as a gameHour run's but for the hour")
+        first = laid["time"]["epoch"]
+        self.assertNotIn("cureSpells", json.loads(files["1.6.1170"].read_text()), "the version's own file is untouched")
+        laid_at, system = [], self.services.system
+        real_run = system.run
+
+        def run(cmd, timeout=120.0, env=None):
+            if cmd[:2] == ["docker", "compose"] and ("up" in cmd or "restart" in cmd):
+                laid_at.append(json.loads(overlay.read_text())["time"]["epoch"])
+            return real_run(cmd, timeout, env)
+
+        system.run = run
+        run_id, body = self._run("id: t-vamp2\nclients: [c1]\nserver: {timeScale: 1440}\nsteps:\n  - c1: connect\n"
+                                 "  - wait: 1\n  - server: restart\n")
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertEqual(len(laid_at), 2, laid_at)
+        self.assertEqual(laid_at[0], laid_at[1], "the restart lays the run's own epoch again")
+        laid = json.loads(overlay.read_text())
+        self.assertNotEqual(laid["time"]["epoch"], first, "each run's rate starts at its own start")
+        ups = [env for cmd, env in zip(self.services.system.commands, self.services.system.envs)
+               if cmd[:2] == ["docker", "compose"] and ("up" in cmd or "restart" in cmd)]
+        self.assertGreaterEqual(len(ups), 2, self.services.system.commands)
+        self.assertNotIn("cureSpells", laid, "a run that names no cures keeps the file's")
+        rec = self.services.runner.last_run
+        self.assertEqual(rec.clock_epoch, laid["time"]["epoch"], "the restart laid the run's own epoch again")
+
+    def test_a_runs_cure_must_name_a_plugin_of_its_load_order(self):
+        """The server matches a cure's plugin case for case and skips an unresolved one silently (fork FormDesc.cpp:62-70,
+        ActionListener.cpp:6765-6770): a cure naming a plugin the run's load order lacks, or one in another case, is the
+        run's settings error before the server starts, never a cure the probe believes it laid."""
+        files = self._settings_files()
+        files["1.6.1170"].write_text(json.dumps({"name": "thuum lab", "npcEnabled": False,
+                                                 "loadOrder": ["/srv/skymp/esm/Skyrim.esm", "/srv/skymp/esm/Update.esm"]}) + "\n")
+        run_id, body = self._run('id: t-cure\nclients: [c1]\nserver: {cureSpells: ["b8780:Skyrim.esm"]}\nsteps:\n  - c1: connect\n')
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertEqual(json.loads((self.tmp / "server-settings-run.json").read_text())["cureSpells"], ["b8780:Skyrim.esm"])
+        for cure in ("b8780:skyrim.esm", "b8780:Dawnguard.esm"):
+            with self.subTest(cure=cure):
+                run_id, body = self._run(f'id: t-cure-bad\nclients: [c1]\nserver: {{cureSpells: ["{cure}"]}}\nsteps:\n  - c1: connect\n')
+                self.assertNotEqual(body["verdict"], "green", body)
+                self.assertTrue(any("E_RUN_SETTINGS" in f["error"] and cure in f["error"] for f in body["failures"]), body["failures"])
+        self.assertNotIn("cureSpells", json.loads(files["1.6.1170"].read_text()), "the version's own file is untouched")
 
     def test_a_runs_game_hour_starts_the_servers_clock_through_the_overlay(self):
         files = self._settings_files()

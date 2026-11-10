@@ -217,6 +217,9 @@ class RunRecord:
     reset_started: set[str] = field(default_factory=set)
     faulted: dict[str, str] = field(default_factory=dict)
     levers: set[str] = field(default_factory=set)
+    # the epoch a run's own timeScale laid at its start (the time block's, wire-rules clock.rs), laid again unchanged at a
+    # restart inside the run so the clock resumes where its function says (ADR-068 rung 5's vampire probes)
+    clock_epoch: str | None = None
 
     def progress(self) -> dict[str, Any]:
         if self.verdict != "running":
@@ -499,8 +502,10 @@ class Runner:
         settle = rec.scenario.server.handoffPassSettleMs
         roll = rec.scenario.server.npcRollLevel
         world_globals = rec.scenario.server.worldGlobals
+        scale = rec.scenario.server.timeScale
+        cures = rec.scenario.server.cureSpells
         if settings and (npc is not None or hour is not None or respawn is not None or settle is not None or roll is not None
-                         or world_globals is not None):
+                         or world_globals is not None or scale is not None or cures is not None):
             # ADR-035 point 9: the run's own npcEnabled (and its game hour) over the version's
             # file, laid beside the world for this run alone, so no second file is kept in step
             try:
@@ -517,12 +522,35 @@ class Runner:
                 d["npcRollLevel"] = roll
             if world_globals is not None:
                 d["worldGlobals"] = world_globals
+            if cures is not None:
+                # ADR-068 rung 5's D-T3 B: a probe lifts a cure for its run alone, the version's file untouched. The server
+                # matches a cure's plugin by its name case for case and skips one it cannot resolve without a word (fork
+                # FormDesc.cpp:62-70, ActionListener.cpp:6765-6770), so an entry naming a plugin the run's load order lacks
+                # is refused here, before a probe reads a cure that never ran as one lifted
+                plugins = {Path(p).name for p in d.get("loadOrder") or []}
+                unknown = [c for c in cures if c.split(":", 1)[1] not in plugins]
+                if unknown:
+                    raise RunnerError(f"E_RUN_SETTINGS: cureSpells {unknown} name a plugin the run's load order lacks "
+                                      "(the server matches plugin names case for case)")
+                d["cureSpells"] = list(cures)
             if hour is not None:
                 # the clock is a pure function of the wall clock and the time block (wire-rules
                 # clock.rs): it reads start.hour at the epoch, so the run's start is the epoch
                 time_block = dict(d.get("time") or {})
                 time_block["epoch"] = _iso(self._wall())
                 time_block["start"] = {**(time_block.get("start") or {}), "hour": hour}
+                if scale is not None:
+                    time_block["timeScale"] = scale
+                    rec.clock_epoch = time_block["epoch"]
+                d["time"] = time_block
+            elif scale is not None:
+                # a rate is a factor on all the time since the epoch, so the run's rate runs from an epoch of its own,
+                # laid at its start (the file's start date, as a gameHour run's) and kept at a restart inside the run
+                time_block = dict(d.get("time") or {})
+                if rec.clock_epoch is None:
+                    rec.clock_epoch = _iso(self._wall())
+                time_block["epoch"] = rec.clock_epoch
+                time_block["timeScale"] = scale
                 d["time"] = time_block
             overlay = Path(self.s.server_world_dir).parent / "server-settings-run.json"
             overlay.write_text(json.dumps(d, indent=2) + "\n")
@@ -2158,7 +2186,8 @@ class Runner:
         reference id, or a name a later refs table resolves), race-pick's
         race its form id, known's and held's ids theirs, inventory's ref its
         form id, transfer's item and its to or from theirs, alias's quest and
-        each of factions' factions theirs (ADR-068 rung 4), and a FormDesc in
+        each of factions' factions theirs (ADR-068 rung 4), script-vars' form
+        and quest-objectives' quest theirs (rung 5), and a FormDesc in
         braces inside console text the run's id in the console's hex
         ("player.equipspell {044d44:Apocalypse - Magic of Skyrim.esp} right"
         types 1a044d44 under the essentials layer)."""
@@ -2178,8 +2207,10 @@ class Runner:
                 out["ids"] = [self.tables.base_id(x) if isinstance(x, str) else x for x in out["ids"]]
             if action == "inventory" and isinstance(out.get("ref"), str):
                 out["ref"] = self.tables.base_id(out["ref"])
-            if action == "alias" and isinstance(out.get("quest"), str):
+            if action in ("alias", "quest-objectives") and isinstance(out.get("quest"), str):
                 out["quest"] = self.tables.base_id(out["quest"])
+            if action == "script-vars" and isinstance(out.get("form"), str):
+                out["form"] = self.tables.base_id(out["form"])
             if action == "factions" and isinstance(out.get("factions"), list):
                 out["factions"] = [self.tables.base_id(x) if isinstance(x, str) else x for x in out["factions"]]
             if action == "transfer":

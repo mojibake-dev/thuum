@@ -116,6 +116,25 @@ class PlaytestProfile(unittest.TestCase):
             with self.assertRaises(ProfileError, msg=bad):
                 self.load(PROFILE + bad)
 
+    def test_a_profiles_cure_list_is_laid_over_the_deployed_file(self):
+        # ADR-068 rung 5's D-T3 B: playtest 51 lifts Sanguinare Vampiris from the deployed cureSpells for its sitting alone;
+        # a cure naming a plugin the deployed load order lacks (case counts, as the server's match does) is refused
+        import json
+
+        from playtest_setup import ProfileError, overlay_text
+
+        deployed = '{"loadOrder": ["/srv/skymp/esm/Skyrim.esm"], "cureSpells": ["b8780:Skyrim.esm"]}'
+        laid = json.loads(overlay_text(deployed, self.load(PROFILE + "server: {cureSpells: []}\n")["server"]))
+        self.assertEqual(laid, {"loadOrder": ["/srv/skymp/esm/Skyrim.esm"], "cureSpells": []})
+        laid = json.loads(overlay_text(deployed, self.load(PROFILE + 'server: {cureSpells: ["e8ae:Skyrim.esm"]}\n')["server"]))
+        self.assertEqual(laid["cureSpells"], ["e8ae:Skyrim.esm"])
+        for cure in ("b8780:skyrim.esm", "b8780:Dawnguard.esm"):
+            with self.subTest(cure=cure), self.assertRaises(ProfileError):
+                overlay_text(deployed, self.load(PROFILE + f'server: {{cureSpells: ["{cure}"]}}\n')["server"])
+        for bad in ("server: {cureSpells: b8780}\n", "server: {cureSpells: [0xb8780]}\n", 'server: {cureSpells: ["b8780"]}\n'):
+            with self.subTest(bad=bad), self.assertRaises(ProfileError):
+                self.load(PROFILE + bad)
+
     def test_a_profiles_switches_are_laid_off_over_the_deployed_file(self):
         # turbo 2 (numidium, 2026-11-02): the deployed settings carry locks, weatherSync, perks and leveling ON for
         # the gates' scenarios; the sitting's server runs them OFF and an item turns its own on

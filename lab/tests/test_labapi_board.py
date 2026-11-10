@@ -146,6 +146,38 @@ class BoardTests(unittest.TestCase):
         self.assertIsNone(board.alias("c1", 0x39645, 0))
         self.assertIsNone(board.factions("c2", 0x39655))
 
+    def test_script_vars_and_objectives_answers_are_kept_by_what_they_named(self):
+        # ADR-068 rung 5's reads: a script-vars answer by its form, a quest-objectives answer by its quest; an error answer
+        # and a failed step take the key's place, as script-state's do
+        from labapi.board import StepBoard
+
+        board = StepBoard(clock=lambda: 100.0)
+
+        def answer(client, action, args, body):
+            step = board.enqueue(client, action, args)
+            board.poll(client)
+            board.complete(step.id, body)
+
+        keys = ["PlayerVampireQuestScript::::VampireStatus_var"]
+        row = {"form": 0xEAFD5, "script": "PlayerVampireQuestScript", "var": "::VampireStatus_var", "k": 3, "i": 1}
+        answer("c1", "script-vars", {"form": 0xEAFD5, "keys": keys}, {"ok": True, "data": {"form": 0xEAFD5, "vars": [row]}})
+        self.assertEqual(board.script_vars("c1", 0xEAFD5)["vars"], [row])
+        answer("c1", "script-vars", {"form": 0xEAFD5, "keys": keys}, {"ok": True, "data": {"error": "ReadScriptVariables refused eafd5"}})
+        self.assertIn("refused", board.script_vars("c1", 0xEAFD5)["error"])
+        answer("c1", "script-vars", {"form": 0xEAFD5, "keys": keys}, {"ok": False, "error": "TypeError: x is undefined"})
+        self.assertEqual(board.script_vars("c1", 0xEAFD5), {"error": "TypeError: x is undefined"})
+        self.assertIsNone(board.script_vars("c2", 0xEAFD5))
+
+        read = {"quest": 0x74A83, "running": True, "objectives": {"10": {"displayed": True, "completed": False}}}
+        answer("c2", "quest-objectives", {"quest": 0x74A83, "objectives": [10]}, {"ok": True, "data": read})
+        self.assertEqual(board.objectives("c2", 0x74A83), read)
+        answer("c2", "quest-objectives", {"quest": 0x74A83, "objectives": [10]}, {"ok": True, "data": {"error": "no quest 74a83 in this game"}})
+        self.assertIn("no quest", board.objectives("c2", 0x74A83)["error"])
+        self.assertIsNone(board.objectives("c1", 0x74A83))
+        board.clear_views()
+        self.assertIsNone(board.script_vars("c1", 0xEAFD5))
+        self.assertIsNone(board.objectives("c2", 0x74A83))
+
     def test_a_seats_kept_perks_go_again_after_a_heartbeat_gap(self):
         from labapi.board import PERK_GAP_S, StepBoard
 

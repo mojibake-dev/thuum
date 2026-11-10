@@ -22,9 +22,9 @@ VECTOR = bytes.fromhex(
 PLAIN = b"racesex_menu " * 40 + bytes(range(256)) + b"end"
 
 
-def bsa105(files, compressed_default=False):
-    """A version-105 archive with one folder 'interface' holding `files` {name: data}, the folder-name flag set."""
-    folder = b"interface"
+def bsa105(files, compressed_default=False, folder=b"interface"):
+    """A version-105 archive with one folder ('interface' unless named) holding `files` {name: data}, the folder-name flag
+    set."""
     names = list(files)
     name_block = b"".join(n.encode() + b"\0" for n in names)
     folder_block_size = 1 + len(folder) + 1 + 16 * len(names)

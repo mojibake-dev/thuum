@@ -1202,7 +1202,7 @@ class AvViews(NearViews):
 
     def __init__(self):
         super().__init__()
-        av = lambda base, current: {"base": base, "current": current, "maximum": base, "percentage": current / base}
+        av = lambda base, current: {"base": base, "current": current, "max": base, "percentage": current / base}
         self.read = {
             "c1": {"self": {"of": 20, "values": {"health": av(250.0, 200.0), "magicka": av(120.0, 120.0)}}},
             "c2": {"other": {"of": 0xFF0008DC, "values": {"health": av(1000000.0, 1000000.0)}, "all": [
@@ -1736,6 +1736,151 @@ class RungFourTests(unittest.TestCase):
                 ev.evaluate(expr)
 
 
+class RungFiveViews(RungFourViews):
+    """Each seat's script-vars and quest-objectives reads (ADR-068 rung 5's grammar), in lab-driver's answer shapes: c1 read
+    PlayerVampireQuest's three variables (one the native refused) and A Lovely Letter's objectives; c2's script-vars read of
+    the quest answered an error, and its quest-stage read is its only read of the letter. The objective indices are the
+    fixture's own."""
+
+    def __init__(self):
+        super().__init__()
+        self.vars = {
+            "c1": {0xEAFD5: {"form": 0xEAFD5, "vars": [
+                {"form": 0xEAFD5, "script": "PlayerVampireQuestScript", "var": "::VampireStatus_var", "k": 3, "i": 2},
+                {"form": 0xEAFD5, "script": "PlayerVampireQuestScript", "var": "::LastFeedTime_var", "k": 4, "f": 3.5},
+                {"form": 0xEAFD5, "script": "OtherScript", "var": "::LastFeedTime_var", "k": 4, "f": 1.0},
+                {"form": 0xEAFD5, "script": "PlayerVampireQuestScript", "var": "::Fed_var", "k": 5, "b": True},
+                {"form": 0xEAFD5, "script": "PlayerVampireQuestScript", "var": "::Missing_var", "reason": "no such variable"},
+                {"form": 0xEAFD5, "script": "PlayerVampireQuestScript", "var": "::Name_var", "k": 2, "s": "x"}]}},
+            "c2": {0xEAFD5: {"error": "ReadScriptVariables unavailable on this platform"}},
+        }
+        self.objective_reads = {
+            "c1": {0x74A83: {"quest": 0x74A83, "running": True, "objectives": {"10": {"displayed": True, "completed": False},
+                                                                                "20": {"displayed": False, "completed": False}}}},
+            "c2": {0x39645: {"error": "no quest 39645 in this game"}},
+        }
+
+    def script_vars(self, observer, form_id):
+        return self.vars.get(observer, {}).get(form_id)
+
+    def objectives(self, observer, quest):
+        return self.objective_reads.get(observer, {}).get(quest)
+
+    def quests(self, observer):
+        return {"c2": {0x74A83: {"stage": 10, "running": True, "done": {"10": True}}}}.get(observer)
+
+
+@needs_deps
+class RungFiveTests(unittest.TestCase):
+    """ADR-068 rung 5's grammar (docs/research/rung5-quests-2026-11-09.md 1(e)): the two seat reads, the server's quest runs,
+    its stage record and its script variables."""
+
+    def test_a_seats_script_vars_read_by_key(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(SlotServer(), RungFiveViews(), ["c1", "c2"])
+        for expr in ('c1.script_vars(0xeafd5).value("PlayerVampireQuestScript::::VampireStatus_var") == 2',
+                     'c1.script_vars(0xeafd5).value("playervampirequestscript::::vampirestatus_var") == 2',  # case-blind
+                     'c1.script_vars(0xeafd5).value("::VampireStatus_var") == 2',                            # one script has it
+                     'c1.script_vars(0xeafd5).value("PlayerVampireQuestScript::VampireStatus") == 2',        # a property's name
+                     'c1.script_vars("0eafd5:Skyrim.esm").value("::VampireStatus_var") == 2',               # a FormDesc form
+                     'c1.script_vars(0xeafd5).value("PlayerVampireQuestScript::::LastFeedTime_var") == 3.5',
+                     'c1.script_vars(0xeafd5).value("PlayerVampireQuestScript::Fed") == true'):
+            with self.subTest(expr=expr):
+                self.assertTrue(ev.evaluate(expr))
+        self.assertEqual(ev.readings['c1.script_vars(962517).value(\'::VampireStatus_var\')'], 2)
+        for expr, why in (('c1.script_vars(0xeafd5).value("::LastFeedTime_var") == 3.5', "names a variable of 2 scripts"),
+                          ('c1.script_vars(0xeafd5).value("PlayerVampireQuestScript::::Missing_var") == 0', "the native refused"),
+                          ('c1.script_vars(0xeafd5).value("PlayerVampireQuestScript::::Name_var") == 0', "of kind 2"),
+                          ('c1.script_vars(0xeafd5).value("PlayerVampireQuestScript::::Nope_var") == 0', "has no variable"),
+                          ('c1.script_vars(0xeafd5).value("VampireStatus") == 0', "names no variable"),
+                          ('c2.script_vars(0xeafd5).value("::VampireStatus_var") == 0', "answered an error"),
+                          ('c1.script_vars(0x74a83).value("::VampireStatus_var") == 0', "has not reported a script-vars step")):
+            with self.subTest(expr=expr), self.assertRaisesRegex(AssertionData, why):
+                ev.evaluate(expr)
+
+    def test_a_seats_objectives_beside_its_stages(self):
+        from labapi.assertions import AssertionData, Evaluator
+        ev = Evaluator(SlotServer(), RungFiveViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate("c1.quest(0x74a83).objectiveDisplayed(10) and not c1.quest(0x74a83).objectiveCompleted(10)"))
+        self.assertTrue(ev.evaluate("c1.quest(0x74a83).objectiveDisplayed(20) == false"))
+        self.assertTrue(ev.evaluate("c2.quest(0x74a83).stageDone(10)"), "a quest-stage read alone still makes the view")
+        for expr, why in (("c1.quest(0x74a83).objectiveDisplayed(30)", "did not read objective 30"),
+                          ("c1.quest(0x74a83).stage() == 10", "read no stage"),             # objectives alone read no stage
+                          ("c2.quest(0x74a83).objectiveDisplayed(10)", "has not reported a quest-objectives step"),
+                          ("c2.quest(0x39645).objectiveDisplayed(10)", "answered an error: no quest 39645"),
+                          ("c1.quest(0x39645).objectiveDisplayed(10)", "has not reported a quest-stage step")):
+            with self.subTest(expr=expr), self.assertRaisesRegex(AssertionData, why):
+                ev.evaluate(expr)
+
+    def test_the_servers_quest_runs_and_stage_record(self):
+        from labapi.assertions import AssertionData, Evaluator
+        srv = SlotServer()
+        srv.quest_runs = lambda: {"found": True, "runs": [{"quest": 0x74A83, "running": True, "seq": 3},
+                                                         {"quest": "02ba16:Skyrim.esm", "running": False, "seq": 4},
+                                                         {"quest": "000999:NoSuch.esp", "running": True, "seq": 1}]}
+        srv.quest_stages = lambda: {"found": True, "stages": [{"quest": 0x74A83, "stage": 10}, {"quest": "074a83:Skyrim.esm", "stage": 20},
+                                                             {"quest": 0x39645, "stage": 10}]}
+        ev = Evaluator(srv, RungFiveViews(), ["c1", "c2"])
+        for expr in ("server.quest_runs(0x74a83).running and server.quest_runs(0x74a83).seq == 3",
+                     'server.quest_runs("02ba16:Skyrim.esm").running == false and server.quest_runs(0x2ba16).seq == 4',
+                     "server.quest_runs(0xeafd5).recorded == false and server.quest_runs(0x74a83).recorded",
+                     "server.quest_record(0x74a83).stageDone(10) and server.quest_record(0x74a83).stageDone(20)",
+                     "server.quest_record(0x74a83).count == 2 and not server.quest_record(0x74a83).stageDone(30)",
+                     "server.quest_record(0x2ba16).count == 0",
+                     'server.quest_record("039645:Skyrim.esm").stageDone(10)'):
+            with self.subTest(expr=expr):
+                self.assertTrue(ev.evaluate(expr))
+        for expr, why in (("server.quest_runs(0xeafd5).running == false", "records no run of 0xeafd5"),
+                          ("server.quest_runs(0xeafd5).seq == 0", "records no run of 0xeafd5"),
+                          ('server.quest_runs("000999:NoSuch.esp").running', "NoSuch.esp is not in the running load order")):
+            with self.subTest(expr=expr), self.assertRaisesRegex(AssertionData, why):
+                ev.evaluate(expr)
+        srv.quest_runs = lambda: None
+        srv.quest_stages = lambda: {"found": False}
+        with self.assertRaisesRegex(AssertionData, "no quest runs to read"):
+            ev.evaluate("server.quest_runs(0x74a83).recorded")
+        with self.assertRaisesRegex(AssertionData, "no quest stages to read"):
+            ev.evaluate("server.quest_record(0x74a83).count == 0")
+
+    def test_the_servers_script_variables_beside_a_seats(self):
+        from labapi.assertions import AssertionData, Evaluator
+        srv = SlotServer()
+        srv.script_variables = lambda: {"found": True, "entries": [
+            {"form": "0eafd5:Skyrim.esm", "script": "PlayerVampireQuestScript", "var": "::VampireStatus_var", "k": 3, "value": 2, "seq": 4},
+            {"form": 0x1F251, "script": "MG01QuestScript", "var": "::NiryaSkillVar_var", "k": 4, "value": 1.5, "seq": 1},
+            {"form": 0x1A0A0001, "script": "ApocQuest", "var": "::Ready_var", "k": 5, "value": False, "seq": 2}]}
+        ev = Evaluator(srv, RungFiveViews(), ["c1", "c2"])
+        for expr in ('server.script_variables().value(0xeafd5, "PlayerVampireQuestScript::::VampireStatus_var") == 2',
+                     'server.script_variables().value(0xeafd5, "::VampireStatus_var") == c1.script_vars(0xeafd5).value("::VampireStatus_var")',
+                     'server.script_variables().value("01f251:Skyrim.esm", "MG01QuestScript::NiryaSkillVar") == 1.5',
+                     'server.script_variables().value("0a0001:Apocalypse - Magic of Skyrim.esp", "::Ready_var") == false'):
+            with self.subTest(expr=expr):
+                self.assertTrue(ev.evaluate(expr))
+        with self.assertRaisesRegex(AssertionData, "has no variable"):
+            ev.evaluate('server.script_variables().value(0xeafd5, "::FeedTimer_var") == 0')
+        srv.script_variables = lambda: None
+        with self.assertRaisesRegex(AssertionData, "no script variables to read"):
+            ev.evaluate('server.script_variables().value(0xeafd5, "::VampireStatus_var") == 2')
+
+    def test_its_call_shapes_are_checked(self):
+        from labapi.assertions import AssertionSyntax, Evaluator
+        srv = SlotServer()
+        srv.quest_runs = lambda: {"found": True, "runs": [{"quest": 0x74A83, "running": True, "seq": 3}]}
+        srv.quest_stages = lambda: {"found": True, "stages": []}
+        srv.script_variables = lambda: {"found": True, "entries": []}
+        ev = Evaluator(srv, RungFiveViews(), ["c1", "c2"])
+        for expr in ("c1.script_vars().value(\"::a\") == 0", "c1.script_vars(0xeafd5).value() == 0",
+                     "c1.script_vars(0xeafd5).value(1) == 0", "c1.script_vars(0xeafd5).vars == 0",
+                     "c1.quest(0x74a83).objectiveDisplayed() == true", 'c1.quest(0x74a83).objectiveDisplayed("10") == true',
+                     "server.quest_runs().running", "server.quest_runs(0x74a83).quest == 0", "server.quest_runs(0x74a83, 1).seq == 0",
+                     "server.quest_record(0x74a83).stageDone() == true", "server.quest_record(0x74a83).stages == 0",
+                     "server.script_variables(0xeafd5).value(0xeafd5, \"::a\") == 0",
+                     "server.script_variables().value(0xeafd5) == 0", "server.script_variables().value(\"::a\", 0xeafd5) == 0",
+                     "server.script_variables().value(true, \"::a\") == 0"):
+            with self.subTest(expr=expr), self.assertRaises(AssertionSyntax):
+                ev.evaluate(expr)
+
+
 @needs_deps
 class NodeScaleTests(unittest.TestCase):
     def test_own_and_figure_scales_read_the_last_node_scale_steps(self):
@@ -1773,6 +1918,39 @@ class AvReadTests(unittest.TestCase):
         self.assertTrue(ev.evaluate("abs(c2.av_of(c1).health - c1.av().health) < 1"))
         self.assertTrue(ev.evaluate("c2.av_of(c1).health < 100000"))
         self.assertTrue(ev.evaluate("abs(c2.av_of(c1).magicka - 120) < 0.01"))
+
+    def test_the_drivers_own_answer_reads_through_the_board(self):
+        # the av-read answers lab-driver posts (lab/driver/src/index.ts, case "av-read" and readActorValue: each name
+        # {base, current, max, percentage}; with other, every actor nearby beside the nearest's values), kept by the board
+        # as they came: the maximum is the answer's max, as every Max accessor reads it
+        from labapi.assertions import AssertionData, Evaluator
+        from labapi.board import StepBoard
+
+        board = StepBoard(clock=lambda: 100.0)
+
+        def answer(client, args, data):
+            step = board.enqueue(client, "av-read", args)
+            board.poll(client)
+            board.complete(step.id, {"ok": True, "data": data})
+
+        value = lambda base, current, top: {"base": base, "current": current, "max": top, "percentage": current / top}
+        answer("c1", {"names": ["health", "magicka", "stamina"]},
+               {"values": {"health": value(250.0, 200.0, 300.0), "magicka": value(120.0, 90.0, 150.0),
+                           "stamina": value(100.0, 100.0, 140.0)}, "of": 20})
+        mine = {"health": value(250.0, 200.0, 310.0)}
+        answer("c2", {"names": ["health"], "other": True},
+               {"values": mine, "of": 0xFF0008DD, "all": [{"id": 0xFF0008DD, "enabled": True, "loaded": True, "pos": [292.0, 1.0, 0.0], "values": mine}]})
+        ev = Evaluator(RichServer(), board, ["c1", "c2"])
+        for expr in ("c1.av().healthMax == 300", "c1.av().magickaMax == 150", "c1.av().staminaMax == 140",
+                     "c1.av().health == 250 and c1.av().healthCurrent == 200", "c2.av_of(c1).healthMax == 310"):
+            with self.subTest(expr=expr):
+                self.assertTrue(ev.evaluate(expr))
+        # an answer stored under the older key still reads; a name read with neither is missing data
+        board._av_reads["c1"]["self"]["values"]["health"] = {"base": 250.0, "current": 200.0, "maximum": 280.0, "percentage": 0.71}
+        self.assertTrue(ev.evaluate("c1.av().healthMax == 280"))
+        board._av_reads["c1"]["self"]["values"]["health"] = {"base": 250.0, "current": 200.0, "percentage": 0.8}
+        with self.assertRaisesRegex(AssertionData, "did not read health's max"):
+            ev.evaluate("c1.av().healthMax > 0")
 
     def test_a_missing_step_or_name_is_a_data_error(self):
         from labapi.assertions import AssertionData, Evaluator

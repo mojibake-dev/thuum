@@ -274,6 +274,11 @@ class FakeState:
         # rows [{quest, alias, refr, created, container, added}], as the gamemode answers them; None answers found: false
         self.world_globals: dict[str, Any] | None = None
         self.alias_fills: list[dict[str, Any]] | None = None
+        # ADR-068 rung 5's journal reads (labState kinds questRuns, questStages and scriptVariables), the rows as the gamemode
+        # answers them ([{quest, running, seq}], [{quest, stage}], [{form, script, var, k, value, seq}]); None answers found: false
+        self.quest_runs: list[dict[str, Any]] | None = None
+        self.quest_stages: list[dict[str, Any]] | None = None
+        self.script_variables: list[dict[str, Any]] | None = None
 
     def spawn(self, profile_id: int, x: float = 0.0, y: float = 0.0, z: float = 0.0, cell: str = "lab-spawn") -> FakeActor:
         a = FakeActor(x, y, z, cell)
@@ -304,6 +309,10 @@ class FakeState:
                 if self.alias_fills is None:
                     return {"found": False, "error": "no such property"}
                 return {"found": True, "fills": list(self.alias_fills)}
+            for kind, rows, name in (("questRuns", self.quest_runs, "runs"), ("questStages", self.quest_stages, "stages"),
+                                     ("scriptVariables", self.script_variables, "entries")):
+                if payload.get("kind") == kind:
+                    return {"found": False, "error": "no such property"} if rows is None else {"found": True, name: list(rows)}
             if payload.get("kind") == "ref":
                 ref_id = int(payload.get("actorId", -1))
                 ref = self.refs.get(ref_id)

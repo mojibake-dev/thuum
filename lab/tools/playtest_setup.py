@@ -13,7 +13,9 @@ A profile's `server: {npcEnabled: true}` is that playtest's server alone (ADR-03
 settings with it over them as /srv/lab/server/server-settings-run.json (the file a run's own npcEnabled uses) and the
 restore recreates the server on that file; both setup and ready read the container's mount back. A lab run after the
 playtest mounts its own settings again. `server: {gameHour: 7.9}` sets the clock the same way, as the runner's time
-block does for a run (the epoch is setup's own time, the hour holds at it). `camp: {teleports: [...]}` names the camp's
+block does for a run (the epoch is setup's own time, the hour holds at it). `server: {cureSpells: []}` lays the sitting's
+own cure list (ADR-068 rung 5's D-T3 B), each entry's plugin one of the deployed load order's, case for case.
+`camp: {teleports: [...]}` names the camp's
 teleports as labCommand takes them, in order, where `playtest-start` reads playtest-start.sh's two. From profile 48 a
 camp is outside unless `camp: {interior: <reason>}` says why not, and every living actor placed near it is listed in
 `camp: {near: [<form id>, ...]}` (CAMP_RULES_FROM, playtest 47's two load-in faults).
@@ -50,7 +52,10 @@ OVERLAY = "/srv/lab/server/server-settings-run.json"
 # the turbo switches (docs/private/playtest-turbo-2.md: the merged base carries every switch OFF, each item turns
 # its own on): the deployed settings keep them ON for the gates' scenarios, a playtest's overlay says otherwise
 SWITCHES = ("locks", "weatherSync", "perks", "leveling")
-SERVER_KEYS = {"npcEnabled", "gameHour", *SWITCHES}
+SERVER_KEYS = {"npcEnabled", "gameHour", "cureSpells", *SWITCHES}
+# a cure as the server's cureSpells setting takes it, "<hex id>:<plugin>" (ADR-068 rung 5's D-T3 B: playtest 51 lifts
+# Sanguinare Vampiris b8780:Skyrim.esm so a seat can turn)
+CURE = re.compile(r"[0-9A-Fa-f]{1,8}:[^:]+\.(?:esm|esp|esl)", re.IGNORECASE)
 PLAYER = 20  # the console's word for the player itself (0x14)
 BARS = ("health", "magicka", "stamina")
 # The standing base (Eli, 2026-11-03, after playtest 44's first lay: "every test should have - no survival - weather synced -
@@ -125,6 +130,9 @@ def check_profile(p: Any, n: int) -> dict[str, Any]:
     hour = server.get("gameHour", 0)
     if isinstance(hour, bool) or not isinstance(hour, (int, float)) or not 0 <= hour < 24:
         raise ProfileError(f"server.gameHour is an hour from 0 up to 24, got {server['gameHour']!r}")
+    cures = server.get("cureSpells", [])
+    if not isinstance(cures, list) or not all(isinstance(c, str) and CURE.fullmatch(c) for c in cures):
+        raise ProfileError(f'server.cureSpells is a list of "<hex id>:<plugin>" strings ([] lifts every cure), got {cures!r}')
     camp_block = p.get("camp") or {}
     if not isinstance(camp_block, dict) or set(camp_block) - {"teleports", "interior", "near"}:
         raise ProfileError(f"camp takes teleports, interior and near, got {camp_block!r}")
@@ -258,6 +266,14 @@ def overlay_text(settings_text: str, server: dict[str, Any], now: float | None =
     for key in ("npcEnabled", *SWITCHES):
         if key in server:
             d[key] = server[key]
+    if "cureSpells" in server:
+        # the server matches a cure's plugin case for case and skips an unresolved one silently (fork FormDesc.cpp:62-70,
+        # ActionListener.cpp:6765-6770), as lab-api's runner refuses one for a run
+        plugins = {Path(p).name for p in d.get("loadOrder") or []}
+        unknown = [c for c in server["cureSpells"] if c.split(":", 1)[1] not in plugins]
+        if unknown:
+            raise ProfileError(f"server.cureSpells {unknown} name a plugin the deployed load order lacks (case counts)")
+        d["cureSpells"] = list(server["cureSpells"])
     if "gameHour" in server:
         block = dict(d.get("time") or {})
         block["epoch"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(time.time() if now is None else now))
