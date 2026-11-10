@@ -29,8 +29,9 @@ both seats (Eli's condition).
 ## What is here
 
 - `src/RotfernEyesAlias.psc`: the script, on a player alias. At OnInit, OnPlayerLoadGame, OnRaceSwitchComplete and
-  OnLocationChange it computes eyes = f(race, DLC2MQ06.IsCompleted()). It calls Actor.ChangeHeadPart only when the player's
-  eyes differ, and does nothing for any race but rotfern's two. No vanilla quest is edited: the questline ends in Apocrypha,
+  OnLocationChange it computes eyes = f(race, DLC2MQ06.IsCompleted() or Mora eyes already worn): the completion is
+  permanent and her look carries it, so OnInit at a login, which runs before the server serves the world quest's stages,
+  never takes the Mora eyes back. It calls Actor.ChangeHeadPart only when the player's eyes differ, and does nothing for any race but rotfern's two. No vanilla quest is edited: the questline ends in Apocrypha,
   so the next location change applies the Mora eyes. Its seven properties are the parts and forms it may set or read, which
   is the bound rung 5's row checks. It reads the eyes from her base list only, which since D-E1 A' no race overlay covers.
 - `build_esp.py`: writes RotfernEyes.esp byte by byte, the same bytes every run. It is a light plugin with masters

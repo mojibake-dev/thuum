@@ -537,7 +537,9 @@ rotfern.esp (read, never written), at load order 82, right after rotfern.esp and
 served index moves. One start-game-enabled quest has the player as its alias, by forced reference PlayerRef (ALFR 0x14,
 the fill every start-game-enabled player-alias quest in the load order uses; rung 5's alias half marks it per player).
 At OnInit, OnPlayerLoadGame, OnRaceSwitchComplete and OnLocationChange its script sets her eyes to her usual pair,
-or after DLC2MQ06 the Mora pair, in the vampire variant for her vampire race, by Actor.ChangeHeadPart. It acts only
+or after DLC2MQ06 the Mora pair, in the vampire variant for her vampire race, by Actor.ChangeHeadPart; Mora eyes she
+already wears stay Mora, since the completion is permanent and her look carries it, so OnInit at a login, which runs
+before the server serves the world quest's stages, never takes them back. It acts only
 when they differ and only for rotfern's two races, and logs "RotfernEyesAlias: <event>: eyes set to <part>". rung
 5's ChangeHeadPart own-player row records the swap on the server. Until that lands, the swap shows on her own game
 only, and the T3 proof (the other seat's view, a relaunch) waits for rung 5's stage. rotfern.esp's rotfernRaceVampire

@@ -1,7 +1,10 @@
 ScriptName RotfernEyesAlias extends ReferenceAlias
 {rotfern's eyes follow her race and Dragonborn's main quest (thuum D-E1, Eli 2026-11-09: "After she kills Miraak and becomes
 hermaeus moras champion is when she gets the eyes"). Her usual eyes, or the Mora eyes once DLC2MQ06 is completed, each in its
-vampire variant while her race is rotfern's vampire race. The alias is the player (forced reference PlayerRef), so every seat
+vampire variant while her race is rotfern's vampire race. Mora eyes she already wears stay Mora: the completion is permanent
+and her look carries it, so an event that runs before the server has served DLC2MQ06's stages at a login (OnInit, at every
+login) never takes them back (thuum-fa's fresh review of the eyes T3, 2026-11-10). The alias is the player (forced reference
+PlayerRef), so every seat
 runs this for its own player; for any race but rotfern's two it does nothing. The four eye head parts and both races live in
 rotfern.esp, which this plugin only reads. Each change writes "RotfernEyesAlias: <event>: eyes set to <part>" to the Papyrus
 log, for a person reading Papyrus.0.log with [Papyrus] bEnableLogging and bEnableTrace on; the lab neither enables nor
@@ -54,7 +57,14 @@ Function UpdateEyes(String why)
 	Else
 		Return
 	EndIf
-	Bool mora = DLC2MQ06 && DLC2MQ06.IsCompleted()
+	; her own eyes, head part type 2 (SKSE's ActorBase.GetIndexOfHeadPartByType)
+	ActorBase base = player.GetActorBase()
+	HeadPart hers
+	Int slot = base.GetIndexOfHeadPartByType(2)
+	If slot >= 0
+		hers = base.GetNthHeadPart(slot)
+	EndIf
+	Bool mora = (DLC2MQ06 && DLC2MQ06.IsCompleted()) || hers == RotfernEyesMora || hers == RotfernEyesMoraVampire
 	HeadPart want
 	If mora && vampire
 		want = RotfernEyesMoraVampire
@@ -65,13 +75,7 @@ Function UpdateEyes(String why)
 	Else
 		want = RotfernEyes
 	EndIf
-	If !want
-		Return
-	EndIf
-	; the player's own eyes, head part type 2 (SKSE's ActorBase.GetIndexOfHeadPartByType)
-	ActorBase base = player.GetActorBase()
-	Int slot = base.GetIndexOfHeadPartByType(2)
-	If slot >= 0 && base.GetNthHeadPart(slot) == want
+	If !want || hers == want
 		Return
 	EndIf
 	player.ChangeHeadPart(want)
