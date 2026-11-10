@@ -532,12 +532,16 @@ inputs come from core's /persist/ck, served to sky-ci and sky-build only and nev
 Bethesda's Scripts.zip and SKSE64 2.2.6's script sources, SKSE's first on the import path, because HeadPart and the
 head-part calls are declared only there. The plugin is light and served: masters Skyrim.esm, Dragonborn.esm and
 rotfern.esp (read, never written), at load order 82, right after rotfern.esp and last in the server's list, so no
-served index moves. One start-game-enabled quest has the player as its alias (ALUA 0x7, rung 5's per-player alias).
+served index moves. One start-game-enabled quest has the player as its alias, by forced reference PlayerRef (ALFR 0x14,
+the fill every start-game-enabled player-alias quest in the load order uses; rung 5's alias half marks it per player).
 At OnInit, OnPlayerLoadGame, OnRaceSwitchComplete and OnLocationChange its script sets her eyes to her usual pair,
 or after DLC2MQ06 the Mora pair, in the vampire variant for her vampire race, by Actor.ChangeHeadPart. It acts only
 when they differ and only for rotfern's two races, and logs "RotfernEyesAlias: <event>: eyes set to <part>". rung
 5's ChangeHeadPart own-player row records the swap on the server. Until that lands, the swap shows on her own game
-only, and the T3 proof (the other seat's view, a relaunch) waits for rung 5's stage.
+only, and the T3 proof (the other seat's view, a relaunch) waits for rung 5's stage. Open, Eli's call: rotfern.esp's
+rotfernRaceVampire lays its default parts over hers as overlays (flag bit 26), and its female default eyes are
+RotfernEyesMoraVampire. So a vampire rotfern likely shows the Mora vampire eyes before the questline, which no script can
+correct (read from the plugin; HYPOTHESIS until a turn is traced).
 
 **CBBE SFW Edition replaces CBBE 2.0.3 (Eli, playtest 48, 2026-11-06: "now all we need is that sfw
 skin to come back in and we're good").** Three rows take the place of the 2.0.3 row.

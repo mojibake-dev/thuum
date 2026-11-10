@@ -1,10 +1,11 @@
 ScriptName RotfernEyesAlias extends ReferenceAlias
 {rotfern's eyes follow her race and Dragonborn's main quest (thuum D-E1, Eli 2026-11-09: "After she kills Miraak and becomes
 hermaeus moras champion is when she gets the eyes"). Her usual eyes, or the Mora eyes once DLC2MQ06 is completed, each in its
-vampire variant while her race is rotfern's vampire race. The alias is the player (unique actor 0x7), so every seat runs this
-for its own player; for any race but rotfern's two it does nothing. The four eye head parts and both races live in rotfern.esp,
-which this plugin only reads. Each change it makes writes one line to the Papyrus log,
-"RotfernEyesAlias: <event>: eyes set to <part>"; a T3 scenario counts those lines, so their words are a contract.}
+vampire variant while her race is rotfern's vampire race. The alias is the player (forced reference PlayerRef), so every seat
+runs this for its own player; for any race but rotfern's two it does nothing. The four eye head parts and both races live in
+rotfern.esp, which this plugin only reads. Each change writes "RotfernEyesAlias: <event>: eyes set to <part>" to the Papyrus
+log, for a person reading Papyrus.0.log with [Papyrus] bEnableLogging and bEnableTrace on; the lab neither enables nor
+collects that log, so the T3 claims rung 5's server line for the ChangeHeadPart row instead.}
 
 Race Property RotfernRace Auto
 {rotfern.esp 0xAA00: the usual eyes and the Mora eyes are valid for it (FLST RotfernEyesRaces)}

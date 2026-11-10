@@ -297,6 +297,9 @@ rotfern-eyes-build:
       }
       foreach ($f in @("$PWD\lab\rotfern-eyes\dist\Scripts\RotfernEyesAlias.pex", "$PWD\lab\rotfern-eyes\dist\RotfernEyes.esp")) { if (-not (Test-Path $f)) { throw "no $f" } }
       Get-ChildItem -Recurse -File lab/rotfern-eyes/dist | ForEach-Object { "{0}`t{1}`t{2}" -f $_.Length, (Get-FileHash -Algorithm SHA256 $_.FullName).Hash.ToLower(), $_.FullName }
+  # a cancelled job never reaches the script's finally; GitLab runs after_script on a cancel too (the review of 7677106e, note 10)
+  after_script:
+    - if (Test-Path 'D:\thuum-papyrus-work') { Remove-Item -Recurse -Force 'D:\thuum-papyrus-work' }
   artifacts:
     name: rotfern-eyes
     paths: [lab/rotfern-eyes/dist]

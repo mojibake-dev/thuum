@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """build_esp.py [out.esp]: RotfernEyes.esp, the companion plugin of thuum D-E1 (Eli, 2026-11-09), written byte by byte.
 
-One light (ESL-flagged) plugin with one record: a start-game-enabled quest whose only alias is the player (unique actor 0x7),
+One light (ESL-flagged) plugin with one record: a start-game-enabled quest whose only alias is the player (forced reference
+PlayerRef 0x14, the fill every start-game-enabled player-alias quest in the load order uses; thuum-fa's review, 2026-11-10),
 carrying the script RotfernEyesAlias (src/RotfernEyesAlias.psc) with its seven properties: rotfern's two races, her four eye head
 parts and Dragonborn's DLC2MQ06. rotfern.esp is read, never written. The same bytes come out of every run (no timestamps), so the
 plugin is reproducible from this file alone.
 
 Layout per UESP "Skyrim Mod:Mod File Format" (TES4, QUST, VMAD), matched against a quest the game loads every session:
-RaceMenuMorphsCBBE.esp's QUST 0x800 (CBBE 2.0.3 folder 26), whose player alias carries a script the same way. Its VMAD with no
-fragments still writes the fragment block's empty file name, and its alias entry names the quest itself and alias 0.
+RaceMenuMorphsCBBE.esp's QUST 0x800 (CBBE 2.0.3 folder 26), whose player alias, filled by ALFR 0x14 as this one is, carries a
+script the same way (that quest also carries a script of its own, which this one needs none of). Its VMAD with no fragments still
+writes the fragment block's empty file name, and its alias entry names the quest itself and alias 0.
 Form ids were read from the files, not typed from memory: DLC2MQ06 is QUST 0x020179d7 in Dragonborn.esm (lab/esm.py find), the
-player's base is NPC_ 0x00000007 in Skyrim.esm, and the rotfern ids come from rotfern.esp sha256 7cadb2df... as persist lays it."""
+player's reference is PlayerRef 0x00000014 in Skyrim.esm, and the rotfern ids come from rotfern.esp sha256 7cadb2df... as persist lays it."""
 import hashlib
 import struct
 import sys
@@ -19,7 +21,7 @@ from pathlib import Path
 MASTERS = ["Skyrim.esm", "Dragonborn.esm", "rotfern.esp"]  # load index 0, 1, 2 inside this plugin; its own records are 3
 SKYRIM, DRAGONBORN, ROTFERN, SELF = 0x00000000, 0x01000000, 0x02000000, 0x03000000
 QUEST = SELF | 0x800                 # a light plugin's own ids sit in 0x800..0xFFF
-PLAYER_BASE = SKYRIM | 0x000007      # NPC_ "Player"
+PLAYER_REF = SKYRIM | 0x000014       # REFR "PlayerRef"
 SCRIPT = "RotfernEyesAlias"
 PROPERTIES = [                       # (name as the script declares it, form id in this plugin's numbering)
     ("RotfernRace", ROTFERN | 0x00AA00),
@@ -84,7 +86,7 @@ def quest() -> bytes:
     data += field("ALST", struct.pack("<I", 0))
     data += field("ALID", zstring("Player"))
     data += field("FNAM", struct.pack("<I", 0))
-    data += field("ALUA", struct.pack("<I", PLAYER_BASE))  # unique actor: the player, rung 5's per-player alias
+    data += field("ALFR", struct.pack("<I", PLAYER_REF))  # forced reference: the player, rung 5's per-player alias
     data += field("VTCK", struct.pack("<I", 0))
     data += field("ALED", b"")
     return record("QUST", QUEST, 0, data)

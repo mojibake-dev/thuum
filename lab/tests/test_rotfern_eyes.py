@@ -1,5 +1,6 @@
 """RotfernEyes.esp (thuum D-E1): the plugin lab/rotfern-eyes/build_esp.py writes, read back field by field, and the script's
 declared properties matched against the plugin's, so the two can never drift apart."""
+import hashlib
 import importlib.util
 import re
 import struct
@@ -11,6 +12,7 @@ SPEC = importlib.util.spec_from_file_location("build_esp", ROOT / "lab" / "rotfe
 build_esp = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(build_esp)
 PSC = ROOT / "lab" / "rotfern-eyes" / "src" / "RotfernEyesAlias.psc"
+PINNED_SHA256 = "7b42ff7ebff5f12cb962f608c648491f2b2140c28ff05513b34f9503bf4b0d89"
 
 
 def fields(data: bytes) -> list[tuple[str, bytes]]:
@@ -34,6 +36,8 @@ class RotfernEyesPlugin(unittest.TestCase):
 
     def test_same_bytes_every_build(self) -> None:
         self.assertEqual(self.data, build_esp.build())
+        # pinned, so a change to the plugin's bytes is a reviewed change (the review of 7677106e, note 5)
+        self.assertEqual(hashlib.sha256(self.data).hexdigest(), PINNED_SHA256)
 
     def test_header_is_light_with_its_masters(self) -> None:
         self.assertEqual(self.data[:4], b"TES4")
@@ -65,11 +69,11 @@ class RotfernEyesPlugin(unittest.TestCase):
         d = dict(f)
         self.assertEqual(d["EDID"], b"RotfernEyesQuest\0")
         flags = struct.unpack_from("<H", d["DNAM"])[0]
-        self.assertTrue(flags & 0x0001, "start game enabled")
+        self.assertEqual(flags, 0x0111)  # kEnabled, kStartsEnabled, kRunOnce (CommonLib TESQuest.h:26-34)
         self.assertEqual(d["ALID"], b"Player\0")
-        self.assertEqual(struct.unpack("<I", d["ALUA"])[0], 0x00000007)
+        self.assertEqual(struct.unpack("<I", d["ALFR"])[0], 0x00000014)  # PlayerRef
         kinds = [k for k, _ in f]
-        self.assertEqual(kinds[kinds.index("NEXT"):], ["NEXT", "ANAM", "ALST", "ALID", "FNAM", "ALUA", "VTCK", "ALED"])
+        self.assertEqual(kinds[kinds.index("NEXT"):], ["NEXT", "ANAM", "ALST", "ALID", "FNAM", "ALFR", "VTCK", "ALED"])
 
     def test_the_alias_script_and_its_properties(self) -> None:
         _form_id, f = self.quest_fields()
