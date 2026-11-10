@@ -34,9 +34,9 @@ directory holds what runs on it.
 - census.py: the static censuses' shared reader over the deployed load order
   (the deploy settings' plugins, the layer's client-only tail, its loose
   scripts and the archives by precedence), derived facts only; on sky-srv,
-  tools/quest-census.py (`--emit`: the settings' playerQuests and
-  playerQuestGlobals) and tools/ctda-vars.py (`--emit`: conditionVariables)
-  read it (ADR-068 rung 5).
+  tools/quest-census.py (`--emit`: the settings' playerQuests,
+  playerQuestGlobals, playerQuestVariables and playerQuestCallers) and
+  tools/ctda-vars.py (`--emit`: conditionVariables) read it (ADR-068 rung 5).
 - addr.py (`just addr`): Address Library ids to offsets, from CommonLib's
   loader; ledger.py (`just ledger`): regenerates docs/NATIVES.md from the
   fork. Tests for both under tests/ (`just test-lab`).

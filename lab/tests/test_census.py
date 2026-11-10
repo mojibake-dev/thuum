@@ -74,9 +74,12 @@ def vmad_script(name, props):
     return out
 
 
-def quest_vmad(scripts, fragment_file=""):
+def quest_vmad(scripts, fragment_file="", frags=()):
+    """A QUST VMAD: its scripts, then the fragment section (UESP "VMAD Field": int8, the fragment count, the file, per
+    fragment uint16 stage, int16, int32 log entry, int8, the script and the fragment's names) and no alias."""
     body = struct.pack("<hhH", 5, 2, len(scripts)) + b"".join(vmad_script(n, p) for n, p in scripts)
-    return body + struct.pack("<bH", 2, 0) + wstr(fragment_file) + struct.pack("<H", 0)
+    section = b"".join(struct.pack("<Hhib", stage, 0, 0, 0) + wstr(fragment_file) + wstr(fragment) for stage, fragment in frags)
+    return body + struct.pack("<bH", 2, len(frags)) + wstr(fragment_file) + section + struct.pack("<H", 0)
 
 
 def alias(aid, name, fills=(), kind="ALST"):
@@ -117,6 +120,16 @@ def skyrim_esm():
         # no alias; its script places an actor at the player and makes that actor's base essential: a value derived from
         # the placed reference is no made-here call, so the quest is the world's
         quest(0xB007, "SpawnQ", quest_vmad([("SpawnScript", [])])),
+        # PQ-3's callers: a world quest whose stage 10 fragment calls PQScript.Turn (its stage 20's calls nothing), one
+        # whose stage 20 fragment calls its own script, which calls PQScript.Turn, and one whose fragment calls a Turn on a
+        # WorldScript receiver, no PQScript's
+        quest(0xB008, "WorldCaller", quest_vmad([("QF_WorldCaller_0000B008", [("PQ", 0xB001)])], "QF_WorldCaller_0000B008",
+                                                [(10, "Fragment_0"), (20, "Fragment_1")])),
+        quest(0xB009, "WorldTwoHop", quest_vmad([("WorldHelperScript", [("PQ", 0xB001)]),
+                                                 ("QF_WorldTwoHop_0000B009", [("Helper", 0xB009)])],
+                                                "QF_WorldTwoHop_0000B009", [(20, "Fragment_0")])),
+        quest(0xB00A, "WorldOther", quest_vmad([("QF_WorldOther_0000B00A", [("Other", 0xB004)])], "QF_WorldOther_0000B00A",
+                                               [(30, "Fragment_0")])),
     ])
     info = record("INFO", 0xE002, field("EDID", zs("PQInfo")) + ctda(629, 0xB001, "::Status_var") + ctda(72, 0xC001))
     return b"".join([
@@ -210,9 +223,50 @@ def scripts():
                              a.call("SetEssential", "::temp2", [pex.Value(5, b"\x01")])],
                         locals_=[("::temp0", "actor"), ("::temp1", "actor"), ("::temp2", "actorbase")]))])
     a = Asm()
+    out["QF_WorldCaller_0000B008"] = a.build("QF_WorldCaller_0000B008", "Quest", props=[("PQ", "pqscript")], functions=[
+        ("Fragment_0", a.fn([], [a.static("Game", "GetPlayer", "::temp0"), a.call("Turn", "::PQ_var", [a.id("::temp0")])],
+                            locals_=[("::temp0", "actor")])),
+        ("Fragment_1", a.fn([], []))])
+    a = Asm()
+    out["WorldHelperScript"] = a.build("WorldHelperScript", "Quest", props=[("PQ", "pqscript")], functions=[
+        ("Help", a.fn([], [a.static("Game", "GetPlayer", "::temp0"), a.call("Turn", "::PQ_var", [a.id("::temp0")])],
+                      locals_=[("::temp0", "actor")]))])
+    a = Asm()
+    out["QF_WorldTwoHop_0000B009"] = a.build("QF_WorldTwoHop_0000B009", "Quest", props=[("Helper", "worldhelperscript")], functions=[
+        ("Fragment_0", a.fn([], [a.call("Help", "::Helper_var", [])]))])
+    a = Asm()
+    out["QF_WorldOther_0000B00A"] = a.build("QF_WorldOther_0000B00A", "Quest", props=[("Other", "worldscript")], functions=[
+        ("Fragment_0", a.fn([], [a.static("Game", "GetPlayer", "::temp0"), a.call("Turn", "::Other_var", [a.id("::temp0")])],
+                            locals_=[("::temp0", "actor")]))])
+    a = Asm()
     out["WorldScript"] = a.build("WorldScript", "Quest", props=[("SomeRef", "objectreference")], functions=[
         ("OnInit", a.fn([], [a.call("Enable", "::SomeRef_var", [])]))])
     return out
+
+
+def settings_shape_errors(e: dict) -> list[str]:
+    """What the fork's PartOne::SetPlayerQuestSettings (m4-scripts-5-server 0390e5cc, PlayerQuestMap and SettingFormDesc)
+    would refuse in an emit: each setting an object keyed by "<hex id>:<plugin>" (one to eight hex digits, a plugin after
+    the colon) whose values are lists; playerQuestGlobals' entries FormDescs, playerQuestVariables' "<script>::<var>" split
+    at the first "::" with both halves non-empty, playerQuestCallers' stages whole numbers from 0 to 65535."""
+    import re
+    desc = re.compile(r"[0-9A-Fa-f]{1,8}:.+")
+    errors = []
+    for name, entry_ok in (("playerQuestGlobals", lambda v: isinstance(v, str) and bool(desc.fullmatch(v))),
+                           ("playerQuestVariables", lambda v: isinstance(v, str) and 0 < v.find("::") and v.find("::") + 2 < len(v)),
+                           ("playerQuestCallers", lambda v: isinstance(v, int) and not isinstance(v, bool) and 0 <= v <= 0xFFFF)):
+        setting = e.get(name)
+        if not isinstance(setting, dict):
+            errors.append(f"{name} is no object")
+            continue
+        for key, values in setting.items():
+            if not desc.fullmatch(key):
+                errors.append(f"{name}: {key!r} is no FormDesc")
+            if not isinstance(values, list):
+                errors.append(f"{name}: {key!r} names no list")
+            else:
+                errors += [f"{name}: {key!r}: {v!r}" for v in values if not entry_ok(v)]
+    return errors
 
 
 class Deploy:
@@ -267,7 +321,8 @@ class CensusTests(unittest.TestCase):
         self.assertEqual([n for n, _ in lo.plugins], ["Skyrim.esm", "Mod.esp", "Client.esp"])
         self.assertEqual(lo.server, {"skyrim.esm", "mod.esp"})
         self.assertEqual(sorted(lo.loose), ["activemagiceffect", "actor", "callerscript", "form", "globalvariable",
-                                            "objectreference", "pqscript", "quest", "spawnscript", "worldscript"])
+                                            "objectreference", "pqscript", "qf_worldcaller_0000b008", "qf_worldother_0000b00a",
+                                            "qf_worldtwohop_0000b009", "quest", "spawnscript", "worldhelperscript", "worldscript"])
         self.assertEqual(lo.desc(C.key("skyrim.esm", 0xEAFD5)), "eafd5:Skyrim.esm")
         self.assertEqual(lo.runtime(C.key("mod.esp", 0x800)), 0x01000800)
         self.assertEqual(lo.runtime(C.key("client.esp", 0x801)), 0x02000801)
@@ -387,7 +442,21 @@ class CensusTests(unittest.TestCase):
         pq = next(r for r in c["marked"] if r["quest"] == "b001:Skyrim.esm")
         self.assertEqual(pq["conditionKeys"], [{"form": "b001:Skyrim.esm", "script": "PQScript", "var": "::Status_var"}])
         self.assertEqual(pq["ownVariables"], ["PQScript::::Status_var"])
-        self.assertEqual(pq["callers"], ["CallerScript.oneffectstart -> PQScript.turn (unattached) x1"])
+        self.assertEqual(pq["callers"], ["CallerScript.oneffectstart -> PQScript.turn (unattached) x1",
+                                         "QF_WorldCaller_0000B008.fragment_0 -> PQScript.turn (QUST) x1",
+                                         "WorldHelperScript.help -> PQScript.turn (QUST) x1"])
+        self.assertEqual(pq["worldStages"], ["b008:Skyrim.esm WorldCaller stage 10", "b009:Skyrim.esm WorldTwoHop stage 20"])
+        # the settings the fork's PartOne::SetPlayerQuestSettings reads, each an object keyed by a quest's FormDesc
+        self.assertEqual(e["playerQuestVariables"], {"b001:Skyrim.esm": ["PQScript::::Status_var"]})
+        self.assertEqual(e["playerQuestCallers"], {"b008:Skyrim.esm": [10], "b009:Skyrim.esm": [20]},
+                         "a stage that calls nothing marked, and a Turn on a WorldScript receiver, are no callers")
+        self.assertEqual(settings_shape_errors(e), [])
+        self.assertEqual(settings_shape_errors({"playerQuestGlobals": {"eafd5": ["ed06d:Skyrim.esm"]},
+                                                "playerQuestVariables": {"eafd5:Skyrim.esm": ["::VampireStatus_var", "S::"]},
+                                                "playerQuestCallers": {"5c625:Skyrim.esm": [65536, True]}}),
+                         ["playerQuestGlobals: 'eafd5' is no FormDesc", "playerQuestVariables: 'eafd5:Skyrim.esm': '::VampireStatus_var'",
+                          "playerQuestVariables: 'eafd5:Skyrim.esm': 'S::'", "playerQuestCallers: '5c625:Skyrim.esm': 65536",
+                          "playerQuestCallers: '5c625:Skyrim.esm': True"], "the check refuses what the parser refuses")
         self.assertEqual(pq["globals"], ["a001:Skyrim.esm PlayerIsX"])
 
     def test_ctda_vars_emits_the_condition_variables(self):

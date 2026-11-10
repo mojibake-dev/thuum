@@ -24,11 +24,22 @@ The rule (8(a), the server's quest_scope.rs keeps the alias half; this tool deri
   that name it (lab/census.py's condition_keys: the 629 conditions reading its variables), which move to the player's
   own record (D-T2); its scripts' scalar variables (D-T2 B's own entries); and the call sites outside its scripts that
   call into them (read 18's callers, PQ-3).
+- The settings the fork's PartOne::SetPlayerQuestSettings reads (m4-scripts-5-server 0390e5cc), each an object keyed by
+  the marked quest's or the world quest's FormDesc, "<hex id>:<plugin>": playerQuestGlobals, the quest's GLOBs as
+  FormDescs; playerQuestVariables, its scalar variables as "<script>::<var>" (split at the first "::": the attached
+  script whose chain declares the variable, as conditionVariables names it, then the variable as compiled, an auto
+  property's "::<name>_var"; the quest's own scripts before its QF fragment script, whose first entry's script keys the
+  quest's game-time registration there); and playerQuestCallers, PQ-3's list: per world quest (no marked quest among
+  them) the stages whose QF fragment calls into a marked quest's scripts, directly or through the calls it makes, to a
+  depth of four (VC01's stage whose Fragment_4 calls VampireCure). A call counts when its receiver's type is the marked
+  quest's attached script or extends it, never a base it shares with world quests; a caller that is no quest's stage
+  fragment (a scene's, a perk's, an alias's, a magic effect's) is reported in the evidence, a declared limit (8(a)).
 
     quest-census.py                   finding 5's sizes over the quest and trigger scripts, then the classification
     quest-census.py --show <id> ...   one quest's aliases, scripts and each counted call's subject (an id as 0xeafd5, or
                                       a FormDesc "eafd5:Skyrim.esm")
-    quest-census.py --emit            JSON: the settings' playerQuests and playerQuestGlobals, and the census's evidence
+    quest-census.py --emit            JSON: the settings' playerQuests, playerQuestGlobals, playerQuestVariables and
+                                      playerQuestCallers, and the census's evidence
 
 lab/census.py's arguments (--settings, --esm, --mods, --game, --version, --cache) name the load order.
 """
@@ -105,6 +116,12 @@ class World:
             for g, rec in R[src].items():
                 for s in C.live_scripts(rec.get("vmad")):
                     self.attach[s["name"].lower()].append((rec.get("type") or src[:-1].upper(), g, None, self._props(s)))
+        # each quest's stage fragments: (fragment script, fragment function) -> [(quest, stage)] (QUST VMAD's fragment section)
+        self.fragments = collections.defaultdict(list)
+        for q, rec in R["quests"].items():
+            vm = rec.get("vmad") or {}
+            for stage, log, script, fragment in vm.get("frags", []):
+                self.fragments[((script or vm.get("file") or "").lower(), fragment.lower())].append((q, stage))
         self.sites = collections.defaultdict(list)  # method -> [(script, function key, receiver type, receiver tag, args)]
         for x, sc in X.items():
             for fk, f in sc["fn"].items():
@@ -282,28 +299,62 @@ def judge(W: World, q: str) -> dict:
     return out
 
 
+def attached(W: World, q: str) -> list[str]:
+    """The quest's own attached scripts in the index, its QF fragment script last."""
+    vm = W.R["quests"][q].get("vmad") or {}
+    frag = (vm.get("file") or "").lower()
+    scripts = [s for s, ctx in quest_scripts(W, q) if s in W.X]
+    return [s for s in scripts if s != frag] + [s for s in scripts if s == frag]
+
+
 def own_scalars(W: World, q: str) -> list[str]:
-    """The scalar variables (int, float, bool) its scripts declare: D-T2 B's own entries."""
+    """The scalar variables (int, float, bool) its scripts declare, D-T2 B's own entries, as playerQuestVariables names
+    them: "<attached script>::<variable as declared>", each attached script's chain read (user code only), the quest's
+    own scripts first and its QF fragment script last."""
     out = []
-    for script, ctx in quest_scripts(W, q):
+    for script in attached(W, q):
         for d in C.chain(W.X, script):
             if d in W.X and not W.X[d]["native"]:
-                out += [f"{W.X[d]['n']}::{decl}" for v, (decl, t) in sorted(W.X[d]["vars"].items()) if t in ("int", "float", "bool")]
-    return sorted(set(out))
+                out += [f"{W.X[script]['n']}::{decl}" for v, (decl, t) in sorted(W.X[d]["vars"].items()) if t in ("int", "float", "bool")]
+    return list(dict.fromkeys(out))
+
+
+def reach(W: World, q: str) -> tuple[list[str], set[tuple[str, int]]]:
+    """Read 18's callers and PQ-3's stages: the call sites outside the quest's scripts that call a function of them, on a
+    receiver whose type is one of its attached scripts or extends it, as "<caller>.<function> -> <script>.<function>
+    (<what the caller is attached to>) x<n>"; and (quest, stage) for every QF stage fragment among those callers or among
+    their own callers, to a depth of four."""
+    scripts = attached(W, q)
+    own = {d for s in scripts for d in C.chain(W.X, s) if d in W.X and not W.X[d]["native"]}
+    hits = collections.Counter()
+    reached = set()
+    for s in scripts:
+        names = {fk.split(".", 1)[1] for d in C.chain(W.X, s) if d in own for fk in W.X[d]["fn"]}
+        for fname in sorted(names):
+            for x, cfk, rt, rtag, args in W.callers(s, fname):
+                if x in own:
+                    continue
+                kinds = sorted({k for k, o, a, p in W.attach.get(x, [])}) or ["unattached"]
+                hits[f"{W.X[x]['n']}.{cfk.split('.', 1)[1]} -> {W.X[s]['n']}.{fname} ({','.join(kinds)})"] += 1
+                reached.add((x, cfk))
+    frontier = set(reached)
+    for _ in range(MAX_DEPTH - 1):
+        nxt = set()
+        for x, cfk in frontier:
+            for y, yfk, rt, rtag, args in W.callers(x, cfk.split(".", 1)[1]):
+                if y not in own and (y, yfk) not in reached:
+                    reached.add((y, yfk))
+                    nxt.add((y, yfk))
+        frontier = nxt
+        if not frontier:
+            break
+    stages = {qs for x, cfk in reached for qs in W.fragments.get((x, cfk.split(".", 1)[1]), [])}
+    return [f"{k} x{n}" for k, n in sorted(hits.items())], stages
 
 
 def callers_into(W: World, q: str) -> list[str]:
-    """Read 18's callers: call sites outside the quest's own scripts that reach a function of them."""
-    own = {s for s, ctx in quest_scripts(W, q)}
-    family = {d for s in own for d in C.chain(W.X, s) if d in W.X and not W.X[d]["native"]}
-    hits = collections.Counter()
-    for s in family:
-        for fk in W.X[s]["fn"]:
-            for x, cfk, rt, rtag, args in W.callers(s, fk.split(".", 1)[1]):
-                if x not in family:
-                    kinds = sorted({k for k, o, a, p in W.attach.get(x, [])}) or ["unattached"]
-                    hits[f"{W.X[x]['n']}.{cfk.split('.', 1)[1]} -> {W.X[s]['n']}.{fk.split('.', 1)[1]} ({','.join(kinds)})"] += 1
-    return [f"{k} x{n}" for k, n in sorted(hits.items())]
+    """Read 18's callers (reach's first half)."""
+    return reach(W, q)[0]
 
 
 def classify(W: World) -> dict[str, dict]:
@@ -320,6 +371,13 @@ def emit(W: World, verdicts: dict, settings: Path) -> dict:
     keys, _ = C.condition_keys(W.R, W.X)
     marked = sorted((q for q, v in verdicts.items() if v["player"]), key=lambda q: (W.lo.runtime(q) or 0, q))
     served = [q for q in marked if split_plugin(q) in W.lo.server]
+    marked_set = set(marked)
+    reaches = {q: reach(W, q) for q in marked}
+    callers = collections.defaultdict(set)  # world quest -> its stages that reach a marked quest's scripts
+    for q in served:
+        for world, stage in reaches[q][1]:
+            if world not in marked_set and split_plugin(world) in W.lo.server:
+                callers[world].add(stage)
     rows = []
     for q in marked:
         v = verdicts[q]
@@ -337,13 +395,18 @@ def emit(W: World, verdicts: dict, settings: Path) -> dict:
             "callsInto": [f"{t} x{n}" for t, n in sorted(v["into"].items())],
             "conditionKeys": [json.loads(c) for c in cond],
             "ownVariables": own_scalars(W, q),
-            "callers": callers_into(W, q),
+            "callers": reaches[q][0],
+            "worldStages": [f"{W.lo.desc(w)} {W.R['quests'][w]['edid']} stage {n}"
+                            for w, n in sorted(reaches[q][1], key=lambda ws: (W.lo.runtime(ws[0]) or 0, ws[0], ws[1]))
+                            if w not in marked_set],
         })
     by_half = collections.Counter(v["half"] for v in verdicts.values() if v["player"])
     return {
         "playerQuests": [W.lo.desc(q) for q in served if verdicts[q]["half"] == "natives"],
         "playerQuestGlobals": {W.lo.desc(q): [W.lo.desc(g) for g in sorted(verdicts[q]["globs"])]
                                for q in served if verdicts[q]["globs"]},
+        "playerQuestVariables": {W.lo.desc(q): own_scalars(W, q) for q in served if own_scalars(W, q)},
+        "playerQuestCallers": {W.lo.desc(w): sorted(callers[w]) for w in sorted(callers, key=lambda w: (W.lo.runtime(w) or 0, w))},
         "census": {
             "quests": len(verdicts), "perPlayer": len(marked), "byHalf": dict(by_half),
             "clientOnly": [W.lo.desc(q) for q in marked if q not in served],
@@ -428,13 +491,17 @@ def show(W: World, verdicts: dict, q: str) -> None:
     print(f"   GLOBs written: {[W.lo.desc(g) + ' ' + W.R['globs'].get(g, '?') for g in sorted(v['globs'])]}")
     print(f"   quest calls: {dict(v['questCalls'])}")
     print(f"   calls into other scripts: {dict(v['into'].most_common(12))}")
-    for c in callers_into(W, q):
+    lines, stages = reach(W, q)
+    for c in lines:
         print(f"   caller: {c}")
+    for w, n in sorted(stages, key=lambda ws: (W.lo.runtime(ws[0]) or 0, ws[1])):
+        print(f"   PQ-3 stage: {W.lo.desc(w)} {W.R['quests'][w]['edid']} stage {n}{' (a marked quest)' if verdicts[w]['player'] else ''}")
 
 
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0], formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--emit", action="store_true", help="the settings' playerQuests and playerQuestGlobals, with the evidence, as JSON")
+    ap.add_argument("--emit", action="store_true", help="the settings' playerQuests, playerQuestGlobals, playerQuestVariables and "
+                    "playerQuestCallers, with the evidence, as JSON")
     ap.add_argument("--show", nargs="+", metavar="QUEST", help="one or more quests' aliases, scripts and counted calls")
     C.add_arguments(ap)
     args = ap.parse_args(argv)
