@@ -264,35 +264,38 @@ rotfern-eyes-build:
       allow_failure: true
   script:
     - |
+      # the licensed inputs live only in $work, which goes on every path out, a red one included (core's review of 0b31e00a)
       $work = 'D:\thuum-papyrus-work'
-      if (Test-Path $work) { Remove-Item -Recurse -Force $work }
-      New-Item -ItemType Directory -Force $work | Out-Null
-      $base = 'https://thuum.gaussing.tv/persist/ck'
-      & curl.exe -sS -f -o "$work\SHA256SUMS" "$base/SHA256SUMS"; if ($LASTEXITCODE) { exit 1 }
-      $want = @{}
-      foreach ($line in Get-Content "$work\SHA256SUMS") { if ($line.Trim()) { $h, $n = $line.Trim() -split '\s+', 2; $want[$n.TrimStart('*')] = $h.ToLower() } }
-      foreach ($n in @('papyrus-compiler-ck.zip', 'vanilla-scripts.zip', 'skse64-2.2.6-scripts-source.zip')) {
-        if (-not $want.ContainsKey($n)) { throw "SHA256SUMS names no $n" }
-        & curl.exe -sS -f -o "$work\$n" "$base/$n"; if ($LASTEXITCODE) { exit 1 }
-        $got = (Get-FileHash -Algorithm SHA256 "$work\$n").Hash.ToLower()
-        if ($got -ne $want[$n]) { throw "$n sha256 $got is not $($want[$n])" }
-        "input ok: $n"
+      try {
+        if (Test-Path $work) { Remove-Item -Recurse -Force $work }
+        New-Item -ItemType Directory -Force $work | Out-Null
+        $base = 'https://thuum.gaussing.tv/persist/ck'
+        & curl.exe -sS -f -o "$work\SHA256SUMS" "$base/SHA256SUMS"; if ($LASTEXITCODE) { throw "fetch SHA256SUMS $LASTEXITCODE" }
+        $want = @{}
+        foreach ($line in Get-Content "$work\SHA256SUMS") { if ($line.Trim()) { $h, $n = $line.Trim() -split '\s+', 2; $want[$n.TrimStart('*')] = $h.ToLower() } }
+        foreach ($n in @('papyrus-compiler-ck.zip', 'vanilla-scripts.zip', 'skse64-2.2.6-scripts-source.zip')) {
+          if (-not $want.ContainsKey($n)) { throw "SHA256SUMS names no $n" }
+          & curl.exe -sS -f -o "$work\$n" "$base/$n"; if ($LASTEXITCODE) { throw "fetch $n $LASTEXITCODE" }
+          $got = (Get-FileHash -Algorithm SHA256 "$work\$n").Hash.ToLower()
+          if ($got -ne $want[$n]) { throw "$n sha256 $got is not $($want[$n])" }
+          "input ok: $n"
+        }
+        $sevenZip = (& D:/thuum-vcpkg/vcpkg.exe fetch 7zip | Select-Object -Last 1).Trim(); if (-not (Test-Path $sevenZip)) { throw "no 7-Zip from vcpkg" }
+        foreach ($pair in @(@('papyrus-compiler-ck.zip', 'ck'), @('vanilla-scripts.zip', 'vanilla'), @('skse64-2.2.6-scripts-source.zip', 'skse'))) {
+          & $sevenZip x -y "-o$work\$($pair[1])" "$work\$($pair[0])" | Out-Null; if ($LASTEXITCODE) { throw "7z $($pair[0]) $LASTEXITCODE" }
+        }
+        $compiler = "$work\ck\Papyrus Compiler\PapyrusCompiler.exe"
+        if (-not (Test-Path $compiler)) { throw "no PapyrusCompiler.exe in the CK archive" }
+        Copy-Item "$work\ck\TESV_Papyrus_Flags.flg" "$work\vanilla\Source\Scripts\"
+        $out = "$PWD\lab\rotfern-eyes\dist\Scripts"
+        New-Item -ItemType Directory -Force $out | Out-Null
+        $imports = "$work\skse\Source\Scripts;$work\vanilla\Source\Scripts;$PWD\lab\rotfern-eyes\src"
+        & $compiler 'RotfernEyesAlias.psc' "-f=TESV_Papyrus_Flags.flg" "-i=$imports" "-o=$out"
+        if ($LASTEXITCODE) { throw "PapyrusCompiler exit $LASTEXITCODE" }
+      } finally {
+        if (Test-Path $work) { Remove-Item -Recurse -Force $work }
       }
-      $sevenZip = (& D:/thuum-vcpkg/vcpkg.exe fetch 7zip | Select-Object -Last 1).Trim(); if (-not (Test-Path $sevenZip)) { exit 1 }
-      foreach ($pair in @(@('papyrus-compiler-ck.zip', 'ck'), @('vanilla-scripts.zip', 'vanilla'), @('skse64-2.2.6-scripts-source.zip', 'skse'))) {
-        & $sevenZip x -y "-o$work\$($pair[1])" "$work\$($pair[0])" | Out-Null; if ($LASTEXITCODE) { throw "7z $($pair[0]) $LASTEXITCODE" }
-      }
-      $compiler = "$work\ck\Papyrus Compiler\PapyrusCompiler.exe"
-      if (-not (Test-Path $compiler)) { throw "no PapyrusCompiler.exe in the CK archive" }
-      Copy-Item "$work\ck\TESV_Papyrus_Flags.flg" "$work\vanilla\Source\Scripts\"
-      $out = "$PWD\lab\rotfern-eyes\dist\Scripts"
-      New-Item -ItemType Directory -Force $out | Out-Null
-      $imports = "$work\skse\Source\Scripts;$work\vanilla\Source\Scripts;$PWD\lab\rotfern-eyes\src"
-      & $compiler 'RotfernEyesAlias.psc' "-f=TESV_Papyrus_Flags.flg" "-i=$imports" "-o=$out"
-      $code = $LASTEXITCODE
-      Remove-Item -Recurse -Force $work
-      if ($code) { throw "PapyrusCompiler exit $code" }
-      foreach ($f in @("$out\RotfernEyesAlias.pex", "$PWD\lab\rotfern-eyes\dist\RotfernEyes.esp")) { if (-not (Test-Path $f)) { throw "no $f" } }
+      foreach ($f in @("$PWD\lab\rotfern-eyes\dist\Scripts\RotfernEyesAlias.pex", "$PWD\lab\rotfern-eyes\dist\RotfernEyes.esp")) { if (-not (Test-Path $f)) { throw "no $f" } }
       Get-ChildItem -Recurse -File lab/rotfern-eyes/dist | ForEach-Object { "{0}`t{1}`t{2}" -f $_.Length, (Get-FileHash -Algorithm SHA256 $_.FullName).Hash.ToLower(), $_.FullName }
   artifacts:
     name: rotfern-eyes
