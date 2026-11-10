@@ -9430,3 +9430,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   x-werewolf-form 120601; red b-quest-stage-two-seats v1 115444 (claim 5 alone, the expected race, Eli's read) and
   x-vampire-stage 115917 (the same lever, not rung 5's code). x-vampire-lever-read v1 asks next for a lever proven to start
   the effect.
+- m4-scripts-5-quests merged to fork canon 44ffafc2 (2026-11-10T15:01Z): the gate 20261110-123559-merge-m4-scripts-5-quests, 20261110-123559-smoke-two-players to 20261110-145721-b-npc-caster (38 runs); T2 skip on skymp-server:m4-scripts-5-quests; clones promoted.
+  Verbs: ADR-068 rung 5, quests under D-F1 C, thuum-fa's build (fork m4-scripts-5-quests: wire, server, platform and
+  client layers integrated, canon 862b9375 and m4-fix-51 762305f1 merged in): a quest one seat moves moves on every seat (the
+  run words and stage relay, the login replay serving starts, stages and stops with fragments skipped, D-Q3 A), the per-player
+  quests' class acting (questScope "derived", D-Q2 built whole per Eli), condition-read variables streamed from every seat
+  (ScriptVariables 81, D-V1 B), the platform's Alias return fixed (x-alias-return green), the gate's per-trigger "ignored"
+  cap, ActingScope, the word wall's triggerEntry (b-word-wall's guest learns, green 141152, out of pending), and the client
+  quest fixes from slot 0's reads (the login's load held, pacing under the budget, a puppet rule's scene stop kept local,
+  client-only plugins' quests skipped). Its stage (from thuum r5-settings 1d3293ca, 11:10Z to 12:14Z, REUSE_DIST over
+  client-build 20247 at ea9a301e) read 8 of 10 probes (b-quest-stage-two-seats' claim 5 the expected race, Eli's read;
+  x-vampire-stage the game data's lever, H-VT0). The T2 is thuum-fa's on skymp-server:m4-scripts-5-quests-013692c7 (52 of 52
+  identical; no server file changed since). The gate ran from the r5-settings worktree (527d23d5): b-puzzle-relay red twice
+  after plain relaunches and green on its cold third try (the log-count copy came up short, a lab-api read fault, thuum-fa's
+  byte-length note next), b-npc-caster red once and green on its rerun. r5-settings (ceb136b0: the settings, W1's two
+  scenarios, the pending lines out) and the first head's docs (dae9343f) merged into main after canon moved (9e9f417c).
