@@ -8,6 +8,10 @@ For each file:
     (x-npc-bow and x-npc-spell 20261026-221512 and 221906, x-npc-copy-fate 20261027-041406: a claim's "server.s"
     against the step's "server's"); server.log_count is live, counted anew before each evaluation (runner.py's
     _evaluate), and so is a seat's inside an until, counted anew before each poll, so neither needs a step;
+  - every log_count in a `server: snapshot {of}` must name a pattern already stored for its holder, the server's
+    included: a snapshot counts nothing (runner.py's _snapshot), it reads the last count a log-count step or an
+    earlier assert's or until's live count stored (x-quest-cause v2 7ca974e0's loginRuns would have been
+    E_RUN_SNAPSHOT at its step 12; its fresh review caught it, this check did not);
   - every expression is dry-run through labapi.assertions.Evaluator against facades that answer nothing, so a missing
     fact (AssertionData) is the expected outcome and E_ASSERT_SYNTAX is a finding (x-body-loot v3 20261027-000612:
     `c1.refs_near.count(26)` for `c1.refs_near().count(26)`).
@@ -18,6 +22,7 @@ from __future__ import annotations
 import ast
 import difflib
 import sys
+import warnings
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "labapi"))
@@ -62,6 +67,21 @@ def check(text: str) -> list[str]:
             holder = st.client if st.kind == "client" else "server"
             counted.setdefault(str(holder), set()).add(str(st.args.get("pattern")))
             continue
+        if st.kind == "server" and st.action == "snapshot":
+            expr = str(st.args.get("of", ""))
+            try:
+                ev.value(expr)
+            except AssertionSyntax as e:
+                findings.append(f"step {i}: {e}: {expr}")
+            except (AssertionData, TypeError, ValueError, KeyError, AttributeError, OSError):
+                pass  # a fact the empty facades cannot give: data, not syntax
+            for holder, pattern in _log_count_calls(expr):
+                seen = counted.get(holder, set())
+                if pattern not in seen:
+                    findings.append(f"step {i}: snapshot {st.args.get('name')!r} reads {holder}.log_count({pattern!r}) with no "
+                                    f"count stored for it: a snapshot counts nothing, so even the server's needs a log-count "
+                                    f"step (or an earlier assert's or until's live count) first{_hint(pattern, seen)}")
+            continue
         for expr in st.assertions or []:
             try:
                 ev.evaluate(expr)
@@ -76,13 +96,24 @@ def check(text: str) -> list[str]:
                     continue  # live in an until: runner.py counts a seat's logs before each poll
                 seen = counted.get(holder, set())
                 if pattern not in seen:
-                    near = difflib.get_close_matches(pattern, sorted(seen), n=1, cutoff=0.6)
-                    hint = f" (the nearest counted: {near[0]!r})" if near else (" (no log-count step for it before this one)" if not seen else "")
-                    findings.append(f"step {i}: {holder}.log_count({pattern!r}) has no earlier log-count step of that pattern{hint}")
+                    findings.append(f"step {i}: {holder}.log_count({pattern!r}) has no earlier log-count step of that pattern{_hint(pattern, seen)}")
+            # a live count is stored as a log-count step's is (runner.py's _evaluate), so a later snapshot can read it
+            for holder, pattern in _log_count_calls(expr):
+                if holder == "server" or (st.kind == "until" and holder in sc.clients):
+                    counted.setdefault(holder, set()).add(pattern)
     return findings
 
 
+def _hint(pattern: str, seen: set[str]) -> str:
+    """The nearest pattern counted for the holder, or that it has none counted before this step."""
+    near = difflib.get_close_matches(pattern, sorted(seen), n=1, cutoff=0.6)
+    return f" (the nearest counted: {near[0]!r})" if near else (" (no log-count step for it before this one)" if not seen else "")
+
+
 def main(argv: list[str]) -> int:
+    # a pattern's regex escapes ("\.") inside an expression's string literal are a SyntaxWarning to Python 3.14's
+    # parser, printed once per expression; the expression is the runner's text, so the warning is noise here
+    warnings.filterwarnings("ignore", category=SyntaxWarning)
     if not argv:
         print("usage: probe-check <scenario.yaml>...", file=sys.stderr)
         return 2

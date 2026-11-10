@@ -2368,6 +2368,33 @@ class CellHostSteps(RunTests):
         self.assertEqual(self.services.board.log_count("c1", "moved"), 1, note)
         self.assertIn("0 in its console log", note)
 
+    def test_a_log_count_note_carries_each_logs_bytes(self):
+        """b-puzzle-relay 20261110-135219 and 135510: after a plain relaunch a copy of the tee counted 0 for a line the
+        run's own c1-console.log holds, so the note says how many bytes each log had on the seat, its copy took and
+        lab-api read of it"""
+        pve, note = self._log_count_on_a_managed_seat({"platform": "a moved line\n", "console": "moved twice\nmoved\n"})
+        self.assertIn("1 in its Skyrim Platform log, 2 in its console log; "
+                      "bytes 13 read of 13 copied of 13 on the seat, 18 read of 18 copied of 18 on the seat", note)
+
+    def test_a_short_read_of_a_copy_shows_in_its_bytes(self):
+        """the seat's tee and its copy longer than what lab-api read: the note names all three, and the count is the
+        read's (the transfer, not the tee, came up short)"""
+        from labapi.proxmox import ExecResult
+
+        pve = self.services.control._b
+        real_exec = pve.exec
+
+        def exec_(guest, command, timeout):
+            res = real_exec(guest, command, timeout)
+            if any("logcount-003-console.log.copy" in a and "Write-Output" in a for a in command):
+                return ExecResult(0, "40 40\r\n", "")
+            return res
+
+        pve.exec = exec_
+        pve2, note = self._log_count_on_a_managed_seat({"platform": "a moved line\n", "console": "moved twice\nmoved\n"})
+        self.assertIn("18 read of 40 copied of 40 on the seat", note)
+        self.assertEqual(self.services.board.log_count("c1", "moved"), 3, note)
+
     def test_a_runs_respawn_hours_reach_the_server_through_the_overlay(self):
         """train-42's death reads: a respawn inside a run, the server's npcRespawnHours over the master's 240."""
         files = self._settings_files()
