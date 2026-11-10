@@ -661,3 +661,179 @@ callers outside vanilla; the lab's mods, USSEP and Survival's archive unread.
   0x7 (the player's actor base) with no ALFR, so QuestScopeTest reads ALUA 0x7 as the player. PlayerWerewolfChangeScript's actor
   natives all target the player but Feed()'s `BleedingFXSpell.Cast(victim, victim)`. Both QUST winners are Dawnguard.esm
   overrides agreeing with Skyrim.esm's aliases and scripts.
+
+## 8. The per-player quests' full build (Eli's D-Q2 word)
+
+Eli's words (ADR-068's "Rung 5's words"; thuum b3871772, e40f8529, cc1382da) replace D-Q2 with one rung's full build, "yes full
+transformation": the classification (a) and both transformations (b) are rung 5's. Planned 2026-11-09 by a read-only agent on
+canon ce0d2664 and sky-srv's game files (read-only).
+
+Reads:
+15. PlayerVampireQuest 0xeafd5's only stage, 10, is the cure (Fragment_0: VampireCure(Game.GetPlayer())), so the ladder's
+    x-vampire-stage frame would cure. The turn is Sanguinare Vampiris 0xb8780's VampireDiseaseEffectScript (a timer at
+    GameDaysPassed + 3, checked hourly, then VampireChange). Stages 1 to 4 live in ::vampirestatus_var, a condition-read key
+    (ctda-vars.tsv, 4 INFOs) that D-V1 B would relay to every seat: the player's own keys need a cut (A1's player cut).
+16. The deployed PlayerVampireQuestScript and PlayerWerewolfChangeScript are RaceCompatibility 2.16's loose overrides
+    (rotfern.esp's master), pairing twins by index in two FormLists (RaceList, VampireList). Section 7's census read vanilla only.
+17. Nothing carries a script's change to its own player: no SetRace, AddSpell, RemoveSpell, AddShout or EquipItem row
+    (NativeRows.inc; natives_table.rs:13-14); an appearance crosses only at the RaceSex Menu's close (sendInputsService.ts:405-426;
+    ActionListener.cpp:1359-1367); and on the turned seat the equipment gate strips an unrecorded spell, shout or item (:1754-1758,
+    :1777-1789, :1857-1861) and the login's syncSpells removes unrecorded spells (sync/spell.ts:28-37). HYPOTHESIS by the code,
+    never run (memo D56 A cures the seats). A script's AddItem to the player has no report path found (containersService.ts:22),
+    UNVERIFIED; x-acting-player leg A's server claim rests on it.
+18. World scripts call into the per-player scripts (the census): VC01 0x5c625 Fragment_4 and C03Rampage call VampireCure,
+    DLC1VQ03Vampire Fragment_26 VampireProgression, and TG05SP Fragment_0, DB09's scene and DLC1VQ02's door alias ShiftBack;
+    CompanionsHousekeepingScript may write PlayerIsWerewolf 0xed06c (UNVERIFIED). On a receiver each writes that seat's own copy.
+19. The race permit e356a3da is in canon (merge-base --is-ancestor holds); a pair rule is not. race_allowed (appearance.rs:30-34)
+    knows recorded, Playable, restricted and permitted only; no twin, nor WerewolfBeastRace 0xcdd84, nor DLC1VampireBeastRace
+    0x0200283a is Playable (esm.py races), so even the menu refuses them (E_APPEARANCE_RACE, :1364). rotfernRaceVampire 0x19d08 is
+    Playable and restricted to profile 1.
+
+### (a) Scope 1, the classification
+
+The rule (quest_scope.rs): a quest is Player when it has aliases and every one is the player's (ALFR 0x14, ALUA 0x7, created in
+or filled from a player alias; libespm QUST.h:110-170), or when it has none and the generated setting `playerQuests` names it (at
+least one actor-state native, each aimed at the player: Game.GetPlayer, a 0x14 property, a player alias, or a parameter every
+caller passes the player). A listed quest with a world alias stays World (proptest). Recommended: precompute the list with
+`lab/tools/quest-census.py --emit` over the deployed load order rather than a runtime rule: the analysis is interprocedural (the
+vampire quest's natives take parameters, settled at 21 call sites in 16 scripts) and whole-archive (the server's BSA storage is off
+in the deploy, and papyrus-vm reads code, not facts); conditionVariables already rides the settings the same way. The emit also
+names, per marked quest, the GLOBs its scripts write (PlayerIsVampire 0xed06d, VampireFeedReady 0xf69cf; neither on today's
+playerGlobals), composed into playerGlobals so WorldGlobal refuses them (world_globals.rs:21-23); its condition keys, which move to
+the player's own record (D-T2); and read 18's callers.
+
+Measured, then acting: the census gives the marked set, its evidence and its overlap with the 44 denied and 4 allowed (11-05's
+alias half also marked DLC2DialogueRavenRock, SurvivalModeMainQuest and two mods' controllers, so each is read by name; a mark on
+the allowed list stops for Eli). One lab read: the 5b head's line "[verb:quest-stage] quest scope (derived): <n> per player:
+<ids>; <k> denied, <m> allowed" equals the census (a claim in x-quest-words v1). Then `questScope` "derived" ships on ("off" a lever
+for a red only). E_QUEST_PLAYER (a line a minute per seat) refuses a stage or a word; the class gates QuestStage 57, AliasFill 79
+and ScriptVariables 81; the login list names denied ∪ player; an older record's stage of a marked quest stays unsent. PQ-3, for read
+18: a stage whose fragment calls a marked quest's script is relayed `served` (applied as a load), so only its acting seat runs it;
+inside another player's acting scope OnCall skips a player global's SetValue; the scene and alias callers are declared limits.
+Retired in A4 as 1(b) has it: IsSeatsOwnQuest (ActionListener.cpp:3254-3268), QuestStageIsEngineStart (:3297-3318), the OWN_START
+block (:3386-3411), SendQuestStages' skip (:6729-6737).
+
+Proofs: T0 quest_scope's halves and the proptest; QuestScopeTest on Skyrim.esm and Dawnguard.esm (Player: 0x2ba16 by ALUA 0x7,
+0xeafd5 by the list, 0x020071d0 by aliases; World: DLC1VCController, MS13, 0x74a83, DB01Misc, VC01; no allowed quest Player);
+QuestStageTest v2 (stage 0 of 0x2ba16, stage 10 of 0xeafd5 and a start word refused, nothing recorded or relayed; VC01's cure relayed
+served); ScriptVariablesTest gains E_SCRIPTVAR_PLAYER. T2 quest-stage.yaml v2's three refusals. T3 the startup claim, and (b)'s
+claims that nothing reaches c2. Sections 1 to 4 change accordingly: 1 and 1(b) take this rule, 1(e) gains the emit, section 2
+re-reads H-QS1 and H-QS2 on the deployed scripts, section 3 gains these cases, section 4 runs the census before A1.
+
+### (b) Scope 2, the two transformations
+
+One channel: six rows (Actor.SetRace, AddSpell, RemoveSpell, AddShout, RemoveShout, EquipItem) in NativeRows.inc and
+natives_table.rs together, batched with their arguments on the seat's own player alone (OwnedHere, ScriptNatives.cpp:486-497),
+carried by ScriptCall 75 and recorded beside RecordRefState and RecordStanding (ActionListener.cpp:4541-4544). R1: the form
+argument must be a property value of the calling script's attachment, or a member of a FormList one (libespm's VMAD), else
+E_SCRIPTCALL_UNNAMED; a race must also pass the twin rule (the recorded race and the new race both named there; restrictedRaces
+still applies). A race neither Playable nor a twin opens a form overlay (D-T1 A): what its scripts add stays off the change form,
+rides the figure's CreateActor and UpdateAppearance, and counts at the equipment gate; the overlay ends at the race's return or at
+disconnect.
+
+| vampire | in canon | missing | rung | the other seat sees |
+| --- | --- | --- | --- | --- |
+| twin and back (VampireChange, VampireCure) | client: the figure rebuilt on an appearance change (formView.ts:236-269, :325-335); server: SendAppearanceToOthers (ActionListener.cpp:1328) | the platform rows; the server branch; the twin rule | R1 | the twin within 5 s; the base after the cure |
+| abilities, powers (EquipSpell rides UpdateEquipment) | the learned set, the login sync | the rows | R1 | nothing (a figure's values are the server's) |
+| actor values | the abilities' effects | nothing | R1 | the server's bars |
+| PlayerIsVampire, VampireFeedReady | PlayerGlobals 45 | (a)'s composition | R2 | its own unchanged |
+| VampireStatus, LastFeedTime, FeedTimer, the game-time registration | lost at a relaunch | wire: ScriptVariables 81 `own`; server: on the player's change form (rule 6); client: applied before the gate, the registration read from queuedOnUpdateGameEvents (CL/S/SkyrimVM.h:143-158, :246-249) and re-issued by Form.RegisterForUpdateGameTime (skyrimPlatform.ts:1933) | R2 | nothing |
+| the feed (VampireFeedBeds perk fragments) | the idle on the stream | its effects are the rows | R2 | the idle (HYPOTHESIS) |
+
+| werewolf | in canon | missing | rung | the other seat sees |
+| --- | --- | --- | --- | --- |
+| the power WerewolfChange 0x92c48 | the console's AddSpell (the server's); the driver's cast (index.ts:2629) | nothing | R0 | nothing |
+| stages 0 to 100 | all cross today (read 2) | Scope 1 | R3 elsewhere | none |
+| WerewolfBeastRace and back | as the twin | the SetRace row; the overlay | R1 | the beast within 5 s; its end |
+| level abilities, the howl, WolfSkinFXArmor (StartTracking) | stripped by the gate | the rows into the overlay | R1 | the howl (casts relay, UNVERIFIED) |
+| SetBeastForm (the controls' mode, CL/M/MenuControls.h:73), SetGhost, factions, SetAttackActorOnSight, the feed's bleed | local | declared (the player's standing stays refused) | R3 | NPCs react by their own seat |
+
+| id | HYPOTHESIS | one observation |
+| --- | --- | --- |
+| H-VT1 | the disease's hourly registration fires on the server clock at a raised timeScale | c1 in its twin within 240 s at 1440 |
+| H-VR1 | SetRace's caller is RaceCompatibility's script, its argument a VampireList member | the server's recorded line naming both |
+| H-VR2 | a figure rebuilt on the twin wears the twin's face with its head parts | c2.view("c1").raceId (assertions.py:317-330), a screenshot |
+| H-VA2 | a batched AddSpell lands before the equipment report | no "is not learned" line for c1 |
+| H-VS3 | the re-issued registration reaches OnUpdateGameTime | VampireStatus rises a game day after c1's relaunch |
+| H-WW1 | a figure on WerewolfBeastRace renders the beast and plays its streamed graph | c2.view("c1").raceId == 0xcdd84, a screenshot |
+
+Probes (each fresh-reviewed; lab-api's run overlay, runner.py:495-530, gains `timeScale` and `cureSpells`). On canon, slot 0,
+recorded only: x-vampire-turn-read v1 (vampirism.md's; reads H-VT1 and read 17's stripping) and x-werewolf-form-read v1 (what c2's
+copy of the quest does with c1's stages). Then x-vampire-stage v1, replacing the ladder's frame. ONE QUESTION: when one seat's own
+quest turns its player, does the other seat see the twin while its own player stays untouched, and does the condition survive
+the turned seat's relaunch? Frame: timeScale 1440, cureSpells []; c1 `cast {spellId: 0xb8780}` on itself; wait for the turn and
+one game day; relaunch c1; then `setstage eafd5 10`. Claims on c2: view("c1").raceId the twin within 5 s of c1's switch, the base
+within 5 s of the cure; c2's own raceId, PlayerIsVampire and script_vars(0xeafd5) ::vampirestatus_var unchanged. On the server: c1's
+twin and stage abilities recorded and kept across the relaunch; no 0xeafd5 stage recorded. And x-werewolf-form v1. ONE QUESTION:
+when one seat's player takes Beast Form, does the other seat see the beast and its end, with nothing of the form left on the
+record after it or after a relaunch mid-form? c1's console `player.addspell 92c48`, `cast {spellId: 0x92c48}`, `setstage 2ba16
+100` 30 s later; leg B relaunches c1 mid-form. Claims on c2: view("c1").raceId 0xcdd84 within 5 s, then c1's base within 5 s of
+the end; quest(0x2ba16).running() false throughout; c2's race unchanged. On the server: no 0x2ba16 stage; no level ability on c1's
+record after either end; no "is not learned" line. Committed: b-vampire-turn v1 (with a restart leg, rule 6) and b-werewolf-form v1,
+each its own commit, Eli's review first.
+
+### (c) The commits and push order, amended
+
+| # | adds |
+| --- | --- |
+| A0 (new, thuum r5-lab, first) | quest-census.py --emit over the deployed scripts, reviewed |
+| A1 | quest_scope's halves; player_own.rs (the bound, the twin, the overlay); script_variables' player cut |
+| A2 | the own entries on the player's change form, migrated |
+| A3 | ScriptVariables `own`; `served` as "applied as a load" |
+| A4 | E_QUEST_PLAYER; the player-own branch; the overlay; the PQ-3 stamp; the composition; the measurement line |
+| A5 | quest-stage.yaml v2; player-own.yaml (new) |
+| B5 (new, in the one 5b head, after B2) | the six rows; the registration read; the PQ-3 skip |
+| B4 | the own entries; the re-issue |
+| L1 | the census tool; the two overlay keys; the labState kinds |
+| L2 | b-vampire-turn v1, b-werewolf-form v1 |
+| D1 | vampirism.md to the law; docs/verbs/lycanthropy.md (new); NATIVES.md's six rows; STATE.md's race row |
+
+Deploy (thuum main): `playerQuests` and `questScope: "derived"`. Order: A0, then 5a, then 5b as one head (B1, B2, B5, B3, B4).
+Slots: 0, the canon premises plus the two reads; 1, as before; 2, the two transformation probes; 3, b-quest-stage-two-seats and the
+reruns; 4, b-vampire-turn and b-werewolf-form; 5, the gate set with W1; 6, the second greens; one reserve.
+
+### (d) The estimate
+
+| | agent half-days | Windows heads | stage slots |
+| --- | --- | --- | --- |
+| section 4 as written | 8 | 1 + 1 FIX FIRST | 5 + 1 |
+| Scope 1 alone (comparison) | 10 | 1 + 1 | 5 + 1 |
+| rung 5, Scopes 1 and 2 | 16 | 1 + 2 | 7 + 1 |
+
+Scope 1 adds 2 (the census over the mods 1, server 0.5, client 0.5); Scope 2 adds 6 (wire-rules 1, server 1.5, platform 1, client
+0.75, lab 0.75, probes 0.5, docs 0.5).
+
+### (e) Playtest 51
+
+1. A stage set on one seat reaches the other's journal, and the reward lands once.
+2. The Aventus rumor's objective shows on both journals.
+3. Arvel's claw alias holds on both seats, and the keyhole opens for its holder.
+4. A guest walking into the ambush wakes the draugr on both screens.
+5. A started quest runs on both seats and after a restart.
+6. A dialogue option conditioned on a quest variable matches on both seats.
+7. Ariadne turns vampire (KhajiitRaceVampire 0x88845): rotfern sees her new face, rotfern's own race and journal unchanged; after
+   a relaunch Ariadne is still a vampire at her stage, and the cure returns her.
+8. rotfern takes Beast Form: Ariadne sees the werewolf and its end; nothing of the form stays on rotfern.
+Arvel's run for a guest waits on leg C; regressions by the gate set. Item 7 needs three game days: one server restart with the clock
+moved three days on (playtest-restart a21e46b1; UNVERIFIED that the time block takes that offset). The run's cureSpells per D-T3.
+
+### (f) Risks and words owed
+
+Risks: the deployed scripts unread until A0 (a wrong mark is the measurement's catch; a wrong bound shows in E_SCRIPTCALL_UNNAMED's
+count); properties assigned at runtime fail the bound (Dawnguard's perks swap CurrentHowl), refused by name and measured; the looks
+(H-VR2, H-WW1) and the re-issue (H-VS3) are engine-dependent, and a red keeps the records and declares the rest (the stage then
+waits for a feed, which re-registers); read 17's AddItem gap may reach quest rewards, read before L2.
+
+D-T1, the beast form's record. Context: the form lasts one run of a quest a relaunch never restarts. A) An overlay, relayed and
+served, never written to the change form, ended by the race's return or disconnect. B) Recorded like the twin: a relaunch
+mid-form logs in as the beast with nothing to end it. C) Local (R3): the other seat sees a human figure. Recommendation: A.
+
+D-T2, the vampire's script state across a relaunch. Context: VampireStatus, LastFeedTime, FeedTimer and the registration are lost
+at every relaunch, and four INFOs read the stage. A) A declared limit: race, abilities and globals kept; the stage clock waits for
+the next feed. B) Kept per player: the marked quests' scalar variables through ScriptVariables 81's `own` onto the player's change
+form (rule 6), served to that player alone, the registration re-issued. C) vampirism.md's server clock: against ADR-068's law.
+Recommendation: B.
+
+D-T3, Sanguinare Vampiris 0xb8780 on cureSpells (memo D56 A). Context: the deploy cures it at login and every minute, so nobody
+can turn. A) Remove it from both deploy files at rung 5's merge. B) Lift it per run (the probes and playtest 51) until 51 verifies a
+turn in play, then A. C) Keep it; seats turn only by a lab lever. Recommendation: B.

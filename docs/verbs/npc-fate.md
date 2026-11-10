@@ -3439,3 +3439,28 @@ raced the background loader's rebuild of the same corpse's 3D; an ActorMediator 
 freed sink array and poisoned a pool free list, so MemoryManager::Allocate (68115) returned the ActorMediator singleton's storage
 (504076). The Frida read x-corpse-lay-crash (lab/frida/corpse-lay-heap.js) comes first (rule 8). The fix direction: the lay waits
 until the actor has no queued background load.
+
+## b-npc-body-release's open after the container hold (17:46 PST 2026-11-09 (01:46Z 11-10), thuum-fa; apocrypha's layer sweep 20261109-225901)
+
+Red three times on canon ce0d2664 under apocrypha's layer, 20261110-013532, 013809 and the cold-rollback 014113, all at step
+41: 'c2.log_count("body 39fe4: the ContainerMenu is open") >= 1' read 0 while the same block's c2.state.menuOpen('ContainerMenu')
+read true. Its last green was 20261102-085137 (m4-object-animation), and it was in no gate set since. The cause is canon's, and
+the behavior is right; the claim counts a path the body no longer takes. Since fork 75167c3d (2026-11-03, ADR-067 decision 6,
+the exclusive container hold; in canon since 49's build), RemoteServer's open of a dead body branches on its AI: a body whose
+AI is off runs D71's openBodyOnTimers (the AI switch, the activate retries, the poll that prints "<tag>: the ContainerMenu is
+open", remoteServer.ts:460), and one whose AI is on is opened at once (refr.activate(player, true) after the line "body <id>:
+the server's open on a blocked body with its AI on (D-C2 A)", remoteServer.ts:295, which logs no activate of its own). In
+013809 c2 released 39fe4 from the puppet state after the ragdoll ("its activation the engine's", 01:40:12.814Z), took the
+direct branch at 01:40:42.205Z, and its own wait lines ("onOpenContainerMesage - waiting for 'ContainerMenu open' (a corpse)
+to be true", then "to be false") show the menu opening and closing; the server took the occupant ("[verb:containers] 39fe4 open
+with 1 occupant(s)", 01:40:44Z) and the block's E_CONTAINER_BUSY claim held. The green of 11-02 ran D71's path (apocrypha's read
+of its c2-console.log: "AI on for the server's open (D71)", the activate retries, the poll's line). Not the layer: Skyrim Souls
+RE (main's layer since 11-03) cannot keep a script from logging an activation it never attempts.
+
+The fix is the claim, Eli's word (ADR-064 decision 4: a claim rewrite after a green): step 40's log-count and claim 2 of step
+41 count either branch's line, both the server's open reaching the guest's body, so the claim keeps its meaning:
+'c2.log_count("body 39fe4: (the ContainerMenu is open|the server.s open on a blocked body with its AI on)") >= 1' (and the step's
+pattern the same). Until Eli's word, b-npc-body-release is pending in lab/gate.yaml, named here.
+c-dungeon-enemies reads the same claim at its step 132 and is red three of three in the same sweep (20261110-053522, 053929,
+054330 cold) with c2.state.menuOpen('ContainerMenu') true; its last green was 20261102-115850. The same placement and the same
+rewrite (either branch's line) hold for it, its own Eli word (ADR-064 decision 4); pending beside it, named here.

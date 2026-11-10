@@ -2795,6 +2795,15 @@ take the late path, one engine re-roll each.
 - [ ] accept with changes (say what)
 - [ ] not yet
 
+D-N1 A, a recorded NPC with no fate level adopts its record as its roll (ACCEPTED by Eli 15:3x PST 2026-11-09 in thuum-fa's
+session, verbatim "go for it", to the memo's recommendation; playtest 50's naked bandits, docs/research/rung5-quests-2026-11-09.md
+and docs/private/playtest-50-findings.md): an actor record that predates this ADR's fate (no fateLevel in its change form: 1,181
+in the canonical world, 330 of them with worn entries) and holds a worn item is the NPC's roll: its fateLevel is set at the first
+loader's level and nothing is rolled, so its recorded outfit stands. A record holding no worn item is rolled beside what it holds,
+as MpActor::RollFateIfUnrolled does today (a put kept, x-fate-inventory v1b's finding 1). Why: the record is the world's state
+(the server holds the last recorded state, TES3MP's rule), and a roll beside a prior roll left the first outfit unworn in the
+NPC's pack even after Inventory::AddItems' early stop was fixed (fork m4-fix-50 e2595d14). Built with ADR-068 rung 5's server half.
+
 ## ADR-050: NPCs through the engine's own entries: the host streams its actors' actions, values and equipment; the simulating engine keeps its own death; one NPC path
 
 Status: ACCEPTED 2026-10-26 02:22 PDT (Eli: "proceed with the pivot. open ADR-050 and
@@ -4855,6 +4864,63 @@ probes' drafting and the pex reads).
   game(s)", the record's view ''). Amendment A's rule (the record carries its view) applied to the second way a script changes what
   an object shows. Rule 6: the change form's graphVariables merge to canon only with a committed restart scenario (b-cobweb-view's
   restart leg). Built ahead on m4-train-50 (S4, W1's graph_vars, C3), kept.
+
+Rung 5's words, W1 B, D-Q3 A and D-Q2 replaced by one rung's full build (ACCEPTED by Eli 14:4x PST 2026-11-09 (22:4xZ), in
+numidium's session, verbatim: "go with recommended the first and the third. for the vapirism/lycanthropy one, ammend the rungs to
+just include the full build needed for it in rung 4 instead of spitting up feature dependencies across rungs."; the memo's three
+questions are docs/research/rung5-quests-2026-11-09.md section 6):
+- W1 B: b-quest-stage-restart v2 is approved now for its additions only (the runs-replay line for both seats, a relaunched c2
+  reading 0x10d3bb running at its login, the refusal claim tightened to "E_QUEST_" == 0); b-quest-rumor v2's rewrite is approved
+  once x-quest-runs v1 names the vampire castle controller's lines inside its window (ADR-064 decision 4). Each its own commit.
+- D-Q3 A, the login replay skips fragments: a replay is a load (a save load restores done stages without fragments), and the
+  record (ref states, alias fills, script records, world globals, condition variables) carries the world effects; the live relay
+  runs fragments under the acting player's scope. The ladder's deletion of the 53987 skip narrows to the live path: the sink
+  replacement and its two natives stay for the replay, which QuestStage 57's `served` names.
+- D-Q2 is none of its three options: the per-player quests' full build lands in ONE rung, not split across rungs. Eli's "rung 4"
+  is the rung being built for playtest 51, rung 5 (rung 4 shipped in 50; Eli confirmed ~14:5x PST, verbatim: "yes, rung 5 is
+  what i meant"). So inside rung 5: D-Q1's derivation whole (the alias half, every alias
+  the player by ALFR 0x14 or ALUA 0x7 or in the player's inventory, and the refinement, a quest whose scripts' state natives all
+  target the player, which closes the vampire quest's no-alias gap: H-QS2 holds statically), measured against today's allowed and
+  denied lists by its census and one lab read before it acts, then acting; and IsSeatsOwnQuest's start-game-enabled rule retired
+  in the same rung. No measuring-only interim and no later rung for the refinement. The plan's section 8 amends rung 5's scope,
+  its proofs and its estimate. "The full build needed for it" carries the two transformations a per-player quest drives, the
+  vampire's stages and the werewolf's beast form, proven on two seats in rung 5 (the ladder's rung 6 had x-vampire-stage): one
+  feature, its dependencies in one rung (Eli ~15:0x PST in numidium's session, verbatim: "b5 for d-v1, and yes full
+  transformation").
+- D-V1 B, built in rung 5 (ACCEPTED by Eli ~15:0x PST, the same words: "b5 for d-v1"). H-CV1 fails (458 of
+  770 condition-read keys have a topic-info fragment writer, 310 only such writers), so every seat reports a listed variable it
+  changes and the latest write wins per key with the server's sequence (AliasFill 79's shape), relayed to the others; D-F1 C's one
+  streaming seat would overwrite the talker's writes.
+
+Rung 5's transformation words, D-T1 A, D-T2 B and D-T3 B (ACCEPTED by Eli 15:3x PST 2026-11-09 in thuum-fa's session, verbatim
+"go for it", to the memo's three recommendations; docs/research/rung5-quests-2026-11-09.md section 8(f)):
+- D-T1 A, the beast form's record is an overlay: what a non-Playable, non-twin race's scripts add (WerewolfBeastRace's level
+  abilities, the howl, WolfSkinFXArmor) is relayed and served on the figure's CreateActor and UpdateAppearance and counts at the
+  equipment gate, but is never written to the change form; the overlay ends at the race's return or at disconnect, so a relaunch
+  mid-form logs in as the player's own race.
+- D-T2 B, a vampire's script state is kept per player: the marked quests' scalar variables (VampireStatus, LastFeedTime,
+  FeedTimer) travel as ScriptVariables 81's `own` entries onto the player's change form (rule 6's migration and restart leg),
+  served to that player alone, and the game-time registration is re-issued at login from queuedOnUpdateGameEvents.
+- D-T3 B, Sanguinare Vampiris 0xb8780 is lifted from cureSpells per run (the probes and playtest 51) until 51 verifies a turn in
+  play; then both deploy files drop it (memo D56 A's cure retires for that disease).
+
+D-E1 A, rotfern's eyes through her own script and one more own-player row (ACCEPTED by Eli ~20:5x PST 2026-11-09 in thuum-fa's
+session, verbatim "A, and it's the Dragonborn Hermaeus Mora Main questline. After she kills Miraak and becomes hermaeus moras
+champion is when she gets the eyes."; Eli's ask through apocrypha; amends ADR-026, which let only the race menu's close write
+appearanceForms' head parts): rotfern's eyes are f(race, the questline done). Her usual pair (RotfernEyes 0x014C06, valid for
+rotfern 0xAA00 by FLST RotfernEyesRaces) or its vampire twin (RotfernEyesVampire 0x019D09, for rotfernRaceVampire 0x19D08), and
+after the questline the Mora pair (RotfernEyesMora 0x023F0E, RotfernEyesMoraVampire 0x023F0F), all in rotfern.esp, untouched. The
+questline is Dragonborn's main quest's end, DLC2MQ06 (179d7:Dragonborn.esm, 0x040179d7 in the load order) completed: its stage
+550 is its one "Complete Quest" log entry (QSDT 0x01, UESP "Skyrim Mod:Mod File Format/QUST"), Miraak's death and Hermaeus Mora's
+champion. Built the single-player way: apocrypha's companion ESL holds a start-game-enabled quest with a player alias (ALUA 0x7, so
+rung 5's alias half marks it per player and every seat runs it for its own player; a no-op unless the race is rotfern's), whose
+alias script sets the eyes at OnInit, OnPlayerLoadGame, OnRaceSwitchComplete and OnLocationChange (no vanilla edit) by
+Actor.ChangeHeadPart on the player. Rung 5 carries it as a seventh own-player row beside the six (D-T1's channel): the server
+records the swap into the player's appearanceForms head parts when the bound holds (the part is a property of the calling script's
+attachment) and the part is valid for the recorded race, then relays it as UpdateAppearance. The script compiles with the
+Creation Kit's PapyrusCompiler.exe as a CI job on the fork's Windows runner (Eli's licensed CK placed there by core; Caprica the
+fallback), the vanilla Scripts.zip and SKSE's script sources as its inputs, lab-only. Proven at T3: the swap seen on the other seat
+and kept across a relaunch.
 
 ## ADR-069: Rotfern's Fixes: engine fixes ship to every player as one SKSE DLL, one detour per lab-read site, never as a lab-only patch
 

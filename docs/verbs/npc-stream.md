@@ -2374,3 +2374,21 @@ lab-api's approach accept a repeated engine placement after the ladder. The
 old premise's red stays the watch item until the scenario is green once more
 in a gate or the nightly; then this section and gate.yaml's entry come out
 together.
+
+## b-npc-stream-equipment's refusals in apocrypha's layer sweep (19:07 PST 2026-11-09 (03:07Z 11-10), thuum-fa; run set 20261109-225901)
+
+Red three times on canon ce0d2664 under apocrypha's layer, 20261110-025851, 030052 and the cold-rollback 030327, all at step 15:
+no "[verb:npc-stream] equipment 1348x by ff000000" line, and E_EQUIP_REFUSED nonzero (10 in 025851) where the claim wants none.
+Its last green was 20261102-095254 (m4-object-animation). The server refused the host's equipment reports because its own copy
+of each NPC's inventory lacked the pieces the host's engine wears: "ActionListener::OnUpdateEquipment 1348c - dropped from the
+equipment update: inventory does not contain item 6c1d9", the same for 209a5, then "E_EQUIP_REFUSED: 1348c's equipment by
+ff000000 refused ... the record stands, nothing sent to the host" (030052, 03:02:18.687Z), and likewise for 13489, 35534 and
+1348a. The two ids are 1348c's outfit (lab/esm.py on sky-srv: ARMO 0x6c1d9 ClothesFarmClothesVariant02, ARMO 0x209a5
+ClothesFarmBoots02), and the log holds no roll line for 1348c, so the server's record or base-container inventory is missing
+exactly the worn outfit. The cause is canon's, not the layer's, HYPOTHESIS: upstream's Inventory::AddItems returned at the
+first item that merged into a held stack (Inventory.cpp:98, "TODO: It seems there is a bug"), and an NPC's base container and
+outfit go into its record through one multi-entry AddItems call (EnsureBaseContainerAdded), so an id that repeats early in the
+list dropped the outfit after it; the host's honest report then names pieces the server never added. Playtest 50's naked
+bandits are the same fault (docs/verbs/npc-fate.md, its reads). The fix is fork m4-fix-50 e2595d14 (AddItems adds every item
+of the call; T0 InventoryTest and NpcFateTest; CI 5671, T2 green), merging by R0 after the sweep. Pending in lab/gate.yaml,
+named here, until one run of b-npc-stream-equipment on the fixed server reads green; a red there sends the read back here.
