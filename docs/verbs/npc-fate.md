@@ -3464,3 +3464,9 @@ pattern the same). Until Eli's word, b-npc-body-release is pending in lab/gate.y
 c-dungeon-enemies reads the same claim at its step 132 and is red three of three in the same sweep (20261110-053522, 053929,
 054330 cold) with c2.state.menuOpen('ContainerMenu') true; its last green was 20261102-115850. The same placement and the same
 rewrite (either branch's line) hold for it, its own Eli word (ADR-064 decision 4); pending beside it, named here.
+
+Eli's word (23:03 PST 2026-11-09 (07:03Z 11-10), in thuum-fa's session, verbatim "go for both"): both rewrites landed. b-npc-body-release v5 (491272a3)
+counts c2's close on either branch (D71's "body 39fe4: closing activation sent, the menu closed" or the direct branch's generic
+close, "onOpenContainerMesage - sent ActivateMessage" with 237540 = 0x39fe4 as its target), after v4's open rewrite read green
+through step 41 and red at step 46 alone on the fixed server (20261110-061755). c-dungeon-enemies v3 (4c384d69) takes v4's open
+and v5's close together. Each stays pending in lab/gate.yaml until it reads green on canon.
