@@ -2402,3 +2402,27 @@ snapshot kept), and e2595d14 keeps new rolls whole but cannot repair a saved one
 fix is the data's: the clean snapshot's (and the canonical world's) actor records whose inventory lacks a piece their worn set
 names, or their base outfit's resolution, are moved aside so the fixed roll runs fresh (numidium composes the snapshots; lab/tools
 world-repair.py is the tool's shape). Pending until a run on a repaired clean world reads green.
+
+Second correction (22:40 PST 2026-11-09 (06:40Z 11-10), thuum-fa; a read-only agent's read of 062127 against the 11-02 green 095254, the code checked
+here): the correction above is WRONG; no saved record exists. Both runs' server.log load "2 ChangeForms (Including 2 player
+characters)" (the clean snapshot holds the two characters only), so 1348c and the nine others are unrecorded and the server
+builds them at load. The cause is fork c312fd39 (2026-11-03 23:08 PST, npc-fate 1c finding 1; in canon, not in the 11-02 green
+build ad1aa50a): MpActor::Init skips EnsureBaseContainerAdded when CanRollFate() holds (MpActor.cpp:2705-2708 at canon), leaving
+the build to RollFateIfUnrolled (:2362), whose only callers are PartOne::SendFates' walk over a player's new grid squares
+(PartOne.cpp:2341) and PlaceAtMe (PapyrusObjectReference.cpp:463). The ten refused NPCs' records stand indoors (1348c in 0x133ca
+RiverwoodFaendalsHouse; 35534 and 13491 in 0x1cb84 RiverwoodSvensHouse; seven in 133c6 to 133c8), so c1's pass at (4,-11)
+(06:22:16.533, 32 fates) skips them; the npc-puppet sighting then moves them outdoors (PartOne.cpp:2589-2600:
+SetCellOrWorldObsolete, SetPos, SetAngle, no roll) into squares already in c1's fated set, so no pass reaches them, and c1's
+first equipment report (06:22:21.086) meets an empty inventory: every worn ARMO fails HasItem (ActionListener.cpp:1845, the
+warning at :1858) and the hosted refusal drops the report whole (:1944-1968). The ten sighted-from-indoors actors are exactly the
+ten E_EQUIP_REFUSED actors. On 11-02 Init built them at load and 1348c's first report was accepted ("3 worn, right 209a5 left
+13985", 09:53:45.758). The outfit itself resolves right (EnsureBaseContainerAdded, MpObjectReference.cpp:2848-2914: Faendal
+0x13480's DOFT 0xdab76 holds 209a5 and 6c1d9; Hilde 0x35533's DOFT 0x2d75f holds 209a5, 209a6, 209aa); the fault is WHEN the
+roll runs, not what it reads. Neither e2595d14 nor moving records aside touches this path; the data fix above is withdrawn.
+
+The fix is the server's (fork, server-only, an R0 merge): the roll belongs to the actor, not to the grid square, so every path
+that first serves an unrolled record to a seat (the pass's walk, the sighting's move, a script's MoveTo, an alias's load) rolls it
+first at the loader's level (FateRollLevel) and sends its fate as the respawn does (onActorFate). T0: 0x1348c loaded with no
+record in 0x133ca, a host pass at (4,-11), the sighting, then a hosted report of 6c1d9, 209a5 and 13985 accepted with no
+E_EQUIP_REFUSED. UNVERIFIED: that c2's pass at 06:22:40.919 rolled the ten (42 minus 32, SendFates logs counts only). The
+scenario stays as written; out of pending when it reads green on the fixed server.
