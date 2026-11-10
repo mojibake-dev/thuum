@@ -4960,6 +4960,19 @@ B 4. B is fine. 5. A 6. B"):
 - ADR-067 decision 7 amended, the order: ADR-068 rungs 5 and 6, then physics objects (props and bodies, Eli's two tests: a dragged
   body, Hailstone at a cabbage cart), then rung 7 (the chaff). Physics no longer waits for the cleanup.
 
+Rung 5's second head, Eli's later words (2026-11-10, in thuum-fa's session):
+- D-Q5 A (Eli 17:11Z, verbatim "A for D-Q5"), the Story Manager's quests: every run word (start and stop) of a quest a Story
+  Manager SMQN node names stays its own seat's (questStoryInstances "seat", the second head's default: wire-rules quest_runs.rs
+  refuses it, neither recorded nor relayed, printed as a plain "kept to its seat" line since fork b23085da), and its stages still
+  cross. Taken over B (split by the quest's cast: a quest whose aliases are all fixed judged by cause like any world quest, one
+  with a condition-picked alias per seat in words and stages) and C (every Story Manager quest judged by cause). Known limits
+  shipped with playtest 51, from the read-only audit of fork 685f6a24 (526 live SMQN nodes naming 1,454 quests in the deployed
+  order): (1) a fixed-cast Story Manager quest finished on one seat stays open on another (A Lovely Letter 0x74a83: stage 310
+  crosses, its Fragment_22 Stop() is kept to its seat, so the other seat keeps the letter at 310 and a later login never gets its
+  end); (2) a radiant Story Manager quest's stage crosses to another seat's own, different instance (BQ01 0x95125, its bounty
+  target picked by conditions per seat). D-Q9 (a player alias's OnLocationChange read as a world cause), D-Q6 and D-Q7 stay
+  with Eli.
+
 ## ADR-069: Rotfern's Fixes: engine fixes ship to every player as one SKSE DLL, one detour per lab-read site, never as a lab-only patch
 
 Status: ACCEPTED 2026-11-06 by Eli, to apocrypha directly, after asking what the fixes are ("wait so what ARE the engine fixes???
