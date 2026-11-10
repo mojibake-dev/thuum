@@ -3,8 +3,9 @@ plugin of the load order and a known patch; the esl patch sets only the header's
 records of its own above 0xFFF; the HDPT patch gives every override its master record's gender bits, keeps every other
 bit and the file's size, refuses a compressed record or a missing master; the form-list patch replaces a list's
 entries in order, keeps its other subrecords and resizes the groups around it; the perk patch drops only the ability
-entry and the spell patch only the magnitudes; a record patch must hit the last plugin overriding the record; and all are
-idempotent."""
+entry and the spell patch only the magnitudes; the race patch sets one sex's default head parts in order and leaves the
+body data's pairs and every other subrecord alone; a record patch must hit the last plugin overriding the record; and all
+are idempotent."""
 import csv
 import importlib.util
 import struct
@@ -287,6 +288,74 @@ class SpellMagnitude(unittest.TestCase):
         new2, _ = plugin_patch.patch_spell_magnitude(q, {"game_dir": str(d)}, "000D8C31", "1.0")
         self.assertEqual([f for _, t, _, f, _ in plugin_patch.walk(new2) if t == b"SPEL"], [0x00048AD0, 0x000D8C31])
         self.assertEqual(new2.count(b"GRUP"), 1)
+
+
+class RaceHeadParts(unittest.TestCase):
+    HEAD, MOUTH, EYES, MORA = 0x0202E116, 0x0202E117, 0x02019D09, 0x02023F0F
+
+    def pairs(self, parts):
+        return b"".join(sub(b"INDX", struct.pack("<I", n)) + sub(b"HEAD", struct.pack("<I", x)) for n, x in enumerate(parts))
+
+    def race(self, male, female, flags=0):
+        body = sub(b"EDID", b"rotfernRaceVampire\0")
+        # the body data's own INDX/MODL pairs come before NAM0 and must stay
+        body += sub(b"NAM1", b"") + sub(b"MNAM", b"") + sub(b"INDX", struct.pack("<I", 0)) + sub(b"MODL", b"m.nif\0")
+        body += sub(b"FNAM", b"") + sub(b"INDX", struct.pack("<I", 0)) + sub(b"MODL", b"f.nif\0")
+        body += sub(b"NAM0", b"") + sub(b"MNAM", b"") + self.pairs(male) + sub(b"MPAI", struct.pack("<I", 0))
+        body += sub(b"FNAM", b"") + self.pairs(female) + sub(b"MPAI", struct.pack("<I", 0)) + sub(b"TINI", struct.pack("<H", 1))
+        body += sub(b"NAM8", struct.pack("<I", 0)) + sub(b"RNAM", struct.pack("<I", 0x00000019))
+        return record(b"RACE", 0x02019D08, body, flags)
+
+    def heads(self, buf, sex):
+        o, _, size = plugin_patch.record_at(buf, 0x02019D08, b"RACE")
+        subs = plugin_patch.subrecords(buf[o + 24:o + 24 + size])
+        sigs = [s for s, _ in subs]
+        start = sigs.index(b"MNAM" if sex == "male" else b"FNAM", sigs.index(b"NAM0"))
+        out, i = [], start + 1
+        while i < len(subs) and sigs[i] in (b"INDX", b"HEAD"):
+            if sigs[i] == b"HEAD":
+                out.append((struct.unpack("<I", subs[i - 1][1])[0], struct.unpack("<I", subs[i][1])[0]))
+            i += 1
+        return out, sigs, subs
+
+    def test_sets_one_sex_s_parts_in_order_and_resizes_the_group(self):
+        p = plugin([self.race([self.MOUTH, self.HEAD, self.EYES], [self.HEAD, self.MOUTH, self.MORA])],
+                   masters=("Skyrim.esm", "RaceCompatibility.esm"))
+        new, what = plugin_patch.patch_race_head_parts(p, {}, "02019D08", "female", "0202E116,0202E117")
+        self.assertEqual(len(new), len(p) - 2 * 10)  # one INDX and one HEAD of 6 + 4 bytes gone
+        female, sigs, subs = self.heads(new, "female")
+        self.assertEqual(female, [(0, self.HEAD), (1, self.MOUTH)])
+        self.assertEqual(self.heads(new, "male")[0], [(0, self.MOUTH), (1, self.HEAD), (2, self.EYES)])
+        # the body data before NAM0 and every subrecord after the pairs are untouched, in their order
+        self.assertEqual(sigs[:sigs.index(b"NAM0")], [b"EDID", b"NAM1", b"MNAM", b"INDX", b"MODL", b"FNAM", b"INDX", b"MODL"])
+        self.assertEqual(sigs[-4:], [b"MPAI", b"TINI", b"NAM8", b"RNAM"])
+        grp = new.index(b"GRUP")
+        self.assertEqual(struct.unpack_from("<I", new, grp + 4)[0], len(new) - grp)
+        self.assertIn("0202E116,0202E117,02023F0F -> 0202E116,0202E117", what)
+        again, what2 = plugin_patch.patch_race_head_parts(new, {}, "02019D08", "female", "0202E116,0202E117")
+        self.assertEqual(again, new)
+        self.assertIn("already", what2)
+
+    def test_swaps_a_part_in_place_at_the_same_size(self):
+        p = plugin([self.race([self.MOUTH, self.HEAD, self.EYES], [self.HEAD, self.MOUTH, self.MORA])],
+                   masters=("Skyrim.esm", "RaceCompatibility.esm"))
+        new, _ = plugin_patch.patch_race_head_parts(p, {}, "02019D08", "female", "0202E116,0202E117,02019D09")
+        self.assertEqual(len(new), len(p))
+        self.assertEqual(self.heads(new, "female")[0], [(0, self.HEAD), (1, self.MOUTH), (2, self.EYES)])
+        diff = [i for i, (x, y) in enumerate(zip(p, new)) if x != y]
+        self.assertTrue(diff and diff[-1] - diff[0] < 4)  # only the one HEAD's form id changed
+
+    def test_refuses_a_missing_race_a_compressed_one_no_head_data_a_bad_sex_and_no_parts(self):
+        p = plugin([self.race([self.MOUTH], [self.HEAD])], masters=("Skyrim.esm", "RaceCompatibility.esm"))
+        for fid, sex, parts in (("02019D07", "female", "0202E116"), ("02019D08", "child", "0202E116"), ("02019D08", "female", "")):
+            with self.assertRaises(SystemExit):
+                plugin_patch.patch_race_head_parts(p, {}, fid, sex, parts)
+        zipped = plugin([record(b"RACE", 0x02019D08, b"\0" * 12, flags=plugin_patch.COMPRESSED)])
+        with self.assertRaises(SystemExit):
+            plugin_patch.patch_race_head_parts(zipped, {}, "02019D08", "female", "0202E116")
+        headless = plugin([record(b"RACE", 0x02019D08, sub(b"EDID", b"r\0") + sub(b"FNAM", b"") + self.pairs([self.HEAD]))])
+        with self.assertRaises(SystemExit):
+            plugin_patch.patch_race_head_parts(headless, {}, "02019D08", "female", "0202E116")
 
 
 class LaterOverrides(unittest.TestCase):

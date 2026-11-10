@@ -44,8 +44,16 @@ lab/layer/load-order.tsv. Every patch is idempotent, keeps the file's size, and 
                     master's text fields (FULL, DESC: string ids into its own strings files) cannot travel
                     into a plugin that is not localized, so they are dropped from the copy. The Slow Time
                     shout's three spells and Block's Quick Reflexes at 1.0, time at its pace.
+  race-head-parts <formid> <male|female> <id,id,...>
+                    set a RACE's default head parts for one sex (the INDX/HEAD pairs after its MNAM or FNAM
+                    in the head data, NAM0 on) to the given HDPT ids in that order, numbered from 0; every
+                    other subrecord stays, the body data's INDX/MODL pairs before NAM0 included. The record
+                    and its groups resize. A race with the Overlay Head Part List flag (bit 26) lays these
+                    parts over the actor's own, each replacing hers of its type (CommonLibSSE-NG
+                    TESNPC::GetCurrentHeadPartByType), so a part listed here hides the one her scripts set.
+                    For D-E1 (rotfern's eyes, docs/DECISIONS.md): rotfernRaceVampire's lists.
 
-A patch that targets a record (drop-record, flst-set, perk-drop-ability, spell-magnitude) must hit the
+A patch that targets a record (drop-record, flst-set, perk-drop-ability, spell-magnitude, race-head-parts) must hit the
 copy that wins: after patching, every plugin later in the load order is scanned for an override of the
 same record (by master name and local id), and one found stops the build and names the plugin to
 patch instead.
@@ -351,6 +359,46 @@ def patch_perk_drop_ability(buf, ctx, fid_hex):
     return new, f'PERK {fid:08X}: {dropped} ability entr{"y" if dropped == 1 else "ies"} removed, {len(buf)} -> {len(new)} B'
 
 
+def patch_race_head_parts(buf, ctx, fid_hex, sex, parts_hex):
+    fid = int(fid_hex, 16)
+    if sex not in ('male', 'female'):
+        raise SystemExit(f'race-head-parts: {sex!r} is neither male nor female')
+    parts = [int(x, 16) for x in parts_hex.split(',') if x]
+    if not parts:
+        raise SystemExit('race-head-parts: no head parts given')
+    hit = record_at(buf, fid, b'RACE')
+    if hit is None:
+        raise SystemExit(f'race-head-parts: no RACE {fid:08X} in the plugin')
+    o, flags, size = hit
+    if flags & COMPRESSED:
+        raise SystemExit(f'race-head-parts: RACE {fid:08X} is compressed; this patch rewrites uncompressed records only')
+    subs = subrecords(buf[o + 24:o + 24 + size])
+    sigs = [sig for sig, _ in subs]
+    if b'NAM0' not in sigs:
+        raise SystemExit(f'race-head-parts: RACE {fid:08X} has no head data (NAM0)')
+    marker = b'MNAM' if sex == 'male' else b'FNAM'
+    start = next((i for i in range(sigs.index(b'NAM0') + 1, len(subs)) if sigs[i] == marker), None)
+    if start is None:
+        raise SystemExit(f'race-head-parts: RACE {fid:08X} has no {sex} head data')
+    end = next((i for i in range(start + 1, len(subs)) if sigs[i] in (b'MNAM', b'FNAM', b'NAM8', b'RNAM')), len(subs))
+    current, rest, at, i = [], [], None, start + 1
+    while i < end:
+        if sigs[i] == b'INDX' and i + 1 < end and sigs[i + 1] == b'HEAD':
+            at = len(rest) if at is None else at
+            current.append(struct.unpack('<I', subs[i + 1][1])[0])
+            i += 2
+            continue
+        rest.append(subs[i])
+        i += 1
+    if current == parts:
+        return buf, f'RACE {fid:08X} {sex} already has these {len(parts)} head parts'
+    at = 0 if at is None else at
+    pairs = [s for n, part in enumerate(parts) for s in ((b'INDX', struct.pack('<I', n)), (b'HEAD', struct.pack('<I', part)))]
+    new = rebuilt(buf, o, join_subrecords(subs[:start + 1] + rest[:at] + pairs + rest[at:] + subs[end:]), flags)
+    was, now = ','.join(f'{x:08X}' for x in current), ','.join(f'{x:08X}' for x in parts)
+    return new, f'RACE {fid:08X} {sex} head parts {was} -> {now}, {len(buf)} -> {len(new)} B'
+
+
 LOCALIZED = 0x80
 LSTRINGS = {b'FULL', b'DESC', b'NNAM', b'CNAM', b'ONAM', b'RNAM', b'SHRT', b'TNAM'}  # the lstring-typed subrecords of SPEL, PERK, MGEF and kin
 
@@ -454,10 +502,11 @@ def patch_spell_magnitude(buf, ctx, fid_hex, value):
 
 
 PATCHES = {'esl': patch_esl, 'hdpt-gender-from-master': patch_hdpt_gender_from_master, 'drop-record': patch_drop_record,
-           'flst-set': patch_flst_set, 'perk-drop-ability': patch_perk_drop_ability, 'spell-magnitude': patch_spell_magnitude}
+           'flst-set': patch_flst_set, 'perk-drop-ability': patch_perk_drop_ability, 'spell-magnitude': patch_spell_magnitude,
+           'race-head-parts': patch_race_head_parts}
 NEEDS_MASTERS = {'hdpt-gender-from-master', 'spell-magnitude'}
-RESIZES = {'drop-record', 'flst-set', 'perk-drop-ability', 'spell-magnitude'}
-RECORD_KINDS = {'drop-record', 'flst-set', 'perk-drop-ability', 'spell-magnitude'}
+RESIZES = {'drop-record', 'flst-set', 'perk-drop-ability', 'spell-magnitude', 'race-head-parts'}
+RECORD_KINDS = {'drop-record', 'flst-set', 'perk-drop-ability', 'spell-magnitude', 'race-head-parts'}
 
 
 def record_key(masters, plugin, fid):
