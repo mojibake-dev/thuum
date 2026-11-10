@@ -96,7 +96,9 @@ class ServerSpec(BaseModel):
     timeScale: float | None = None
     # the run's own cure list (the cureSpells server setting, memo D56 A: the listed spells removed from every player's game
     # at login and every minute): "<hex id>:<plugin>" strings, [] lifting every cure, so a probe's seat can turn (D-T3 B,
-    # Sanguinare Vampiris b8780:Skyrim.esm lifted per run until playtest 51 verifies a turn). None keeps the file's
+    # Sanguinare Vampiris b8780:Skyrim.esm lifted per run until playtest 51 verifies a turn); each plugin as the run's load
+    # order writes it, case for case, or the runner refuses the run (the server skips an unresolved cure silently). None
+    # keeps the file's
     cureSpells: list[str] | None = None
 
 

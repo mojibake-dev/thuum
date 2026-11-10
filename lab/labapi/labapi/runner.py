@@ -523,7 +523,15 @@ class Runner:
             if world_globals is not None:
                 d["worldGlobals"] = world_globals
             if cures is not None:
-                # ADR-068 rung 5's D-T3 B: a probe lifts a cure for its run alone, the version's file untouched
+                # ADR-068 rung 5's D-T3 B: a probe lifts a cure for its run alone, the version's file untouched. The server
+                # matches a cure's plugin by its name case for case and skips one it cannot resolve without a word (fork
+                # FormDesc.cpp:62-70, ActionListener.cpp:6765-6770), so an entry naming a plugin the run's load order lacks
+                # is refused here, before a probe reads a cure that never ran as one lifted
+                plugins = {Path(p).name for p in d.get("loadOrder") or []}
+                unknown = [c for c in cures if c.split(":", 1)[1] not in plugins]
+                if unknown:
+                    raise RunnerError(f"E_RUN_SETTINGS: cureSpells {unknown} name a plugin the run's load order lacks "
+                                      "(the server matches plugin names case for case)")
                 d["cureSpells"] = list(cures)
             if hour is not None:
                 # the clock is a pure function of the wall clock and the time block (wire-rules

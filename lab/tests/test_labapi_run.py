@@ -2449,6 +2449,23 @@ class CellHostSteps(RunTests):
         rec = self.services.runner.last_run
         self.assertEqual(rec.clock_epoch, laid["time"]["epoch"], "the restart laid the run's own epoch again")
 
+    def test_a_runs_cure_must_name_a_plugin_of_its_load_order(self):
+        """The server matches a cure's plugin case for case and skips an unresolved one silently (fork FormDesc.cpp:62-70,
+        ActionListener.cpp:6765-6770): a cure naming a plugin the run's load order lacks, or one in another case, is the
+        run's settings error before the server starts, never a cure the probe believes it laid."""
+        files = self._settings_files()
+        files["1.6.1170"].write_text(json.dumps({"name": "thuum lab", "npcEnabled": False,
+                                                 "loadOrder": ["/srv/skymp/esm/Skyrim.esm", "/srv/skymp/esm/Update.esm"]}) + "\n")
+        run_id, body = self._run('id: t-cure\nclients: [c1]\nserver: {cureSpells: ["b8780:Skyrim.esm"]}\nsteps:\n  - c1: connect\n')
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertEqual(json.loads((self.tmp / "server-settings-run.json").read_text())["cureSpells"], ["b8780:Skyrim.esm"])
+        for cure in ("b8780:skyrim.esm", "b8780:Dawnguard.esm"):
+            with self.subTest(cure=cure):
+                run_id, body = self._run(f'id: t-cure-bad\nclients: [c1]\nserver: {{cureSpells: ["{cure}"]}}\nsteps:\n  - c1: connect\n')
+                self.assertNotEqual(body["verdict"], "green", body)
+                self.assertTrue(any("E_RUN_SETTINGS" in f["error"] and cure in f["error"] for f in body["failures"]), body["failures"])
+        self.assertNotIn("cureSpells", json.loads(files["1.6.1170"].read_text()), "the version's own file is untouched")
+
     def test_a_runs_game_hour_starts_the_servers_clock_through_the_overlay(self):
         files = self._settings_files()
         run_id, body = self._run("id: t-hour\nclients: [c1]\nserver: {gameHour: 7.9}\nsteps:\n  - c1: connect\n")
