@@ -634,3 +634,13 @@ TURN_SIGN) that ramps lockAngle with the pick snapped: HYPOTHESIS that the menu'
   before the kill (lab/.cache/drafts/fifty/x-corpse-lay-crash.yaml by path). Ids by `just addr`
   on 2026-11-06; layouts CommonLib's (file:line in the header); the roles the report's static
   read (HYPOTHESIS). Written 2026-11-06; never run. 1.6.1170 only.
+- acting-frame.js: whom a fragment's Game.GetPlayer() names on a seat that applies a relayed quest stage, and what that call's
+  stack holds at its root (ADR-068 rung 5's H-AP1; docs/research/rung5-quests-2026-11-09.md section 2; the probe
+  x-acting-frame by path, lab/.cache/drafts/rung5). native-frame.js's attach on NativeFunctionBase::Call (104651, `just addr`
+  0x143dc00), filtered to Game.GetPlayer by the bound IFunction's own class and name; per hit, the stack's root frame (its
+  owningObjectType's name, owningFunction's name, self's handle kind, mid and low 32 bits) walked through previousFrame, and the
+  returnValue after the call. A root whose self is the watched quest (LAB_PARAMS QUEST, default 0x74a83) or whose script ends in
+  the quest's QF suffix prints as a quest row (ownScript true with quest false reads H-AP1 false); platform calls past PROWS are
+  counted (platformQuiet) and skip the walk. Reads only, no engine call from a listener; a liveness row with a kernel32!Sleep
+  pulse. Layouts CommonLib b93280e8's (Stack.h, StackFrame.h, Variable.h, ObjectTypeInfo.h, Object.h; file:line in the header).
+  Fresh-reviewed 2026-11-09 (GO WITH NOTES, the notes applied as written); never run. 1.6.1170 only.
