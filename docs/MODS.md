@@ -525,9 +525,11 @@ same source when the layer merges does not move it (a rebuild's DLL differs in i
 
 **rotfern's eyes (thuum D-E1; Eli, 2026-11-09: "After she kills Miraak and becomes hermaeus moras champion is when
 she gets the eyes").** The row `rotfern-eyes-1.0` is lab/rotfern-eyes' companion plugin, of source `ci`:
-`thuum/20191` (rotfern-eyes-build, pipeline 5699, commit f244179d) and its lab/rotfern-eyes/dist. It holds
+`thuum/20234` (rotfern-eyes-build, pipeline 5706, commit 351ed80d) and its lab/rotfern-eyes/dist. It holds
 RotfernEyes.esp, which build_esp.py writes as the same 634 bytes every run, and Scripts\RotfernEyesAlias.pex. The
-Creation Kit's own PapyrusCompiler.exe compiled the script on sky-build in 20 s, with 0 errors and 0 warnings. Its
+Creation Kit's own PapyrusCompiler.exe compiled the script on sky-build in 22 s, with 0 errors and 0 warnings
+(the first build, job 20191 of pipeline 5699, came before thuum-fa's review: its plugin filled the alias by unique
+actor 0x7, and its script carried the earlier doc comment; the code is the same). Its
 inputs come from core's /persist/ck, served to sky-ci and sky-build only and never put in a repo or an artifact:
 Bethesda's Scripts.zip and SKSE64 2.2.6's script sources, SKSE's first on the import path, because HeadPart and the
 head-part calls are declared only there. The plugin is light and served: masters Skyrim.esm, Dragonborn.esm and
