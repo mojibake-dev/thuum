@@ -2425,9 +2425,20 @@ class CellHostSteps(RunTests):
         self.assertNotIn("start", laid["time"], "the file's start date, as a gameHour run's but for the hour")
         first = laid["time"]["epoch"]
         self.assertNotIn("cureSpells", json.loads(files["1.6.1170"].read_text()), "the version's own file is untouched")
+        laid_at, system = [], self.services.system
+        real_run = system.run
+
+        def run(cmd, timeout=120.0, env=None):
+            if cmd[:2] == ["docker", "compose"] and ("up" in cmd or "restart" in cmd):
+                laid_at.append(json.loads(overlay.read_text())["time"]["epoch"])
+            return real_run(cmd, timeout, env)
+
+        system.run = run
         run_id, body = self._run("id: t-vamp2\nclients: [c1]\nserver: {timeScale: 1440}\nsteps:\n  - c1: connect\n"
                                  "  - wait: 1\n  - server: restart\n")
         self.assertEqual(body["verdict"], "green", body)
+        self.assertEqual(len(laid_at), 2, laid_at)
+        self.assertEqual(laid_at[0], laid_at[1], "the restart lays the run's own epoch again")
         laid = json.loads(overlay.read_text())
         self.assertNotEqual(laid["time"]["epoch"], first, "each run's rate starts at its own start")
         ups = [env for cmd, env in zip(self.services.system.commands, self.services.system.envs)
