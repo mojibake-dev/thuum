@@ -235,6 +235,14 @@ d["loadOrder"] = json.load(open(pinned))
 if d.get("weatherSync"):
     d["weather"] = {"changeGameMinutes": 1440, "seed": 1,
                     "pools": {"3c:Skyrim.esm": [{"weather": "12f89:Skyrim.esm", "chance": 100}]}}
+# rung 5's quest keys (thuum ADR-068 rung 5, r5-settings, deployed with rung 5's stage 2026-11-10): the legacy server
+# has none of their words (ScriptVariables' login watch, the player-class split, the derived quest scope), so each one
+# was an undeclared divergence in every session: m4-scripts-5-second f6ca339d's T2 of 16:40Z, 413 watch lines over all
+# 52 sessions, where every green T2 before the deploy (013692c7 at 10:29Z) had none. T2 compares the two stacks on
+# what both know, as it pins the load order and the weather; rung 5's own sessions and its T3 prove these keys
+for k in ("conditionVariables", "playerQuests", "playerQuestVariables", "playerQuestGlobals", "playerQuestCallers",
+          "questScope"):
+    d.pop(k, None)
 json.dump(d, open(t2, "w"), indent=2)
 d["loadOrder"] = [p for p in d["loadOrder"] if not p.lower().endswith(".esl")]
 json.dump(d, open(legacy, "w"), indent=2)
