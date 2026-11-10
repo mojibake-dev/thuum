@@ -224,14 +224,18 @@ def quest_scripts(W: World, q: str) -> list[tuple[str, list]]:
     return out
 
 
-MADE = (".placeatme(", ".placeactoratme(")
+# the tag of a PlaceAtMe or PlaceActorAtMe result itself: the call last in the tag, its arguments' own calls one level deep
+MADE = re.compile(r"\.place(?:actor)?atme\((?:[^()]|\([^()]*\))*\)$")
 
 
 def verdict(W: World, subject: str, script: str, fkey: str, ctx: list) -> str:
-    """Which tally a counted call joins: the player's, the world's, or made here: a call on a reference the same function
+    """Which tally a counted call joins: the player's, the world's, or made here: a call on the reference the same function
     placed (a PlaceAtMe or PlaceActorAtMe result, such as the marker PlayerVampireQuestScript places at its target and
-    disables), which no other seat holds, so it is neither the player's state nor the world's and is reported alone."""
-    if any(m in subject for m in MADE):
+    disables), which no other seat holds, so it is neither the player's state nor the world's and is reported alone. Only
+    the placed reference itself is made here: a value derived from it (its base, as in
+    Game.GetPlayer().PlaceActorAtMe(X).GetActorBase().SetEssential(true)) is judged as any other subject, and a tag the
+    index cut at its length cap is never made here."""
+    if len(subject) < C.CAP and MADE.search(subject):
         return "madeHere"
     return "counted" if W.tag_is_player(subject, script, fkey, ctx) else "notPlayer"
 

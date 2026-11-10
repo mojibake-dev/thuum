@@ -114,6 +114,9 @@ def skyrim_esm():
         quest(0xB005, "Created", aliases=alias(0, "Player", [("ALFR", 0x14)]) + alias(1, "Item", [("ALCO", 0xD001), ("ALCA", 0x80000000)])),
         # a location alias: the world's whatever the rest
         quest(0xB006, "Located", aliases=alias(0, "Player", [("ALFR", 0x14)]) + alias(1, "Where", kind="ALLS")),
+        # no alias; its script places an actor at the player and makes that actor's base essential: a value derived from
+        # the placed reference is no made-here call, so the quest is the world's
+        quest(0xB007, "SpawnQ", quest_vmad([("SpawnScript", [])])),
     ])
     info = record("INFO", 0xE002, field("EDID", zs("PQInfo")) + ctda(629, 0xB001, "::Status_var") + ctda(72, 0xC001))
     return b"".join([
@@ -200,6 +203,13 @@ def scripts():
                                [a.static("Game", "GetPlayer", "::temp0"), a.call("Turn", "::PQ_var", [a.id("::temp0")])],
                                locals_=[("::temp0", "actor")]))])
     a = Asm()
+    out["SpawnScript"] = a.build("SpawnScript", "Quest", functions=[
+        ("OnInit", a.fn([], [a.static("Game", "GetPlayer", "::temp0"),
+                             a.call("PlaceActorAtMe", "::temp0", [a.none()], dest="::temp1"),
+                             a.call("GetActorBase", "::temp1", [], dest="::temp2"),
+                             a.call("SetEssential", "::temp2", [pex.Value(5, b"\x01")])],
+                        locals_=[("::temp0", "actor"), ("::temp1", "actor"), ("::temp2", "actorbase")]))])
+    a = Asm()
     out["WorldScript"] = a.build("WorldScript", "Quest", props=[("SomeRef", "objectreference")], functions=[
         ("OnInit", a.fn([], [a.call("Enable", "::SomeRef_var", [])]))])
     return out
@@ -257,7 +267,7 @@ class CensusTests(unittest.TestCase):
         self.assertEqual([n for n, _ in lo.plugins], ["Skyrim.esm", "Mod.esp", "Client.esp"])
         self.assertEqual(lo.server, {"skyrim.esm", "mod.esp"})
         self.assertEqual(sorted(lo.loose), ["activemagiceffect", "actor", "callerscript", "form", "globalvariable",
-                                            "objectreference", "pqscript", "quest", "worldscript"])
+                                            "objectreference", "pqscript", "quest", "spawnscript", "worldscript"])
         self.assertEqual(lo.desc(C.key("skyrim.esm", 0xEAFD5)), "eafd5:Skyrim.esm")
         self.assertEqual(lo.runtime(C.key("mod.esp", 0x800)), 0x01000800)
         self.assertEqual(lo.runtime(C.key("client.esp", 0x801)), 0x02000801)
@@ -348,6 +358,16 @@ class CensusTests(unittest.TestCase):
         self.assertEqual((v[k(0xB004)]["half"], v[k(0xB004)]["player"]), ("natives", False))
         self.assertEqual(dict(v[k(0xB004)]["notPlayer"]), {("enable", "prop:someref"): 1})
         self.assertTrue(v[k(0xB005)]["player"], "an item created in the player's alias is the player's")
+        spawn = v[k(0xB007)]
+        self.assertEqual((spawn["half"], spawn["player"], dict(spawn["madeHere"])), ("natives", False, {}))
+        self.assertEqual(dict(spawn["notPlayer"]), {("setessential", "getplayer.placeactoratme(None).getactorbase()"): 1},
+                         "a value derived from the placed actor is judged as any subject, never made here")
+        self.assertIsNotNone(QC.MADE.search("param:target.placeatme(prop:xmarker,1,False,False)"))
+        self.assertIsNotNone(QC.MADE.search("getplayer.placeactoratme(prop:lvl.getat(0),1)"), "an argument's own call")
+        self.assertIsNone(QC.MADE.search("getplayer.placeactoratme(None).getactorbase()"))
+        long_tag = "param:" + "x" * C.CAP + ".placeatme(None)"
+        self.assertIsNotNone(QC.MADE.search(long_tag))
+        self.assertEqual(QC.verdict(W, long_tag, "pqscript", ".turn", []), "notPlayer", "a tag at the cap is never made here")
         self.assertFalse(v[k(0xB006)]["player"], "a location alias makes the quest the world's")
         self.assertTrue(v[C.key("mod.esp", 0x800)]["player"])
         # a parameter no caller passes the player to is not the player's
