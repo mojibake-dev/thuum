@@ -1,3 +1,49 @@
+# b-quest-stage-restart v2 DRAFT (thuum-fa, 00:5x PST 2026-11-10): the additions Eli approved now as W1 B (14:4x PST 2026-11-09 in
+# numidium's session, ADR-068's "Rung 5's words", docs/DECISIONS.md :4872-4874, verbatim there: "b-quest-stage-restart v2 is
+# approved now for its additions only (the runs-replay line for both seats, a relaunched c2 reading 0x10d3bb running at its login,
+# the refusal claim tightened to "E_QUEST_" == 0)"; ADR-064 decision 4; the plan's section 6 W1), for rung 5 (fork
+# m4-scripts-5-quests at the stage's head on the server and both seats; every line below read at fork 90601f16, 013692c7 and its
+# one TypeScript commit, the cited server lines 013692c7's). Line by line:
+# (1) added, after the restart's reconnects: the runs-replay line for both seats, 'server.log_count("QuestStage: actor
+#     ff[0-9a-f]+ sent [1-9][0-9]* running and [0-9]+ stopped quest.s. around the stages after a login") >=
+#     snapshot("runsLinesBefore") + 2' (SendQuestStages, ActionListener.cpp :7682-7683, printed beside the old login line at every
+#     login once the record's starts are served ahead of the stages): two more lines with a running quest than before the restart,
+#     10d3bb recorded running by the start c1's console set makes (an engine start, reported as the start word). Its baseline is a
+#     server log-count and a snapshot just before the restart (steps added there), since a login before the restart may
+#     already serve a running quest another seat's engine started. HYPOTHESIS under it: c1's console setstage on the stopped
+#     quest starts it through the engine's own start, which raises the platform's questStart (the TESQuestStartStopEvent sink,
+#     EventHandler.cpp); the server's "starts 10d3bb" count after step 2 is recorded beside the baseline for that read. If no
+#     start prints, the record holds no run of 10d3bb and (1) reads red on the frame, not the verb (a startquest ahead of the
+#     setstage would be the fix, a step for Eli's word), while (2) still holds through the stage's own Quest.Start;
+# (2) added at step 4: c2.quest(0x10d3bb).running() == true after the relaunched c2's login (the served start word applied ahead
+#     of the served stage);
+# (3) both refusal claims (steps 2 and 3) tightened from 'server.log_count("E_QUEST_(?!OWN_START)") == 0' to
+#     'server.log_count("E_QUEST_") == 0', a strengthening: rung 5 retires E_QUEST_OWN_START (OnQuestStage prints no such line at
+#     90601f16, nor since 155c12fa; its codes are ACTING, CHURN, DENIED, FULL, PLAYER, RUNS_FULL, STAGE, UNKNOWN and UNLISTED), so
+#     the lookahead excludes nothing. Expected to hold on the stage's head, fork 013692c7, whose client fixes (ad25ac10, d8182c19)
+#     stop reporting client-only plugins' quests (d8182c19's skipClientOnly, questStageService.ts :1076-1092, called at :778 for a
+#     word and :1188 for a stage) and the login's own load-time quest events, except in the reconnect window after the restart,
+#     which "expected to hold on the stage's head" missed: the claim after the restart depends on fork 90601f16, the client fix
+#     that keeps the client-only set across a reconnect (keepOrDropPluginList, questStageService.ts :1044-1060, called at :1260;
+#     its line "the server's plugin list kept from the last connection (<k> client-only plugin(s)) until the new answer", :1055);
+#     each seat's "the server serves <n> plugin(s): quests of <m> client-only plugin(s) are this seat's own" (:1029) and "the
+#     server's plugin list unavailable" (:1041) counts and the server's E_QUEST_UNKNOWN count, read before each E_QUEST_ claim,
+#     say which seat lacked the set. Tonight's x-quest-runs v1 20261110-071422 read one churner, RL_DetectionQuest 0x30002859 of
+#     RLAiO.esp, a client-only plugin (1,514 and 1,559 run flips in about ten minutes on c1 and c2), whose reports would reach the
+#     server as E_QUEST_UNKNOWN (a quest in no loaded plugin, OnQuestStage :3508-3515, one line a report); on 155c12fa alone,
+#     whose reports() filters only the login's list and the player class (reports() unchanged at :1377-1382; the client-only
+#     filter is d8182c19's, above), the tightened claim reads red on that, not on this verb;
+# Run words are read at the lab's default (on): (1) and (2) are the run words' (the record's run of 10d3bb, the served start),
+# read with the client setting questRuns on unless false (questStageService.ts runsEnabled :1446-1449) and no lever. The lab keeps
+# that default under every answer to D-Q4 (D-Q4 A would turn the words off only in playtest 51's own profile; the coordinator's
+# word, 2026-11-10), so nothing here changes with D-Q4.
+# Every other step and claim byte for byte; the steps added are the two server log-counts and the snapshot before the restart,
+# and the ten plugin-list reads, five before each E_QUEST_ claim (the fresh review's FIX FIRST): on each seat a log-count of the
+# client-only set's line ("the server serves <n> plugin(s): quests of <m> client-only plugin(s) are this seat's own",
+# questStageService.ts :1029) and one of "the server's plugin list unavailable" (:1041), and the server's count of
+# "E_QUEST_UNKNOWN: ... which is in no loaded plugin" (ActionListener.cpp :3511-3512).
+# Commits alone (rule 13), after its fresh review and its green on the stage.
+#
 # b-quest-stage-restart (thuum-magnus, drafted 05:37 PDT 2026-10-31; docs/verbs/quest-stage.md, ADR-056: the verb's restart scenario,
 # named in its Tests since 2026-10-29 and noted as a debt on 10-30): the world's quest stages survive a server restart and reach a
 # fresh seat at its login. The frame is b-quest-stage's (mode all with the main quest's intro chain and the DLC starts denied, the
@@ -46,11 +92,21 @@ steps:
   - wait: 5
   - c1: quest-stage {quests: [0x10d3bb], stages: [10]}
   - c2: quest-stage {quests: [0x10d3bb], stages: [10]}
+  - c1: log-count {pattern: "the server serves [0-9]+ plugin.s.: quests of [0-9]+ client-only plugin.s. are this seat.s own"}
+  - c2: log-count {pattern: "the server serves [0-9]+ plugin.s.: quests of [0-9]+ client-only plugin.s. are this seat.s own"}
+  - c1: log-count {pattern: "the server.s plugin list unavailable"}
+  - c2: log-count {pattern: "the server.s plugin list unavailable"}
+  - server: log-count {pattern: "E_QUEST_UNKNOWN: .* which is in no loaded plugin"}
   - assert:
       - c1.quest(0x10d3bb).stageDone(10) == true
       - c2.quest(0x10d3bb).stageDone(10) == true
-      - 'server.log_count("E_QUEST_(?!OWN_START)") == 0'
+      # v2 (W1, header (3)): every E_QUEST_ code, OWN_START retired with rung 5
+      - 'server.log_count("E_QUEST_") == 0'
   # 3. the restart: the journal back from its change form, the login replay to both
+  # v2 (W1, header (1)): the runs-replay line's count before the restart, and c1's start of 10d3bb recorded (a read, not a claim)
+  - server: log-count {pattern: "starts 10d3bb:Skyrim.esm: recorded"}
+  - server: log-count {pattern: "QuestStage: actor ff[0-9a-f]+ sent [1-9][0-9]* running and [0-9]+ stopped quest.s. around the stages after a login"}
+  - server: snapshot {name: runsLinesBefore, of: 'server.log_count("QuestStage: actor ff[0-9a-f]+ sent [1-9][0-9]* running and [0-9]+ stopped quest.s. around the stages after a login")'}
   - wait: 5
   - server: restart
   - wait: 20
@@ -63,11 +119,19 @@ steps:
   - c2: quest-stage {quests: [0x10d3bb], stages: [10]}
   - c1: screenshot
   - c2: screenshot
+  - c1: log-count {pattern: "the server serves [0-9]+ plugin.s.: quests of [0-9]+ client-only plugin.s. are this seat.s own"}
+  - c2: log-count {pattern: "the server serves [0-9]+ plugin.s.: quests of [0-9]+ client-only plugin.s. are this seat.s own"}
+  - c1: log-count {pattern: "the server.s plugin list unavailable"}
+  - c2: log-count {pattern: "the server.s plugin list unavailable"}
+  - server: log-count {pattern: "E_QUEST_UNKNOWN: .* which is in no loaded plugin"}
   - assert:
       - c1.quest(0x10d3bb).stageDone(10) == true
       - c2.quest(0x10d3bb).stageDone(10) == true
       - 'server.log_count("QuestStage: actor ff[0-9a-f]+ sent mode .* [1-9][0-9]* stages after a login") >= 2'
-      - 'server.log_count("E_QUEST_(?!OWN_START)") == 0'
+      # v2 (W1, header (3)): every E_QUEST_ code, OWN_START retired with rung 5
+      - 'server.log_count("E_QUEST_") == 0'
+      # v2 (W1, header (1)): the runs-replay line for both seats, a running quest (10d3bb) served at each reconnect's login
+      - 'server.log_count("QuestStage: actor ff[0-9a-f]+ sent [1-9][0-9]* running and [0-9]+ stopped quest.s. around the stages after a login") >= snapshot("runsLinesBefore") + 2'
   # 4. a fresh game reads the world's stage at its login
   - c2: relaunch {until: gone}
   - c2: connect
@@ -80,4 +144,6 @@ steps:
   - assert:
       - c2.quest(0x10d3bb).stageDone(10) == true
       - c2.quest(0x10d3bb).stage() == 10
+      # v2 (W1, header (2)): the record's run of 10d3bb reached the fresh game, its start served ahead of its stage
+      - c2.quest(0x10d3bb).running() == true
 artifacts: [server.log, c1.log, c2.log, screenshots]
