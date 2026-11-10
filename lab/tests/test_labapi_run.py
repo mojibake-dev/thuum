@@ -84,6 +84,8 @@ class Doubles:
         self.stuck: set[str] = set()  # the clients whose engine moves nothing on a transfer (the driver's after-count throw)
         self.aliases: dict[str, dict[tuple[int, int], int]] = {}  # the references a client's alias reads: (quest, alias) -> refr
         self.standing: dict[str, dict[int, dict[int, int]]] = {}  # the ranks a client's factions read: actor -> faction -> rank
+        self.script_vars: dict[str, dict[int, dict[str, int]]] = {}  # the ints a client's script-vars reads: form -> "<script>::<var>" -> value
+        self.objectives: dict[str, dict[int, set[int]]] = {}  # the objectives a client's game shows: quest -> displayed indices
 
     def turn(self):
         for name in self.names:
@@ -174,6 +176,23 @@ class Doubles:
                 ranks = (self.standing.get(name) or {}).get(actor)
                 data = ({"formId": actor, "ranks": {str(f): ranks.get(f, -2) for f in fs}, "members": {str(f): f in ranks for f in fs}, "crime": 0}
                         if ranks is not None else {"error": f"no actor {actor:x} in this game"})
+            elif step["action"] == "script-vars":
+                # the driver's contract: the form as a form id (lab-api resolves a FormDesc first), the keys as written
+                form, keys = step["args"].get("form"), step["args"].get("keys")
+                assert isinstance(form, int) and not isinstance(form, bool), step["args"]
+                held = (self.script_vars.get(name) or {}).get(form)
+                rows = []
+                for k in keys:
+                    script, _, var = k.partition("::")
+                    rows.append({"form": form, "script": script, "var": var, "k": 3, "i": held[k]} if held and k in held
+                                else {"form": form, "script": script, "var": var, "error": "no such variable"})
+                data = {"form": form, "vars": rows} if held is not None else {"error": f"no form {form:x} in this game"}
+            elif step["action"] == "quest-objectives":
+                q, wanted = step["args"].get("quest"), step["args"].get("objectives")
+                assert isinstance(q, int) and not isinstance(q, bool), step["args"]
+                shown = (self.objectives.get(name) or {}).get(q)
+                data = ({"quest": q, "running": True, "objectives": {str(i): {"displayed": i in shown, "completed": False} for i in wanted}}
+                        if shown is not None else {"error": f"no quest {q:x} in this game"})
             elif step["action"] == "av-table":
                 data = {"ids": list(range(1000, 1164))}
             elif step["action"] == "add-perks":
@@ -1768,6 +1787,63 @@ class RungFourSteps(RunTests):
         self.assertEqual(errors, ["server has no alias fills to read (no AliasFill: a server before ADR-068 rung 4)",
                                   "server has no world globals to read (no WorldGlobal: a server before ADR-068 rung 4)",
                                   "server holds no record for 0x3ac73"])
+
+
+RUNG_FIVE = """
+id: t-rung5
+clients: [c1, c2]
+steps:
+  - c1: connect
+  - c2: connect
+  - c2: script-vars {form: 0xeafd5, keys: ["PlayerVampireQuestScript::::VampireStatus_var"]}
+  - c2: quest-objectives {quest: 0x74a83, objectives: [10, 20]}
+  - assert:
+      - c2.script_vars(0xeafd5).value("::VampireStatus_var") == 0
+      - server.script_variables().value(0xeafd5, "::VampireStatus_var") == c2.script_vars(0xeafd5).value("::VampireStatus_var")
+      - c2.quest(0x74a83).objectiveDisplayed(10) and not c2.quest(0x74a83).objectiveDisplayed(20)
+      - server.quest_runs(0x74a83).running and server.quest_runs(0x74a83).seq == 2
+      - server.quest_record(0x74a83).stageDone(10) and server.quest_record(0x2ba16).count == 0
+"""
+
+
+@needs_deps
+class RungFiveSteps(RunTests):
+    def test_the_seats_reads_and_the_servers_records_meet_in_one_claim_block(self):
+        """ADR-068 rung 5's grammar end to end: the script-vars and quest-objectives steps reach the driver with their form
+        ids, the board keeps each answer, and the claims read them beside labState's quest runs, stage record and script
+        variables."""
+        self.doubles.script_vars = {"c2": {0xEAFD5: {"PlayerVampireQuestScript::::VampireStatus_var": 0}}}
+        self.doubles.objectives = {"c2": {0x74A83: {10}}}
+        self.state.quest_runs = [{"quest": 0x74A83, "running": True, "seq": 2}]
+        self.state.quest_stages = [{"quest": 0x74A83, "stage": 10}]
+        self.state.script_variables = [{"form": 0xEAFD5, "script": "PlayerVampireQuestScript", "var": "::VampireStatus_var",
+                                        "k": 3, "value": 0, "seq": 1}]
+        run_id, body = self._run(RUNG_FIVE)
+        self.assertEqual(body["verdict"], "green", json.dumps(body, indent=1))
+        sent = [(c, a) for c, act, a in self.doubles.seen if act in ("script-vars", "quest-objectives")]
+        self.assertEqual(sent, [("c2", {"form": 0xEAFD5, "keys": ["PlayerVampireQuestScript::::VampireStatus_var"]}),
+                                ("c2", {"quest": 0x74A83, "objectives": [10, 20]})])
+
+    def test_a_server_without_the_kinds_is_red_on_data_never_green(self):
+        self.doubles.script_vars = {"c2": {0xEAFD5: {"PlayerVampireQuestScript::::VampireStatus_var": 0}}}
+        self.doubles.objectives = {"c2": {0x74A83: {10}}}
+        run_id, body = self._run(RUNG_FIVE)
+        self.assertEqual(body["verdict"], "red", body)
+        self.assertEqual({f["kind"] for f in body["failures"]}, {"assertion-data"}, body["failures"])
+        errors = sorted(set(f["error"] for f in body["failures"]))
+        self.assertEqual(errors, ["server has no quest runs to read (no labState questRuns: a server before ADR-068 rung 5)",
+                                  "server has no quest stages to read (no labState questStages: a server before ADR-068 rung 5)",
+                                  "server has no script variables to read (no labState scriptVariables: a server before ADR-068 rung 5)"])
+
+    def test_a_formdesc_form_or_quest_reaches_the_driver_as_its_id(self):
+        # the runner resolves script-vars' form and quest-objectives' quest through the run's load order, alias's way
+        self.services.runner.tables.slots.update({"skyrim.esm": (False, 0), "dawnguard.esm": (False, 2)})
+        runner = self.services.runner
+        self.assertEqual(runner._client_args("script-vars", {"form": "0eafd5:Skyrim.esm", "keys": ["A::b"]}),
+                         {"form": 0xEAFD5, "keys": ["A::b"]})
+        self.assertEqual(runner._client_args("quest-objectives", {"quest": "71d0:Dawnguard.esm", "objectives": [1]}),
+                         {"quest": 0x020071D0, "objectives": [1]})
+        self.assertEqual(runner._client_args("script-vars", {"form": 0x74A83, "keys": ["A::b"]})["form"], 0x74A83)
 
 
 CHEST_MOVES = """

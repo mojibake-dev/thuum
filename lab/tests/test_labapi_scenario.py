@@ -467,6 +467,34 @@ class NpcKillStep(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 load_scenario(f"id: x-g\nclients: [c1]\nserver: {{worldGlobals: {bad}}}\nsteps:\n  - wait: 1\n")
 
+    def test_script_vars_and_quest_objectives_name_what_they_read(self):
+        # ADR-068 rung 5's two seat reads: a quest's or a reference's script variables by "<script>::<var>", and a quest's
+        # objectives by index; a FormDesc form or quest passes as written for the runner to resolve
+        from labapi.scenario import load_scenario, playtest_step
+
+        head = "id: x-sv\nclients: [c1, c2]\nsteps:\n  - c2: "
+        step = load_scenario(head + 'script-vars {form: 0xeafd5, keys: ["PlayerVampireQuestScript::::VampireStatus_var"]}\n').steps[0]
+        self.assertEqual((step.kind, step.client, step.action, step.args),
+                         ("client", "c2", "script-vars", {"form": 0xEAFD5, "keys": ["PlayerVampireQuestScript::::VampireStatus_var"]}))
+        self.assertEqual(load_scenario(head + 'script-vars {form: "1f251:Skyrim.esm", keys: ["MG01QuestScript::NiryaSkillVar"]}\n').steps[0].args,
+                         {"form": "1f251:Skyrim.esm", "keys": ["MG01QuestScript::NiryaSkillVar"]})
+        step = load_scenario(head + "quest-objectives {quest: 0x74a83, objectives: [0, 10]}\n").steps[0]
+        self.assertEqual((step.action, step.args), ("quest-objectives", {"quest": 0x74A83, "objectives": [0, 10]}))
+        for bad in ("script-vars", "script-vars {}", "script-vars {form: 0xeafd5}", 'script-vars {keys: ["A::b"]}',
+                    "script-vars {form: 0xeafd5, keys: []}", 'script-vars {form: 0xeafd5, keys: ["VampireStatus"]}',
+                    'script-vars {form: 0xeafd5, keys: ["::VampireStatus_var"]}', 'script-vars {form: 0xeafd5, keys: ["A::"]}',
+                    'script-vars {form: 0, keys: ["A::b"]}', 'script-vars {form: true, keys: ["A::b"]}',
+                    'script-vars {form: 0xeafd5, keys: ["A::b"], formId: 1}',
+                    "quest-objectives", "quest-objectives {quest: 0x74a83}", "quest-objectives {objectives: [1]}",
+                    "quest-objectives {quest: 0x74a83, objectives: []}", "quest-objectives {quest: 0x74a83, objectives: [-1]}",
+                    "quest-objectives {quest: 0x74a83, objectives: [0x10000]}", 'quest-objectives {quest: 0x74a83, objectives: ["10"]}',
+                    "quest-objectives {quest: 0x74a83, objectives: [true]}", "quest-objectives {quest: 0x74a83, objectives: [1], stage: 10}"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(head + bad + "\n")
+        self.assertEqual(playtest_step("quest-objectives {quest: 0x74a83, objectives: [10]}"),
+                         ("quest-objectives", {"quest": 0x74A83, "objectives": [10]}))
+        self.assertEqual(playtest_step('script-vars {form: 0xeafd5, keys: ["A::b"]}'), ("script-vars", {"form": 0xEAFD5, "keys": ["A::b"]}))
+
     def test_kill_ref_and_respawn_ref_take_a_form_id(self):
         # a game-file actor killed by the server (its killer a client of the scenario) or put up again at once
         from labapi.scenario import load_scenario
