@@ -237,6 +237,7 @@ class EvaluatorTests(unittest.TestCase):
         from labapi.assertions import clients_needing_views
 
         self.assertEqual(clients_needing_views("abs(c2.view(c1).x - server.actor(c1).x) < 50", ["c1", "c2"]), {"c2"})
+        self.assertEqual(clients_needing_views("c2.head_part_of(c1, 2) == c1.head_part(2)", ["c1", "c2"]), {"c2"})
         self.assertEqual(clients_needing_views("c1.sees(c2) == true and c2.sees(c1) == true", ["c1", "c2"]), {"c1", "c2"})
         self.assertEqual(clients_needing_views('server.actor(c1).cell == "x"', ["c1", "c2"]), set())
 
@@ -1321,16 +1322,22 @@ class PartsServer(RichServer):
 
 
 class PartsViews(NearViews):
-    """c1's last head-parts step on its own player; c2 read only c1's figure."""
+    """c1's last head-parts step on its own player; c2 read only c1's figure, 0xff000001 in its near list."""
 
     def __init__(self):
         super().__init__()
         self.read = {"c1": {"actor": 0x14, "parts": [{"id": 0x5162F, "type": 1, "name": "x"},
                                                     {"id": 0x51631, "type": 0, "name": "y"},
                                                     {"id": 0x51505, "type": 3, "name": "z"}]}}
+        self.other = {"c2": {"actor": 0xFF000001, "parts": [{"id": 0x51505, "type": 3, "name": "z"},
+                                                         {"id": 0x5162F, "type": 1, "name": "x"},
+                                                         {"id": 0x51631, "type": 0, "name": "y"}]}}
 
     def head_parts(self, observer):
         return self.read.get(observer)
+
+    def head_parts_other(self, observer):
+        return self.other.get(observer)
 
 
 @needs_deps
@@ -1346,6 +1353,29 @@ class HeadPartTests(unittest.TestCase):
         ev = Evaluator(PartsServer(), PartsViews(), ["c1", "c2"])
         with self.assertRaises(AssertionData):
             ev.evaluate('c2.head_parts() == ""')
+
+    def test_a_figure_s_parts_count_when_the_actor_read_is_the_matched_figure(self):
+        """thuum D-E1: the other seat's view of rotfern's eyes, c2.head_parts_of(c1) against the server's look"""
+        from labapi.assertions import Evaluator
+        ev = Evaluator(PartsServer(), PartsViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate('c2.head_parts_of(c1) == server.actor(c1).headParts'))
+        self.assertTrue(ev.evaluate('c2.head_parts_of(c1) == c1.head_parts()'))
+        # one part by its HDPT type, on the player and on the figure; a type the read lacks is 0
+        self.assertTrue(ev.evaluate('c1.head_part(1) == 0x5162f'))
+        self.assertTrue(ev.evaluate('c2.head_part_of(c1, 3) == 0x51505'))
+        self.assertTrue(ev.evaluate('c1.head_part(2) == 0'))
+
+    def test_another_actor_or_no_read_is_a_data_error(self):
+        from labapi.assertions import AssertionData, Evaluator
+        views = PartsViews()
+        views.other["c2"]["actor"] = 0xFF000009  # the guard 4,800 units off, not c1's figure
+        ev = Evaluator(PartsServer(), views, ["c1", "c2"])
+        with self.assertRaises(AssertionData):
+            ev.evaluate('c2.head_parts_of(c1) == ""')
+        with self.assertRaises(AssertionData):
+            ev.evaluate('c1.head_parts_of(c2) == ""')  # c1 read no other actor
+        with self.assertRaises(AssertionData):
+            ev.evaluate('c2.head_part_of(c1, 2) == 0')  # the same figure check
 
 
 class NodeRotationViews(NearViews):
