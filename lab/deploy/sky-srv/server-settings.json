@@ -96,7 +96,8 @@
     "/srv/skymp/esm/LoweredHoods.esp",
     "/srv/skymp/esm/LoweredHoods_MoreCraftableEquipment.esp",
     "/srv/skymp/esm/vampireinverterdg.esp",
-    "/srv/skymp/esm/rotfern.esp"
+    "/srv/skymp/esm/rotfern.esp",
+    "/srv/skymp/esm/RotfernEyes.esp"
   ],
   "databaseDriver": "file",
   "databaseName": "world",

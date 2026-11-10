@@ -523,6 +523,22 @@ earlier session was lost); 0.1.0 was job 19505 (pipeline 5544, commit 24e1fcce).
 lab/rotferns-fixes builds on main by itself and the row then moves to that job; main's rebuild of the
 same source when the layer merges does not move it (a rebuild's DLL differs in its timestamp bytes).
 
+**rotfern's eyes (thuum D-E1; Eli, 2026-11-09: "After she kills Miraak and becomes hermaeus moras champion is when
+she gets the eyes").** The row `rotfern-eyes-1.0` is lab/rotfern-eyes' companion plugin, of source `ci`:
+`thuum/20191` (rotfern-eyes-build, pipeline 5699, commit f244179d) and its lab/rotfern-eyes/dist. It holds
+RotfernEyes.esp, which build_esp.py writes as the same 634 bytes every run, and Scripts\RotfernEyesAlias.pex. The
+Creation Kit's own PapyrusCompiler.exe compiled the script on sky-build in 20 s, with 0 errors and 0 warnings. Its
+inputs come from core's /persist/ck, served to sky-ci and sky-build only and never put in a repo or an artifact:
+Bethesda's Scripts.zip and SKSE64 2.2.6's script sources, SKSE's first on the import path, because HeadPart and the
+head-part calls are declared only there. The plugin is light and served: masters Skyrim.esm, Dragonborn.esm and
+rotfern.esp (read, never written), at load order 82, right after rotfern.esp and last in the server's list, so no
+served index moves. One start-game-enabled quest has the player as its alias (ALUA 0x7, rung 5's per-player alias).
+At OnInit, OnPlayerLoadGame, OnRaceSwitchComplete and OnLocationChange its script sets her eyes to her usual pair,
+or after DLC2MQ06 the Mora pair, in the vampire variant for her vampire race, by Actor.ChangeHeadPart. It acts only
+when they differ and only for rotfern's two races, and logs "RotfernEyesAlias: <event>: eyes set to <part>". rung
+5's ChangeHeadPart own-player row records the swap on the server. Until that lands, the swap shows on her own game
+only, and the T3 proof (the other seat's view, a relaunch) waits for rung 5's stage.
+
 **CBBE SFW Edition replaces CBBE 2.0.3 (Eli, playtest 48, 2026-11-06: "now all we need is that sfw
 skin to come back in and we're good").** Three rows take the place of the 2.0.3 row.
 `cbbe-sfw-1.1.4@1.6.1170` is the SFW archive (Nexus 74257 file 790860) as its installer lays NeverNude

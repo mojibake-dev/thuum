@@ -82,12 +82,13 @@ order	plugin	mod	light	versions	server	why
 79	LoweredHoods_MoreCraftableEquipment.esp	lowered-hoods-1.9.0	light	all	yes	
 80	vampireinverterdg.esp	vampirism-inverter-dawnguard-1.01	full	all	yes	
 81	rotfern.esp	rotfern	full	all	yes	
-82	SkyUI_SE.esp	skyui-6.11	light	all	client-only	UI
-83	RLAiO.esp	reading-list-1.0	full	all	client-only	book-tracking UI
-84	UnreadBooksGlow.esp	unread-books-glow-sse-with-mcm-2.21	full	all	client-only	book glow
-85	NMNEB.esp	no-more-night-eye-blur-1.1	full	all	client-only	image space only
-86	MCMHelper.esp	mcm-helper-1.6.2@1.6.1170	light	1.6.1170	client-only	UI config
-87	DisableSpellLight_Prebuilt.esp	stealth-detection-fixes-2.2	light	all	client-only	spell light removal, visual
-88	RaceMenuMiscSlider.esp	racemenu-misc-slider-more-bodymorph-slider-for-r-0.1.0	light	all	client-only	RaceMenu sliders
-89	RaceMenuMorphsCBBE.esp	cbbe-2.0.3-racemenu-morphs@1.6.1170	full	1.6.1170	client-only	RaceMenu sliders (CBBE 2.0.3's folder 26, since the SFW swap)
-90	CBBE.esp	cbbe-sfw-1.1.4@1.6.1170	light	1.6.1170	client-only	body (CBBE SFW Edition since 2026-11-06)
+82	RotfernEyes.esp	rotfern-eyes-1.0	light	all	yes	rotfern's eyes by her race and DLC2MQ06 (thuum D-E1); after rotfern.esp, its master
+83	SkyUI_SE.esp	skyui-6.11	light	all	client-only	UI
+84	RLAiO.esp	reading-list-1.0	full	all	client-only	book-tracking UI
+85	UnreadBooksGlow.esp	unread-books-glow-sse-with-mcm-2.21	full	all	client-only	book glow
+86	NMNEB.esp	no-more-night-eye-blur-1.1	full	all	client-only	image space only
+87	MCMHelper.esp	mcm-helper-1.6.2@1.6.1170	light	1.6.1170	client-only	UI config
+88	DisableSpellLight_Prebuilt.esp	stealth-detection-fixes-2.2	light	all	client-only	spell light removal, visual
+89	RaceMenuMiscSlider.esp	racemenu-misc-slider-more-bodymorph-slider-for-r-0.1.0	light	all	client-only	RaceMenu sliders
+90	RaceMenuMorphsCBBE.esp	cbbe-2.0.3-racemenu-morphs@1.6.1170	full	1.6.1170	client-only	RaceMenu sliders (CBBE 2.0.3's folder 26, since the SFW swap)
+91	CBBE.esp	cbbe-sfw-1.1.4@1.6.1170	light	1.6.1170	client-only	body (CBBE SFW Edition since 2026-11-06)
