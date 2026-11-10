@@ -218,3 +218,12 @@ trigger entry rule's, docs/verbs/trigger-entry.md: a trigger whose script is a p
 presser's own seat's, or rung 5's acting scope carries the guest's learning to the guest (its SendTriggerEvent arm names the
 guest's figure as Game.GetPlayer() on the host, and the word's report then names the guest). Pending in lab/gate.yaml, named here,
 until that fix reads green on a guest.
+
+Confirmed (22:36 PST 2026-11-09 (06:36Z 11-10), thuum-fa) by 20261110-062732 on the fixed server (fork canon 862b9375), whose artifacts line (0292261b) kept the
+logs: c2 logs "[verb:traps] trigger entry 709d2 by 14 (enter): relayed to the cell's host (D-C2)" (06:30:04.426Z); the host c1
+logs "relayed entry 709d2 by ff000001: OnTriggerEnter sent to 2 script(s)"; the server logs "ff000001 reports ff000001 entering
+709d2 in cell 371dd (its host ff000000): relayed to the host" and no "learns word" for ff000001. c1's own learning went through
+its WordWallService ("word wall 709d2 entered", then "reported"), the player-own client service; c2's WordWallService never saw
+its own player's entry, which D-C2 A relayed away. The fix is the client's: the presser's own seat's WordWallService takes its
+own player's entry into a word wall's trigger even when the trigger's script runs on the host (D-C2 A unchanged for the script).
+It rides rung 5's client as a TypeScript-only fix; out of pending when b-word-wall reads green on a guest.
