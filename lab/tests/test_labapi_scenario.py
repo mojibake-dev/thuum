@@ -467,6 +467,23 @@ class NpcKillStep(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 load_scenario(f"id: x-g\nclients: [c1]\nserver: {{worldGlobals: {bad}}}\nsteps:\n  - wait: 1\n")
 
+    def test_a_server_block_may_set_the_runs_time_scale_and_cures(self):
+        # ADR-068 rung 5's vampire probes (8(b)): timeScale 1440 and cureSpells [] as the run's own; unnamed, the file's
+        from labapi.scenario import load_scenario
+
+        s = load_scenario("id: x-v\nclients: [c1]\nserver: {timeScale: 1440, cureSpells: []}\nsteps:\n  - wait: 1\n")
+        self.assertEqual((s.server.timeScale, s.server.cureSpells), (1440.0, []))
+        s = load_scenario('id: x-v\nclients: [c1]\nserver: {cureSpells: ["b8780:Skyrim.esm", "0a6ec2:Apocalypse - Magic of Skyrim.esp"]}\n'
+                          "steps:\n  - wait: 1\n")
+        self.assertEqual((s.server.timeScale, s.server.cureSpells), (None, ["b8780:Skyrim.esm", "0a6ec2:Apocalypse - Magic of Skyrim.esp"]))
+        plain = load_scenario("id: x-v\nclients: [c1]\nsteps:\n  - wait: 1\n").server
+        self.assertEqual((plain.timeScale, plain.cureSpells), (None, None))
+        for bad in ("{timeScale: 0}", "{timeScale: -20}", "{timeScale: true}", "{timeScale: '20'}", "{timeScale: 100001}",
+                    "{cureSpells: b8780}", "{cureSpells: [0xb8780]}", '{cureSpells: ["b8780"]}', '{cureSpells: ["Skyrim.esm:b8780"]}',
+                    '{cureSpells: ["xyz:Skyrim.esm"]}', "{cureSpells: true}"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(f"id: x-v\nclients: [c1]\nserver: {bad}\nsteps:\n  - wait: 1\n")
+
     def test_script_vars_and_quest_objectives_name_what_they_read(self):
         # ADR-068 rung 5's two seat reads: a quest's or a reference's script variables by "<script>::<var>", and a quest's
         # objectives by index; a FormDesc form or quest passes as written for the runner to resolve

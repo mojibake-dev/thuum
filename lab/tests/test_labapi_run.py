@@ -2407,6 +2407,36 @@ class CellHostSteps(RunTests):
         self.assertEqual(laid["npcEnabled"], False, "the version's file kept beside the knob")
         self.assertNotIn("worldGlobals", json.loads(files["1.6.1170"].read_text()), "the version's own file is untouched")
 
+    def test_a_runs_time_scale_and_cures_reach_the_server_through_the_overlay(self):
+        """ADR-068 rung 5's vampire probes (8(b)): the run's own clock rate from an epoch of its own, kept through a restart
+        inside the run (a rate multiplies all the time since the epoch, so the file's would jump the calendar), and the
+        run's own cure list, [] lifting every cure (D-T3 B); the version's own file untouched."""
+        files = self._settings_files()
+        ticks = iter(range(1_800_000_000, 1_800_000_100, 7))
+        self.services.runner._wall = lambda: float(next(ticks))
+        run_id, body = self._run("id: t-vamp\nclients: [c1]\nserver: {timeScale: 1440, cureSpells: []}\nsteps:\n  - c1: connect\n")
+        self.assertEqual(body["verdict"], "green", body)
+        overlay = self.tmp / "server-settings-run.json"
+        self.assertEqual(self._up_env()["SERVER_SETTINGS"], str(overlay))
+        laid = json.loads(overlay.read_text())
+        self.assertEqual(laid["cureSpells"], [])
+        self.assertEqual(laid["time"]["timeScale"], 1440.0)
+        self.assertRegex(laid["time"]["epoch"], r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$")
+        self.assertNotIn("start", laid["time"], "the file's start date, as a gameHour run's but for the hour")
+        first = laid["time"]["epoch"]
+        self.assertNotIn("cureSpells", json.loads(files["1.6.1170"].read_text()), "the version's own file is untouched")
+        run_id, body = self._run("id: t-vamp2\nclients: [c1]\nserver: {timeScale: 1440}\nsteps:\n  - c1: connect\n"
+                                 "  - wait: 1\n  - server: restart\n")
+        self.assertEqual(body["verdict"], "green", body)
+        laid = json.loads(overlay.read_text())
+        self.assertNotEqual(laid["time"]["epoch"], first, "each run's rate starts at its own start")
+        ups = [env for cmd, env in zip(self.services.system.commands, self.services.system.envs)
+               if cmd[:2] == ["docker", "compose"] and ("up" in cmd or "restart" in cmd)]
+        self.assertGreaterEqual(len(ups), 2, self.services.system.commands)
+        self.assertNotIn("cureSpells", laid, "a run that names no cures keeps the file's")
+        rec = self.services.runner.last_run
+        self.assertEqual(rec.clock_epoch, laid["time"]["epoch"], "the restart laid the run's own epoch again")
+
     def test_a_runs_game_hour_starts_the_servers_clock_through_the_overlay(self):
         files = self._settings_files()
         run_id, body = self._run("id: t-hour\nclients: [c1]\nserver: {gameHour: 7.9}\nsteps:\n  - c1: connect\n")

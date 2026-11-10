@@ -88,6 +88,16 @@ class ServerSpec(BaseModel):
     # serves (x-world-globals-rate, b-world-global); None keeps the file's, and the server's own default, false (nobody
     # elected, every game's globals its own), so the lab's settings stay off
     worldGlobals: bool | None = None
+    # the run's own game clock rate (the time block's timeScale, wire-rules clock.rs: game seconds per real second, 20 in
+    # Skyrim.esm): a raised rate brings a game-time timer inside a run (H-VT1: Sanguinare Vampiris turns its host three game
+    # days on, 180 s at 1440). The clock is a pure function of its time block, so a new rate runs from the run's own epoch,
+    # laid at the run's start from the file's start date, as gameHour's is, never over the time before it; a restart in
+    # the run keeps that epoch (docs/research/rung5-quests-2026-11-09.md 8(b)). None keeps the file's
+    timeScale: float | None = None
+    # the run's own cure list (the cureSpells server setting, memo D56 A: the listed spells removed from every player's game
+    # at login and every minute): "<hex id>:<plugin>" strings, [] lifting every cure, so a probe's seat can turn (D-T3 B,
+    # Sanguinare Vampiris b8780:Skyrim.esm lifted per run until playtest 51 verifies a turn). None keeps the file's
+    cureSpells: list[str] | None = None
 
 
 class Step(BaseModel):
@@ -719,6 +729,8 @@ def parse_step(raw: Any, clients: list[str]) -> Step:
 
 
 _WORLD_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
+# a FormDesc's text as the server's settings take it, "<hex id>:<plugin>" (FormDesc::FromString)
+_FORM_DESC = re.compile(r"[0-9A-Fa-f]{1,8}:[^:]+\.(?:esm|esp|esl)", re.IGNORECASE)
 
 
 def _server_spec(server: dict[str, Any]) -> ServerSpec:
@@ -746,8 +758,16 @@ def _server_spec(server: dict[str, Any]) -> ServerSpec:
     world_globals = server.get("worldGlobals")
     if world_globals is not None and not isinstance(world_globals, bool):
         raise ValueError(f"server.worldGlobals is true or false, got {world_globals!r}")
+    scale = server.get("timeScale")
+    if scale is not None and (isinstance(scale, bool) or not isinstance(scale, (int, float)) or not 0 < scale <= 100000):
+        raise ValueError(f"server.timeScale is the game seconds per real second, above 0 and up to 100000 (20 is Skyrim's), got {scale!r}")
+    scale = float(scale) if scale is not None else None
+    cures = server.get("cureSpells")
+    if cures is not None and (not isinstance(cures, list) or len(cures) > 64
+                              or not all(isinstance(c, str) and _FORM_DESC.fullmatch(c) for c in cures)):
+        raise ValueError(f'server.cureSpells is a list of "<hex id>:<plugin>" strings ([] lifts every cure), got {cures!r}')
     knobs = dict(npcEnabled=npc, gameHour=hour, npcRespawnHours=respawn, handoffPassSettleMs=settle, npcRollLevel=roll,
-                 worldGlobals=world_globals)
+                 worldGlobals=world_globals, timeScale=scale, cureSpells=list(cures) if cures is not None else None)
     world = server.get("world")
     if world is None:
         return ServerSpec(snapshot=str(server.get("snapshot", "clean")), netem=netem, **knobs)
