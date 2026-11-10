@@ -3461,3 +3461,6 @@ The fix is the claim, Eli's word (ADR-064 decision 4: a claim rewrite after a gr
 41 count either branch's line, both the server's open reaching the guest's body, so the claim keeps its meaning:
 'c2.log_count("body 39fe4: (the ContainerMenu is open|the server.s open on a blocked body with its AI on)") >= 1' (and the step's
 pattern the same). Until Eli's word, b-npc-body-release is pending in lab/gate.yaml, named here.
+c-dungeon-enemies reads the same claim at its step 132 and is red three of three in the same sweep (20261110-053522, 053929,
+054330 cold) with c2.state.menuOpen('ContainerMenu') true; its last green was 20261102-115850. The same placement and the same
+rewrite (either branch's line) hold for it, its own Eli word (ADR-064 decision 4); pending beside it, named here.
