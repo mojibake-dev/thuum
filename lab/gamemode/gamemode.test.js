@@ -706,3 +706,61 @@ test("labState aliasFills reads the server's alias rows, found: false without th
   };
   assert.strictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "aliasFills" }).found, false);
 });
+
+test("labState questRuns, questStages and scriptVariables read the journal's rung 5 rows, found: false without each property", () => {
+  // thuum ADR-068 rung 5 (docs/research/rung5-quests-2026-11-09.md 1(e)): mp.get(0, "questRuns"), mp.get(0, "questStages") and
+  // mp.get(0, "scriptVariables"), a quest or form named by FormDesc text or by form id
+  global.mp = fakeMp();
+  mp.set(0, "questRuns", [
+    { quest: 0x74a83, running: true, seq: 3 },
+    { quest: "2ba16:Skyrim.esm", running: false },
+    { running: true, seq: 9 },
+  ]);
+  mp.set(0, "questStages", [{ quest: 0x74a83, stage: 10 }, { quest: "74a83:Skyrim.esm", stage: 20 }, { quest: 0x74a83 }, null]);
+  mp.set(0, "scriptVariables", [
+    { form: "1f251:Skyrim.esm", script: "MG01QuestScript", var: "::NiryaSkillVar_var", k: 3, i: 2, seq: 5 },
+    { form: 0x30042b4, script: "BYOHRelationshipAdoptionScript", var: "::numChildrenAdopted_var", k: 4, f: 1.5 },
+    { form: 0xeafd5, script: "PlayerVampireQuestScript", var: "::VampireStatus_var", k: 5, b: false, seq: 1 },
+    { form: 0xeafd5, script: "PlayerVampireQuestScript", var: "::FeedTimer_var", k: 3 },
+    { script: "NoForm", var: "x", k: 3, i: 1 },
+  ]);
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "questRuns" }), {
+    found: true,
+    runs: [
+      { quest: 0x74a83, running: true, seq: 3 },
+      { quest: "2ba16:Skyrim.esm", running: false, seq: 0 },
+    ],
+  });
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "questStages" }), {
+    found: true,
+    stages: [
+      { quest: 0x74a83, stage: 10 },
+      { quest: "74a83:Skyrim.esm", stage: 20 },
+    ],
+  });
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "scriptVariables" }), {
+    found: true,
+    entries: [
+      { form: "1f251:Skyrim.esm", script: "MG01QuestScript", var: "::NiryaSkillVar_var", k: 3, value: 2, seq: 5 },
+      { form: 0x30042b4, script: "BYOHRelationshipAdoptionScript", var: "::numChildrenAdopted_var", k: 4, value: 1.5, seq: 0 },
+      { form: 0xeafd5, script: "PlayerVampireQuestScript", var: "::VampireStatus_var", k: 5, value: false, seq: 1 },
+    ],
+  });
+  // nothing recorded yet
+  for (const k of ["questRuns", "questStages", "scriptVariables"]) mp.set(0, k, null);
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "questRuns" }), { found: true, runs: [] });
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "questStages" }), { found: true, stages: [] });
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "scriptVariables" }), { found: true, entries: [] });
+  const get = mp.get;
+  mp.get = (id, k) => {
+    if (k === "questRuns" || k === "questStages" || k === "scriptVariables") throw new Error(`Property '${k}' doesn't exist`);
+    return get(id, k);
+  };
+  for (const kind of ["questRuns", "questStages", "scriptVariables"]) {
+    const legacy = mp.onHttpRpcRunAttempt("labState", { kind });
+    assert.strictEqual(legacy.found, false, kind);
+    assert.match(legacy.error, new RegExp(kind));
+  }
+});

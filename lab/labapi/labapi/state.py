@@ -149,6 +149,24 @@ class ServerState:
         body = self._backend.rpc("labState", {"kind": "aliasFills"})
         return body if body.get("found") else None
 
+    def quest_runs(self) -> dict[str, Any] | None:
+        """The server's run record of quests (labState kind questRuns, ADR-068 rung 5's quest words): {found, runs: [{quest,
+        running, seq}]}, or None from a server without it."""
+        body = self._backend.rpc("labState", {"kind": "questRuns"})
+        return body if body.get("found") else None
+
+    def quest_stages(self) -> dict[str, Any] | None:
+        """The server's record of quest stages done (labState kind questStages, ADR-056 decision 2's journal): {found, stages:
+        [{quest, stage}]}, or None from a server without it."""
+        body = self._backend.rpc("labState", {"kind": "questStages"})
+        return body if body.get("found") else None
+
+    def script_variables(self) -> dict[str, Any] | None:
+        """The world's condition-read script variables as the server records them (labState kind scriptVariables, ADR-068
+        rung 5's ScriptVariables): {found, entries: [{form, script, var, k, value, seq}]}, or None from a server without them."""
+        body = self._backend.rpc("labState", {"kind": "scriptVariables"})
+        return body if body.get("found") else None
+
     def spell(self, form_id: int) -> dict[str, Any] | None:
         """A spell's effects and their MGEFs as the server's espm resolves them
         (labState kind spell), or None for a form the server does not load."""

@@ -19,6 +19,9 @@
 //              {kind: "stream", profileId}: a player's stream counters by message type (npc-stream slice 4)
 //              {kind: "worldGlobals"}: the world's recorded globals and their streamer (ADR-068 rung 4's WorldGlobal)
 //              {kind: "aliasFills"}: the server's record of quest aliases (ADR-068 rung 4's AliasFill)
+//              {kind: "questRuns"}: the server's run record of quests, running and its sequence (ADR-068 rung 5's quest words)
+//              {kind: "questStages"}: the server's record of quest stages done (ADR-056 decision 2, the world journal's)
+//              {kind: "scriptVariables"}: the world's condition-read script variables as recorded (ADR-068 rung 5's ScriptVariables)
 //   labCommand {kind: "teleport", profileId, cell, pos, rot?}
 //              {kind: "give", profileId, baseId, count}
 //              {kind: "open-race-menu", profileId}, and the others below
@@ -430,6 +433,82 @@ const state = {
           created: formOf(r.created),
           container: formOf(r.container),
           added: Boolean(r.added),
+        })),
+    };
+  },
+
+  // The server's run record of quests (thuum ADR-068 rung 5's quest words, docs/research/rung5-quests-2026-11-09.md 1(b) and
+  // 1(e)): mp.get(0, "questRuns"), the journal's rows, answered as {found, runs: [{quest, running, seq}]}: the quest as the
+  // server names it (a FormDesc's text or a form id; lab-api resolves either through the run's load order), whether the record
+  // holds it running, and the record's sequence for it (0 when the row carries none). A server without the property answers
+  // found: false
+  questRuns() {
+    let rows;
+    try {
+      rows = mp.get(0, "questRuns");
+    } catch (e) {
+      return { found: false, error: String((e && e.message) || e) };
+    }
+    return {
+      found: true,
+      runs: (Array.isArray(rows) ? rows : [])
+        .filter((r) => r && (typeof r.quest === "number" || typeof r.quest === "string"))
+        .map((r) => ({ quest: r.quest, running: Boolean(r.running), seq: Number(r.seq) || 0 })),
+    };
+  },
+
+  // The server's record of quest stages done (ADR-056 decision 2: per quest the stages the world has done, on the world's
+  // journal; rung 5's claims read the record instead of a log line): mp.get(0, "questStages"), answered as {found, stages:
+  // [{quest, stage}]}, the quest as the server names it and the stage a number. A server without the property answers
+  // found: false
+  questStages() {
+    let rows;
+    try {
+      rows = mp.get(0, "questStages");
+    } catch (e) {
+      return { found: false, error: String((e && e.message) || e) };
+    }
+    return {
+      found: true,
+      stages: (Array.isArray(rows) ? rows : [])
+        .filter((r) => r && (typeof r.quest === "number" || typeof r.quest === "string") && Number.isFinite(Number(r.stage)) && r.stage !== null)
+        .map((r) => ({ quest: r.quest, stage: Number(r.stage) })),
+    };
+  },
+
+  // The world's condition-read script variables as the server records them (thuum ADR-068 rung 5's ScriptVariables 81, D-V1
+  // B: the latest write per key): mp.get(0, "scriptVariables"), the journal's rows {form, script, var, k, i | f | b, seq},
+  // answered as {found, entries: [{form, script, var, k, value, seq}]}: the form as the server names it (a FormDesc's text
+  // or a form id), the attached script and the variable as the row names them, the kind (3 int, 4 float, 5 bool: rung 3's
+  // folded kinds) and the value its i, f or b holds, and the record's sequence for the key (0 when the row carries none). A
+  // row with no value of its kind is dropped. A server without the property answers found: false
+  scriptVariables() {
+    let rows;
+    try {
+      rows = mp.get(0, "scriptVariables");
+    } catch (e) {
+      return { found: false, error: String((e && e.message) || e) };
+    }
+    const valueOf = (r) => (r.k === 3 ? r.i : r.k === 4 ? r.f : r.k === 5 ? r.b : undefined);
+    return {
+      found: true,
+      entries: (Array.isArray(rows) ? rows : [])
+        .filter(
+          (r) =>
+            r &&
+            (typeof r.form === "number" || typeof r.form === "string") &&
+            typeof r.script === "string" &&
+            typeof r.var === "string" &&
+            valueOf(r) !== undefined &&
+            valueOf(r) !== null,
+        )
+        .map((r) => ({
+          form: r.form,
+          script: r.script,
+          var: r.var,
+          k: r.k,
+          value: r.k === 5 ? Boolean(r.b) : Number(valueOf(r)),
+          seq: Number(r.seq) || 0,
         })),
     };
   },
