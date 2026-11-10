@@ -404,7 +404,7 @@ T0:
 - wire-validate: check_quest_stage's word, acting and served cases; check_script_variables; proptests (.claude/rules/rust.md: no
   panic from a packet).
 - unit/QuestStageTest.cpp v2: replaces the D62 and D69 case (:340) (a start-game-enabled quest's stage 0 is the start word's: the
-  run recorded, no stage, no E_QUEST_ line; its start-up stage recorded like any other); a start recorded and relayed with the
+  run recorded, no stage, no E_QUEST_ line; its start-up stage recorded like any other; REVISED 01:34 PST 2026-11-10, fork ef9215c9: a report of a start-up stage, QUST INDX, is the start word's as stage 0's is, read 5 generalized, so b-quest-rumor's kept HeartwoodMill claim "set e3ea5:Skyrim.esm stage 10" == 0 holds); a start recorded and relayed with the
   reporter as acting; a repeated start folded (no relay); a stop relayed; a denied quest's word refused E_QUEST_DENIED;
   E_QUEST_PLAYER under `questScope` "aliases", none under "off"; a report's acting relayed as reported; an acting naming no
   connected player stamped as the reporter, E_QUEST_ACTING; the login: the list, starts (served), stages (served), stops (served),
