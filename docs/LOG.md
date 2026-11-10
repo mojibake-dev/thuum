@@ -9400,3 +9400,21 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   b-npc-stream-equipment still reads E_EQUIP_REFUSED (20261110-062127: 1348c lacking 0x6c1d9 and 0x209a5 with no record at
   the run's start, the clean world holding the two lab characters alone), so e2595d14 doesn't reach that path; its line
   stays pending.
+- m4-fix-51 merged to fork canon 762305f1 (2026-11-10T11:01Z): R0 (ADR-053): T0 pipeline 5720 server-build 20295: 100% tests passed, 0 tests failed out of 13, no lab gate (the line's "nightly" is stale: the nightly has been off since 11-03, NIGHTLY_SWEEP_UTC=""; its T3 is rung
+  5's gate); T2 skip on skymp-server:m4-fix-51; clones not promoted.
+  Verbs: b-npc-stream-equipment's cause, thuum-fa's read: since fork c312fd39 (11-03) MpActor::Init skipped
+  EnsureBaseContainerAdded when CanRollFate() held, leaving an unrecorded NPC's inventory to RollFateIfUnrolled, called only
+  by SendFates' grid walk and PlaceAtMe; ten Riverwood NPCs whose placements stand indoors (1348c in Faendal's house 133ca,
+  35534 and 13491 in Sven's 1cb84, seven in 133c6 to 133c8) were moved outdoors by the npc-puppet sighting into squares
+  already fated, never rolled, so the host's first equipment report met an empty inventory (E_EQUIP_REFUSED). The fix: every
+  first serve of an unrolled record rolls it at the loader's level and sends its fate as respawn does (762305f1, with a fresh
+  review's five notes: a fated NPC's fate ahead of every create word, EquipBestWeapon to listeners with a user, the loader
+  level restored, a throw in the roll no longer unwinding a login, the loader preferring the cell's host). T0 pipeline 5720
+  (694 test cases); T2 thuum-fa's on skymp-server:m4-fix-51-762305f1, 50 of 50 identical, read here. The lab pinned to
+  skymp-server:m4-fix-51-762305f1 at 11:03Z, and b-npc-stream-equipment read green on it (20261110-110409; its 110154 red
+  ran on m4-fix-50, a pin command that never ran, zsh not splitting a variable), so its pending line comes out. Before it
+  this morning: r5-lab d6f2d7b5 merged into main (ac9c3cf7, lab-api only; rung 5's settings stay on r5-settings), its
+  lab-api image pulled (version ac9c3cf7), and x-vampire-turn-read read green (20261110-105037); slot 0's four canon probes
+  read green at 07:14Z to 07:43Z (x-quest-runs 071422, x-acting-frame 072506, x-trigger-preload 073038,
+  x-werewolf-form-read 073450); b-npc-body-release v5 (070356) and c-dungeon-enemies v3 (070657) read green and left
+  pending (a8d3390f).
