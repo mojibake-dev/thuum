@@ -91,6 +91,10 @@ class FakeProxmox:
         copied = re.search(r"\[IO\.File\]::Open\('([^']+)'.*\[IO\.File\]::Create\('([^']+)'\)", " ".join(command))
         if copied and copied.group(1) in self.files:
             self.files[copied.group(2)] = self.files[copied.group(1)]
+            # log-count's copy prints the source's length at the open and the copy's (runner.py _log_count)
+            if "Write-Output" in " ".join(command) and self.exec_result.exitcode == 0:
+                n = len(self.files[copied.group(1)].encode("utf-8"))
+                return ExecResult(0, f"{n} {n}\r\n", "")
         # its else branch: a source not yet written leaves an empty copy (a frida script's .log before any line)
         empty = re.search(r"Set-Content -Path '([^']+\.copy)' -Value ''", " ".join(command))
         if empty and not (copied and copied.group(1) in self.files):

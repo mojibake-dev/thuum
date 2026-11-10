@@ -1207,7 +1207,10 @@ class Runner:
         printConsole, which skymp5-client's logTrace and logError use, reaches no other file, so a count of the
         first alone never saw them (x-handoff-door 20261024-013234). An unmanaged seat or a failed copy of the
         Skyrim Platform log keeps no count, so the assert raises; a console log not there yet (a driver from
-        before the tee) counts as empty."""
+        before the tee) counts as empty. The note carries each log's bytes three ways: the file's length on the
+        seat when the copy opened it, the copy's length and what lab-api read of the copy, since a copy after a
+        plain relaunch counted 0 for a line the run's own artifact holds (b-puzzle-relay 20261110-135219 and
+        135510, step 24; the cold rollback's 135732 counted it), and the three numbers say where the bytes went."""
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
             return True, f"log-count skipped: {client} is unmanaged or unmapped"
@@ -1221,18 +1224,24 @@ class Runner:
         except ProxmoxError as e:
             return True, f"log-count: {client}'s game folder unread: {e}"
         texts: list[str] = []
+        byte_notes: list[str] = []
         for src, suffix in ((self.s.client_driver_log, ""), (f"{game_dir}\\{self.s.client_console_log}", "-console")):
             copy = f"{self.s.client_lab_dir}\\logcount-{index:03d}{suffix}.log.copy"
-            read = (f"$s = [IO.File]::Open('{src}', 'Open', 'Read', 'ReadWrite'); $d = [IO.File]::Create('{copy}'); "
-                    f"$s.CopyTo($d); $d.Close(); $s.Close()")
+            # the source's length at the open and the copy's after it, printed for the note (single quotes only: the
+            # guest agent's argument passing strips double quotes)
+            read = (f"$s = [IO.File]::Open('{src}', 'Open', 'Read', 'ReadWrite'); $n = $s.Length; "
+                    f"$d = [IO.File]::Create('{copy}'); $s.CopyTo($d); $m = $d.Length; $d.Close(); $s.Close(); "
+                    f"Write-Output ([string]$n + ' ' + [string]$m)")
             if suffix:
                 read = f"if (Test-Path '{src}') {{ {read} }} else {{ Set-Content -Path '{copy}' -Value '' -NoNewline }}"
             cmd = ["powershell", "-NoProfile", "-Command", read]
-            text, why = None, ""
+            text, why, sizes = None, "", None
             for attempt in range(3):
                 try:
                     res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
                     if res.exitcode == 0:
+                        got = re.search(r"(\d+) (\d+)\s*$", res.out or "")
+                        sizes = (int(got.group(1)), int(got.group(2))) if got else None
                         text = await asyncio.to_thread(self.control.file_read, g, copy)
                         break
                     why = f"the copy exited {res.exitcode}: {res.err.strip()[:200]}"
@@ -1243,12 +1252,16 @@ class Runner:
                 which = "console log" if suffix else "Skyrim Platform log"
                 return True, f"log-count: {client}'s {which} unread after three tries ({why}); no count kept"
             texts.append(text)
+            read_bytes = len(text.encode("utf-8"))
+            byte_notes.append(f"{read_bytes} read" if sizes is None
+                              else f"{read_bytes} read of {sizes[1]} copied of {sizes[0]} on the seat")
         rx = re.compile(pattern)
         counts = [sum(1 for line in text.splitlines() if rx.search(line)) for text in texts]
         n = sum(counts)
         self.board.set_log_count(client, pattern, n)
         return True, (f"{n} line(s) of {client}'s logs match {pattern!r} "
-                      f"({counts[0]} in its Skyrim Platform log, {counts[1]} in its console log)")
+                      f"({counts[0]} in its Skyrim Platform log, {counts[1]} in its console log; "
+                      f"bytes {byte_notes[0]}, {byte_notes[1]})")
 
     async def _game_dir(self, rec: RunRecord, g, client: str) -> str:
         """The seat's game folder (C:\\sky-lab\\game-dir.txt), read once a run: log-count's copies name literal paths."""
