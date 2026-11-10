@@ -228,3 +228,20 @@ nothing in the bolt's or the proc's path reads them; every train since 11-02 and
 11-03) are canon's side. Cause UNREAD; the read is c1's: whether the bolt's effect script casts the proc on c2's figure at all
 (its effect events through the Papyrus gate, the caster-is-the-player branch), and if it does, why magicSyncService reports no
 stream for it. Pending in lab/gate.yaml, named here, until that read finds the fix and a run reads green.
+
+The read's first hypothesis (numidium's static read, 2026-11-10; HYPOTHESIS, unconfirmed): H1, ADR-068's seam skips Crackle's
+helper placement because the call's subject is c2's figure. The bolt's effect script (WB_CrackleNew_Script, Apocalypse 10.2.3's
+pex) never casts the proc at the figure: its OnEffectStart places TheBox = akTarget.PlaceAtMe(FXEmptyActivator), then
+TheShooter = TheBox.PlaceAtMe(...), a MoveTo, then WB_Crackle.RemoteCast(TheShooter, akCaster, TheBox). PlaceAtMe is a state
+row keyed on its subject (skyrim-platform NativeRows.inc:37, non-latent); OwnedHere answers false for any figure
+(ScriptNatives.cpp:567-578, used at :1706-1708), and with the lever at nonLatent its body is skipped (:903) with None returned
+(:1709-1717). TheBox is then None, RemoteCast has no source, no proc is cast and c1 reports nothing, as the server's silence after
+the bolt's OnSpellHit reads. The dates fit: the seam (fork 43cc22a3, 11-05 02:13Z), its lever (183566c4, 02:27Z) and the lever
+set to nonLatent in thuum's skymp5-client-settings.txt (18eaf29e, 12:15Z) all fall after the 11-02 green and before ce0d2664.
+The Papyrus gate itself passes the script (FridaHooks.cpp:922-932, an active effect whose caster is the player). If H1 holds,
+the class is wider than this spell: the seam judges a call by the object it is called on, not by who cast the calling effect,
+against ADR-068 decision 6 (the player's effects belong to the player's seat), so every effect script that places a helper on
+its target fails the same way on a figure. H2, the weak alternative: OnEffectStart never ran on the figure. The read: probe
+x-second-hand-read v1 (lab/.cache/drafts/rung5, by path, after rung 5's stage 2), b-second-hand's steps with c1's platform log
+kept and the 30 s census after the cast: an "ObjectReference.PlaceAtMe" census row marked skipped confirms H1; no PlaceAtMe row
+of any kind refutes it and leaves H2.
