@@ -117,9 +117,11 @@ def skyrim_esm():
         quest(0xB005, "Created", aliases=alias(0, "Player", [("ALFR", 0x14)]) + alias(1, "Item", [("ALCO", 0xD001), ("ALCA", 0x80000000)])),
         # a location alias: the world's whatever the rest
         quest(0xB006, "Located", aliases=alias(0, "Player", [("ALFR", 0x14)]) + alias(1, "Where", kind="ALLS")),
-        # no alias; its script places an actor at the player and makes that actor's base essential: a value derived from
-        # the placed reference is no made-here call, so the quest is the world's
+        # no alias; its script places an object at the player and enables that object's linked reference: a value derived
+        # from the placed reference is no made-here call, so the quest is the world's
         quest(0xB007, "SpawnQ", quest_vmad([("SpawnScript", [])])),
+        # no alias; its script acts only through natives with no state row (Game.IncrementStat, AddToFaction): the world's
+        quest(0xB00B, "LocalQ", quest_vmad([("LocalScript", [])])),
         # PQ-3's callers: a world quest whose stage 10 fragment calls PQScript.Turn (its stage 20's calls nothing), one
         # whose stage 20 fragment calls its own script, which calls PQScript.Turn, and one whose fragment calls a Turn on a
         # WorldScript receiver, no PQScript's
@@ -218,10 +220,16 @@ def scripts():
     a = Asm()
     out["SpawnScript"] = a.build("SpawnScript", "Quest", functions=[
         ("OnInit", a.fn([], [a.static("Game", "GetPlayer", "::temp0"),
-                             a.call("PlaceActorAtMe", "::temp0", [a.none()], dest="::temp1"),
-                             a.call("GetActorBase", "::temp1", [], dest="::temp2"),
-                             a.call("SetEssential", "::temp2", [pex.Value(5, b"\x01")])],
-                        locals_=[("::temp0", "actor"), ("::temp1", "actor"), ("::temp2", "actorbase")]))])
+                             a.call("PlaceAtMe", "::temp0", [a.none()], dest="::temp1"),
+                             a.call("GetLinkedRef", "::temp1", [], dest="::temp2"),
+                             a.call("Enable", "::temp2", [])],
+                        locals_=[("::temp0", "actor"), ("::temp1", "objectreference"), ("::temp2", "objectreference")]))])
+    a = Asm()
+    out["LocalScript"] = a.build("LocalScript", "Quest", functions=[
+        ("OnInit", a.fn([], [a.static("Game", "IncrementStat", "::NoneVar", [a.none(), a.int(1)]),
+                             a.static("Game", "GetPlayer", "::temp0"),
+                             a.call("AddToFaction", "::temp0", [a.none()])],
+                        locals_=[("::temp0", "actor")]))])
     a = Asm()
     out["QF_WorldCaller_0000B008"] = a.build("QF_WorldCaller_0000B008", "Quest", props=[("PQ", "pqscript")], functions=[
         ("Fragment_0", a.fn([], [a.static("Game", "GetPlayer", "::temp0"), a.call("Turn", "::PQ_var", [a.id("::temp0")])],
@@ -242,6 +250,17 @@ def scripts():
     out["WorldScript"] = a.build("WorldScript", "Quest", props=[("SomeRef", "objectreference")], functions=[
         ("OnInit", a.fn([], [a.call("Enable", "::SomeRef_var", [])]))])
     return out
+
+
+# the seam's natives table as wire-rules natives_table.rs writes its rows (the fixture's subset: the kinds and classes the
+# synthetic scripts call)
+NATIVES_TABLE = "\n".join(
+    f'    Row {{ cls: "{cls}", func: "{func}", kind: Kind::{kind}, subject: Subject::SelfRef, params: &[] }},'
+    for cls, func, kind in (("ObjectReference", "AddItem", "State"), ("ObjectReference", "Enable", "State"),
+                            ("ObjectReference", "Disable", "State"), ("ObjectReference", "PlaceAtMe", "State"),
+                            ("ObjectReference", "PlaceActorAtMe", "State"), ("Actor", "SetRace", "State"),
+                            ("ObjectReference", "PlayAnimation", "Action"), ("Quest", "SetCurrentStageID", "Everyone"),
+                            ("GlobalVariable", "SetValue", "Everyone"), ("Game", "GetPlayer", "Local")))
 
 
 def settings_shape_errors(e: dict) -> list[str]:
@@ -297,15 +316,31 @@ class Deploy:
         self.game = tmp / "game"
         self.game.mkdir()
         self.cache = tmp / "cache"
+        self.natives = tmp / "natives_table.rs"
+        self.natives.write_text("pub const TABLE: &[Row] = &[\n" + NATIVES_TABLE + "\n];\n")
 
-    def args(self):
-        return ["--settings", str(self.settings), "--esm", str(self.esm), "--mods", str(self.mods), "--game", str(self.game),
-                "--cache", str(self.cache)]
+    def args(self, natives=True):
+        """lab/census.py's arguments, with quest-census.py's natives table unless natives is false (ctda-vars.py reads none)."""
+        return (["--settings", str(self.settings), "--esm", str(self.esm), "--mods", str(self.mods), "--game", str(self.game),
+                 "--cache", str(self.cache)] + (["--natives", str(self.natives)] if natives else []))
 
     def load(self):
         lo = C.deployed(self.settings, self.esm, self.mods, self.game, "1.6.1170")
         R, X = C.index(lo, self.cache, log=lambda m: None)
         return lo, R, X
+
+
+class NativesTableTests(unittest.TestCase):
+    def test_the_table_reads_its_rows_and_refuses_a_file_without_one(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            table = Path(tmp) / "natives_table.rs"
+            table.write_text(NATIVES_TABLE)
+            kinds = QC.native_kinds(table)
+            self.assertEqual(kinds["setrace"], [("actor", "state")])
+            self.assertEqual(sum(map(len, kinds.values())), 10)
+            table.write_text("// no rows here\n")
+            with self.assertRaises(SystemExit):
+                QC.native_kinds(table)
 
 
 class CensusTests(unittest.TestCase):
@@ -320,7 +355,7 @@ class CensusTests(unittest.TestCase):
         lo = C.deployed(self.d.settings, self.d.esm, self.d.mods, self.d.game, "1.6.1170")
         self.assertEqual([n for n, _ in lo.plugins], ["Skyrim.esm", "Mod.esp", "Client.esp"])
         self.assertEqual(lo.server, {"skyrim.esm", "mod.esp"})
-        self.assertEqual(sorted(lo.loose), ["activemagiceffect", "actor", "callerscript", "form", "globalvariable",
+        self.assertEqual(sorted(lo.loose), ["activemagiceffect", "actor", "callerscript", "form", "globalvariable", "localscript",
                                             "objectreference", "pqscript", "qf_worldcaller_0000b008", "qf_worldother_0000b00a",
                                             "qf_worldtwohop_0000b009", "quest", "spawnscript", "worldhelperscript", "worldscript"])
         self.assertEqual(lo.desc(C.key("skyrim.esm", 0xEAFD5)), "eafd5:Skyrim.esm")
@@ -400,7 +435,7 @@ class CensusTests(unittest.TestCase):
 
     def test_the_rule_marks_each_half_and_leaves_the_world_its_own(self):
         lo, R, Xi = self.d.load()
-        W = QC.World(lo, R, Xi["scripts"])
+        W = QC.World(lo, R, Xi["scripts"], QC.native_kinds(self.d.natives))
         v = QC.classify(W)
         k = lambda n: C.key("skyrim.esm", n)  # noqa: E731
         self.assertEqual((v[k(0xB001)]["half"], v[k(0xB001)]["player"]), ("natives", True))
@@ -415,8 +450,16 @@ class CensusTests(unittest.TestCase):
         self.assertTrue(v[k(0xB005)]["player"], "an item created in the player's alias is the player's")
         spawn = v[k(0xB007)]
         self.assertEqual((spawn["half"], spawn["player"], dict(spawn["madeHere"])), ("natives", False, {}))
-        self.assertEqual(dict(spawn["notPlayer"]), {("setessential", "getplayer.placeactoratme(None).getactorbase()"): 1},
-                         "a value derived from the placed actor is judged as any subject, never made here")
+        self.assertEqual(dict(spawn["counted"]), {("placeatme", "getplayer"): 1})
+        self.assertEqual(dict(spawn["notPlayer"]), {("enable", "getplayer.placeatme(None).getlinkedref()"): 1},
+                         "a value derived from the placed reference is judged as any subject, never made here")
+        # natives the table holds no state row of are local: a quest acting only through them is the world's
+        local = v[k(0xB00B)]
+        self.assertEqual((local["half"], local["player"], dict(local["counted"]), dict(local["notPlayer"])), (None, False, {}, {}))
+        self.assertEqual(dict(local["local"]), {("Game.incrementstat (no row)", "the player"): 1, ("addtofaction (no row)", "getplayer"): 1})
+        self.assertEqual(W.row_kind("additem", "actor"), "state", "an Actor receiver takes ObjectReference's row")
+        self.assertEqual((W.row_kind("playanimation", "objectreference"), W.row_kind("getplayer", "game")), ("action", "local"))
+        self.assertIsNone(W.row_kind("additem", "quest"), "a row matches its class's family alone")
         self.assertIsNotNone(QC.MADE.search("param:target.placeatme(prop:xmarker,1,False,False)"))
         self.assertIsNotNone(QC.MADE.search("getplayer.placeactoratme(prop:lvl.getat(0),1)"), "an argument's own call")
         self.assertIsNone(QC.MADE.search("getplayer.placeactoratme(None).getactorbase()"))
@@ -462,7 +505,7 @@ class CensusTests(unittest.TestCase):
     def test_ctda_vars_emits_the_condition_variables(self):
         out = io.StringIO()
         with redirect_stdout(out), redirect_stderr(io.StringIO()):
-            self.assertEqual(CV.main(["--emit"] + self.d.args()), 0)
+            self.assertEqual(CV.main(["--emit"] + self.d.args(natives=False)), 0)
         e = json.loads(out.getvalue())
         self.assertEqual(e["conditionVariables"], [{"form": "b001:Skyrim.esm", "script": "PQScript", "var": "::Status_var"}])
         self.assertEqual(e["census"]["keys"]["dialogue keys"], 1)

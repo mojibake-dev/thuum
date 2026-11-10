@@ -9,15 +9,18 @@ The rule (8(a), the server's quest_scope.rs keeps the alias half; this tool deri
   object created in such an alias (ALCO with ALCA's "in"), or an external alias (ALEQ and ALEA) that is the player's.
   A location alias, any other fill, or no fill at all makes the quest the world's.
 - **The list half** (the deploy settings' `playerQuests`). A quest with no alias is the player's when its scripts (its
-  VMAD's live scripts and their parents with code, the QF fragment script among them) make at least one call that
-  changes a reference's or an actor's state, and every such call is aimed at the player: Game.GetPlayer(), a property
+  VMAD's live scripts and their parents with code, the QF fragment script among them) make at least one call of a
+  native the seam's table classes as state, and every such call is aimed at the player: Game.GetPlayer(), a property
   whose value on that quest is the player's reference (or a player alias), an object variable every write of which is
   one of those, or a function parameter every vanilla or layer call site passes one of those to (followed to a depth
-  of four). A Game static that acts on the player by itself (SetBeastForm, AdvanceSkill, IncrementStat ...) counts as
-  aimed at the player. The calls counted are lab/tools/papyrus-census.py's inventory, life, values, ai, placement and
-  object-state natives on a reference, an actor or an actor base, and a spell's Cast or RemoteCast (aimed at its
-  target, else its source); the quest's own stage and objective calls, other quests' calls and GlobalVariable writes
-  are reported, never counted, and so is a call on a reference the same function placed (a PlaceAtMe or
+  of four). The table is the fork's wire-rules natives_table.rs (`--natives`; m4-scripts-5-server 0390e5cc's forty-nine
+  rows: kind state, action, local or everyone), a call matching a row when its function is the row's and its
+  receiver's type is the row's class or extends it. A native with no row (Game.IncrementStat, the achievement,
+  notification and control calls, AddToFaction, EquipSpell, a spell's Cast) counts as local: it changes only the seat's
+  own player's own view, so a quest acting only through such calls is the world's, and under D-F1 C its fragments run
+  on every seat, each seat's player its own (the coordinator's read of AchievementsQuest, 2026-11-10). Local, action
+  and everyone calls are reported, never counted; so are the quest's own stage and objective calls, other quests'
+  calls and GlobalVariable writes, and a state call on a reference the same function placed (a PlaceAtMe or
   PlaceActorAtMe result: made here, held by no other seat; this tool's reading beside 8(a)'s words, for Eli's review).
 - Per quest either half marks, the GLOBs its scripts write (GlobalVariable SetValue, SetValueInt and Mod, and a Value
   property set, on a property whose value is a GLOB), which the server composes into playerGlobals; the condition keys
@@ -72,6 +75,21 @@ REF_NATIVES = {n.lower() for n in (
     "SetDisplayName SetHarvested SetAnimationVariableBool SetAnimationVariableFloat SetAnimationVariableInt "
     "SendAnimationEvent DispelAllSpells DispelSpell DoCombatSpellApply SetVehicle").split()}
 SPELL_CASTS = {"cast", "remotecast"}
+# a row of the seam's natives table (wire-rules natives_table.rs: `Row { cls: "<class>", func: "<name>", kind: Kind::<kind>`)
+TABLE_ROW = re.compile(r'Row \{ cls: "([^"]+)", func: "([^"]+)", kind: Kind::(\w+)')
+TABLE_DEFAULT = Path(__file__).resolve().parents[2] / "skymp" / "skymp-wire" / "crates" / "wire-rules" / "src" / "natives_table.rs"
+
+
+def native_kinds(path: Path) -> dict[str, list[tuple[str, str]]]:
+    """The table's rows by function, lowercased: {function: [(class, kind)]}; a table that parses to no row is refused, so
+    a wrong file never reads as every native local."""
+    rows = TABLE_ROW.findall(Path(path).read_text())
+    if not rows:
+        raise SystemExit(f"quest-census: {path} holds no natives table row (Row {{ cls, func, kind }})")
+    out: dict[str, list[tuple[str, str]]] = collections.defaultdict(list)
+    for cls, func, kind in rows:
+        out[func.lower()].append((cls.lower(), kind.lower()))
+    return out
 GLOBAL_WRITES = {"setvalue", "setvalueint", "mod"}  # GlobalVariable's writes (its Value property's set is the fourth)
 QUEST_NATIVES = {n.lower() for n in (
     "SetStage SetCurrentStageID Start Stop CompleteQuest CompleteAllObjectives SetObjectiveCompleted SetObjectiveDisplayed "
@@ -98,10 +116,11 @@ def parse_form(text: str, lo=None) -> str:
 
 
 class World:
-    """The index's facts with the resolvers the rule needs."""
+    """The index's facts with the resolvers the rule needs, and the seam's natives table's row kinds."""
 
-    def __init__(self, lo, R, X):
+    def __init__(self, lo, R, X, kinds: dict[str, list[tuple[str, str]]] | None = None):
         self.lo, self.R, self.X = lo, R, X
+        self.kinds = kinds or {}
         self.aliases = {(q, a["id"]): a for q, rec in R["quests"].items() for a in rec["aliases"]}
         # each script's attachments: (owner kind, owner, alias pair or None, {property: value})
         self.attach = collections.defaultdict(list)
@@ -134,6 +153,14 @@ class World:
 
     def is_type(self, rt: str, base: str) -> bool:
         return rt == base or (rt in self.X and base in C.chain(self.X, rt))
+
+    def row_kind(self, meth: str, rt: str) -> str | None:
+        """The table's kind for a call (state, action, local, everyone): the row whose function it is and whose class its
+        receiver's type is or extends; None for a native with no row, which the rule takes as local."""
+        for cls, kind in self.kinds.get(meth, []):
+            if self.is_type(rt, cls):
+                return kind
+        return None
 
     def alias_is_player(self, quest: str, alias: int, seen: frozenset = frozenset()) -> bool:
         a = self.aliases.get((quest, alias))
@@ -261,7 +288,8 @@ def judge(W: World, q: str) -> dict:
     """One quest's verdict and evidence."""
     rec = W.R["quests"][q]
     out = {"quest": q, "half": None, "player": False, "counted": collections.Counter(), "notPlayer": collections.Counter(),
-           "madeHere": collections.Counter(), "globs": set(), "questCalls": collections.Counter(), "into": collections.Counter(), "scripts": [], "aliases": []}
+           "madeHere": collections.Counter(), "local": collections.Counter(), "globs": set(), "questCalls": collections.Counter(),
+           "into": collections.Counter(), "scripts": [], "aliases": []}
     if rec["aliases"]:
         for a in rec["aliases"]:
             fill = {k: (W.lo.desc(v) if isinstance(v, str) and ":" in v else v) for k, v in a["fill"].items()}
@@ -280,11 +308,12 @@ def judge(W: World, q: str) -> dict:
                         out["globs"].update(W.glob_of(rtag, ctx))
                     elif meth in QUEST_NATIVES and W.is_type(rt, "quest"):
                         out["questCalls"]["self" if rtag == "self" else rtag[:60]] += 1
-                    elif meth in SPELL_CASTS and W.is_type(rt, "spell"):
-                        subject = args[1] if len(args) > 1 and args[1] != "None" else (args[0] if args else "None")
-                        out[verdict(W, subject, d, fk, ctx)][(meth, subject[:60])] += 1
-                    elif meth in REF_NATIVES and (W.is_type(rt, "objectreference") or W.is_type(rt, "actorbase")):
+                    elif W.row_kind(meth, rt) == "state":
                         out[verdict(W, rtag, d, fk, ctx)][(meth, rtag[:60])] += 1
+                    elif (meth in REF_NATIVES and (W.is_type(rt, "objectreference") or W.is_type(rt, "actorbase"))) or (
+                            meth in SPELL_CASTS and W.is_type(rt, "spell")) or W.row_kind(meth, rt) in ("action", "local", "everyone"):
+                        # a native the table classes as no state (or holds no row of): the evidence's, never counted
+                        out["local"][(f"{meth} ({W.row_kind(meth, rt) or 'no row'})", rtag[:60])] += 1
                     elif rt in W.X and not W.X[rt]["native"] and rt not in C.chain(W.X, script):
                         out["into"][f"{W.X[rt]['n']}.{meth}"] += 1
                 for prop, rt, rtag, vtag in f["ps"]:
@@ -292,7 +321,7 @@ def judge(W: World, q: str) -> dict:
                         out["globs"].update(W.glob_of(rtag, ctx))
                 for cls, meth, args in f["cs"]:
                     if cls == "game" and meth in IMPLICIT:
-                        out["counted"][(f"Game.{meth}", "the player")] += 1
+                        out["local"][(f"Game.{meth} ({W.row_kind(meth, 'game') or 'no row'})", "the player")] += 1
     if out["half"] is None and (out["counted"] or out["notPlayer"]):
         out["half"] = "natives"
         out["player"] = bool(out["counted"]) and not out["notPlayer"]
@@ -390,6 +419,7 @@ def emit(W: World, verdicts: dict, settings: Path) -> dict:
             "scripts": v["scripts"],
             "natives": [f"{m} on {s} x{n}" for (m, s), n in sorted(v["counted"].items())],
             "madeHere": [f"{m} on {s} x{n}" for (m, s), n in sorted(v["madeHere"].items())],
+            "local": [f"{m} on {s} x{n}" for (m, s), n in sorted(v["local"].items())],
             "globals": [f"{W.lo.desc(g)} {W.R['globs'].get(g, '?')}" for g in sorted(v["globs"])],
             "questCalls": [f"{t} x{n}" for t, n in sorted(v["questCalls"].items())],
             "callsInto": [f"{t} x{n}" for t, n in sorted(v["into"].items())],
@@ -415,6 +445,8 @@ def emit(W: World, verdicts: dict, settings: Path) -> dict:
             "deniedListed": len(denied), "allowedListed": len(allowed),
             "loadOrder": {"plugins": len(W.lo.plugins), "server": len(W.lo.server), "archives": [a.name for a in W.lo.archives],
                           "loose": len(W.lo.loose), "scripts": len(W.X), "missing": W.lo.missing},
+            "natives": {"rows": sum(map(len, W.kinds.values())),
+                        "state": sum(1 for rows in W.kinds.values() for c, k in rows if k == "state")},
             "marked": rows,
         },
     }
@@ -488,6 +520,8 @@ def show(W: World, verdicts: dict, q: str) -> None:
         print(f"   counted, NOT the player: {m} on {s} x{n}")
     for (m, s), n in sorted(v["madeHere"].items()):
         print(f"   made here (not counted): {m} on {s} x{n}")
+    for (m, s), n in sorted(v["local"].items()):
+        print(f"   no state row (not counted): {m} on {s} x{n}")
     print(f"   GLOBs written: {[W.lo.desc(g) + ' ' + W.R['globs'].get(g, '?') for g in sorted(v['globs'])]}")
     print(f"   quest calls: {dict(v['questCalls'])}")
     print(f"   calls into other scripts: {dict(v['into'].most_common(12))}")
@@ -503,10 +537,13 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--emit", action="store_true", help="the settings' playerQuests, playerQuestGlobals, playerQuestVariables and "
                     "playerQuestCallers, with the evidence, as JSON")
     ap.add_argument("--show", nargs="+", metavar="QUEST", help="one or more quests' aliases, scripts and counted calls")
+    ap.add_argument("--natives", default=str(TABLE_DEFAULT),
+                    help="the seam's natives table, wire-rules natives_table.rs (the fork's, at the server's build)")
     C.add_arguments(ap)
     args = ap.parse_args(argv)
+    kinds = native_kinds(Path(args.natives))
     lo, R, X = C.load(args)
-    W = World(lo, R, X["scripts"])
+    W = World(lo, R, X["scripts"], kinds)
     verdicts = classify(W)
     if args.emit:
         print(json.dumps(emit(W, verdicts, Path(args.settings)), indent=1))
