@@ -404,3 +404,15 @@ quest records' persistence across a restart rides a-restart-persistence's world 
 is written after D69's merge (rule 6's shape: the recorded stages read back after a server restart on both seats).
 Written 05:38 PDT 2026-10-31 (thuum main ca3e80e8): the stage set and relayed, the restart, both seats' reads after the reconnect with
 the login replay lines, a relaunched c2 reading the stage at its login. Its first run is owed before any gate that lists it.
+
+## b-quest-rumor's dead mode-all claim in apocrypha's layer sweep (20:01 PST 2026-11-09 (04:01Z 11-10), thuum-fa; run set 20261109-225901)
+
+Red at 20261110-035739, step 11: 'server.log_count("QuestStage: actor ff[0-9a-f]+ sent .* mode all") >= 1' read 0 on canon
+ce0d2664 under apocrypha's layer, with both seats' "the server shares .* mode all" at 1; its reruns read the same, and DB01Misc
+0x1ea4f's stage 10 is unset on either seat only because the run stops at the red step before its set. The pattern can never match:
+the server prints its login line as "QuestStage: actor <id> sent mode 1 with <n> denied quests" (ActionListener.cpp:6741-6745), the
+mode a number, the same dead pattern the gate audit's 521cba05 (2026-11-02) gave b-quest-stage, whose rewrite Eli approved
+(50de1f6b, green 20261109-091605). docs/research/rung5-quests-2026-11-09.md read 3 named it before this run. The fix is W1 B
+(ADR-068's "Rung 5's words", Eli 14:4x PST 2026-11-09): b-quest-rumor v2's rewrite, which takes the numeric form and the rung's new
+quest rules, approved once x-quest-runs v1 names the vampire castle controller's lines inside its window. Pending in lab/gate.yaml,
+named here, until v2 lands green; a run before then is evidence only.

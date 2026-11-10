@@ -24,20 +24,9 @@
 #   ini, without the ModderResource header, plus its racesex_menu.swf laid
 #   loose out of the BSA (SkyUI's archive carries the same file and loads
 #   later as client-only; loose beats every archive).
-# - CBBE 2.0.3, for every player (Eli, 2026-10-07: body morphs are how armor
-#   is fitted, and a look carries them): Nexus mod 198 file 489053, checked
-#   against the md5 Nexus names for the file, laid out as its installer does
-#   for the choices fenestrate had (apocrypha: "Vanilla Shape", "Vanilla
-#   Outfits", "RaceMenu Morphs (BodyMorph)", "Morph Files (Outfits)"),
-#   plus "Face Pack", its female face textures that match its body ones),
-#   resolved from its FOMOD config each run. Its two plugins stay on the
-#   clients: no server state names their forms, and each is the last of its
-#   kind, so every other plugin keeps its index on both ends. CBBE.esp is
-#   light (the clones number it fourth among light plugins, x-light-probe
-#   20261008-101512; the server reads light plugins since the light-plugins
-#   verb) and RaceMenuMorphsCBBE.esp (full, Skyrim.esm its only master) only
-#   drives RaceMenu's sliders. Scoped to 1.6.1170 with RaceMenu, the
-#   players' version (ADR-025).
+# - CBBE 2.0.3 is an essentials row since 2026-11-06 (D2 B, Eli: "yeah let's go with B. fire at will"):
+#   lab/layer/essentials.tsv; since 2026-11-06 the SFW Edition (cbbe-sfw-1.1.4@1.6.1170) with 2.0.3's slider plugin and a
+#   BodySlide build for its morphs (docs/MODS.md).
 # - Lost Grimoire 1.6 (Eli, 2026-10-10: "i guess we're rolling in
 #   lostgrimoire as well"), for its Teleportation (docs/MODS.md): Nexus mod
 #   4455 file 746543, Fenestrate's version so Eli's own install matches the
@@ -128,17 +117,6 @@ rc_api=https://api.nexusmods.com/v1/games/skyrimspecialedition/mods/2853/files/3
 rm_7z="$cache/RaceMenu-AE-0.4.20.0.7z"
 rm_sha=e0f5e923f1eaaefefcb0a98822df091c5b96b010d2df2b52dc377aae539097da
 rm_api=https://api.nexusmods.com/v1/games/skyrimspecialedition/mods/19080/files/743640
-# CBBE 2.0.3 (Eli, 2026-10-07: for every player), Nexus mod 198 file 489053,
-# checked against the md5 Nexus gives for that file (md5_search, apocrypha)
-cb_7z="$cache/CBBE-2.0.3.7z"
-cb_md5=f6d438974d0cedbd0f174e79d7390ee9
-cb_api=https://api.nexusmods.com/v1/games/skyrimspecialedition/mods/198/files/489053
-# CBBE's installer choices, as fenestrate had them (apocrypha, 2026-10-07)
-# plus the Face Pack: CBBE's required files bring its own female body and
-# hand textures, which meet the vanilla female head textures at the neck
-# (the seam on every adult female in the lab, Eli's playtest nine); the
-# FOMOD defaults it on, fenestrate most likely had it (apocrypha)
-cb_options="Vanilla Shape|Vanilla Outfits|RaceMenu Morphs (BodyMorph)|Morph Files (Outfits)|Face Pack"
 # Lost Grimoire 1.6, Nexus mod 4455 file 746543 (Fenestrate's; apocrypha's md5)
 lg_zip="$cache/LostGrimoire-1.6.zip"
 lg_md5=9ff6e8c0ba4be4689406305ac509ee89
@@ -189,17 +167,6 @@ if [ ! -f "$rm_7z" ] || [ "$(shasum -a 256 "$rm_7z" | cut -c1-64)" != "$rm_sha" 
   mv "$rm_7z.part" "$rm_7z"
 fi
 [ "$(shasum -a 256 "$rm_7z" | cut -c1-64)" = "$rm_sha" ] || { echo "RaceMenu archive SHA-256 is not $rm_sha" >&2; exit 2; }
-if [ ! -f "$cb_7z" ] || [ "$(md5 -q "$cb_7z")" != "$cb_md5" ]; then
-  echo "fetching CBBE 2.0.3 from Nexus (475 MB)"
-  # the file's name on the CDN has spaces and an apostrophe: the path is
-  # quoted, its query and the percent escapes already in it kept
-  url=$(security find-generic-password -s nexus-api-key -a nexus -w | sed 's/^/apikey: /' \
-    | curl -fsS -m 30 -H @- "$cb_api/download_link.json" \
-    | python3 -c 'import sys,json,urllib.parse; print(urllib.parse.quote(json.load(sys.stdin)[0]["URI"], safe=":/?&=%"))')
-  curl -fsS -m 1800 -o "$cb_7z.part" "$url"
-  mv "$cb_7z.part" "$cb_7z"
-fi
-[ "$(md5 -q "$cb_7z")" = "$cb_md5" ] || { echo "CBBE archive md5 is not $cb_md5" >&2; exit 2; }
 if [ ! -f "$lg_zip" ]; then
   echo "fetching Lost Grimoire 1.6 from Nexus"
   url=$(security find-generic-password -s nexus-api-key -a nexus -w | sed 's/^/apikey: /' \
@@ -240,7 +207,7 @@ if [ ! -f "$ff_zip" ]; then
   mv "$ff_zip.part" "$ff_zip"
 fi
 [ "$(md5 -q "$ff_zip")" = "$ff_md5" ] || { echo "AI Pathing Freeze Fix archive md5 is not $ff_md5" >&2; exit 2; }
-command -v 7zz >/dev/null || { echo "7zz is needed to unpack RaceMenu and CBBE (brew install sevenzip)" >&2; exit 2; }
+command -v 7zz >/dev/null || { echo "7zz is needed to unpack RaceMenu and the nexus rows (brew install sevenzip)" >&2; exit 2; }
 command -v unar >/dev/null || { echo "unar is needed to unpack Cloaks of Skyrim's RAR, a method 7zz refuses (brew install unar)" >&2; exit 2; }
 layer_tsv="$root/lab/layer/essentials.tsv"
 order_tsv="$root/lab/layer/load-order.tsv"
@@ -293,52 +260,6 @@ cp "$rmx/SKSE/Plugins/skee64.dll" "$rmx/SKSE/Plugins/skee64.ini" "$rm/SKSE/Plugi
 # chargen never initialised; the a-rotfern CTD was that menu's tint rebuild). A loose file beats
 # every archive whatever the order, and no slot moves.
 python3 "$root/lab/tools/bsa-extract.py" "$rm/RaceMenu.bsa" "interface/racesex_menu.swf" "$rm/Interface/racesex_menu.swf"
-# CBBE as its installer lays it out for the choices above: the FOMOD's
-# required files, the chosen options' folders and the conditional folders
-# whose flags those choices set, in the installer's order (a later folder
-# overwrites an earlier one, as a mod manager installs them). Only the
-# folders the plan names leave the archive.
-cbx="$stage/cbbe"; mkdir -p "$cbx/fomod" "$cbx/x"
-7zz x -y -o"$cbx/fomod" "$cb_7z" "FOMod/ModuleConfig.xml" >/dev/null
-python3 - "$cbx/fomod/FOMod/ModuleConfig.xml" "$cb_options" > "$cbx/plan.tsv" <<'EOF'
-import sys, xml.etree.ElementTree as ET
-root = ET.parse(sys.argv[1]).getroot()
-chosen = set(sys.argv[2].split("|"))
-plan, flags, seen = [], {}, set()
-def take(files):
-    if files is None:
-        return
-    for el in files:
-        if el.tag != "folder":
-            sys.exit("FOMOD %s entries are not handled: %r" % (el.tag, el.attrib))
-        plan.append((int(el.get("priority", "0")), len(plan), el.get("source"), el.get("destination", "")))
-take(root.find("requiredInstallFiles"))
-for plugin in root.iter("plugin"):
-    if plugin.get("name") not in chosen:
-        continue
-    seen.add(plugin.get("name"))
-    take(plugin.find("files"))
-    for flag in plugin.findall("conditionFlags/flag"):
-        flags[flag.get("name")] = flag.text or ""
-if chosen - seen:
-    sys.exit("installer options not found: %s" % sorted(chosen - seen))
-for pattern in root.findall("conditionalFileInstalls/patterns/pattern"):
-    deps = pattern.find("dependencies")
-    if deps is not None and deps.get("operator", "And") != "And":
-        sys.exit("Or dependencies are not handled")
-    if all(flags.get(d.get("flag")) == d.get("value") for d in pattern.findall("dependencies/flagDependency")):
-        take(pattern.find("files"))
-for _, _, src, dst in sorted(plan):
-    print("%s\t%s" % (src, dst.strip("\\/")))
-EOF
-cb="$stage/tree/cbbe-2.0.3@1.6.1170"; mkdir -p "$cb"
-while IFS=$'\t' read -r folder into; do
-  7zz x -y -o"$cbx/x" "$cb_7z" -ir!"$folder/*" >/dev/null
-  [ -d "$cbx/x/$folder" ] || continue # "== Installer ==" holds no files
-  mkdir -p "$cb/$into"
-  rsync -a "$cbx/x/$folder/" "$cb/$into/"
-done < "$cbx/plan.tsv"
-echo "CBBE: $(wc -l < "$cbx/plan.tsv" | tr -d ' ') installer folders, $(find "$cb" -type f | wc -l | tr -d ' ') files"
 lg="$stage/tree/lostgrimoire-1.6"; mkdir -p "$lg"
 unzip -q "$lg_zip" "LostGrimoire.esp" "LostGrimoire.bsa" "LostGrimoire - Textures.bsa" "LostGrimoire_ANIO.ini" -d "$lg"
 ap="$stage/tree/apocalypse-10.2.3"; mkdir -p "$ap"
@@ -399,6 +320,19 @@ while IFS=$'\x1f' read -r folder source ref check take exclude plugins_ note; do
       rsync -a "${excl[@]}" "$src/" "$dest/"
       got=$(tree_hash "$dest")
       [ "tree:$got" = "$check" ] || { echo "$folder: tree hash $got is not ${check#tree:}" >&2; exit 2; }
+      n_fen=$((n_fen + 1));;
+    ci)
+      # a build job's artifact (ADR-069: the row takes the pipeline's output, never a hand-built file): ref is
+      # <project>/<job id>|<folder inside the artifact>, fetched once into lab/.cache/mods/ci/<project>-<job id>
+      # by glab.py, then checked like a staging folder (Rotfern's Fixes, rotferns-fixes-build)
+      ids=${ref%%|*}; inner=${ref#*|}; src="$cache/ci/${ids%%/*}-${ids#*/}"
+      [ -d "$src/$inner" ] || python3 "$root/lab/tools/glab.py" artifact "${ids%%/*}" "${ids#*/}" "$src" \
+        || { echo "$folder: could not fetch job ${ids#*/}'s artifact from ${ids%%/*} (glab.py artifact)" >&2; exit 2; }
+      [ -d "$src/$inner" ] || { echo "$folder: no '$inner' in job ${ids#*/}'s artifact" >&2; exit 2; }
+      mkdir -p "$dest"
+      rsync -a "${excl[@]}" "$src/$inner/" "$dest/"
+      got=$(tree_hash "$dest")
+      [ "tree:$got" = "$check" ] || { echo "$folder: tree hash $got is not ${check#tree:} (job ${ids#*/}'s artifact differs from the one the manifest was built from; delete $src to fetch it again)" >&2; exit 2; }
       n_fen=$((n_fen + 1));;
     nexus)
       ids=${ref%%|*}; archive="$cache/${ref#*|}"

@@ -1,3 +1,17 @@
+# b-npc-body-release v5 (thuum-fa, 2026-11-10; Eli's word "go for both", 23:02 PST 2026-11-09, ADR-064 decision 4, docs/verbs/npc-fate.md:3443): c2's close is
+# counted on either branch too. A body opened by the direct branch (its AI on, remoteServer.ts:295) closes through the generic
+# handler, whose closing activation logs "onOpenContainerMesage - sent ActivateMessage" with the body as its target (237540 =
+# 0x39fe4; the console truncates the line after the target); D71's path logs "body 39fe4: closing activation sent, the menu
+# closed". Both are c2's closing activation leaving for the server after its menu closed, so step 45's count and step 46's claim 2
+# match either line. v4 read red at step 46 alone on the fixed server (20261110-061755: the menu closed, the generic close line
+# once, no D71 line). Nothing else changed.
+# b-npc-body-release v4 (thuum-fa, 2026-11-09; Eli's word "rewrite", ADR-064 decision 4, docs/verbs/npc-fate.md:3443): c2's open
+# is counted on either branch of RemoteServer's open of a dead body. Since fork 75167c3d (11-03, ADR-067 decision 6) a body whose
+# AI is off runs D71's openBodyOnTimers, whose poll prints "<tag>: the ContainerMenu is open" (remoteServer.ts:460), and one
+# whose AI is on opens at once after "the server's open on a blocked body with its AI on (D-C2 A)" (remoteServer.ts:295); both
+# are the server's open reaching the guest's body, so step 40's count and step 41's claim 2 match either line ("a blocked" kept:
+# an unblocked body would be another defect). v3's claim counted D71's line alone and read red three times in apocrypha's layer
+# sweep 20261109-225901 (013532, 013809, 014113) with the menu open and the occupant recorded. Nothing else changed.
 # b-npc-body-release v3 (thuum-cf, 2026-11-03; ADR-067 decision 6, the exclusive container hold on fork m3-turbo3-sys2-container):
 # the release's-effect claim is rewritten: the server no longer logs "N players in the container now" (one occupant at most), so the
 # claim that c2 joins a FREE body reads the hold's refusal instead: no E_CONTAINER_BUSY for 39fe4 (c1's close released the body before
@@ -110,19 +124,19 @@ steps:
   - wait: 4
   - c2: dump-state
   - c2: screenshot
-  - c2: log-count {pattern: "body 39fe4: the ContainerMenu is open"}
+  - c2: log-count {pattern: "body 39fe4: (the ContainerMenu is open|the server.s open on a blocked body with its AI on)"}
   - assert:
       - 'c2.state.menuOpen("ContainerMenu") == true'
-      - 'c2.log_count("body 39fe4: the ContainerMenu is open") >= 1'
+      - 'c2.log_count("body 39fe4: (the ContainerMenu is open|the server.s open on a blocked body with its AI on)") >= 1'
       # the release's effect: c1 is out of the set when c2 joins, so c2's activation is not refused (ADR-067 decision 6: the hold)
       - 'server.log_count("E_CONTAINER_BUSY: ff[0-9a-f]+ activates 39fe4") == 0'
   - c2: close-menu {name: ContainerMenu}
   - wait: 3
   - c2: dump-state
-  - c2: log-count {pattern: "body 39fe4: closing activation sent, the menu closed"}
+  - c2: log-count {pattern: "(body 39fe4: closing activation sent, the menu closed|onOpenContainerMesage - sent ActivateMessage ..t.:6,.data.:..caster.:20,.target.:237540,)"}
   - assert:
       - 'c2.state.menuOpen("ContainerMenu") == false'
-      - 'c2.log_count("body 39fe4: closing activation sent, the menu closed") >= 1'
+      - 'c2.log_count("(body 39fe4: closing activation sent, the menu closed|onOpenContainerMesage - sent ActivateMessage ..t.:6,.data.:..caster.:20,.target.:237540,)") >= 1'
       - 'server.log_count("ProcessActivate 39fe4 - occupant is another object") == 0'
       - 'server.log_count("E_ACTIVATE_REACH") == 0'
       - server.ref(0x39fe4).isDead == true

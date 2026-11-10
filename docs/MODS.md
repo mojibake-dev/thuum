@@ -490,7 +490,7 @@ docs/research/mod-layer-plan.md). Built by apocrypha on branch
 Winter Is Coming from decision 4, Realistic Aspen Trees after playtest 26, the Survival
 collection's two non-HDT warmth patches after playtest 27, Skyrim Souls RE for the pausing on
 2026-10-28, all below), on top of the layer's
-existing eight (RaceCompatibility, rotfern, RaceMenu, CBBE, Lost Grimoire, Apocalypse, Headshot
+existing eight (RaceCompatibility, rotfern, RaceMenu, CBBE (a row since 2026-11-06, below), Lost Grimoire, Apocalypse, Headshot
 Kills with CIF 2.0.7, AI Pathing Freeze Fix): 90 plugins in the clients' order (81 served, 9
 client-only at the tail), 45 of them light; the SKSE DLL mods scoped `@1.6.1170` (all of them loaded on Fenestrate's
 1.6.1170 under SKSE 2.2.6 or, Skyrim Souls RE, carry a build for it; none has run on 1.7.104), with Death Drop Overhaul
@@ -503,6 +503,97 @@ PREVIOUS.sums (persist-mods: the manifest it replaced, for a clone laid before t
 purges what it deployed. A file at that path with another hash stays and is counted. Before that, a dropped file stayed
 on any clone whose base carried it (FSMP's DLL came off on 2026-10-20 only because its base lacked it), so a promoted mod
 could never leave.
+
+**Rotfern's Fixes 0.1.1 (ADR-069; Eli, 2026-11-06: "let's create a patch called rotferns fixes that
+will contain anything we need like that").** The row `rotferns-fixes-0.1.1@1.6.1170` is the layer's
+first of source `ci`: it names a pipeline job, `thuum/19668` (rotferns-fixes-build, pipeline 5577,
+commit 16f631e0), and the folder inside its artifact; persist-mods fetches the artifact once into
+lab/.cache/mods/ci/thuum-19668 with lab/tools/glab.py and checks it by tree hash like any staging
+folder, so the row carries no file a pipeline did not build. The artifact is kept (it never expires,
+and the job's artifacts now never expire either). What it lays: SKSE\Plugins\RotfernsFixes.dll and
+its .pdb, ESP-less, no slot, scoped to 1.6.1170. The DLL, read byte-level: x64, the three SKSE exports,
+the declaration "Rotfern's Fixes" 0.1.1 by thuum with the Address Library flag, no struct use and an
+SKSE 2.2.6 floor (CommonLib's declaration fills its unused 16-slot version list with 1.0.0.0, its
+VersionNumber default, which SKSE ignores under the Address Library flag), imports the VC++ runtime
+and system DLLs only, and every contract log string present. Its one fix is the terrain-overlay null
+check (docs/research/terrain-upgrade-crash.md); the run set reads rotferns-fixes.log at least 11 s
+after the load-in for "installed" and the skip count. Since 0.1.1 the log appends across launches with
+dated lines (numidium, playtest 48: 0.1.0's log held only the last of about ten launches, so a skip in an
+earlier session was lost); 0.1.0 was job 19505 (pipeline 5544, commit 24e1fcce). A later change to
+lab/rotferns-fixes builds on main by itself and the row then moves to that job; main's rebuild of the
+same source when the layer merges does not move it (a rebuild's DLL differs in its timestamp bytes).
+
+**CBBE SFW Edition replaces CBBE 2.0.3 (Eli, playtest 48, 2026-11-06: "now all we need is that sfw
+skin to come back in and we're good").** Three rows take the place of the 2.0.3 row.
+`cbbe-sfw-1.1.4@1.6.1170` is the SFW archive (Nexus 74257 file 790860) as its installer lays NeverNude
+and Vanilla Outfits (00 Required and 10 Outfits; the NeverNude body is 00 Required's own), without the
+Face Pack, the brow and dirt options, 11 Outfits BodySlide or 00 Required's CalienteTools. Its CBBE.esp is
+byte-identical to 2.0.3's. `cbbe-2.0.3-racemenu-morphs@1.6.1170` keeps CBBE 2.0.3's folder 26, the slider
+plugin RaceMenuMorphsCBBE.esp and its scripts, byte-identical, which SFW does not ship (its Q15).
+`cbbe-sfw-bodyslide-1.1.4@1.6.1170` is SFW's own BodySlide projects built with morph files: BodySlide and
+Outfit Studio 6.1.0 (Nexus 201 file 832109) run headless on sky-build with the preset SFW's prebuilt
+meshes are built with, "CBBE Curvy (Outfit)", and --trimorphs --quiet. That is the NeverNude body, feet, hands and beast hands, then the
+groups "CBBE Vanilla Outfits (SFW)" (the one group the Vanilla, Dawnguard, Dragonborn and Vanilla 1st
+Person files define), "CBBE Creation Club (SFW)" and "CBBE Creation Club 1st Person (SFW)". It produced
+1,369 meshes, each with a BODYTRI link to one of 686 .tri, laid over the prebuilt ones it rebuilds. The
+other 18 prebuilt meshes (the first-person body and hands, Astrid's body, a few first-person clothes)
+stay without morphs; the body project's three first-person sets can join the build later. The body's
+morphs now cover SFW's bra and panty shapes, so the underwear follows the sliders. The hand morphs carry
+one slider, still not VanillaSSEHi, so that slider still opens the wrists. A replay of the three rows
+against the host's manifest of the 2.0.3 stage: 441 files kept byte-identical, 867 changed (SFW's
+outfit meshes), 793 added (mostly SFW's Creation Club outfits), 984 gone. The gone files are nearly
+all the BodySlide project files the 2.0.3 row laid into Data from its 09 Outfits BodySlide, tooling that
+never belonged there, plus four .tri for meshes that no longer reference them; the clones' lay record
+prunes them by hash. Goam's row still wins femalebody_1_sk and femalehands_1_sk. The BodySlide row is
+of source `ci`: `thuum/19760` (cbbe-sfw-bodyslide-build, pipeline 5596, commit 0ba2e76b) and
+its lab/bodyslide/dist, built on sky-build by lab/bodyslide/build.ps1 from the two archives
+lab/bodyslide/inputs.tsv names by md5, which lab/tools/bodyslide-inputs.sh places in D:\thuum-inputs
+(licensed files, never the repo or an artifact). 1,367 of its 1,369 meshes match SFW's prebuilt copy
+vertex for vertex (max 0.029 units); the Blind Moth Priest robes (Dawnguard, both weights) differ in
+the robe shape alone (mean 0.78 units), at any preset: SFW's project for that robe is not the one its
+prebuilt robe was made from. The artifact is kept. The first builds, the hand
+proof and job 19669, passed "CBBE (SFW)", which is the group of SFW's 14 presets and not a preset:
+BodySlide 6.1.0 then builds at the projects' default sliders without a warning, a shape slimmer than
+SFW's (its body's chest 8.15 units forward against SFW's 10.38). A sweep of the 14 on sky-build
+(2026-11-07) matched SFW's prebuilt body to CBBE Curvy (Outfit) alone, and build.ps1 now refuses a
+preset name that no SliderPresets file defines. Main's rebuild of the same source when the
+layer merges does not move the row. Underwear choice: NeverNude, vanilla-styled; the modern style is
+the "CBBE Underwear (SFW)" set plus SFW's 30 Underwear textures, if Eli prefers it.
+
+**CBBE 2.0.3 becomes a row (D2 B, Eli, 2026-11-06: "yeah let's go with B. fire at will").** The
+render's own CBBE block (its FOMOD resolved each run with the choices Vanilla Shape, Vanilla Outfits,
+RaceMenu Morphs (BodyMorph), Morph Files (Outfits) and Face Pack) is gone; the row
+`cbbe-2.0.3@1.6.1170` lays that installer plan's folders in its order with two of Eli's appearance
+changes (docs/research/appearance-asks.md). Morph Files (Body) comes in: the seven .tri beside the
+body meshes, without which the naked body's sliders did nothing in the race menu on both seats.
+Face Pack goes out: its 27 face files (the 28th, femalehead_sk, is Goam's) are the "baby smooth"
+female faces; 2982ce82 had added the pack on 2026-10-07 for the neck seam of playtest nine, so
+vanilla faces over CBBE's body textures may show that seam again (to be looked at on the first
+stage; a seam-matched face texture with more detail is the next step if it does). A simulation of
+the row against the host's manifest of 2026-11-06: the same 2,285 files byte-for-byte, the 27 gone,
+the seven added; the clones' lay record lists the gone files, so add-mods prunes them by hash. The
+row is the layer's first, as the block laid CBBE before every row, and no hardcoded folder shares a
+path with it, so nothing else moves; its two plugins keep their slots, byte-identical to the
+archive's, and the canonical characters' looks keep loading.
+
+**Vanilla hair remake 1.0.2 (Eli, 2026-11-06, the hair link; "it's fine to just use them as
+replacers").** The row `vanilla-hair-remake-1.0.2` lays jg1's no-physics main file (Nexus 63979 file
+501460, 8.8 MB): 146 vanilla hairstyles remade from scratch for every playable race, as a replacer
+at the vanilla mesh paths, 271 hair meshes and 204 .tri under character assets\hair, no plugin and
+no textures (vanilla's hair textures, and any replacer of them, apply). Client-only by nature: no
+slot, nothing served, no load-order change; a player's hair records are vanilla's, the mesh they
+point at is the remade one. Main files reach the player characters only, since NPCs carry their hair
+in baked face data; the optional NPC file (501461, 70.5 MB of regenerated face data for over 2,000
+vanilla NPCs) is not taken, nor the SMP main file (510409), which needs FSMP. The read and Eli's
+other two appearance asks: docs/research/appearance-asks.md. Four of its meshes are left out by the row's
+excludes since playtest 48 (2026-11-06: c2's game crashed in RaceMenu while Eli flipped through
+hairs, SkyrimSE.exe+0D17F13, Khajiit hairs and an earring part on the stack): the vanilla records
+HairKhajiitFemale05, HairFemaleDremora01 and 02 and HairLineFemaleNord04 name a .tri the remake does
+not replace (khajiitfemalehair01.tri, femaledremorahair01/02.tri, 4hairlinefemale.tri), so each remade
+mesh would meet morph data built for the vanilla mesh. Of the 285 records whose mesh the remake
+replaces, these are the only four (the other 195 .tri it names are the remake's own); they stay
+vanilla, mesh and .tri together. Playable Headparts All Races offers every hair to every race and sex,
+which is how a Khajiit reached the Dremora and Nord ones.
 
 **Out by Eli's letters.** Death Drop Overhaul 1.2.4 (D37 B, 2026-10-27 00:00 PDT, "recommended on
 both"): it drops a dead actor's held shield as a world reference on each client that the server

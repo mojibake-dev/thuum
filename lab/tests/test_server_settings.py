@@ -105,7 +105,7 @@ class ServerSettings(unittest.TestCase):
                 self.assertIn((m["folder"], p), in_order, f"{m['folder']} ships {p}, which load-order.tsv lacks")
         folders = {m["folder"] for m in mods if m["source"] != "out"}
         legacy = {"racecompatibility-2.16", "rotfern", "racemenu-0.4.20.0@1.6.1170", "lostgrimoire-1.6", "apocalypse-10.2.3",
-                  "headshotkills-1.2", "cbbe-2.0.3@1.6.1170"}
+                  "headshotkills-1.2"}
         for r in self.order:
             self.assertIn(r["mod"], folders | legacy, r)
 

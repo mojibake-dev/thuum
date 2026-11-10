@@ -89,5 +89,5 @@ order	plugin	mod	light	versions	server	why
 86	MCMHelper.esp	mcm-helper-1.6.2@1.6.1170	light	1.6.1170	client-only	UI config
 87	DisableSpellLight_Prebuilt.esp	stealth-detection-fixes-2.2	light	all	client-only	spell light removal, visual
 88	RaceMenuMiscSlider.esp	racemenu-misc-slider-more-bodymorph-slider-for-r-0.1.0	light	all	client-only	RaceMenu sliders
-89	RaceMenuMorphsCBBE.esp	cbbe-2.0.3@1.6.1170	full	1.6.1170	client-only	RaceMenu sliders (existing)
-90	CBBE.esp	cbbe-2.0.3@1.6.1170	light	1.6.1170	client-only	body, existing
+89	RaceMenuMorphsCBBE.esp	cbbe-2.0.3-racemenu-morphs@1.6.1170	full	1.6.1170	client-only	RaceMenu sliders (CBBE 2.0.3's folder 26, since the SFW swap)
+90	CBBE.esp	cbbe-sfw-1.1.4@1.6.1170	light	1.6.1170	client-only	body (CBBE SFW Edition since 2026-11-06)

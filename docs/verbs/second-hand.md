@@ -212,3 +212,19 @@ probe reads the cadence); OnHit's own budget.
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
+
+## b-second-hand's missing proc ticks in apocrypha's layer sweep (20:34 PST 2026-11-09 (04:34Z 11-10), thuum-fa; run set 20261109-225901)
+
+Red at 20261110-042731 and its relaunched rerun 042924, step 25: 'server.actor(c2).healthPercentage < 0.97' read 1.0 on canon
+ce0d2664 under apocrypha's layer. Its last green was 20261102-110708. The difference is in the server's log: in the green, the
+bolt's hit ("OnSpellHit - Target ff000001 is hit by 1a109653 spell at 1 times its magnitudes (once). By caster: ff000000",
+11:08:24.223) is followed by the proc's stream from the caster's game ("... hit by 1a0b2c83 spell at 0.5 times its magnitudes (a
+stream's seconds)", then 0.133, 0.172, 0.149, 0.161 ...); in 042924 the bolt's hit (04:30:41.627) is followed by nothing, so c1's
+game never reported the proc's ticks and c2 took no damage. Not the cause: c1's "getProjectile threw for spell 1a109653" trace
+(magicSyncService.ts:583-593, a handled throw counted as a projectile) appears in the green too; the seam holds no Spell row
+(canon NativeRows.inc) and c1 logged no census line for a spell native; the bond settings (proc 55B32, spell 31C4D) are the same.
+Placed as canon's, by elimination (HYPOTHESIS): apocrypha's layer-appearance changes bodies, outfits, hair and the race menu, and
+nothing in the bolt's or the proc's path reads them; every train since 11-02 and main's own mod changes (Skyrim Souls RE since
+11-03) are canon's side. Cause UNREAD; the read is c1's: whether the bolt's effect script casts the proc on c2's figure at all
+(its effect events through the Papyrus gate, the caster-is-the-player branch), and if it does, why magicSyncService reports no
+stream for it. Pending in lab/gate.yaml, named here, until that read finds the fix and a run reads green.

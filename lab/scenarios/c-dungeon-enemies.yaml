@@ -1,3 +1,11 @@
+# c-dungeon-enemies v3 (thuum-fa, 2026-11-10; Eli's word "go for both", 23:02 PST 2026-11-09, ADR-064 decision 4, docs/verbs/npc-fate.md:3443): c2's open and close are
+# counted on either branch of RemoteServer's open of a dead body, as in b-npc-body-release v4 and v5. Since fork 75167c3d (11-03,
+# ADR-067 decision 6) a body whose AI is off runs D71's openBodyOnTimers ("<tag>: the ContainerMenu is open", then "closing
+# activation sent, the menu closed"), and one whose AI is on opens at once after "the server's open on a blocked body with its AI
+# on (D-C2 A)" and closes through the generic handler ("onOpenContainerMesage - sent ActivateMessage" with the body, 237540 =
+# 0x39fe4, as its target). v2's claims counted D71's lines alone and read red at step 132 three times in apocrypha's layer sweep
+# 20261109-225901 (053522, 053929, 054330 cold) and on the fixed server (20261110-063054), the menu open each time. Nothing else
+# changed.
 # c-dungeon-enemies v2 (thuum-cf, 2026-11-03; ADR-067 decision 6, the exclusive container hold on fork m3-turbo3-sys2-container):
 # the release's-effect claim is rewritten: the server no longer logs "N players in the container now" (one occupant at most), so the
 # claim that the second looter joins a FREE body reads the hold's refusal instead: no E_CONTAINER_BUSY for 39fe4 (the first looter's
@@ -242,17 +250,17 @@ steps:
   - wait: 4
   - c2: dump-state
   - c2: screenshot
-  - c2: log-count {pattern: "body 39fe4: the ContainerMenu is open"}
+  - c2: log-count {pattern: "body 39fe4: (the ContainerMenu is open|the server.s open on a blocked body with its AI on)"}
   - assert:
       - 'c2.state.menuOpen("ContainerMenu") == true'
-      - 'c2.log_count("body 39fe4: the ContainerMenu is open") >= 1'
+      - 'c2.log_count("body 39fe4: (the ContainerMenu is open|the server.s open on a blocked body with its AI on)") >= 1'
   - c2: close-menu {name: ContainerMenu}
   - wait: 4
   - c2: dump-state
-  - c2: log-count {pattern: "body 39fe4: closing activation sent, the menu closed"}
+  - c2: log-count {pattern: "(body 39fe4: closing activation sent, the menu closed|onOpenContainerMesage - sent ActivateMessage ..t.:6,.data.:..caster.:20,.target.:237540,)"}
   - assert:
       - 'c2.state.menuOpen("ContainerMenu") == false'
-      - 'c2.log_count("body 39fe4: closing activation sent, the menu closed") >= 1'
+      - 'c2.log_count("(body 39fe4: closing activation sent, the menu closed|onOpenContainerMesage - sent ActivateMessage ..t.:6,.data.:..caster.:20,.target.:237540,)") >= 1'
   - c1: approach {formId: 0x39fe4, distance: 150, cell: "371de:Skyrim.esm"}
   - wait: 6
   - c1: close-menu {name: MessageBoxMenu}
