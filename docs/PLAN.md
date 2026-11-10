@@ -1523,6 +1523,12 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   warpaint; the pillars after a restart and a trip out (Eli: a transient edge case). Next: thuum-fa's reads and fixes for the
   three; rung 5 (quests) for 51 once Eli gives W1, D-Q2 and D-Q3; apocrypha's layer-merge sweep of
   apocrypha/layer-appearance c407d1fa on the free lab.
+- STATE 2026-11-09 22:30 PST (numidium): apocrypha's appearance layer merged to main (e90ff6e0) by its cited full sweep (122 green;
+  six canon reds pending, each with its verb doc), both clones promoted; fork canon at 862b9375, m4-fix-50 by R0 (the naked
+  bandits' AddItems, the invincible bandit's EITM, mp racemenu's log), the lab pinned to it for the nightly as its T3. Open:
+  an unrecorded NPC's outfit missing on the fixed server (b-npc-stream-equipment, not e2595d14's path), the close half of the
+  D-C2 A body open (b-npc-body-release v5 and c-dungeon-enemies, Eli's word), b-word-wall's guest learning, b-second-hand's
+  proc ticks, b-quest-rumor v2 (W1). Next: rung 5's slot 0 after the nightly (about 08:00 PST 11-10), then rung 5's build.
 
 ### M5: Progression (4 to 8 weeks, Class A/B). Started 2026-10-31 (the weekend pass)
 

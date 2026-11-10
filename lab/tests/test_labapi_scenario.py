@@ -467,6 +467,51 @@ class NpcKillStep(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 load_scenario(f"id: x-g\nclients: [c1]\nserver: {{worldGlobals: {bad}}}\nsteps:\n  - wait: 1\n")
 
+    def test_a_server_block_may_set_the_runs_time_scale_and_cures(self):
+        # ADR-068 rung 5's vampire probes (8(b)): timeScale 1440 and cureSpells [] as the run's own; unnamed, the file's
+        from labapi.scenario import load_scenario
+
+        s = load_scenario("id: x-v\nclients: [c1]\nserver: {timeScale: 1440, cureSpells: []}\nsteps:\n  - wait: 1\n")
+        self.assertEqual((s.server.timeScale, s.server.cureSpells), (1440.0, []))
+        s = load_scenario('id: x-v\nclients: [c1]\nserver: {cureSpells: ["b8780:Skyrim.esm", "0a6ec2:Apocalypse - Magic of Skyrim.esp"]}\n'
+                          "steps:\n  - wait: 1\n")
+        self.assertEqual((s.server.timeScale, s.server.cureSpells), (None, ["b8780:Skyrim.esm", "0a6ec2:Apocalypse - Magic of Skyrim.esp"]))
+        plain = load_scenario("id: x-v\nclients: [c1]\nsteps:\n  - wait: 1\n").server
+        self.assertEqual((plain.timeScale, plain.cureSpells), (None, None))
+        for bad in ("{timeScale: 0}", "{timeScale: -20}", "{timeScale: true}", "{timeScale: '20'}", "{timeScale: 100001}",
+                    "{cureSpells: b8780}", "{cureSpells: [0xb8780]}", '{cureSpells: ["b8780"]}', '{cureSpells: ["Skyrim.esm:b8780"]}',
+                    '{cureSpells: ["xyz:Skyrim.esm"]}', "{cureSpells: true}"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(f"id: x-v\nclients: [c1]\nserver: {bad}\nsteps:\n  - wait: 1\n")
+
+    def test_script_vars_and_quest_objectives_name_what_they_read(self):
+        # ADR-068 rung 5's two seat reads: a quest's or a reference's script variables by "<script>::<var>", and a quest's
+        # objectives by index; a FormDesc form or quest passes as written for the runner to resolve
+        from labapi.scenario import load_scenario, playtest_step
+
+        head = "id: x-sv\nclients: [c1, c2]\nsteps:\n  - c2: "
+        step = load_scenario(head + 'script-vars {form: 0xeafd5, keys: ["PlayerVampireQuestScript::::VampireStatus_var"]}\n').steps[0]
+        self.assertEqual((step.kind, step.client, step.action, step.args),
+                         ("client", "c2", "script-vars", {"form": 0xEAFD5, "keys": ["PlayerVampireQuestScript::::VampireStatus_var"]}))
+        self.assertEqual(load_scenario(head + 'script-vars {form: "1f251:Skyrim.esm", keys: ["MG01QuestScript::NiryaSkillVar"]}\n').steps[0].args,
+                         {"form": "1f251:Skyrim.esm", "keys": ["MG01QuestScript::NiryaSkillVar"]})
+        step = load_scenario(head + "quest-objectives {quest: 0x74a83, objectives: [0, 10]}\n").steps[0]
+        self.assertEqual((step.action, step.args), ("quest-objectives", {"quest": 0x74A83, "objectives": [0, 10]}))
+        for bad in ("script-vars", "script-vars {}", "script-vars {form: 0xeafd5}", 'script-vars {keys: ["A::b"]}',
+                    "script-vars {form: 0xeafd5, keys: []}", 'script-vars {form: 0xeafd5, keys: ["VampireStatus"]}',
+                    'script-vars {form: 0xeafd5, keys: ["::VampireStatus_var"]}', 'script-vars {form: 0xeafd5, keys: ["A::"]}',
+                    'script-vars {form: 0, keys: ["A::b"]}', 'script-vars {form: true, keys: ["A::b"]}',
+                    'script-vars {form: 0xeafd5, keys: ["A::b"], formId: 1}',
+                    "quest-objectives", "quest-objectives {quest: 0x74a83}", "quest-objectives {objectives: [1]}",
+                    "quest-objectives {quest: 0x74a83, objectives: []}", "quest-objectives {quest: 0x74a83, objectives: [-1]}",
+                    "quest-objectives {quest: 0x74a83, objectives: [0x10000]}", 'quest-objectives {quest: 0x74a83, objectives: ["10"]}',
+                    "quest-objectives {quest: 0x74a83, objectives: [true]}", "quest-objectives {quest: 0x74a83, objectives: [1], stage: 10}"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                load_scenario(head + bad + "\n")
+        self.assertEqual(playtest_step("quest-objectives {quest: 0x74a83, objectives: [10]}"),
+                         ("quest-objectives", {"quest": 0x74A83, "objectives": [10]}))
+        self.assertEqual(playtest_step('script-vars {form: 0xeafd5, keys: ["A::b"]}'), ("script-vars", {"form": 0xEAFD5, "keys": ["A::b"]}))
+
     def test_kill_ref_and_respawn_ref_take_a_form_id(self):
         # a game-file actor killed by the server (its killer a client of the scenario) or put up again at once
         from labapi.scenario import load_scenario

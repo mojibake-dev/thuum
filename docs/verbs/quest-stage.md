@@ -56,6 +56,16 @@ What the server validates (R1): the quest is a QUST in the server's load order; 
 the reporter is a logged-in player. What it records (R0): per quest the set of stages done, world-wide.
 Rate limit / bounds: 50 ms per quest per player; a report of a stage already done is a no-op (no error, no relay).
 
+**Rung 5's trust (rule 5; ADR-068 rung 5, fork m4-scripts-5-quests 44ffafc2, as its server half m4-scripts-5-server a403ddd4
+declares it: the run words and their acting player, the quest scope, a player's own rows and their overlay, ScriptVariables 81;
+docs/WIRE.md's QuestStage, ScriptCall and ScriptVariables rows):** A player's own row is R1 on the seat's word that its calling
+script ran: the server checks the kind, the bound over the live attachments, the twin rule, the Playable flag, restrictedRaces and
+the head part's race list, and cannot tell which named form a script chose or when. Journal liveness is the world's (once any seat
+runs or stages a world quest, every seat may use that quest script's properties); under questScope derived a player-class quest is
+live for every player at all times. Run-time values (CurrentHowl, Game.GetFormFromFile) and cast-only spells are refused and
+counted. Overlay contents never reach the change form; the figure's look is R2. A run word's acting player is the seat's word when
+it names a connected player; wordStages are the server's read of the record. ScriptVariables stay R2.
+
 ## Engine surface
 
 - Quest.SetStage, GetStage, GetStageDone, IsRunning: Papyrus natives on the client, through Skyrim Platform's Quest
@@ -93,6 +103,17 @@ Rate limit / bounds: 50 ms per quest per player; a report of a stage already don
 - How: a set of (quest, stage) pairs the service is applying, consumed by the `questStage` handler.
 - Release condition: per pair, at its event or after 2 s.
 - Side effects: none.
+- The served start (ADR-068 rung 5, D-Q3 A; fork m4-scripts-5-quests 44ffafc2): the client's 5b head declared a limit, its
+  builder's note 5: a served START word still ran the quest's start-up stage fragments, since the suppress mark is per (quest,
+  stage) and Skyrim Platform cannot name a quest's start-up stages. SCHEMA_VERSION 42 closes it (the fresh review's note 7):
+  the server stamps every start and stop word it sends with `wordStages`, read from the QUST record (stage 0 and the
+  StartUpStage stages for a start, the ShutDownStage stages for a stop; ActionListener.cpp WordStages :3331-3368), and the
+  receiver marks each before Quest.Start or Quest.Stop, an echo mark always and the sink's suppress mark when the word is served
+  or questFragmentLive is not true (questStageService.ts markWordStages :434-450, marksFragment :1670-1672). What stays, a
+  static read of 44ffafc2 UNVERIFIED by a run: the implicit start a stage's apply makes on a quest not running here marks the
+  start-up stages the quest's last start word named (:557-563), so a seat that has heard no start word for the quest this
+  session runs those fragments; a login serves no start word for a quest the record holds stopped, only its stages and then its
+  stop word, so a fresh seat's replay of such a quest is that case.
 
 ## Message contract
 

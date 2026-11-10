@@ -91,6 +91,10 @@ class FakeProxmox:
         copied = re.search(r"\[IO\.File\]::Open\('([^']+)'.*\[IO\.File\]::Create\('([^']+)'\)", " ".join(command))
         if copied and copied.group(1) in self.files:
             self.files[copied.group(2)] = self.files[copied.group(1)]
+            # log-count's copy prints the source's length at the open and the copy's (runner.py _log_count)
+            if "Write-Output" in " ".join(command) and self.exec_result.exitcode == 0:
+                n = len(self.files[copied.group(1)].encode("utf-8"))
+                return ExecResult(0, f"{n} {n}\r\n", "")
         # its else branch: a source not yet written leaves an empty copy (a frida script's .log before any line)
         empty = re.search(r"Set-Content -Path '([^']+\.copy)' -Value ''", " ".join(command))
         if empty and not (copied and copied.group(1) in self.files):
@@ -274,6 +278,11 @@ class FakeState:
         # rows [{quest, alias, refr, created, container, added}], as the gamemode answers them; None answers found: false
         self.world_globals: dict[str, Any] | None = None
         self.alias_fills: list[dict[str, Any]] | None = None
+        # ADR-068 rung 5's journal reads (labState kinds questRuns, questStages and scriptVariables), the rows as the gamemode
+        # answers them ([{quest, running, seq}], [{quest, stage}], [{form, script, var, k, value, seq}]); None answers found: false
+        self.quest_runs: list[dict[str, Any]] | None = None
+        self.quest_stages: list[dict[str, Any]] | None = None
+        self.script_variables: list[dict[str, Any]] | None = None
 
     def spawn(self, profile_id: int, x: float = 0.0, y: float = 0.0, z: float = 0.0, cell: str = "lab-spawn") -> FakeActor:
         a = FakeActor(x, y, z, cell)
@@ -304,6 +313,10 @@ class FakeState:
                 if self.alias_fills is None:
                     return {"found": False, "error": "no such property"}
                 return {"found": True, "fills": list(self.alias_fills)}
+            for kind, rows, name in (("questRuns", self.quest_runs, "runs"), ("questStages", self.quest_stages, "stages"),
+                                     ("scriptVariables", self.script_variables, "entries")):
+                if payload.get("kind") == kind:
+                    return {"found": False, "error": "no such property"} if rows is None else {"found": True, name: list(rows)}
             if payload.get("kind") == "ref":
                 ref_id = int(payload.get("actorId", -1))
                 ref = self.refs.get(ref_id)

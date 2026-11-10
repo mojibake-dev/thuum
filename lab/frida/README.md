@@ -644,3 +644,25 @@ TURN_SIGN) that ramps lockAngle with the pick snapped: HYPOTHESIS that the menu'
   counted (platformQuiet) and skip the walk. Reads only, no engine call from a listener; a liveness row with a kernel32!Sleep
   pulse. Layouts CommonLib b93280e8's (Stack.h, StackFrame.h, Variable.h, ObjectTypeInfo.h, Object.h; file:line in the header).
   Fresh-reviewed 2026-11-09 (GO WITH NOTES, the notes applied as written); never run. 1.6.1170 only.
+- additem-functor.js: whether a script's AddItem of a leveled list on its own player lands through a container event fired
+  synchronously inside SkyrimScript::AddItemFunctor's operator() on its thread, carrying the stack id the platform's seam recorded
+  at the call (ADR-068 rung 5, Eli's D-R1 C and its named gap: fork m4-scripts-5-rewards 1bc4059b refuses a leveled list by name,
+  E_SCRIPTCALL_LEVELED, because the engine rolls it later, in the functor). The probe x-additem-functor by path
+  (lab/.cache/drafts/rung5) sets MS01's stages 39 and 49, each a fragment's AddItem of LvlQuestReward02Medium 0xc0405 on the
+  player, and FreeformStonehillsA's 20, Gold001 x25, the control. Hooks: native-frame.js's NativeFunctionBase::Call (104651, `just
+  addr` 0x143dc00), filtered to ObjectReference.AddItem and Activate by the bound IFunction's own class and name; AddItemFunctor's
+  operator() at the address its live vtable's slot 01 holds (218372; the locator checked against RTTI 397281, slots 00 to 06
+  printed, slot 01 against the static read's 56095); the VM's container sink (SkyrimVM 400475 +0x48, slot 01 ProcessEvent, RTTI
+  396984) and Skyrim Platform's, found in the event source's sink array at the VM sink's first event and attached 500 ms later
+  from Frida's own thread. A sink call whose `this` is not the registered sink counts as foreign and reads nothing. Rows: ready
+  (pid, each site's live first bytes, the locator and slot checks); addItemCall per AddItem (the Stack, the three arguments, the
+  caller frame, the CallResult); activateCall for an Activate whose window caught an event; functorEnter and functorLeave
+  (stackID, the matched call or a requeued functor's rerun, raw bytes named by value as HYPOTHESIS, a leveled list's live members
+  capped at 256 entries and 64 leaves, the sret reading a detour needs: rax against the entry's rdx); event per container event
+  naming the player or fired in a window (the window, member, listItself, paired across the two sinks); sinks and platformSink
+  once; a summary every 10 s with every hook's count before its filter and the pending calls; final and detached at TTL.
+  Backtraces go only to functors matched to a call on PLAYER and to their events. Reads only, no engine call from a listener; a
+  kernel32!Sleep pulse. LAB_PARAMS: TTL (default 600; the probe passes 100 so final lands before the run's fetch), ROWS (64),
+  EVENT_ROWS (200), BT (3), RAW (0x28), PLAYER (0x14). Ids by `just addr` on 2026-11-10; layouts CommonLib b93280e8's (file:line
+  in the header). Fresh-reviewed 2026-11-10 (runs as is, its notes all NOTE; notes 1 to 6 and 8 applied, 7 and 9 optional and
+  left); never run. 1.6.1170 only.

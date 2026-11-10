@@ -218,3 +218,38 @@ trigger entry rule's, docs/verbs/trigger-entry.md: a trigger whose script is a p
 presser's own seat's, or rung 5's acting scope carries the guest's learning to the guest (its SendTriggerEvent arm names the
 guest's figure as Game.GetPlayer() on the host, and the word's report then names the guest). Pending in lab/gate.yaml, named here,
 until that fix reads green on a guest.
+
+Confirmed (22:36 PST 2026-11-09 (06:36Z 11-10), thuum-fa) by 20261110-062732 on the fixed server (fork canon 862b9375), whose artifacts line (0292261b) kept the
+logs: c2 logs "[verb:traps] trigger entry 709d2 by 14 (enter): relayed to the cell's host (D-C2)" (06:30:04.426Z); the host c1
+logs "relayed entry 709d2 by ff000001: OnTriggerEnter sent to 2 script(s)"; the server logs "ff000001 reports ff000001 entering
+709d2 in cell 371dd (its host ff000000): relayed to the host" and no "learns word" for ff000001. c1's own learning went through
+its WordWallService ("word wall 709d2 entered", then "reported"), the player-own client service; c2's WordWallService never saw
+its own player's entry, which D-C2 A relayed away. The fix is the client's: the presser's own seat's WordWallService takes its
+own player's entry into a word wall's trigger even when the trigger's script runs on the host (D-C2 A unchanged for the script).
+It rides rung 5's client as a TypeScript-only fix; out of pending when b-word-wall reads green on a guest.
+
+Correction (22:52 PST 2026-11-09 (06:52Z 11-10), thuum-fa, from the same run's platform logs and the platform's gate code): the paragraph above has the
+right symptom and the wrong mechanism. The gate (FridaHooks.cpp OnSendEventEnter on m4-scripts-5-platform) calls
+SendPapyrusEventEnter, the JS hook this service listens on, before any trigger rule, and its presser rule matches OnTriggerEnter
+and OnTriggerLeave only (TriggerEntryOf: "OnTrigger, the continuous event, is none of them"); neither the script-record pending
+blank (OnLoad and OnCellLoad only) nor the record-apply blank (no line in c2.log) touched 709d2's events. What c2.log shows
+(c2's local clock): 22:30:04:111 "OnTriggerEnter to 709d2 by 14: this seat's presser, told as triggerEntry"; :275 "ApplyScriptState
+709d2: 2 of 2 script(s) applied"; :437 "onResult called: ObjectReference.setPosition (call 2)"; :449 "OnTriggerLeave to 709d2 by
+14"; then no OnTrigger to 709d2 for the rest of the leg while c2 walked north 4 s inside the 2,065-unit sphere (XPRM type 2,
+radius 2064.78; c2 landed at (-7621.5, -608.5, 540), about 474 units from the centre), though its engine delivered a later walk
+into 493b7 normally (:13:469). c1's walk-in at 06:28:21 had no leave and its first OnTrigger came 220 ms after the enter; c2's
+stay of 338 ms ended in a leave first. So the service, which heard OnTrigger alone, never reported, and the guest never learned.
+
+The fix (fork m4-scripts-5-client 8857db37, TypeScript only; tsc, webpack, fork-lint clean): WordWallService also takes the
+presser rule's triggerEntry for this game's own player (0x14) on the enter, the base checked on the update as for OnTrigger, one
+report a wall a session. A guest's walk-in or arrival is told as triggerEntry whatever its engine does next; the host (no
+triggerEntry for its own cell's trigger) and a game that logs in inside (no entry) keep OnTrigger. It merges into
+m4-scripts-5-quests after integration pass 2 and rides rung 5's stage (its client as a TypeScript layer over pass 2's build).
+
+HYPOTHESIS, a side read and not this verb's: a guest arriving inside a trigger of a cell another game hosts is dropped from it by
+its own engine within a third of a second (the leave 12 ms after a setPosition whose target the log does not name: the player's
+own teleport settle or a figure's spawn sequence, setPosition then enable then resurrect, all "(call 2)"), and never re-enters
+while it stays inside. Dynamic plan: one probe by path, c2 teleported inside 709d2's sphere with c1 hosting, a Frida script on
+c2 logging every OnTriggerEnter, OnTrigger and OnTriggerLeave to 709d2 with each ObjectReference.SetPosition's self in order.
+Expected: the setPosition just before the leave names its self; if it is 0x14, every guest arrival inside a continuous-event
+trigger loses it (the word wall is covered by the fix either way). Out of pending when b-word-wall reads green on a guest.

@@ -31,6 +31,12 @@ directory holds what runs on it.
   rpool/sky/results, mounted at /srv/lab/results on sky-srv and browsed
   read-only at https://thuum.gaussing.tv/results/<run>/. `just lab-run`
   saves each run's result.json here.
+- census.py: the static censuses' shared reader over the deployed load order
+  (the deploy settings' plugins, the layer's client-only tail, its loose
+  scripts and the archives by precedence), derived facts only; on sky-srv,
+  tools/quest-census.py (`--emit`: the settings' playerQuests,
+  playerQuestGlobals, playerQuestVariables and playerQuestCallers) and
+  tools/ctda-vars.py (`--emit`: conditionVariables) read it (ADR-068 rung 5).
 - addr.py (`just addr`): Address Library ids to offsets, from CommonLib's
   loader; ledger.py (`just ledger`): regenerates docs/NATIVES.md from the
   fork. Tests for both under tests/ (`just test-lab`).

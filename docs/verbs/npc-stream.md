@@ -2392,3 +2392,56 @@ list dropped the outfit after it; the host's honest report then names pieces the
 bandits are the same fault (docs/verbs/npc-fate.md, its reads). The fix is fork m4-fix-50 e2595d14 (AddItems adds every item
 of the call; T0 InventoryTest and NpcFateTest; CI 5671, T2 green), merging by R0 after the sweep. Pending in lab/gate.yaml,
 named here, until one run of b-npc-stream-equipment on the fixed server reads green; a red there sends the read back here.
+
+Correction (22:28 PST 2026-11-09 (06:28Z 11-10), thuum-fa): on the fixed server (fork canon 862b9375, m4-fix-50 merged R0 at 06:17Z; the lab pinned to
+skymp-server:m4-fix-50-862b9375), b-npc-stream-equipment 20261110-062127 is red exactly as before: "OnUpdateEquipment 1348c -
+dropped ... inventory does not contain item 6c1d9" and 209a5, 35534 lacking 209aa, 209a6 and 209a5, E_EQUIP_REFUSED 10, with the
+server's "ff000000 sights 1348c ... the record stood in 133ca". So the clean world carries a SAVED record for 1348c whose inventory
+lacks its outfit: the inventory was written before the fix (the same AddItems early stop, at an earlier roll that the clean
+snapshot kept), and e2595d14 keeps new rolls whole but cannot repair a saved one; D-N1 A adopts such a record as it stands. The
+fix is the data's: the clean snapshot's (and the canonical world's) actor records whose inventory lacks a piece their worn set
+names, or their base outfit's resolution, are moved aside so the fixed roll runs fresh (numidium composes the snapshots; lab/tools
+world-repair.py is the tool's shape). Pending until a run on a repaired clean world reads green.
+
+Second correction (22:40 PST 2026-11-09 (06:40Z 11-10), thuum-fa; a read-only agent's read of 062127 against the 11-02 green 095254, the code checked
+here): the correction above is WRONG; no saved record exists. Both runs' server.log load "2 ChangeForms (Including 2 player
+characters)" (the clean snapshot holds the two characters only), so 1348c and the nine others are unrecorded and the server
+builds them at load. The cause is fork c312fd39 (2026-11-03 23:08 PST, npc-fate 1c finding 1; in canon, not in the 11-02 green
+build ad1aa50a): MpActor::Init skips EnsureBaseContainerAdded when CanRollFate() holds (MpActor.cpp:2705-2708 at canon), leaving
+the build to RollFateIfUnrolled (:2362), whose only callers are PartOne::SendFates' walk over a player's new grid squares
+(PartOne.cpp:2341) and PlaceAtMe (PapyrusObjectReference.cpp:463). The ten refused NPCs' records stand indoors (1348c in 0x133ca
+RiverwoodFaendalsHouse; 35534 and 13491 in 0x1cb84 RiverwoodSvensHouse; seven in 133c6 to 133c8), so c1's pass at (4,-11)
+(06:22:16.533, 32 fates) skips them; the npc-puppet sighting then moves them outdoors (PartOne.cpp:2589-2600:
+SetCellOrWorldObsolete, SetPos, SetAngle, no roll) into squares already in c1's fated set, so no pass reaches them, and c1's
+first equipment report (06:22:21.086) meets an empty inventory: every worn ARMO fails HasItem (ActionListener.cpp:1845, the
+warning at :1858) and the hosted refusal drops the report whole (:1944-1968). The ten sighted-from-indoors actors are exactly the
+ten E_EQUIP_REFUSED actors. On 11-02 Init built them at load and 1348c's first report was accepted ("3 worn, right 209a5 left
+13985", 09:53:45.758). The outfit itself resolves right (EnsureBaseContainerAdded, MpObjectReference.cpp:2848-2914: Faendal
+0x13480's DOFT 0xdab76 holds 209a5 and 6c1d9; Hilde 0x35533's DOFT 0x2d75f holds 209a5, 209a6, 209aa); the fault is WHEN the
+roll runs, not what it reads. Neither e2595d14 nor moving records aside touches this path; the data fix above is withdrawn.
+
+The fix is the server's (fork, server-only, an R0 merge): the roll belongs to the actor, not to the grid square, so every path
+that first serves an unrolled record to a seat (the pass's walk, the sighting's move, a script's MoveTo, an alias's load) rolls it
+first at the loader's level (FateRollLevel) and sends its fate as the respawn does (onActorFate). T0: 0x1348c loaded with no
+record in 0x133ca, a host pass at (4,-11), the sighting, then a hosted report of 6c1d9, 209a5 and 13985 accepted with no
+E_EQUIP_REFUSED. UNVERIFIED: that c2's pass at 06:22:40.919 rolled the ten (42 minus 32, SendFates logs counts only). The
+scenario stays as written; out of pending when it reads green on the fixed server.
+
+The fix built (01:16 PST 2026-11-10 (09:16Z 11-10), thuum-fa): fork m4-fix-51 762305f1, two commits on canon 862b9375 (062e9065, then a fresh read-only
+review's notes), T0 green (pipeline 5720, ctest 13 of 13, test_unit 694 cases) and T2 green (50 of 50 sessions, both heads),
+merging R0 at numidium's slot with the lab pinned to skymp-server:m4-fix-51-762305f1. The roll belongs to the actor:
+PartOne::EnsureFated (PartOne.cpp:2315) rolls an unrolled game-file actor at its loader's level wherever its record first
+reaches a game, called by the grid walk (:2433) and by a new onActorSubscribe hook at the top of MpObjectReference::Subscribe
+(MpObjectReference.cpp:1446), so the create word carries the roll (the sighting's move, a script's MoveTo, an alias load, a
+login's 3x3, Enable). The loader is the cell's host when a game hosts it, else the served listener; a throw in the roll is
+caught and logged once per actor. A fated NPC's fate now rides ahead of every create word (PartOne.cpp:1647; a repeat costs the
+seat nothing, actorFateService.ts:59-63), EquipBestWeapon sends only to listeners with a user (MpActor.cpp:313), and the roll
+restores the outer loader level. T0: Faendal 0x1348c loaded indoors in 0x133ca and sighted into the host's fated square rolls
+once at the host's level, one fate ahead of his create word naming 0x6c1d9 and 0x209a5, and the host's report of 0x6c1d9, 0x209a5
+and 0x13985 is accepted whole; Sigrid 0x13483 moved by Teleport rolls once; a walk-rolled actor is not rolled again; a login's
+3x3 carries rolls behind their fates. Found on the way: on canon a first login's create words carried unrolled records until the
+first pass, about a second later. Open (UNVERIFIED, no lab case yet): a record holding a roll but no fate level can be rolled
+again (RebuildAndRespawn's level-less roll, a world older than c312fd39; D-N1 A covers a record wearing an item); an already
+rolled actor moving into a fated square outside a seat's 3x3 sends that seat no fate; a throw after the level is set is never
+retried; the walk's roll is unguarded, as on canon; the fate's key includes the worn hands, so a seat's copy is redressed once
+after an accepted hands report or a loot changes the worn set.

@@ -4922,6 +4922,44 @@ Creation Kit's PapyrusCompiler.exe as a CI job on the fork's Windows runner (Eli
 fallback), the vanilla Scripts.zip and SKSE's script sources as its inputs, lab-only. Proven at T3: the swap seen on the other seat
 and kept across a relaunch.
 
+Rung 5's stage-eve words (Eli, ~02:3x PST 2026-11-10 (10:3xZ), in thuum-fa's session, answering the six-item summary; verbatim
+"1. im thinking C because it's the most likely to fire every time 2. C seems like the most complete build, correct? 3. straight to
+B 4. B is fine. 5. A 6. B"):
+- D-R1 C, a quest's reward to the player is the seat's own record (R2, rule 5's "record it as unvalidated", declared in the verb
+  doc): a script's AddItem or RemoveItem on the seat's own player is recorded into the player's inventory as the seat reports it,
+  with no property bound, because it fires every time (Eli's reason; a bound would refuse a leveled reward or an item the script
+  computes at run time). Other seats run the same fragment on the acting player's figure (rung 5's acting scope), so the grant is
+  reported once, by the acting seat. Found by x-acting-frame 20261110-072506: today the client's 5 s inventory apply undoes a
+  fragment's reward on both seats. Built as a head after rung 5's stage (its head 44ffafc2 is frozen while the stage runs).
+- D-Q4 C (Eli's leaning, asked as a question; the answer and the build order in the session): a quest's run word counts as the
+  world's only when a script's native call makes it, read at the seam (Quest.Start, Quest.Stop and their caller), not every
+  engine start and stop (the template save's load, start-game housekeeping, the Story Manager's per-seat starts). Its rule is not
+  settled (a world quest completing and USSEP's housekeeping both stop themselves from their own script), so it starts with a
+  read, then the build and its probe.
+- D-W3 B, built now: a held entry of an NPC standing inside a WORLD trigger at its cell's load is replayed once at its presser's
+  ownership; a trap family trigger with an NPC on it stays unfired until the next press. Rebuilt from x-trigger-preload
+  20261110-073038's read (H-TP1 and H-TP2 hold): the held store counts entries, takes a lock, keeps accepting after the grant,
+  checks ownership at the next update (not at setHosted), and tells a load's demote from a hand-off's; its probe is
+  x-trigger-preload v2 with an NPC standing in a world trigger at the host's load.
+- b-quest-rumor v2's DLC1VCController claim stays as W1 wrote it, "starts 1a428:Dawnguard.esm" <= 1 (Eli: "B is fine").
+- D-E1 A amended, rotfern's vampire eyes: rotfern.esp's rotfernRaceVampire female default eyes become RotfernEyesVampire 0x019D09
+  (they are RotfernEyesMoraVampire 0x023F0F, an overlay from the race, so a vampire rotfern would show the Mora eyes before the
+  questline), meant to match D-E1 A's design (her usual pair or its vampire twin, the Mora pair after DLC2MQ06). apocrypha's edit.
+  HELD (02:46 PST 2026-11-10, apocrypha's static read before building): with the race's Overlay Head Part List flag the race's
+  part of a type replaces hers (CommonLibSSE-NG TESNPC.cpp:94-96, GetCurrentHeadPartByType; Actor.cpp:467), so A covers
+  three of the four cases and a vampire rotfern after the questline would keep the race's RotfernEyesVampire over the
+  Mora vampire pair the script sets (the male list has the same gap). Option A' put to Eli: drop the eye entry from
+  rotfernRaceVampire's lists, both sexes (the head and mouth overlays stay), so her own eyes show and her script decides
+  all four cases. Either way the change is a build-time row in lab/layer/plugin-patches.tsv on rotfern.esp (rotfern.esp's
+  file untouched), static until a rotfern seat's vampire turn is traced. The build waits for Eli's A or A'.
+  A' ACCEPTED (Eli 02:51 PST 2026-11-10, in thuum-fa's session, verbatim "the male list is irrelevant male rotfern will never be
+  picked and is a fully abandoned branch. as long as A' gets the placement right then roll with it."): the eye entry leaves
+  rotfernRaceVampire's FEMALE list (the male list is an abandoned branch, left as it is); the head and mouth overlays stay;
+  her own eyes, set by her script, show in all four cases. Eli's condition is the placement: the T3 beside the eyes T3 claims
+  her eyes sit right in the vampire head (screenshots on both seats, before and after DLC2MQ06), not only which part shows.
+- ADR-067 decision 7 amended, the order: ADR-068 rungs 5 and 6, then physics objects (props and bodies, Eli's two tests: a dragged
+  body, Hailstone at a cabbage cart), then rung 7 (the chaff). Physics no longer waits for the cleanup.
+
 ## ADR-069: Rotfern's Fixes: engine fixes ship to every player as one SKSE DLL, one detour per lab-read site, never as a lab-only patch
 
 Status: ACCEPTED 2026-11-06 by Eli, to apocrypha directly, after asking what the fixes are ("wait so what ARE the engine fixes???

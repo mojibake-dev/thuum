@@ -404,7 +404,7 @@ T0:
 - wire-validate: check_quest_stage's word, acting and served cases; check_script_variables; proptests (.claude/rules/rust.md: no
   panic from a packet).
 - unit/QuestStageTest.cpp v2: replaces the D62 and D69 case (:340) (a start-game-enabled quest's stage 0 is the start word's: the
-  run recorded, no stage, no E_QUEST_ line; its start-up stage recorded like any other); a start recorded and relayed with the
+  run recorded, no stage, no E_QUEST_ line; its start-up stage recorded like any other; REVISED 01:34 PST 2026-11-10, fork ef9215c9: a report of a start-up stage, QUST INDX, is the start word's as stage 0's is, read 5 generalized, so b-quest-rumor's kept HeartwoodMill claim "set e3ea5:Skyrim.esm stage 10" == 0 holds); a start recorded and relayed with the
   reporter as acting; a repeated start folded (no relay); a stop relayed; a denied quest's word refused E_QUEST_DENIED;
   E_QUEST_PLAYER under `questScope` "aliases", none under "off"; a report's acting relayed as reported; an acting naming no
   connected player stamped as the reporter, E_QUEST_ACTING; the login: the list, starts (served), stages (served), stops (served),
@@ -688,6 +688,24 @@ Reads:
     knows recorded, Playable, restricted and permitted only; no twin, nor WerewolfBeastRace 0xcdd84, nor DLC1VampireBeastRace
     0x0200283a is Playable (esm.py races), so even the menu refuses them (E_APPEARANCE_RACE, :1364). rotfernRaceVampire 0x19d08 is
     Playable and restricted to profile 1.
+20. The platform's SendEvent gate blanks the per-player quests' own scripts (the transformation drafter's read, 2026-11-09,
+    after this section's plan). At canon the gate (FridaHooks.cpp:834-896 at 762305f1) admits a hosted world script, a class
+    AdmittedByChain names and four scripts by name (RaceMenu*, GRIM_ALT_TeleportationMarker, WB_DestroyAfterDelay_Script,
+    defaultDisableHavokOnLoad), and the branch before it an effect the player bears or cast (:802-828); a quest's own scripts
+    and its aliases' are none of these, so PlayerVampireQuestScript's OnUpdateGameTime never fires (the stage never past 1) and
+    the beast form never ends by itself. The fix is the ownership rule, no name list: each seat runs its own player's per-player
+    quests. Landed on m4-scripts-5-quests 44ffafc2: the login's list message carries `player`, the whole player class while
+    questScope is "derived" (fork m4-scripts-5-server dc5c51ec, fixture 57-QuestStage-6; docs/WIRE.md's QuestStage row);
+    skymp5-client hands it to the platform's new export setPlayerQuests (PuppetApi.cpp:457-480, ActingScope::PlayerQuests, the
+    set replaced whole) at every login, game load and plugin reload ("[verb:quest-stage] player quests: <n> told to the platform
+    at the login") and never reports a player-class quest; and the gate's player-quest branch (FridaHooks.cpp:934-962, after the
+    effect branch and before the class-chain test, never asked for an actor's or a reference's event) passes an event to a quest
+    in the set or to an alias of one (PlayerQuestOfHandle :245-283: TESQuest::FORMTYPE, else the three alias VM types and
+    BGSBaseAlias::owningQuest), tallied " (player quest)", its first admission per quest logged ("[verb:quests] <event> to
+    handle <h> passed (player quest): a script of <q>, this seat's own player's quest (<n> so far)"). An effect the player bears
+    or cast (Sanguinare Vampiris's VampireDiseaseEffectScript among them) passes the effect branch as before (:922-932).
+    HYPOTHESIS H-PQ1: HandleIsType(Quest) holds for a quest's own handle (the gate never resolved a quest's handle before); if
+    not, the quest's scripts stay blanked while its aliases' pass. x-vampire-stage (the stage past 1) and the gate's line read it.
 
 ### (a) Scope 1, the classification
 

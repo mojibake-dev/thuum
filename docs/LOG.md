@@ -9374,3 +9374,74 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (a21e46b1; its online wait reads through lab-api's 502 since 12fdb86c) and playtest-teleport (1bacb4d8). Eli: "seems like
   playtest 51 should new rung 4 stuff and those fixes"; rung 4 shipped in this build, so the new work for 51 is rung 5, quests
   (thuum-fa's plan docs/research/rung5-quests-2026-11-09.md), waiting on Eli's W1, D-Q2 and D-Q3 (D-V1 decided B by its census).
+
+### 2026-11-10
+
+- apocrypha/layer-appearance (a mod layer) merged to main e90ff6e0 by fast-forward (2026-11-10T06:17Z): the full sweep 20261109-225901-layer-apocrypha-layer-appearance (cited with m4-train-50, ADR-042a; the layer's own run 20261109-225547-smoke-two-players), 20261109-225901-a-activation-reach to 20261110-061018-t2-fakeclient-restart (145 runs); both clones promoted.
+  Plugins: the appearance layer as laid at b2bcc92d (CBBE SFW Edition's body and outfits built in SFW's own shape on CI job
+  19760, Rotfern's Fixes 0.1.1), its inputs byte-identical through 2eec913d and e90ff6e0, which merge main alone. The sweep
+  read 122 green of 128; its six reds are canon's, each pending at the merge with its verb doc: b-npc-body-release and
+  c-dungeon-enemies (50's D-C2 A direct open of a blocked body logs neither of D71's lines; npc-fate.md:3443; v4 at aca69db8
+  takes the open line, the close line next), b-npc-stream-equipment (an unrecorded NPC's inventory built without its outfit,
+  E_EQUIP_REFUSED; npc-stream.md:2378), b-quest-rumor (the dead "mode all" pattern, W1; quest-stage.md:408), b-second-hand
+  (no proc ticks streamed after the bolt's hit; second-hand.md:216) and b-word-wall (the guest's relayed trigger entry
+  teaches nobody; word-wall.md:206). Four lone reds read green on their reruns: b-duel's Flames flake, b-lever-relay's sample
+  window (c2's graph took the relayed pull, thuum-fa from c2.log), b-npc-handoff-cross, and b-npc-talk on its cold third
+  try. The merge stopped once at 06:14Z on a docs/DECISIONS.md conflict (main's ADR-068 rung 5 amendments and D-E1 A against
+  the branch's ADR-069) until apocrypha merged main 0292261b in (e90ff6e0); the citation's eight checks held both times.
+- m4-fix-50 merged to fork canon 862b9375 (2026-11-10T06:17Z): R0 (ADR-053): T0 pipeline 5671 server-build 20059: 100% tests passed, 0 tests failed out of 13, no lab gate (the nightly is its T3); T2 skip on skymp-server:m4-fix-50; clones not promoted.
+  Verbs: playtest 50's two server breaks and a log line: e2595d14 Inventory::AddItems adds every item of a call (the naked
+  bandits: a re-roll over a held inventory stopped at the first merged stack, so the worn set named pieces the inventory
+  lacked), c3045a1b a worn armor's EITM and its effect ids converted through the armor's own file's masters, an unresolved
+  enchantment adding 0 with a warning (the invincible bandit: b6fe4's WIC cloak's raw 0x0200db5a resolved to Dawnguard's
+  REFR and threw the whole weapon hit; 985 of the load order's 5,284 enchanted ARMO winners), and 862b9375 mp racemenu's open
+  logged. The T2 is thuum-fa's on skymp-server:m4-fix-50-862b9375 (fakeclient ok, 50 of 50 difftest sessions identical). The
+  lab's server is pinned to skymp-server:m4-fix-50-862b9375 since 06:17:53Z, so the nightly is its T3. On the fixed server
+  b-npc-stream-equipment still reads E_EQUIP_REFUSED (20261110-062127: 1348c lacking 0x6c1d9 and 0x209a5 with no record at
+  the run's start, the clean world holding the two lab characters alone), so e2595d14 doesn't reach that path; its line
+  stays pending.
+- m4-fix-51 merged to fork canon 762305f1 (2026-11-10T11:01Z): R0 (ADR-053): T0 pipeline 5720 server-build 20295: 100% tests passed, 0 tests failed out of 13, no lab gate (the line's "nightly" is stale: the nightly has been off since 11-03, NIGHTLY_SWEEP_UTC=""; its T3 is rung
+  5's gate); T2 skip on skymp-server:m4-fix-51; clones not promoted.
+  Verbs: b-npc-stream-equipment's cause, thuum-fa's read: since fork c312fd39 (11-03) MpActor::Init skipped
+  EnsureBaseContainerAdded when CanRollFate() held, leaving an unrecorded NPC's inventory to RollFateIfUnrolled, called only
+  by SendFates' grid walk and PlaceAtMe; ten Riverwood NPCs whose placements stand indoors (1348c in Faendal's house 133ca,
+  35534 and 13491 in Sven's 1cb84, seven in 133c6 to 133c8) were moved outdoors by the npc-puppet sighting into squares
+  already fated, never rolled, so the host's first equipment report met an empty inventory (E_EQUIP_REFUSED). The fix: every
+  first serve of an unrolled record rolls it at the loader's level and sends its fate as respawn does (762305f1, with a fresh
+  review's five notes: a fated NPC's fate ahead of every create word, EquipBestWeapon to listeners with a user, the loader
+  level restored, a throw in the roll no longer unwinding a login, the loader preferring the cell's host). T0 pipeline 5720
+  (694 test cases); T2 thuum-fa's on skymp-server:m4-fix-51-762305f1, 50 of 50 identical, read here. The lab pinned to
+  skymp-server:m4-fix-51-762305f1 at 11:03Z, and b-npc-stream-equipment read green on it (20261110-110409; its 110154 red
+  ran on m4-fix-50, a pin command that never ran, zsh not splitting a variable), so its pending line comes out. Before it
+  this morning: r5-lab d6f2d7b5 merged into main (ac9c3cf7, lab-api only; rung 5's settings stay on r5-settings), its
+  lab-api image pulled (version ac9c3cf7), and x-vampire-turn-read read green (20261110-105037); slot 0's four canon probes
+  read green at 07:14Z to 07:43Z (x-quest-runs 071422, x-acting-frame 072506, x-trigger-preload 073038,
+  x-werewolf-form-read 073450); b-npc-body-release v5 (070356) and c-dungeon-enemies v3 (070657) read green and left
+  pending (a8d3390f).
+- Correction to the line above (numidium, from thuum-fa's read): x-vampire-turn-read's 20261110-105037 is green on its
+  premises only; by its own reading rule H-VT1 failed (c1 stayed 0x13746 in all nine race snapshots while GameDaysPassed went
+  3.48 to 11.45, past the due day near 6.6; PlayerIsVampire 0xed06d stayed 0; no stage spell learned), so canon never turned
+  c1 either. The cause is a game-data HYPOTHESIS (H-VT0): Sanguinare's only effect, DisDamageHealthVampire 0xb8778
+  (Dawnguard.esm's override winning), carries GetRandomPercent <= 15 AND GetIsID Player, and its script sets the 3-day timer in
+  OnEffectStart alone, so after learn-spell the effect is inactive about 85% of the time. Rung 5's stage (fork
+  m4-scripts-5-quests 44ffafc2 from thuum r5-settings 1d3293ca, 11:10Z to 12:14Z) read 8 of 10 with x-acting-player's rerun
+  (121420; its 113217 red a lab fault, the relaunch's answer lost): green x-quest-words 112413, x-alias-return 112825,
+  x-trigger-owner v2.5 113348, x-cobweb-relay v1.6 114535, b-quest-rumor v2 114848, b-quest-stage-restart v2 115131,
+  x-werewolf-form 120601; red b-quest-stage-two-seats v1 115444 (claim 5 alone, the expected race, Eli's read) and
+  x-vampire-stage 115917 (the same lever, not rung 5's code). x-vampire-lever-read v1 asks next for a lever proven to start
+  the effect.
+- m4-scripts-5-quests merged to fork canon 44ffafc2 (2026-11-10T15:01Z): the gate 20261110-123559-merge-m4-scripts-5-quests, 20261110-123559-smoke-two-players to 20261110-145721-b-npc-caster (38 runs); T2 skip on skymp-server:m4-scripts-5-quests; clones promoted.
+  Verbs: ADR-068 rung 5, quests under D-F1 C, thuum-fa's build (fork m4-scripts-5-quests: wire, server, platform and
+  client layers integrated, canon 862b9375 and m4-fix-51 762305f1 merged in): a quest one seat moves moves on every seat (the
+  run words and stage relay, the login replay serving starts, stages and stops with fragments skipped, D-Q3 A), the per-player
+  quests' class acting (questScope "derived", D-Q2 built whole per Eli), condition-read variables streamed from every seat
+  (ScriptVariables 81, D-V1 B), the platform's Alias return fixed (x-alias-return green), the gate's per-trigger "ignored"
+  cap, ActingScope, the word wall's triggerEntry (b-word-wall's guest learns, green 141152, out of pending), and the client
+  quest fixes from slot 0's reads (the login's load held, pacing under the budget, a puppet rule's scene stop kept local,
+  client-only plugins' quests skipped). Its stage (from thuum r5-settings 1d3293ca, 11:10Z to 12:14Z, REUSE_DIST over
+  client-build 20247 at ea9a301e) read 8 of 10 probes (b-quest-stage-two-seats' claim 5 the expected race, Eli's read;
+  x-vampire-stage the game data's lever, H-VT0). The T2 is thuum-fa's on skymp-server:m4-scripts-5-quests-013692c7 (52 of 52
+  identical; no server file changed since). The gate ran from the r5-settings worktree (527d23d5): b-puzzle-relay red twice
+  after plain relaunches and green on its cold third try (the log-count copy came up short, a lab-api read fault, thuum-fa's
+  byte-length note next), b-npc-caster red once and green on its rerun. r5-settings (ceb136b0: the settings, W1's two
+  scenarios, the pending lines out) and the first head's docs (dae9343f) merged into main after canon moved (9e9f417c).

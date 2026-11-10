@@ -133,6 +133,12 @@ def extract(buf, entry):
     if key not in table:
         raise KeyError(entry)
     size, offset = table[key]
+    return read(buf, size, offset, aflags, ver, entry)
+
+
+def read(buf, size, offset, aflags, ver, entry=''):
+    """One entry's bytes from its table row (entries' size field and offset), decoded: what extract returns, for a
+    reader that walks a whole table once (lab/census.py's script index) instead of re-reading it per entry."""
     compressed = bool(aflags & 4) != bool(size & 0x40000000)
     size &= 0x3FFFFFFF
     p = offset
