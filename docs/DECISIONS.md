@@ -4944,7 +4944,14 @@ B 4. B is fine. 5. A 6. B"):
 - b-quest-rumor v2's DLC1VCController claim stays as W1 wrote it, "starts 1a428:Dawnguard.esm" <= 1 (Eli: "B is fine").
 - D-E1 A amended, rotfern's vampire eyes: rotfern.esp's rotfernRaceVampire female default eyes become RotfernEyesVampire 0x019D09
   (they are RotfernEyesMoraVampire 0x023F0F, an overlay from the race, so a vampire rotfern would show the Mora eyes before the
-  questline), matching D-E1 A's design (her usual pair or its vampire twin, the Mora pair after DLC2MQ06). apocrypha's edit.
+  questline), meant to match D-E1 A's design (her usual pair or its vampire twin, the Mora pair after DLC2MQ06). apocrypha's edit.
+  HELD (02:46 PST 2026-11-10, apocrypha's static read before building): with the race's Overlay Head Part List flag the race's
+  part of a type replaces hers (CommonLibSSE-NG TESNPC.cpp:94-96, GetCurrentHeadPartByType; Actor.cpp:467), so A covers
+  three of the four cases and a vampire rotfern after the questline would keep the race's RotfernEyesVampire over the
+  Mora vampire pair the script sets (the male list has the same gap). Option A' put to Eli: drop the eye entry from
+  rotfernRaceVampire's lists, both sexes (the head and mouth overlays stay), so her own eyes show and her script decides
+  all four cases. Either way the change is a build-time row in lab/layer/plugin-patches.tsv on rotfern.esp (rotfern.esp's
+  file untouched), static until a rotfern seat's vampire turn is traced. The build waits for Eli's A or A'.
 - ADR-067 decision 7 amended, the order: ADR-068 rungs 5 and 6, then physics objects (props and bodies, Eli's two tests: a dragged
   body, Hailstone at a cabbage cart), then rung 7 (the chaff). Physics no longer waits for the cleanup.
 
