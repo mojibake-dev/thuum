@@ -1,0 +1,7 @@
+# Files the game owns after their first lay (numidium, 2026-11-10: the lay's question is "did the layer change since I laid it").
+# A mod's plugin rewrites these at load, so a seat's copy that differs from the manifest is the game's doing, not drift.
+# add-mods.ps1 lays one again only when the layer's own copy changed since the clone's last lay (C:\sky-lab\mods.sums), and
+# counts it "owned" otherwise. persist-mods puts this file at the tree's root beside game-ini.tsv. path: as SHA256SUMS names
+# it, <folder>/<path inside Data>.
+path	why
+skyrim-souls-re-3.2.0@1.6.1170/SKSE/Plugins/SkyrimSoulsRE.ini	Skyrim Souls RE rewrites its ini at every load: one more CRLF after the header comment (7,148 bytes laid, 7,150 after a launch), every value kept; it was fetched again at every lay (apocrypha's read of the 6bbdb751 restage, 2026-11-07)

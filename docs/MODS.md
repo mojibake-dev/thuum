@@ -504,6 +504,14 @@ purges what it deployed. A file at that path with another hash stays and is coun
 on any clone whose base carried it (FSMP's DLL came off on 2026-10-20 only because its base lacked it), so a promoted mod
 could never leave.
 
+A file the game rewrites after its first lay is the game's from then on (the layer tidy, 2026-11-10; numidium's choice
+(b): "the lay's question is 'did the layer change since I laid it'"). `lab/layer/game-owned.tsv` lists such files as
+SHA256SUMS names them, with a why; persist-mods copies it to the tree's root beside game-ini.tsv, outside SHA256SUMS. A
+listed file whose copy differs from the manifest is laid again only when the layer's own hash changed since the clone's
+record of its last lay, and is counted `owned` otherwise, so a lay with no layer change fetches nothing. The one row so far
+is Skyrim Souls RE's ini, which the mod rewrites at load with one more CRLF after its header comment (7,148 bytes laid,
+7,150 after a launch, every value kept); the next mod that rewrites its own file is one more row and no new code.
+
 **Rotfern's Fixes 0.1.1 (ADR-069; Eli, 2026-11-06: "let's create a patch called rotferns fixes that
 will contain anything we need like that").** The row `rotferns-fixes-0.1.1@1.6.1170` is the layer's
 first of source `ci`: it names a pipeline job, `thuum/19668` (rotferns-fixes-build, pipeline 5577,
@@ -613,7 +621,10 @@ lab/tools/persist-mods.sh after its hand-written blocks:
   against the plugin heads pulled with the mod list; Playable Headparts All Races.esp has
   since gained its build-time patch, below). Each row records a tree hash of the
   folder after exclusions and persist-mods refuses a copy that differs. The manager's
-  own top-level files (readmes, pictures, meta.ini, Vortex's marker) are excluded.
+  own top-level files (readmes, pictures, meta.ini, Vortex's marker) are excluded, and so is a
+  log at any depth since the layer tidy (2026-11-10): Barter Limit Fix, Bug Fixes SSE and
+  Scrambled Bugs shipped their authors' BarterLimitFix.log, BugFixesSSE.log and
+  ScrambledBugs.log, which the plugins rewrite at every launch, so every lay fetched them again.
 - `nexus` rows fetch the archive the row names with the Keychain's Nexus key, check its
   md5 (each confirmed by Nexus's md5_search on 2026-10-19) and lay out the installer folders
   the `take` column lists, read from each FOMOD ModuleConfig.xml by hand. Cloaks of Skyrim's
@@ -892,7 +903,10 @@ and goes on when the 1.7.104 set takes its first DLL (its Address Library covera
 first). What the archive holds, plain Data layout taken whole: the DLL, its ini and pdb, the
 combat-alert overlay swf, its English strings, and seven vanilla script patches based on USSEP
 (loose .pex, so they shadow USSEP's archive copies; the Papyrus block leaves them inert connected,
-as it does USSEP's). Needs: SKSE64 and Address Library, both in place; SSE Engine Fixes is
+as it does USSEP's), with their sources. Since the layer tidy (2026-11-10) the row leaves out two of those sources,
+Scripts/Source/uimenubase.psc and DLC2SummonDremoraMerchantScript.psc: the skymp client dist lays its own copies at
+both paths, so a client install put skymp's back and the next lay put Souls' back; the compiled .pex are byte-identical in
+both packages, so the game never ran anything different. Needs: SKSE64 and Address Library, both in place; SSE Engine Fixes is
 recommended by the page "with the Memory Manager Patch and Global Time Fix features enabled. This is
 technically not needed for the mod to run, but is highly recommended if you want to avoid certain
 issues", and the layer does not carry it: Engine Fixes 7.0.20 needs its game-root preloader on
