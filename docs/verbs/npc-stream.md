@@ -2392,3 +2392,13 @@ list dropped the outfit after it; the host's honest report then names pieces the
 bandits are the same fault (docs/verbs/npc-fate.md, its reads). The fix is fork m4-fix-50 e2595d14 (AddItems adds every item
 of the call; T0 InventoryTest and NpcFateTest; CI 5671, T2 green), merging by R0 after the sweep. Pending in lab/gate.yaml,
 named here, until one run of b-npc-stream-equipment on the fixed server reads green; a red there sends the read back here.
+
+Correction (22:28 PST 2026-11-09 (06:28Z 11-10), thuum-fa): on the fixed server (fork canon 862b9375, m4-fix-50 merged R0 at 06:17Z; the lab pinned to
+skymp-server:m4-fix-50-862b9375), b-npc-stream-equipment 20261110-062127 is red exactly as before: "OnUpdateEquipment 1348c -
+dropped ... inventory does not contain item 6c1d9" and 209a5, 35534 lacking 209aa, 209a6 and 209a5, E_EQUIP_REFUSED 10, with the
+server's "ff000000 sights 1348c ... the record stood in 133ca". So the clean world carries a SAVED record for 1348c whose inventory
+lacks its outfit: the inventory was written before the fix (the same AddItems early stop, at an earlier roll that the clean
+snapshot kept), and e2595d14 keeps new rolls whole but cannot repair a saved one; D-N1 A adopts such a record as it stands. The
+fix is the data's: the clean snapshot's (and the canonical world's) actor records whose inventory lacks a piece their worn set
+names, or their base outfit's resolution, are moved aside so the fixed roll runs fresh (numidium composes the snapshots; lab/tools
+world-repair.py is the tool's shape). Pending until a run on a repaired clean world reads green.
