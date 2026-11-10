@@ -1,0 +1,6 @@
+# The two archives the SFW BodySlide build takes (lab/bodyslide/README.md). They are licensed mod files: they live in the
+# Mac's lab/.cache/mods and in sky-build's D:\thuum-inputs (lab/tools/bodyslide-inputs.sh places them), never in this repo or
+# an artifact that leaves the estate. md5 as Nexus names the file; the build checks it before it unpacks anything.
+name	nexus	file	md5
+bodyslide	201/832109	BodySlide and Outfit Studio 201 6.1.0 file 832109.7z	409470e98c48247223e22c50d36fc883
+cbbe-sfw	74257/790860	CBBE SFW Edition 74257 1.1.4 file 790860.zip	233c2c7af1137910c0a4dda2abd0286f
