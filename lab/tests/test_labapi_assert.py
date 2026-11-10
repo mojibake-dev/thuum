@@ -1202,7 +1202,7 @@ class AvViews(NearViews):
 
     def __init__(self):
         super().__init__()
-        av = lambda base, current: {"base": base, "current": current, "maximum": base, "percentage": current / base}
+        av = lambda base, current: {"base": base, "current": current, "max": base, "percentage": current / base}
         self.read = {
             "c1": {"self": {"of": 20, "values": {"health": av(250.0, 200.0), "magicka": av(120.0, 120.0)}}},
             "c2": {"other": {"of": 0xFF0008DC, "values": {"health": av(1000000.0, 1000000.0)}, "all": [
@@ -1918,6 +1918,39 @@ class AvReadTests(unittest.TestCase):
         self.assertTrue(ev.evaluate("abs(c2.av_of(c1).health - c1.av().health) < 1"))
         self.assertTrue(ev.evaluate("c2.av_of(c1).health < 100000"))
         self.assertTrue(ev.evaluate("abs(c2.av_of(c1).magicka - 120) < 0.01"))
+
+    def test_the_drivers_own_answer_reads_through_the_board(self):
+        # the av-read answers lab-driver posts (lab/driver/src/index.ts, case "av-read" and readActorValue: each name
+        # {base, current, max, percentage}; with other, every actor nearby beside the nearest's values), kept by the board
+        # as they came: the maximum is the answer's max, as every Max accessor reads it
+        from labapi.assertions import AssertionData, Evaluator
+        from labapi.board import StepBoard
+
+        board = StepBoard(clock=lambda: 100.0)
+
+        def answer(client, args, data):
+            step = board.enqueue(client, "av-read", args)
+            board.poll(client)
+            board.complete(step.id, {"ok": True, "data": data})
+
+        value = lambda base, current, top: {"base": base, "current": current, "max": top, "percentage": current / top}
+        answer("c1", {"names": ["health", "magicka", "stamina"]},
+               {"values": {"health": value(250.0, 200.0, 300.0), "magicka": value(120.0, 90.0, 150.0),
+                           "stamina": value(100.0, 100.0, 140.0)}, "of": 20})
+        mine = {"health": value(250.0, 200.0, 310.0)}
+        answer("c2", {"names": ["health"], "other": True},
+               {"values": mine, "of": 0xFF0008DD, "all": [{"id": 0xFF0008DD, "enabled": True, "loaded": True, "pos": [292.0, 1.0, 0.0], "values": mine}]})
+        ev = Evaluator(RichServer(), board, ["c1", "c2"])
+        for expr in ("c1.av().healthMax == 300", "c1.av().magickaMax == 150", "c1.av().staminaMax == 140",
+                     "c1.av().health == 250 and c1.av().healthCurrent == 200", "c2.av_of(c1).healthMax == 310"):
+            with self.subTest(expr=expr):
+                self.assertTrue(ev.evaluate(expr))
+        # an answer stored under the older key still reads; a name read with neither is missing data
+        board._av_reads["c1"]["self"]["values"]["health"] = {"base": 250.0, "current": 200.0, "maximum": 280.0, "percentage": 0.71}
+        self.assertTrue(ev.evaluate("c1.av().healthMax == 280"))
+        board._av_reads["c1"]["self"]["values"]["health"] = {"base": 250.0, "current": 200.0, "percentage": 0.8}
+        with self.assertRaisesRegex(AssertionData, "did not read health's max"):
+            ev.evaluate("c1.av().healthMax > 0")
 
     def test_a_missing_step_or_name_is_a_data_error(self):
         from labapi.assertions import AssertionData, Evaluator

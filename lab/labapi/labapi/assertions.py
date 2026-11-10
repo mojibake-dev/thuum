@@ -1558,18 +1558,21 @@ class AvView:
     health, magicka and stamina, <name> is the base value, <name>Current the
     current one, <name>Max the maximum and <name>Percentage the share, as the
     driver read them on the player (c.av()) or on its figure of another client
-    (c.av_of(o))."""
+    (c.av_of(o)). The driver answers each name as {base, current, max,
+    percentage} (lab/driver/src/index.ts readActorValue); a maximum stored as
+    `maximum`, an older answer's shape, still reads."""
 
     def __init__(self, who: str, values: dict[str, Any]):
         self._who = who
         self._values = values
 
-    def _field(self, name: str, field: str) -> float:
+    def _field(self, name: str, field: str, *older: str) -> float:
         v = self._values.get(name)
-        if not isinstance(v, dict) or field not in v:
+        key = next((f for f in (field, *older) if isinstance(v, dict) and f in v), None)
+        if key is None:
             raise AssertionData(f"{self._who}'s av-read did not read {name}'s {field}")
         try:
-            return float(v[field])
+            return float(v[key])
         except (TypeError, ValueError) as e:
             raise AssertionData(f"{self._who}'s av-read {name} {field} is not a number") from e
 
@@ -1599,15 +1602,15 @@ class AvView:
 
     @property
     def healthMax(self) -> float:
-        return self._field("health", "maximum")
+        return self._field("health", "max", "maximum")
 
     @property
     def magickaMax(self) -> float:
-        return self._field("magicka", "maximum")
+        return self._field("magicka", "max", "maximum")
 
     @property
     def staminaMax(self) -> float:
-        return self._field("stamina", "maximum")
+        return self._field("stamina", "max", "maximum")
 
     @property
     def healthPercentage(self) -> float:
