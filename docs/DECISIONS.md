@@ -4903,3 +4903,21 @@ Rung 5's transformation words, D-T1 A, D-T2 B and D-T3 B (ACCEPTED by Eli 15:3x 
   served to that player alone, and the game-time registration is re-issued at login from queuedOnUpdateGameEvents.
 - D-T3 B, Sanguinare Vampiris 0xb8780 is lifted from cureSpells per run (the probes and playtest 51) until 51 verifies a turn in
   play; then both deploy files drop it (memo D56 A's cure retires for that disease).
+
+D-E1 A, rotfern's eyes through her own script and one more own-player row (ACCEPTED by Eli ~20:5x PST 2026-11-09 in thuum-fa's
+session, verbatim "A, and it's the Dragonborn Hermaeus Mora Main questline. After she kills Miraak and becomes hermaeus moras
+champion is when she gets the eyes."; Eli's ask through apocrypha; amends ADR-026, which let only the race menu's close write
+appearanceForms' head parts): rotfern's eyes are f(race, the questline done). Her usual pair (RotfernEyes 0x014C06, valid for
+rotfern 0xAA00 by FLST RotfernEyesRaces) or its vampire twin (RotfernEyesVampire 0x019D09, for rotfernRaceVampire 0x19D08), and
+after the questline the Mora pair (RotfernEyesMora 0x023F0E, RotfernEyesMoraVampire 0x023F0F), all in rotfern.esp, untouched. The
+questline is Dragonborn's main quest's end, DLC2MQ06 (179d7:Dragonborn.esm, 0x040179d7 in the load order) completed: its stage
+550 is its one "Complete Quest" log entry (QSDT 0x01, UESP "Skyrim Mod:Mod File Format/QUST"), Miraak's death and Hermaeus Mora's
+champion. Built the single-player way: apocrypha's companion ESL holds a start-game-enabled quest with a player alias (ALUA 0x7, so
+rung 5's alias half marks it per player and every seat runs it for its own player; a no-op unless the race is rotfern's), whose
+alias script sets the eyes at OnInit, OnPlayerLoadGame, OnRaceSwitchComplete and OnLocationChange (no vanilla edit) by
+Actor.ChangeHeadPart on the player. Rung 5 carries it as a seventh own-player row beside the six (D-T1's channel): the server
+records the swap into the player's appearanceForms head parts when the bound holds (the part is a property of the calling script's
+attachment) and the part is valid for the recorded race, then relays it as UpdateAppearance. The script compiles with the
+Creation Kit's PapyrusCompiler.exe as a CI job on the fork's Windows runner (Eli's licensed CK placed there by core; Caprica the
+fallback), the vanilla Scripts.zip and SKSE's script sources as its inputs, lab-only. Proven at T3: the swap seen on the other seat
+and kept across a relaunch.
