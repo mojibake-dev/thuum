@@ -1411,8 +1411,9 @@ class ScriptVarsView:
     def value(self, key: str) -> Any:
         label = f"{self._client}'s script-vars of {self._id:#x}"
         r = _var_entry(self._rows, key, label)
-        if "error" in r:
-            raise AssertionData(f"{label}: the native refused {key!r}: {str(r['error'])[:160]}")
+        why = r.get("reason", r.get("error"))
+        if why is not None:
+            raise AssertionData(f"{label}: the native refused {key!r}: {str(why)[:160]}")
         k = r.get("k")
         slot = {3: ("i", int), 4: ("f", (int, float)), 5: ("b", bool)}.get(k) if isinstance(k, int) and not isinstance(k, bool) else None
         if slot is None:

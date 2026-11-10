@@ -185,7 +185,7 @@ class Doubles:
                 for k in keys:
                     script, _, var = k.partition("::")
                     rows.append({"form": form, "script": script, "var": var, "k": 3, "i": held[k]} if held and k in held
-                                else {"form": form, "script": script, "var": var, "error": "no such variable"})
+                                else {"form": form, "script": script, "var": var, "reason": "no such variable"})
                 data = {"form": form, "vars": rows} if held is not None else {"error": f"no form {form:x} in this game"}
             elif step["action"] == "quest-objectives":
                 q, wanted = step["args"].get("quest"), step["args"].get("objectives")

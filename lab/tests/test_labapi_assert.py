@@ -1750,7 +1750,7 @@ class RungFiveViews(RungFourViews):
                 {"form": 0xEAFD5, "script": "PlayerVampireQuestScript", "var": "::LastFeedTime_var", "k": 4, "f": 3.5},
                 {"form": 0xEAFD5, "script": "OtherScript", "var": "::LastFeedTime_var", "k": 4, "f": 1.0},
                 {"form": 0xEAFD5, "script": "PlayerVampireQuestScript", "var": "::Fed_var", "k": 5, "b": True},
-                {"form": 0xEAFD5, "script": "PlayerVampireQuestScript", "var": "::Missing_var", "error": "no such variable"},
+                {"form": 0xEAFD5, "script": "PlayerVampireQuestScript", "var": "::Missing_var", "reason": "no such variable"},
                 {"form": 0xEAFD5, "script": "PlayerVampireQuestScript", "var": "::Name_var", "k": 2, "s": "x"}]}},
             "c2": {0xEAFD5: {"error": "ReadScriptVariables unavailable on this platform"}},
         }
