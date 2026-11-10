@@ -9418,3 +9418,15 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   read green at 07:14Z to 07:43Z (x-quest-runs 071422, x-acting-frame 072506, x-trigger-preload 073038,
   x-werewolf-form-read 073450); b-npc-body-release v5 (070356) and c-dungeon-enemies v3 (070657) read green and left
   pending (a8d3390f).
+- Correction to the line above (numidium, from thuum-fa's read): x-vampire-turn-read's 20261110-105037 is green on its
+  premises only; by its own reading rule H-VT1 failed (c1 stayed 0x13746 in all nine race snapshots while GameDaysPassed went
+  3.48 to 11.45, past the due day near 6.6; PlayerIsVampire 0xed06d stayed 0; no stage spell learned), so canon never turned
+  c1 either. The cause is a game-data HYPOTHESIS (H-VT0): Sanguinare's only effect, DisDamageHealthVampire 0xb8778
+  (Dawnguard.esm's override winning), carries GetRandomPercent <= 15 AND GetIsID Player, and its script sets the 3-day timer in
+  OnEffectStart alone, so after learn-spell the effect is inactive about 85% of the time. Rung 5's stage (fork
+  m4-scripts-5-quests 44ffafc2 from thuum r5-settings 1d3293ca, 11:10Z to 12:14Z) read 8 of 10 with x-acting-player's rerun
+  (121420; its 113217 red a lab fault, the relaunch's answer lost): green x-quest-words 112413, x-alias-return 112825,
+  x-trigger-owner v2.5 113348, x-cobweb-relay v1.6 114535, b-quest-rumor v2 114848, b-quest-stage-restart v2 115131,
+  x-werewolf-form 120601; red b-quest-stage-two-seats v1 115444 (claim 5 alone, the expected race, Eli's read) and
+  x-vampire-stage 115917 (the same lever, not rung 5's code). x-vampire-lever-read v1 asks next for a lever proven to start
+  the effect.
