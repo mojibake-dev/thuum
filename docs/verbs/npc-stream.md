@@ -2426,3 +2426,22 @@ first at the loader's level (FateRollLevel) and sends its fate as the respawn do
 record in 0x133ca, a host pass at (4,-11), the sighting, then a hosted report of 6c1d9, 209a5 and 13985 accepted with no
 E_EQUIP_REFUSED. UNVERIFIED: that c2's pass at 06:22:40.919 rolled the ten (42 minus 32, SendFates logs counts only). The
 scenario stays as written; out of pending when it reads green on the fixed server.
+
+The fix built (01:16 PST 2026-11-10 (09:16Z 11-10), thuum-fa): fork m4-fix-51 762305f1, two commits on canon 862b9375 (062e9065, then a fresh read-only
+review's notes), T0 green (pipeline 5720, ctest 13 of 13, test_unit 694 cases) and T2 green (50 of 50 sessions, both heads),
+merging R0 at numidium's slot with the lab pinned to skymp-server:m4-fix-51-762305f1. The roll belongs to the actor:
+PartOne::EnsureFated (PartOne.cpp:2315) rolls an unrolled game-file actor at its loader's level wherever its record first
+reaches a game, called by the grid walk (:2433) and by a new onActorSubscribe hook at the top of MpObjectReference::Subscribe
+(MpObjectReference.cpp:1446), so the create word carries the roll (the sighting's move, a script's MoveTo, an alias load, a
+login's 3x3, Enable). The loader is the cell's host when a game hosts it, else the served listener; a throw in the roll is
+caught and logged once per actor. A fated NPC's fate now rides ahead of every create word (PartOne.cpp:1647; a repeat costs the
+seat nothing, actorFateService.ts:59-63), EquipBestWeapon sends only to listeners with a user (MpActor.cpp:313), and the roll
+restores the outer loader level. T0: Faendal 0x1348c loaded indoors in 0x133ca and sighted into the host's fated square rolls
+once at the host's level, one fate ahead of his create word naming 0x6c1d9 and 0x209a5, and the host's report of 0x6c1d9, 0x209a5
+and 0x13985 is accepted whole; Sigrid 0x13483 moved by Teleport rolls once; a walk-rolled actor is not rolled again; a login's
+3x3 carries rolls behind their fates. Found on the way: on canon a first login's create words carried unrolled records until the
+first pass, about a second later. Open (UNVERIFIED, no lab case yet): a record holding a roll but no fate level can be rolled
+again (RebuildAndRespawn's level-less roll, a world older than c312fd39; D-N1 A covers a record wearing an item); an already
+rolled actor moving into a fated square outside a seat's 3x3 sends that seat no fate; a throw after the level is set is never
+retried; the walk's roll is unguarded, as on canon; the fate's key includes the worn hands, so a seat's copy is redressed once
+after an accepted hands report or a loot changes the worn set.
