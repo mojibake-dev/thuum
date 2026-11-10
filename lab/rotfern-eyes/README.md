@@ -17,12 +17,14 @@ All four eye head parts and both races are already in rotfern.esp, which this fo
 
 The race lists are rotfern.esp's FLSTs RotfernEyesRaces (0x2E120) and RotfernEyesVampireRaces (0x2E121). A race switch drops
 an eye part that is not valid for the new race to that race's default. rotfernRaceVampire also carries the "Overlay Head
-Part List" flag (0x54A08943, bit 26), so its default parts are laid over her own as overlays. Its female defaults are
-RotfernChildHead, RotfernChildMouth and RotfernEyesMoraVampire, while its male defaults end in RotfernEyesVampire. So a
-vampire rotfern likely shows the Mora vampire eyes before the questline, with or without this plugin, and a script cannot
-correct an overlay that comes from the race. That is read from the plugin; the runtime effect is a HYPOTHESIS until a turn
-is traced (thuum-fa's review of 7677106e, note 2). Changing that default is rotfern.esp's change, Eli's call. Hence the
-script for the Mora switch, and an open question for the vampire half.
+Part List" flag (0x54A08943, bit 26), so each part of its default list replaces hers of that type
+(CommonLibSSE-NG TESNPC.cpp:94-96, GetCurrentHeadPartByType). Its female defaults were RotfernChildHead, RotfernChildMouth
+and RotfernEyesMoraVampire, so a vampire rotfern would have shown the Mora vampire eyes before the questline, and the
+race's eyes over the pair this script sets after it. D-E1 A' (Eli, 2026-11-10) drops that eye entry at build, a
+race-head-parts row in lab/layer/plugin-patches.tsv (rotfern.esp's file untouched; the male list, an abandoned branch,
+stays), so her own eyes show and this script decides all four cases; on a turn, OnRaceSwitchComplete sets them. Read
+from the plugins; the runtime effect is a HYPOTHESIS until a turn is traced, and the T3 photographs the placement on
+both seats (Eli's condition).
 
 ## What is here
 
@@ -30,8 +32,7 @@ script for the Mora switch, and an open question for the vampire half.
   OnLocationChange it computes eyes = f(race, DLC2MQ06.IsCompleted()). It calls Actor.ChangeHeadPart only when the player's
   eyes differ, and does nothing for any race but rotfern's two. No vanilla quest is edited: the questline ends in Apocrypha,
   so the next location change applies the Mora eyes. Its seven properties are the parts and forms it may set or read, which
-  is the bound rung 5's row checks. It reads the eyes from her base list only. If a traced turn shows ChangeHeadPart moving
-  the overlay, the check reads the overlay first (GetIndexOfOverlayHeadPartByType and GetNthOverlayHeadPart).
+  is the bound rung 5's row checks. It reads the eyes from her base list only, which since D-E1 A' no race overlay covers.
 - `build_esp.py`: writes RotfernEyes.esp byte by byte, the same bytes every run. It is a light plugin with masters
   Skyrim.esm, Dragonborn.esm and rotfern.esp, and one start-game-enabled quest, RotfernEyesQuest (0x800). The quest's alias 0
   is the player by forced reference PlayerRef 0x14 (ALFR). Every start-game-enabled player-alias quest in the load order fills

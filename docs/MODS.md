@@ -540,10 +540,17 @@ At OnInit, OnPlayerLoadGame, OnRaceSwitchComplete and OnLocationChange its scrip
 or after DLC2MQ06 the Mora pair, in the vampire variant for her vampire race, by Actor.ChangeHeadPart. It acts only
 when they differ and only for rotfern's two races, and logs "RotfernEyesAlias: <event>: eyes set to <part>". rung
 5's ChangeHeadPart own-player row records the swap on the server. Until that lands, the swap shows on her own game
-only, and the T3 proof (the other seat's view, a relaunch) waits for rung 5's stage. Open, Eli's call: rotfern.esp's
-rotfernRaceVampire lays its default parts over hers as overlays (flag bit 26), and its female default eyes are
-RotfernEyesMoraVampire. So a vampire rotfern likely shows the Mora vampire eyes before the questline, which no script can
-correct (read from the plugin; HYPOTHESIS until a turn is traced).
+only, and the T3 proof (the other seat's view, a relaunch) waits for rung 5's stage. rotfern.esp's rotfernRaceVampire
+carries the Overlay Head Part List flag (bit 26), so each part of its default list replaces hers of that type
+(CommonLibSSE-NG TESNPC.cpp:94-96), and its female list ended in RotfernEyesMoraVampire: a vampire rotfern would have
+shown the Mora eyes before the questline, and the race's eyes over her script's after it. D-E1 A' (Eli, 02:51 PST
+2026-11-10: "the male list is irrelevant male rotfern will never be picked and is a fully abandoned branch. as long as A'
+gets the placement right then roll with it.") drops that eye entry at build, a race-head-parts row in
+lab/layer/plugin-patches.tsv (the plugin untouched; the male list stays), so her own eyes show and her script decides
+all four cases. The placement, read statically: both vampire eye parts use rotfernVampire.nif, whose 176 vertices equal
+the copy of the vanilla human female eyes in rotfern's folder, with the morph files the race's eyes used, so only the
+texture set changes. HYPOTHESIS until a rotfern seat's vampire turn is traced; the T3 photographs the eyes in her
+vampire head on both seats, before and after DLC2MQ06, which is Eli's condition.
 
 **CBBE SFW Edition replaces CBBE 2.0.3 (Eli, playtest 48, 2026-11-06: "now all we need is that sfw
 skin to come back in and we're good").** Three rows take the place of the 2.0.3 row.
@@ -736,7 +743,9 @@ rotfern at [14] of 15 (four child races before it) against rotfernRaceVampire at
 turn set no race and a cure gave ImperialRaceChild (the 2026-10-06 diff below; the read in
 docs/research/vampirism-under-the-server.md). The served copy now holds the ten vanilla pairs and
 rotfern's at [10] in both lists; Eli's plugin is untouched, and the slot's CRC32 moves with the
-render. `perk-drop-ability <formid>` removes a perk's ability entry and `spell-magnitude <formid> <value>` sets a
+render. `race-head-parts <formid> <male|female> <id,...>` sets one sex's default head parts of a race (the INDX/HEAD
+pairs of its head data) in the given order, every other subrecord kept; it carries D-E1 A' (Eli, 2026-11-10, below):
+rotfernRaceVampire's female list loses its eye entry. `perk-drop-ability <formid>` removes a perk's ability entry and `spell-magnitude <formid> <value>` sets a
 spell's magnitudes, injecting the record from its master first when the plugin lacks it (the multiplayer
 defaults, below); every record patch must hit the last plugin overriding its record, which the tool
 checks against the load order. `drop-record <formid>` removes one record, the groups around

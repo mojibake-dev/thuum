@@ -345,6 +345,12 @@ class RaceHeadParts(unittest.TestCase):
         diff = [i for i, (x, y) in enumerate(zip(p, new)) if x != y]
         self.assertTrue(diff and diff[-1] - diff[0] < 4)  # only the one HEAD's form id changed
 
+    def test_the_rotfern_row_drops_only_the_female_vampire_eye_entry(self):
+        # D-E1 A' (Eli, 2026-11-10): rotfernRaceVampire's female list keeps RotfernChildHead and RotfernChildMouth, the male list is left alone
+        got = [r["patch"].split()[1:] for r in rows(ROOT / "lab" / "layer" / "plugin-patches.tsv")
+               if r["plugin"] == "rotfern.esp" and r["patch"].startswith("race-head-parts ")]
+        self.assertEqual(got, [["02019D08", "female", "0202E116,0202E117"]])
+
     def test_refuses_a_missing_race_a_compressed_one_no_head_data_a_bad_sex_and_no_parts(self):
         p = plugin([self.race([self.MOUTH], [self.HEAD])], masters=("Skyrim.esm", "RaceCompatibility.esm"))
         for fid, sex, parts in (("02019D07", "female", "0202E116"), ("02019D08", "child", "0202E116"), ("02019D08", "female", "")):
