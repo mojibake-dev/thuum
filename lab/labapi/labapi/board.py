@@ -109,6 +109,8 @@ class StepBoard:
         self._consoles: dict[str, dict[str, Any]] = {}
         # a head-parts step's answer on the client's own player: {parts, ...}
         self._head_parts: dict[str, dict[str, Any]] = {}
+        # and with {other: true}, on the nearest other actor: {actor, parts, ...} (c.head_parts_of(o), thuum D-E1)
+        self._head_parts_other: dict[str, dict[str, Any]] = {}
         self._seq = itertools.count(1)
 
     # lab-driver side ---------------------------------------------------------
@@ -240,8 +242,8 @@ class StepBoard:
             self._av_reads.setdefault(step.client, {})[kind] = body["data"]
         if step.action == "console" and isinstance(body.get("data"), dict):
             self._consoles[step.client] = body["data"]
-        if step.action == "head-parts" and not (step.args or {}).get("other") and isinstance(body.get("data"), dict):
-            self._head_parts[step.client] = body["data"]
+        if step.action == "head-parts" and isinstance(body.get("data"), dict):
+            (self._head_parts_other if (step.args or {}).get("other") else self._head_parts)[step.client] = body["data"]
         if step.action == "racemenu-save" and isinstance(body.get("data"), dict):
             self._presets.setdefault(step.client, {})[str((step.args or {}).get("name", ""))] = body["data"]
         step.done.set()
@@ -391,6 +393,9 @@ class StepBoard:
     def head_parts(self, observer: str) -> dict[str, Any] | None:
         return self._head_parts.get(observer)
 
+    def head_parts_other(self, observer: str) -> dict[str, Any] | None:
+        return self._head_parts_other.get(observer)
+
     def clear_views(self) -> None:
         self._views.clear()
         self._watches.clear()
@@ -420,6 +425,7 @@ class StepBoard:
         self._presets.clear()
         self._consoles.clear()
         self._head_parts.clear()
+        self._head_parts_other.clear()
 
     def clear(self, client: str | None = None) -> None:
         if client is None:
