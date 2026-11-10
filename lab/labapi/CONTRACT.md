@@ -239,8 +239,11 @@ Request: `{"payload": {"kind": "questRuns"}}`. Answer: `{"found": true,
 1(b) and 1(e)): `mp.get(0, "questRuns")`, the journal's rows. `quest` as the
 server names it (a FormDesc's text or a form id), `running` whether the record
 holds it running, `seq` the record's sequence for it (0 when the row carries
-none). A server without the property answers `{"found": false, "error"}`.
-Scenarios read `server.quest_runs(0x74a83).running | .seq | .recorded`; a
+none). A server without the property answers `{"found": false, "error"}`, and
+so do an answer that is no list of rows and a row without its quest or its
+`running` boolean: a record the gamemode cannot read whole is missing data,
+never a shorter record that could turn a claim green. Scenarios read
+`server.quest_runs(0x74a83).running | .seq | .recorded`; a
 quest with no row is a data error for `.running` and `.seq`, and `.recorded`
 false.
 
@@ -250,8 +253,9 @@ Request: `{"payload": {"kind": "questStages"}}`. Answer: `{"found": true,
 "stages": [{"quest", "stage"}]}`, the server's record of quest stages done
 (ADR-056 decision 2: per quest the stages the world has done, on the world's
 journal): `mp.get(0, "questStages")`. `quest` as the server names it, `stage`
-a number. A server without the property answers `{"found": false, "error"}`.
-Scenarios read `server.quest_record(0x74a83).stageDone(10)`, whether the
+a number. A server without the property answers `{"found": false, "error"}`,
+and so do an answer that is no list of rows and a row without its quest or its
+stage (a dropped row would turn a `.count == 0` claim green). Scenarios read `server.quest_record(0x74a83).stageDone(10)`, whether the
 record holds that stage, and `.count`, how many stages it holds of that quest
 (0 for none: an empty record is the server's answer, not missing data), so a
 claim reads the record instead of a log line.
@@ -267,8 +271,10 @@ seq}`. `form` as the server names it (a FormDesc's text or a form id),
 `script` the attached script and `var` the variable as the row names them,
 `k` the kind (3 int, 4 float, 5 bool: rung 3's folded kinds) and `value` the
 row's `i`, `f` or `b` by it, `seq` the record's sequence for the key (0 when
-the row carries none); a row with no value of its kind is dropped. A server
-without the property answers `{"found": false, "error"}`. Scenarios read
+the row carries none). A server without the property answers `{"found":
+false, "error"}`, and so do an answer that is no list of rows and a row
+without its form, its script and variable names, or a value of its kind (a
+number for 3 and 4, a boolean for 5). Scenarios read
 `server.script_variables().value(0xeafd5, "PlayerVampireQuestScript::::VampireStatus_var")`
 (the key is `<script>::<var>`, split at its first `::`; a bare `::<var>` names
 the one script that has it, and a property's name its backing

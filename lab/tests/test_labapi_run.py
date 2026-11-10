@@ -1831,9 +1831,10 @@ class RungFiveSteps(RunTests):
         self.assertEqual(body["verdict"], "red", body)
         self.assertEqual({f["kind"] for f in body["failures"]}, {"assertion-data"}, body["failures"])
         errors = sorted(set(f["error"] for f in body["failures"]))
-        self.assertEqual(errors, ["server has no quest runs to read (no labState questRuns: a server before ADR-068 rung 5)",
-                                  "server has no quest stages to read (no labState questStages: a server before ADR-068 rung 5)",
-                                  "server has no script variables to read (no labState scriptVariables: a server before ADR-068 rung 5)"])
+        tail = "found nothing: a server before ADR-068 rung 5, or an answer the gamemode refused)"
+        self.assertEqual(errors, [f"server has no quest runs to read (labState questRuns {tail}",
+                                  f"server has no quest stages to read (labState questStages {tail}",
+                                  f"server has no script variables to read (labState scriptVariables {tail}"])
 
     def test_a_formdesc_form_or_quest_reaches_the_driver_as_its_id(self):
         # the runner resolves script-vars' form and quest-objectives' quest through the run's load order, alias's way

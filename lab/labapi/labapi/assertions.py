@@ -1892,7 +1892,8 @@ class _ServerRef:
         fn = getattr(self._f, fn_name, None)
         d = fn() if fn else None
         if not d or not d.get("found"):
-            raise AssertionData(f"server has no {what} to read (no labState {kind}: a server before ADR-068 rung 5)")
+            raise AssertionData(f"server has no {what} to read (labState {kind} found nothing: a server before ADR-068 rung 5, "
+                                "or an answer the gamemode refused)")
         rows = []
         for row in d.get(field) or []:
             if not isinstance(row, dict):
@@ -1927,7 +1928,8 @@ class _ServerRef:
         fn = getattr(self._f, "script_variables", None)
         d = fn() if fn else None
         if not d or not d.get("found"):
-            raise AssertionData("server has no script variables to read (no labState scriptVariables: a server before ADR-068 rung 5)")
+            raise AssertionData("server has no script variables to read (labState scriptVariables found nothing: a server before "
+                                "ADR-068 rung 5, or an answer the gamemode refused)")
         return ScriptVariablesView([e for e in d.get("entries") or [] if isinstance(e, dict)], self._f.base_id)
 
     def spell(self, spec) -> SpellView:

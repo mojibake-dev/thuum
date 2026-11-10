@@ -714,15 +714,12 @@ test("labState questRuns, questStages and scriptVariables read the journal's run
   mp.set(0, "questRuns", [
     { quest: 0x74a83, running: true, seq: 3 },
     { quest: "2ba16:Skyrim.esm", running: false },
-    { running: true, seq: 9 },
   ]);
-  mp.set(0, "questStages", [{ quest: 0x74a83, stage: 10 }, { quest: "74a83:Skyrim.esm", stage: 20 }, { quest: 0x74a83 }, null]);
+  mp.set(0, "questStages", [{ quest: 0x74a83, stage: 10 }, { quest: "74a83:Skyrim.esm", stage: 20 }]);
   mp.set(0, "scriptVariables", [
     { form: "1f251:Skyrim.esm", script: "MG01QuestScript", var: "::NiryaSkillVar_var", k: 3, i: 2, seq: 5 },
     { form: 0x30042b4, script: "BYOHRelationshipAdoptionScript", var: "::numChildrenAdopted_var", k: 4, f: 1.5 },
     { form: 0xeafd5, script: "PlayerVampireQuestScript", var: "::VampireStatus_var", k: 5, b: false, seq: 1 },
-    { form: 0xeafd5, script: "PlayerVampireQuestScript", var: "::FeedTimer_var", k: 3 },
-    { script: "NoForm", var: "x", k: 3, i: 1 },
   ]);
   delete require.cache[require.resolve("./gamemode.js")];
   require("./gamemode.js");
@@ -753,6 +750,32 @@ test("labState questRuns, questStages and scriptVariables read the journal's run
   assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "questRuns" }), { found: true, runs: [] });
   assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "questStages" }), { found: true, stages: [] });
   assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "scriptVariables" }), { found: true, entries: [] });
+  // an answer that is no list of rows (canon's journal shape {entries: [...]} passed through) is no empty record
+  for (const [k, wrapped] of [
+    ["questRuns", { runs: [{ quest: 0x74a83, running: true }] }],
+    ["questStages", { entries: [{ quest: 0x74a83, stage: 10 }] }],
+    ["scriptVariables", { entries: [] }],
+  ]) {
+    mp.set(0, k, wrapped);
+    assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: k }), { found: false, error: "not a list of rows" }, k);
+  }
+  // one malformed row makes the whole answer missing data, never a shorter record
+  for (const [k, rows] of [
+    ["questRuns", [{ quest: 0x74a83, running: true }, { running: true, seq: 9 }]],
+    ["questRuns", [{ quest: 0x74a83, seq: 2 }]],
+    ["questStages", [{ quest: 0x74a83, stage: 10 }, { quest: 0x74a83 }]],
+    ["questStages", [null]],
+    ["questStages", [{ quest: 0x74a83, stage: "10" }]],
+    ["scriptVariables", [{ form: 0xeafd5, script: "PlayerVampireQuestScript", var: "::FeedTimer_var", k: 3 }]],
+    ["scriptVariables", [{ script: "NoForm", var: "x", k: 3, i: 1 }]],
+    ["scriptVariables", [{ form: 0xeafd5, script: "S", var: "::v", k: 5, b: 1 }]],
+    ["scriptVariables", [{ form: 0xeafd5, script: "S", var: "::v", k: 2, s: "x" }]],
+  ]) {
+    mp.set(0, k, rows);
+    const answer = mp.onHttpRpcRunAttempt("labState", { kind: k });
+    assert.strictEqual(answer.found, false, `${k} ${JSON.stringify(rows)}`);
+    assert.match(answer.error, new RegExp(`${k} rows malformed`));
+  }
   const get = mp.get;
   mp.get = (id, k) => {
     if (k === "questRuns" || k === "questStages" || k === "scriptVariables") throw new Error(`Property '${k}' doesn't exist`);
