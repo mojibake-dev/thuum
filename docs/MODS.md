@@ -920,8 +920,14 @@ The menu choices, `lab/layer/ini-patches.tsv` over the mod's own ini (lab/tools/
 file stays the mod's, the manifest holds the deltas): every menu the mod covers stays unpaused as
 shipped (Inventory, Container, Barter, Gift, Favorites, Magic, Tween, Stats, LevelUp, Training,
 Journal, Map, Book, Lockpicking, SleepWait, Tutorial, MessageBox, Custom), with movement in menus on,
-no slow motion, the combat-alert overlay on, auto-close at 400 units; one delta,
-`bHideEngineFixesWarning = true`, the start-up message box the mod shows without Engine Fixes, which
+no slow motion, the combat-alert overlay on; two deltas. `fAutoCloseDistance = 420` (the layer tidy, 2026-11-10,
+thuum-fa's choice; shipped 400): a container menu closes where the server releases the container. Souls measures the gap
+between the player's and the container's bounding boxes (AutoCloseManager.cpp, GetBBDistance), the server the distance
+between their centers (PruneContainerOccupants, kOccupationReach 512), so 512 less the player's half-width (22, NPC_ 0x7's
+OBND) less a container's half-width (67 at the 90th percentile of Skyrim.esm's 436 CONT records) is about 420: the menu
+closes at or before the release for 90% of containers, near 490 center to center for the median one, and the largest can
+close a little after it. `fAutoCloseTolerance` stays 100, since it applies only to a menu opened already past the limit.
+And `bHideEngineFixesWarning = true`, the start-up message box the mod shows without Engine Fixes, which
 every seat would have to click away and the smoke would read as E_RUN_PAUSED. The console stays
 unpaused as shipped (Eli, 2026-11-02, mid Turbo 2: "nothing should pause"); the lab's scenario steps
 type console commands against a paused world, so a lab run sets `bConsole = false` for itself in the
