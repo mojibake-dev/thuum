@@ -5033,3 +5033,70 @@ log) until each site is re-read; nothing is patched blind. The first fix is the 
 Note under ADR-069 (2026-11-06, numidium's rules review): a fix that skips work also logs its count (`skipped N ... so far`,
 every ten seconds the count moved), since a rare fault's absence alone does not show the fix fired; and a fix checks the bytes at its
 jump-back targets as well as at its site.
+
+## ADR-070: Quest paradigms are server settings: one quest record, and each paradigm a policy over who is shown it and who is paid
+
+Status: PROPOSED 2026-11-11 by thuum-fa, after Eli's question in its session ("can we code various questing paradigms and make
+them server settings?") and its word on rung 5's four open decisions ("go with recommendations in the mean time if we're trying a
+few different questing paradigms", the D-Q7 A, D-Q10 A, D-Q9 B and D-Q6 A entry above, main 7ced7f5a). The number read free on
+main 7ced7f5a.
+
+Context. D-F1 C (ADR-063) gave a quest no owner: one record on the server, applied by every seat, so a stage's fragment runs on
+every seat. Rung 5 (ADR-068) built that record with its exceptions, each already a setting on fork m4-scripts-5-second f6ca339d:
+per-player quests (questScope "off" or "derived" over the generated playerQuests list, which never overrides a world alias:
+skymp-wire/crates/wire-rules/src/quest_scope.rs:20-34; D-Q1, D-Q2), the Story Manager's instances (questStoryInstances "seat" or
+"world", quest_runs.rs:44-50; D-Q5 A) and a relayed stage's script on the other seats (questFragmentLive, a client setting,
+skymp5-client questStageService.ts:259; D-Q10 A). Eli's frame of 2026-11-11 asks for more: separate journals, a spell that shares
+a quest, and a player caught up by what they witness in a shared cell (Hermaeus Mora at Septimus Signus's outpost, DA04 0x2d512;
+the market murder in Markarth), against the case that breaks per-player quests: Astrid, one actor who cannot stand in the
+Sanctuary for one player and in the abandoned shack for another (Eli's case of 2026-10-10). TES3MP ships the same shape as
+switches over one server journal (CoreScripts 0.8.1 scripts/config.lua: shareJournal, shareTopics, shareFactionRanks,
+shareFactionExpulsion, shareReputation, shareBounty, shareKills). World of Warcraft's phasing gives each player a world at their
+own stage, at the price that players in different phases cannot see each other (Wowpedia, "Phasing"). A witnessed catch-up follows
+Jenkins's embedded narrative, the story the space holds for whoever reads it (Henry Jenkins, "Game Design as Narrative
+Architecture", 2004).
+
+Decision.
+
+1. A quest paradigm is a policy over the one record, never a second implementation: one record (the journal, D-F1 C), one wire
+   (QuestStage 57 and its words), one validator (wire-rules), one engine state per seat. A setting decides which player is shown a
+   world quest and which is paid by it; no setting decides what the world is.
+
+2. The axes, each a server setting with its default. The server serves a client's half at login with the rest of its settings, so
+   one file names the paradigm: questScope and questStoryInstances as built ("off" and "seat"); questFragmentLive as built, moved
+   from the client's settings to the server's (proposed default true from the train that moves it: D-F1 C as designed, D-Q10 A's
+   reading); questJournal (new): "shared" (the default, today's), "witnessed" or "own"; questRewards (new): "earner" (the default,
+   D-R1 C), "joined" or "everyone"; questShare (new): "off" (the default) or "on"; questParadigm (new): a named bundle of the
+   axes, any axis overridable after it: "together" (shared, earner: today's), "party" (shared, joined), "personal" (own, earner,
+   share on), "witness" (witnessed, joined, share on).
+
+3. questJournal filters what a player is shown (the journal's quest list, the HUD's quest notices, the quest's map markers), and
+   nothing else: the record and every seat's engine stay as D-F1 C makes them. The server keeps, per player, the set of world
+   quests that player joined (R0): by acting (the player's seat reported the stage, or the relayed request's acting scope named
+   the player), by witnessing (the player's actor in the cell of the stage's cause when the server recorded it), by a share, or by
+   talking to an actor one of the quest's aliases holds. "own" joins by acting and a share alone. Rule 6: the set ships with a
+   migration and a restart scenario.
+
+4. questRewards "joined" gives every joined player in the earner's cell the stage's plain reward, the server granting the copies
+   (R0); "everyone" gives it to every connected player. A leveled reward keeps D-R1 C's refusal until its hook lands. questShare
+   is a verb (rule 3) that adds a named player to one quest's joined set; its carrier (a spell in a companion plugin, a chat
+   command) is the verb doc's.
+
+5. What no setting does, refused at the server's start with a named error: two world states for one quest (Astrid in two places, a
+   Sanctuary burned for one player; only phasing gives that, and it costs co-presence), and per-player NPC memory. A
+   conversation's conditions read the talking player's own game (ADR-068's speaker rule), and that game must hold the world's real
+   stage because it runs the quest's world scripts whenever it hosts a cell; so under "witnessed" or "own" an NPC talks to a
+   player who never joined as the world stands. The journal can be private; the world's memory cannot. A per-quest override moves
+   a quest between questScope's classes only within the derivation's rule (a quest with a world alias stays World).
+
+Options considered. A, this: policies over one record. B, a code path per paradigm (a quest system per mode): two authorities for
+one quest, refused by the design law. C, phasing or instancing: one world per seat in the engine, and players in different phases
+could not see each other; out under ADR-068.
+
+Consequences. Rung 5's open decisions read as defaults (D-Q5's "seat", D-Q10's live fragments, D-Q6's parked stage), so trying a
+paradigm is a settings edit and a relaunch, not a train. Each new axis ships whole: questJournal's server set with its migration
+and restart scenario (rule 6); questRewards server-only, R0, merging on T0 and T2; the share as a whole verb (rule 3). The journal
+filter's engine route (how one seat hides a running quest's journal entry, notices and markers) is unread, so its Dynamic section
+comes first (rule 8), and "witnessed" ships only once a two-seat run reads a quest hidden on one seat and shown on the other.
+Every preset gets a T2 session and one T3 run with both journals read. The witnessed rule's audience (the cell, the scene's
+actors, a distance) is UNMEASURED and named in the verb doc.
