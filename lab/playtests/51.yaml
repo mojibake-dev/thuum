@@ -1,10 +1,11 @@
-# Playtest 51 (numidium, 2026-11-11 04:2x UTC): Ariadne turns vampire on rotfern's screen and is cured, and quests are shared,
-# on the canonical seats. The build is ADR-068 rung 5 whole: fork canon at m4-scripts-5-quests 44ffafc2 (rung 5's first head)
-# plus its second head m4-scripts-5-second f6ca339d (staged 2026-11-11 04:05Z, its pinned T2 green 52 of 52, its merge
-# cited on the pair's sweep), the server image skymp-server:m4-scripts-5-second, the client of gitlab build 20500 at 685f6a24
-# with skymp5-client.js built at f6ca339d over it (SkyrimPlatformImpl 8b66a14f2989a7cb), under apocrypha/layer-tidy as laid at
-# eb1a1bce (Skyrim Souls RE's container close at 420). thuum-fa's checklist is docs/private/playtest-51.md (items 1 to 8, each
-# marked NEW or RE-TEST, in the disease clock's order).
+# Playtest 51 (numidium, 2026-11-11 04:2x UTC; the build line 12:4x UTC): Ariadne turns vampire on rotfern's screen and is
+# cured, and quests are shared, on the canonical seats. The build is fork canon 24f1cc6a: ADR-068 rung 5 whole (its first head
+# 44ffafc2 by its gate on 11-10; its second head f6ca339d by the pair's cited sweep, 11-11 11:28Z, its pinned T2 green 52 of 52)
+# plus the headless-figure fix m4-scripts-5-heads 24f1cc6a (its gate 20261111-120511-merge-m4-scripts-5-heads, 11 green, 12:40Z):
+# the server image skymp-server:m4-scripts-5-heads-24f1cc6a (the lab's pin), the client of gitlab build 20578 at 24f1cc6a
+# (SkyrimPlatformImpl a5af631db71da6ca) on both clones' clean-m1, under apocrypha's layer tidy as merged (main 5f5579c5; Skyrim
+# Souls RE's container close at 420). thuum-fa's checklist is docs/private/playtest-51.md (items 1 to 8, each marked NEW or
+# RE-TEST, in the disease clock's order).
 # The world is playtest-canon-51-20261111T033258Z, composed 2026-11-11 03:32Z from the canonical
 # playtest-canon-chars-20261107T064547Z (untouched; 1,337 records to 1,329): Arvel 0x39655 (dead in 0x371de since 47),
 # Embershard's six recorded bandits 0xb6dbb, 0xb6fdb, 0xb6fe4 (50's arrow-proof one), 0xb6fe6, 0xb6fec, 0xb6fee and the main
@@ -48,7 +49,7 @@
 # or a clone rollback (on Eli's word only) the seat's relaunch names the playtest the same way, never Ariadne's between the
 # drain that took and her turn. The ids above read from Skyrim.esm 1.6.1170 (lab/esm.py id, 2026-11-11).
 id: 51
-build: "ADR-068 rung 5 whole: fork m4-scripts-5-second f6ca339d over canon 44ffafc2, staged by verb-stage under apocrypha/layer-tidy as laid at eb1a1bce"
+build: "fork canon 24f1cc6a: ADR-068 rung 5 whole plus the headless-figure fix, both clones promoted, under apocrypha's layer tidy as merged (main 5f5579c5)"
 world: playtest-canon-51-20261111T033258Z
 hold:
   minutes: 300
