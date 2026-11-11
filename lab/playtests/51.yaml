@@ -18,7 +18,8 @@
 # 07:00) for Falion's circle 6 to 12 game hours on (18 to 36 real minutes). Ariadne's game is never relaunched between the
 # drain that took and her turn (a relaunch re-adds the disease at login, a fresh roll); a server restart is fine.
 # The camps, each the game's own landing of an interior door (lab/esm.py door), the second seat 60 units behind the first on
-# the exit path, both facing the door; Ariadne first at the lair (she walks in first, so her game runs the vampires):
+# the exit path, both facing the door (the Temple's pair keeps 50's camp as played, the landing's own facing 104.6, away
+# from the door); Ariadne first at the lair (she walks in first, so her game runs the vampires):
 #   Movarth's Lair (the start, below): door 0x1f595's landing (-31537, 77289, -13729), rot -53.9
 #   Moorside Inn (item 2, Gorm; and the cure, Jonna then Falion), door 0x1738c's landing:
 #     - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [-40054, 65484, -13802], rot: [0, 0, -30.6]}
@@ -41,8 +42,11 @@
 #     - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [16146, -54009, 1380], rot: [0, 0, 164.5]}
 # Each move is `just playtest-teleport <profile> 3c:Skyrim.esm <x> <y> <z> <rot>`. The live steps, each a recipe: item 7's
 # Beast Form `just playtest-console 1 addspell 20 0x92c48` (WerewolfChange, SPEL; the server's AddSpell, ConsoleCommands.cpp's
-# ExecuteAddSpell, then rotfern's own game told); item 5's restart `just playtest-restart 51`; item 1's relaunch of Ariadne
-# after her turn `just playtest-relaunch c2`. The ids above read from Skyrim.esm 1.6.1170 (lab/esm.py id, 2026-11-11).
+# ExecuteAddSpell, then rotfern's own game told; labCommand answers before the server runs it, so confirm it by the server
+# log's "added the spell 92c48"); item 5's restart `just playtest-restart 51`; item 1's relaunch of Ariadne after her turn
+# `PLAYTEST=51 just playtest-relaunch c2` (clientSettings set again in the stopped game, as ready set them). After a dist push
+# or a clone rollback (on Eli's word only) the seat's relaunch names the playtest the same way, never Ariadne's between the
+# drain that took and her turn. The ids above read from Skyrim.esm 1.6.1170 (lab/esm.py id, 2026-11-11).
 id: 51
 build: "ADR-068 rung 5 whole: fork m4-scripts-5-second f6ca339d over canon 44ffafc2, staged by verb-stage under apocrypha/layer-tidy as laid at eb1a1bce"
 world: playtest-canon-51-20261111T033258Z

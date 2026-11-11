@@ -74,8 +74,9 @@ SOULS_DLL = r"Data\SKSE\Plugins\SkyrimSoulsRE.dll"  # the archive's SKSE/Plugins
 # A playtest's client settings (`clientSettings: {<key>: <value>}`; playtest 51's questFragmentLive, D-Q10 A, until ADR-070
 # moves it to the server's settings): keys of the client's skymp5-client-settings.txt, read once at the client's start, so
 # ready's relaunch sets them while each game is stopped, by the probes' own relaunch file change (lab-api's
-# runner._relaunch_files_ps on the lab's default game, the entries checked by scenario._relaunch_args). The file keeps them
-# through the playtest's later relaunches; a clone's rollback restores the dist's copy.
+# runner._relaunch_files_ps on the lab's default game, the entries checked by scenario._relaunch_args), and so does any
+# `PLAYTEST=<n> just playtest-relaunch <client>` (settings-ps below). The file keeps them through the playtest's later
+# relaunches; a dist push or a clone's rollback lays the dist's copy again, so the relaunch after one names the playtest.
 CLIENT_SETTINGS_FILE = "Data/Platform/Plugins/skymp5-client-settings.txt"
 # The camp's two rules, from profile 48 (playtest 47, 2026-11-05). Outside: both seats logged in inside Bleak Falls Temple
 # 0x371de and neither game ran the cell's OnCellLoad, so the pillars sat empty and the darts unarmed; after the restart
@@ -202,7 +203,8 @@ def check_profile(p: Any, n: int) -> dict[str, Any]:
 
 def _labapi() -> tuple[Any, Any, Any]:
     """lab-api's runner, scenario grammar and settings defaults (playtest_setup runs in lab/labapi's uv project)."""
-    sys.path.insert(0, str(ROOT / "lab" / "labapi"))
+    if str(ROOT / "lab" / "labapi") not in sys.path:
+        sys.path.insert(0, str(ROOT / "lab" / "labapi"))
     from labapi import config, runner, scenario
 
     return runner, scenario, config.Settings()
@@ -604,9 +606,7 @@ def ready(n: int) -> int:
         since = _srv("date -u +%Y-%m-%dT%H:%M:%SZ").strip()
     except Exception:
         since = None
-    env = dict(os.environ)
-    if p.get("clientSettings"):  # set in each stopped game before its launch task, read back by the relaunch
-        env["CLIENT_SETTINGS_PS"] = base64.b64encode(client_settings_ps(p["clientSettings"]).encode()).decode()
+    env = {**os.environ, "PLAYTEST": str(n)}  # the relaunch sets the profile's clientSettings in each stopped game, read back
     procs = [subprocess.Popen([str(ROOT / "lab/tools/playtest-relaunch.sh"), c], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=env)
              for c in ("c1", "c2")]
     for c, pr in zip(("c1", "c2"), procs):
@@ -1069,11 +1069,17 @@ def main(argv: list[str]) -> int:
         except ProfileError as e:
             print(f"== profile {argv[1]}: {e}", file=sys.stderr)
             return 2
-    if len(argv) != 2 or argv[0] not in ("setup", "ready", "check", "go", "roles", "streams", "restart") or not argv[1].isdigit():
-        print("usage: playtest_setup.py go|setup|ready|check|roles|streams|restart <n> | switch <n> <" + "|".join(SWITCHES) + "> on|off", file=sys.stderr)
+    if len(argv) != 2 or argv[0] not in ("setup", "ready", "check", "go", "roles", "streams", "restart", "settings-ps") or not argv[1].isdigit():
+        print("usage: playtest_setup.py go|setup|ready|check|roles|streams|restart|settings-ps <n> | switch <n> <" + "|".join(SWITCHES) + "> on|off", file=sys.stderr)
         return 2
     n = int(argv[1])
     try:
+        if argv[0] == "settings-ps":
+            # playtest-relaunch.sh's PLAYTEST=<n>: the profile's clientSettings as the base64 of the PowerShell that sets
+            # them in a stopped game, or nothing when the profile has none
+            settings = load_profile(n).get("clientSettings")
+            print(base64.b64encode(client_settings_ps(settings).encode()).decode() if settings else "")
+            return 0
         if argv[0] == "check":
             p = load_profile(n)
             print(f"profile {n} ok: {len(p['seats'])} seats, {sum(len(seat_commands(s)) for s in p['seats'])} sets, world {p['world']}")

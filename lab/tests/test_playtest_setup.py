@@ -422,6 +422,23 @@ class PlaytestClientSettings(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ProfileError):
                 client_settings_files(bad)
 
+    def test_settings_ps_serves_the_relaunch(self):
+        """playtest-relaunch.sh's PLAYTEST=<n>: the profile's PowerShell as base64, nothing for a profile without settings."""
+        import base64
+        import contextlib
+        import io
+
+        from playtest_setup import client_settings_ps, main
+
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            self.assertEqual(main(["settings-ps", "51"]), 0)
+        self.assertEqual(base64.b64decode(out.getvalue().strip()).decode(), client_settings_ps({"questFragmentLive": True}))
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            self.assertEqual(main(["settings-ps", "50"]), 0)
+        self.assertEqual(out.getvalue().strip(), "")
+
     def test_a_profile_carries_them(self):
         import yaml
         from playtest_setup import ProfileError, check_profile

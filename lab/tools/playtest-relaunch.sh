@@ -63,11 +63,19 @@ online() { curl -fsS -m 15 -X POST "$api/state/rpc/labState" -H 'content-type: a
 active=$(curl -fsS -m 15 "$api/status" | python3 -c 'import sys,json; print(json.load(sys.stdin).get("run") or "")')
 hold "playtest (playtest-relaunch)"
 [ -z "$active" ] || { echo "a lab run is active: $active" >&2; exit 3; }
-keep
-# a playtest's client settings (playtest_setup.py's ready: a profile's clientSettings as base64 PowerShell, the runner's own
-# relaunch file change) set in the stopped game before its launch task; each prints a "set ..." line, echoed below
+# a playtest's client settings (PLAYTEST=<n>: profile n's clientSettings, playtest_setup.py settings-ps, the runner's own
+# relaunch file change; ready sets it for its two relaunches) set in the stopped game before its launch task, each printing a
+# "set ..." line echoed below. A dist push or a clone rollback lays the dist's copy of the file again, so the relaunch after
+# one names the playtest: `PLAYTEST=51 just playtest-relaunch c1`. Read before anything stops, so a profile that does not
+# load leaves the game running.
 settings=""
-[ -z "${CLIENT_SETTINGS_PS:-}" ] || settings=$(printf '%s' "$CLIENT_SETTINGS_PS" | base64 -d)
+if [ -n "${PLAYTEST:-}" ]; then
+  root=$(cd "$(dirname "$0")/../.." && pwd)
+  b64=$(uv run --project "$root/lab/labapi" python "$root/lab/tools/playtest_setup.py" settings-ps "$PLAYTEST") \
+    || { echo "playtest $PLAYTEST's client settings do not load: nothing relaunched" >&2; exit 2; }
+  [ -z "$b64" ] || settings=$(printf '%s' "$b64" | base64 -d)
+fi
+keep
 ps='Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 3'
 [ -z "$settings" ] || ps="$ps
 $settings"
@@ -79,9 +87,12 @@ Start-ScheduledTask -TaskName sky-lab-launch; "relaunch started " + (Get-Date -F
 for attempt in 1 2; do
   out=$(ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$ps")" 2>&1 || true)
   line=$(printf '%s' "$out" | python3 -c 'import sys,json; print((json.load(sys.stdin).get("out-data") or "").strip().splitlines()[-1])' 2>/dev/null || true)
-  [ -n "$line" ] && {
-    [ -z "$settings" ] || { printf '%s' "$out" | python3 -c 'import sys,json; [print(l) for l in (json.load(sys.stdin).get("out-data") or "").splitlines() if l.startswith("set ")]' || true; }
-    echo "$line"; break; }
+  # the launch task's own line, not just any last line: a settings block's error stops the script after its "set ..." lines
+  case "$line" in
+    "relaunch started "*)
+      [ -z "$settings" ] || { printf '%s' "$out" | python3 -c 'import sys,json; [print(l) for l in (json.load(sys.stdin).get("out-data") or "").splitlines() if l.startswith("set ")]' || true; }
+      echo "$line"; break ;;
+  esac
   echo "the guest agent answered no relaunch line (attempt $attempt): ${out:0:200}" >&2
   [ "$attempt" = 2 ] && exit 5
   sleep 5
