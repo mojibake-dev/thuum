@@ -1121,6 +1121,13 @@ while. Not a loosening candidate: the bound stays, the watch closes on a green g
   ChangeFormGuard marks a skipped edit, MpObjectReference::FlushUnsavedEdit, WorldState::FlushSaveStorage drains the storage within a
   budget, PartOne::FlushSaves, the addon's flushSaves, index.ts's SIGTERM and SIGINT handlers with a 5 s flush; SaveStorageTest's case).
   c-riverwood is pended in lab/gate.yaml until the fix is on parity and a gate plays it.
+- An heir about to go stale (numidium, 2026-11-11, playtest-stagger's live test at 21:19Z; HYPOTHESIS, cells.rs unread): the
+  pick of a departing host's heir seems not to read the heir's own silence. At 21:19:33.5Z the server gave c1's cells to
+  ff000001, whose stale line at 21:19:34.5Z reads "silent 10238 ms", so the heir had been silent about 9.2 s when it was picked;
+  harmless there (both games were down; all nine cells froze unhosted at 21:19:39Z), but in play a seat about to time out could
+  take a departing host's cells for a few seconds and freeze them. Source: that run's server log, 21:19:28Z to 21:19:40Z. The
+  read: cells.rs's heir selection against the silent state (cells.rs :225-232 marks a connection silent only at the server's
+  stale threshold), and whether a candidate's last-message age is in its order. After playtest 51; an R0 fix if it holds.
 
 ## Playtest 49 (21:13 to 22:57 PST 2026-11-06, 05:13Z to 06:57Z 11-07; fork m4-train-48 75c134ad under apocrypha's layer b2bcc92d)
 

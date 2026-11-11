@@ -285,10 +285,16 @@ positions' age.
   next read, if wanted, arms that: c2 sets stage 1 of a Companions radiant c1
   is not running, then c1 casts. The risk for play is a run start where both
   seats log in at once, so playtest 51's one-at-a-time logins are unlikely to
-  meet it (HYPOTHESIS). Corrected the same day (numidium): 51's logins are not
-  one at a time; ready() relaunches both seats at once (playtest_setup.py
-  :610-611) and so does setup's restore (playtest-world.sh :58-60), the first
-  login on the restored world.
+  meet it (HYPOTHESIS). Corrected the same day (numidium): 51's logins were not
+  one at a time; ready() relaunched both seats at once (playtest_setup.py
+  :610-611 before main 7721a6e6) and so did setup's restore (playtest-world.sh
+  :58-60), the first login on the restored world. Since main 7721a6e6
+  (numidium's playtest-stagger, Eli's word below) both are one at a time:
+  relaunch_seats() stops both games, then starts c1's, then c2's (c2 not
+  started if c1's start fails), and the restore keeps that shape around its
+  swap; live at 21:19Z, c1 took fresh grants on all nine cells and c2 logged
+  in as a guest. Not staggered yet: playtest-restart's reconnects (the seats
+  reconnect by themselves) and turbo-client.sh and turbo-back.sh, after 51.
   x-ghostwalk-race-read v2.1 (b20dc5ac, fresh review READY; R the run's own
   start, the only moment the radiants can race, since the world's journal
   folds a recorded stage, ActionListener.cpp :3755 and :3781; S c1 relaunched
