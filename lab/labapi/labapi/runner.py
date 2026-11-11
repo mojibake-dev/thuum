@@ -258,6 +258,13 @@ class SeatState:
 # a preset name the relaunch's cleaning may write into its script (lab-driver saves <name>.jslot in the Presets folder)
 _PRESET_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9 _.-]*")
 
+# The most raw bytes of a seat's file one guest-agent read carries back (Runner._read_back): a whole trace in one read
+# timed out on both seats (20261111-191642-x-prop-blast, notes 49 and 50: prop-impulse.js's .log, "qga command
+# 'guest-file-read' failed - got timeout" on 711 and 712) and left its copy held open in the agent; a guest exec that
+# printed a 4 MiB chunk as base64, about 5.6 MB, killed sky-c1's agent on 2026-10-28, where 1 MiB chunks of the same
+# 12.8 MB file came across with it up
+READ_SLICE_BYTES = 1024 * 1024
+
 
 class Runner:
     def __init__(self, settings: Settings, tables: Tables, control: GuestControl, system: System, state: ServerState, board: StepBoard, clock=time.monotonic, wall=time.time):
@@ -2146,6 +2153,68 @@ class Runner:
         except ProxmoxError as e:
             rec.notes.append(f"{name}: {e}")
 
+    async def _read_back(self, rec: RunRecord, g: Guest, path: str, what: str) -> bytes:
+        """The file at `path` on the seat, one the runner made there to read (a shared-read copy), read back whole in
+        slices and then removed with them. Its length first, one guest exec; then for each slice of at most
+        READ_SLICE_BYTES raw bytes a guest exec writes that byte range of the file base64-encoded to <path>.<k>.b64
+        beside it (the agent's file API carries text, as the screenshot's .b64 sidecar has it), and one agent
+        file-read takes that back, GuestControl.file_read's own retry on "got timeout" its only retry. The slices'
+        bytes join in order and must come to the length; the caller decodes the whole once, since a slice boundary
+        can fall inside a multibyte character. A ProxmoxError (an exec or a read refused) or a ValueError (a length
+        unread, an exec that failed, a slice that is no base64, a short read) is the caller's, after the removal,
+        which runs whatever happened: a file it leaves is a note under `what`, never a failure, and the next
+        relaunch's cleaning takes what it can. _fetch_client_file's copies and the screenshot reads (each .b64
+        sidecar read whole) are the fetches this is meant to serve next."""
+        made: list[str] = []
+        try:
+            cmd = ["powershell", "-NoProfile", "-Command", f"$ErrorActionPreference = 'Stop'; (Get-Item -LiteralPath '{path}').Length"]
+            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+            length = res.out.strip()
+            if res.exitcode != 0 or not length.isdigit():
+                raise ValueError(f"its length unread (exit {res.exitcode}: {(res.err or res.out).strip()[:200]})")
+            size = int(length)
+            slices = -(-size // READ_SLICE_BYTES)
+            data = bytearray()
+            for k in range(slices):
+                at = k * READ_SLICE_BYTES
+                count = min(READ_SLICE_BYTES, size - at)
+                part = f"{path}.{k}.b64"
+                made.append(part)
+                # the byte range read until it is whole or the file ends (Stream.Read may return less than it is asked)
+                cmd = ["powershell", "-NoProfile", "-Command",
+                       f"$ErrorActionPreference = 'Stop'; $s = [IO.File]::OpenRead('{path}'); $s.Position = {at}; "
+                       f"$b = New-Object byte[] {count}; $n = 0; "
+                       f"while ($n -lt {count}) {{ $r = $s.Read($b, $n, {count} - $n); if ($r -le 0) {{ break }}; $n += $r }}; "
+                       f"$s.Close(); [IO.File]::WriteAllText('{part}', [Convert]::ToBase64String($b, 0, $n))"]
+                try:
+                    res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+                    if res.exitcode != 0:
+                        raise ValueError(f"its exec exited {res.exitcode}: {res.err.strip()[:200]}")
+                    text = await asyncio.to_thread(self.control.file_read, g, part)
+                    data += base64.b64decode(text.strip(), validate=True)
+                except ProxmoxError as e:
+                    raise ProxmoxError(f"slice {k + 1} of {slices}: {e}") from e
+                except ValueError as e:
+                    raise ValueError(f"slice {k + 1} of {slices}: {e}") from e
+            if len(data) != size:
+                raise ValueError(f"{len(data)} bytes read of its {size}")
+            return bytes(data)
+        finally:
+            paths = [path, *made]
+            listed = ", ".join(f"'{p}'" for p in paths)
+            cmd = ["powershell", "-NoProfile", "-Command",
+                   f"$p = @({listed}); Remove-Item -LiteralPath $p -Force -ErrorAction SilentlyContinue; "
+                   "$p | Where-Object { Test-Path -LiteralPath $_ }"]
+            try:
+                res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+                left = [ln.strip() for ln in res.out.splitlines() if ln.strip()]
+                if res.exitcode != 0:
+                    rec.notes.append(f"{what}: the removal of its {len(paths)} file(s) on {g.name} exited {res.exitcode}: {res.err.strip()[:200]}")
+                elif left:
+                    rec.notes.append(f"{what}: {len(left)} of its {len(paths)} file(s) left on {g.name} after its read ({', '.join(left[:2])})")
+            except ProxmoxError as e:
+                rec.notes.append(f"{what}: its {len(paths)} file(s) on {g.name} not removed: {e}")
+
     async def _frida_trace(self, rec: RunRecord, client: str, script: str, suffix: str = "") -> None:
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
@@ -2159,7 +2228,9 @@ class Runner:
         # write access can, so it is copied that way first
         # the injector's .out (a load error; the injector exits once the script is eternalized) and then
         # the script's own .log (frida_script_text's preamble, flushed every 250 ms), each copied with a
-        # read that shares write access, since the script still holds its .log open
+        # read that shares write access, since the script still holds its .log open, and the copy read back
+        # in slices (_read_back): read whole, prop-impulse.js's large .log timed out on both seats
+        # (20261111-191642-x-prop-blast) and the copy stayed held open in the agent
         texts = []
         for ext in ("out", "log"):
             src = f"{self.s.client_lab_dir}\\frida\\{script}.{ext}"
@@ -2172,11 +2243,13 @@ class Runner:
                 if res.exitcode != 0:
                     rec.notes.append(f"frida {script}.{ext}: copy exited {res.exitcode}: {res.err.strip()[:200]}")
                     continue
-                texts.append(await asyncio.to_thread(self.control.file_read, g, copy))
-            except ProxmoxError as e:
+                # one decode of the whole; a character the copy cut mid-write at its end reads as U+FFFD
+                data = await self._read_back(rec, g, copy, f"frida {script}.{ext}")
+                texts.append(data.decode("utf-8", errors="replace"))
+            except (ProxmoxError, ValueError) as e:
                 rec.notes.append(f"frida {script}.{ext}: {e}")
         if texts:
-            (rec.dir / "frida" / name).write_text("".join(t if t.endswith("\n") or not t else t + "\n" for t in texts))
+            (rec.dir / "frida" / name).write_text("".join(t if t.endswith("\n") or not t else t + "\n" for t in texts), encoding="utf-8")
             rec.artifacts.append(f"frida/{name}")
 
     @staticmethod
@@ -2371,8 +2444,8 @@ def _client_relaunch_ps(lab_dir: str, driver_log: str, presets: list[str], stop:
     leaves on a seat that its rollback undid, by folder and name pattern, never a wildcard over the lab folder
     (launch.ps1 needs game-dir.txt and games\\):
     - frida\\: each run's script and its .out, .err and .log, and, as far as they go, the runner's shared-read .copy
-      of the last two (config.frida_exec_template, frida_script_text, Runner._frida_trace); frida-inject.exe and the
-      tools beside it stay;
+      of the last two and that copy's .<k>.b64 slices (config.frida_exec_template, frida_script_text,
+      Runner._frida_trace, Runner._read_back); frida-inject.exe and the tools beside it stay;
     - shots\\ (a screenshot step's copy and its base64 sidecar, a burst's frame folder), screenshots\\
       (screenshot.ps1's captures and latest.png), burst\\ and input\\ (their tasks' request and done files);
     - every recorded game folder's RaceMenu presets: skymp5-client's thuum-*.jslot (raceMenuService.ts) and
@@ -2418,8 +2491,9 @@ def _client_relaunch_ps(lab_dir: str, driver_log: str, presets: list[str], stop:
         # timed-out guest-file-close left open in the agent (proxmox.py file_read, 2026-10-17) stays until the VM
         # restarts, and failing the try on it cost a rollback (sky-c2, b-cloak-fight 20261030-053144: 025.png.b64 and
         # 032.png.b64; sky-c1, x-quest-mode 20261030-131512: story-location-20261030-131130-x-story-arrival-login-13
-        # .js.log.copy); the next capture writes its own name, and a copy carries its run's script name
-        "Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy') @() -soft",
+        # .js.log.copy); the next capture writes its own name, and a copy carries its run's script name. A copy and
+        # its slices (Runner._read_back) leave the seat once read; these are what a timed-out slice read holds open
+        "Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy', '*.js.out.copy.*.b64', '*.js.log.copy.*.b64') @() -soft",
         "Clean (Join-Path $lab 'shots') @('*.png', '*.png.b64') @('*-burst') -soft",
         "Clean (Join-Path $lab 'screenshots') @('*.png') @() -soft",
         "Clean (Join-Path $lab 'burst') @('request.json', 'done.json') @()",

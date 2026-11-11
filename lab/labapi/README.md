@@ -26,8 +26,14 @@ Phases: rollback-server, netem (when the scenario asks), rollback-clients,
 steps, artifacts. A run's directory is `RESULTS_DIR/<utc stamp>-<scenario
 id>/` with `result.json`, `world-before/`, `world-after/`, `world-diff`,
 `server.log`, `screenshots/`, `lab.pcap`, `frida/`, and client logs when the
-scenario lists them. The verdict is green only when every assertion held and
-no step timed out; red when an assertion failed, a step timed out, or the
+scenario lists them. A Frida trace, `frida/<client>-<script>.jsonl` (the
+injector's .out, then the script's .log), is copied on the seat by a read
+that shares write access and read back in base64 slices of at most 1 MiB of
+raw bytes, a guest exec and a guest-agent file read each, joined as bytes,
+checked against the copy's length and decoded as UTF-8 once; the copy and
+its slices are removed once read. The verdict is green only when every
+assertion held and no step timed out; red when an assertion failed, a step
+timed out, or the
 server refused a command; error when the lab itself failed (no snapshot, the
 server never became ready, a client never heartbeated, the scenario timed
 out, an assertion that is not in the language).

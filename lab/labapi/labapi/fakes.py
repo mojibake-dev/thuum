@@ -99,6 +99,26 @@ class FakeProxmox:
         empty = re.search(r"Set-Content -Path '([^']+\.copy)' -Value ''", " ".join(command))
         if empty and not (copied and copied.group(1) in self.files):
             self.files[empty.group(1)] = ""
+        # Runner._read_back on a file of the seat's, its UTF-8 bytes: the length, a byte range base64-encoded into a slice
+        # file beside it, and the removal of the file with its slices, which prints any still there
+        length = re.search(r"\(Get-Item -LiteralPath '([^']+)'\)\.Length", " ".join(command))
+        if length:
+            if length.group(1) not in self.files:
+                return ExecResult(1, "", f"Get-Item : Cannot find path '{length.group(1)}' because it does not exist.")
+            return ExecResult(0, f"{len(self.files[length.group(1)].encode('utf-8'))}\r\n", "")
+        piece = re.search(r"\[IO\.File\]::OpenRead\('([^']+)'\); \$s\.Position = (\d+); \$b = New-Object byte\[\] (\d+);"
+                          r".*\[IO\.File\]::WriteAllText\('([^']+)'", " ".join(command))
+        if piece:
+            src, at, count, part = piece.group(1), int(piece.group(2)), int(piece.group(3)), piece.group(4)
+            if src not in self.files:
+                return ExecResult(1, "", f"Exception calling 'OpenRead': Could not find file '{src}'.")
+            self.files[part] = base64.b64encode(self.files[src].encode("utf-8")[at:at + count]).decode("ascii")
+            return ExecResult(0, "", "")
+        removal = re.search(r"\$p = @\(([^)]*)\); Remove-Item -LiteralPath \$p", " ".join(command))
+        if removal:
+            for p in re.findall(r"'([^']+)'", removal.group(1)):
+                self.files.pop(p, None)
+            return ExecResult(0, "", "")
         if any("Get-Process SkyrimSE" in c for c in command):
             # a guest agent too busy to answer, this many times first
             if self.game_misses > 0:

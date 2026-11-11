@@ -371,8 +371,16 @@ Screenshots and Frida invocations go through a guest exec from lab-api,
 not through the game, so a crashed client can still be observed. Scripts
 reach the client by the client pulling them from lab-api over http inside
 that guest exec; artifacts come back through the Proxmox guest-agent file
-API, which caps each file at 16 MiB, so Frida traces are rotated into files
-under that size. The token has no FileWrite privilege.
+API, which carries text and caps each file at 16 MiB. A Frida trace comes
+back in slices: the injector's .out and the script's .log are each copied
+with a read that shares write access (the script still writes its .log),
+then for each slice a guest exec writes at most 1 MiB of the copy's bytes
+base64-encoded to a file beside it, and one file read takes that back. The
+slices join as bytes, must come to the copy's length, and are decoded as
+UTF-8 once, so a slice boundary inside a multibyte character splits
+nothing; the copy and its slices leave the seat once read. Read whole, a
+large trace timed out the agent on both seats (20261111-191642-x-prop-blast)
+and left its copy held open there. The token has no FileWrite privilege.
 
 ## Scenario runner (lab-api on sky-srv)
 
@@ -833,8 +841,10 @@ run's end would collect as its own). Crash dumps stay: a run's end counts
 only those written since a few minutes before its start, and a crash it finds
 rolls the seat back. A file that will not go fails the try, except in the
 capture folders shots\ and screenshots\ and for the runner's trace copies
-in frida\ (*.js.out.copy, *.js.log.copy, the files it reads back through the
-agent), which are cleaned as far as they go: a file a timed-out
+in frida\ (*.js.out.copy, *.js.log.copy and their *.copy.<k>.b64 slices,
+the files it reads back through the agent, which leave the seat once read
+and stay only when the agent holds one open), which are cleaned as far as
+they go: a file a timed-out
 guest-file-close left open in the agent stays until the VM restarts, the note
 says "<n> held open left in place", and the next capture writes its own name,
 as the next copy carries its run's script name (b-cloak-fight

@@ -1060,15 +1060,69 @@ class FridaTraces(RunTests):
         run_dir = self.tmp / "results" / run_id
         self.assertEqual((run_dir / "frida" / "c1-handle-trace.js.before-run.jsonl").read_text(), '{"attached":1}\n')
         # read through a shared-read copy: frida-inject still writes the file
-        # while the game runs (run 20261006-183431)
+        # while the game runs (run 20261006-183431); the copy comes back in
+        # slices (Runner._read_back), this short one in one
         copies = [i for i, c in enumerate(pve.calls) if c[:2] == ("exec", 901) and any(out in a and "ReadWrite" in a for a in c[2])]
-        reads = [i for i, c in enumerate(pve.calls) if c[:3] == ("file_read", 901, out + ".copy")]
+        reads = [i for i, c in enumerate(pve.calls) if c[:3] == ("file_read", 901, out + ".copy.0.b64")]
         rollback = next(i for i, c in enumerate(pve.calls) if c[:2] == ("rollback", 901))
         self.assertEqual(len(copies), 1, pve.calls)
         self.assertEqual(len(reads), 1, pve.calls)  # once, though started twice
         self.assertLess(copies[0], reads[0])
         self.assertLess(reads[0], rollback)
         self.assertEqual(runner.frida_started, [])
+        self.assertFalse([n for n in body.get("notes", []) if "frida" in n], body.get("notes"))
+
+    def _hand_trace(self, script, log):
+        """c1 managed, and a trace `script` started on it by hand (POST /lab/frida's record) whose .log holds `log`."""
+        from labapi.guests import Guest
+
+        self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        pve.files[f"C:\\sky-lab\\frida\\{script}.log"] = log
+        self.services.runner.frida_started.append(("c1", script))
+        return pve
+
+    def test_a_trace_larger_than_a_slice_comes_back_byte_exact(self):
+        """20261111-191642-x-prop-blast: prop-impulse.js's large .log, read whole, timed out on both seats. The copy
+        comes back in slices of at most READ_SLICE_BYTES raw bytes, each base64 on the seat, joined as bytes and
+        decoded once, so a slice boundary inside a multibyte character splits nothing."""
+        from labapi.runner import READ_SLICE_BYTES as S
+
+        # an é across the first boundary (its bytes at S - 1 and S), a € across the second (2S - 2 to 2S)
+        log = "a" * (S - 1) + "é" + "b" * (S - 3) + "€" + "c" * 10 + "\n"
+        self.assertEqual(len(log.encode("utf-8")), 2 * S + 12)
+        pve = self._hand_trace("big-trace.js", log)
+        run_id, body = self._run(SOLO_WITH_LOG)
+        self.assertEqual(body["verdict"], "green", body)
+        got = (self.tmp / "results" / run_id / "frida" / "c1-big-trace.js.before-run.jsonl").read_bytes()
+        self.assertEqual(got, log.encode("utf-8"))
+        copy = "C:\\sky-lab\\frida\\big-trace.js.log.copy"
+        ranges = [tuple(map(int, m.groups())) for c in pve.calls if c[:2] == ("exec", 901)
+                  for m in [re.search(r"OpenRead\('" + re.escape(copy) + r"'\); \$s\.Position = (\d+); \$b = New-Object byte\[\] (\d+);",
+                                      " ".join(c[2]))] if m]
+        self.assertEqual(ranges, [(0, S), (S, S), (2 * S, 12)])
+        reads = [c[2] for c in pve.calls if c[:2] == ("file_read", 901) and c[2].startswith(copy)]
+        self.assertEqual(reads, [f"{copy}.{k}.b64" for k in range(3)])
+        self.assertFalse([n for n in body.get("notes", []) if "frida" in n], body.get("notes"))
+
+    def test_the_copy_and_its_slices_leave_the_seat_once_read(self):
+        """A copy the agent read is a file it can hold open (x-quest-mode 20261030-131512's .js.log.copy cost a
+        rollback; after x-prop-blast's timed-out reads the relaunches' held count grew 11, 17, 25): once read, the copy
+        and its slices go in one guest exec, after the last slice's read."""
+        from labapi.runner import READ_SLICE_BYTES as S
+
+        pve = self._hand_trace("big-trace.js", "x" * (S + 1) + "\n")
+        run_id, body = self._run(SOLO_WITH_LOG)
+        self.assertEqual(body["verdict"], "green", body)
+        copy = "C:\\sky-lab\\frida\\big-trace.js.log.copy"
+        # the script's own .log is the relaunch cleaning's; the .out's empty copy went the same way
+        self.assertEqual([p for p in pve.files if p.startswith("C:\\sky-lab\\frida\\big-trace.js.")], ["C:\\sky-lab\\frida\\big-trace.js.log"])
+        removals = [i for i, c in enumerate(pve.calls) if c[:2] == ("exec", 901) and "Remove-Item" in " ".join(c[2]) and copy in " ".join(c[2])]
+        self.assertEqual(len(removals), 1, pve.calls)
+        named = re.findall(r"'([^']+)'", re.search(r"\$p = @\(([^)]*)\)", " ".join(pve.calls[removals[0]][2])).group(1))
+        self.assertEqual(named, [copy, f"{copy}.0.b64", f"{copy}.1.b64"])
+        last_read = max(i for i, c in enumerate(pve.calls) if c[:2] == ("file_read", 901) and c[2].startswith(copy))
+        self.assertLess(last_read, removals[0])
         self.assertFalse([n for n in body.get("notes", []) if "frida" in n], body.get("notes"))
 
 MOUSE = """
@@ -3083,7 +3137,7 @@ class ClientResets(RunTests):
         at = [first.index(s) for s in steps]
         self.assertEqual(at, sorted(at), steps)
         for named in ("Clean (Join-Path $lab 'frida') @('*.js', '*.js.out', '*.js.err', '*.js.log') @()",
-                      "Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy') @() -soft",
+                      "Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy', '*.js.out.copy.*.b64', '*.js.log.copy.*.b64') @() -soft",
                       "Clean (Join-Path $lab 'shots') @('*.png', '*.png.b64') @('*-burst')",
                       "Clean (Join-Path $lab 'screenshots') @('*.png') @()",
                       "Clean (Join-Path $lab 'burst') @('request.json', 'done.json') @()",
@@ -3199,7 +3253,7 @@ class ClientResets(RunTests):
         reset, body = self._reset()
         self.assertEqual((body["verdict"], reset["kind"]), ("green", "relaunch"), body)
         script = pve.relaunches[-1]
-        self.assertIn("Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy') @() -soft", script)
+        self.assertIn("Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy', '*.js.out.copy.*.b64', '*.js.log.copy.*.b64') @() -soft", script)
         self.assertIn("Clean (Join-Path $lab 'frida') @('*.js', '*.js.out', '*.js.err', '*.js.log') @()\n", script)
         self.assertTrue(any("1 held open left in place (C:\\sky-lab\\frida\\story-location-20261030-131130" in n
                             for n in body["notes"]), body["notes"])
