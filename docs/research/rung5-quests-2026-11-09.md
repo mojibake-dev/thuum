@@ -200,10 +200,17 @@ The core:
   seat. `acting` stamped: the report's own when it names a connected player's actor, else the reporter (E_QUEST_ACTING once a
   minute per seat). The stage line "[verb:quest-stage] {:x} set {} stage {}: recorded, relayed to {}" (:3461) byte for byte:
   b-quest-stage, b-quest-rumor and b-quest-stage-restart grep it. R0 record, R1 feed as before; the reported `acting` is R2.
-- SendQuestStages (:6695-6746): the order becomes the list message (unchanged; mode all names denied ∪ player), served start
-  words for recorded-running quests, served stages (no acting), served stop words for recorded-stopped quests; the
-  start-game-enabled skip (:6729-6737) deleted. The login line (:6741-6745) byte for byte, with one beside it: "QuestStage: actor
-  <id> sent <n> running and <m> stopped quest(s) around the stages after a login".
+- SendQuestStages (:6695-6746): the order becomes the list message (unchanged; mode all names denied ∪ player), served start words
+  for recorded-running quests and for recorded-stopped quests whose stages the login replays, served stages (no acting), served
+  stop words for recorded-stopped quests, so per quest the replay reads its start (its start-up stages in `wordStages`), its
+  stages ascending, its stop, and a stopped quest with no stage to replay gets its stop alone; the start-game-enabled skip
+  (:6729-6737) deleted. The login line (:6741-6745) byte for byte, with one beside it: "QuestStage: actor <id> sent <n> running
+  and <m> stopped quest(s) around the stages after a login, <k> of the stopped started ahead of their stages (D-Q3 A)". CORRECTED
+  2026-11-10 by fork m4-scripts-5-loginstart f2689cfa (merged at m4-scripts-5-second f6ca339d; D-Q3 A): this plan served a
+  recorded-stopped quest its stages and its stop with no start word, and its line had no <k>, so a fresh seat's first replayed
+  stage started the quest with its start-up fragments unsuppressed (a static read found it, the code at 685f6a24 confirmed it);
+  the starts now come from wire-rules quest_runs at_login (quest_runs.rs :438-457 at f6ca339d), the order and the line from
+  SendQuestStages :7894-7957 at f6ca339d.
 - The record (rule 6): MpChangeFormREFR (the journal, PartOne::WorldJournal, PartOne.cpp:3654) gains `std::optional<std::vector<
   QuestRun>> questRuns` and `std::optional<std::vector<ScriptVariableRecord>> scriptVariables` beside questStages
   (MpChangeForms.h:265) and aliasFills (:394-420), inside ToTuple (:455-462); keys "questRuns" and "scriptVariables" beside
