@@ -632,6 +632,15 @@ and accepted (r-cell-leave 083700).
   same way (ghostwalk.md's Tests), so a relaunched warm clone on this build
   may carry something the cold rollback clears (HYPOTHESIS, unread); until
   that read, a red here on a warm clone waits for its cold rerun.
+  Read the same day (artifacts only): not a carried state. The generic
+  "follows ... within the pass margin" line fires warm for other residents;
+  Sigrid 0x13483 reads cell 0x9731 at all eight sampled npc-states in all
+  three runs and crosses once, late, in the green alone. HYPOTHESIS, a timing
+  budget: the cold rollback takes 84 to 93 s against the relaunch's 32 s,
+  and the server ticks from its container's start, so a cold run gives her
+  about 60 s more (about 20 game minutes) before the fixed window counts.
+  The read that settles it: an npc-state of 0x13483 just before and after
+  the scenario's server restart on one matched warm and cold pair.
 - Assertions that would fail if the verb silently regressed: a refusal for
   a followed actor; a frozen record while its host's track moves; an epoch
   step over the bound on the west column; no keyframe line before a grant;

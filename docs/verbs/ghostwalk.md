@@ -233,6 +233,19 @@ positions' age.
   b-npc-handoff-cross the same way (072204 and 072734 red, 073308 cold
   green; npc-handoff.md's Tests): two scenarios in one sweep, a pattern to
   read (what a relaunched warm clone on this build carries).
+  Read the same day (artifacts only): CONFIRMED that WB_Ghostwalk_Script's
+  OnEffectFinish body never ran on the warm-relaunched c1: the cold green's
+  server.log has the landing, the permitted jump and "ff000000's own
+  Actor.AddSpell 1a0cb7e1 (from WB_Ghostwalk_Script.OnEffectFinish)"
+  (061139 :574-577; c1-console.log :1489 the AddSpell on 14), the warm reds
+  none of them, and c1's y stays frozen from step 18 to 23. c1 was rolled
+  back cold for both greens and relaunched warm for both reds; c2 was
+  relaunched in all four, so c1's mode is the variable; one build, f6ca339d.
+  Why is unread (HYPOTHESIS): rung 5's effect-event and acting-scope work
+  (fork 9db243a0) is one suspect, the server record carrying the earlier
+  run's Eye Fix ability 1a0cb7e1 into the warm run is another. The read that
+  settles it: a Frida trace of c1's active effects and the effect's two
+  events across one more warm cast.
 - Assertions that would fail if the verb silently regressed: c1's server
   position after the effect (at the cast point, held: fails with the
   script blanked, or with the server sending c1 back); c2's own position
