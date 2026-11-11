@@ -5,7 +5,7 @@
 // it); the ready row's pid (against the run's c<N>-skyrim-platform-pid<N>.log: the memory note lab-frida-wrong-process), base and each
 // hook's address with its first bytes read before the attach; every attach caught into attachErrors; a liveness row every 10 s with
 // each hook's count before its filter. And one fix: v1 read 78304's second argument as the body, the misreading the launch tracer
-// corrected (20261031-190643, prop-launch.js:138-143; prop-physics.md:653-654): it is the hkpCharacterObjectInteractionEvent, whose
+// corrected (20261031-190643, prop-launch.js:138-143; prop-physics.md:757-760): it is the hkpCharacterObjectInteractionEvent, whose
 // body is at +0x30 (include/RE/H/hkpCharacterProxyListener.h:25, as prop-sleep.js reads it), so v1's impulse rows named the event's
 // memory, never the body; E27's read needs the row's body. Review before its first run (ADR-064 rule A). v1's header follows.
 // prop-contact.js: the player's Havok contact with a prop (thuum docs/verbs/prop-physics.md, ADR-058;
