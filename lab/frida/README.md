@@ -335,13 +335,24 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   PlayerCharacter::StartGrabObject (40552; the grab fields before and after,
   the grabbed reference by LookupReferenceByHandle) and DestroyMouseSprings
   (40557, the release; EndGrabObject is inline in CommonLibSSE-NG), and
-  polls the player's grabbedObject, grabObjectWeight and grabType every
-  250 ms (the runtime data at the newer layout's 0x3E0 start, so each
-  header comment plus 8), emitting on change. Expected: the grabber's seat
-  shows the call, a handle and a weight held until the release; the other
-  seat shows no call and handle 0 throughout, and a second hand on the same
-  body shows a call with the handle still 0 or no call. Written 2026-11-03
-  for x-prop-arbitration leg 3 on both seats; never run.
+  polls the player's grabbedObject, grabObjectWeight and grabType once a
+  game frame inside the player's own update (v2; v1 polled every 250 ms on
+  Frida's thread), the runtime data at the newer layout's 0x3E0 start, so
+  each header comment plus 8, emitting on change. Expected: the grabber's
+  seat shows the call, a handle and a weight held until the release; the
+  other seat shows no call and handle 0 throughout, and a second hand on the
+  same body shows a call with the handle still 0 or no call. Written
+  2026-11-03 for x-prop-arbitration leg 3 on both seats; never run. v2
+  (2026-11-11, ADR-071 rung 0's H5, x-corpse-grab v1): the grabbed
+  reference's facts at each grab, release and handle change (its form
+  type, an actor's life state, its 3D's bodies by motion type with each
+  bone's name, layer and kAnimTargeted bit, and the kBlockActivate bit of
+  its ExtraFlags, the block canon puts on every dead NPC body); the
+  grabSpring array (0x8A0) with each spring's vtable checked against
+  VTABLE_bhkMouseSpringAction (208070) and the body its Havok action
+  names, matched by value against the walk; every 30 frames while held,
+  the named bodies' positions and speeds; the ready row's pid, base, Main's
+  thread and first bytes, a liveness row every 10 s.
 - prop-sleep.js: the engine's own sleep of a prop against the client's
   500 ms stir test (docs/engine/havok-props.md row E10; prop-physics.md A3,
   A4). Finds the clutter bodies the player's capsule touches through
