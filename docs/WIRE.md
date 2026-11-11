@@ -413,23 +413,33 @@ SetStage, "<Script>.<Function>", at most cap::QUEST_ROOT 257 bytes, two PAPYRUS_
 command the player typed), absent from an older client and from the server, the seat's own word (R2). Validator (E_VAL_RANGE): a
 cause other than 1 or 2, or with quest 0; a root without a cause, empty, or with a byte outside [A-Za-z0-9_.]. wire-rules
 quest_runs' judge_caused refuses a run word whose cause is the seat's own first (E_QUEST_CAUSE), touching neither the record nor
-the churn counter; a stage report the record reads as a start (stage 0 or a start-up stage, with no word) and the seat's own
-cause is not recorded either, the designed path and no E_QUEST_ code, in one plain line a minute per seat ("QuestStage: user <u>
-actor <a> reported stage <s> of <q>, which the record reads as its start (cause seat, root <r>, R2): the seat's own, not the
-world's (D-Q4 C), nothing recorded; <n> such report(s) since the last line"); any other stage crosses whatever its cause, and a
-report with no cause, an older client's, is judged as before. A quest a Story Manager quest node names (SMQN NNAM, which libespm
-now reads; PartOne reads each node's last version at AttachEspm, a deleted or ignored node naming nothing, and logs the nodes and
-quests it read) keeps its runs per seat while the server setting `questStoryInstances` is "seat" (the default, PENDING ELI as
-D-Q5; "world" judges such a quest by its cause like any other; any other value is a settings error at start): its run words are
-refused (E_QUEST_INSTANCE, touching neither the record nor the churn counter) and the login serves none of its runs, while its
-stages still cross. E_QUEST_CAUSE and E_QUEST_INSTANCE log one line a minute per seat and quest with the reported cause and root
-and, for an instance, the node naming it; a recorded line names a reported cause. On the seat a run word, and a stage-0 report,
-goes only with a world cause; the client setting `questRunCause` "any" turns that rule off (every report as before, naming no
-cause; said once), the kill switch, and a platform that names no cause gets the same. Fixture 57-QuestStage-9 (c1's world-caused
-stop of dunEmbershardQST 0xb6fef rooted at QF_dunEmbershardQST_000B6FEF.Fragment_16); QuestStageMessage.h carries both, and
-QuestStage's 4 KiB holds them at their caps. A schema 42 client cannot connect to a schema 43 server (netcode's protocol id
-carries the version). The difftest sessions are unchanged; T0 unit/QuestStageTest.cpp's cause and instance cases and
+the churn counter; a stage report the record reads as a start (stage 0 or a start-up stage, with no word) and the seat's own cause
+is not recorded either, the designed path and no E_QUEST_ code, in one plain line a minute per seat ("QuestStage: user <u> actor
+<a> reported stage <s> of <q>, which the record reads as its start (cause seat, root <r>, R2): the seat's own, not the world's
+(D-Q4 C), nothing recorded; <n> such report(s) since the last line"); any other stage crosses whatever its cause, and a report
+with no cause, an older client's, is judged as before. A quest a Story Manager quest node names (SMQN NNAM, which libespm now
+reads; PartOne reads each node's last version at AttachEspm, a deleted or ignored node naming nothing, and logs the nodes and
+quests it read) keeps its runs per seat while the server setting `questStoryInstances` is "seat" (the default, Eli's D-Q5 A since
+2026-11-10, docs/DECISIONS.md; "world" judges such a quest by its cause like any other; any other value is a settings error at
+start): its run words are refused (E_QUEST_INSTANCE, touching neither the record nor the churn counter) and the login serves none
+of its runs, while its stages still cross. E_QUEST_CAUSE logs one line a minute per seat and quest with the reported cause and
+root; the instance's refusal, the designed path, logs instead (since fork m4-scripts-5-review b23085da, merged at
+m4-scripts-5-second f6ca339d) a plain line a minute per seat and quest, "[verb:quest-stage] the <start|stop> of <q> by <actor>
+kept to its seat: a Story Manager instance (questStoryInstances seat[; cause <world|seat>, root <r|none>, R2])[, named by <node>
+<id>[ and <n> more]], its stages still crossing; user <u>'s report not recorded, nothing relayed; <n> such report(s) of the quest
+since the last line", the refusal itself unchanged; a recorded line names a reported cause. On the seat a run word, and a stage-0
+report, goes only with a world cause; the client setting `questRunCause` "any" turns that rule off (every report as before, naming
+no cause; said once), the kill switch, and a platform that names no cause gets the same. Fixture 57-QuestStage-9 (c1's
+world-caused stop of dunEmbershardQST 0xb6fef rooted at QF_dunEmbershardQST_000B6FEF.Fragment_16); QuestStageMessage.h carries
+both, and QuestStage's 4 KiB holds them at their caps. A schema 42 client cannot connect to a schema 43 server (netcode's protocol
+id carries the version). The difftest sessions are unchanged; T0 unit/QuestStageTest.cpp's cause and instance cases and
 unit/EspmTest.cpp's SMQN case.
+
+Since fork m4-scripts-5-loginstart f2689cfa (merged at m4-scripts-5-second f6ca339d; D-Q3 A; no wire change) the login also serves
+a start word to a quest recorded stopped whose stages it replays, ahead of them (wire-rules quest_runs at_login), so per quest the
+replay reads its start, with its `wordStages`, its stages ascending, its stop; a stopped quest with no stage to replay gets its
+stop alone. The runs line gains the count: "QuestStage: actor <a> sent <n> running and <m> stopped quest(s) around the stages
+after a login, <k> of the stopped started ahead of their stages (D-Q3 A)".
 
 DamageCause (id 63, MsgType 55), server to client, reliable, R0 output (fork
 m3-npc-death 354b13c2, 2026-10-26; docs/verbs/npc-fate.md, ADR-050 decision 2,
@@ -991,21 +1001,27 @@ NativeRows.inc has no owner or keep column, so its lines stand) with Owner::Play
 reporter's own player (subject 0x14) a script's call is the player's own record, nine rows in all (wire-rules player_own's ROWS,
 the two first in the table's order), and on any other subject neither has a channel (E_SCRIPTCALL_ROW). Their judgment has no
 bound (R2, rule 5's "record it as unvalidated": a quest's reward fires every time, a leveled one or a count its script computes
-among them): the form an item (E_SCRIPTCALL_ARGS otherwise, a FormList or a reference among them), a leveled list's add refused
-by name (E_SCRIPTCALL_LEVELED: what landed is the engine's roll, which the report does not carry, so the record never holds the
+among them): the form an item (E_SCRIPTCALL_ARGS otherwise, a FormList or a reference among them), a leveled list's add refused by
+name (E_SCRIPTCALL_LEVELED: what landed is the engine's roll, which the report does not carry, so the record never holds the
 list), the count, aiCount, a whole number from 1 to 2147483647 (E_SCRIPTCALL_ARGS otherwise); an add recorded whole up to the
 record's u32 bound over the form's stacks; a removal at most what the record holds (one of what it lacks folds), the open
 overlay's item first (the beast form's WolfSkinFXArmor), and folding into a container the player holds open (that container's
-PutItem moves the item). The core writes MpObjectReference::AddItem, or RemoveItems over StacksToRemove (the plain stack first),
-and only the player's own game hears its inventory, at the tick. The platform batches the two on the seat's own player alone
-(kBatchedStateRows, RecordRow::PlayerOwn; a non-owned call on a container, an NPC or a figure keeps its latent rule under the
-recorded lever), and inside another player's acting scope the self is that player's figure by step (0), so a relayed fragment's
-grant crosses once, from the acting seat. The client sends them as the seven go (selfId 0x14, unfolded) and holds each item's
-base against its 5 s inventory apply for 10 s past the send (remoteServer.ts holdPcInventoryBase). Named gaps: a leveled reward,
-a removal's receiving side, and a reward a giver moves into the player (RemoveItem on the giver: the giver's row). Since fork
-m4-scripts-5-rewards 922d881e a recorded ChangeHeadPart also rewrites the player's stored RaceMenu look to the new part of its
-type and sends it as RaceMenuPreset ahead of the appearance (F2), and a quest's alias scripts count as its attachments for the
-bound (F1, libespm's VMAD Alias Scripts Section); no wire change. The difftest sessions are unchanged; T0 unit/PlayerOwnTest.cpp.
+PutItem moves the item). Since fork m4-scripts-5-review f3a2a44c (merged at m4-scripts-5-second f6ca339d; rule 12's bound on a
+client-fed record) an add that needs a new stack (no plain, unworn stack of the form in the record, Inventory::AddItems' own
+match) is refused once the record holds 4096 stacks, the wire's in one inventory (player_own.rs INVENTORY_STACKS, which
+wire-bridge's test holds equal to wire-schema cap::INVENTORY), by a new E_SCRIPTCALL_FULL, after the leveled, kind and count
+checks: past it the server's edge would refuse every SetInventory and CreateActor naming the player's inventory. An add joining a
+stack the record holds, and every removal, are untouched; the refusal is a server line, so no field, validator or fixture moves.
+The core writes MpObjectReference::AddItem, or RemoveItems over StacksToRemove (the plain stack first), and only the player's own
+game hears its inventory, at the tick. The platform batches the two on the seat's own player alone (kBatchedStateRows,
+RecordRow::PlayerOwn; a non-owned call on a container, an NPC or a figure keeps its latent rule under the recorded lever), and
+inside another player's acting scope the self is that player's figure by step (0), so a relayed fragment's grant crosses once,
+from the acting seat. The client sends them as the seven go (selfId 0x14, unfolded) and holds each item's base against its 5 s
+inventory apply for 10 s past the send (remoteServer.ts holdPcInventoryBase). Named gaps: a leveled reward, a removal's receiving
+side, and a reward a giver moves into the player (RemoveItem on the giver: the giver's row). Since fork m4-scripts-5-rewards
+922d881e a recorded ChangeHeadPart also rewrites the player's stored RaceMenu look to the new part of its type and sends it as
+RaceMenuPreset ahead of the appearance (F2), and a quest's alias scripts count as its attachments for the bound (F1, libespm's
+VMAD Alias Scripts Section); no wire change. The difftest sessions are unchanged; T0 unit/PlayerOwnTest.cpp.
 
 ### ScriptState (t 76, wire id 84) and ScriptStateApply (t 77, wire id 85): the script record (ADR-068 rung 3)
 
