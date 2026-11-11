@@ -226,9 +226,11 @@ ssh_srv "$dc pull -q skymp-server-test skymp-server-legacy"
 ssh_srv "cat > /srv/lab/server/t2-load-order.json" < lab/deploy/sky-srv/server-settings-t2-load-order.json
 # rung 5's quest keys stay in T2's settings when the head's own difftest declares their login watch (the t:81 entry
 # in skymp-wire/difftest/divergences.yaml, train 52 with the drain fix, fork 1bb3893b); an older head, or one this
-# checkout has not fetched, keeps them popped, so a T2 of any head is consistent with its own declarations
+# checkout has not fetched, keeps them popped, so a T2 of any head is consistent with its own declarations. The fork
+# is read where FORK_DIR names it (verb-stage's and verb-merge's default): a worktree's skymp/ is an uninitialized
+# submodule directory, so git would walk up to the thuum worktree and find no fork commit (numidium, 2026-11-11)
 r5_keys=pop
-if [ -n "${head_commit:-}" ] && git -C skymp show "$head_commit:skymp-wire/difftest/divergences.yaml" 2>/dev/null \
+if [ -n "${head_commit:-}" ] && git -C "${FORK_DIR:-skymp}" show "$head_commit:skymp-wire/difftest/divergences.yaml" 2>/dev/null \
      | grep -Eq 'msg: \{t: 81[,}]'; then
   r5_keys=keep
 fi
