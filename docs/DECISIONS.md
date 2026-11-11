@@ -5176,8 +5176,10 @@ Decision.
    2026-11-11). The dynamic mode sets the physics step to the frame's own between 60 and 240 fps and holds it at 1/60 below
    60, so a 47 fps seat steps at 1/60 and a 144 fps seat at 1/144 (HYPOTHESIS: the rest difference the skeptic named, about
    0.2 units a step at either rate). Rest is therefore read framerate-independently, by the engine's own deactivation
-   (decision 6), never by a per-frame stir test; nothing is laid. Capping every player at 60 for one step rate would cost
-   Eli's 144 fps and stays Eli's call.
+   (decision 6), never by a per-frame stir test. Amended (Eli about 17:18Z 2026-11-11, verbatim "that works . cap it"):
+   every player is capped at 60 fps with a static physics step of 1/60, so every engine steps Havok alike; Eli's own
+   144 fps goes with it. An ini-patches row on SSEDisplayTweaks.ini in the shared layer (apocrypha's), laid after playtest
+   51; rest stays read by the engine's own deactivation.
 
 8. Traps' bodies (D-S3) are unified under these rules, their scenarios kept green and unweakened.
 

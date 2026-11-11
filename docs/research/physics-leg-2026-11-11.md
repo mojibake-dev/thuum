@@ -43,8 +43,8 @@ Eli then switched to plan mode to see the plan first. This is recorded under ADR
 - **W7: four playtests,** P1 to P4.
 - **Physics settings: the same fix for everyone.** Already true (apocrypha, 2026-11-11): the shared layer lays Display Tweaks
   0.5.16 with Eli's INI on every seat (essentials.tsv:89). Its dynamic mode steps a 47 fps seat at 1/60 and a 144 fps seat
-  at 1/144, so rest is read by the engine's deactivation (model point 8), and nothing is laid. A cap at 60 for everyone
-  would cost Eli's 144 fps and stays Eli's call.
+  at 1/144, so rest is read by the engine's deactivation (model point 8). Eli then capped it ("that works . cap it"): every
+  player at 60 fps with a static 1/60 physics step, an ini-patches row on SSEDisplayTweaks.ini laid after playtest 51.
 - **The b-npc-handoff-cross window: widened.** The scenario waits up to 60 s more for Sigrid's crossing through an until, with the claim unchanged. Its red was marginal by seconds in any mode: the green's crossing came at 225.6 s, and the reds' logs end at about 227 s.
 - **The two diagnostic reads: "Run them now"** (step 0).
 - **W3 stays Eli's at the time:** a rewrite of b-prop-push's step 27, if the drop read calls for one.
@@ -63,8 +63,9 @@ Eli then switched to plan mode to see the plan first. This is recorded under ADR
    - The ghostwalk read now leads with suspect 1. Every red run's start ran c2's Companions quests under rung 5's acting scope in c1's game (060821 c1.log :222-249); no green did.
 3. **b-npc-handoff-cross's widened window,** as its own scenario commit (rule 13) citing Eli's word.
 4. **ghostwalk.md's correction:** 061139 rolled c2 back too.
-5. **The physics fix in the shared layer:** already laid (essentials.tsv:89, Eli's Display Tweaks INI on every seat), so nothing
-   waits for it. The rest reads (E10) read Havok's own deactivation, which holds at any step rate.
+5. **The physics step for every player:** Display Tweaks is already laid (essentials.tsv:89). Eli's cap (60 fps, a static
+   1/60 step) is apocrypha's ini-patches row, laid after playtest 51. The rest reads (E10) read Havok's own deactivation and run
+   after the cap lands.
 
 ## The model
 1. **One row, one stream.** Every Havok body, whether an item, a derived static or a dead actor's ragdoll, is a "prop" row in wire-rules props.rs, on PropTransform. No rule names content.
