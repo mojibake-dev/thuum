@@ -116,6 +116,65 @@ class GuestControlTests(unittest.TestCase):
                 GuestControl(b).file_read(g, "C:\\x")
             self.assertEqual(len(b.calls), 1)
 
+    def test_a_ranged_read_asks_again_after_an_agent_timeout_as_file_read_does(self):
+        """20261111-191642-x-prop-blast: guest-file-read timed out on 711 and 712. A range's read is asked again, up to
+        three times in all, as a whole file's is; any other refusal (a range that came back as no base64) is not."""
+        from unittest import mock
+
+        from labapi import proxmox
+        from labapi.fakes import FakeProxmox
+        from labapi.guests import Guest
+        from labapi.proxmox import GuestControl, ProxmoxError
+
+        timeout = "500 Internal Server Error: VM 711 qga command 'guest-file-read' failed - got timeout"
+
+        class Backend(FakeProxmox):
+            def __init__(self, answers):
+                super().__init__()
+                self.answers = list(answers)
+
+            def file_read_range(self, guest, path, offset, count):
+                self.calls.append(("file_read_range", guest.vmid, path, offset, count))
+                a = self.answers.pop(0)
+                if isinstance(a, Exception):
+                    raise a
+                return a
+
+        g = Guest("sky-c1", 711, "10.10.70.21", "qemu", "client", True, "clean-m1", "c1")
+        with mock.patch.object(proxmox, "FILE_READ_PAUSES", (0.0, 0.0)):
+            b = Backend([RuntimeError(timeout), RuntimeError(timeout), b"\x00\xffrange"])
+            self.assertEqual(GuestControl(b).file_read_range(g, "C:\\x.copy", 524288, 7), b"\x00\xffrange")
+            self.assertEqual(b.calls, [("file_read_range", 711, "C:\\x.copy", 524288, 7)] * 3)
+
+            b = Backend([RuntimeError(timeout)] * 3)
+            with self.assertRaises(ProxmoxError) as cm:
+                GuestControl(b).file_read_range(g, "C:\\x.copy", 0, 7)
+            self.assertIn("got timeout", str(cm.exception))
+            self.assertEqual(len(b.calls), 3)
+
+            b = Backend([ProxmoxError("E_PVE_FILE: C:\\x.copy on sky-c1: the range at 0 came back as no base64"), b"never read"])
+            with self.assertRaises(ProxmoxError):
+                GuestControl(b).file_read_range(g, "C:\\x.copy", 0, 7)
+            self.assertEqual(len(b.calls), 1)
+
+    def test_a_ranged_read_keeps_to_managed_guests_and_the_agents_bounds(self):
+        """Agent.pm's file-read takes a count of 1 to 16 MiB and an offset of 0 or more; the fake answers as it does,
+        the bytes from the offset, fewer where the file ends, none from an offset at or past its end."""
+        from labapi.proxmox import FILE_READ_MAX, ProxmoxError
+
+        self.pve.files["C:\\x.copy"] = "abcé"
+        for call in (lambda: self.control.file_read_range(self.fen, "C:\\x.copy", 0, 1),
+                     lambda: self.control.file_read_range(self.c1, "C:\\x.copy", 0, 0),
+                     lambda: self.control.file_read_range(self.c1, "C:\\x.copy", 0, FILE_READ_MAX + 1),
+                     lambda: self.control.file_read_range(self.c1, "C:\\x.copy", -1, 1)):
+            with self.assertRaises(ProxmoxError):
+                call()
+        self.assertEqual(self.pve.calls, [])
+        self.assertEqual(self.control.file_read_range(self.c1, "C:\\x.copy", 1, 3), b"bc\xc3")
+        self.assertEqual(self.control.file_read_range(self.c1, "C:\\x.copy", 3, 9), b"\xc3\xa9")
+        self.assertEqual(self.control.file_read_range(self.c1, "C:\\x.copy", 5, 9), b"")
+        self.assertEqual(self.control.file_read_range(self.c1, "C:\\x.copy", 99, 9), b"")
+
     def test_empty_snapshot_name_is_refused(self):
         from labapi.guests import Guest
         from labapi.proxmox import ProxmoxError
@@ -198,6 +257,71 @@ class ProxmoxerExecTests(unittest.TestCase):
         with mock.patch("labapi.proxmox.time.sleep"), self.assertRaises(ProxmoxError) as cm:
             b.exec(g, ["cmd"], 0.05)
         self.assertIn("got timeout", str(cm.exception))
+
+
+@needs_deps
+class ProxmoxerFileReadTests(unittest.TestCase):
+    """The real backend's ranged read against a scripted agent file-read endpoint answering as qemu-server 9.2.10's
+    Agent.pm does (ec268ede5b, lines 512-571): {content, bytes-read}, truncated when it saw no eof, and with decode=0
+    the content is the agent's base64 as it came."""
+
+    def _backend(self, answer):
+        from labapi.proxmox import ProxmoxerGuests
+
+        asked = []
+
+        class FileRead:
+            def get(self, **params):
+                asked.append(params)
+                return dict(answer)
+
+        class Agent:
+            def __call__(self, name):
+                assert name == "file-read"
+                return FileRead()
+
+        class Res:
+            agent = Agent()
+
+        b = object.__new__(ProxmoxerGuests)
+        b._res = lambda guest: Res()
+        return b, asked
+
+    def _g(self):
+        from labapi.guests import Guest
+
+        return Guest("sky-c1", 711, "10.10.70.21", "qemu", "client", True, "clean-m1", "c1")
+
+    def test_a_range_is_asked_undecoded_and_comes_back_as_its_bytes(self):
+        import base64
+
+        raw = b"\x00\xff" + "é€".encode("utf-8") + b"\n"
+        b, asked = self._backend({"content": base64.b64encode(raw).decode(), "bytes-read": len(raw), "truncated": 1})
+        self.assertEqual(b.file_read_range(self._g(), "C:\\x.copy", 524288, len(raw)), raw)
+        self.assertEqual(asked, [{"file": "C:\\x.copy", "offset": 524288, "count": len(raw), "decode": 0}])
+
+    def test_an_offset_at_or_past_the_end_answers_no_bytes(self):
+        # the agent's read there is 0 bytes with eof: no chunk joins the content, bytes-read stays 0, and no truncated
+        b, _ = self._backend({"content": "", "bytes-read": 0})
+        self.assertEqual(b.file_read_range(self._g(), "C:\\x.copy", 1048576, 524288), b"")
+
+    def test_a_range_that_is_no_base64_is_refused(self):
+        from labapi.proxmox import ProxmoxError
+
+        b, _ = self._backend({"content": "not base64!", "bytes-read": 8, "truncated": 1})
+        with self.assertRaises(ProxmoxError) as cm:
+            b.file_read_range(self._g(), "C:\\x.copy", 0, 8)
+        self.assertIn("E_PVE_FILE: C:\\x.copy on sky-c1: the range at 0 came back as no base64", str(cm.exception))
+
+    def test_a_range_whose_bytes_disagree_with_the_agents_count_is_refused(self):
+        import base64
+
+        from labapi.proxmox import ProxmoxError
+
+        b, _ = self._backend({"content": base64.b64encode(b"abc").decode(), "bytes-read": 5})
+        with self.assertRaises(ProxmoxError) as cm:
+            b.file_read_range(self._g(), "C:\\x.copy", 0, 5)
+        self.assertIn("decodes to 3 bytes of the 5 the agent read", str(cm.exception))
 
 
 @needs_deps

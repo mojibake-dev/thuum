@@ -6,6 +6,7 @@ with the one rule that matters: an unmanaged guest is never touched."""
 
 from __future__ import annotations
 
+import base64
 import logging
 import re
 import threading
@@ -52,6 +53,8 @@ class ProxmoxGuests(Protocol):
     def status(self, guest: Guest) -> str: ...
     def exec(self, guest: Guest, command: list[str], timeout: float) -> ExecResult: ...
     def file_read(self, guest: Guest, path: str) -> str: ...
+    # `count` bytes of the file from byte `offset`, exactly as the guest holds them (agent file-read's offset, count, decode=0)
+    def file_read_range(self, guest: Guest, path: str, offset: int, count: int) -> bytes: ...
     # an ACPI shutdown: the task's exit status and its log lines
     def shutdown(self, guest: Guest, timeout_s: int) -> tuple[str, list[str]]: ...
     # a seat's stop by an ACPI shutdown that PVE forces to a stop after timeout_s (GuestControl's seat_stop)
@@ -153,12 +156,11 @@ class GuestControl:
             raise ProxmoxError(f"E_PVE_EXEC: {guest.name} is not a qemu guest; the guest agent is qemu only")
         return self._call("E_PVE_EXEC", guest, self._b.exec, guest, command, timeout)
 
-    def file_read(self, guest: Guest, path: str) -> str:
-        self._managed(guest, "read a file from")
+    def _agent_read(self, guest: Guest, path: str, fn, *args):
+        """One agent file-read of `path` through the backend's `fn`, the whole file's or a range's."""
         for pause in (*FILE_READ_PAUSES, None):
             try:
-                content = self._call("E_PVE_FILE", guest, self._b.file_read, guest, path)
-                break
+                return self._call("E_PVE_FILE", guest, fn, guest, path, *args)
             except ProxmoxError as e:
                 # A busy guest agent answers a read's open, read or close with "got timeout" now and then
                 # (guest-file-read on 711, guest-file-close on 712, 2026-10-17: train-23's smoke lost
@@ -167,9 +169,25 @@ class GuestControl:
                     raise
                 log.info("file-read %s on %s: %s; again in %.0f s", path, guest.name, str(e)[-60:], pause)
                 time.sleep(pause)
+        raise AssertionError("the last try raises")
+
+    def file_read(self, guest: Guest, path: str) -> str:
+        self._managed(guest, "read a file from")
+        content = self._agent_read(guest, path, self._b.file_read)
         if len(content.encode("utf-8", errors="replace")) > FILE_READ_MAX:
             raise ProxmoxError(f"E_PVE_FILE_TOO_BIG: {path} on {guest.name} exceeds the 16 MiB guest-agent cap")
         return content
+
+    def file_read_range(self, guest: Guest, path: str, offset: int, count: int) -> bytes:
+        """`count` bytes of the file at `path` from byte `offset`, exactly as the guest holds them: the agent file-read's
+        own offset, count and decode=0 (qemu-server 9.1.5 and later), so a big file comes back a range at a time
+        and bytes that are no text cross intact. Fewer bytes come back only where the file ends first, none from an
+        offset at or past its end. A "got timeout" is asked again as file_read's is (FILE_READ_PAUSES)."""
+        self._managed(guest, "read a file from")
+        if offset < 0 or not 1 <= count <= FILE_READ_MAX:
+            raise ProxmoxError(f"E_PVE_FILE: a ranged read of {path} takes 1 to {FILE_READ_MAX} bytes from an offset of 0 or more, "
+                               f"not {count} from {offset}")
+        return self._agent_read(guest, path, self._b.file_read_range, offset, count)
 
     def snapshot_list(self, guest: Guest) -> list[dict[str, Any]]:
         """The guest's snapshots as PVE lists them (name, parent, description), `current` included."""
@@ -461,3 +479,25 @@ class ProxmoxerGuests:
         if r.get("truncated"):
             raise ProxmoxError(f"E_PVE_FILE_TOO_BIG: {path} on {guest.name} was truncated at the 16 MiB guest-agent cap")
         return str(r.get("content", ""))
+
+    def file_read_range(self, guest: Guest, path: str, offset: int, count: int) -> bytes:
+        # qemu-server's file-read (src/PVE/API2/Qemu/Agent.pm; the lab's 9.2.10 runs it as of ec268ede5b, lines 512-571)
+        # seeks to `offset`, then calls guest-file-read for at most read_size, 1 MiB, at a time until `count` bytes or
+        # the agent's eof, and answers {content, bytes-read}, with truncated set when it saw no eof: with decode=0 the
+        # content is each call's buf-b64 joined as it came. A range under read_size is one call, so one base64 string;
+        # a second call only follows a short read, which the Windows agent gives only at the file's end and follows with
+        # 0 bytes, eof and no buf-b64 (qemu qga/commands-win32.c guest_file_read_unsafe, eof = read_count == 0). From an
+        # offset at or past the end the content is empty and bytes-read 0. truncated means only that no eof was seen,
+        # as in every whole range short of the end, so the caller judges a range by its byte count
+        r = self._res(guest).agent("file-read").get(file=path, offset=offset, count=count, decode=0)
+        content = str(r.get("content") or "")
+        try:
+            data = base64.b64decode(content, validate=True)
+        except ValueError as e:  # binascii.Error
+            raise ProxmoxError(f"E_PVE_FILE: {path} on {guest.name}: the range at {offset} came back as no base64 "
+                               f"({e}; {len(content)} characters, {content[:40]!r})") from e
+        read = r.get("bytes-read")
+        if read is not None and int(read) != len(data):
+            raise ProxmoxError(f"E_PVE_FILE: {path} on {guest.name}: the range at {offset} decodes to {len(data)} bytes of the "
+                               f"{read} the agent read")
+        return data

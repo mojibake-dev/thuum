@@ -188,6 +188,13 @@ class FakeProxmox:
             raise ProxmoxError(f"E_PVE_FILE: no such file {path} on {guest.name}")
         return self.files[path]
 
+    def file_read_range(self, guest: Guest, path: str, offset: int, count: int) -> bytes:
+        # the file's UTF-8 bytes from offset; from an offset at or past the end none, as Agent.pm answers there
+        self.calls.append(("file_read_range", guest.vmid, path, offset, count))
+        if path not in self.files:
+            raise ProxmoxError(f"E_PVE_FILE: no such file {path} on {guest.name}")
+        return self.files[path].encode("utf-8")[offset:offset + count]
+
 
 class _FakeCapture:
     def __init__(self, owner: "FakeSystem", cmd: list[str]):
