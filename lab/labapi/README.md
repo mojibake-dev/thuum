@@ -39,7 +39,7 @@ when every assertion held and no step timed out; red when an assertion
 failed, a step timed out, or the server refused a command; error when the
 lab itself failed (no snapshot, the server never became ready, a client
 never heartbeated, the scenario timed out, an assertion that is not in the
-language, an exception out of the artifacts phase, a trace the run's own
+language, an exception out of the artifacts phase in a run not already red, a trace the run's own
 frida step or relaunch arm started that its end could not fetch whole).
 That last is E_RUN_FRIDA_FETCH, naming the script, the seat and the reason
 (its copy failed three tries, a range still unread after the file read's

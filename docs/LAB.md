@@ -795,8 +795,10 @@ after any E_RUN_* naming it, which also closes a handle a timed-out read
 left open in its agent; a copy held open after a whole read rolls the seat
 back too, with this run's verdict as it was: in this run's own reset when
 the fetch came before it, else at its next run. An exception
-that escapes the artifacts phase is an internal failure and the run error,
-since what it skipped may be the run's own traces. 20261111-191642-x-prop-blast
+that escapes the artifacts phase is an internal failure, and a run that
+would have been green is error, since what it skipped may be the run's own
+traces; a red stays red and gains it, and its seats roll back at their next
+run. 20261111-191642-x-prop-blast
 stayed green with both seats' prop-impulse.js traces unread, two notes. A
 trace started by hand (POST /lab/frida) is no run's evidence, whether the end
 fetches it or the next run fetches it before its rollback as

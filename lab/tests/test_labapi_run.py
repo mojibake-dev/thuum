@@ -1958,10 +1958,12 @@ class FridaSteps(RunTests):
 
     def test_an_exception_out_of_the_artifacts_is_an_internal_failure(self):
         """An exception that escapes the artifacts phase is a bug in lab-api, and what it skipped may be the run's own
-        traces (here the trace artifact raised, ahead of their fetch): the internal failure's shape, and the run is
-        error, never green with its trace unread."""
+        traces (here the trace artifact raised, ahead of their fetch): the internal failure's shape, and a run that
+        would have been green is error, never green with its trace unread. A red run stays red and gains the failure
+        (the re-review of 5b982dc6, nit 3), which still rolls its seat back at the next run (_remember_seats' whole)."""
         self._traced_seat('{"impulse": 1}\n')
         runner = self.services.runner
+        internal = {"step": "end", "kind": "internal", "error": "artifacts: RuntimeError: the board lost its watch"}
 
         def watch(observer):
             raise RuntimeError("the board lost its watch")
@@ -1969,8 +1971,14 @@ class FridaSteps(RunTests):
         runner.board.watch = watch
         run_id, body = self._run(FRIDA_ONE + "artifacts: [trace]\n")
         self.assertEqual(body["verdict"], "error", body)
-        self.assertEqual(body["failures"], [{"step": "end", "kind": "internal", "error": "artifacts: RuntimeError: the board lost its watch"}])
+        self.assertEqual(body["failures"], [internal])
         self.assertIn(("c1", f"x-trace-{run_id}-1.js"), runner.frida_started)
+
+        run_id, body = self._run(FRIDA_ONE + "  - assert:\n      - server.actor(c1).x == 12345\nartifacts: [trace]\n")
+        self.assertEqual(body["verdict"], "red", body)
+        self.assertEqual([f["kind"] for f in body["failures"]], ["assertion", "internal"], body["failures"])
+        self.assertEqual(body["failures"][1], internal)
+        self.assertEqual(runner.seats["c1"].force, f"its last run ({run_id}) ended in a fault: {internal['error']}")
 
 
 OFFLINE = """

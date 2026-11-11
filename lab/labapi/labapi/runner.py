@@ -410,9 +410,11 @@ class Runner:
                 await self._artifacts(rec, capture)
             except Exception as e:
                 # a bug in lab-api, reported as one (the internal failure above): what it skipped may be the run's own
-                # Frida traces, whose fetch is the run's evidence, so the run is error, never green with them unread
+                # Frida traces, whose fetch is the run's evidence, so the run is error, never green with them unread; a
+                # red stays red, and the internal failure still rolls its seats back at their next run (_remember_seats)
                 rec.failures.append({"step": "end", "kind": "internal", "error": f"artifacts: {type(e).__name__}: {e}"})
-                rec.verdict = "error"
+                if rec.verdict != "red":
+                    rec.verdict = "error"
             if self.netem_active:
                 try:
                     await self._clear_netem(rec)
