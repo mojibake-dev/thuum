@@ -240,7 +240,13 @@ positions' age.
   (061139 :574-577; c1-console.log :1489 the AddSpell on 14), the warm reds
   none of them, and c1's y stays frozen from step 18 to 23. c1 was rolled
   back cold for both greens and relaunched warm for both reds; c2 was
-  relaunched in all four, so c1's mode is the variable; one build, f6ca339d.
+  relaunched in both reds and in 060535 and rolled back in 061139 (corrected
+  2026-11-11 from "all four"), so c1's mode is the variable through 060535;
+  one build, f6ca339d. The reds' starts, and no green's, ran c2's Companions
+  quests under rung 5's acting scope in c1's game (060821 c1.log :222-249,
+  061001 :222-233), a race between the two seats' logins; both red logins
+  were served an empty spell list (060821 c1-console.log :843, 061001 :849),
+  so the Eye Fix suspect is unlikely. x-ghostwalk-warm-read reads it.
   Why is unread (HYPOTHESIS): rung 5's effect-event and acting-scope work
   (fork 9db243a0) is one suspect, the server record carrying the earlier
   run's Eye Fix ability 1a0cb7e1 into the warm run is another. The read that

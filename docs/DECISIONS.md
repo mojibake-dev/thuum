@@ -4078,6 +4078,9 @@ Outcome notes under decision 4 (PROPOSED by thuum-cf, added after Eli's acceptan
   moves again: a grab beats a touch; a non-owner's contact never takes a moving prop; ownership returns to the host only at rest
   on the owner's screen, by the owner's own final sample, never by a timer. No prop change reaches a seat except through a gate
   with a two-seat scenario (numidium and thuum-cf, 2026-11-03 02:36Z).
+  Accepted 2026-11-11 (Eli, in thuum-fa's plan mode, W1a, verbatim "A1 to A7"; ADR-071): the props rule is A1 to A7
+  (docs/verbs/prop-physics.md :20-107), its three clauses above; canon's newest-touch-wins with its lease and silence timers
+  retires with it.
 
 Amended 11:34 PST 2026-11-03 by Eli, verbatim via numidium: "fine go with those decisions" (D-F1 C, docs/private/decisions-after-fnv-read.md): a quest has no owner.
 Its stages, objectives and running state are the server's record at R0, the design law's leveling-and-economy class. A seat's
@@ -4146,6 +4149,9 @@ Decision.
 7. The freeze (Eli's call): a reference's life on a non-owning seat, containers and menus, Havok props, the progression
    UI, and state no native reaches take no new code until their system doc is confirmed on both viewpoints and a
    two-player test covers the change. Scripts (ADR-062), tooling and test repair are not frozen.
+   Amended 2026-11-11 for Havok props (Eli, in thuum-fa's plan mode, W1b, verbatim "Rung by rung"; ADR-071): the freeze lifts per
+   change. A physics rung reaches a seat once the docs/engine/havok-props.md rows it rests on read on both viewpoints and its
+   two-seat scenario is green; the doc thaws whole at ADR-071's last rung.
 
 Consequences. Tooling: verb-lint (on main, 3df010af; into docs-lint after the 29 boxes are unticked); the scenario lint
 and the mutation run (lab-api's parser, a kill-switch relaunch per verb); verb-merge refuses a doc naming an unrun probe
@@ -5106,3 +5112,76 @@ filter's engine route (how one seat hides a running quest's journal entry, notic
 comes first (rule 8), and "witnessed" ships only once a two-seat run reads a quest hidden on one seat and shown on the other.
 Every preset gets a T2 session and one T3 run with both journals read. The witnessed rule's audience (the cell, the scene's
 actors, a distance) is UNMEASURED and named in the verb doc.
+
+## ADR-071: Physics as one system: every Havok body one prop row on one stream, owned by the engine that set it moving
+
+Status: ACCEPTED 2026-11-11 by Eli in thuum-fa's plan mode (the plan approved as written; its record
+docs/research/physics-leg-2026-11-11.md). Eli's answers, verbatim: the reach "Both tests, one ladder"; W1a "A1 to A7"; W1b "Rung
+by rung"; W5 "Caster only"; W6 "Engine's own record", refined "Block at rest, bones live"; W2 "Keep them"; W4 "test with all 3";
+W7 "Four"; the physics settings "Same fix for everyone"; b-npc-handoff-cross "Widen it"; the two diagnostic reads "Run them now".
+It follows Eli's word of about 16:04Z ("instead of expanding on functionality we havent tested, can you start the physics leg of
+work?", ADR-067 decision 7's order).
+
+Context. ADR-058's slice one made dropped items props (merged 2026-11-01), but playtest 44 read "physics props do not work"
+(E_PROP_CELL at a cell edge), b-prop-push is pending, the arbitration rule, statics, the blast pair and the E_PROP_CELL retirement
+sit off canon unverified, ADR-064 decision 7 froze prop code with no thaw, and the docs held six contradictions (A1 to A7 against
+canon's timers; the retired refusals still live; the freeze; three mechanisms for bodies; one scenario under two names; a deployed
+propStatics no code reads). The two tests are ADR-067 decision 7's: a dragged body, and spells at a cabbage cart. The research
+(the repo, the Havok surface by CommonLibSSE-NG and `just addr`, prior art) and three designs (mechanism, ladder, skeptic) are the
+plan's. Prior art: one owner by interaction and the others render (Fiedler, "Networked Physics in Virtual Reality", 2018; "State
+Synchronization", 2015; Delaney, Ward and McLoone, Presence 15(2) and 15(4), 2006), ragdolls as replicated bone poses (Source SDK
+2013's prop_ragdoll; Capin et al., "A Dead-Reckoning Algorithm for Virtual Human Figures", VRAIS 1997), and Havok's divergence
+across seats (measured, docs/verbs/push.md:224-232; Monniaux, ACM TOPLAS 30(3), 2008).
+
+Decision.
+
+1. One row, one stream. Every Havok body, an item, a static whose class is derived from its record (type and Havok data, never a
+   per-name list), or a dead actor's ragdoll, is a prop row in wire-rules props.rs, streamed on PropTransform.
+
+2. Ownership is A1 to A7 with no timers: the cell's host owns a resting or stalled body; a claim from the engine that moved it
+   (its capsule, its hand, its drop, an impulse whose cause it owns, or island contact with a body it moved) takes it at the next
+   epoch; a moving body stays with its mover, a grab alone takes it, anything else is refused E_PROP_MOVING; a held body is the
+   grabber's (E_PROP_HELD); it returns to the host only by the owner's asleep sample or a departure word. A moving island has one
+   owner. A moving body's owner never depends on its cell: a listener check (E_PROP_UNSEEN) replaces E_PROP_CELL and E_PROP_REACH,
+   which retire only with A1 to A7. ADR-066's epochs (d3, d4) are built for the prop row; its ack (d5) and ActorOwner (d2) are
+   not.
+
+3. Non-owners render: a copy goes Keyframed at a word naming another seat or at the first awake sample, otherwise stays Dynamic
+   and asleep (D73, a responsive first touch); followers interpolate three samples behind the owner's clock (about 300 ms,
+   UNMEASURED) and never extrapolate; a late joiner stays Keyframed until the owner's rest; no copy is placed inside a capsule.
+
+4. Impulses (W5): a seat applies a Havok impulse only from a cause it owns. One replacement at the impulse site the rung 0 read
+   names (AddExplosionImpulse 26005 or ScaleGameplayImpulseForce 26004, CommonLibSSE-NG TESHavokUtilities.h:14, :18) reads the
+   cause (HitData::aggressor, Explosion::actorOwner); another seat's cause is zeroed and counted in native code. The caster claims
+   what its impact moved in one PropClaim per impact and tracks what it owns at any distance. Sound and visuals play everywhere.
+
+5. Bodies (W6): a dead actor's row is owned by the death's simulator. A grab on a corpse needs the dragger's copy Dynamic at the
+   first frame (measured: a Keyframed body cannot be held); Held is answered at once, the loser ends its grab and swallows its
+   next activation, and one hold covers grab and loot. The live drag streams per-bone poses on PropTransform; the follower imposes
+   them by the path the rung 0 read holds within 32 units. At rest the engine's saved Havok block (the kHavokMoved block) goes as
+   ChangeForm 72, re-applied at a reload, a login and a restart: D78's pose replication. If no path holds, D78's backlog clause
+   applies and the drag ships as a re-rest alone.
+
+6. The wire (rule 4, one SCHEMA bump after train 52's): PropTransform v2 {refr, epoch, seq, the owner's t_ms, pos, rot, linear and
+   angular velocity, asleep, held, bones up to 64 {pos, quat}}, bounded against the sender's previous sample, a live owner's rest
+   clamped and accepted, every refusal answered with the record; PropClaim v2 (up to 16 refrs, an outcome each); PropOwner with
+   player 0; ChangeForm 72 from a body's prop owner with Rust bounds on the block's floats. Rest is the engine's deactivation with
+   a 500 ms heartbeat while awake; the asleep sample is reliable and a priority accumulator always passes it. Trust (rules 5 and
+   12) is the epoch, conservation (no record under the floor or outside a cell), the speed cap and Rust bounds on every relayed
+   float.
+
+7. Every player runs the same physics fix: Display Tweaks' physics fix in the shared mod layer, laid after playtest 51.
+
+8. Traps' bodies (D-S3) are unified under these rules, their scenarios kept green and unweakened.
+
+The ladder (the plan's table): rung 0 the reads (Frida on the impulse site, the grab on a corpse, the pose's two paths and a
+save's Havok block; the three spells' PROJ and EXPL forces; the rule-free havok-props.md rows on both seats); rung 1 props hold
+(A1 to A7 with the refusals' retirement, x-prop-edge for playtest 44, b-prop-push out of pending); rung 2 the sample v2; rung 3
+the impact (b-prop-impulse with Hailstone, Fireball and Unrelenting Force at the mill's cabbages); rung 4 statics (the derived
+class); rung 5 bodies and the drag (b-corpse-drag); rung 6 the rest and reload; rung 7 the chaff, havok-props.md thawed whole.
+Four playtests, P1 to P4, one after each pair of rungs. About 16 stage slots; the smaller ladder (rungs 0, 1, 3a, 3 on v1 samples,
+then bodies as rows with the re-rest) about 8.
+
+Amends: ADR-064 decision 7 (dated note under it), ADR-063's props note (accepted under it), ADR-058's slices (slice two kept as a
+derived class; slice three is rungs 5 and 6), ADR-067 decision 4 (its final sample is the asleep sample; the built ChangeForm
+apply is the record). W3 stays Eli's at the time: a rewrite of b-prop-push's step 27 if the drop read calls for one.
