@@ -95,30 +95,24 @@ class FakeProxmox:
             if "Write-Output" in " ".join(command) and self.exec_result.exitcode == 0:
                 n = len(self.files[copied.group(1)].encode("utf-8"))
                 return ExecResult(0, f"{n} {n}\r\n", "")
-        # its else branch: a source not yet written leaves an empty copy (a frida script's .log before any line)
+        # its else branch: a source not yet written leaves an empty copy (a frida script's .log before any line), whose
+        # lengths a frida trace's copy prints after both branches (Runner._frida_trace), where log-count's prints none
         empty = re.search(r"Set-Content -Path '([^']+\.copy)' -Value ''", " ".join(command))
         if empty and not (copied and copied.group(1) in self.files):
             self.files[empty.group(1)] = ""
-        # Runner._read_back on a file of the seat's, its UTF-8 bytes: the length, a byte range base64-encoded into a slice
-        # file beside it, and the removal of the file with its slices, which prints any still there
+            if re.search(r"\} else \{[^{}]*\}; Write-Output", " ".join(command)):
+                return ExecResult(0, "0 0\r\n", "")
+        # Runner._seat_copy's length of a copy whose exec answer was lost, its UTF-8 bytes; and Runner._read_back's
+        # removal of a copy once read, which prints whether it is still there
         length = re.search(r"\(Get-Item -LiteralPath '([^']+)'\)\.Length", " ".join(command))
         if length:
             if length.group(1) not in self.files:
                 return ExecResult(1, "", f"Get-Item : Cannot find path '{length.group(1)}' because it does not exist.")
             return ExecResult(0, f"{len(self.files[length.group(1)].encode('utf-8'))}\r\n", "")
-        piece = re.search(r"\[IO\.File\]::OpenRead\('([^']+)'\); \$s\.Position = (\d+); \$b = New-Object byte\[\] (\d+);"
-                          r".*\[IO\.File\]::WriteAllText\('([^']+)'", " ".join(command))
-        if piece:
-            src, at, count, part = piece.group(1), int(piece.group(2)), int(piece.group(3)), piece.group(4)
-            if src not in self.files:
-                return ExecResult(1, "", f"Exception calling 'OpenRead': Could not find file '{src}'.")
-            self.files[part] = base64.b64encode(self.files[src].encode("utf-8")[at:at + count]).decode("ascii")
-            return ExecResult(0, "", "")
-        removal = re.search(r"\$p = @\(([^)]*)\); Remove-Item -LiteralPath \$p", " ".join(command))
+        removal = re.search(r"Remove-Item -LiteralPath '([^']+\.copy)' -Force -ErrorAction SilentlyContinue; Test-Path", " ".join(command))
         if removal:
-            for p in re.findall(r"'([^']+)'", removal.group(1)):
-                self.files.pop(p, None)
-            return ExecResult(0, "", "")
+            self.files.pop(removal.group(1), None)
+            return ExecResult(0, "False\r\n", "")
         if any("Get-Process SkyrimSE" in c for c in command):
             # a guest agent too busy to answer, this many times first
             if self.game_misses > 0:

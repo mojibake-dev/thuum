@@ -1061,9 +1061,9 @@ class FridaTraces(RunTests):
         self.assertEqual((run_dir / "frida" / "c1-handle-trace.js.before-run.jsonl").read_text(), '{"attached":1}\n')
         # read through a shared-read copy: frida-inject still writes the file
         # while the game runs (run 20261006-183431); the copy comes back in
-        # slices (Runner._read_back), this short one in one
+        # ranges (Runner._read_back), this short one in one
         copies = [i for i, c in enumerate(pve.calls) if c[:2] == ("exec", 901) and any(out in a and "ReadWrite" in a for a in c[2])]
-        reads = [i for i, c in enumerate(pve.calls) if c[:3] == ("file_read", 901, out + ".copy.0.b64")]
+        reads = [i for i, c in enumerate(pve.calls) if c[:3] == ("file_read_range", 901, out + ".copy")]
         rollback = next(i for i, c in enumerate(pve.calls) if c[:2] == ("rollback", 901))
         self.assertEqual(len(copies), 1, pve.calls)
         self.assertEqual(len(reads), 1, pve.calls)  # once, though started twice
@@ -1082,36 +1082,34 @@ class FridaTraces(RunTests):
         self.services.runner.frida_started.append(("c1", script))
         return pve
 
-    def test_a_trace_larger_than_a_slice_comes_back_byte_exact(self):
+    def test_a_trace_larger_than_a_range_comes_back_byte_exact(self):
         """20261111-191642-x-prop-blast: prop-impulse.js's large .log, read whole, timed out on both seats. The copy
-        comes back in slices of at most READ_SLICE_BYTES raw bytes, each base64 on the seat, joined as bytes and
-        decoded once, so a slice boundary inside a multibyte character splits nothing."""
-        from labapi.runner import READ_SLICE_BYTES as S
+        comes back through Proxmox's own ranged file-reads of READ_RANGE_BYTES, the last range short and asked for
+        exactly, joined as bytes and decoded once, so a range boundary inside a multibyte character splits nothing."""
+        from labapi.runner import READ_RANGE_BYTES as R
 
-        # an é across the first boundary (its bytes at S - 1 and S), a € across the second (2S - 2 to 2S)
-        log = "a" * (S - 1) + "é" + "b" * (S - 3) + "€" + "c" * 10 + "\n"
-        self.assertEqual(len(log.encode("utf-8")), 2 * S + 12)
+        # an é across the first boundary (its bytes at R - 1 and R), a € across the second (2R - 2 to 2R)
+        log = "a" * (R - 1) + "é" + "b" * (R - 3) + "€" + "c" * 10 + "\n"
+        self.assertEqual(len(log.encode("utf-8")), 2 * R + 12)
         pve = self._hand_trace("big-trace.js", log)
         run_id, body = self._run(SOLO_WITH_LOG)
         self.assertEqual(body["verdict"], "green", body)
         got = (self.tmp / "results" / run_id / "frida" / "c1-big-trace.js.before-run.jsonl").read_bytes()
         self.assertEqual(got, log.encode("utf-8"))
         copy = "C:\\sky-lab\\frida\\big-trace.js.log.copy"
-        ranges = [tuple(map(int, m.groups())) for c in pve.calls if c[:2] == ("exec", 901)
-                  for m in [re.search(r"OpenRead\('" + re.escape(copy) + r"'\); \$s\.Position = (\d+); \$b = New-Object byte\[\] (\d+);",
-                                      " ".join(c[2]))] if m]
-        self.assertEqual(ranges, [(0, S), (S, S), (2 * S, 12)])
-        reads = [c[2] for c in pve.calls if c[:2] == ("file_read", 901) and c[2].startswith(copy)]
-        self.assertEqual(reads, [f"{copy}.{k}.b64" for k in range(3)])
+        ranges = [c[3:] for c in pve.calls if c[:3] == ("file_read_range", 901, copy)]
+        self.assertEqual(ranges, [(0, R), (R, R), (2 * R, 12)])
+        # no slice exec and no .b64 file: the agent reads the copy itself
+        self.assertFalse([c for c in pve.calls if c[0] == "file_read" and c[2].startswith(copy)], pve.calls)
         self.assertFalse([n for n in body.get("notes", []) if "frida" in n], body.get("notes"))
 
-    def test_the_copy_and_its_slices_leave_the_seat_once_read(self):
+    def test_the_copy_leaves_the_seat_once_read(self):
         """A copy the agent read is a file it can hold open (x-quest-mode 20261030-131512's .js.log.copy cost a
         rollback; after x-prop-blast's timed-out reads the relaunches' held count grew 11, 17, 25): once read, the copy
-        and its slices go in one guest exec, after the last slice's read."""
-        from labapi.runner import READ_SLICE_BYTES as S
+        goes by one guest exec, after its last range's read."""
+        from labapi.runner import READ_RANGE_BYTES as R
 
-        pve = self._hand_trace("big-trace.js", "x" * (S + 1) + "\n")
+        pve = self._hand_trace("big-trace.js", "x" * (R + 1) + "\n")
         run_id, body = self._run(SOLO_WITH_LOG)
         self.assertEqual(body["verdict"], "green", body)
         copy = "C:\\sky-lab\\frida\\big-trace.js.log.copy"
@@ -1119,41 +1117,53 @@ class FridaTraces(RunTests):
         self.assertEqual([p for p in pve.files if p.startswith("C:\\sky-lab\\frida\\big-trace.js.")], ["C:\\sky-lab\\frida\\big-trace.js.log"])
         removals = [i for i, c in enumerate(pve.calls) if c[:2] == ("exec", 901) and "Remove-Item" in " ".join(c[2]) and copy in " ".join(c[2])]
         self.assertEqual(len(removals), 1, pve.calls)
-        named = re.findall(r"'([^']+)'", re.search(r"\$p = @\(([^)]*)\)", " ".join(pve.calls[removals[0]][2])).group(1))
-        self.assertEqual(named, [copy, f"{copy}.0.b64", f"{copy}.1.b64"])
-        last_read = max(i for i, c in enumerate(pve.calls) if c[:2] == ("file_read", 901) and c[2].startswith(copy))
+        self.assertIn(f"Remove-Item -LiteralPath '{copy}' -Force", " ".join(pve.calls[removals[0]][2]))
+        last_read = max(i for i, c in enumerate(pve.calls) if c[:3] == ("file_read_range", 901, copy))
         self.assertLess(last_read, removals[0])
         self.assertFalse([n for n in body.get("notes", []) if "frida" in n], body.get("notes"))
 
     def test_a_trace_started_by_hand_not_fetched_whole_is_a_note(self):
         """A trace started by hand (POST /lab/frida) is no run's evidence: no step of the run started it, and a rerun
         would not start it again, so a run that fetches it keeps its verdict and says in a note what was not read,
-        before its rollback (c1, in the run) or at its end (c2, a seat it does not play)."""
+        before its rollback (c1, in the run: a copy shorter than its length) or at its end (c2, a seat it does not
+        play: a copy past the cap, refused before its first read)."""
         from labapi.guests import Guest
         from labapi.proxmox import ExecResult
+        from labapi.runner import FETCH_MAX_BYTES
 
         pve = self._hand_trace("hand-trace.js", '{"leak": 1}\n')
         self.services.tables.guests["fake-c2"] = Guest("fake-c2", 902, "127.0.0.1", "qemu", "client", True, "clean-sp", "c2")
         pve.files["C:\\sky-lab\\frida\\hand-two.js.log"] = '{"leak": 2}\n'
         self.services.runner.frida_started.append(("c2", "hand-two.js"))
-        plain_exec = pve.exec
-
-        def exec_(guest, command, timeout):
-            res = plain_exec(guest, command, timeout)
-            if re.search(r"Get-Item -LiteralPath '[^']+\.js\.log\.copy'\)\.Length", " ".join(command)):
-                return ExecResult(0, f"{int(res.out) + 2}\r\n", "")  # two bytes lost on the way
-            return res
-
-        pve.exec = exec_
+        _log_copy_answers(pve, lambda guest, res: ExecResult(0, "12 14\r\n", "") if guest.vmid == 901
+                          else ExecResult(0, f"{FETCH_MAX_BYTES + 1} {FETCH_MAX_BYTES + 1}\r\n", ""))
         run_id, body = self._run(SOLO_WITH_LOG)
         self.assertEqual(body["verdict"], "green", body)
         self.assertEqual(body["failures"], [])
-        for note in ("frida hand-trace.js.log on c1 (fake-c1) not fetched whole: 12 bytes read of its 14",
-                     "frida hand-two.js.log on c2 (fake-c2) not fetched whole: 12 bytes read of its 14"):
+        for note in ("frida hand-trace.js.log on c1 (fake-c1) not fetched whole: 12 bytes read of its 14: range 1 of 1, "
+                     "at 0, came back 12 of its 14",
+                     f"frida hand-two.js.log on c2 (fake-c2) not fetched whole: its copy is {FETCH_MAX_BYTES + 1} bytes, "
+                     f"past the {FETCH_MAX_BYTES} (64 MiB) a fetch reads"):
             self.assertIn(note, body["notes"])
+        self.assertFalse([c for c in pve.calls if c[:3] == ("file_read_range", 902, "C:\\sky-lab\\frida\\hand-two.js.log.copy")])
         for name in ("frida/c1-hand-trace.js.before-run.jsonl", "frida/c2-hand-two.js.jsonl"):
             self.assertIn(name, body["artifacts"])
         self.assertEqual(self.services.runner.frida_started, [])
+
+
+def _log_copy_answers(pve, answer):
+    """A trace's .log copy exec on the fake seat answering `answer(guest, the fake's own answer)`, every other exec as
+    the fake answers it: a seat whose copy reports another length than the bytes it holds."""
+    plain_exec = pve.exec
+
+    def exec_(guest, command, timeout):
+        res = plain_exec(guest, command, timeout)
+        if re.search(r"\[IO\.File\]::Create\('[^']+\.js\.log\.copy'\)", " ".join(command)):
+            return answer(guest, res)
+        return res
+
+    pve.exec = exec_
+
 
 MOUSE = """
 id: mouse
@@ -1715,102 +1725,208 @@ class FridaSteps(RunTests):
         pve.exec = exec_
         return pve
 
-    def test_a_slice_still_unread_after_its_retries_makes_the_run_a_lab_fault(self):
+    def test_a_range_still_unread_after_its_retries_makes_the_run_a_lab_fault(self):
         """20261111-191642-x-prop-blast stayed green with both seats' traces unread, each failure a note. A run's own
-        trace is its evidence: a slice whose read still times out after file_read's own retries is E_RUN_FRIDA_FETCH,
-        naming the script, the seat and the reason, and the run is error, which its run set reruns."""
+        trace is its evidence: a range whose read still times out after file_read_range's own retries is
+        E_RUN_FRIDA_FETCH, naming the script, the seat and the reason, and the run is error, which its run set reruns."""
         from unittest import mock
 
         from labapi import proxmox
         from labapi.proxmox import ProxmoxError
-        from labapi.runner import READ_SLICE_BYTES as S
+        from labapi.runner import READ_RANGE_BYTES as R
 
-        pve = self._traced_seat("x" * (S + 10) + "\n")
-        plain_read = pve.file_read
+        pve = self._traced_seat("x" * (R + 10) + "\n")
+        plain_range = pve.file_read_range
 
-        def file_read(guest, path):
-            if path.endswith(".js.log.copy.1.b64"):
-                pve.calls.append(("file_read", guest.vmid, path))
+        def file_read_range(guest, path, offset, count):
+            if path.endswith(".js.log.copy") and offset == R:
+                pve.calls.append(("file_read_range", guest.vmid, path, offset, count))
                 raise ProxmoxError(f"E_PVE_FILE: {guest.name}: ResourceException: 500 Internal Server Error: VM {guest.vmid} "
                                    "qga command 'guest-file-read' failed - got timeout")
-            return plain_read(guest, path)
+            return plain_range(guest, path, offset, count)
 
-        pve.file_read = file_read
+        pve.file_read_range = file_read_range
         with mock.patch.object(proxmox, "FILE_READ_PAUSES", (0.0, 0.0)):
             run_id, body = self._run(FRIDA_ONE)
         self.assertEqual(body["verdict"], "error", body)
         script = f"x-trace-{run_id}-1.js"
         self.assertEqual(body["failures"], [{
             "step": "end", "kind": "lab", "client": "c1",
-            "error": f"E_RUN_FRIDA_FETCH: {script}.log on c1 (fake-c1) not fetched whole: slice 2 of 2: E_PVE_FILE: fake-c1: "
+            "error": f"E_RUN_FRIDA_FETCH: {script}.log on c1 (fake-c1) not fetched whole: range 2 of 2: E_PVE_FILE: fake-c1: "
                      "ResourceException: 500 Internal Server Error: VM 901 qga command 'guest-file-read' failed - got timeout"}])
-        # file_read's own retry, three tries in all, and none of the runner's beside it
+        # file_read_range's own retry, three tries in all, and none of the runner's beside it
         copy = f"C:\\sky-lab\\frida\\{script}.log.copy"
-        self.assertEqual(len([c for c in pve.calls if c[:3] == ("file_read", 901, f"{copy}.1.b64")]), 3)
-        # the copy and its slices leave the seat whatever the read did
-        self.assertFalse([p for p in pve.files if p.startswith(copy)], list(pve.files))
+        self.assertEqual([c[3:] for c in pve.calls if c[:3] == ("file_read_range", 901, copy)], [(0, R)] + [(R, 11)] * 3)
+        # the copy leaves the seat whatever the read did
+        self.assertNotIn(copy, pve.files)
 
-    def test_a_short_read_makes_the_run_a_lab_fault(self):
-        """The slices must come to the copy's length: bytes lost between the seat and lab-api leave a trace not
-        fetched whole, as a slice never read does."""
+    def test_a_copy_that_fails_its_three_tries_makes_the_run_a_lab_fault(self):
+        """The copy is tried three times 10 s apart, as the game check and log-count's copy are (an exec that never
+        ended, a busy agent's "got timeout", a file refused for a moment); after the third the trace is not fetched."""
+        from labapi.proxmox import ExecResult, ProxmoxError
+
+        pve = self._traced_seat('{"impulse": 1}\n')
+        busy = "The process cannot access the file because it is being used by another process."
+        answers = [ProxmoxError("E_PVE_EXEC: pid 42 on fake-c1 did not exit in 120.0s"),
+                   ProxmoxError("E_PVE_EXEC: fake-c1: ResourceException: 500 Internal Server Error: VM 901 qga command "
+                                "'guest-exec' failed - got timeout"),
+                   ExecResult(1, "", busy)]
+
+        def answer(guest, res):
+            a = answers.pop(0)
+            if isinstance(a, Exception):
+                raise a
+            return a
+
+        _log_copy_answers(pve, answer)
+        run_id, body = self._run(FRIDA_ONE)
+        self.assertEqual(body["verdict"], "error", body)
+        script = f"x-trace-{run_id}-1.js"
+        self.assertEqual([f["error"] for f in body["failures"]],
+                         [f"E_RUN_FRIDA_FETCH: {script}.log on c1 (fake-c1) not fetched whole: its copy failed three tries "
+                          f"10 s apart, the last exit 1: {busy}"])
+        self.assertEqual(answers, [])
+        self.assertFalse([c for c in pve.calls if c[:3] == ("file_read_range", 901, f"C:\\sky-lab\\frida\\{script}.log.copy")])
+
+    def test_a_copy_whose_exec_answer_was_lost_is_read_by_its_own_length(self):
+        """An exec whose answer the agent lost has ended on the seat (E_PVE_EXEC_LOST, run 20261018-204244): the copy
+        is made, so its length comes from the copy itself by one length exec, and the read goes on, the copy not made
+        again over a .log the script still writes."""
+        from labapi.proxmox import ProxmoxError
+
+        log = '{"impulse": 1}\n' * 3
+        pve = self._traced_seat(log)
+
+        def answer(guest, res):
+            raise ProxmoxError(f"E_PVE_EXEC_LOST: pid 42 on {guest.name}: the guest agent no longer knows it (RuntimeError: "
+                               "PID 42 does not exist); the command ended and its answer is lost")
+
+        _log_copy_answers(pve, answer)
+        run_id, body = self._run(FRIDA_ONE)
+        self.assertEqual(body["verdict"], "green", body)
+        script = f"x-trace-{run_id}-1.js"
+        copy = f"C:\\sky-lab\\frida\\{script}.log.copy"
+        execs = [" ".join(c[2]) for c in pve.calls if c[:2] == ("exec", 901)]
+        self.assertEqual(len([e for e in execs if f"[IO.File]::Create('{copy}')" in e]), 1)
+        self.assertEqual(len([e for e in execs if f"(Get-Item -LiteralPath '{copy}').Length" in e]), 1)
+        self.assertEqual((self.tmp / "results" / run_id / "frida" / f"c1-{script}.jsonl").read_text(encoding="utf-8"), log)
+
+    def test_a_size_mismatch_makes_the_run_a_lab_fault(self):
+        """The ranges must come to the copy's length: a copy holding fewer bytes than its exec said meets its end
+        inside its last range, which comes back short, a trace not fetched whole."""
         from labapi.proxmox import ExecResult
 
         pve = self._traced_seat('{"impulse": 1}\n' * 3)
-        plain_exec = pve.exec
-
-        def exec_(guest, command, timeout):
-            res = plain_exec(guest, command, timeout)
-            if re.search(r"Get-Item -LiteralPath '[^']+\.js\.log\.copy'\)\.Length", " ".join(command)):
-                return ExecResult(0, f"{int(res.out) + 7}\r\n", "")  # the seat reports more than it hands over
-            return res
-
-        pve.exec = exec_
+        _log_copy_answers(pve, lambda guest, res: ExecResult(0, "45 52\r\n", ""))
         run_id, body = self._run(FRIDA_ONE)
         self.assertEqual(body["verdict"], "error", body)
         self.assertEqual([(f["kind"], f["client"], f["error"]) for f in body["failures"]],
                          [("lab", "c1", f"E_RUN_FRIDA_FETCH: x-trace-{run_id}-1.js.log on c1 (fake-c1) not fetched whole: "
-                                        "45 bytes read of its 52")])
+                                        "45 bytes read of its 52: range 1 of 1, at 0, came back 45 of its 52")])
+
+    def test_a_range_from_the_copys_end_answers_no_bytes_and_the_fetch_stops_there(self):
+        """Agent.pm reads from an offset at or past a file's end as no bytes (the Windows agent's 0-byte read is its
+        eof): a copy that said a whole range more than it holds is read whole up to its end, then the range from its end
+        comes back empty, a trace not fetched whole, and nothing is asked past it."""
+        from labapi.proxmox import ExecResult
+        from labapi.runner import READ_RANGE_BYTES as R
+
+        pve = self._traced_seat("y" * (R - 1) + "\n")
+        _log_copy_answers(pve, lambda guest, res: ExecResult(0, f"{R} {2 * R + 100}\r\n", ""))
+        run_id, body = self._run(FRIDA_ONE)
+        self.assertEqual(body["verdict"], "error", body)
+        script = f"x-trace-{run_id}-1.js"
+        self.assertEqual([f["error"] for f in body["failures"]],
+                         [f"E_RUN_FRIDA_FETCH: {script}.log on c1 (fake-c1) not fetched whole: {R} bytes read of its "
+                          f"{2 * R + 100}: range 2 of 3, at {R}, came back 0 of its {R}"])
+        copy = f"C:\\sky-lab\\frida\\{script}.log.copy"
+        self.assertEqual([c[3:] for c in pve.calls if c[:3] == ("file_read_range", 901, copy)], [(0, R), (R, R)])
+
+    def test_a_copy_past_the_cap_is_refused_before_its_first_read(self):
+        """A runaway trace cannot hold up the run's end, whose artifacts phase has no deadline: a copy past
+        FETCH_MAX_BYTES (64 MiB) is refused before any range is read, the run's own trace a fault naming its size,
+        and the copy leaves the seat."""
+        from labapi.proxmox import ExecResult
+        from labapi.runner import FETCH_MAX_BYTES
+
+        pve = self._traced_seat('{"impulse": 1}\n')
+        big = FETCH_MAX_BYTES + 1
+        _log_copy_answers(pve, lambda guest, res: ExecResult(0, f"{big} {big}\r\n", ""))
+        run_id, body = self._run(FRIDA_ONE)
+        self.assertEqual(body["verdict"], "error", body)
+        script = f"x-trace-{run_id}-1.js"
+        self.assertEqual([f["error"] for f in body["failures"]],
+                         [f"E_RUN_FRIDA_FETCH: {script}.log on c1 (fake-c1) not fetched whole: its copy is {big} bytes, past "
+                          f"the {FETCH_MAX_BYTES} (64 MiB) a fetch reads"])
+        copy = f"C:\\sky-lab\\frida\\{script}.log.copy"
+        self.assertFalse([c for c in pve.calls if c[:3] == ("file_read_range", 901, copy)])
+        self.assertNotIn(copy, pve.files)
+
+    def test_a_relaunch_arms_trace_is_the_runs_own(self):
+        """relaunch {frida} starts its trace by the frida step's own start (_frida_start), so the trace is the run's
+        evidence as a frida step's is: not fetched whole, the run is a lab fault."""
+        from labapi.proxmox import ExecResult
+
+        pve = self._traced_seat('{"impulse": 1}\n')
+        _log_copy_answers(pve, lambda guest, res: ExecResult(0, "15 16\r\n", ""))
+        run_id, body = self._run(FRIDA_RELAUNCH)
+        self.assertEqual(body["verdict"], "error", body)
+        self.assertEqual([(f["kind"], f["client"], f["error"]) for f in body["failures"]],
+                         [("lab", "c1", f"E_RUN_FRIDA_FETCH: x-trace-{run_id}-1.js.log on c1 (fake-c1) not fetched whole: "
+                                        "15 bytes read of its 16: range 1 of 1, at 0, came back 15 of its 16")])
 
     def test_a_red_run_stays_red_and_gains_the_fetch_fault(self):
         """The crash check's path at a run's end: a lab fault turns only a would-be green into error."""
         from labapi.proxmox import ExecResult
 
         pve = self._traced_seat('{"impulse": 1}\n')
-        plain_exec = pve.exec
-
-        def exec_(guest, command, timeout):
-            res = plain_exec(guest, command, timeout)
-            if re.search(r"Get-Item -LiteralPath '[^']+\.js\.log\.copy'\)\.Length", " ".join(command)):
-                return ExecResult(0, f"{int(res.out) + 1}\r\n", "")
-            return res
-
-        pve.exec = exec_
+        _log_copy_answers(pve, lambda guest, res: ExecResult(0, "15 16\r\n", ""))
         run_id, body = self._run(FRIDA_ONE + "  - assert:\n      - server.actor(c1).x == 12345\n")
         self.assertEqual(body["verdict"], "red", body)
         self.assertEqual([f["kind"] for f in body["failures"]], ["assertion", "lab"], body["failures"])
         self.assertTrue(body["failures"][1]["error"].startswith("E_RUN_FRIDA_FETCH: "), body["failures"])
 
-    def test_a_copy_left_on_the_seat_is_a_note_never_a_fault(self):
-        """A slice the agent still holds open will not go; the trace came back whole, so the run keeps its verdict and
-        a note names what stayed, for the next relaunch's cleaning to take as far as it will go."""
+    def test_a_copy_held_open_after_its_read_rolls_the_seat_back_at_its_next_run(self):
+        """qemu-server 9.2.10 leaves a guest-file-read's handle open when the read dies (Agent.pm at ec268ede5b), the
+        held copies of x-prop-blast's later relaunches, and only the seat's restart closes it. A copy the removal leaves
+        is a note and the seat's fault (RunRecord.faulted, which _seat_fault reads first), so its next run rolls it
+        back; the trace came back whole, so this run's verdict stands."""
         from labapi.proxmox import ExecResult
 
         pve = self._traced_seat('{"impulse": 1}\n')
         plain_exec = pve.exec
 
         def exec_(guest, command, timeout):
-            joined = " ".join(command)
-            if "Remove-Item -LiteralPath $p" in joined and ".js.log.copy'" in joined:
-                plain_exec(guest, command, timeout)
-                held = re.findall(r"'([^']+\.js\.log\.copy\.0\.b64)'", joined)
-                return ExecResult(0, "".join(f"{p}\r\n" for p in held), "")
+            if re.search(r"Remove-Item -LiteralPath '[^']+\.js\.log\.copy' -Force", " ".join(command)):
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                return ExecResult(0, "True\r\n", "")  # still there: the agent holds it
             return plain_exec(guest, command, timeout)
 
         pve.exec = exec_
         run_id, body = self._run(FRIDA_ONE)
         self.assertEqual(body["verdict"], "green", body)
-        held = f"C:\\sky-lab\\frida\\x-trace-{run_id}-1.js.log.copy.0.b64"
-        self.assertIn(f"frida x-trace-{run_id}-1.js.log: 1 of its 2 file(s) left on fake-c1 after its read ({held})", body["notes"])
+        self.assertEqual(body["failures"], [])
+        copy = f"C:\\sky-lab\\frida\\x-trace-{run_id}-1.js.log.copy"
+        self.assertIn(f"frida x-trace-{run_id}-1.js.log: {copy} held open in its agent after its read", body["notes"])
+        force = self.services.runner.seats["c1"].force
+        self.assertTrue(force.startswith(f"its last run ({run_id}) ended in a fault: frida x-trace-{run_id}-1.js.log: "), force)
+        self.assertIn("held open in its agent", force)
+
+    def test_an_exception_out_of_the_artifacts_is_an_internal_failure(self):
+        """An exception that escapes the artifacts phase is a bug in lab-api, and what it skipped may be the run's own
+        traces (here the trace artifact raised, ahead of their fetch): the internal failure's shape, and the run is
+        error, never green with its trace unread."""
+        self._traced_seat('{"impulse": 1}\n')
+        runner = self.services.runner
+
+        def watch(observer):
+            raise RuntimeError("the board lost its watch")
+
+        runner.board.watch = watch
+        run_id, body = self._run(FRIDA_ONE + "artifacts: [trace]\n")
+        self.assertEqual(body["verdict"], "error", body)
+        self.assertEqual(body["failures"], [{"step": "end", "kind": "internal", "error": "artifacts: RuntimeError: the board lost its watch"}])
+        self.assertIn(("c1", f"x-trace-{run_id}-1.js"), runner.frida_started)
 
 
 OFFLINE = """
@@ -3293,7 +3409,7 @@ class ClientResets(RunTests):
         at = [first.index(s) for s in steps]
         self.assertEqual(at, sorted(at), steps)
         for named in ("Clean (Join-Path $lab 'frida') @('*.js', '*.js.out', '*.js.err', '*.js.log') @()",
-                      "Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy', '*.js.out.copy.*.b64', '*.js.log.copy.*.b64') @() -soft",
+                      "Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy') @() -soft",
                       "Clean (Join-Path $lab 'shots') @('*.png', '*.png.b64') @('*-burst')",
                       "Clean (Join-Path $lab 'screenshots') @('*.png') @()",
                       "Clean (Join-Path $lab 'burst') @('request.json', 'done.json') @()",
@@ -3409,7 +3525,7 @@ class ClientResets(RunTests):
         reset, body = self._reset()
         self.assertEqual((body["verdict"], reset["kind"]), ("green", "relaunch"), body)
         script = pve.relaunches[-1]
-        self.assertIn("Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy', '*.js.out.copy.*.b64', '*.js.log.copy.*.b64') @() -soft", script)
+        self.assertIn("Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy') @() -soft", script)
         self.assertIn("Clean (Join-Path $lab 'frida') @('*.js', '*.js.out', '*.js.err', '*.js.log') @()\n", script)
         self.assertTrue(any("1 held open left in place (C:\\sky-lab\\frida\\story-location-20261030-131130" in n
                             for n in body["notes"]), body["notes"])

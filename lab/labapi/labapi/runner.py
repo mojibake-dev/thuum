@@ -48,6 +48,12 @@ def _brief(value: Any, limit: int = 800) -> str:
     return text if len(text) <= limit else text[: limit - 3] + "..."
 
 
+def _last_line(text: str) -> str:
+    """The last line of an exec's stdout that is not blank, stripped; empty for none."""
+    lines = [ln.strip() for ln in (text or "").splitlines() if ln.strip()]
+    return lines[-1] if lines else ""
+
+
 # A hung seat's dump (Settings.hang_evidence), run on the seat as SYSTEM through the guest
 # agent as -EncodedCommand, so no quoting reaches PowerShell. MiniDumpWriteDump's signature and
 # the MINIDUMP_TYPE bits are Microsoft's (learn.microsoft.com, minidumpapiset.h): WithFullMemory
@@ -262,12 +268,16 @@ class SeatState:
 # a preset name the relaunch's cleaning may write into its script (lab-driver saves <name>.jslot in the Presets folder)
 _PRESET_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9 _.-]*")
 
-# The most raw bytes of a seat's file one guest-agent read carries back (Runner._read_back): a whole trace in one read
-# timed out on both seats (20261111-191642-x-prop-blast, notes 49 and 50: prop-impulse.js's .log, "qga command
-# 'guest-file-read' failed - got timeout" on 711 and 712) and left its copy held open in the agent; a guest exec that
-# printed a 4 MiB chunk as base64, about 5.6 MB, killed sky-c1's agent on 2026-10-28, where 1 MiB chunks of the same
-# 12.8 MB file came across with it up
-READ_SLICE_BYTES = 1024 * 1024
+# The bytes of a seat's file one ranged agent file-read asks for (Runner._read_back, GuestControl.file_read_range).
+# Proxmox's file-read takes a file in guest-file-read calls of its read_size, 1 MiB (qemu-server's
+# src/PVE/API2/Qemu/Agent.pm, file-read), and calls of that size timed out on both seats in
+# 20261111-191642-x-prop-blast (notes 49 and 50: prop-impulse.js's .log read whole, "qga command 'guest-file-read' failed
+# - got timeout" on 711 and 712); a range of half that is one guest-file-read of at most 512 KiB (the fresh review of
+# 77a4279d)
+READ_RANGE_BYTES = 512 * 1024
+# The largest copy a fetch reads back, refused before its first read: 128 ranges at most, so a runaway trace cannot hold
+# up the run's end, whose artifacts phase has no deadline
+FETCH_MAX_BYTES = 64 * 1024 * 1024
 
 
 class Runner:
@@ -399,7 +409,10 @@ class Runner:
             try:
                 await self._artifacts(rec, capture)
             except Exception as e:
-                rec.notes.append(f"artifacts: {type(e).__name__}: {e}")
+                # a bug in lab-api, reported as one (the internal failure above): what it skipped may be the run's own
+                # Frida traces, whose fetch is the run's evidence, so the run is error, never green with them unread
+                rec.failures.append({"step": "end", "kind": "internal", "error": f"artifacts: {type(e).__name__}: {e}"})
+                rec.verdict = "error"
             if self.netem_active:
                 try:
                     await self._clear_netem(rec)
@@ -2178,67 +2191,98 @@ class Runner:
         except ProxmoxError as e:
             rec.notes.append(f"{name}: {e}")
 
-    async def _read_back(self, rec: RunRecord, g: Guest, path: str, what: str) -> bytes:
-        """The file at `path` on the seat, one the runner made there to read (a shared-read copy), read back whole in
-        slices and then removed with them. Its length first, one guest exec; then for each slice of at most
-        READ_SLICE_BYTES raw bytes a guest exec writes that byte range of the file base64-encoded to <path>.<k>.b64
-        beside it (the agent's file API carries text, as the screenshot's .b64 sidecar has it), and one agent
-        file-read takes that back, GuestControl.file_read's own retry on "got timeout" its only retry. The slices'
-        bytes join in order and must come to the length; the caller decodes the whole once, since a slice boundary
-        can fall inside a multibyte character. A ProxmoxError (an exec or a read refused) or a ValueError (a length
-        unread, an exec that failed, a slice that is no base64, a short read) is the caller's, after the removal,
-        which runs whatever happened: a file it leaves is a note under `what`, never a failure, and the next
-        relaunch's cleaning takes what it can. _fetch_client_file's copies and the screenshot reads (each .b64
-        sidecar read whole) are the fetches this is meant to serve next."""
-        made: list[str] = []
-        try:
-            cmd = ["powershell", "-NoProfile", "-Command", f"$ErrorActionPreference = 'Stop'; (Get-Item -LiteralPath '{path}').Length"]
-            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
-            length = res.out.strip()
-            if res.exitcode != 0 or not length.isdigit():
-                raise ValueError(f"its length unread (exit {res.exitcode}: {(res.err or res.out).strip()[:200]})")
-            size = int(length)
-            slices = -(-size // READ_SLICE_BYTES)
-            data = bytearray()
-            for k in range(slices):
-                at = k * READ_SLICE_BYTES
-                count = min(READ_SLICE_BYTES, size - at)
-                part = f"{path}.{k}.b64"
-                made.append(part)
-                # the byte range read until it is whole or the file ends (Stream.Read may return less than it is asked)
-                cmd = ["powershell", "-NoProfile", "-Command",
-                       f"$ErrorActionPreference = 'Stop'; $s = [IO.File]::OpenRead('{path}'); $s.Position = {at}; "
-                       f"$b = New-Object byte[] {count}; $n = 0; "
-                       f"while ($n -lt {count}) {{ $r = $s.Read($b, $n, {count} - $n); if ($r -le 0) {{ break }}; $n += $r }}; "
-                       f"$s.Close(); [IO.File]::WriteAllText('{part}', [Convert]::ToBase64String($b, 0, $n))"]
-                try:
-                    res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
-                    if res.exitcode != 0:
-                        raise ValueError(f"its exec exited {res.exitcode}: {res.err.strip()[:200]}")
-                    text = await asyncio.to_thread(self.control.file_read, g, part)
-                    data += base64.b64decode(text.strip(), validate=True)
-                except ProxmoxError as e:
-                    raise ProxmoxError(f"slice {k + 1} of {slices}: {e}") from e
-                except ValueError as e:
-                    raise ValueError(f"slice {k + 1} of {slices}: {e}") from e
-            if len(data) != size:
-                raise ValueError(f"{len(data)} bytes read of its {size}")
-            return bytes(data)
-        finally:
-            paths = [path, *made]
-            listed = ", ".join(f"'{p}'" for p in paths)
-            cmd = ["powershell", "-NoProfile", "-Command",
-                   f"$p = @({listed}); Remove-Item -LiteralPath $p -Force -ErrorAction SilentlyContinue; "
-                   "$p | Where-Object { Test-Path -LiteralPath $_ }"]
+    async def _tried(self, g: Guest, cmd: list[str], answer, what: str) -> int:
+        """`cmd` on the seat with three tries 10 s apart, as the game check and log-count's copy try theirs (a busy
+        agent's "got timeout", a file refused for a moment): `answer` reads a finished exec, None for a try that
+        failed, and the first good answer is the value; three failed tries are a ValueError naming the last. An exec
+        whose answer the agent lost (E_PVE_EXEC_LOST) has ended on the seat, so that ProxmoxError is the caller's at
+        once."""
+        why = ""
+        for attempt in range(3):
+            if attempt:
+                await asyncio.sleep(10 * self.s.time_scale)
             try:
                 res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
-                left = [ln.strip() for ln in res.out.splitlines() if ln.strip()]
-                if res.exitcode != 0:
-                    rec.notes.append(f"{what}: the removal of its {len(paths)} file(s) on {g.name} exited {res.exitcode}: {res.err.strip()[:200]}")
-                elif left:
-                    rec.notes.append(f"{what}: {len(left)} of its {len(paths)} file(s) left on {g.name} after its read ({', '.join(left[:2])})")
             except ProxmoxError as e:
-                rec.notes.append(f"{what}: its {len(paths)} file(s) on {g.name} not removed: {e}")
+                if "E_PVE_EXEC_LOST" in str(e):
+                    raise
+                why = str(e)
+                continue
+            got = answer(res)
+            if got is not None:
+                return got
+            why = f"exit {res.exitcode}: {(res.err or res.out).strip()[:200]}"
+        raise ValueError(f"{what} failed three tries 10 s apart, the last {why}")
+
+    async def _seat_copy(self, g: Guest, cmd: list[str], copy: str) -> int:
+        """A copy `cmd` makes on the seat, whose last stdout line is "<the source's bytes at its open> <the copy's
+        bytes>" as log-count's copy prints them, and the copy's length from that line, three tries 10 s apart (_tried).
+        A copy whose exec answer the agent lost (E_PVE_EXEC_LOST) ran to its end on the seat, so its length then comes
+        from the copy itself, by one length exec under the same tries."""
+        def copied(res) -> int | None:
+            got = re.fullmatch(r"(\d+) (\d+)", _last_line(res.out))
+            return int(got.group(2)) if res.exitcode == 0 and got else None
+
+        def length(res) -> int | None:
+            last = _last_line(res.out)
+            return int(last) if res.exitcode == 0 and last.isdigit() else None
+
+        try:
+            return await self._tried(g, cmd, copied, "its copy")
+        except ProxmoxError as e:  # E_PVE_EXEC_LOST, the one error _tried passes on
+            cmd = ["powershell", "-NoProfile", "-Command", f"$ErrorActionPreference = 'Stop'; (Get-Item -LiteralPath '{copy}').Length"]
+            return await self._tried(g, cmd, length, f"its copy's length, the copy's own answer lost ({str(e)[:120]}),")
+
+    async def _read_back(self, rec: RunRecord, g: Guest, path: str, size: int, what: str) -> bytes:
+        """The `size` bytes of the file at `path` on the seat, a file the runner made there to read (a shared-read copy
+        whose exec printed its length, _seat_copy), through Proxmox's own ranged agent file-reads of READ_RANGE_BYTES
+        (GuestControl.file_read_range, whose retry on "got timeout" is the only retry), and then removed. A file past
+        FETCH_MAX_BYTES is refused before its first read. Each range must come back whole: one that comes back short
+        met the file's end first, a copy shorter than its length (an offset at or past the end answers no bytes).
+        The caller decodes the whole once, since a range boundary can fall inside a multibyte character. A
+        ProxmoxError (a read refused, a range that came back as no base64) or a ValueError (the cap, a short read) is
+        the caller's, after the removal, which runs whatever happened: a copy that will not go is held open in the
+        agent (qemu-server 9.2.10's file-read leaves a handle open when a read dies, Agent.pm at ec268ede5b lines
+        539-555, and only the seat's restart closes it), so the seat's next run rolls it back (RunRecord.faulted,
+        _seat_fault), this run's verdict as it was. _fetch_client_file's copies and the screenshot reads (each .b64
+        sidecar read whole) are the fetches this is meant to serve next."""
+        try:
+            if size > FETCH_MAX_BYTES:
+                raise ValueError(f"its copy is {size} bytes, past the {FETCH_MAX_BYTES} (64 MiB) a fetch reads")
+            data = bytearray()
+            ranges = -(-size // READ_RANGE_BYTES)
+            for k in range(ranges):
+                at = k * READ_RANGE_BYTES
+                want = min(READ_RANGE_BYTES, size - at)
+                try:
+                    got = await asyncio.to_thread(self.control.file_read_range, g, path, at, want)
+                except ProxmoxError as e:
+                    raise ProxmoxError(f"range {k + 1} of {ranges}: {e}") from e
+                data += got
+                if len(got) != want:
+                    raise ValueError(f"{len(data)} bytes read of its {size}: range {k + 1} of {ranges}, at {at}, came back "
+                                     f"{len(got)} of its {want}")
+            return bytes(data)
+        finally:
+            cmd = ["powershell", "-NoProfile", "-Command",
+                   f"Remove-Item -LiteralPath '{path}' -Force -ErrorAction SilentlyContinue; Test-Path -LiteralPath '{path}'"]
+            try:
+                res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+                said = _last_line(res.out)
+                if res.exitcode != 0 or said not in ("True", "False"):
+                    rec.notes.append(f"{what}: the removal of {path} on {g.name} answered exit {res.exitcode}: "
+                                     f"{(res.err or res.out).strip()[:200]}")
+                elif said == "True":
+                    held = f"{what}: {path} held open in its agent after its read"
+                    rec.notes.append(held)
+                    # a seat the run plays rolls back at its next run through the fault, one outside it (a hand trace
+                    # the end fetched there) through its remembered state, as anything that touched it does
+                    if g.client in rec.scenario.clients:
+                        rec.faulted.setdefault(g.client, held)
+                    elif g.client:
+                        self.forget_seats(held, [g.client])
+            except ProxmoxError as e:
+                rec.notes.append(f"{what}: {path} on {g.name} not removed: {e}")
 
     async def _frida_trace(self, rec: RunRecord, client: str, script: str, suffix: str = "") -> list[str]:
         """A trace from its seat as frida/<client>-<script><suffix>.jsonl, the injector's .out and then the script's
@@ -2256,24 +2300,23 @@ class Runner:
         # write access can, so it is copied that way first
         # the injector's .out (a load error; the injector exits once the script is eternalized) and then
         # the script's own .log (frida_script_text's preamble, flushed every 250 ms), each copied with a
-        # read that shares write access, since the script still holds its .log open, and the copy read back
-        # in slices (_read_back): read whole, prop-impulse.js's large .log timed out on both seats
-        # (20261111-191642-x-prop-blast) and the copy stayed held open in the agent
+        # read that shares write access, since the script still holds its .log open; the copy prints its
+        # length last, as log-count's does (_seat_copy), and comes back in ranges (_read_back): read whole,
+        # prop-impulse.js's large .log timed out on both seats (20261111-191642-x-prop-blast) and the copy
+        # stayed held open in the agent
         texts, lost = [], []
         for ext in ("out", "log"):
             src = f"{self.s.client_lab_dir}\\frida\\{script}.{ext}"
             copy = f"{src}.copy"
             whole = f"{script}.{ext} on {client} ({g.name}) not fetched whole"
+            cmd = ["powershell", "-NoProfile", "-Command",
+                   f"if (Test-Path '{src}') {{ $s = [IO.File]::Open('{src}', 'Open', 'Read', 'ReadWrite'); $n = $s.Length; "
+                   f"$d = [IO.File]::Create('{copy}'); $s.CopyTo($d); $m = $d.Length; $d.Close(); $s.Close() }} "
+                   f"else {{ Set-Content -Path '{copy}' -Value '' -NoNewline; $n = 0; $m = 0 }}; Write-Output ([string]$n + ' ' + [string]$m)"]
             try:
-                cmd = ["powershell", "-NoProfile", "-Command",
-                       f"if (Test-Path '{src}') {{ $s = [IO.File]::Open('{src}', 'Open', 'Read', 'ReadWrite'); $d = [IO.File]::Create('{copy}'); "
-                       f"$s.CopyTo($d); $d.Close(); $s.Close() }} else {{ Set-Content -Path '{copy}' -Value '' -NoNewline }}"]
-                res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
-                if res.exitcode != 0:
-                    lost.append(f"{whole}: its copy exited {res.exitcode}: {res.err.strip()[:200]}")
-                    continue
+                size = await self._seat_copy(g, cmd, copy)
                 # one decode of the whole; a character the copy cut mid-write at its end reads as U+FFFD
-                data = await self._read_back(rec, g, copy, f"frida {script}.{ext}")
+                data = await self._read_back(rec, g, copy, size, f"frida {script}.{ext}")
                 texts.append(data.decode("utf-8", errors="replace"))
             except (ProxmoxError, ValueError) as e:
                 lost.append(f"{whole}: {e}")
@@ -2474,8 +2517,8 @@ def _client_relaunch_ps(lab_dir: str, driver_log: str, presets: list[str], stop:
     leaves on a seat that its rollback undid, by folder and name pattern, never a wildcard over the lab folder
     (launch.ps1 needs game-dir.txt and games\\):
     - frida\\: each run's script and its .out, .err and .log, and, as far as they go, the runner's shared-read .copy
-      of the last two and that copy's .<k>.b64 slices (config.frida_exec_template, frida_script_text,
-      Runner._frida_trace, Runner._read_back); frida-inject.exe and the tools beside it stay;
+      of the last two (config.frida_exec_template, frida_script_text, Runner._frida_trace, Runner._read_back);
+      frida-inject.exe and the tools beside it stay;
     - shots\\ (a screenshot step's copy and its base64 sidecar, a burst's frame folder), screenshots\\
       (screenshot.ps1's captures and latest.png), burst\\ and input\\ (their tasks' request and done files);
     - every recorded game folder's RaceMenu presets: skymp5-client's thuum-*.jslot (raceMenuService.ts) and
@@ -2521,9 +2564,9 @@ def _client_relaunch_ps(lab_dir: str, driver_log: str, presets: list[str], stop:
         # timed-out guest-file-close left open in the agent (proxmox.py file_read, 2026-10-17) stays until the VM
         # restarts, and failing the try on it cost a rollback (sky-c2, b-cloak-fight 20261030-053144: 025.png.b64 and
         # 032.png.b64; sky-c1, x-quest-mode 20261030-131512: story-location-20261030-131130-x-story-arrival-login-13
-        # .js.log.copy); the next capture writes its own name, and a copy carries its run's script name. A copy and
-        # its slices (Runner._read_back) leave the seat once read; these are what a timed-out slice read holds open
-        "Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy', '*.js.out.copy.*.b64', '*.js.log.copy.*.b64') @() -soft",
+        # .js.log.copy); the next capture writes its own name, and a copy carries its run's script name. A copy leaves
+        # the seat once read (Runner._read_back); one here is a copy a timed-out ranged read holds open
+        "Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy') @() -soft",
         "Clean (Join-Path $lab 'shots') @('*.png', '*.png.b64') @('*-burst') -soft",
         "Clean (Join-Path $lab 'screenshots') @('*.png') @() -soft",
         "Clean (Join-Path $lab 'burst') @('request.json', 'done.json') @()",

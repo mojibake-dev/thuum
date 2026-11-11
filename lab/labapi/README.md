@@ -28,21 +28,24 @@ id>/` with `result.json`, `world-before/`, `world-after/`, `world-diff`,
 `server.log`, `screenshots/`, `lab.pcap`, `frida/`, and client logs when the
 scenario lists them. A Frida trace, `frida/<client>-<script>.jsonl` (the
 injector's .out, then the script's .log), is copied on the seat by a read
-that shares write access and read back in base64 slices of at most 1 MiB of
-raw bytes, a guest exec and a guest-agent file read each, joined as bytes,
-checked against the copy's length and decoded as UTF-8 once; the copy and
-its slices are removed once read. The verdict is green only when every
-assertion held and no step timed out; red when an assertion failed, a step
-timed out, or the
-server refused a command; error when the lab itself failed (no snapshot, the
-server never became ready, a client never heartbeated, the scenario timed
-out, an assertion that is not in the language, a trace the run's own frida
-step or relaunch arm started that its end could not fetch whole). That last
-is E_RUN_FRIDA_FETCH, naming the script, the seat and the reason (a slice
-still unread after the file read's retries, an exec that failed, bytes that
-do not come to the copy's length); as for a crash at the end, a red run stays
-red and gains the failure. A trace started by hand (POST /lab/frida) is no
-run's evidence: what of it is not fetched is a note.
+that shares write access, the copy exec printing the copy's length (three
+tries, 10 s apart), and read back by Proxmox's own ranged agent file-read
+(offset, count, decode=0), 512 KiB a call, joined as bytes, checked against
+the copy's length and decoded as UTF-8 once; a copy past 64 MiB is refused
+before its first read, and the copy is removed once read (one the agent
+holds open rolls the seat back at its next run). The verdict is green only
+when every assertion held and no step timed out; red when an assertion
+failed, a step timed out, or the server refused a command; error when the
+lab itself failed (no snapshot, the server never became ready, a client
+never heartbeated, the scenario timed out, an assertion that is not in the
+language, an exception out of the artifacts phase, a trace the run's own
+frida step or relaunch arm started that its end could not fetch whole).
+That last is E_RUN_FRIDA_FETCH, naming the script, the seat and the reason
+(its copy failed three tries, a range still unread after the file read's
+retries, a range that came back as no base64, bytes that do not come to the
+copy's length, a copy past 64 MiB); as for a crash at the end, a red run
+stays red and gains the failure. A trace started by hand (POST /lab/frida)
+is no run's evidence: what of it is not fetched is a note.
 
 Server rollback runs in `state` mode by default: stop the server container,
 restore `SERVER_WORLD_DIR` from `SERVER_SNAPSHOTS_DIR/<snapshot>/`, `docker

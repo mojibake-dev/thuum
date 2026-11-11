@@ -371,18 +371,25 @@ Screenshots and Frida invocations go through a guest exec from lab-api,
 not through the game, so a crashed client can still be observed. Scripts
 reach the client by the client pulling them from lab-api over http inside
 that guest exec; artifacts come back through the Proxmox guest-agent file
-API, which carries text and caps each file at 16 MiB. A Frida trace comes
-back in slices: the injector's .out and the script's .log are each copied
-with a read that shares write access (the script still writes its .log),
-then for each slice a guest exec writes at most 1 MiB of the copy's bytes
-base64-encoded to a file beside it, and one file read takes that back. The
-slices join as bytes, must come to the copy's length, and are decoded as
-UTF-8 once, so a slice boundary inside a multibyte character splits
-nothing; the copy and its slices leave the seat once read. Read whole, a
-large trace timed out the agent on both seats (20261111-191642-x-prop-blast)
-and left its copy held open there. A run's own trace not fetched whole is a
-lab fault, E_RUN_FRIDA_FETCH (the scenario runner's run end, below). The
-token has no FileWrite privilege.
+API, which caps each read at 16 MiB. A Frida trace comes back in ranges:
+the injector's .out and the script's .log are each copied with a read that
+shares write access (the script still writes its .log), the copy exec
+printing the copy's length last, as log-count's copy does (tried three
+times, 10 s apart; a copy whose exec answer the agent lost has its length
+read from the copy itself). The copy is then read by the agent's own
+file-read with offset, count and decode=0 (qemu-server 9.1.5 and later),
+512 KiB a call: Proxmox reads a file in guest-file-read calls of its
+read_size, 1 MiB (qemu-server's Agent.pm), and calls of that size timed out
+on both seats when a large trace was read whole
+(20261111-191642-x-prop-blast). Each range must come back whole, the bytes
+must come to the copy's length, and they are decoded as UTF-8 once, so a
+range boundary inside a multibyte character splits nothing; a copy past
+64 MiB is refused before its first read; the copy leaves the seat once
+read. A copy that will not go is held open in the agent (qemu-server
+9.2.10's file-read leaves a handle open when a read dies), which only the
+seat's restart closes, so the seat's next run rolls it back. A run's own
+trace not fetched whole is a lab fault, E_RUN_FRIDA_FETCH (the scenario
+runner's run end, below). The token has no FileWrite privilege.
 
 ## Scenario runner (lab-api on sky-srv)
 
@@ -771,18 +778,22 @@ Every run's end also reads each managed seat's game:
 Any of the three keeps the seat's launch.log as <client>-launch.log and turns
 a run that would have been green into error, which a run set reruns once as
 a lab fault. A red run stays red and gains the failure.
-The end also fetches every Frida trace started on a seat, in slices (the
+The end also fetches every Frida trace started on a seat, in ranges (the
 client template's section above). One the run's own steps started, a frida
 step's or a relaunch's frida arm's, is the run's evidence: not fetched whole
-(a slice still unread after the file read's retries, a copy or slice exec
-that failed, bytes that do not come to the copy's length) it is
-E_RUN_FRIDA_FETCH, naming the script, the seat and the reason, and it turns a
-would-be green into error the same way, so a run set's rerun starts the trace
-again; a red stays red and gains it. The failure names the seat, so its next
-run rolls it back, as after any E_RUN_* naming it, which also closes a slice
-a timed-out read left open in its agent. 20261111-191642-x-prop-blast stayed
-green with both seats' prop-impulse.js traces unread, two notes. A trace
-started by hand (POST /lab/frida) is no run's evidence, whether the end
+(its copy failed three tries, a range still unread after the file read's
+retries, a range that came back as no base64, bytes that do not come to the
+copy's length, a copy past 64 MiB) it is E_RUN_FRIDA_FETCH, naming the
+script, the seat and the reason, and it turns a would-be green into error
+the same way, so a run set's rerun starts the trace again; a red stays red
+and gains it. The failure names the seat, so its next run rolls it back, as
+after any E_RUN_* naming it, which also closes a handle a timed-out read
+left open in its agent; a copy held open after a whole read rolls the seat
+back at its next run too, with this run's verdict as it was. An exception
+that escapes the artifacts phase is an internal failure and the run error,
+since what it skipped may be the run's own traces. 20261111-191642-x-prop-blast
+stayed green with both seats' prop-impulse.js traces unread, two notes. A
+trace started by hand (POST /lab/frida) is no run's evidence, whether the end
 fetches it or the next run fetches it before its rollback as
 frida/<client>-<script>.before-run.jsonl: what of it is not fetched is a
 note.
@@ -858,11 +869,12 @@ run's end would collect as its own). Crash dumps stay: a run's end counts
 only those written since a few minutes before its start, and a crash it finds
 rolls the seat back. A file that will not go fails the try, except in the
 capture folders shots\ and screenshots\ and for the runner's trace copies
-in frida\ (*.js.out.copy, *.js.log.copy and their *.copy.<k>.b64 slices,
-the files it reads back through the agent, which leave the seat once read
-and stay only when the agent holds one open), which are cleaned as far as
-they go: a file a timed-out
-guest-file-close left open in the agent stays until the VM restarts, the note
+in frida\ (*.js.out.copy and *.js.log.copy, the files the agent itself
+reads back in ranges, which leave the seat once read and stay only when the
+agent holds one open), which are cleaned as far as they go: a file a
+timed-out guest-file-read or guest-file-close left open in the agent stays
+until the VM restarts (a copy held after its read also rolls the seat back
+at its next run), the note
 says "<n> held open left in place", and the next capture writes its own name,
 as the next copy carries its run's script name (b-cloak-fight
 20261030-053144 lost a rollback to two held .png.b64 sidecars, x-quest-mode
