@@ -1,3 +1,6 @@
+// save-havok.js v1.2 DRAFT (thuum, 2026-11-11; the re-review's FIX FIRST applied as written): a SetAngularVelocity row's scaled column
+// is named 'scaled', no longer 'game', the name the linear rows keep for real game units (its vector is rad/s times the scale, to
+// compare with the block's angular floats, which the adr065 read's :781 calls game units, HYPOTHESIS). v1.1's header follows.
 // save-havok.js v1.1 DRAFT (thuum, 2026-11-11; the fresh review's FIX FIRST applied as written, ADR-064 amendment A): the scale is
 // bhkWorld::GetWorldScaleInverse's float (187407, game units per Havok unit), where v1 read GetWorldScale's (188105), its inverse
 // (69.99125 and 0.0142875 in the exe's .rdata, lab/.cache/game/exe-1.6.1170, read 2026-11-11; the adr065 read's :781 and :821), so
@@ -61,7 +64,8 @@
 //   {event:'havokWrite'} at 19534's leave, for FORM or a block with an active body: the reference, its base, the thread, the
 //     block's length, flags, count, pitch and roll, and each body's slice decoded.
 //   {event:'havokRead'} at 19535's leave, for FORM or a call that set a velocity: the reference, the thread, the caller, the 19538
-//     count, the vectors SetLinearVelocity and SetAngularVelocity took inside it (Havok units, and times the scale).
+//     count, the vectors SetLinearVelocity and SetAngularVelocity took inside it (Havok units, and times the scale: a linear row's
+//     game column and speed, an angular row's scaled column, v1.2).
 //   {event:'velocity'} for a setter outside any 19535, the first 32: the caller and the vector, so another writer shows.
 //   {event:'liveness'} every 10 s: every hook's count before its filter.
 // Params (LAB_PARAMS): FORM (a reference id, a number or a hex string; 0 prints by the active rule alone), ROWS (64), BODIES (16 a
@@ -231,8 +235,10 @@ if (off === undefined) {
         counts[name] += 1;
         try {
           const v = [f32(args[1], 0), f32(args[1], 4), f32(args[1], 8)];
-          const row = { havok: v.map(r2), game: v.map(function (x) { return r2(x * SCALE); }) };
-          if (name === 'setLinearVelocity') row.speed = len3(row.game); // v1.1: an angular vector is rad/s, no speed
+          const row = { havok: v.map(r2) };
+          const times = v.map(function (x) { return r2(x * SCALE); });
+          // v1.2: a linear vector times the scale is game units a second; an angular one (rad/s) is only scaled, for the comparison
+          if (name === 'setLinearVelocity') { row.game = times; row.speed = len3(times); } else row.scaled = times;
           const r = reads[this.threadId];
           if (r !== undefined) { (name === 'setLinearVelocity' ? r.linear : r.angular).push(row); return; }
           outside += 1;
@@ -244,6 +250,6 @@ if (off === undefined) {
   attach('78089', at('setLinearVelocity'), velocityHook('setLinearVelocity'));
   attach('78090', at('setAngularVelocity'), velocityHook('setAngularVelocity'));
 
-  emit({ event: 'ready', script: 'save-havok.js', v: '1.1', version: version, pid: Process.id, base: String(exe.base), mainThread: mainTid(), worldScale: { inverse187407: scaleInverse, forward188105: scaleForward, ok: scaleOk }, hooks: resolved, params: { FORM: hex(FORM_ID), ROWS: ROWS, BODIES: BODIES }, attachErrors: attachErrors });
+  emit({ event: 'ready', script: 'save-havok.js', v: '1.2', version: version, pid: Process.id, base: String(exe.base), mainThread: mainTid(), worldScale: { inverse187407: scaleInverse, forward188105: scaleForward, ok: scaleOk }, hooks: resolved, params: { FORM: hex(FORM_ID), ROWS: ROWS, BODIES: BODIES }, attachErrors: attachErrors });
   setInterval(function () { emit({ event: 'liveness', pid: Process.id, counts: JSON.parse(JSON.stringify(counts)), rows: rows, outside: outside, mainThread: mainTid() }); }, 10000);
 }
