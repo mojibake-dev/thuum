@@ -9490,3 +9490,36 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   byte-identical. Its setup (lab/playtests/51.yaml, questFragmentLive on both seats by Eli's D-Q10 A through a profile's new
   clientSettings) is on thuum branch playtest-client-settings 8b421d56, reviewed, for main before 51.
 - m4-scripts-5-heads merged to fork canon 24f1cc6a (2026-11-11T12:40Z): the gate 20261111-120511-merge-m4-scripts-5-heads, 20261111-120511-smoke-two-players to 20261111-123653-b-npc-caster (12 runs); T2 skip on skymp-server:m4-scripts-5-heads; clones promoted. Verbs: appearance (thuum-fa): a seat whose own player turned vampire drew other players' figures with no head (x-vampire-stage 20261111-035133's recorded reads), since every figure's base reads form id 7 and the engine's TESNPC::HasOverlays answers from the local player's race on that id; one Gum hook in FridaHooks.cpp answers false for an id-7 base that isn't the player's own, the offset named through CommonLibSSE-NG's RE::Offset::TESNPC::HasOverlays (Offsets.h:532). Stage (from a main worktree 5f5579c5, REUSE_DIST over client-build 20578 at the head, SkyrimPlatformImpl a5af631db71da6ca): x-vampire-figure-head v2.1 20261111-114511 and x-werewolf-form 20261111-115629, 2 green of 2. T2 cited: the pinned T2 of f6ca339d (no skymp5-server or skymp-wire file changed). The gate's b-duel read red once (120926, the Flames leg's known first-report flake, 0.7845 against < 0.78) and green on its rerun 121203. The lab's server pinned to skymp-server:m4-scripts-5-heads-24f1cc6a (the bare tag's image, sha256:f75701db), listening 12:41Z.
+- (numidium) The afternoon before playtest 51, which waits on Eli's go (no new scripting or quest builds before it; the
+  physics leg's prework meanwhile, Eli's word relayed by thuum-fa). main took 51's tooling: playtest-client-settings
+  7dc747a6 (a profile's clientSettings set in each stopped game at ready's relaunch and read back), t2-r5-keys 336fab2c
+  (rung 5's six quest keys kept in T2's settings when the head declares their login watch), layer-merge's chain citation
+  81dd7dfc (gate-cite.py --combine; the tidy's first try had stopped on lab-api's 404 for a chain's id), physics-0-reads
+  ffd3feb8 (rung 0's six Frida scripts) and apocrypha's labapi-setting 156fac51 (c.setting(name), for x-havok-cap-read;
+  lab-api not pulled yet). Reads on canon 24f1cc6a, each sequence ending with both clones rolled back to their newest
+  snapshot, the state 51's warm setup expects:
+  - x-ghostwalk-warm-read 20261111-172354 and x-ghostwalk-race-read 182610, both green: a warm relaunch, a stage-relayed
+    scope and hosting each keep Ghostwalk's return (CONFIRMED); the reds' own arm was the run start's race, c2's relayed
+    start of a quest c1 was not running against c1's own Story Manager start (the loss tracks it, HYPOTHESIS). v2.1's
+    three tries (200503, 201347, 202253, each behind a throwaway smoke run so its own start relaunched both seats) never
+    raced at the start (R0 red, inconclusive) and held the staggered logins twice; try 2's casts went into a
+    MessageBoxMenu open on c1. ghostwalk.md (0f5e449d, 1d3e27f5).
+  - x-handoff-cross-timing: 173213 red on its own clock read (labState refused right after the restart; thuum-fa's until,
+    e32a64c0), then the pair 174045 cold red at its Alvor claim (all 66 snapshots in) and 174935 warm green: the sweep's
+    reds are the NPCs' run-to-run timing against a fixed window (npc-handoff.md 2a7af8ae), widened by Eli's word, d09bc3a4.
+  - ADR-071 rung 0, 19:06Z to 20:02Z: x-prop-engine 190610, x-prop-blast 191642, x-corpse-grab 193821, x-body-impose
+    194559 and x-prop-push-souls 195437, five green. x-prop-blast's prop-impulse traces were never fetched (E_PVE_FILE in its
+    notes 49 and 50: lab-api reads each .log in one guest-file-read, and both reads timed out), so its H2 to H4 stay unread
+    until thuum-fa's labapi-frida-fetch lands and v3 b0c8945e runs again.
+- (numidium) playtest-stagger merged to main 7721a6e6: a playtest's seats stop together and start apart, c1 first and c2
+  once c1 is online again, at ready() and at the restore (Eli's word, "Restore and ready()"). playtest-relaunch.sh takes a
+  stop or start phase; relaunch_seats() runs both stops at once and then the starts in turn, holding c2 when c1's start
+  failed; the restore checks the world before any seat stops. Two fresh reviews. The first live test (20:54Z, the stops one
+  after the other) showed the second review's main point: c2's running game took c1's nine cells at 20:55:04Z and held
+  them about 20 s. The final shape live at 21:19Z: both games stopped in the same second (21:19:23Z); the server passed
+  c1's cells to c2's seat when c2 had been silent about 9 s (the heir pick reads no heir's silence, HYPOTHESIS, to
+  thuum-fa), and all nine froze unhosted at 21:19:39Z; c1 took fresh grants on all nine at 21:20:12Z and c2 logged in a
+  guest from 21:21:03Z, questFragmentLive set on both; both clones rolled back. Pipeline 5834 green, labapi-tests'
+  image now with bash for the scripts' stub tests. Open: playtest-restart's reconnects are not staggered (outside the
+  word; the seats reconnect by themselves), turbo-client.sh and turbo-back.sh keep the together relaunch until after 51,
+  and the justfile's playtest-go comment still reads "together" (the shared checkout's justfile hunk first).
