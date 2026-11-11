@@ -229,7 +229,10 @@ positions' age.
   the cold rollback 061139: ADR-027's red, red, cold green, read as state
   the warm clone carried from b-ghostwalk's run, not the build (numidium's
   read; which piece of state is unread, HYPOTHESIS). If it recurs warm, run
-  b-ghostwalk-look cold or ahead of b-ghostwalk.
+  b-ghostwalk-look cold or ahead of b-ghostwalk. The same sweep read
+  b-npc-handoff-cross the same way (072204 and 072734 red, 073308 cold
+  green; npc-handoff.md's Tests): two scenarios in one sweep, a pattern to
+  read (what a relaunched warm clone on this build carries).
 - Assertions that would fail if the verb silently regressed: c1's server
   position after the effect (at the cast point, held: fails with the
   script blanked, or with the server sending c1 back); c2's own position
