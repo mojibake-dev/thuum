@@ -270,6 +270,22 @@ positions' age.
   inside the scope's window and about 24 s after it, in a 2x2 against
   hosting (x-ghostwalk-race-read, lab/.cache/drafts/reads, 544fb05c); a read
   of 51's build, run on the idle lab.
+  x-ghostwalk-race-read 544fb05c GREEN, 20261111-182610 (both seats
+  relaunched): all six returns ran. The seam's AddSpell of the Eye Fix from
+  OnEffectFinish counted once more after every cast (1 to 6), and c1's y came
+  back to -299.95 each time. That held with the scope acting in B and D
+  (Game.GetPlayer answered c2's figure in A Lovely Letter's Fragment_10 and
+  Fragment_22) and with c2 hosting the cast cell in C and D. So a
+  stage-relayed scope does not stop the return, inside its window or after,
+  and neither does hosting (CONFIRMED). What the lever did not reproduce is
+  the reds' arm. Theirs was the implicit START arm (setActingPlayer(<quest>,
+  -1, ...), "requested and armed"): c2's stage relay started a quest c1 was
+  not running, racing c1's own Story Manager start of it, while this run's
+  arms were stage arms on a quest both seats ran (bArmed and dArmed 0). The
+  next read, if wanted, arms that: c2 sets stage 1 of a Companions radiant c1
+  is not running, then c1 casts. The risk for play is a run start where both
+  seats log in at once, so playtest 51's one-at-a-time logins are unlikely to
+  meet it (HYPOTHESIS).
   Why is unread (HYPOTHESIS): rung 5's effect-event and acting-scope work
   (fork 9db243a0) is one suspect, the server record carrying the earlier
   run's Eye Fix ability 1a0cb7e1 into the warm run is another. The read that
