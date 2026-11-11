@@ -355,7 +355,12 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   VTABLE_bhkMouseSpringAction (208070) and the body its Havok action
   names, matched by value against the walk; every 30 frames while held,
   the named bodies' positions and speeds; the ready row's pid, base, Main's
-  thread and first bytes, a liveness row every 10 s.
+  thread and first bytes, a liveness row every 10 s. v2.1 (the same day, its
+  review's fixes): the hold rows' game units by GetWorldScaleInverse's float
+  (187407; v2 read GetWorldScale's, 188105, the inverse, and fell back to
+  1), trusted only when the two multiply to 1, each row labelled with its
+  units; the walk counts every body of the grabbed 3D (BODIES_MAX bounds
+  only the printed list).
 - prop-sleep.js: the engine's own sleep of a prop against the client's
   500 ms stir test (docs/engine/havok-props.md row E10; prop-physics.md A3,
   A4). Finds the clutter bodies the player's capsule touches through

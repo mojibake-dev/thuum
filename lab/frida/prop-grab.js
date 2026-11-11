@@ -1,3 +1,12 @@
+// prop-grab.js v2.1 DRAFT (thuum, 2026-11-11; the fresh review's FIX FIRST applied as written, ADR-064 amendment A): (1) the hold
+// rows' scale is bhkWorld::GetWorldScaleInverse's float (187407, include/RE/B/bhkWorld.h:48-52, `just addr 187407` 0x177adfc), game
+// units per Havok unit, where v2 read GetWorldScale's (188105, :42-46, 0x17849dc), its inverse: the exe's .rdata holds 69.99125 and
+// 0.0142875 there (lab/.cache/game/exe-1.6.1170, read 2026-11-11; the adr065 read's :781 and :821), so v2's (1, 1000) test failed and
+// fell back to 1, printing Havok units under game units' names; v2.1 trusts the scale only when the two floats multiply to 1, prints
+// both in the ready row, and labels each hold row's units ('game', or 'havok' with the raw values when the scale did not read);
+// (2) the body walk counts every body of the grabbed 3D (a NODES_MAX of 8192 nodes bounds it) where v2 stopped at BODIES_MAX, so the
+// facts' body count and motion types are the whole body's; BODIES_MAX (64) now bounds only the printed bodyList, and the springs are
+// matched against every body walked; (3) a citation corrected (ExtraDataList.h:44). v2's header follows, corrected in place.
 // prop-grab.js v2 DRAFT (thuum, 2026-11-11; ADR-071 rung 0, docs/research/physics-leg-2026-11-11.md H5): v1 extended for a grab on a
 // corpse, for x-corpse-grab v1 (a host's corpse and a watcher's corpse, each grabbed) beside x-prop-engine v1's ingot legs. New in v2,
 // so a fresh review comes before its first run (ADR-064 rule A):
@@ -27,7 +36,7 @@
 //   before the attach); a liveness row every 10 s carries every hook's count before its filter and the frames.
 // The v2 layouts (CommonLibSSE-NG b93280e8, include/RE/): TESForm formID +0x14, formType +0x1A (T/TESForm.h:353-355; ACHR 0x3E,
 // F/FormTypes.h:202); TESObjectREFR data.objectReference +0x40 (T/TESObjectREFR.h:77, :495), loadedData +0x68 (:497), data3D +0x68
-// (:101), extraList +0x70 (:498) whose head is +0x08 on AE (E/ExtraDataList.h:43, the second column), each BSExtraData's next +0x08
+// (:101), extraList +0x70 (:498) whose head is +0x08 on AE (E/ExtraDataList.h:44, the second column), each BSExtraData's next +0x08
 // (B/BSExtraData.h:32), ExtraFlags' flags +0x10 and kBlockActivate bit 0 (E/ExtraFlags.h:17, :32), its vtable VTABLE_ExtraFlags
 // (Offsets_VTABLE.h:174, `just addr 186869` 0x1771470: the chain is matched by vtable without the list's lock, HYPOTHESIS as
 // apply-on-demand.js's extraNoLock is); an Actor's ActorState at +0xC0 on AE (A/Actor.h:128), actorState1 +0x08 (A/ActorState.h:203),
@@ -39,7 +48,8 @@
 // +0x150 (H/hkpEntity.h:99), the motion's type +0x10, position +0x50 (motionState +0x20, its translation +0x30: H/hkpMotion.h:77,
 // :82, H/hkMotionState.h:14, H/hkTransform.h:12), linear velocity +0xE0 (hkpMotion.h:84); the layer the low seven bits of the
 // collidable's filter info at +0x4C (H/hkpWorldObject.h:67, H/hkpCollidable.h:54, :72, H/hkpTypedBroadPhaseHandle.h:19); game units
-// by bhkWorld's scale (B/bhkWorld.h:42-46, `just addr 188105` 0x17849dc). v1's header follows.
+// by GetWorldScaleInverse's float (B/bhkWorld.h:48-52, `just addr 187407` 0x177adfc), checked against GetWorldScale's (:42-46, 188105,
+// 0x17849dc), its inverse (v2.1). v1's header follows.
 //
 // prop-grab.js: the player's grab of a prop, on the grabber's seat and on the other seat (thuum docs/engine/havok-props.md
 // rows E13, E14, E15, E31; docs/verbs/prop-physics.md A2 and A6). The engine's grab is PlayerCharacter::StartGrabObject
@@ -61,12 +71,13 @@
 // on the other seat during the hold: no StartGrabObject and the poll's handle 0 throughout (E14, E15); and if the other seat's E
 // is held on the same body (a Keyframed copy under the holder's stream): StartGrabObject with the handle still 0 on leave,
 // or no call at all (E31, E28's refusal). Every id is a HYPOTHESIS until this trace reads as expected (rule 2).
-// Params: RAW (false), HOLD_EVERY (30 frames), BODIES_MAX (64).
+// Params: RAW (false), HOLD_EVERY (30 frames), BODIES_MAX (64 bodies printed in bodyList; v2.1: the walk counts every body).
 // Offsets by `just addr` (lab/addr.py, Address Library 1.6.1170 only), 2026-11-03; v2's 2026-11-11.
 const PARAMS = (typeof LAB_PARAMS === 'object' && LAB_PARAMS) ? LAB_PARAMS : {};
 const RAW = PARAMS.RAW === undefined ? false : !!PARAMS.RAW;
 const HOLD_EVERY = PARAMS.HOLD_EVERY === undefined ? 30 : Number(PARAMS.HOLD_EVERY);
 const BODIES_MAX = PARAMS.BODIES_MAX === undefined ? 64 : Number(PARAMS.BODIES_MAX);
+const NODES_MAX = 8192; // v2.1: the walk's bound, in nodes visited (a humanoid's 3D is a few hundred)
 function emit(obj) { obj.t = Date.now(); send(obj); console.log(JSON.stringify(obj)); }
 
 const OFFSETS = {
@@ -79,7 +90,8 @@ const OFFSETS = {
     playerVtable: 0x18ab9c0, // 208040 VTABLE_PlayerCharacter[0] (v2: slot 0xAD, the per-frame poll)
     springVtable: 0x18ac640, // 208070 VTABLE_bhkMouseSpringAction[0] (v2)
     extraFlagsVtable: 0x1771470, // 186869 VTABLE_ExtraFlags[0] (v2)
-    worldScale: 0x17849dc, // 188105 bhkWorld's world scale (v2)
+    worldScaleInverse: 0x177adfc, // 187407 bhkWorld::GetWorldScaleInverse's float: game units per Havok unit (v2.1)
+    worldScale: 0x17849dc, // 188105 bhkWorld::GetWorldScale's float: Havok units per game unit, the cross-check (v2.1)
   },
 };
 // PlayerCharacter.h:696-698 and :712, the older layout's "898", "8C8", "8CC", "AF4" plus the 8 bytes of the newer runtime-data start
@@ -147,8 +159,13 @@ if (off === undefined) {
   const exeEnd = exe.base.add(exe.size);
   const inExe = function (p) { return !isNil(p) && p.compare(exe.base) >= 0 && p.compare(exeEnd) < 0; };
   const lookup = new NativeFunction(at('lookupRef'), 'bool', ['pointer', 'pointer'], 'win64');
-  const scaleRaw = f32(at('worldScale'), 0);
-  const SCALE = scaleRaw > 1 && scaleRaw < 1000 ? scaleRaw : 1;
+  // game units per Havok unit: GetWorldScaleInverse's float, trusted only when GetWorldScale's is its inverse (v2.1); without it the
+  // hold rows print Havok units and say so
+  const scaleInverse = f32(at('worldScaleInverse'), 0);
+  const scaleForward = f32(at('worldScale'), 0);
+  const scaleOk = scaleInverse > 1 && scaleInverse < 1000 && Math.abs(scaleInverse * scaleForward - 1) < 0.001;
+  const SCALE = scaleOk ? scaleInverse : 1;
+  const UNITS = scaleOk ? 'game' : 'havok';
   const mainTid = function () { return u32(ptrAt(at('mainSingleton'), 0), 0x28); };
   const counts = { frames: 0, startGrab: 0, destroyMouseSprings: 0 };
   const attachErrors = [];
@@ -184,11 +201,13 @@ if (off === undefined) {
   const walkBodies = function (root) {
     const out = [];
     const seen = {};
+    let nodes = 0;
     const visit = function (node, depth) {
-      if (isNil(node) || depth > 40 || out.length >= BODIES_MAX) return;
+      if (isNil(node) || depth > 40 || nodes >= NODES_MAX) return;
       const k = String(node);
       if (seen[k]) return;
       seen[k] = true;
+      nodes += 1;
       const co = ptrAt(node, NODE.collision);
       if (!isNil(co)) {
         const bhk = ptrAt(co, COLL.body);
@@ -204,6 +223,8 @@ if (off === undefined) {
       for (let i = 0; i < cap && i < 256 && !isNil(data); i++) visit(ptrAt(data, i * 8), depth + 1);
     };
     visit(root, 0);
+    out.nodes = nodes;
+    out.nodesCapped = nodes >= NODES_MAX;
     return out;
   };
   // the activation block: the ExtraFlags in the reference's extra list, matched by vtable, read without the list's lock
@@ -239,7 +260,10 @@ if (off === undefined) {
     f.bodies = bodies.length;
     f.motionTypes = byType;
     f.animTargeted = bodies.filter(function (x) { return x.animTargeted; }).length;
-    f.bodyList = bodies.map(function (x) { return [x.name, x.type, x.layer, x.animTargeted ? 1 : 0]; });
+    f.nodes = bodies.nodes === undefined ? 0 : bodies.nodes;
+    f.nodesCapped = !!bodies.nodesCapped;
+    f.bodyList = bodies.slice(0, BODIES_MAX).map(function (x) { return [x.name, x.type, x.layer, x.animTargeted ? 1 : 0]; });
+    f.bodyListCut = bodies.length > BODIES_MAX;
     return { facts: f, bodies: bodies };
   };
   // the grab's springs, each named by the grabbed reference's body a word of its Havok action holds
@@ -364,7 +388,7 @@ if (off === undefined) {
                 const v = [f32(x.hkp, MOTION.linV) * SCALE, f32(x.hkp, MOTION.linV + 4) * SCALE, f32(x.hkp, MOTION.linV + 8) * SCALE];
                 return { body: x.name, type: u8(x.hkp, MOTION.type), pos: [r1(f32(x.hkp, MOTION.pos) * SCALE), r1(f32(x.hkp, MOTION.pos + 4) * SCALE), r1(f32(x.hkp, MOTION.pos + 8) * SCALE)], speed: r1(Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2])) };
               });
-              emit({ event: 'hold', frame: counts.frames, handle: hex(f.handle), ref: isNil(held.refr) ? '0x0' : hex(formId(held.refr)), springs: f.springs, bodies: bodies });
+              emit({ event: 'hold', frame: counts.frames, handle: hex(f.handle), ref: isNil(held.refr) ? '0x0' : hex(formId(held.refr)), springs: f.springs, units: UNITS, bodies: bodies });
             }
           } catch (e) { fail('poll', e); }
         },
@@ -372,7 +396,7 @@ if (off === undefined) {
     } catch (e) { attachErrors.push('PlayerCharacter::Update: ' + e); }
   } else attachErrors.push('PlayerCharacter::Update: no slot');
 
-  emit({ event: 'ready', script: 'prop-grab.js', v: 2, version: version, pid: Process.id, base: String(exe.base), mainThread: mainTid(), worldScale: scaleRaw, hooks: resolved, raw: RAW, holdEvery: HOLD_EVERY, bodiesMax: BODIES_MAX, attachErrors: attachErrors });
+  emit({ event: 'ready', script: 'prop-grab.js', v: '2.1', version: version, pid: Process.id, base: String(exe.base), mainThread: mainTid(), worldScale: { inverse187407: scaleInverse, forward188105: scaleForward, ok: scaleOk, units: UNITS }, hooks: resolved, raw: RAW, holdEvery: HOLD_EVERY, bodiesMax: BODIES_MAX, attachErrors: attachErrors });
   let lastFrames = 0;
   setInterval(function () {
     emit({ event: 'liveness', pid: Process.id, counts: JSON.parse(JSON.stringify(counts)), frames10s: counts.frames - lastFrames, mainThread: mainTid() });
