@@ -1,3 +1,6 @@
+// body-impose.js v1.2 DRAFT (thuum, 2026-11-11; the re-review's FIX FIRST applied as written): phase B's setPos and setRot counted every
+// bhkRigidBodyT write twice, at its T setter and again at the bhkRigidBody setter it ends in; they now count at bhkRigidBody's sites
+// alone, the T sites' labels kept as the breakdown (the ids block below). v1.1's header follows.
 // body-impose.js v1.1 DRAFT (thuum, 2026-11-11; the fresh review's FIX FIRST applied as written, ADR-064 amendment A): (1) the scale
 // is bhkWorld::GetWorldScaleInverse's float (187407, game units per Havok unit), where v1 read GetWorldScale's (188105), its inverse
 // (69.99125 and 0.0142875 in the exe's .rdata, lab/.cache/game/exe-1.6.1170, read 2026-11-11; the adr065 read's :781 and :821), so
@@ -76,7 +79,11 @@
 //                     both ATTACHED, each distinct address once, to count the engine's own writes inside 19535 (v1.1: bhkRigidBodyT
 //                     overrides slots 0x33 to 0x37, its 0x35 and 0x36 at 0xebb820 and 0xebb8f0 against bhkRigidBody's 0xe92d90 and
 //                     0xe92e20, the exe's vtables read 2026-11-11); every call this script makes goes through the body's own vtable
-//                     (slots 0x33 to 0x36, :41-44)
+//                     (slots 0x33 to 0x36, :41-44). v1.2: each T setter ends by calling bhkRigidBody's own (0xebb8cc calls 0xe92d90,
+//                     0xebb97b calls 0xe92e20; 19538 calls them through the vtable, slot 0x36 at 0x2dc291 and 0x35 at 0x2dc2df; the
+//                     exe's disassembly, 2026-11-11, HYPOTHESIS by rule 2: T SetRotation is straight-line, T SetPosition skips the base
+//                     call only when its hkpRigidBody at +0x10 is null), so setPos and setRot count at bhkRigidBody's sites alone, once
+//                     a write, and the T sites' labels are the breakdown
 //   Named by the static read alone (pyghidra-mcp on sky-re, 2026-11-03; HYPOTHESIS by rule 2; ids, signatures and roles from
 //   docs/research/adr065-serialize-on-demand-2026-11-03.md: :718 the id table, :810-822 19535, :955 36016, :1023-1031 Q3):
 //   36016  0x6259a0   the live pose into a sub-buffer, void (BGSLoadGameSubBuffer** holder, TESForm* form): ran in apply-on-demand.js
@@ -665,11 +672,14 @@ if (off === undefined || !(FORM_ID > 0)) {
     },
   });
   attach('19538', at('havokBody'), { onEnter() { counts.havokBody += 1; const r = reads[this.threadId]; if (r !== undefined) r.bodies += 1; } });
+  // v1.2: a T body's write enters its T setter and then bhkRigidBody's own (the header's disassembly), so the phase totals count at
+  // bhkRigidBody's sites alone, once a write; a site's label counts every call there, the T labels being the breakdown
   Object.keys(rbSites).forEach(function (k) {
     const site = rbSites[k];
     const label = site.kind + '@' + site.classes.join('+');
+    const total = site.classes.indexOf('bhkRigidBody') >= 0;
     counts[label] = 0;
-    attach(label, site.at, { onEnter() { if (reads[this.threadId] !== undefined) { counts[site.kind] += 1; counts[label] += 1; } } });
+    attach(label, site.at, { onEnter() { if (reads[this.threadId] !== undefined) { if (total) counts[site.kind] += 1; counts[label] += 1; } } });
   });
 
   let reverted = false;
@@ -723,7 +733,7 @@ if (off === undefined || !(FORM_ID > 0)) {
   } else attachErrors.push('PlayerCharacter::Update: no slot');
 
   emit({
-    event: 'ready', script: 'body-impose.js', v: '1.1', version: version, pid: Process.id, base: String(exe.base), mainThread: mainTid(),
+    event: 'ready', script: 'body-impose.js', v: '1.2', version: version, pid: Process.id, base: String(exe.base), mainThread: mainTid(),
     worldScale: { inverse187407: scaleInverse, forward188105: scaleForward, ok: scaleOk },
     update: { slot: rva(updateAt), byId40447: rva(at('playerUpdateById')), agree: !isNil(updateAt) && updateAt.equals(at('playerUpdateById')), replaced: updateReplaced },
     hooks: resolved, attachErrors: attachErrors,
