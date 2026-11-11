@@ -36,7 +36,13 @@ assertion held and no step timed out; red when an assertion failed, a step
 timed out, or the
 server refused a command; error when the lab itself failed (no snapshot, the
 server never became ready, a client never heartbeated, the scenario timed
-out, an assertion that is not in the language).
+out, an assertion that is not in the language, a trace the run's own frida
+step or relaunch arm started that its end could not fetch whole). That last
+is E_RUN_FRIDA_FETCH, naming the script, the seat and the reason (a slice
+still unread after the file read's retries, an exec that failed, bytes that
+do not come to the copy's length); as for a crash at the end, a red run stays
+red and gains the failure. A trace started by hand (POST /lab/frida) is no
+run's evidence: what of it is not fetched is a note.
 
 Server rollback runs in `state` mode by default: stop the server container,
 restore `SERVER_WORLD_DIR` from `SERVER_SNAPSHOTS_DIR/<snapshot>/`, `docker

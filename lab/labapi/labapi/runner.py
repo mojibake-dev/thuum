@@ -220,6 +220,10 @@ class RunRecord:
     # the epoch a run's own timeScale laid at its start (the time block's, wire-rules clock.rs), laid again unchanged at a
     # restart inside the run so the clock resumes where its function says (ADR-068 rung 5's vampire probes)
     clock_epoch: str | None = None
+    # the Frida traces this run's own steps started (a frida step, a relaunch's frida arm) as (client, script name): its
+    # evidence, which its end must fetch whole or the run is a lab fault (E_RUN_FRIDA_FETCH); a trace started by hand
+    # beside it (POST /lab/frida) is not
+    frida: set[tuple[str, str]] = field(default_factory=set)
 
     def progress(self) -> dict[str, Any]:
         if self.verdict != "running":
@@ -845,11 +849,16 @@ class Runner:
         """A trace started outside a run (POST /lab/frida) is still being
         written on its clone, and this run's rollback is about to erase it
         (2026-10-05: the idle-client leak traces went that way). Fetch each one
-        into this run first, once however often it was started."""
+        into this run first, once however often it was started. None of them
+        is this run's evidence, so what of one is not fetched whole is a note,
+        never E_RUN_FRIDA_FETCH: no step of this run started it (an earlier
+        run's own trace lands here only when that run's end never finished its
+        fetch, and it was that run's evidence, its verdict already written),
+        and a rerun could not fetch it again, this reset erasing it either way."""
         keep: list[tuple[str, str]] = []
         for client, script in dict.fromkeys(self.frida_started):
             if client in clients:
-                await self._frida_trace(rec, client, script, ".before-run")
+                rec.notes.extend(f"frida {why}" for why in await self._frida_trace(rec, client, script, ".before-run"))
             else:
                 keep.append((client, script))
         self.frida_started = keep
@@ -1780,6 +1789,7 @@ class Runner:
         if res.exitcode != 0:
             return fail(f"E_RUN_FRIDA: {name} on {client} exited {res.exitcode}: {res.err.strip()[:200]}")
         self.frida_started.append((client, name))
+        rec.frida.add((client, name))
         return True, f"frida {name} started"
 
     async def _screenshot(self, rec: RunRecord, index: int, client: str) -> tuple[bool, str]:
@@ -1934,9 +1944,24 @@ class Runner:
                     name = f"trace-{client}.json"
                     (rec.dir / name).write_text(json.dumps(data, indent=1, sort_keys=True))
                     rec.artifacts.append(name)
+        # the run's own traces (RunRecord.frida) are its evidence: one not fetched whole is a lab fault, as a crash at the
+        # end is (below), so a run that would have been green is error and its run set reruns it (ADR-030), the rerun
+        # starting the trace again, and the failure names the seat, whose next run rolls it back (_seat_fault) and so
+        # closes what a timed-out read left open in its agent; a red stays red and gains it. 20261111-191642-x-prop-blast
+        # stayed green with both seats' traces unread, two notes. A trace started by hand beside the run (POST
+        # /lab/frida) is no evidence of the run's, and a rerun would not start it again: what of it is unread is a note
+        green = rec.verdict == "running" and not rec.failures
+        unread = False
         for client, script in dict.fromkeys(self.frida_started):
-            await self._frida_trace(rec, client, script)
+            lost = await self._frida_trace(rec, client, script)
+            if (client, script) in rec.frida:
+                rec.failures.extend({"step": "end", "kind": "lab", "client": client, "error": f"E_RUN_FRIDA_FETCH: {why}"} for why in lost)
+                unread = unread or bool(lost)
+            else:
+                rec.notes.extend(f"frida {why}" for why in lost)
         self.frida_started.clear()
+        if unread and green:
+            rec.verdict = "error"
         if self.s.hang_evidence:
             for client in self._hung_clients(rec):
                 await self._hang_evidence(rec, client)
@@ -2215,11 +2240,14 @@ class Runner:
             except ProxmoxError as e:
                 rec.notes.append(f"{what}: its {len(paths)} file(s) on {g.name} not removed: {e}")
 
-    async def _frida_trace(self, rec: RunRecord, client: str, script: str, suffix: str = "") -> None:
+    async def _frida_trace(self, rec: RunRecord, client: str, script: str, suffix: str = "") -> list[str]:
+        """A trace from its seat as frida/<client>-<script><suffix>.jsonl, the injector's .out and then the script's
+        .log, each as far as it came back whole. What did not is returned, a line a file ("<script>.<ext> on <client>
+        (<guest>) not fetched whole: <why>"), for the caller to judge: the run's own trace (RunRecord.frida) makes it
+        a lab fault, E_RUN_FRIDA_FETCH (_artifacts); any other trace's is a note."""
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
-            rec.notes.append(f"frida {script}: {client} unmanaged; trace not fetched")
-            return
+            return [f"{script} on {client} not fetched: the seat is unmanaged"]
         (rec.dir / "frida").mkdir(exist_ok=True)
         name = f"{client}-{script}{suffix}.jsonl"
         # frida-inject's stdout, still open for writing while the game runs:
@@ -2231,26 +2259,28 @@ class Runner:
         # read that shares write access, since the script still holds its .log open, and the copy read back
         # in slices (_read_back): read whole, prop-impulse.js's large .log timed out on both seats
         # (20261111-191642-x-prop-blast) and the copy stayed held open in the agent
-        texts = []
+        texts, lost = [], []
         for ext in ("out", "log"):
             src = f"{self.s.client_lab_dir}\\frida\\{script}.{ext}"
             copy = f"{src}.copy"
+            whole = f"{script}.{ext} on {client} ({g.name}) not fetched whole"
             try:
                 cmd = ["powershell", "-NoProfile", "-Command",
                        f"if (Test-Path '{src}') {{ $s = [IO.File]::Open('{src}', 'Open', 'Read', 'ReadWrite'); $d = [IO.File]::Create('{copy}'); "
                        f"$s.CopyTo($d); $d.Close(); $s.Close() }} else {{ Set-Content -Path '{copy}' -Value '' -NoNewline }}"]
                 res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
                 if res.exitcode != 0:
-                    rec.notes.append(f"frida {script}.{ext}: copy exited {res.exitcode}: {res.err.strip()[:200]}")
+                    lost.append(f"{whole}: its copy exited {res.exitcode}: {res.err.strip()[:200]}")
                     continue
                 # one decode of the whole; a character the copy cut mid-write at its end reads as U+FFFD
                 data = await self._read_back(rec, g, copy, f"frida {script}.{ext}")
                 texts.append(data.decode("utf-8", errors="replace"))
             except (ProxmoxError, ValueError) as e:
-                rec.notes.append(f"frida {script}.{ext}: {e}")
+                lost.append(f"{whole}: {e}")
         if texts:
             (rec.dir / "frida" / name).write_text("".join(t if t.endswith("\n") or not t else t + "\n" for t in texts), encoding="utf-8")
             rec.artifacts.append(f"frida/{name}")
+        return lost
 
     @staticmethod
     def _client_names(scenario) -> list[str]:

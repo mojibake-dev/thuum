@@ -380,7 +380,9 @@ slices join as bytes, must come to the copy's length, and are decoded as
 UTF-8 once, so a slice boundary inside a multibyte character splits
 nothing; the copy and its slices leave the seat once read. Read whole, a
 large trace timed out the agent on both seats (20261111-191642-x-prop-blast)
-and left its copy held open there. The token has no FileWrite privilege.
+and left its copy held open there. A run's own trace not fetched whole is a
+lab fault, E_RUN_FRIDA_FETCH (the scenario runner's run end, below). The
+token has no FileWrite privilege.
 
 ## Scenario runner (lab-api on sky-srv)
 
@@ -769,6 +771,21 @@ Every run's end also reads each managed seat's game:
 Any of the three keeps the seat's launch.log as <client>-launch.log and turns
 a run that would have been green into error, which a run set reruns once as
 a lab fault. A red run stays red and gains the failure.
+The end also fetches every Frida trace started on a seat, in slices (the
+client template's section above). One the run's own steps started, a frida
+step's or a relaunch's frida arm's, is the run's evidence: not fetched whole
+(a slice still unread after the file read's retries, a copy or slice exec
+that failed, bytes that do not come to the copy's length) it is
+E_RUN_FRIDA_FETCH, naming the script, the seat and the reason, and it turns a
+would-be green into error the same way, so a run set's rerun starts the trace
+again; a red stays red and gains it. The failure names the seat, so its next
+run rolls it back, as after any E_RUN_* naming it, which also closes a slice
+a timed-out read left open in its agent. 20261111-191642-x-prop-blast stayed
+green with both seats' prop-impulse.js traces unread, two notes. A trace
+started by hand (POST /lab/frida) is no run's evidence, whether the end
+fetches it or the next run fetches it before its rollback as
+frida/<client>-<script>.before-run.jsonl: what of it is not fetched is a
+note.
 A seat whose dump-state shows MessageBoxMenu open is paused unless its
 GameDaysPassed moved in a fresh dump-state one second later: under Skyrim
 Souls RE (apocrypha/layer-souls) a message box leaves the world running, so
