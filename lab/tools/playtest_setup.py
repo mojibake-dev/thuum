@@ -71,6 +71,12 @@ HEADSHOT_PROFILE = 1  # rotfern, test 1: CIF's rule wants base Archery 60 and Ov
 HEADSHOT_PERK = 0x7934B  # Overdraw40
 HEADSHOT_ARCHERY = 60  # the actor value Marksman
 SOULS_DLL = r"Data\SKSE\Plugins\SkyrimSoulsRE.dll"  # the archive's SKSE/Plugins/SkyrimSoulsRE.dll (lab/layer/essentials.tsv)
+# A playtest's client settings (`clientSettings: {<key>: <value>}`; playtest 51's questFragmentLive, D-Q10 A, until ADR-070
+# moves it to the server's settings): keys of the client's skymp5-client-settings.txt, read once at the client's start, so
+# ready's relaunch sets them while each game is stopped, by the probes' own relaunch file change (lab-api's
+# runner._relaunch_files_ps on the lab's default game, the entries checked by scenario._relaunch_args). The file keeps them
+# through the playtest's later relaunches; a clone's rollback restores the dist's copy.
+CLIENT_SETTINGS_FILE = "Data/Platform/Plugins/skymp5-client-settings.txt"
 # The camp's two rules, from profile 48 (playtest 47, 2026-11-05). Outside: both seats logged in inside Bleak Falls Temple
 # 0x371de and neither game ran the cell's OnCellLoad, so the pillars sat empty and the darts unarmed; after the restart
 # outside the entrance, both walked in by a real cell load and every scripted item worked. A camp inside a cell needs
@@ -187,9 +193,37 @@ def check_profile(p: Any, n: int) -> dict[str, Any]:
     if ((p.get("after") or {}).get("readback")) not in (None, "percentages"):
         raise ProfileError("after.readback is percentages or absent")
     _check_lay(p.get("lay"))
+    if "clientSettings" in p:
+        client_settings_files(p["clientSettings"])
     if n >= STANDING_FROM:
         _standing(p)
     return p
+
+
+def _labapi() -> tuple[Any, Any, Any]:
+    """lab-api's runner, scenario grammar and settings defaults (playtest_setup runs in lab/labapi's uv project)."""
+    sys.path.insert(0, str(ROOT / "lab" / "labapi"))
+    from labapi import config, runner, scenario
+
+    return runner, scenario, config.Settings()
+
+
+def client_settings_files(settings: Any) -> list[dict[str, Any]]:
+    """A profile's clientSettings as a relaunch's JSON file changes, checked as a scenario's are."""
+    if not isinstance(settings, dict) or not settings:
+        raise ProfileError(f"clientSettings is a map of skymp5-client-settings.txt keys to values, got {settings!r}")
+    _, scenario, _ = _labapi()
+    try:
+        return scenario._relaunch_args({"files": [{"json": CLIENT_SETTINGS_FILE, "key": k, "value": v} for k, v in settings.items()]})["files"]
+    except ValueError as e:
+        raise ProfileError(f"clientSettings: {e}") from None
+
+
+def client_settings_ps(settings: Any) -> str:
+    """The PowerShell that sets a profile's clientSettings in a stopped game (playtest-relaunch.sh runs it between the stop
+    and the launch task): the runner's own text, with no stop command of its own."""
+    runner, _, s = _labapi()
+    return runner._relaunch_files_ps(s.client_lab_dir, s.game_default, client_settings_files(settings), "")
 
 
 def _check_lay(lay: Any) -> None:
@@ -570,10 +604,17 @@ def ready(n: int) -> int:
         since = _srv("date -u +%Y-%m-%dT%H:%M:%SZ").strip()
     except Exception:
         since = None
-    procs = [subprocess.Popen([str(ROOT / "lab/tools/playtest-relaunch.sh"), c], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True) for c in ("c1", "c2")]
+    env = dict(os.environ)
+    if p.get("clientSettings"):  # set in each stopped game before its launch task, read back by the relaunch
+        env["CLIENT_SETTINGS_PS"] = base64.b64encode(client_settings_ps(p["clientSettings"]).encode()).decode()
+    procs = [subprocess.Popen([str(ROOT / "lab/tools/playtest-relaunch.sh"), c], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=env)
+             for c in ("c1", "c2")]
     for c, pr in zip(("c1", "c2"), procs):
         out = (pr.communicate()[0] or "").strip().splitlines()
         (rep.ok if pr.returncode == 0 else rep.fail)(f"{c}: {out[-1] if out else 'no output'}")
+        if p.get("clientSettings"):
+            got = [line for line in out if line.startswith("set ")]
+            (rep.ok if len(got) == len(p["clientSettings"]) else rep.fail)(f"{c}: client settings {'; '.join(got) or 'none set'}")
     online = sorted(x.get("profileId") for x in state({"kind": "online"}).get("players", []))
     want = sorted(s["profile"] for s in p["seats"])
     (rep.ok if online == want else rep.fail)(f"online {online} (wanted {want})")

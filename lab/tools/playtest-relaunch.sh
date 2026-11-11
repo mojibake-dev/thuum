@@ -64,14 +64,24 @@ active=$(curl -fsS -m 15 "$api/status" | python3 -c 'import sys,json; print(json
 hold "playtest (playtest-relaunch)"
 [ -z "$active" ] || { echo "a lab run is active: $active" >&2; exit 3; }
 keep
-ps='Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 3; Start-ScheduledTask -TaskName sky-lab-launch; "relaunch started " + (Get-Date -Format HH:mm:ss)'
+# a playtest's client settings (playtest_setup.py's ready: a profile's clientSettings as base64 PowerShell, the runner's own
+# relaunch file change) set in the stopped game before its launch task; each prints a "set ..." line, echoed below
+settings=""
+[ -z "${CLIENT_SETTINGS_PS:-}" ] || settings=$(printf '%s' "$CLIENT_SETTINGS_PS" | base64 -d)
+ps='Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 3'
+[ -z "$settings" ] || ps="$ps
+$settings"
+ps="$ps"'
+Start-ScheduledTask -TaskName sky-lab-launch; "relaunch started " + (Get-Date -Format HH:mm:ss)'
 # the guest agent once answered nothing right after a stream started
 # (2026-10-09 11:55, sky-c2: the game stopped, the task never started); the
 # same command again is safe, stopping nothing new and starting the task
 for attempt in 1 2; do
   out=$(ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$ps")" 2>&1 || true)
   line=$(printf '%s' "$out" | python3 -c 'import sys,json; print((json.load(sys.stdin).get("out-data") or "").strip().splitlines()[-1])' 2>/dev/null || true)
-  [ -n "$line" ] && { echo "$line"; break; }
+  [ -n "$line" ] && {
+    [ -z "$settings" ] || { printf '%s' "$out" | python3 -c 'import sys,json; [print(l) for l in (json.load(sys.stdin).get("out-data") or "").splitlines() if l.startswith("set ")]' || true; }
+    echo "$line"; break; }
   echo "the guest agent answered no relaunch line (attempt $attempt): ${out:0:200}" >&2
   [ "$attempt" = 2 ] && exit 5
   sleep 5

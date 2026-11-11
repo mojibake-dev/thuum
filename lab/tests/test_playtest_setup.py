@@ -398,5 +398,39 @@ class PlaytestProfile(unittest.TestCase):
                 load_profile(int(f.stem))
 
 
+@needs_deps
+class PlaytestClientSettings(unittest.TestCase):
+    """Playtest 51's questFragmentLive (D-Q10 A): a profile's clientSettings become the runner's own relaunch file
+    changes, set in each stopped game by ready's relaunch."""
+
+    def test_settings_become_the_runners_json_changes(self):
+        from playtest_setup import client_settings_files, client_settings_ps
+
+        self.assertEqual(client_settings_files({"questFragmentLive": True}),
+                         [{"json": "Data/Platform/Plugins/skymp5-client-settings.txt", "key": "questFragmentLive", "value": True}])
+        ps = client_settings_ps({"questFragmentLive": True})
+        self.assertIn("C:\\sky-lab\\games\\1.6.1170.txt", ps)
+        self.assertIn("Data\\Platform\\Plugins\\skymp5-client-settings.txt", ps)
+        self.assertIn("-NotePropertyName 'questFragmentLive' -NotePropertyValue $true -Force", ps)
+        self.assertIn("'set questFragmentLive in ' + $p", ps)
+        self.assertNotIn("Stop-Process", ps)  # playtest-relaunch.sh stops the game itself, before this text runs
+
+    def test_a_bad_setting_is_refused(self):
+        from playtest_setup import ProfileError, client_settings_files
+
+        for bad in ({}, [], "questFragmentLive", {"a b": True}, {"questFragmentLive": None}, {"k": "it's"}, {"k": [1]}):
+            with self.subTest(bad=bad), self.assertRaises(ProfileError):
+                client_settings_files(bad)
+
+    def test_a_profile_carries_them(self):
+        import yaml
+        from playtest_setup import ProfileError, check_profile
+
+        p = check_profile(yaml.safe_load(PROFILE + "clientSettings: {questFragmentLive: true}\n"), 24)
+        self.assertEqual(p["clientSettings"], {"questFragmentLive": True})
+        with self.assertRaises(ProfileError):
+            check_profile(yaml.safe_load(PROFILE + "clientSettings: {questFragmentLive: null}\n"), 24)
+
+
 if __name__ == "__main__":
     unittest.main()
