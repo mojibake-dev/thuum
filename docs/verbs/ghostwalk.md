@@ -247,6 +247,23 @@ positions' age.
   061001 :222-233), a race between the two seats' logins; both red logins
   were served an empty spell list (060821 c1-console.log :843, 061001 :849),
   so the Eye Fix suspect is unlikely. x-ghostwalk-warm-read reads it.
+  x-ghostwalk-warm-read v1 (4b6b7eaf) GREEN, 20261111-172354, both seats
+  relaunched: the return ran on all three casts, the second after a mid-run
+  relaunch of c1 (bLandings 2, bEyeAdded 2, bSeam 1), so a warm relaunch is
+  not the cause (CONFIRMED). Its start armed no acting scope (aActing0 0,
+  aArmed 0), while both reds' starts ran c2's Companions radiants' Setup in
+  c1's game with Game.GetPlayer swapped for c2's figure (CR02 25185, CR08
+  25251, CR06 c18e1, CR05 2522f; 060821 c1.log :222-245, 061001 :222-230):
+  the loss tracks that start race, three greens without it and two reds with
+  it (HYPOTHESIS: how a scope armed about 25 s before the cast, its arms of
+  10 s, reaches Ghostwalk's own stack is unread). Both reds also cast from a
+  cell c1 did not host (060821 :256, a trigger entry "in a cell this seat
+  does not host") and lost cells 9755, bb8f and bb90 4 s after the cast
+  (:258-260). The settling read reproduces the race on purpose: c2 starts a
+  Companions radiant whose Setup calls Game.GetPlayer, relayed to c1, and c1
+  casts Ghostwalk inside the scope's window and after it, with the gate's
+  OnEffectFinish dispatch traced. A scripting read, after playtest 51 by
+  ADR-067 decision 7's order.
   Why is unread (HYPOTHESIS): rung 5's effect-event and acting-scope work
   (fork 9db243a0) is one suspect, the server record carrying the earlier
   run's Eye Fix ability 1a0cb7e1 into the warm run is another. The read that
