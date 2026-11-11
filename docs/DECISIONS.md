@@ -4996,6 +4996,38 @@ Rung 5's second head, Eli's later words (2026-11-10, in thuum-fa's session):
     quest's stop is never recorded, so no replayed stop drops it (:249). Unread at T3. Taken over B (a platform path that starts
     an event quest outside the Story Manager for a login replay, a trace first) and C (a declared limit for 51).
 
+Train 52's own decisions, and D-Q9 B built (the train 52 plan, lab/.cache/drafts/train52-plan.md section 6, 2026-11-11; fork
+m4-train-52 c3f9d175, pushed with its pipelines green, its stage after playtest 51). D-R2 B, D-H1 B and D-S4 A are the plan's
+recommendations taken as the train's defaults, not Eli's words: each refines words he accepted (D-R1 C; ADR-068 decision 6 and
+D-S2 B; ADR-066's hand-off), so the merge does not wait on them, and he may overturn any at review, this file then recording
+whichever stands. D-S4 B would change hand-off timing and is his alone. The verb docs record each as built, T3 pending
+(docs/verbs/papyrus-events.md and quest-stage.md, "Train 52"):
+- D-R2 B, a leveled landing's check (inside D-R1 C: the seat's grant is its own record): each landing of a leveled AddItem's roll
+  (ScriptCall's `landed`, SCHEMA_VERSION 44) is checked against the bases its list can roll, read from the game files (the list's
+  entries with nested lists followed, LeveledListUtils::Reach), and a base outside is refused E_SCRIPTCALL_ROLL; built on
+  9d635d6b, its write one record edit a call since 1a70a16b. A consistency check, not a bound: it refuses no genuine roll while
+  the server's reach is the engine's list, which two cases may break, HYPOTHESIS both (an entry LeveledItem.AddForm added at run
+  time, which persists in saves; a COED inside the LVLO run libespm reads as contiguous, a COED census of the masters deciding
+  it). Taken over A (each landing recorded as reported, D-R1 C's letter) and C (the server rolls the list itself, R0: it
+  reimplements what the seat's engine just did, against the design law, and the player sees the engine's number replaced).
+- D-H1 B, what an effect's local helper may be (inside ADR-068 decision 6 and D-S2 B): an activator, a static or a light, the
+  census's helper kinds that simulate nothing (ACTI 10, STAT 7, LIGH 2 of the 19 helper spells); furniture, containers, actors,
+  items, explosions and hazards keep the owner's judgment. A PlaceAtMe of one inside this seat's own player's effect runs whatever
+  its subject's owner and places this seat's local helper, R3 (built on ea6da0a1). Taken over A (an activator alone, Crackle's
+  FXEmptyActivator) and C (no effect rule, b-second-hand's class left broken).
+- D-S4 A, a departing host's release read behind a successor (inside ADR-066's hand-off): the grace read, the cell's known
+  references read at the host's own epoch when it reports the cell unloaded (client only, no timing change; built on 1c856c66). It
+  misses the grid case (a cell that leaves the server's 3x3 while the host's engine still loads it sends no unload report) and,
+  its reads spending the one shared send bucket, can miss a busy cell's grace (HYPOTHESIS). Taken over C (the refusal left as
+  designed and the loss declared). D-S4 B, the grant waiting a bound for the release read after a release whose old host is still
+  connected (the cells rule, a new RELEASE_READ_MS, UNMEASURED), covers every case at the cost of the bound added to every warm
+  hand-off: a feel change, Eli's alone, put to him only if a read shows the grid case.
+- D-Q9 B (Eli's, the entry above) built on fork m4-train-52 8c53b76c as the server setting questPlayerAliasCause, "seat" the
+  default (D-Q9 B) and "world" D-Q9 A, ADR-070's axis: under "seat" a world-caused report rooted at OnLocationChange on a script
+  the game files attach to player aliases alone is judged as the seat's own (a run word refused E_QUEST_CAUSE, a report judged a
+  start not recorded, a plain stage crossing as before); server only, no deployed settings file changes. Its T3 waits on a census
+  for a quest whose player alias script handles OnLocationChange and calls Start, Stop or SetStage.
+
 ## ADR-069: Rotfern's Fixes: engine fixes ship to every player as one SKSE DLL, one detour per lab-read site, never as a lab-only patch
 
 Status: ACCEPTED 2026-11-06 by Eli, to apocrypha directly, after asking what the fixes are ("wait so what ARE the engine fixes???
