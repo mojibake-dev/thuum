@@ -366,7 +366,12 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   +0x32), emitted on change and once a second while awake. Expected on the
   simulating seat: the frames reach 5 and the island leaves the active array
   within one sample interval of the seat's "stream ... asleep" line; the
-  non-owner's Keyframed copy reads type 4. Written 2026-11-03; never run.
+  non-owner's Keyframed copy reads type 4. Written 2026-11-03; never run. v2
+  (2026-11-11, x-prop-engine v1): the poll runs once a game frame inside the
+  player's own update instead of on a 100 ms timer on Frida's thread, each
+  row with its frame, the change key on the thresholds (an awake body every
+  15 frames besides); the ready row's pid, base, Main's thread and first
+  bytes, a liveness row every 10 s. E10's verdict waits for ADR-071's cap.
 - prop-launch.js: prop-contact.js plus the body's motion at each contact and before and after every impulse push (the hkpEntity's
   embedded motion: type, position, linear velocity and its length, angular speed, inverse mass; offsets from hkpEntity.h, hkpMotion.h,
   hkMotionState.h, hkTransform.h), for D73's open item: a resting Dynamic basket thrown out of reach by a standing capsule contact (push

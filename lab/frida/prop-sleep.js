@@ -1,3 +1,16 @@
+// prop-sleep.js v2 DRAFT (thuum, 2026-11-11; ADR-071 rung 0, x-prop-engine v1): E10 is a timing read, and v1 polled on a 100 ms timer
+// on Frida's own thread, the shape that stalled a seat (x-trap-rock-hang 20261105-231108: the memory note frida-lab-script-pitfalls,
+// "a trace samples once per frame from a game hook, never from a timer callback"). v2 runs the same poll body once a game frame
+// inside the player's own update, VTABLE_PlayerCharacter[0] slot 0xAD, Actor::Update(float) (CommonLibSSE-NG
+// include/RE/Offsets_VTABLE.h:2231, `just addr 208040` 0x18ab9c0, 2026-11-11; include/RE/A/Actor.h:371), rock-motion-trace.js v1.2's
+// idiom; each row carries the frame, so the inactive frames read against frames; POLL_MS is gone, and the change key holds the
+// thresholds (the inactive frames capped at 6, no integrate counter) with an awake body printed every AWAKE_EVERY (15) frames. The ready row adds the pid (against
+// the run's c<N>-skyrim-platform-pid<N>.log: the memory note lab-frida-wrong-process), base, Main's thread (403449, Main** with threadID
+// +0x28, Offsets.h:383, Main.h:87) and each hook's first bytes read before the attach; every attach is caught into attachErrors; a
+// liveness row every 10 s carries each hook's count before its filter, the frames and the slowest sample. The watch's reads, its
+// rows and its rules are v1's. E10's verdict counts only on a run after ADR-071 decision 7's cap lands (60 fps, a static 1/60 step;
+// docs/research/physics-leg-2026-11-11.md step 5): before it, its rows are the pre-cap baseline. v2's params: RAW (false),
+// AWAKE_EVERY (15). Review before its first run (ADR-064 rule A). v1's header follows.
 // prop-sleep.js: the engine's own sleep of a prop against the client's stand-in (thuum docs/engine/havok-props.md row E10;
 // docs/verbs/prop-physics.md A3, A4 and :348's SLEEP_AFTER_MS and STIR_UNITS). The client calls a simulated body asleep after
 // 500 ms under 0.25 units of stir and sends one reliable asleep sample ("stream <refr> asleep" in the seat's console log); Havok
@@ -18,7 +31,6 @@
 // (prop-contact.js), this script 2026-11-03.
 const PARAMS = (typeof LAB_PARAMS === 'object' && LAB_PARAMS) ? LAB_PARAMS : {};
 const RAW = PARAMS.RAW === undefined ? false : !!PARAMS.RAW;
-const POLL_MS = PARAMS.POLL_MS === undefined ? 100 : Number(PARAMS.POLL_MS);
 function emit(obj) { obj.t = Date.now(); send(obj); console.log(JSON.stringify(obj)); }
 
 const OFFSETS = {
@@ -27,6 +39,8 @@ const OFFSETS = {
     impulseBody: 0xea1600, // 78304 the surface interaction's impulse body
     findCollidableRef: 0x3fd3d0, // 26003 TESHavokUtilities::FindCollidableRef
     proxyControllerVtable: 0x19edff0, // 240560 the proxy controller's bhkCharacterController vtable (at +0x10)
+    playerVtable: 0x18ab9c0, // 208040 VTABLE_PlayerCharacter[0] (v2: slot 0xAD, the per-frame poll)
+    mainSingleton: 0x31872c0, // 403449 Main** (v2)
   },
 };
 // hkpEntity.h: simulationIsland 0x130, motion 0x150; hkpMotion.h: type +0x10, deactivationIntegrateCounter +0x11,
@@ -66,6 +80,11 @@ const f32 = function (p, o) { try { return p.add(o).readFloat(); } catch (e) { r
 const ptrAt = function (p, o) { try { return p.add(o).readPointer(); } catch (e) { return NULL; } };
 const r1 = function (x) { return Math.round(x * 10) / 10; };
 const raw = function (args) { return RAW ? [String(args[0]), String(args[1]), String(args[2]), String(args[3])] : undefined; };
+const firstBytes = function (p) {
+  try { return Array.from(new Uint8Array(p.readByteArray(8))).map(function (b) { return ('0' + b.toString(16)).slice(-2); }).join(' '); } catch (e) { return 'unreadable'; }
+};
+const UPDATE_SLOT = 0xad; // Actor::Update(float a_delta), include/RE/A/Actor.h:371
+const AWAKE_EVERY = PARAMS.AWAKE_EVERY === undefined ? 15 : Number(PARAMS.AWAKE_EVERY); // v2: frames between an awake body's rows
 
 // hkpWorldObject.h: the embedded hkpLinkedCollidable's offset (the header's comment column; verified at write time)
 const COLLIDABLE_IN_WORLD_OBJECT = 0x20;
@@ -78,6 +97,15 @@ if (off === undefined) {
   const at = function (name) { return exe.base.add(off[name]); };
   const findRef = new NativeFunction(at('findCollidableRef'), 'pointer', ['pointer']);
   const proxyVtable = at('proxyControllerVtable');
+  const mainTid = function () { const m = ptrAt(at('mainSingleton'), 0); return m.isNull() ? -1 : u32(m, 0x28); };
+  const counts = { contactAdded: 0, impulseBody: 0, frames: 0 };
+  const attachErrors = [];
+  const updateAt = ptrAt(at('playerVtable'), UPDATE_SLOT * Process.pointerSize);
+  const hooks = {
+    contactAdded: { id: 79131, at: String(at('contactAdded')), bytes: firstBytes(at('contactAdded')) },
+    impulseBody: { id: 78304, at: String(at('impulseBody')), bytes: firstBytes(at('impulseBody')) },
+    playerUpdate: { id: 208040, at: String(updateAt), bytes: updateAt.isNull() ? 'no slot' : firstBytes(updateAt) },
+  };
 
   // the sleep fields of one body: its motion's type, the deactivation counters, the island's flags, its speed
   const sleepFacts = function (body) {
@@ -119,15 +147,19 @@ if (off === undefined) {
     try { ref = formId(findRef(c)); } catch (e) { ref = -1; }
     return { layer: layer, ref: hex(ref), ownerType: type, owner: type === 1 ? owner : NULL };
   };
+  try {
   Interceptor.attach(at('contactAdded'), {
     onEnter(args) {
+      counts.contactAdded += 1;
       if (!ptrAt(args[0], 0x10).equals(proxyVtable)) return; // the player's proxy alone
       const b = collidableFacts(ptrAt(args[2], 0x30));
       if (b.layer === 4 && b.ownerType === 1) addWatch(b.owner, b.ref);
     },
   });
+  } catch (e) { attachErrors.push('contactAdded: ' + e); }
+  try {
   Interceptor.attach(at('impulseBody'), {
-    onEnter(args) { this.body = ptrAt(args[1], 0x30); },
+    onEnter(args) { counts.impulseBody += 1; this.body = ptrAt(args[1], 0x30); },
     onLeave(retval) {
       if (this.body.isNull()) return;
       let ref = 0;
@@ -135,8 +167,11 @@ if (off === undefined) {
       addWatch(this.body, hex(ref));
     },
   });
+  } catch (e) { attachErrors.push('impulseBody: ' + e); }
 
-  setInterval(function () {
+  // v2: the poll once a game frame inside the player's own update (v1's body, unchanged but for the frame on each row)
+  let sampleMaxMs = 0;
+  const poll = function () {
     const now = Date.now();
     for (const k in watched) {
       const w = watched[k];
@@ -148,13 +183,36 @@ if (off === undefined) {
         continue;
       }
       w.errors = 0;
-      const key = [f.type, f.integrateCounter, f.inactiveFrames[0], f.inactiveFrames[1], f.inActiveArray, f.activeMark].join('/');
+      // v2: polled every frame, so the key holds the thresholds, not the counters' every value (the integrate counter moves each
+      // step): the inactive frames capped at 6, so the climb to 5 prints each frame and then stops; an awake body prints every
+      // AWAKE_EVERY frames besides
+      const key = [f.type, Math.min(f.inactiveFrames[0], 6), Math.min(f.inactiveFrames[1], 6), f.inActiveArray, f.activeMark].join('/');
       const awake = f.inActiveArray === 1 || f.speed > 0.1;
-      if (key === w.lastKey && !(awake && now - w.lastEmit >= 1000)) continue;
+      if (key === w.lastKey && !(awake && counts.frames - (w.lastFrame || 0) >= AWAKE_EVERY)) continue;
+      w.lastFrame = counts.frames;
       w.lastKey = key;
       w.lastEmit = now;
-      emit(Object.assign({ event: 'sleep', ref: w.ref, asleepByFrames: f.inactiveFrames[0] >= FRAMES_TO_DEACTIVATE && f.inactiveFrames[1] >= FRAMES_TO_DEACTIVATE }, f));
+      emit(Object.assign({ event: 'sleep', ref: w.ref, frame: counts.frames, asleepByFrames: f.inactiveFrames[0] >= FRAMES_TO_DEACTIVATE && f.inactiveFrames[1] >= FRAMES_TO_DEACTIVATE }, f));
     }
-  }, POLL_MS);
-  emit({ event: 'ready', version: version, poll_ms: POLL_MS, raw: RAW });
+  };
+  if (!updateAt.isNull()) {
+    try {
+      Interceptor.attach(updateAt, {
+        onEnter() {
+          counts.frames += 1;
+          const t0 = Date.now();
+          try { poll(); } catch (e) { emit({ event: 'error', where: 'poll', error: String(e) }); }
+          const dt = Date.now() - t0;
+          if (dt > sampleMaxMs) sampleMaxMs = dt;
+        },
+      });
+    } catch (e) { attachErrors.push('playerUpdate: ' + e); }
+  } else attachErrors.push('playerUpdate: no slot');
+  emit({ event: 'ready', version: version, v: 2, raw: RAW, pid: Process.id, base: String(exe.base), mainThread: mainTid(), hooks: hooks, attachErrors: attachErrors });
+  let lastFrames = 0;
+  setInterval(function () {
+    emit({ event: 'liveness', pid: Process.id, counts: JSON.parse(JSON.stringify(counts)), frames10s: counts.frames - lastFrames, sampleMaxMs: sampleMaxMs, watched: Object.keys(watched).length, mainThread: mainTid() });
+    lastFrames = counts.frames;
+    sampleMaxMs = 0;
+  }, 10000);
 }
