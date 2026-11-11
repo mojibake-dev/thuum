@@ -1,3 +1,15 @@
+// prop-impulse.js v1.1 DRAFT (thuum, 2026-11-11; the fresh review's FIX FIRST applied as written, ADR-064 amendment A): (1) the scale
+// is GetWorldScaleInverse's float, 187407, game units per Havok unit, where v1 read GetWorldScale's, 188105, its inverse (0.0142875
+// in the exe's .rdata at 0x17849dc, 69.99125 at 0x177adfc: read from lab/.cache/game/exe-1.6.1170 on 2026-11-11, the numbers the
+// adr065 read gives at :781 and :821), so v1's sanity test failed and every position and speed printed in Havok units under game
+// units' names; v1.1 uses the scale only when the two floats multiply to 1, prints both in the ready row, labels each body row's
+// units, and never falls back to 1: with no scale the game-unit fields print null and the speed band reads -1 (unknown), the raw
+// Havok vectors still printed; (2) the two replacements call the original through NativeFunctions with exceptions 'propagate'
+// (apply-on-demand.js:831), so an engine fault inside the original is the engine's as without Frida, and the nest is popped in a
+// finally; each NativeCallback is held in a binding the liveness row reads, so it outlives a revert; (3) TTL_S (1800, longer than
+// x-prop-blast's 1200 s) reverts both replacements from Frida's own thread, so a second instance on the same game can replace them
+// again (one replacement a function a process; before the revert, relaunch the seat first). v1's header follows, corrected in place
+// where it named the scale.
 // prop-impulse.js v1 DRAFT (thuum, 2026-11-11; ADR-071 rung 0, docs/research/physics-leg-2026-11-11.md H2, H3, H4): which engine
 // call pushes a prop at a spell's or a shout's impact, what names its cause, whether a remote figure's projectile copy pushes the
 // watcher's own copies, and whether a hit body's island merges with its neighbours before it moves. New, so a fresh review comes
@@ -32,8 +44,10 @@
 //                     cause handle's reference; each resolved handle keeps one reference count, as prop-grab.js's and face-dump.js's
 //                     lookups do, and a handle is looked up once and cached)
 //   403449 0x31872c0  Main's singleton, a Main** (Offsets.h:383, src/RE/M/Main.cpp:8-12); threadID at +0x28 (include/RE/M/Main.h:87)
-//   188105 0x17849dc  bhkWorld::GetWorldScale's float, include/RE/B/bhkWorld.h:42-46 RELOCATION_ID(231896, 188105): game units per
-//                     Havok unit, read once at load (positions and speeds print in game units)
+//   187407 0x177adfc  bhkWorld::GetWorldScaleInverse's float, include/RE/B/bhkWorld.h:48-52 RELOCATION_ID(230692, 187407): game units
+//                     per Havok unit (69.99125), read once at load; positions and speeds print in game units by it (v1.1)
+//   188105 0x17849dc  bhkWorld::GetWorldScale's float, bhkWorld.h:42-46 RELOCATION_ID(231896, 188105): Havok units per game unit
+//                     (0.0142875), printed beside it in the ready row and used only as the cross-check (their product is 1)
 //   208040 0x18ab9c0  VTABLE_PlayerCharacter[0], include/RE/Offsets_VTABLE.h:2231; slot 0xAD Actor::Update(float), include/RE/A/Actor.h:371:
 //                     the per-frame sampler (rock-motion-trace.js v1.2's idiom: a trace samples once a game frame from a game hook,
 //                     never from a timer, the memory note frida-lab-script-pitfalls), ATTACHED; the ready row prints the slot's
@@ -78,7 +92,7 @@
 //
 // Rows, one JSON line each through console.log (lab-api's preamble writes them to the trace's .log every 250 ms) and send():
 //   {event:'ready'} once: version, pid (read it against the run's c<N>-skyrim-platform-pid<N>.log before any row: the memory note
-//     lab-frida-wrong-process), base, mainThread, worldScale, each hook's id, rva, address, mode and live first bytes read BEFORE any
+//     lab-frida-wrong-process), base, mainThread, worldScale (both floats and whether they agree), each hook's id, rva, address, mode and live first bytes read BEFORE any
 //     attach (e9 there means another hook patched the site first), the update slot against 40447, params, attachErrors.
 //   {fn:'AddExplosionImpulse'|'ScaleGameplayImpulseForce'|'SetLinearImpulse'} per call (the first ROWS of each; every call counted):
 //     seq, tid, main (the tid equals Main's), frame, the body's reference and base, its facts before (and after, for 26005 and
@@ -89,9 +103,11 @@
 //   {fn:'AddImpact'} per projectile impact: the projectile, its base, its shooter, the reference it hit, the collidable's reference
 //     and layer, the impact point and velocity.
 //   {fn:'body'} for POLL_MS after each impulse call, sampled once a game frame from the player's update: every body an impulse call
-//     named and every member of their islands (at most WATCH_MAX), a row on change (motion type, the speed's band: under 1, under
-//     50, faster; the island's pointer, size or active bit; the inactive frames reaching five) and every ROW_EVERY_FRAMES frames
-//     while moving; each sample re-walks a reference's 3D first, so a rebuilt body is never read through a stale pointer.
+//     named and every member of their islands (at most WATCH_MAX), a row on change (motion type, the speed's band in game units a
+//     second: under 1, under 50, faster, or -1 with no scale; the island's pointer, size or active bit; the inactive frames reaching
+//     five) and every ROW_EVERY_FRAMES frames while moving; each sample re-walks a reference's 3D first, so a rebuilt body is never
+//     read through a stale pointer. Each body's facts carry units ('game', or 'havok' when the scale did not read), the raw Havok
+//     velocity vHavok beside the game-unit v, pos and speed.
 //   {fn:'island'} when a watched body's island pointer or size changes: the members (at most ISLAND_MAX) by reference, each
 //     joining the watch.
 //   {fn:'window'} when a poll window closes, then one final body row per watched body.
@@ -102,8 +118,8 @@
 // Params (LAB_PARAMS): POLL_MS (2000, the plan's 2 s), ROW_EVERY_FRAMES (6), ROWS (400 per row family), REPLACE (true; false
 // attaches 26005 and 26004 instead and prints no force), WATCH (reference ids, numbers or hex strings: rows tag them; a body joins
 // the sampler by an impulse call or by sharing a hit body's island, never by id alone, since CommonLib's TESForm::LookupByID is an
-// inline template with no Address Library id), WATCH_MAX (32), ISLAND_MAX (16). 1.6.1170 only. Attach, replace and memory reads;
-// the only engine calls are 26003 and 12332, both lookups.
+// inline template with no Address Library id), WATCH_MAX (32), ISLAND_MAX (16), TTL_S (1800: the replacements' life, v1.1).
+// 1.6.1170 only. Attach, replace and memory reads; the only engine calls are 26003 and 12332, both lookups.
 const PARAMS = (typeof LAB_PARAMS === 'object' && LAB_PARAMS) ? LAB_PARAMS : {};
 const num = function (v, d) { return (v === undefined || v === null) ? d : Number(v); };
 const idList = function (v) {
@@ -116,6 +132,7 @@ const REPLACE = PARAMS.REPLACE === undefined ? true : !!PARAMS.REPLACE;
 const WATCH = idList(PARAMS.WATCH);
 const WATCH_MAX = num(PARAMS.WATCH_MAX, 32);
 const ISLAND_MAX = num(PARAMS.ISLAND_MAX, 16);
+const TTL_S = num(PARAMS.TTL_S, 1800);
 function emit(obj) { obj.t = Date.now(); send(obj); console.log(JSON.stringify(obj)); }
 
 const OFFSETS = {
@@ -126,7 +143,8 @@ const OFFSETS = {
     findCollidableRef: 0x3fd3d0, // 26003 TESHavokUtilities::FindCollidableRef
     lookupRef: 0x179710, // 12332 LookupReferenceByHandle
     mainSingleton: 0x31872c0, // 403449 Main**
-    worldScale: 0x17849dc, // 188105 bhkWorld's world scale
+    worldScaleInverse: 0x177adfc, // 187407 bhkWorld::GetWorldScaleInverse's float: game units per Havok unit (v1.1)
+    worldScale: 0x17849dc, // 188105 bhkWorld::GetWorldScale's float: Havok units per game unit, the cross-check
     playerVtable: 0x18ab9c0, // 208040 VTABLE_PlayerCharacter[0]
     playerUpdateById: 0x732660, // 40447, the cross-check for slot 0xAD
     explosionVtable: 0x18c06a8, // 209940 VTABLE_Explosion[0]
@@ -203,9 +221,12 @@ if (off === undefined) {
   const rva = function (p) { try { return hex(p.sub(exe.base).toUInt32()); } catch (e) { return String(p); } };
   const findRef = new NativeFunction(at('findCollidableRef'), 'pointer', ['pointer'], 'win64');
   const lookup = new NativeFunction(at('lookupRef'), 'bool', ['pointer', 'pointer'], 'win64');
-  const scaleRaw = f32(at('worldScale'), 0);
-  const scaleOk = scaleRaw > 1 && scaleRaw < 1000;
-  const SCALE = scaleOk ? scaleRaw : 1;
+  // game units per Havok unit: GetWorldScaleInverse's float, trusted only when GetWorldScale's float is its inverse; no fallback
+  const scaleInverse = f32(at('worldScaleInverse'), 0);
+  const scaleForward = f32(at('worldScale'), 0);
+  const scaleOk = scaleInverse > 1 && scaleInverse < 1000 && Math.abs(scaleInverse * scaleForward - 1) < 0.001;
+  const SCALE = scaleOk ? scaleInverse : NaN;
+  const UNITS = scaleOk ? 'game' : 'havok';
   const mainTid = function () { return u32(ptrAt(at('mainSingleton'), 0), 0x28); };
   let mainThread = mainTid();
   const counts = { frames: 0 };
@@ -301,10 +322,11 @@ if (off === undefined) {
     const m = hkp.add(ENTITY.motion);
     const fi = u32(hkp, FILTER_INFO);
     const v = v3(m, MOTION.linV, SCALE);
+    const vHavok = v3(m, MOTION.linV, 1);
     return {
       type: u8(m, MOTION.type), layer: fi < 0 ? -1 : fi & 0x7f, massInv: r2(f32(m, MOTION.massInv)),
       counter: u8(m, MOTION.counter), frames: [u16(m, MOTION.frames), u16(m, MOTION.frames + 2)],
-      pos: v3(m, MOTION.pos, SCALE), v: v, speed: len3(v), w: v3(m, MOTION.angV, 1),
+      units: UNITS, pos: v3(m, MOTION.pos, SCALE), v: v, speed: len3(v), vHavok: vHavok, speedHavok: len3(vHavok), w: v3(m, MOTION.angV, 1),
       island: islandFacts(ptrAt(hkp, ENTITY.island)),
     };
   };
@@ -431,32 +453,53 @@ if (off === undefined) {
     return row;
   };
   const hooks = { replaced: [], attached: [] };
+  // v1.1: the originals are called with exceptions 'propagate' (apply-on-demand.js:831): no exceptor scope around the engine's own
+  // code, so a fault there is the engine's as without Frida; the JS around it is caught. Each NativeCallback is held here, read by the
+  // liveness row, so it outlives its revert (Interceptor keeps a replacement until the revert; a call still in flight then returns
+  // through it)
+  const replacements = { 26005: null, 26004: null };
+  let reverted = false;
   if (REPLACE) {
     try {
       const sig = ['pointer', 'pointer', 'float', 'pointer'];
-      const original = new NativeFunction(at('addExplosionImpulse'), 'void', sig, 'win64');
-      Interceptor.replace(at('addExplosionImpulse'), new NativeCallback(function (obj3D, pos, force, hit) {
+      const original = new NativeFunction(at('addExplosionImpulse'), 'void', sig, { abi: 'win64', exceptions: 'propagate' });
+      replacements[26005] = new NativeCallback(function (obj3D, pos, force, hit) {
         const tid = Process.getCurrentThreadId();
         let row = null;
         try { counts.AddExplosionImpulse = (counts.AddExplosionImpulse || 0) + 1; row = explosionRow(obj3D, pos, force, hit, tid); push(nests, tid, row); } catch (e) { fail('26005 enter', e); }
-        original(obj3D, pos, force, hit);
-        try { if (row !== null) pop(nests, tid); finishExplosion(row); } catch (e) { fail('26005 leave', e); }
-      }, 'void', sig, 'win64'));
+        try { original(obj3D, pos, force, hit); } finally { if (row !== null) pop(nests, tid); }
+        try { finishExplosion(row); } catch (e) { fail('26005 leave', e); }
+      }, 'void', sig, 'win64');
+      Interceptor.replace(at('addExplosionImpulse'), replacements[26005]);
       hooks.replaced.push(26005);
     } catch (e) { attachErrors.push('26005 replace: ' + e); }
     try {
       const sig = ['float', 'pointer', 'uint8'];
-      const original = new NativeFunction(at('scaleImpulseForce'), 'float', sig, 'win64');
-      Interceptor.replace(at('scaleImpulseForce'), new NativeCallback(function (input, bhk, factorMass) {
+      const original = new NativeFunction(at('scaleImpulseForce'), 'float', sig, { abi: 'win64', exceptions: 'propagate' });
+      replacements[26004] = new NativeCallback(function (input, bhk, factorMass) {
         const tid = Process.getCurrentThreadId();
         let row = null;
         try { counts.ScaleGameplayImpulseForce = (counts.ScaleGameplayImpulseForce || 0) + 1; row = scaleRow(input, bhk, factorMass, tid); } catch (e) { fail('26004 enter', e); }
         const result = original(input, bhk, factorMass);
         try { if (row !== null) { row.result = r2(result); emitCapped(row); } } catch (e) { fail('26004 leave', e); }
         return result;
-      }, 'float', sig, 'win64'));
+      }, 'float', sig, 'win64');
+      Interceptor.replace(at('scaleImpulseForce'), replacements[26004]);
       hooks.replaced.push(26004);
     } catch (e) { attachErrors.push('26004 replace: ' + e); }
+    // the replacements' life: reverted from Frida's own thread after TTL_S (outside every engine frame of ours)
+    if (hooks.replaced.length > 0) {
+      setTimeout(function () {
+        const out = [];
+        [[26005, 'addExplosionImpulse'], [26004, 'scaleImpulseForce']].forEach(function (r) {
+          if (hooks.replaced.indexOf(r[0]) < 0) return;
+          try { Interceptor.revert(at(r[1])); out.push(r[0]); } catch (e) { fail('revert ' + r[0], e); }
+        });
+        try { Interceptor.flush(); } catch (e) { fail('flush', e); }
+        reverted = true;
+        emit({ event: 'reverted', ids: out, ttl_s: TTL_S, frame: counts.frames });
+      }, TTL_S * 1000);
+    }
   }
   // the attach fallback: no float can be read (the force and the result print null)
   if (hooks.replaced.indexOf(26005) < 0) {
@@ -608,10 +651,10 @@ if (off === undefined) {
       const f = bodyFacts(w.hkp);
       if (f === null || f.type < 0 || f.type > 7) { w.errors += 1; if (w.errors === 5) emit({ fn: 'body', ref: w.key, frame: counts.frames, gone: 'five unreadable samples' }); if (w.errors >= 5) w.gone = true; return; }
       w.errors = 0;
-      const band = f.speed < 1 ? 0 : (f.speed < 50 ? 1 : 2);
+      const band = !scaleOk ? -1 : (f.speed < 1 ? 0 : (f.speed < 50 ? 1 : 2)); // game units a second; -1 with no scale
       const isl = f.island === null ? 'none' : f.island.at + '/' + f.island.n;
       const key = [f.type, band, isl, f.island === null ? -1 : f.island.inActive, f.frames[0] >= 5 ? 1 : 0].join('|');
-      if (key !== w.lastKey || (band > 0 && counts.frames - w.lastFrame >= EVERY)) {
+      if (key !== w.lastKey || (band !== 0 && counts.frames - w.lastFrame >= EVERY)) {
         w.lastKey = key;
         w.lastFrame = counts.frames;
         emit({ fn: 'body', ref: w.key, tag: w.tag, listed: w.listed, frame: counts.frames, facts: f });
@@ -641,15 +684,15 @@ if (off === undefined) {
 
   emit({
     event: 'ready', script: 'prop-impulse.js', version: version, pid: Process.id, base: String(exe.base), mainThread: mainThread,
-    worldScale: scaleOk ? scaleRaw : null, worldScaleRaw: scaleRaw, update: { slot: rva(updateAt), byId40447: rva(at('playerUpdateById')), agree: !isNil(updateAt) && updateAt.equals(at('playerUpdateById')) },
+    worldScale: { inverse187407: scaleInverse, forward188105: scaleForward, ok: scaleOk, units: UNITS }, update: { slot: rva(updateAt), byId40447: rva(at('playerUpdateById')), agree: !isNil(updateAt) && updateAt.equals(at('playerUpdateById')) },
     hooks: resolved, replaced: hooks.replaced, attached: hooks.attached,
-    params: { POLL_MS: POLL_MS, ROW_EVERY_FRAMES: EVERY, ROWS: ROWS, REPLACE: REPLACE, WATCH: WATCH.map(hex), WATCH_MAX: WATCH_MAX, ISLAND_MAX: ISLAND_MAX },
+    params: { POLL_MS: POLL_MS, ROW_EVERY_FRAMES: EVERY, ROWS: ROWS, REPLACE: REPLACE, WATCH: WATCH.map(hex), WATCH_MAX: WATCH_MAX, ISLAND_MAX: ISLAND_MAX, TTL_S: TTL_S },
     attachErrors: attachErrors,
   });
   let lastFrames = 0;
   setInterval(function () {
     mainThread = mainTid();
-    emit({ event: 'liveness', pid: Process.id, counts: JSON.parse(JSON.stringify(counts)), capped: JSON.parse(JSON.stringify(capped)), frames10s: counts.frames - lastFrames, sampleMaxMs: sampleMaxMs, watched: Object.keys(watched).length, mainThread: mainThread });
+    emit({ event: 'liveness', pid: Process.id, counts: JSON.parse(JSON.stringify(counts)), capped: JSON.parse(JSON.stringify(capped)), frames10s: counts.frames - lastFrames, sampleMaxMs: sampleMaxMs, watched: Object.keys(watched).length, mainThread: mainThread, replacements: { 26005: String(replacements[26005]), 26004: String(replacements[26004]), reverted: reverted } });
     lastFrames = counts.frames;
     sampleMaxMs = 0;
   }, 10000);

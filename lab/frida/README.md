@@ -386,10 +386,13 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   body's reference, its motion facts before and after, the HitData's handles resolved, the thread against Main's, and the innermost
   bracket on its thread: Explosion's Update and FindTargets (209940's slots 0xA3, 0xA4) and every projectile class's ProcessImpacts
   (slot 0xAC; AddImpact, 0xBD, a row per impact). For POLL_MS (2000) after each call, every named body and its island's members are
-  sampled once a game frame inside the player's own update (rock-motion-trace.js v1.2's idiom): velocity (the body's +0x230, game
-  units by bhkWorld's scale, 188105), motion type, the deactivation counters, the island's pointer, size and active bit, its members
-  by reference on change. Run on both seats through x-prop-blast v3: the caster's rows read H2, the watcher's H3, the island rows H4.
-  Ids by `just addr`, 2026-11-11; 1.6.1170 only. Written 2026-11-11, never run.
+  sampled once a game frame inside the player's own update (rock-motion-trace.js v1.2's idiom): velocity (the body's +0x230, in
+  game units by GetWorldScaleInverse's float, 187407, used only when GetWorldScale's, 188105, is its inverse; the raw Havok vector
+  beside it), motion type, the deactivation counters, the island's pointer, size and active bit, its members by reference on change.
+  Run on both seats through x-prop-blast v3: the caster's rows read H2, the watcher's H3, the island rows H4. The originals run under
+  exceptions 'propagate'; the replacements are reverted after TTL_S (1800) from Frida's own thread, and until then a second
+  instance on the same game falls back to attaching 26005 and 26004 with no forces: relaunch the seat before a rerun inside the
+  half hour. Ids by `just addr`, 2026-11-11; 1.6.1170 only. Written 2026-11-11, v1.1 the same day (its review's fixes); never run.
 - body-impose.js: ADR-071 rung 0's pose read on one seat (H6): can the engine hold a dead body in a pose it is handed, within 32
   units a bone. It finds FORM's actor in the process lists, waits for its body to rest, captures each body's position and rotation
   (bhkRigidBody slots 0x33, 0x34) and the Havok block by the engine's own serializer (36016, the copy freed), then, each time the
