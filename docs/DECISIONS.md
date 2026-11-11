@@ -4959,6 +4959,11 @@ B 4. B is fine. 5. A 6. B"):
   her eyes sit right in the vampire head (screenshots on both seats, before and after DLC2MQ06), not only which part shows.
 - ADR-067 decision 7 amended, the order: ADR-068 rungs 5 and 6, then physics objects (props and bodies, Eli's two tests: a dragged
   body, Hailstone at a cabbage cart), then rung 7 (the chaff). Physics no longer waits for the cleanup.
+  Amended again (Eli about 16:04Z 2026-11-11, in thuum-fa's session, verbatim "ill have to wait on getting to playtest 51, im
+  out rn. id love some prework in the mean time- instead of expanding on functionality we havent tested, can you start the
+  physics leg of work?"): the physics leg's prework starts now, ahead of rung 6, while playtest 51 waits on Eli; nothing new
+  is built on the scripting and quest lines until 51 tests what is built (train 52 stays built and stages after 51; train 53's
+  trigger hold, rung 6 and ADR-070's axes wait). The leg starts as the scripting leg did: the research, then a plan for Eli.
 
 Rung 5's second head, Eli's later words (2026-11-10, in thuum-fa's session):
 - D-Q5 A (Eli 17:11Z, verbatim "A for D-Q5"), the Story Manager's quests: every run word (start and stop) of a quest a Story
