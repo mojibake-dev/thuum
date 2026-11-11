@@ -5193,6 +5193,12 @@ Riverwood Trader's cart, 0x1c0c6 to 0x1c0cb, from XMarkerHeading 0x96595); rung 
 Four playtests, P1 to P4, one after each pair of rungs. About 16 stage slots; the smaller ladder (rungs 0, 1, 3a, 3 on v1 samples,
 then bodies as rows with the re-rest) about 8.
 
+Source SDK 2013 is read for design and never copied, as TiltedEvolution under ADR-005 (Eli 2026-11-11, "add those three files to
+rung 5's read"): its Source 1 SDK License grants use only "to develop a modified Valve game running on Valve's Source 1 engine",
+and the simulation it networks (vphysics.dll, Valve's modified IVP) ships without source and is not Skyrim's Havok 2010, so no
+REA time goes to it; rung 5's design read takes props.h's physics attacker, physics_prop_ragdoll.cpp's networked bone arrays and
+player_pickup.h's hooks.
+
 Amends: ADR-064 decision 7 (dated note under it), ADR-063's props note (accepted under it), ADR-058's slices (slice two kept as a
 derived class; slice three is rungs 5 and 6), ADR-067 decision 4 (its final sample is the asleep sample; the built ChangeForm
 apply is the record). W3 stays Eli's at the time: a rewrite of b-prop-push's step 27 if the drop read calls for one.
