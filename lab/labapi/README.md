@@ -33,7 +33,8 @@ tries, 10 s apart), and read back by Proxmox's own ranged agent file-read
 (offset, count, decode=0), 512 KiB a call, joined as bytes, checked against
 the copy's length and decoded as UTF-8 once; a copy past 64 MiB is refused
 before its first read, and the copy is removed once read (one the agent
-holds open rolls the seat back at its next run). The verdict is green only
+holds open rolls the seat back: in the same run's reset when the fetch came
+before it, else at its next run). The verdict is green only
 when every assertion held and no step timed out; red when an assertion
 failed, a step timed out, or the server refused a command; error when the
 lab itself failed (no snapshot, the server never became ready, a client

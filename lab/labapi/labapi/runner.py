@@ -2243,8 +2243,9 @@ class Runner:
         ProxmoxError (a read refused, a range that came back as no base64) or a ValueError (the cap, a short read) is
         the caller's, after the removal, which runs whatever happened: a copy that will not go is held open in the
         agent (qemu-server 9.2.10's file-read leaves a handle open when a read dies, Agent.pm at ec268ede5b lines
-        539-555, and only the seat's restart closes it), so the seat's next run rolls it back (RunRecord.faulted,
-        _seat_fault), this run's verdict as it was. _fetch_client_file's copies and the screenshot reads (each .b64
+        539-555, and only the seat's restart closes it), so the seat rolls back, in this run's own reset when that is
+        still to come (RunRecord.rollback), else at its next run (RunRecord.faulted, _seat_fault), this run's verdict
+        as it was. _fetch_client_file's copies and the screenshot reads (each .b64
         sidecar read whole) are the fetches this is meant to serve next."""
         try:
             if size > FETCH_MAX_BYTES:
@@ -2275,9 +2276,13 @@ class Runner:
                 elif said == "True":
                     held = f"{what}: {path} held open in its agent after its read"
                     rec.notes.append(held)
-                    # a seat the run plays rolls back at its next run through the fault, one outside it (a hand trace
-                    # the end fetched there) through its remembered state, as anything that touched it does
-                    if g.client in rec.scenario.clients:
+                    # a seat the run plays and has not reset yet (a .before-run fetch, ahead of the resets) rolls back in
+                    # this run's own reset (_rollback_reason reads rec.rollback); one the run already reset rolls back at
+                    # its next run through the fault; one outside the run (a hand trace the end fetched there) through
+                    # its remembered state, as anything that touched it does
+                    if g.client in rec.scenario.clients and g.client not in rec.reset_started:
+                        rec.rollback.setdefault(g.client, held)
+                    elif g.client in rec.scenario.clients:
                         rec.faulted.setdefault(g.client, held)
                     elif g.client:
                         self.forget_seats(held, [g.client])

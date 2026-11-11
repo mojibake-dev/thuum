@@ -387,7 +387,9 @@ range boundary inside a multibyte character splits nothing; a copy past
 64 MiB is refused before its first read; the copy leaves the seat once
 read. A copy that will not go is held open in the agent (qemu-server
 9.2.10's file-read leaves a handle open when a read dies), which only the
-seat's restart closes, so the seat's next run rolls it back. A run's own
+seat's restart closes, so the seat rolls back: in this run's own reset when
+the fetch came before it (a hand-started trace fetched before the
+rollback), else at its next run. A run's own
 trace not fetched whole is a lab fault, E_RUN_FRIDA_FETCH (the scenario
 runner's run end, below). The token has no FileWrite privilege.
 
@@ -789,7 +791,8 @@ the same way, so a run set's rerun starts the trace again; a red stays red
 and gains it. The failure names the seat, so its next run rolls it back, as
 after any E_RUN_* naming it, which also closes a handle a timed-out read
 left open in its agent; a copy held open after a whole read rolls the seat
-back at its next run too, with this run's verdict as it was. An exception
+back too, with this run's verdict as it was: in this run's own reset when
+the fetch came before it, else at its next run. An exception
 that escapes the artifacts phase is an internal failure and the run error,
 since what it skipped may be the run's own traces. 20261111-191642-x-prop-blast
 stayed green with both seats' prop-impulse.js traces unread, two notes. A
@@ -873,8 +876,9 @@ in frida\ (*.js.out.copy and *.js.log.copy, the files the agent itself
 reads back in ranges, which leave the seat once read and stay only when the
 agent holds one open), which are cleaned as far as they go: a file a
 timed-out guest-file-read or guest-file-close left open in the agent stays
-until the VM restarts (a copy held after its read also rolls the seat back
-at its next run), the note
+until the VM restarts (a copy held after its read also rolls the seat back,
+in the same run's reset when the fetch came before it, else at its next
+run), the note
 says "<n> held open left in place", and the next capture writes its own name,
 as the next copy carries its run's script name (b-cloak-fight
 20261030-053144 lost a rollback to two held .png.b64 sidecars, x-quest-mode

@@ -3387,6 +3387,32 @@ class ClientResets(RunTests):
     def _vm_resets(pve, since=0):
         return [c for c in pve.calls[since:] if c[0] in ("stop", "rollback", "start")]
 
+    def test_a_trace_copy_held_after_a_before_run_fetch_rolls_the_seat_back_in_this_run(self):
+        """A hand-started trace is fetched before the seats' resets (_traces_before_rollback): a copy the agent then
+        holds open rolls the seat back in this run's own reset (RunRecord.rollback, which _rollback_reason reads), not
+        one run late through the fault read at the run's end (the re-review of 5b982dc6, nit 1), and the seat's next
+        run is free to relaunch it."""
+        from labapi.proxmox import ExecResult
+
+        pve = self._warm()
+        pve.files["C:\\sky-lab\\frida\\hand-trace.js.log"] = '{"leak": 1}\n'
+        self.services.runner.frida_started.append(("c1", "hand-trace.js"))
+        plain_exec = pve.exec
+
+        def exec_(guest, command, timeout):
+            if re.search(r"Remove-Item -LiteralPath '[^']+hand-trace\.js\.log\.copy' -Force", " ".join(command)):
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                return ExecResult(0, "True\r\n", "")  # still there: the agent holds it
+            return plain_exec(guest, command, timeout)
+
+        pve.exec = exec_
+        reset, body = self._reset()
+        held = "frida hand-trace.js.log: C:\\sky-lab\\frida\\hand-trace.js.log.copy held open in its agent after its read"
+        self.assertEqual((body["verdict"], reset["kind"], reset["reason"]), ("green", "rollback", held), body)
+        self.assertIn(held, body["notes"])
+        self.assertEqual(pve.relaunches, [])
+        self.assertEqual(self.services.runner.seats["c1"].force, "")
+
     def test_rollback_mode_rolls_back_every_run_and_says_so(self):
         pve = self._seat(mode="rollback")
         for _ in range(2):
