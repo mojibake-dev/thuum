@@ -95,10 +95,24 @@ class FakeProxmox:
             if "Write-Output" in " ".join(command) and self.exec_result.exitcode == 0:
                 n = len(self.files[copied.group(1)].encode("utf-8"))
                 return ExecResult(0, f"{n} {n}\r\n", "")
-        # its else branch: a source not yet written leaves an empty copy (a frida script's .log before any line)
+        # its else branch: a source not yet written leaves an empty copy (a frida script's .log before any line), whose
+        # lengths a frida trace's copy prints after both branches (Runner._frida_trace), where log-count's prints none
         empty = re.search(r"Set-Content -Path '([^']+\.copy)' -Value ''", " ".join(command))
         if empty and not (copied and copied.group(1) in self.files):
             self.files[empty.group(1)] = ""
+            if re.search(r"\} else \{[^{}]*\}; Write-Output", " ".join(command)):
+                return ExecResult(0, "0 0\r\n", "")
+        # Runner._seat_copy's length of a copy whose exec answer was lost, its UTF-8 bytes; and Runner._read_back's
+        # removal of a copy once read, which prints whether it is still there
+        length = re.search(r"\(Get-Item -LiteralPath '([^']+)'\)\.Length", " ".join(command))
+        if length:
+            if length.group(1) not in self.files:
+                return ExecResult(1, "", f"Get-Item : Cannot find path '{length.group(1)}' because it does not exist.")
+            return ExecResult(0, f"{len(self.files[length.group(1)].encode('utf-8'))}\r\n", "")
+        removal = re.search(r"Remove-Item -LiteralPath '([^']+\.copy)' -Force -ErrorAction SilentlyContinue; Test-Path", " ".join(command))
+        if removal:
+            self.files.pop(removal.group(1), None)
+            return ExecResult(0, "False\r\n", "")
         if any("Get-Process SkyrimSE" in c for c in command):
             # a guest agent too busy to answer, this many times first
             if self.game_misses > 0:
@@ -167,6 +181,13 @@ class FakeProxmox:
         if path not in self.files:
             raise ProxmoxError(f"E_PVE_FILE: no such file {path} on {guest.name}")
         return self.files[path]
+
+    def file_read_range(self, guest: Guest, path: str, offset: int, count: int) -> bytes:
+        # the file's UTF-8 bytes from offset; from an offset at or past the end none, as Agent.pm answers there
+        self.calls.append(("file_read_range", guest.vmid, path, offset, count))
+        if path not in self.files:
+            raise ProxmoxError(f"E_PVE_FILE: no such file {path} on {guest.name}")
+        return self.files[path].encode("utf-8")[offset:offset + count]
 
 
 class _FakeCapture:

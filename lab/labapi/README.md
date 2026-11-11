@@ -26,11 +26,27 @@ Phases: rollback-server, netem (when the scenario asks), rollback-clients,
 steps, artifacts. A run's directory is `RESULTS_DIR/<utc stamp>-<scenario
 id>/` with `result.json`, `world-before/`, `world-after/`, `world-diff`,
 `server.log`, `screenshots/`, `lab.pcap`, `frida/`, and client logs when the
-scenario lists them. The verdict is green only when every assertion held and
-no step timed out; red when an assertion failed, a step timed out, or the
-server refused a command; error when the lab itself failed (no snapshot, the
-server never became ready, a client never heartbeated, the scenario timed
-out, an assertion that is not in the language).
+scenario lists them. A Frida trace, `frida/<client>-<script>.jsonl` (the
+injector's .out, then the script's .log), is copied on the seat by a read
+that shares write access, the copy exec printing the copy's length (three
+tries, 10 s apart, but one for an exec that ran to its deadline), and read back by Proxmox's own ranged agent file-read
+(offset, count, decode=0), 512 KiB a call, joined as bytes, checked against
+the copy's length and decoded as UTF-8 once; a copy past 64 MiB is refused
+before its first read, and the copy is removed once read (one the agent
+holds open rolls the seat back: in the same run's reset when the fetch came
+before it, else at its next run). The verdict is green only
+when every assertion held and no step timed out; red when an assertion
+failed, a step timed out, or the server refused a command; error when the
+lab itself failed (no snapshot, the server never became ready, a client
+never heartbeated, the scenario timed out, an assertion that is not in the
+language, an exception out of the artifacts phase in a run not already red, a trace the run's own
+frida step or relaunch arm started that its end could not fetch whole).
+That last is E_RUN_FRIDA_FETCH, naming the script, the seat and the reason
+(its copy failed three tries, a range still unread after the file read's
+retries, a range that came back as no base64, bytes that do not come to the
+copy's length, a copy past 64 MiB); as for a crash at the end, a red run
+stays red and gains the failure. A trace started by hand (POST /lab/frida)
+is no run's evidence: what of it is not fetched is a note.
 
 Server rollback runs in `state` mode by default: stop the server container,
 restore `SERVER_WORLD_DIR` from `SERVER_SNAPSHOTS_DIR/<snapshot>/`, `docker

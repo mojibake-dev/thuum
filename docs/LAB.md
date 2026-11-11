@@ -371,8 +371,30 @@ Screenshots and Frida invocations go through a guest exec from lab-api,
 not through the game, so a crashed client can still be observed. Scripts
 reach the client by the client pulling them from lab-api over http inside
 that guest exec; artifacts come back through the Proxmox guest-agent file
-API, which caps each file at 16 MiB, so Frida traces are rotated into files
-under that size. The token has no FileWrite privilege.
+API, which caps each read at 16 MiB. A Frida trace comes back in ranges:
+the injector's .out and the script's .log are each copied with a read that
+shares write access (the script still writes its .log), the copy exec
+printing the source's length at its open and the copy's last, as
+log-count's copy does (tried three times, 10 s apart, except an exec that
+ran to its deadline, which is not tried again; a copy shorter than its
+source at its open was cut short, the sources only growing, and is made
+again; a copy whose exec answer the agent lost has its length read from the
+copy itself). The copy is then read by the agent's own
+file-read with offset, count and decode=0 (qemu-server 9.1.5 and later),
+512 KiB a call: Proxmox reads a file in guest-file-read calls of its
+read_size, 1 MiB (qemu-server's Agent.pm), and calls of that size timed out
+on both seats when a large trace was read whole
+(20261111-191642-x-prop-blast). Each range must come back whole, the bytes
+must come to the copy's length, and they are decoded as UTF-8 once, so a
+range boundary inside a multibyte character splits nothing; a copy past
+64 MiB is refused before its first read; the copy leaves the seat once
+read. A copy that will not go is held open in the agent (qemu-server
+9.2.10's file-read leaves a handle open when a read dies), which only the
+seat's restart closes, so the seat rolls back: in this run's own reset when
+the fetch came before it (a hand-started trace fetched before the
+rollback), else at its next run. A run's own
+trace not fetched whole is a lab fault, E_RUN_FRIDA_FETCH (the scenario
+runner's run end, below). The token has no FileWrite privilege.
 
 ## Scenario runner (lab-api on sky-srv)
 
@@ -761,6 +783,28 @@ Every run's end also reads each managed seat's game:
 Any of the three keeps the seat's launch.log as <client>-launch.log and turns
 a run that would have been green into error, which a run set reruns once as
 a lab fault. A red run stays red and gains the failure.
+The end also fetches every Frida trace started on a seat, in ranges (the
+client template's section above). One the run's own steps started, a frida
+step's or a relaunch's frida arm's, is the run's evidence: not fetched whole
+(its copy failed three tries, a range still unread after the file read's
+retries, a range that came back as no base64, bytes that do not come to the
+copy's length, a copy past 64 MiB) it is E_RUN_FRIDA_FETCH, naming the
+script, the seat and the reason, and it turns a would-be green into error
+the same way, so a run set's rerun starts the trace again; a red stays red
+and gains it. The failure names the seat, so its next run rolls it back, as
+after any E_RUN_* naming it, which also closes a handle a timed-out read
+left open in its agent; a copy held open after a whole read rolls the seat
+back too, with this run's verdict as it was: in this run's own reset when
+the fetch came before it, else at its next run. An exception
+that escapes the artifacts phase is an internal failure, and a run that
+would have been green is error, since what it skipped may be the run's own
+traces; a red stays red and gains it, and its seats roll back at their next
+run. 20261111-191642-x-prop-blast
+stayed green with both seats' prop-impulse.js traces unread, two notes. A
+trace started by hand (POST /lab/frida) is no run's evidence, whether the end
+fetches it or the next run fetches it before its rollback as
+frida/<client>-<script>.before-run.jsonl: what of it is not fetched is a
+note.
 A seat whose dump-state shows MessageBoxMenu open is paused unless its
 GameDaysPassed moved in a fresh dump-state one second later: under Skyrim
 Souls RE (apocrypha/layer-souls) a message box leaves the world running, so
@@ -833,9 +877,13 @@ run's end would collect as its own). Crash dumps stay: a run's end counts
 only those written since a few minutes before its start, and a crash it finds
 rolls the seat back. A file that will not go fails the try, except in the
 capture folders shots\ and screenshots\ and for the runner's trace copies
-in frida\ (*.js.out.copy, *.js.log.copy, the files it reads back through the
-agent), which are cleaned as far as they go: a file a timed-out
-guest-file-close left open in the agent stays until the VM restarts, the note
+in frida\ (*.js.out.copy and *.js.log.copy, the files the agent itself
+reads back in ranges, which leave the seat once read and stay only when the
+agent holds one open), which are cleaned as far as they go: a file a
+timed-out guest-file-read or guest-file-close left open in the agent stays
+until the VM restarts (a copy held after its read also rolls the seat back,
+in the same run's reset when the fetch came before it, else at its next
+run), the note
 says "<n> held open left in place", and the next capture writes its own name,
 as the next copy carries its run's script name (b-cloak-fight
 20261030-053144 lost a rollback to two held .png.b64 sidecars, x-quest-mode

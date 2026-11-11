@@ -48,6 +48,12 @@ def _brief(value: Any, limit: int = 800) -> str:
     return text if len(text) <= limit else text[: limit - 3] + "..."
 
 
+def _last_line(text: str) -> str:
+    """The last line of an exec's stdout that is not blank, stripped; empty for none."""
+    lines = [ln.strip() for ln in (text or "").splitlines() if ln.strip()]
+    return lines[-1] if lines else ""
+
+
 # A hung seat's dump (Settings.hang_evidence), run on the seat as SYSTEM through the guest
 # agent as -EncodedCommand, so no quoting reaches PowerShell. MiniDumpWriteDump's signature and
 # the MINIDUMP_TYPE bits are Microsoft's (learn.microsoft.com, minidumpapiset.h): WithFullMemory
@@ -220,6 +226,10 @@ class RunRecord:
     # the epoch a run's own timeScale laid at its start (the time block's, wire-rules clock.rs), laid again unchanged at a
     # restart inside the run so the clock resumes where its function says (ADR-068 rung 5's vampire probes)
     clock_epoch: str | None = None
+    # the Frida traces this run's own steps started (a frida step, a relaunch's frida arm) as (client, script name): its
+    # evidence, which its end must fetch whole or the run is a lab fault (E_RUN_FRIDA_FETCH); a trace started by hand
+    # beside it (POST /lab/frida) is not
+    frida: set[tuple[str, str]] = field(default_factory=set)
 
     def progress(self) -> dict[str, Any]:
         if self.verdict != "running":
@@ -257,6 +267,17 @@ class SeatState:
 
 # a preset name the relaunch's cleaning may write into its script (lab-driver saves <name>.jslot in the Presets folder)
 _PRESET_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9 _.-]*")
+
+# The bytes of a seat's file one ranged agent file-read asks for (Runner._read_back, GuestControl.file_read_range).
+# Proxmox's file-read takes a file in guest-file-read calls of its read_size, 1 MiB (qemu-server's
+# src/PVE/API2/Qemu/Agent.pm, file-read), and calls of that size timed out on both seats in
+# 20261111-191642-x-prop-blast (notes 49 and 50: prop-impulse.js's .log read whole, "qga command 'guest-file-read' failed
+# - got timeout" on 711 and 712); a range of half that is one guest-file-read of at most 512 KiB (the fresh review of
+# 77a4279d)
+READ_RANGE_BYTES = 512 * 1024
+# The largest copy a fetch reads back, refused before its first read: 128 ranges at most, so a runaway trace cannot hold
+# up the run's end, whose artifacts phase has no deadline
+FETCH_MAX_BYTES = 64 * 1024 * 1024
 
 
 class Runner:
@@ -388,7 +409,12 @@ class Runner:
             try:
                 await self._artifacts(rec, capture)
             except Exception as e:
-                rec.notes.append(f"artifacts: {type(e).__name__}: {e}")
+                # a bug in lab-api, reported as one (the internal failure above): what it skipped may be the run's own
+                # Frida traces, whose fetch is the run's evidence, so the run is error, never green with them unread; a
+                # red stays red, and the internal failure still rolls its seats back at their next run (_remember_seats)
+                rec.failures.append({"step": "end", "kind": "internal", "error": f"artifacts: {type(e).__name__}: {e}"})
+                if rec.verdict != "red":
+                    rec.verdict = "error"
             if self.netem_active:
                 try:
                     await self._clear_netem(rec)
@@ -838,11 +864,16 @@ class Runner:
         """A trace started outside a run (POST /lab/frida) is still being
         written on its clone, and this run's rollback is about to erase it
         (2026-10-05: the idle-client leak traces went that way). Fetch each one
-        into this run first, once however often it was started."""
+        into this run first, once however often it was started. None of them
+        is this run's evidence, so what of one is not fetched whole is a note,
+        never E_RUN_FRIDA_FETCH: no step of this run started it (an earlier
+        run's own trace lands here only when that run's end never finished its
+        fetch, and it was that run's evidence, its verdict already written),
+        and a rerun could not fetch it again, this reset erasing it either way."""
         keep: list[tuple[str, str]] = []
         for client, script in dict.fromkeys(self.frida_started):
             if client in clients:
-                await self._frida_trace(rec, client, script, ".before-run")
+                rec.notes.extend(f"frida {why}" for why in await self._frida_trace(rec, client, script, ".before-run"))
             else:
                 keep.append((client, script))
         self.frida_started = keep
@@ -1773,6 +1804,7 @@ class Runner:
         if res.exitcode != 0:
             return fail(f"E_RUN_FRIDA: {name} on {client} exited {res.exitcode}: {res.err.strip()[:200]}")
         self.frida_started.append((client, name))
+        rec.frida.add((client, name))
         return True, f"frida {name} started"
 
     async def _screenshot(self, rec: RunRecord, index: int, client: str) -> tuple[bool, str]:
@@ -1927,9 +1959,24 @@ class Runner:
                     name = f"trace-{client}.json"
                     (rec.dir / name).write_text(json.dumps(data, indent=1, sort_keys=True))
                     rec.artifacts.append(name)
+        # the run's own traces (RunRecord.frida) are its evidence: one not fetched whole is a lab fault, as a crash at the
+        # end is (below), so a run that would have been green is error and its run set reruns it (ADR-030), the rerun
+        # starting the trace again, and the failure names the seat, whose next run rolls it back (_seat_fault) and so
+        # closes what a timed-out read left open in its agent; a red stays red and gains it. 20261111-191642-x-prop-blast
+        # stayed green with both seats' traces unread, two notes. A trace started by hand beside the run (POST
+        # /lab/frida) is no evidence of the run's, and a rerun would not start it again: what of it is unread is a note
+        green = rec.verdict == "running" and not rec.failures
+        unread = False
         for client, script in dict.fromkeys(self.frida_started):
-            await self._frida_trace(rec, client, script)
+            lost = await self._frida_trace(rec, client, script)
+            if (client, script) in rec.frida:
+                rec.failures.extend({"step": "end", "kind": "lab", "client": client, "error": f"E_RUN_FRIDA_FETCH: {why}"} for why in lost)
+                unread = unread or bool(lost)
+            else:
+                rec.notes.extend(f"frida {why}" for why in lost)
         self.frida_started.clear()
+        if unread and green:
+            rec.verdict = "error"
         if self.s.hang_evidence:
             for client in self._hung_clients(rec):
                 await self._hang_evidence(rec, client)
@@ -2146,11 +2193,117 @@ class Runner:
         except ProxmoxError as e:
             rec.notes.append(f"{name}: {e}")
 
-    async def _frida_trace(self, rec: RunRecord, client: str, script: str, suffix: str = "") -> None:
+    async def _tried(self, g: Guest, cmd: list[str], answer, what: str) -> int:
+        """`cmd` on the seat with three tries 10 s apart, as the game check and log-count's copy try theirs (a busy
+        agent's "got timeout", a file refused for a moment): `answer` reads a finished exec, None for a try that
+        failed, and the first good answer is the value; three failed tries are a ValueError naming the last. An exec
+        whose answer the agent lost (E_PVE_EXEC_LOST) has ended on the seat, so that ProxmoxError is the caller's at
+        once. An exec that ran to its deadline (it "did not exit in" guest_task_timeout_s) is not tried again: three
+        such tries and their pauses held a trace's end for up to about 760 s (the re-review of 5b982dc6, nit 4)."""
+        why = ""
+        for attempt in range(3):
+            if attempt:
+                await asyncio.sleep(10 * self.s.time_scale)
+            try:
+                res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+            except ProxmoxError as e:
+                if "E_PVE_EXEC_LOST" in str(e):
+                    raise
+                if "did not exit in" in str(e):
+                    raise ValueError(f"{what} ran out its time, not tried again: {e}") from e
+                why = str(e)
+                continue
+            got = answer(res)
+            if got is not None:
+                return got
+            why = f"exit {res.exitcode}: {(res.err or res.out).strip()[:200]}"
+        raise ValueError(f"{what} failed three tries 10 s apart, the last {why}")
+
+    async def _seat_copy(self, g: Guest, cmd: list[str], copy: str) -> int:
+        """A copy `cmd` makes on the seat, whose last stdout line is "<the source's bytes at its open> <the copy's
+        bytes>" as log-count's copy prints them, and the copy's length from that line, three tries 10 s apart (_tried).
+        A copy whose exec answer the agent lost (E_PVE_EXEC_LOST) ran to its end on the seat, so its length then comes
+        from the copy itself, by one length exec under the same tries. A copy shorter than its source at its open was
+        cut short, since the sources only grow (the script's .log is opened 'a', frida_script_text; frida-inject's
+        stdout appends), and is tried again as a failed one is."""
+        def copied(res) -> int | None:
+            got = re.fullmatch(r"(\d+) (\d+)", _last_line(res.out))
+            return int(got.group(2)) if res.exitcode == 0 and got and int(got.group(2)) >= int(got.group(1)) else None
+
+        def length(res) -> int | None:
+            last = _last_line(res.out)
+            return int(last) if res.exitcode == 0 and last.isdigit() else None
+
+        try:
+            return await self._tried(g, cmd, copied, "its copy")
+        except ProxmoxError as e:  # E_PVE_EXEC_LOST, the one error _tried passes on
+            cmd = ["powershell", "-NoProfile", "-Command", f"$ErrorActionPreference = 'Stop'; (Get-Item -LiteralPath '{copy}').Length"]
+            return await self._tried(g, cmd, length, f"its copy's length, the copy's own answer lost ({str(e)[:120]}),")
+
+    async def _read_back(self, rec: RunRecord, g: Guest, path: str, size: int, what: str) -> bytes:
+        """The `size` bytes of the file at `path` on the seat, a file the runner made there to read (a shared-read copy
+        whose exec printed its length, _seat_copy), through Proxmox's own ranged agent file-reads of READ_RANGE_BYTES
+        (GuestControl.file_read_range, whose retry on "got timeout" is the only retry), and then removed. A file past
+        FETCH_MAX_BYTES is refused before its first read. Each range must come back whole: one that comes back short
+        met the file's end first, a copy shorter than its length (an offset at or past the end answers no bytes).
+        The caller decodes the whole once, since a range boundary can fall inside a multibyte character. A
+        ProxmoxError (a read refused, a range that came back as no base64) or a ValueError (the cap, a short read) is
+        the caller's, after the removal, which runs whatever happened: a copy that will not go is held open in the
+        agent (qemu-server 9.2.10's file-read leaves a handle open when a read dies, Agent.pm at ec268ede5b lines
+        539-555, and only the seat's restart closes it), so the seat rolls back, in this run's own reset when that is
+        still to come (RunRecord.rollback), else at its next run (RunRecord.faulted, _seat_fault), this run's verdict
+        as it was. _fetch_client_file's copies and the screenshot reads (each .b64
+        sidecar read whole) are the fetches this is meant to serve next."""
+        try:
+            if size > FETCH_MAX_BYTES:
+                raise ValueError(f"its copy is {size} bytes, past the {FETCH_MAX_BYTES} ({FETCH_MAX_BYTES // (1024 * 1024)} MiB) a fetch reads")
+            data = bytearray()
+            ranges = -(-size // READ_RANGE_BYTES)
+            for k in range(ranges):
+                at = k * READ_RANGE_BYTES
+                want = min(READ_RANGE_BYTES, size - at)
+                try:
+                    got = await asyncio.to_thread(self.control.file_read_range, g, path, at, want)
+                except ProxmoxError as e:
+                    raise ProxmoxError(f"range {k + 1} of {ranges}: {e}") from e
+                data += got
+                if len(got) != want:
+                    raise ValueError(f"{len(data)} bytes read of its {size}: range {k + 1} of {ranges}, at {at}, came back "
+                                     f"{len(got)} of its {want}")
+            return bytes(data)
+        finally:
+            cmd = ["powershell", "-NoProfile", "-Command",
+                   f"Remove-Item -LiteralPath '{path}' -Force -ErrorAction SilentlyContinue; Test-Path -LiteralPath '{path}'"]
+            try:
+                res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+                said = _last_line(res.out)
+                if res.exitcode != 0 or said not in ("True", "False"):
+                    rec.notes.append(f"{what}: the removal of {path} on {g.name} answered exit {res.exitcode}: "
+                                     f"{(res.err or res.out).strip()[:200]}")
+                elif said == "True":
+                    held = f"{what}: {path} held open in its agent after its read"
+                    rec.notes.append(held)
+                    # a seat the run plays and has not reset yet (a .before-run fetch, ahead of the resets) rolls back in
+                    # this run's own reset (_rollback_reason reads rec.rollback); one the run already reset rolls back at
+                    # its next run through the fault; one outside the run (a hand trace the end fetched there) through
+                    # its remembered state, as anything that touched it does
+                    if g.client in rec.scenario.clients and g.client not in rec.reset_started:
+                        rec.rollback.setdefault(g.client, held)
+                    elif g.client in rec.scenario.clients:
+                        rec.faulted.setdefault(g.client, held)
+                    elif g.client:
+                        self.forget_seats(held, [g.client])
+            except ProxmoxError as e:
+                rec.notes.append(f"{what}: {path} on {g.name} not removed: {e}")
+
+    async def _frida_trace(self, rec: RunRecord, client: str, script: str, suffix: str = "") -> list[str]:
+        """A trace from its seat as frida/<client>-<script><suffix>.jsonl, the injector's .out and then the script's
+        .log, each as far as it came back whole. What did not is returned, a line a file ("<script>.<ext> on <client>
+        (<guest>) not fetched whole: <why>"), for the caller to judge: the run's own trace (RunRecord.frida) makes it
+        a lab fault, E_RUN_FRIDA_FETCH (_artifacts); any other trace's is a note."""
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
-            rec.notes.append(f"frida {script}: {client} unmanaged; trace not fetched")
-            return
+            return [f"{script} on {client} not fetched: the seat is unmanaged"]
         (rec.dir / "frida").mkdir(exist_ok=True)
         name = f"{client}-{script}{suffix}.jsonl"
         # frida-inject's stdout, still open for writing while the game runs:
@@ -2159,25 +2312,30 @@ class Runner:
         # write access can, so it is copied that way first
         # the injector's .out (a load error; the injector exits once the script is eternalized) and then
         # the script's own .log (frida_script_text's preamble, flushed every 250 ms), each copied with a
-        # read that shares write access, since the script still holds its .log open
-        texts = []
+        # read that shares write access, since the script still holds its .log open; the copy prints its
+        # length last, as log-count's does (_seat_copy), and comes back in ranges (_read_back): read whole,
+        # prop-impulse.js's large .log timed out on both seats (20261111-191642-x-prop-blast) and the copy
+        # stayed held open in the agent
+        texts, lost = [], []
         for ext in ("out", "log"):
             src = f"{self.s.client_lab_dir}\\frida\\{script}.{ext}"
             copy = f"{src}.copy"
+            whole = f"{script}.{ext} on {client} ({g.name}) not fetched whole"
+            cmd = ["powershell", "-NoProfile", "-Command",
+                   f"if (Test-Path '{src}') {{ $s = [IO.File]::Open('{src}', 'Open', 'Read', 'ReadWrite'); $n = $s.Length; "
+                   f"$d = [IO.File]::Create('{copy}'); $s.CopyTo($d); $m = $d.Length; $d.Close(); $s.Close() }} "
+                   f"else {{ Set-Content -Path '{copy}' -Value '' -NoNewline; $n = 0; $m = 0 }}; Write-Output ([string]$n + ' ' + [string]$m)"]
             try:
-                cmd = ["powershell", "-NoProfile", "-Command",
-                       f"if (Test-Path '{src}') {{ $s = [IO.File]::Open('{src}', 'Open', 'Read', 'ReadWrite'); $d = [IO.File]::Create('{copy}'); "
-                       f"$s.CopyTo($d); $d.Close(); $s.Close() }} else {{ Set-Content -Path '{copy}' -Value '' -NoNewline }}"]
-                res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
-                if res.exitcode != 0:
-                    rec.notes.append(f"frida {script}.{ext}: copy exited {res.exitcode}: {res.err.strip()[:200]}")
-                    continue
-                texts.append(await asyncio.to_thread(self.control.file_read, g, copy))
-            except ProxmoxError as e:
-                rec.notes.append(f"frida {script}.{ext}: {e}")
+                size = await self._seat_copy(g, cmd, copy)
+                # one decode of the whole; a character the copy cut mid-write at its end reads as U+FFFD
+                data = await self._read_back(rec, g, copy, size, f"frida {script}.{ext}")
+                texts.append(data.decode("utf-8", errors="replace"))
+            except (ProxmoxError, ValueError) as e:
+                lost.append(f"{whole}: {e}")
         if texts:
-            (rec.dir / "frida" / name).write_text("".join(t if t.endswith("\n") or not t else t + "\n" for t in texts))
+            (rec.dir / "frida" / name).write_text("".join(t if t.endswith("\n") or not t else t + "\n" for t in texts), encoding="utf-8")
             rec.artifacts.append(f"frida/{name}")
+        return lost
 
     @staticmethod
     def _client_names(scenario) -> list[str]:
@@ -2371,8 +2529,8 @@ def _client_relaunch_ps(lab_dir: str, driver_log: str, presets: list[str], stop:
     leaves on a seat that its rollback undid, by folder and name pattern, never a wildcard over the lab folder
     (launch.ps1 needs game-dir.txt and games\\):
     - frida\\: each run's script and its .out, .err and .log, and, as far as they go, the runner's shared-read .copy
-      of the last two (config.frida_exec_template, frida_script_text, Runner._frida_trace); frida-inject.exe and the
-      tools beside it stay;
+      of the last two (config.frida_exec_template, frida_script_text, Runner._frida_trace, Runner._read_back);
+      frida-inject.exe and the tools beside it stay;
     - shots\\ (a screenshot step's copy and its base64 sidecar, a burst's frame folder), screenshots\\
       (screenshot.ps1's captures and latest.png), burst\\ and input\\ (their tasks' request and done files);
     - every recorded game folder's RaceMenu presets: skymp5-client's thuum-*.jslot (raceMenuService.ts) and
@@ -2418,7 +2576,8 @@ def _client_relaunch_ps(lab_dir: str, driver_log: str, presets: list[str], stop:
         # timed-out guest-file-close left open in the agent (proxmox.py file_read, 2026-10-17) stays until the VM
         # restarts, and failing the try on it cost a rollback (sky-c2, b-cloak-fight 20261030-053144: 025.png.b64 and
         # 032.png.b64; sky-c1, x-quest-mode 20261030-131512: story-location-20261030-131130-x-story-arrival-login-13
-        # .js.log.copy); the next capture writes its own name, and a copy carries its run's script name
+        # .js.log.copy); the next capture writes its own name, and a copy carries its run's script name. A copy leaves
+        # the seat once read (Runner._read_back); one here is a copy a timed-out ranged read holds open
         "Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy') @() -soft",
         "Clean (Join-Path $lab 'shots') @('*.png', '*.png.b64') @('*-burst') -soft",
         "Clean (Join-Path $lab 'screenshots') @('*.png') @() -soft",
