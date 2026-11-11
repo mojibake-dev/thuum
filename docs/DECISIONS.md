@@ -4972,6 +4972,29 @@ Rung 5's second head, Eli's later words (2026-11-10, in thuum-fa's session):
   end); (2) a radiant Story Manager quest's stage crosses to another seat's own, different instance (BQ01 0x95125, its bounty
   target picked by conditions per seat). D-Q9 (a player alias's OnLocationChange read as a world cause), D-Q6 and D-Q7 stay
   with Eli.
+- D-Q7 A, D-Q10 A, D-Q9 B and D-Q6 A, the four recommendations (Eli about 04:53Z 2026-11-11, in thuum-fa's session, verbatim
+  "go with recommendations in the mean time if we're trying a few different questing paradigms"). Eli's frame: each is the
+  default of a quest setting, not a fixed rule, since quest paradigms are to become server settings (the settings ADR, PROPOSED
+  next).
+  - D-Q7 A: b-quest-report-dedupe is rewritten to the second head's behavior (v2, from lab/.cache/drafts/rung5 sha1 5bced22f): a
+    seat holds the engine's own stage 0 of DLC1NPCMentalModel (2b6e:Dawnguard.esm) with the seat's own cause (D-Q4 C), so
+    neither seat reports it and the dedupe has nothing to drop. Claim 2's four lines become eight (each seat traced the stage
+    with its own cause and counted it held; no seat reported it; the server recorded no start from a report and set none aside);
+    claims 1, 3 and 4 stay byte for byte. v2 reads red on canon 44ffafc2, so its commit rides thuum r5b-docs (the second head's
+    docs, merged with its canon move) and a rest set reads it before the merge. Taken over B (v1 carried as pending).
+  - D-Q10 A: a relayed stage's fragment runs on every applying seat in playtest 51 (the client setting questFragmentLive true on
+    both seats), so a stage's objectives show in both journals: D-F1 C as designed, now that x-acting-player has read the acting
+    player's scope twice (20261110-121420 on the first head; 20261111-034406 on the second, where c2 ran A Lovely Letter's
+    Fragment_22 and stopped its own copy by the same root, so the letter finishes on both seats that are on). Taken over B (the
+    fragment kept to the acting seat for one more playtest). The client's default stays false until the settings ADR sets it.
+  - D-Q9 B: a player alias's OnLocationChange is its seat's own cause (the event is about that seat's player), not the world's,
+    so a quest that stops itself when its player changes location stops on that seat alone. Built in train 52; playtest 51 keeps
+    the second head's world reading as a declared limit. Taken over A (the world's).
+  - D-Q6 A: a late joiner's journal for a world-finished Story Manager quest: the world's stage waits, parked, until the seat's
+    own Story Manager starts the quest, then applies (and under D-Q10 A its fragment runs there). The second head behaves so
+    under D-Q5 A: a refused start parks the stage (skymp5-client questStageService.ts:614-621 at f6ca339d) and a Story Manager
+    quest's stop is never recorded, so no replayed stop drops it (:249). Unread at T3. Taken over B (a platform path that starts
+    an event quest outside the Story Manager for a login replay, a trace first) and C (a declared limit for 51).
 
 ## ADR-069: Rotfern's Fixes: engine fixes ship to every player as one SKSE DLL, one detour per lab-read site, never as a lab-only patch
 
