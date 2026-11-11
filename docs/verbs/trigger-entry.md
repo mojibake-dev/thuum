@@ -412,6 +412,19 @@ that called setHosted, so ownership is read at a later update, never at the setH
   the trigger's script as the engine's own enter would, its aliases relayed; the update after an owner flip finds the flags
   landed; the replay line comes once per pair, on the host. R2 (rule 5), as D-C2's relay: the platform's own hold and replay of
   its engine's enter, no wire and no server judgment.
+- x-trigger-preload v2.3 (56723365) RED as a read on canon 24f1cc6a, 20261111-132736, at step 75 (c1's held and replayed counts for
+  "OnTriggerEnter to 38098 by 39655" 0, MS13QuestScript ArvelCombat_var not 1). H-TP6 CONFIRMED: c1's first load stood Arvel
+  at the engine's own placement, his web, whatever the server's record said (c1.log 05:30:48.261, his enter into 4940d held, the
+  owner undecided; 0x380b9's into the box 38098 the same), and the record reached the engine only through the view. The path was
+  a third one beside the two H-TP6 named: the view applied him as a puppet (49.090), promoted him live, c1 his simulator, before
+  the cell's grant (49.260), then he left the web (49.436, "this seat's presser, blanked, its enter held and never replayed")
+  and entered the box as c1's own presser in a cell c1 did not host yet: "told as triggerEntry (a world trigger in a cell this
+  seat does not host)" (49.436), with no host to relay it to, and the server logged nothing of it; c1's grant of 0x371de came
+  0.3 s later (49.733). The gap, CONFIRMED by this one read: an owned presser's enter between its promotion and its trigger's
+  cell grant is relayed to no host and lost. The fix, placed in train 53 (train 52's T2 and builds stand): the hold covers an
+  enter whose trigger's cell has no host decided here either, replayed at the cell's grant when it is this seat's (the same
+  ReplayHeldEntries path) or relayed to the host the grant names; and the server logs a triggerEntry it cannot deliver (no host)
+  rather than dropping it unseen. The proof: this probe again, its claims unchanged.
 
 ## Status
 
