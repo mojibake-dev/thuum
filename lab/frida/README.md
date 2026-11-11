@@ -329,7 +329,10 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   contact with motion type 1 to 3 then the impulse every step; the other
   seat sees motion type 4 and no impulse. Struct offsets are read from the
   CommonLibSSE-NG headers named in the header. Run on both seats through
-  x-prop-push.
+  x-prop-push. v2 (2026-11-11, for x-prop-engine v1's E2): Main's thread in
+  the ready row and a `main` field on every row, the ready row's pid, base
+  and first bytes, a liveness row every 10 s; and the impulse body read at
+  the interaction event's +0x30 (v1 read the event itself as the body).
 - prop-grab.js: the player's grab of a prop (docs/engine/havok-props.md rows
   E13, E14, E15, E31; docs/verbs/prop-physics.md A2, A6). Hooks
   PlayerCharacter::StartGrabObject (40552; the grab fields before and after,
