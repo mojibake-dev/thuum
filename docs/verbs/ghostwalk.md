@@ -222,6 +222,14 @@ positions' age.
   is back at the cast point on the server and in its own game, and stays
   there five seconds later; during the effect c2's figure of c1 is
   invisible (the figure's Invisibility above 0) and c2 has not moved itself.
+- Lab note, 2026-11-11 (the rung 5 pair's sweep): b-ghostwalk-look read red
+  twice on warm clones (20261111-060821 and 061001, step 23: no return
+  logged after the cast, server.actor(c1).y -1291 and -1303 against
+  -300 +/- 128) right after b-ghostwalk's own green 060535, then green on
+  the cold rollback 061139: ADR-027's red, red, cold green, read as state
+  the warm clone carried from b-ghostwalk's run, not the build (numidium's
+  read; which piece of state is unread, HYPOTHESIS). If it recurs warm, run
+  b-ghostwalk-look cold or ahead of b-ghostwalk.
 - Assertions that would fail if the verb silently regressed: c1's server
   position after the effect (at the cast point, held: fails with the
   script blanked, or with the server sending c1 back); c2's own position
