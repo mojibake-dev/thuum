@@ -374,9 +374,11 @@ that guest exec; artifacts come back through the Proxmox guest-agent file
 API, which caps each read at 16 MiB. A Frida trace comes back in ranges:
 the injector's .out and the script's .log are each copied with a read that
 shares write access (the script still writes its .log), the copy exec
-printing the copy's length last, as log-count's copy does (tried three
-times, 10 s apart; a copy whose exec answer the agent lost has its length
-read from the copy itself). The copy is then read by the agent's own
+printing the source's length at its open and the copy's last, as
+log-count's copy does (tried three times, 10 s apart; a copy shorter than
+its source at its open was cut short, the sources only growing, and is made
+again; a copy whose exec answer the agent lost has its length read from the
+copy itself). The copy is then read by the agent's own
 file-read with offset, count and decode=0 (qemu-server 9.1.5 and later),
 512 KiB a call: Proxmox reads a file in guest-file-read calls of its
 read_size, 1 MiB (qemu-server's Agent.pm), and calls of that size timed out

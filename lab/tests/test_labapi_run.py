@@ -1813,6 +1813,25 @@ class FridaSteps(RunTests):
         self.assertEqual(answers, [])
         self.assertFalse([c for c in pve.calls if c[:3] == ("file_read_range", 901, f"C:\\sky-lab\\frida\\{script}.log.copy")])
 
+    def test_a_copy_shorter_than_its_source_at_its_open_is_tried_again(self):
+        """The sources only grow (the script's .log is opened 'a', frida-inject's stdout appends), so a copy whose
+        length is under its source's at the open was cut short: it is tried again as a failed copy is, and the trace
+        comes back whole from the next (the re-review of 5b982dc6, nit 2)."""
+        from labapi.proxmox import ExecResult
+
+        log = '{"impulse": 1}\n' * 3
+        pve = self._traced_seat(log)
+        short = [ExecResult(0, "45 30\r\n", "")]
+        _log_copy_answers(pve, lambda guest, res: short.pop(0) if short else res)
+        run_id, body = self._run(FRIDA_ONE)
+        self.assertEqual(body["verdict"], "green", body)
+        script = f"x-trace-{run_id}-1.js"
+        copy = f"C:\\sky-lab\\frida\\{script}.log.copy"
+        copies = [c for c in pve.calls if c[:2] == ("exec", 901) and f"[IO.File]::Create('{copy}')" in " ".join(c[2])]
+        self.assertEqual(len(copies), 2, "the short copy is made again")
+        self.assertEqual([c[3:] for c in pve.calls if c[:3] == ("file_read_range", 901, copy)], [(0, 45)])
+        self.assertEqual((self.tmp / "results" / run_id / "frida" / f"c1-{script}.jsonl").read_text(encoding="utf-8"), log)
+
     def test_a_copy_whose_exec_answer_was_lost_is_read_by_its_own_length(self):
         """An exec whose answer the agent lost has ended on the seat (E_PVE_EXEC_LOST, run 20261018-204244): the copy
         is made, so its length comes from the copy itself by one length exec, and the read goes on, the copy not made

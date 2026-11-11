@@ -2218,10 +2218,12 @@ class Runner:
         """A copy `cmd` makes on the seat, whose last stdout line is "<the source's bytes at its open> <the copy's
         bytes>" as log-count's copy prints them, and the copy's length from that line, three tries 10 s apart (_tried).
         A copy whose exec answer the agent lost (E_PVE_EXEC_LOST) ran to its end on the seat, so its length then comes
-        from the copy itself, by one length exec under the same tries."""
+        from the copy itself, by one length exec under the same tries. A copy shorter than its source at its open was
+        cut short, since the sources only grow (the script's .log is opened 'a', frida_script_text; frida-inject's
+        stdout appends), and is tried again as a failed one is."""
         def copied(res) -> int | None:
             got = re.fullmatch(r"(\d+) (\d+)", _last_line(res.out))
-            return int(got.group(2)) if res.exitcode == 0 and got else None
+            return int(got.group(2)) if res.exitcode == 0 and got and int(got.group(2)) >= int(got.group(1)) else None
 
         def length(res) -> int | None:
             last = _last_line(res.out)
