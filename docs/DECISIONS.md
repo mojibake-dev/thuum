@@ -5135,8 +5135,10 @@ across seats (measured, docs/verbs/push.md:224-232; Monniaux, ACM TOPLAS 30(3), 
 
 Decision.
 
-1. One row, one stream. Every Havok body, an item, a static whose class is derived from its record (type and Havok data, never a
-   per-name list), or a dead actor's ragdoll, is a prop row in wire-rules props.rs, streamed on PropTransform.
+1. One row, one stream. Every Havok body, an item, a static whose class is derived from its base's model (its BSXFlags kDynamic
+   bit, BSXFlags.h:22, read once from the archives or the loaded 3D; never a per-name list: the rung 0 census found the record
+   type no predictor, no STAT and 5 of 27 MSTT near Riverwood carrying a moving body), or a dead actor's ragdoll, is a prop row
+   in wire-rules props.rs, streamed on PropTransform.
 
 2. Ownership is A1 to A7 with no timers: the cell's host owns a resting or stalled body; a claim from the engine that moved it
    (its capsule, its hand, its drop, an impulse whose cause it owns, or island contact with a body it moved) takes it at the next
@@ -5186,8 +5188,8 @@ Decision.
 The ladder (the plan's table): rung 0 the reads (Frida on the impulse site, the grab on a corpse, the pose's two paths and a
 save's Havok block; the three spells' PROJ and EXPL forces; the rule-free havok-props.md rows on both seats); rung 1 props hold
 (A1 to A7 with the refusals' retirement, x-prop-edge for playtest 44, b-prop-push out of pending); rung 2 the sample v2; rung 3
-the impact (b-prop-impulse with Hailstone, Fireball and Unrelenting Force at the mill's cabbages); rung 4 statics (the derived
-class); rung 5 bodies and the drag (b-corpse-drag); rung 6 the rest and reload; rung 7 the chaff, havok-props.md thawed whole.
+the impact (b-prop-impulse with Hailstone, Fireball and Unrelenting Force, two words or more, at the six ALCH cabbages on the
+Riverwood Trader's cart, 0x1c0c6 to 0x1c0cb, from XMarkerHeading 0x96595); rung 4 statics (the class from the model); rung 5 bodies and the drag (b-corpse-drag); rung 6 the rest and reload; rung 7 the chaff, havok-props.md thawed whole.
 Four playtests, P1 to P4, one after each pair of rungs. About 16 stage slots; the smaller ladder (rungs 0, 1, 3a, 3 on v1 samples,
 then bodies as rows with the re-rest) about 8.
 

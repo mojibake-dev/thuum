@@ -38,7 +38,8 @@ Eli then switched to plan mode to see the plan first. This is recorded under ADR
 - **W1b, the ADR-064 d7 freeze: lifted rung by rung.** A rung merges once the havok-props.md rows it rests on read on both screens and its scenario is green. The whole doc thaws at the last rung.
 - **W5, the impact: caster only.** Other seats skip a remote player's push on props and render the caster's stream. Sound and visuals still play everywhere.
 - **W6, bodies:** the engine's saved Havok block holds the resting pose (D78, re-applied at reload, login and restart), and compact per-bone samples carry the live drag.
-- **W2, statics: kept.** They are a rung of this leg. The static class is derived from the record (type and Havok data), never from a per-name list (ADR-063 d5).
+- **W2, statics: kept.** They are a rung of this leg. The static class is derived from the base's model (its BSXFlags kDynamic bit, read once from the archives or the loaded 3D),
+  never from a per-name list (ADR-063 d5); rung 0's census found the record type no predictor.
 - **W4: test with all three.** Hailstone, Fireball and Unrelenting Force on the cabbage cart.
 - **W7: four playtests,** P1 to P4.
 - **Physics settings: the same fix for everyone.** Already true (apocrypha, 2026-11-11): the shared layer lays Display Tweaks
@@ -122,12 +123,12 @@ R0 rungs merge on T0 and T2 alone. There is one Windows runner.
 
 | rung | branch | builds | proof | deletes | slots |
 |---|---|---|---|---|---|
-| 0 reads | thuum physics-0-reads (lab/frida, its own commits) | prop-impulse.js (H2, H3, H4), prop-grab.js on a corpse (H5), body-impose.js (H6), save-havok.js; esm reads of Hailstone, Fireball and Unrelenting Force's PROJ and EXPL forces (H1) and the mill's cabbages; x-prop-blast v1's unread red | x-prop-engine v1 (the rule-free havok-props.md rows), x-prop-blast v3, x-corpse-grab v1, x-body-impose v1, b-prop-push with bInventoryMenu=false: each row gets a two-seat run id | rows E7, E19, E38 | 2 windows |
+| 0 reads | thuum physics-0-reads (lab/frida, its own commits) | prop-impulse.js (H2, H3, H4), prop-grab.js on a corpse (H5), body-impose.js (H6), save-havok.js; esm reads of Hailstone, Fireball and Unrelenting Force's PROJ and EXPL forces (H1, done: all three push) and the cart's six cabbages; x-prop-blast v1's unread red | x-prop-engine v1 (the rule-free havok-props.md rows), x-prop-blast v3, x-corpse-grab v1, x-body-impose v1, b-prop-push with bInventoryMenu=false: each row gets a two-seat run id | rows E7, E19, E38 | 2 windows |
 | 1 props hold | m4-physics-1-arbitration | A1 to A7, rebuilt from 8deb7809, 4b471676 and up to 147a6cfe, with f67fb0f8; PropOwner player 0; the listener check; island refusal; cell-free ownership; traps unified | x-prop-arbitration v12, x-prop-edge v1 (playtest 44's edge); b-prop-push out of pending, then b-prop-arbitration | PROP_LEASE_MS, PROP_SILENCE_MS, the lease mirror, E_PROP_CELL, E_PROP_REACH, the propStatics list | 2 |
 | 2 sample v2 | m4-physics-2-sample | PropTransform v2 and PropClaim v2 (rule 4); the platform's ReadBodies native; the three-sample buffer on the owner's clock; 78089 hand-off velocity; seq-bounded allowance; answered refusals; rest by deactivation plus heartbeat; prop epochs | x-prop-follow v1 (rolling basket, tumbling cabbages, a 5% loss leg); b-prop-follow | the arrival stamp, the one-interval glide, the stir test | 2 |
 | 3a | m4-physics-3a-impact-srv (R0) | the first-sample allowance refill at each grant; budgets sized from rung 0's per-blast count | T0, T2 | | 0 |
-| 3 impact | m4-physics-3-impact | the impulse Replace with the owned-cause test; propImpulse; one claim per impact; tracking owned props at any distance; island claims | x-prop-impact v1; b-prop-impulse with three legs (Hailstone, Fireball, Unrelenting Force at the mill's cabbages) and a restart leg; x-prop-blast v4 | objectReferenceEx's Keyframing of items on arrival; TOUCH_RADIUS and the proximity stand-in | 2 |
-| 4 statics | m4-physics-4-statics | the derived static class (record type and Havok data, read by libespm), admitted as references under the same rows; f07ba07e as prior art only | x-prop-static v1 (a Havok world object pushed by a kick and by a spell); b-prop-static | | 2 |
+| 3 impact | m4-physics-3-impact | the impulse Replace with the owned-cause test; propImpulse; one claim per impact; tracking owned props at any distance; island claims | x-prop-impact v1; b-prop-impulse with three legs (Hailstone, Fireball, Unrelenting Force of two words or more, at the Riverwood Trader cart's six ALCH cabbages 0x1c0c6 to 0x1c0cb, from XMarkerHeading 0x96595) and a restart leg; x-prop-blast v4 | objectReferenceEx's Keyframing of items on arrival; TOUCH_RADIUS and the proximity stand-in | 2 |
+| 4 statics | m4-physics-4-statics | the derived static class (the base model's BSXFlags kDynamic bit, read from the archives or the loaded 3D), admitted as references under the same rows; f07ba07e as prior art only | x-prop-static v1 (a Havok world object pushed by a kick and by a spell); b-prop-static | | 2 |
 | 5a | m4-physics-5a-bodies-srv (R0) | a dead actor as a props.rs row; ChangeForm acceptance from the prop owner | T0; T2's npc-fate sessions identical | BodyOwnerId, ClaimBodyOwner, E_BODY_NOT_OWNER | 0 |
 | 5 drag | m4-physics-5-drag | PropClaim admits a dead actor; propService tracks the dead; the pre-grab guard; Held answered; the hold covering grab and loot; the bones stream and its impose path | x-corpse-drag v1 (a bandit dragged 300 units, within 32 per bone); b-corpse-drag; x-corpse-record, b-npc-death and b-npc-body-release unweakened | E_BODY_AT_REST; the corpse movement-sample path | 3 |
 | 6 rest and reload | m4-physics-6-rest | D78 whole: the saved block recorded at deactivation and re-applied at reload, login and restart; late joiners Keyframed until rest; Rust checks of the block's velocities; rule 6's migration if the record changes | x-corpse-reload v1; b-corpse-drag's restart leg (its own commit) | CORPSE_REST_* and the settle backstop | 2 |
@@ -207,3 +208,19 @@ R0 rungs merge on T0 and T2 alone. There is one Windows runner.
 - fork skymp5-client/src/services/services/sendInputsService.ts
 - fork skyrim-platform/src/platform_se/skyrim_platform/FridaHooks.cpp (the contact hook; the impulse Replace)
 - thuum docs/verbs/prop-physics.md, docs/engine/havok-props.md, docs/DECISIONS.md, lab/frida/, lab/gate.yaml
+
+## Rung 0's static reads (2026-11-11, a7896bda; esm.py on sky-srv, the winning records in the 91-plugin order)
+- H1 done, all three push props: Hailstone SPEL 02e634:Apocalypse (PROJ 0b477d impact force 5; its Shatter EXPL 0b2c7d force 24,
+  radius 128), Fireball SPEL 0x01c789 (Odin's; PROJ 0x10fbed impact 1.5; EXPL 0x0439c0 force 1, radius 320), Unrelenting Force SHOU
+  0x013e07 (a cone, impact 50, 65, 85 and range 1000, 2000, 10000 by word, no EXPL); fGameplayImpulseMultClutter 1.0. The engine
+  scales PROJ and EXPL forces differently, so the records do not rank them; H2's trace does.
+- The cart: six ALCH FoodCabbage 0x064b3f references (0x1c0c6 to 0x1c0cb, 0x1c0c9 included), each one CLUTTER body of 2 kg, on
+  STAT HandCart02 0x1c0c1 (FIXED, a collider) by the Riverwood Trader's sign in cell 0x9731, not the mill. The caster spot:
+  XMarkerHeading 0x96595 at (20587, -46080, -122), 1,190 units southwest on the road, in the same cell; Unrelenting Force's first
+  word falls short from there, so the test shouts two words or more.
+- x-prop-blast v1's red (20261104-004612): its build had no touch-3 claim (the blast pair off canon), and its refs-near steps
+  passed no ids, so steps 19 and 20 listed nothing.
+- Statics: the record type does not predict a moving body (0 of 194 STAT, 5 of 27 MSTT near Riverwood); the mesh's BSXFlags
+  kDynamic bit matched the rigid-body read on all 252 referenced models. Riverwood's movable statics: SignRiverwoodBlacksmith01
+  0x3822a, two HandCart01Wheel 0x1c0c2 and 0x14201, SignRiverwoodRiverwoodTrader01 0x5161a, SpitPotOpen01 0x54177.
+
