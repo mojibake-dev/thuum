@@ -360,7 +360,8 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   (187407; v2 read GetWorldScale's, 188105, the inverse, and fell back to
   1), trusted only when the two multiply to 1, each row labelled with its
   units; the walk counts every body of the grabbed 3D (BODIES_MAX bounds
-  only the printed list).
+  only the printed list). v2.2: without the scale the game-unit fields
+  print null (no fallback to 1), the raw Havok values beside them.
 - prop-sleep.js: the engine's own sleep of a prop against the client's
   500 ms stir test (docs/engine/havok-props.md row E10; prop-physics.md A3,
   A4). Finds the clutter bodies the player's capsule touches through

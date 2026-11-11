@@ -1,3 +1,6 @@
+// prop-grab.js v2.2 DRAFT (thuum, 2026-11-11; the re-review's FIX FIRST applied as written): with no scale v2.1 still multiplied by 1
+// under a 'havok' label; v2.2 sets the scale to NaN there, as prop-impulse.js does, so a hold row's game-unit pos and speed print null,
+// and every hold row carries the raw Havok posHavok and speedHavok beside them. v2.1's header follows.
 // prop-grab.js v2.1 DRAFT (thuum, 2026-11-11; the fresh review's FIX FIRST applied as written, ADR-064 amendment A): (1) the hold
 // rows' scale is bhkWorld::GetWorldScaleInverse's float (187407, include/RE/B/bhkWorld.h:48-52, `just addr 187407` 0x177adfc), game
 // units per Havok unit, where v2 read GetWorldScale's (188105, :42-46, 0x17849dc), its inverse: the exe's .rdata holds 69.99125 and
@@ -159,12 +162,12 @@ if (off === undefined) {
   const exeEnd = exe.base.add(exe.size);
   const inExe = function (p) { return !isNil(p) && p.compare(exe.base) >= 0 && p.compare(exeEnd) < 0; };
   const lookup = new NativeFunction(at('lookupRef'), 'bool', ['pointer', 'pointer'], 'win64');
-  // game units per Havok unit: GetWorldScaleInverse's float, trusted only when GetWorldScale's is its inverse (v2.1); without it the
-  // hold rows print Havok units and say so
+  // game units per Havok unit: GetWorldScaleInverse's float, trusted only when GetWorldScale's is its inverse (v2.1); without it
+  // NaN (v2.2): the hold rows' game-unit fields print null, their raw Havok fields stand beside them
   const scaleInverse = f32(at('worldScaleInverse'), 0);
   const scaleForward = f32(at('worldScale'), 0);
   const scaleOk = scaleInverse > 1 && scaleInverse < 1000 && Math.abs(scaleInverse * scaleForward - 1) < 0.001;
-  const SCALE = scaleOk ? scaleInverse : 1;
+  const SCALE = scaleOk ? scaleInverse : NaN;
   const UNITS = scaleOk ? 'game' : 'havok';
   const mainTid = function () { return u32(ptrAt(at('mainSingleton'), 0), 0x28); };
   const counts = { frames: 0, startGrab: 0, destroyMouseSprings: 0 };
@@ -385,8 +388,11 @@ if (off === undefined) {
               lastHold = counts.frames;
               const names = named(springsOf(p, held.bodies));
               const bodies = held.bodies.filter(function (x) { return names.indexOf(x.name) >= 0; }).slice(0, 8).map(function (x) {
-                const v = [f32(x.hkp, MOTION.linV) * SCALE, f32(x.hkp, MOTION.linV + 4) * SCALE, f32(x.hkp, MOTION.linV + 8) * SCALE];
-                return { body: x.name, type: u8(x.hkp, MOTION.type), pos: [r1(f32(x.hkp, MOTION.pos) * SCALE), r1(f32(x.hkp, MOTION.pos + 4) * SCALE), r1(f32(x.hkp, MOTION.pos + 8) * SCALE)], speed: r1(Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2])) };
+                const vH = [f32(x.hkp, MOTION.linV), f32(x.hkp, MOTION.linV + 4), f32(x.hkp, MOTION.linV + 8)];
+                const pH = [f32(x.hkp, MOTION.pos), f32(x.hkp, MOTION.pos + 4), f32(x.hkp, MOTION.pos + 8)];
+                const sH = Math.sqrt(vH[0] * vH[0] + vH[1] * vH[1] + vH[2] * vH[2]);
+                // v2.2: game units by the scale (null without it), the raw Havok values beside them
+                return { body: x.name, type: u8(x.hkp, MOTION.type), pos: pH.map(function (c) { return r1(c * SCALE); }), speed: r1(sH * SCALE), posHavok: pH.map(function (c) { return Math.round(c * 1000) / 1000; }), speedHavok: Math.round(sH * 1000) / 1000 };
               });
               emit({ event: 'hold', frame: counts.frames, handle: hex(f.handle), ref: isNil(held.refr) ? '0x0' : hex(formId(held.refr)), springs: f.springs, units: UNITS, bodies: bodies });
             }
@@ -396,7 +402,7 @@ if (off === undefined) {
     } catch (e) { attachErrors.push('PlayerCharacter::Update: ' + e); }
   } else attachErrors.push('PlayerCharacter::Update: no slot');
 
-  emit({ event: 'ready', script: 'prop-grab.js', v: '2.1', version: version, pid: Process.id, base: String(exe.base), mainThread: mainTid(), worldScale: { inverse187407: scaleInverse, forward188105: scaleForward, ok: scaleOk, units: UNITS }, hooks: resolved, raw: RAW, holdEvery: HOLD_EVERY, bodiesMax: BODIES_MAX, attachErrors: attachErrors });
+  emit({ event: 'ready', script: 'prop-grab.js', v: '2.2', version: version, pid: Process.id, base: String(exe.base), mainThread: mainTid(), worldScale: { inverse187407: scaleInverse, forward188105: scaleForward, ok: scaleOk, units: UNITS }, hooks: resolved, raw: RAW, holdEvery: HOLD_EVERY, bodiesMax: BODIES_MAX, attachErrors: attachErrors });
   let lastFrames = 0;
   setInterval(function () {
     emit({ event: 'liveness', pid: Process.id, counts: JSON.parse(JSON.stringify(counts)), frames10s: counts.frames - lastFrames, mainThread: mainTid() });
