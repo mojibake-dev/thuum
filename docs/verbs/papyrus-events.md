@@ -898,3 +898,58 @@ possibly new reds, so b-cloak-apply and b-cloak-fight run in the stage.
   actor-self snippet: c1's server console SetAV on Faendal, delegated to c2, his cell's host, whose line names the fallback and
   whose engine's health share moves with the base. The 0x14 argument prints no line of its own (UNVERIFIED end to end, the probe's
   header).
+
+## D-S4 A, the grace read: a departing host's script records land before its successor's grant (stage 2's read; fork m4-train-52 1c856c66, built 2026-11-11, T3 pending)
+
+The read (stage 2 of the second head, 2026-11-11): a departing host's script-state reports were refused E_SCRIPTSTATE_EPOCH after
+each hand-off, 3 in one run and 7 in the other; nothing was lost there, only because the successor's own records covered it. Why,
+by construction: HostService's onHostRelease asks ScriptStateService for the release read (hostService.ts:704-725; onRelease,
+scriptStateService.ts:528, every known reference of the cell read again under the released epoch), and wire-rules script_state
+takes such a read only while nobody hosts the cell (script_state.rs:14-25, the epoch judged first; docs/WIRE.md's ScriptState
+section). When a host's 5 s grace ends with a successor, the cells rule emits the Release and the successor's Grant in one tick
+(cells.rs GRACE_MS :23, tick :644), and ApplyHostDecisions notes the release, then the grant (PartOne.cpp:2296 and :2245,
+script_state's released then granted), so behind a successor every release read is refused. The refused reads carried new bytes,
+since a read whose FNV-1a equals the last sent is never sent: a change no state row touched (a script variable alone), which only
+such a read finds, so a change made inside the report window could be lost to the record. Line numbers are fork c3f9d175's.
+
+**D-S4 A, built (1c856c66, client only; the train 52 plan's section 4.3, its default, docs/DECISIONS.md's ADR-068 train 52
+entry).** When this seat reports a cell it hosts unloaded (HostService.report, hostService.ts:840-859: after the CellLoaded goes
+out, a loaded false for a cell in its hosted set calls onUnloaded), ScriptStateService.onUnloaded (scriptStateService.ts:554-584)
+makes every known reference of the cell due at once, marked grace (noteDue at epoch 0, :645-678, so the read stamps
+epochForActor's epoch while the grant still holds; the mark kept once set and carried to the read's hops, as a release read's
+epoch is). The unload report is the grace's start (cells.rs unloaded :295: the host keeps the cell, its leaving_since_ms set,
+until tick passes GRACE_MS), and through the grace script_state judges the reporter the cell's host at its epoch, so the reads
+land as the owner's. After them the release read finds the bytes already sent and sends nothing, unless the grace changed them; it
+keeps its place for a cell left unhosted, and a grace read the release overtakes goes at the released epoch as the release read.
+Lines: the send, "[verb:scripts] script state <id> sent: <n> script(s), <v> variable(s), fnv <x>, epoch <e> (the grace read)"
+(:1401-1403, every grace send printed, as every release send is), and a trace at the report, "cell <c> reported unloaded while
+hosted here: <n> known reference(s) due for the grace read (D-S4 A)" (:582). Rule 5: nothing loosens; the server's rule is
+unchanged and judges a grace read as any owner's read. No T0 or T2 (client only; tsc --noEmit and webpack clean, and a scratch
+harness over the two services walked the hand-off: a reference changed by a variable alone went out at the host's epoch as the
+grace read and the release read then sent nothing; the same harness on f6ca339d's two files fails four of its ten checks, the
+release read sending the change).
+
+**Its shared send bucket (the whole-branch review's SHOULD 3).** The grace reads spend the one bucket every record read spends
+(scriptStateService.ts SEND_BURST 64 and SEND_PER_S 8, :136-141, wire-validate's script_state_budget mirrored, lib.rs:306), with
+no priority over the other due reads, and a read waits while the bucket is empty (:1335-1340). So inside the 5 s grace a seat
+sends at most 64 + 8 x 5 = 104 changed records from a full bucket, and fewer from one the cell's sweep, its hops or another cell's
+reads spent just before the unload; a grace read still due when the grace ends goes at the released epoch and is refused behind a
+successor, as before. HYPOTHESIS, UNMEASURED: a busy cell can miss the grace this way (no run has counted a cell's changed
+references at its unload report against the bucket).
+
+**The grid case, A's declared gap, and D-S4 B.** The grace read starts at an unload report alone. A host whose exterior cell left
+the server's 3x3 grid while its engine still loads it (the game's 5x5) keeps simulating through the grace and sends no unload
+report, so no grace read starts, and behind a successor its release read is refused as before (scriptStateService.ts's known
+limits, :82-89; a persistent exterior reference's record is read by neither, its parent the worldspace's persistent cell). D-S4 B,
+the grant waiting a bound for the release read after a release whose old host is still connected (a new RELEASE_READ_MS in the
+cells rule, UNMEASURED), would cover the grid case and every other, at the cost of the bound added to every warm hand-off: it
+changes hand-off timing, a feel change, and is Eli's call alone (docs/DECISIONS.md, ADR-068's train 52 entry), put to him only if
+a read shows the grid case.
+
+HYPOTHESIS H-SS1 (in the code, scriptStateService.ts:567-569): at the unload report the cell's references are still readable by
+SerializeScriptState for the grace's reads; one the engine freed at the detach is not read, and its record stays the last sent
+(the release read already read after the detach, five seconds later). T3: x-acting-player v3 (367ecd50, by path,
+lab/.cache/drafts/train52), its leg C a hand-off by a load door with the successor inside the cell, and its 4.3 block: claim 25,
+no E_SCRIPTSTATE_EPOCH on the server; 26, c1's "(the grace read)" send at least once; 27, the "due for the grace read" count; 28
+and 29, the premises (c1 hosted the street's cell and crossed; the successor took it); 30, the door's own grace read. Leg C keeps
+every grid release unhosted, so the grid case stays unread there.
