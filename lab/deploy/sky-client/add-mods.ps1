@@ -29,7 +29,7 @@ $folders = @(Get-ChildItem (Join-Path $lab 'games') -Filter '*.txt' | ForEach-Ob
   Where-Object { $_.Dir -and (Test-Path (Join-Path $_.Dir 'SkyrimSE.exe')) })
 if (-not $folders) { throw "no game folder recorded in $lab\games" }
 $games = @($folders | ForEach-Object { $_.Dir })
-$r = [ordered]@{ games = $games; fetched = 0; kept = 0; bytes = 0; pruned = 0; unpruned = 0; plugins = @() }
+$r = [ordered]@{ games = $games; fetched = 0; kept = 0; owned = 0; bytes = 0; pruned = 0; unpruned = 0; plugins = @() }
 # where an entry lands in a game folder, or $null when its mod is scoped to another version (<mod>@<version>)
 function Get-DataPath([string]$rel, $folder) {
   $parts = $rel -split '/'
@@ -41,12 +41,30 @@ function Get-DataPath([string]$rel, $folder) {
 $sums = ((& curl.exe -sS -f "$From/SHA256SUMS") -join "`n") -split "`n" | Where-Object { $_.Trim() }
 if (-not $sums) { throw "no SHA256SUMS at $From" }
 $entries = $sums | ForEach-Object { [pscustomobject]@{ Hash = $_.Substring(0, 64).ToLower(); Rel = $_.Substring(64).TrimStart(' ', '*').Trim() } }
+# Files the game owns after their first lay (game-owned.tsv, lab/layer/game-owned.tsv, "path why" rows): a mod's plugin
+# rewrites them at load (Skyrim Souls RE its ini), so a copy that differs from the manifest is the game's doing. One is laid
+# again only when the layer's own copy changed since this clone's last lay (its record, below), and is counted "owned"
+# otherwise. An older tree without the file lays as before.
+$record = Join-Path $lab 'mods.sums'
+$gameOwned = (& curl.exe -sS -f "$From/game-owned.tsv") -join "`n"
+$owned = @{}
+if ($LASTEXITCODE -eq 0 -and $gameOwned) {
+  $gameOwned -split "`n" | Where-Object { $_.Trim() -and -not $_.StartsWith('#') } | Select-Object -Skip 1 |
+    ForEach-Object { $owned[($_ -split "`t")[0].Trim().ToLower()] = $true }
+}
+$lastLaid = @{}
+if (Test-Path $record) {
+  Get-Content $record | Where-Object { $_.Trim() } |
+    ForEach-Object { $lastLaid[$_.Substring(64).TrimStart(' ', '*').Trim().ToLower()] = $_.Substring(0, 64).ToLower() }
+}
 foreach ($folder in $folders) {
   foreach ($e in $entries) {
     $dest = Get-DataPath $e.Rel $folder
     if (-not $dest) { continue }
     $parts = $e.Rel -split '/'
     if ((Test-Path $dest) -and ((Get-FileHash -Algorithm SHA256 $dest).Hash.ToLower() -eq $e.Hash)) { $r.kept++; continue }
+    $key = $e.Rel.ToLower()
+    if ($owned.ContainsKey($key) -and (Test-Path $dest) -and $lastLaid[$key] -eq $e.Hash) { $r.owned++; continue }
     New-Item -ItemType Directory -Force -Path (Split-Path $dest) | Out-Null
     $url = $From + '/' + (($parts | ForEach-Object { [uri]::EscapeDataString($_) }) -join '/')
     & curl.exe -sS -f -o $dest $url
@@ -63,7 +81,6 @@ foreach ($folder in $folders) {
 # record existed). A file goes only when its hash is the one that render laid; anything
 # else at its path stays, counted; directories stay. Before 2026-10-27 nothing was ever
 # removed, and D37's DeathDropOverhaul.dll, out of the layer, would still have loaded.
-$record = Join-Path $lab 'mods.sums'
 $earlier = @()
 if (Test-Path $record) { $earlier += @(Get-Content $record) }
 $prev = Join-Path $lab 'mods-previous.sums'
