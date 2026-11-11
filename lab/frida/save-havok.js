@@ -1,3 +1,11 @@
+// save-havok.js v1.1 DRAFT (thuum, 2026-11-11; the fresh review's FIX FIRST applied as written, ADR-064 amendment A): the scale is
+// bhkWorld::GetWorldScaleInverse's float (187407, game units per Havok unit), where v1 read GetWorldScale's (188105), its inverse
+// (69.99125 and 0.0142875 in the exe's .rdata, lab/.cache/game/exe-1.6.1170, read 2026-11-11; the adr065 read's :781 and :821), so
+// v1's (1, 1000) test failed and every game-unit column printed null; v1.1 trusts the scale only when the two floats multiply to 1
+// and prints both in the ready row. And one clarification: an angular velocity is radians a second, not a length, so a
+// SetAngularVelocity row's game column is the raw vector times the scale only to compare with the block's angular floats, which the
+// static read says the writer scales too (HYPOTHESIS), and the speed is printed for linear rows alone. v1's header follows,
+// corrected in place.
 // save-havok.js v1 DRAFT (thuum, 2026-11-11; ADR-071 rung 0, docs/research/physics-leg-2026-11-11.md "The kHavokMoved block keeps an
 // awake body's velocities"): does a save written while a body rolls keep that body's velocities in its Havok block, and does the
 // load hand them back to the body? The plan's read: 19534 at a save while a body rolls, then 19538 and 78089 at the load. Records
@@ -18,8 +26,9 @@
 //                     78090); ATTACHED (the adr065 read names 78088 for this step; CommonLib's 78090 is the setter, and 78088 is left
 //                     out: the same read calls it the body's activate)
 //   403449 0x31872c0  Main** (Offsets.h:383); threadID +0x28 (M/Main.h:87)
-//   188105 0x17849dc  bhkWorld's world scale (B/bhkWorld.h:42-46): game units per Havok unit, so the block's game-unit velocities and
-//                     the setters' Havok-unit vectors read side by side
+//   187407 0x177adfc  bhkWorld::GetWorldScaleInverse's float (B/bhkWorld.h:48-52): game units per Havok unit (69.99125), so the
+//                     block's game-unit velocities and the setters' Havok-unit vectors read side by side (v1.1)
+//   188105 0x17849dc  bhkWorld::GetWorldScale's float (:42-46): Havok units per game unit (0.0142875), the cross-check, printed
 //   Named by the static read alone (pyghidra-mcp on sky-re, 2026-11-03; HYPOTHESIS by rule 2; docs/research/adr065-serialize-on-demand-
 //   2026-11-03.md: the id table :718, the block's layout :768-783, the reader :810-822):
 //   19534  0x2db2c0   the Havok block writer (ref, buf): ATTACHED; the block's bytes are the save buffer's from its position at the
@@ -47,7 +56,7 @@
 // bytes for the rolling body (the velocities dropped) or no setter inside its 19535.
 //
 // Rows (console.log and send(); the lab's preamble flushes them to the trace's .log every 250 ms):
-//   {event:'ready'}: version, pid (against the run's c<N>-skyrim-platform-pid<N>.log), base, Main's thread, the world scale, every
+//   {event:'ready'}: version, pid (against the run's c<N>-skyrim-platform-pid<N>.log), base, Main's thread, both scale floats, every
 //     site's id, rva, address and first bytes before the attach, params, attachErrors.
 //   {event:'havokWrite'} at 19534's leave, for FORM or a block with an active body: the reference, its base, the thread, the
 //     block's length, flags, count, pitch and roll, and each body's slice decoded.
@@ -73,7 +82,8 @@ const OFFSETS = {
     setLinearVelocity: 0xe931e0, // 78089 bhkRigidBody::SetLinearVelocity
     setAngularVelocity: 0xe932b0, // 78090 bhkRigidBody::SetAngularVelocity
     mainSingleton: 0x31872c0, // 403449 Main**
-    worldScale: 0x17849dc, // 188105 bhkWorld's world scale
+    worldScaleInverse: 0x177adfc, // 187407 bhkWorld::GetWorldScaleInverse's float: game units per Havok unit (v1.1)
+    worldScale: 0x17849dc, // 188105 bhkWorld::GetWorldScale's float: Havok units per game unit, the cross-check
   },
 };
 const SAVE_BUFFER = { data: 0x08, pos: 0x14 };
@@ -120,8 +130,12 @@ if (off === undefined) {
 } else {
   const at = function (name) { return exe.base.add(off[name]); };
   const rva = function (p) { try { return hex(p.sub(exe.base).toUInt32()); } catch (e) { return String(p); } };
-  const scaleRaw = f32(at('worldScale'), 0);
-  const SCALE = scaleRaw > 1 && scaleRaw < 1000 ? scaleRaw : NaN;
+  // game units per Havok unit: GetWorldScaleInverse's float, trusted only when GetWorldScale's is its inverse (v1.1); without it the
+  // game columns print null and the Havok ones stand
+  const scaleInverse = f32(at('worldScaleInverse'), 0);
+  const scaleForward = f32(at('worldScale'), 0);
+  const scaleOk = scaleInverse > 1 && scaleInverse < 1000 && Math.abs(scaleInverse * scaleForward - 1) < 0.001;
+  const SCALE = scaleOk ? scaleInverse : NaN;
   const mainTid = function () { return u32(ptrAt(at('mainSingleton'), 0), 0x28); };
   const counts = { havokWrite: 0, havokBodyWrite: 0, havokRead: 0, havokBodyRead: 0, setLinearVelocity: 0, setAngularVelocity: 0 };
   const attachErrors = [];
@@ -218,7 +232,7 @@ if (off === undefined) {
         try {
           const v = [f32(args[1], 0), f32(args[1], 4), f32(args[1], 8)];
           const row = { havok: v.map(r2), game: v.map(function (x) { return r2(x * SCALE); }) };
-          row.speed = len3(row.game);
+          if (name === 'setLinearVelocity') row.speed = len3(row.game); // v1.1: an angular vector is rad/s, no speed
           const r = reads[this.threadId];
           if (r !== undefined) { (name === 'setLinearVelocity' ? r.linear : r.angular).push(row); return; }
           outside += 1;
@@ -230,6 +244,6 @@ if (off === undefined) {
   attach('78089', at('setLinearVelocity'), velocityHook('setLinearVelocity'));
   attach('78090', at('setAngularVelocity'), velocityHook('setAngularVelocity'));
 
-  emit({ event: 'ready', script: 'save-havok.js', version: version, pid: Process.id, base: String(exe.base), mainThread: mainTid(), worldScale: scaleRaw, hooks: resolved, params: { FORM: hex(FORM_ID), ROWS: ROWS, BODIES: BODIES }, attachErrors: attachErrors });
+  emit({ event: 'ready', script: 'save-havok.js', v: '1.1', version: version, pid: Process.id, base: String(exe.base), mainThread: mainTid(), worldScale: { inverse187407: scaleInverse, forward188105: scaleForward, ok: scaleOk }, hooks: resolved, params: { FORM: hex(FORM_ID), ROWS: ROWS, BODIES: BODIES }, attachErrors: attachErrors });
   setInterval(function () { emit({ event: 'liveness', pid: Process.id, counts: JSON.parse(JSON.stringify(counts)), rows: rows, outside: outside, mainThread: mainTid() }); }, 10000);
 }
