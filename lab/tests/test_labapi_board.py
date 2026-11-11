@@ -291,6 +291,12 @@ class BoardTests(unittest.TestCase):
             board.poll("c2")
             board.complete(theirs.id, {"ok": True, "data": {"actor": 0xFF000001, "parts": [{"id": 0x19D09, "type": 2, "name": "e"}]}})
             self.assertEqual(board.head_parts("c2")["actor"], 0x14)
+            # a settings step's live values are kept per client
+            st = board.enqueue("c1", "settings", {"ini": ["fMaxTime:HAVOK"]})
+            board.poll("c1")
+            board.complete(st.id, {"ok": True, "data": {"ini": {"fMaxTime:HAVOK": 0.016667}, "gmst": {}}})
+            self.assertEqual(board.settings("c1")["ini"]["fMaxTime:HAVOK"], 0.016667)
+            self.assertIsNone(board.settings("c2"))
             board.clear_views()
             self.assertIsNone(board.node_rotations("c2"))
             self.assertIsNone(board.held("c1"))
@@ -301,6 +307,7 @@ class BoardTests(unittest.TestCase):
             self.assertIsNone(board.node_scales("c1"))
             self.assertIsNone(board.presets("c1"))
             self.assertIsNone(board.head_parts("c2"))
+            self.assertIsNone(board.settings("c1"))
             # a timed-out step is cancelled and a late result is ignored
             late = board.enqueue("c1", "connect")
             board.poll("c1")

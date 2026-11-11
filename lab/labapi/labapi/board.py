@@ -107,6 +107,8 @@ class StepBoard:
         self._presets: dict[str, dict[str, Any]] = {}
         # a console step's answer: {typed, lines, keys}
         self._consoles: dict[str, dict[str, Any]] = {}
+        # a settings step's answer, the live values it read: {ini: {name: value}, gmst: {name: value}} (c.setting(name))
+        self._settings: dict[str, dict[str, Any]] = {}
         # a head-parts step's answer on the client's own player: {parts, ...}
         self._head_parts: dict[str, dict[str, Any]] = {}
         self._seq = itertools.count(1)
@@ -240,6 +242,8 @@ class StepBoard:
             self._av_reads.setdefault(step.client, {})[kind] = body["data"]
         if step.action == "console" and isinstance(body.get("data"), dict):
             self._consoles[step.client] = body["data"]
+        if step.action == "settings" and isinstance(body.get("data"), dict):
+            self._settings[step.client] = body["data"]
         if step.action == "head-parts" and not (step.args or {}).get("other") and isinstance(body.get("data"), dict):
             # a {other: true} read of a SkyMP figure lists the seat's own player's base (skymp5-client applyTints gives the
             # figure's base the player's form id), so only the own read is kept; a figure's parts are read by node
@@ -390,6 +394,9 @@ class StepBoard:
     def consoles(self, observer: str) -> dict[str, Any] | None:
         return self._consoles.get(observer)
 
+    def settings(self, observer: str) -> dict[str, Any] | None:
+        return self._settings.get(observer)
+
     def head_parts(self, observer: str) -> dict[str, Any] | None:
         return self._head_parts.get(observer)
 
@@ -421,6 +428,7 @@ class StepBoard:
         self._av_reads.clear()
         self._presets.clear()
         self._consoles.clear()
+        self._settings.clear()
         self._head_parts.clear()
 
     def clear(self, client: str | None = None) -> None:

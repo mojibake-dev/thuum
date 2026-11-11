@@ -179,6 +179,9 @@ the lab can grep (E_ASSERT_*).
                                                      its player (SKSE's overlay natives read the engine's per-NPC
                                                      overlay map, not HasOverlays; which parts the face takes from
                                                      it is HYPOTHESIS), 0 for none
+  <client>.setting("<name>")                         the live value its last settings step read under that name: an
+                                                     INI setting "name:Section" (Utility.GetINIFloat, the engine's
+                                                     live value, a plugin's write included) or a game setting
   <client>.printed("<text>")                         true when a line the console printed during its last
                                                      console step contains the text (the server's
                                                      ConsoleOutput as skymp5-client prints it)
@@ -290,6 +293,7 @@ class ViewsFacade(Protocol):
     def av_reads(self, observer: str) -> dict[str, Any] | None: ...
     def presets(self, observer: str) -> dict[str, Any] | None: ...
     def consoles(self, observer: str) -> dict[str, Any] | None: ...
+    def settings(self, observer: str) -> dict[str, Any] | None: ...
     def head_parts(self, observer: str) -> dict[str, Any] | None: ...
 
 
@@ -2657,6 +2661,24 @@ class _ClientRef:
             raise AssertionData(f"{self.name}'s head-parts read holds {len(found)} parts of type {kind}")
         return found[0] if found else 0
 
+    def setting(self, name: str) -> float:
+        """c.setting(name): one setting's live value as that client's last `settings` step read it, by the name the step
+        named: an INI setting "name:Section" (Utility.GetINIFloat, the engine's live value, so a plugin's write shows) or a
+        game setting (Game.GetGameSettingFloat or GetGameSettingInt). thuum ADR-071 decision 7 reads Display Tweaks'
+        static Havok step with it: abs(c1.setting("fMaxTime:HAVOK") - 1/60) < 0.0005."""
+        fn = getattr(self._views, "settings", None)
+        data = fn(self.name) if fn else None
+        if not isinstance(data, dict):
+            raise AssertionData(f"{self.name} has not reported a settings step yet")
+        for kind in ("ini", "gmst"):
+            table = data.get(kind)
+            if isinstance(table, dict) and name in table:
+                v = table[name]
+                if isinstance(v, bool) or not isinstance(v, (int, float)):
+                    raise AssertionData(f"{self.name}'s settings step read {name} as {v!r}, not a number")
+                return float(v)
+        raise AssertionData(f"{self.name}'s last settings step did not read {name}")
+
     def printed(self, text: str) -> bool:
         """c.printed(text): whether a line the game's console printed during
         that client's last `console` step contains the text (Skyrim
@@ -2925,7 +2947,7 @@ _NULLARY = {
 _METHODS = {
     _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref", "follow", "fate", "log_count", "stream",
                  "world_globals", "alias_fill", "quest_runs", "quest_record", "script_variables"},
-    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "inventory", "globalValue", "projectile", "poison", "skill", "level", "weather", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "head_part", "overlay_part", "refs_near", "node_rotation", "script_state", "alias", "factions", "script_vars"},
+    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "inventory", "globalValue", "projectile", "poison", "skill", "level", "weather", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "setting", "head_parts", "head_part", "overlay_part", "refs_near", "node_rotation", "script_state", "alias", "factions", "script_vars"},
     NodeRotationView: {"angle_to", "local_angle_to"},
     FactionsView: {"rank", "member"},
     WorldGlobalsView: {"value"},
