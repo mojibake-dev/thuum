@@ -9523,3 +9523,21 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   image now with bash for the scripts' stub tests. Open: playtest-restart's reconnects are not staggered (outside the
   word; the seats reconnect by themselves), turbo-client.sh and turbo-back.sh keep the together relaunch until after 51,
   and the justfile's playtest-go comment still reads "together" (the shared checkout's justfile hunk first).
+- (numidium) The physics leg's evening reads on canon 24f1cc6a. x-drop-leftover v1.1 (thuum-fa's READY, 296ff33b), W3's
+  read of b-prop-push's step 27: 20261111-220150 red at its main block's two Q3 claims, c1Cell and c1Restart, 27 of 29 held.
+  The leftover Souls RE's running inventory menu leaves at a drop (0xff000947, deleted true, disabled false, 116 north of c1
+  and 124 above its feet) held through time, the copy's removal, c1's presses and the touches, and was gone at c1's first
+  listing after a cell change and return (step 134), so the restart's listing read the same absence. thuum-fa's read of the
+  artifacts: never targeted at six pitches bracketing its bearing, never drawn in either picture, never solid, never listed on
+  c2. An invisible leaked reference that leaving its cell frees (HYPOTHESIS: the cell's detach); W3's next step, step 27's
+  count restated to live references or the drop service fixed, goes to Eli with thuum-fa's memo.
+- (numidium) labapi-frida-fetch merged to main 8bd23824 (thuum-fa; two fresh reviews; pipelines 5838 and 5839 green) and
+  lab-api deployed at 8bd23824 at 22:32Z (it ran 0577d36b, so apocrypha's c.setting, bddde451, went live with it): a Frida
+  trace's copy comes back in 512 KiB ranges through Proxmox's own agent file-read (offset, count and decode=0, qemu-server
+  9.2.10 on core), checked against the length its copy printed; a run's own trace not fetched whole is E_RUN_FRIDA_FETCH, and
+  a copy the agent still holds rolls its seat back. 9.2.10's file-read leaves a timed-out read's handle open (fixed upstream
+  in 9.2.11; the upgrade is Eli's call). The reviewer's real-seat check passed on both seats under a ten-minute hold (a
+  2,097,164-byte file with an e-acute and a euro across range boundaries: the sha equal, the copy removed, both edge reads
+  exact, 3.4 s a seat). x-prop-blast v3 b0c8945e again, 20261111-223256 green, its two prop-impulse traces whole (c1 666 rows,
+  c2 314, where 191642's held only the ready rows), H2 to H4 for thuum-fa's read. Still whole-file: _fetch_client_file's
+  console-log reads (191642's timed out as well), the ranged read's next caller. Both clones rolled back after each run.
