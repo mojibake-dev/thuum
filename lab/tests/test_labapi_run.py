@@ -1150,6 +1150,35 @@ class FridaTraces(RunTests):
             self.assertIn(name, body["artifacts"])
         self.assertEqual(self.services.runner.frida_started, [])
 
+    def test_a_copy_held_on_a_seat_outside_the_run_rolls_that_seat_back_at_its_next_run(self):
+        """A hand trace the run's end fetches on a seat the run does not play: a copy its agent then holds open is that
+        seat's to clear, through its remembered state (Runner.forget_seats), as anything that touched it outside its
+        own runs is; the run's verdict stands (the re-review of 5b982dc6, nit 5)."""
+        from labapi.guests import Guest
+        from labapi.proxmox import ExecResult
+        from labapi.runner import SeatState
+
+        pve = self.services.control._b
+        self.services.tables.guests["fake-c2"] = Guest("fake-c2", 902, "127.0.0.1", "qemu", "client", True, "clean-sp", "c2")
+        self.services.runner.seats["c2"] = SeatState(since_rollback=1)
+        pve.files["C:\\sky-lab\\frida\\hand-two.js.log"] = '{"leak": 2}\n'
+        self.services.runner.frida_started.append(("c2", "hand-two.js"))
+        plain_exec = pve.exec
+
+        def exec_(guest, command, timeout):
+            if re.search(r"Remove-Item -LiteralPath '[^']+hand-two\.js\.log\.copy' -Force", " ".join(command)):
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                return ExecResult(0, "True\r\n", "")  # still there: the agent holds it
+            return plain_exec(guest, command, timeout)
+
+        pve.exec = exec_
+        run_id, body = self._run(SOLO_WITH_LOG)
+        self.assertEqual(body["verdict"], "green", body)
+        held = "frida hand-two.js.log: C:\\sky-lab\\frida\\hand-two.js.log.copy held open in its agent after its read"
+        self.assertIn(held, body["notes"])
+        self.assertEqual(self.services.runner.seats["c2"].force, held)
+        self.assertIn("frida/c2-hand-two.js.jsonl", body["artifacts"])
+
 
 def _log_copy_answers(pve, answer):
     """A trace's .log copy exec on the fake seat answering `answer(guest, the fake's own answer)`, every other exec as
@@ -1976,6 +2005,31 @@ class FridaSteps(RunTests):
         force = self.services.runner.seats["c1"].force
         self.assertTrue(force.startswith(f"its last run ({run_id}) ended in a fault: frida x-trace-{run_id}-1.js.log: "), force)
         self.assertIn("held open in its agent", force)
+
+    def test_a_removal_that_answers_neither_true_nor_false_is_a_note(self):
+        """A removal whose answer says nothing of the copy (neither True nor False on its last line, or an exit that is
+        not 0) leaves the copy unknown: a note naming the answer, never the seat's fault nor the run's (the re-review of
+        5b982dc6, nit 5)."""
+        from labapi.proxmox import ExecResult
+
+        pve = self._traced_seat('{"impulse": 1}\n')
+        plain_exec = pve.exec
+
+        def exec_(guest, command, timeout):
+            if re.search(r"Remove-Item -LiteralPath '[^']+\.js\.log\.copy' -Force", " ".join(command)):
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                return ExecResult(0, "WARNING: the path is in use\r\n", "")
+            return plain_exec(guest, command, timeout)
+
+        pve.exec = exec_
+        run_id, body = self._run(FRIDA_ONE)
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertEqual(body["failures"], [])
+        copy = f"C:\\sky-lab\\frida\\x-trace-{run_id}-1.js.log.copy"
+        self.assertIn(f"frida x-trace-{run_id}-1.js.log: the removal of {copy} on fake-c1 answered exit 0: WARNING: the path is "
+                      "in use", body["notes"])
+        self.assertFalse([n for n in body["notes"] if "held open in its agent" in n], body["notes"])
+        self.assertEqual(self.services.runner.seats["c1"].force, "")
 
     def test_an_exception_out_of_the_artifacts_is_an_internal_failure(self):
         """An exception that escapes the artifacts phase is a bug in lab-api, and what it skipped may be the run's own
