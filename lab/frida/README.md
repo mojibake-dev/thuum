@@ -406,9 +406,16 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   copied onto the engine heap, the reference's location and angle set back, and the re-apply route 36014 (19535 on the live 3D,
   its 19538 and slot 0x35 and 0x36 calls counted). Pose rows carry the per-bone error against the capture in game units (max, mean,
   the root's, the worst three bones) and the motion types, the rotation error at each window's end. Its engine calls run inside a
-  replacement of the player's own update, never inside a listener (the listener guard), and the replacement is reverted when the
-  run ends. It WRITES the body's transforms during its phases: a lab experiment, never a resident. 36014, 36016, 19535 and 19538
-  are the static read's (HYPOTHESIS); the rest by `just addr` and CommonLibSSE-NG, 2026-11-11. Written 2026-11-11, never run.
+  replacement of the player's own update, never inside a listener (the listener guard), on Main's thread alone (a 'thread' row if
+  the update runs elsewhere), and the replacement is reverted when the run ends. Its writes, a lab experiment's, never a
+  resident's: path A's body transforms and the driver's motion type (set back to kDynamic at its release and by any finish while
+  keyframed); path B's block through 36014, and the reference's data.angle and data.location written directly in memory to the
+  capture's values and NOT restored afterwards, so the body's record moves with the host's next samples. v1.1 (the same day, its
+  review's fixes): game units by GetWorldScaleInverse's float (187407; v1 read GetWorldScale's, 188105, the inverse), the original
+  under exceptions 'propagate', the graphs re-resolved at every driver call, the walk counting every body so H6's 64 can fail,
+  slots 0x35 and 0x36 counted on bhkRigidBodyT (239275) too, and the pose errors read memory against memory while the writes go
+  accessor to accessor (bhkRigidBodyT overrides GetPosition and SetPosition). 36014, 36016, 19535 and 19538 are the static
+  read's (HYPOTHESIS); the rest by `just addr` and CommonLibSSE-NG, 2026-11-11. Written 2026-11-11, never run.
 - save-havok.js: ADR-071 rung 0's save read (the plan's "the kHavokMoved block keeps an awake body's velocities"): at a save, the
   Havok block writer 19534 (its bytes the save buffer's between its entry and leave positions, BGSSaveGameBuffer.h:30-32) sliced per
   body by 19537's entry and leave, each slice decoded by its length (position and rotation, the body flag byte, six velocity floats

@@ -1,10 +1,33 @@
+// body-impose.js v1.1 DRAFT (thuum, 2026-11-11; the fresh review's FIX FIRST applied as written, ADR-064 amendment A): (1) the scale
+// is bhkWorld::GetWorldScaleInverse's float (187407, game units per Havok unit), where v1 read GetWorldScale's (188105), its inverse
+// (69.99125 and 0.0142875 in the exe's .rdata, lab/.cache/game/exe-1.6.1170, read 2026-11-11; the adr065 read's :781 and :821), so
+// v1's (1, 1000) test failed and its first step would have ended the run; v1.1 trusts the scale only when the two floats multiply to
+// 1 and prints both in the ready row; (2) the replacement's original is a NativeFunction with exceptions 'propagate'
+// (apply-on-demand.js:831) and its NativeCallback is held in a binding the liveness row reads, so it outlives the revert; (3) the
+// step runs only when the update's thread is Main's (one 'thread' row when it is not); (4) the driver's graphs are re-resolved at
+// every SetMotionType (a rebuilt 3D may have freed the old ones), every finish while the ragdoll is keyframed sets it back to
+// kDynamic first, and path B's direct writes of the reference's angle and location, never restored, are named in the list of
+// writes below; (5) the walk counts every body (a NODES_MAX of 8192 nodes bounds it), so the capture's H6 check on 64 bodies can
+// fail; and from the review's notes: slots 0x35 and 0x36 are counted on bhkRigidBodyT's vtable too (239275, which overrides them),
+// and two citations corrected (BSIRagdollDriver.h:23, TESObjectREFR.h:78-79). One more fix the bhkRigidBodyT read called for:
+// bhkRigidBodyT overrides GetPosition and SetPosition as well (slots 0x33 to 0x37), so a body's accessor position may carry an
+// offset the motion state does not; v1 lerped from the memory position toward the accessor's, so v1.1 keeps the two families
+// apart: the pose errors compare the motion state's translation with the capture's (memory against memory), and the writes go from
+// GetPosition at the phase's start to GetPosition at the capture through SetPosition (accessor to accessor); the capture row's
+// getPosAgainstMemory is the largest gap between them. v1's header follows, corrected in place.
 // body-impose.js v1 DRAFT (thuum, 2026-11-11; ADR-071 rung 0, docs/research/physics-leg-2026-11-11.md H6): on ONE seat, can the
 // engine be made to hold a dead body in a pose it is handed, and how close does it come? The follower's two candidate paths
 // (ADR-071 decision 5): path A keyframes the ragdoll through its BSIRagdollDriver and writes each body; path B replays a Havok block
 // the engine's own writer captured through the engine's own reader. H6 holds when a path keeps every bone within 32 units of the
 // source pose; its second clause, a humanoid's bodies fitting 64 in one packet, reads off the capture row's body count. New, so a
-// fresh review comes before its first run (ADR-064 rule A). This script WRITES engine state (the bodies' transforms, the driver's
-// motion type) during its phases: it is a lab experiment on one seat, never a resident, and it changes no build.
+// fresh review comes before its first run (ADR-064 rule A). This script WRITES engine state during its phases, on one seat, as a lab
+// experiment, never a resident, and it changes no build. Its writes, all of them: path A, every body's rotation and position
+// (bhkRigidBody slots 0x36, 0x35) and the ragdoll driver's motion type (kKeyframed, then kDynamic at its release, and kDynamic again
+// by any finish while it is keyframed); path B, the captured block copied onto the engine heap and handed to 36014 (which applies it
+// to the bodies through 19535), and the reference's data.angle and data.location (OBJ_REFR +0x48 and +0x54, TESObjectREFR.h:78-79)
+// written DIRECTLY in memory to the capture's values before the replay, with no setter and NO RESTORE: the reference keeps the
+// capture's place after the run, so the host's later samples of the body report from there and the server records them as the
+// body's (R2, a dead hosted actor's samples).
 //
 // The run (x-body-impose v1): the seat kills FORM (an NPC it hosts), the body settles, the script CAPTURES the source pose P0; the
 // probe shouts the body away; once it rests again, PATH A; the probe shouts it away again; once it rests, PATH B. The phases run in
@@ -21,13 +44,15 @@
 //     where it lay toward P0, through SetRotation then SetPosition (slots 0x36, 0x35, the order the engine's own per-body reader
 //     19538 uses); HOLD_MS with no writes; then SetMotionType(kDynamic) and RELEASE_MS more. Pose rows throughout.
 //   B: after another move and rest: the captured sub-buffer copied onto the engine heap (MemoryManager::Allocate), the reference's
-//     location and angle written back to the capture's (RESET_REFR; the static read: 19535 places the root body at the reference's
-//     position and skips a saved body more than 4096 from it), then 36014(holder, form), the re-apply route that runs 19535 on a
-//     live 3D (docs/research/adr065-serialize-on-demand-2026-11-03.md Q3); OBSERVE_MS of pose rows.
+//     location and angle written back to the capture's, directly in memory and never restored (RESET_REFR; the static read: 19535
+//     places the root body at the reference's position and skips a saved body more than 4096 from it), then 36014(holder, form), the
+//     re-apply route that runs 19535 on a live 3D (docs/research/adr065-serialize-on-demand-2026-11-03.md Q3); OBSERVE_MS of pose rows.
 // Every engine call runs inside a REPLACEMENT of the player's own update (the original first), never inside a listener: Frida's
 // listener guard makes every hooked function called from a listener invisible on that thread (the memory note
 // frida-lab-script-pitfalls; apply-on-demand.js v2.2's idiom), and the 19535, 19538 and slot 0x35 and 0x36 counts are the read.
-// The replacement is reverted from Frida's own thread when the run is done or TTL_S passes.
+// The replacement is reverted from Frida's own thread when the run is done or TTL_S passes (v1.1: a finish while the ragdoll is
+// keyframed first sets it back to kDynamic, on the main thread; a ragdoll left keyframed with no main-thread step for 10 s is
+// reported by a 'stalled' row from Frida's thread, which calls nothing).
 //
 // Ids, by `just addr <id>` (lab/addr.py over addrlib/, runtime 1.6.1170.0, 428461 entries, run 2026-11-11; never from memory):
 //   CommonLibSSE-NG b93280e8 names these (RELOCATION_ID is (SE, AE), the AE id resolved):
@@ -39,14 +64,19 @@
 //                     _size +0x10 (B/BSTArray.h:47, after the 0x10-byte heap allocator)
 //   12332  0x179710   LookupReferenceByHandle (Offsets.h:582)
 //   403449 0x31872c0  Main** (Offsets.h:383); threadID +0x28 (M/Main.h:87)
-//   188105 0x17849dc  bhkWorld's world scale (B/bhkWorld.h:42-46): game units per Havok unit
+//   187407 0x177adfc  bhkWorld::GetWorldScaleInverse's float (B/bhkWorld.h:48-52): game units per Havok unit (69.99125), the factor
+//                     the errors and speeds are read by (v1.1)
+//   188105 0x17849dc  bhkWorld::GetWorldScale's float (:42-46): Havok units per game unit (0.0142875), the cross-check, printed
 //   11141  0x11bba0   MemoryManager::GetSingleton (M/MemoryManager.h:29-33)
 //   68115  0xcc40c0   MemoryManager::Allocate(this, size, alignment, alignmentRequired) (M/MemoryManager.h:36-40); the bool as uint8
 //                     (the memory note frida-bool-args)
 //   68117  0xcc4510   MemoryManager::Deallocate(this, mem, alignmentRequired) (M/MemoryManager.h:43-46)
-//   190275 0x17aeb58  VTABLE_bhkRigidBody[0] (Offsets_VTABLE.h:654): slots 0x35 SetPosition and 0x36 SetRotation (B/bhkRigidBody.h:43-44)
-//                     ATTACHED to count the engine's own writes inside 19535; every call this script makes goes through the body's
-//                     own vtable (slots 0x33 to 0x36, :41-44)
+//   190275 0x17aeb58  VTABLE_bhkRigidBody[0] (Offsets_VTABLE.h:654) and 239275 0x19e7a68 VTABLE_bhkRigidBodyT[0] (:5885; CommonLib
+//                     names the class by its vtable alone): slots 0x35 SetPosition and 0x36 SetRotation (B/bhkRigidBody.h:43-44) of
+//                     both ATTACHED, each distinct address once, to count the engine's own writes inside 19535 (v1.1: bhkRigidBodyT
+//                     overrides slots 0x33 to 0x37, its 0x35 and 0x36 at 0xebb820 and 0xebb8f0 against bhkRigidBody's 0xe92d90 and
+//                     0xe92e20, the exe's vtables read 2026-11-11); every call this script makes goes through the body's own vtable
+//                     (slots 0x33 to 0x36, :41-44)
 //   Named by the static read alone (pyghidra-mcp on sky-re, 2026-11-03; HYPOTHESIS by rule 2; ids, signatures and roles from
 //   docs/research/adr065-serialize-on-demand-2026-11-03.md: :718 the id table, :810-822 19535, :955 36016, :1023-1031 Q3):
 //   36016  0x6259a0   the live pose into a sub-buffer, void (BGSLoadGameSubBuffer** holder, TESForm* form): ran in apply-on-demand.js
@@ -62,7 +92,7 @@
 //
 // Layouts (CommonLibSSE-NG b93280e8, include/RE/):
 //   TESForm formID +0x14, formType +0x1A (T/TESForm.h:353-355); TESObjectREFR data.angle +0x48 and data.location +0x54 (OBJ_REFR at
-//     +0x40, T/TESObjectREFR.h:76-77, :495), loadedData +0x68 (:497), data3D +0x68 (:101); the IAnimationGraphManagerHolder at +0x38
+//     +0x40, T/TESObjectREFR.h:78-79, :495), loadedData +0x68 (:497), data3D +0x68 (:101); the IAnimationGraphManagerHolder at +0x38
 //     (T/TESObjectREFR.h:112), its slot 0x02 GetAnimationGraphManagerImpl(BSTSmartPointer<BSAnimationGraphManager>&)
 //     (I/IAnimationGraphManagerHolder.h:26), the fallback when the actor has no middle-high process (the smart pointer it fills keeps
 //     its one count).
@@ -73,7 +103,7 @@
 //     pointer (B/BSTSmartPointer.h:229); BSAnimationGraphManager graphs +0x40 (B/BSAnimationGraphManager.h:121), a
 //     BSTSmallArray<BSTSmartPointer<BShkbAnimationGraph>> of one inline slot (BSTArray.h:648-649): its word +0x40 (the local bit 31,
 //     BSTArray.h:280-281), data +0x48 (:282), size +0x50 (:47); a BShkbAnimationGraph's BSIRagdollDriver is its first base, at +0
-//     (B/BShkbAnimationGraph.h:28-29), slot 0x08 SetMotionType(hkpMotion::MotionType) (B/BSIRagdollDriver.h:24; MotionType an int
+//     (B/BShkbAnimationGraph.h:28-29), slot 0x08 SetMotionType(hkpMotion::MotionType) (B/BSIRagdollDriver.h:23; MotionType an int
 //     enum, kDynamic 1, kKeyframed 4, H/hkpMotion.h:26-35).
 //   The bodies: the 3D walked node by node, a node descended only when its RTTI names NiNode among its bases (face-dump.js's
 //     locator); a node's collisionObject +0x40 (N/NiAVObject.h:156), name +0x10 (N/NiObjectNET.h:53); NiNode children +0x110, a
@@ -93,18 +123,23 @@
 //   {event:'ready'}: version, pid (against the run's c<N>-skyrim-platform-pid<N>.log: the memory note lab-frida-wrong-process),
 //     base, Main's thread, every site's id, rva, address and first bytes read before any patch, params, attachErrors.
 //   {event:'found'}: the actor, its life state, bodies (name, motion type, layer, kAnimTargeted), the graphs and how they were reached.
-//   {event:'capture'}: P0's body count (H6's 64), the root body's position, the reference's location and angle, the largest gap
-//     between GetPosition and the memory read (the +0x1A0 offset's check), the block's header (version, length, count, flags, FNV-1a).
+//   {event:'capture'}: P0's body count (H6's 64; v1.1: every body the walk met, so fitsIn64 can read false), the root body's
+//     position, the reference's location and angle, the largest gap between GetPosition and the memory read (the +0x1A0 offset's
+//     check, and bhkRigidBodyT's offset if it has one), the block's header (version, length, count, flags, FNV-1a).
 //   {event:'phase'}: each phase's start, each step, the keyframe's and the release's resulting motion types, B's holder after 36014
 //     (null: consumed), and per phase the 19535, 19538, slot 0x35 and slot 0x36 counts on the replacement's thread.
 //   {event:'pose'}: every ROW_EVERY_FRAMES frames of an active window and at each window's end: the per-bone error against P0 in
 //     game units (max, mean, the root's, the worst three by name), the motion types, the rotation error in degrees at the end.
 //   {event:'havokRead'}: each 19535 call on any thread with its caller and its 19538 count, so a read the engine makes on its own
 //     (the 3D init, a cell's flush) shows beside the script's.
-//   {event:'liveness'} every 10 s: the phase, counts, frames.
+//   {event:'thread'} once, if the update ran on a thread that is not Main's (no step runs there).
+//   {event:'restore'} at a finish while the ragdoll is keyframed: kDynamic set back, or why it was not (no 3D, no id).
+//   {event:'stalled'} from Frida's thread, once a stall, when the ragdoll is keyframed and no main-thread step ran for 10 s.
+//   {event:'liveness'} every 10 s: the phase, counts (offMain: the update's calls off Main's thread), frames.
 // Params (LAB_PARAMS): FORM (required: the body's reference id, a number or a hex string), PHASES ('A,B'), STEPS (10), STEP_MS
 // (100), HOLD_MS (3000), RELEASE_MS (3000), OBSERVE_MS (5000), REST_SPEED (5 units a second), REST_MS (1500), MOVE_UNITS (48),
-// RESET_REFR (true), ROW_EVERY_FRAMES (6), BODIES_MAX (64), TTL_S (900). 1.6.1170 only.
+// RESET_REFR (true), ROW_EVERY_FRAMES (6), TTL_S (900); v1.1 drops BODIES_MAX (the walk counts every body, NODES_MAX 8192 nodes
+// bounding it). 1.6.1170 only.
 const PARAMS = (typeof LAB_PARAMS === 'object' && LAB_PARAMS) ? LAB_PARAMS : {};
 const num = function (v, d) { return (v === undefined || v === null) ? d : Number(v); };
 const FORM_ID = typeof PARAMS.FORM === 'string' ? parseInt(PARAMS.FORM, 16) : num(PARAMS.FORM, 0);
@@ -119,7 +154,7 @@ const REST_MS = num(PARAMS.REST_MS, 1500);
 const MOVE_UNITS = num(PARAMS.MOVE_UNITS, 48);
 const RESET_REFR = PARAMS.RESET_REFR === undefined ? true : !!PARAMS.RESET_REFR;
 const EVERY = num(PARAMS.ROW_EVERY_FRAMES, 6);
-const BODIES_MAX = num(PARAMS.BODIES_MAX, 64);
+const NODES_MAX = 8192; // v1.1: the walk's bound, in nodes visited; every body met is counted and kept
 const TTL_S = num(PARAMS.TTL_S, 900);
 function emit(obj) { obj.t = Date.now(); send(obj); console.log(JSON.stringify(obj)); }
 
@@ -130,11 +165,13 @@ const OFFSETS = {
     processLists: 0x20f69b0, // 400315 ProcessLists**
     lookupRef: 0x179710, // 12332 LookupReferenceByHandle
     mainSingleton: 0x31872c0, // 403449 Main**
-    worldScale: 0x17849dc, // 188105 bhkWorld's world scale
+    worldScaleInverse: 0x177adfc, // 187407 bhkWorld::GetWorldScaleInverse's float: game units per Havok unit (v1.1)
+    worldScale: 0x17849dc, // 188105 bhkWorld::GetWorldScale's float: Havok units per game unit, the cross-check
     heap: 0x11bba0, // 11141 MemoryManager::GetSingleton
     allocate: 0xcc40c0, // 68115 MemoryManager::Allocate
     deallocate: 0xcc4510, // 68117 MemoryManager::Deallocate
     rigidBodyVtable: 0x17aeb58, // 190275 VTABLE_bhkRigidBody[0]
+    rigidBodyTVtable: 0x19e7a68, // 239275 VTABLE_bhkRigidBodyT[0] (v1.1)
     livePose: 0x6259a0, // 36016 (static read) the live pose into a sub-buffer
     reapply: 0x625800, // 36014 (static read) the re-apply route
     havokRead: 0x2db450, // 19535 (static read) the Havok block reader
@@ -218,8 +255,12 @@ if (off === undefined || !(FORM_ID > 0)) {
   const rva = function (p) { try { return hex(p.sub(exe.base).toUInt32()); } catch (e) { return String(p); } };
   const exeEnd = exe.base.add(exe.size);
   const inExe = function (p) { return !isNil(p) && p.compare(exe.base) >= 0 && p.compare(exeEnd) < 0; };
-  const scaleRaw = f32(at('worldScale'), 0);
-  const SCALE = scaleRaw > 1 && scaleRaw < 1000 ? scaleRaw : NaN;
+  // game units per Havok unit: GetWorldScaleInverse's float, trusted only when GetWorldScale's is its inverse (v1.1); without it the
+  // first step ends the run (an error in game units needs the scale)
+  const scaleInverse = f32(at('worldScaleInverse'), 0);
+  const scaleForward = f32(at('worldScale'), 0);
+  const scaleOk = scaleInverse > 1 && scaleInverse < 1000 && Math.abs(scaleInverse * scaleForward - 1) < 0.001;
+  const SCALE = scaleOk ? scaleInverse : NaN;
   const mainTid = function () { return u32(ptrAt(at('mainSingleton'), 0), 0x28); };
   const nf = {
     lookup: new NativeFunction(at('lookupRef'), 'bool', ['pointer', 'pointer'], 'win64'),
@@ -240,7 +281,7 @@ if (off === undefined || !(FORM_ID > 0)) {
   const scratch = Memory.alloc(Process.pageSize); // page aligned: hkVector4 and hkQuaternion slots 16 bytes apart
   const VEC = scratch;
   const QUAT = scratch.add(0x10);
-  const counts = { frames: 0, havokRead: 0, havokBody: 0, setPos: 0, setRot: 0, scans: 0, lookups: 0 };
+  const counts = { frames: 0, offMain: 0, havokRead: 0, havokBody: 0, setPos: 0, setRot: 0, scans: 0, lookups: 0 };
   const attachErrors = [];
   const failed = {};
   const fail = function (where, e) { if (failed[where]) return; failed[where] = true; emit({ event: 'error', where: where, error: String(e) }); };
@@ -273,11 +314,13 @@ if (off === undefined || !(FORM_ID > 0)) {
   const walkBodies = function (root) {
     const out = [];
     const seen = {};
+    let nodes = 0;
     const visit = function (node, depth) {
-      if (isNil(node) || depth > 40 || out.length >= BODIES_MAX) return;
+      if (isNil(node) || depth > 40 || nodes >= NODES_MAX) return;
       const k = String(node);
       if (seen[k]) return;
       seen[k] = true;
+      nodes += 1;
       const co = ptrAt(node, NODE.collision);
       if (!isNil(co)) {
         const bhk = ptrAt(co, COLL.body);
@@ -293,6 +336,8 @@ if (off === undefined || !(FORM_ID > 0)) {
       for (let i = 0; i < cap && i < 256 && !isNil(data); i++) visit(ptrAt(data, i * 8), depth + 1);
     };
     visit(root, 0);
+    out.nodes = nodes;
+    out.nodesCapped = nodes >= NODES_MAX;
     return out;
   };
   const rootOf = function (actor) { const ld = ptrAt(actor, REFR.loaded); return isNil(ld) ? NULL : ptrAt(ld, LOADED_3D); };
@@ -402,7 +447,7 @@ if (off === undefined || !(FORM_ID > 0)) {
       const hp = getPos(b);
       const mem = [f32(b.hkp, BODY.pos), f32(b.hkp, BODY.pos + 4), f32(b.hkp, BODY.pos + 8)];
       gap = Math.max(gap, dist3(hp, mem));
-      p0.push({ pos: [hp[0] * SCALE, hp[1] * SCALE, hp[2] * SCALE], havok: hp, rot: getRot(b) });
+      p0.push({ pos: [mem[0] * SCALE, mem[1] * SCALE, mem[2] * SCALE], mem: mem, havok: hp, rot: getRot(b) }); // v1.1: errors by memory, writes by accessor
     });
     run.p0 = p0;
     run.refr0 = { angle: [f32(run.actor, REFR.angle), f32(run.actor, REFR.angle + 4), f32(run.actor, REFR.angle + 8)], location: [f32(run.actor, REFR.location), f32(run.actor, REFR.location + 4), f32(run.actor, REFR.location + 8)] };
@@ -425,13 +470,16 @@ if (off === undefined || !(FORM_ID > 0)) {
       }
     } catch (e) { block = { error: '36016: ' + e }; }
     run.block = block;
-    emit({ event: 'capture', frame: counts.frames, bodies: run.bodies.length, fitsIn64: run.bodies.length <= 64, root: { name: run.bodies[0].name, pos: p0[0].pos.map(r1) }, refr: { angle: run.refr0.angle.map(function (x) { return +x.toFixed(4); }), location: run.refr0.location.map(r1) }, getPosAgainstMemory: +gap.toFixed(5), types: typesOf(run.bodies), block: block === null ? null : { version: block.version, blockLen: block.blockLen, total: block.total, blockFlags: block.blockFlags, count: block.count, fnv1a: block.fnv1a, error: block.error, freeError: block.freeError } });
+    emit({ event: 'capture', frame: counts.frames, bodies: run.bodies.length, fitsIn64: run.bodies.length <= 64, nodes: run.bodies.nodes, nodesCapped: !!run.bodies.nodesCapped, root: { name: run.bodies[0].name, pos: p0[0].pos.map(r1) }, refr: { angle: run.refr0.angle.map(function (x) { return +x.toFixed(4); }), location: run.refr0.location.map(r1) }, getPosAgainstMemory: +gap.toFixed(5), types: typesOf(run.bodies), block: block === null ? null : { version: block.version, blockLen: block.blockLen, total: block.total, blockFlags: block.blockFlags, count: block.count, fnv1a: block.fnv1a, error: block.error, freeError: block.freeError } });
   };
   const setDriver = function (type) {
     const results = [];
+    run.graphs = graphsOf(run.actor); // v1.1: re-resolved at every call; a rebuilt 3D may have freed the graphs read before
+    if (run.graphs.graphs.length === 0) results.push({ error: 'no graph: ' + run.graphs.how });
     run.graphs.graphs.forEach(function (g) {
       try { virtualFn(g, SLOT.driverMotion, 'void', ['pointer', 'uint32'])(g, type); results.push({ graph: String(g), ok: true }); } catch (e) { results.push({ graph: String(g), error: String(e) }); }
     });
+    run.keyframed = type === MOTION_KEYFRAMED;
     return results;
   };
   const startPhase = function (name) {
@@ -440,8 +488,16 @@ if (off === undefined || !(FORM_ID > 0)) {
     run.step = 0;
     run.lastRow = counts.frames;
     run.base = phaseCounts();
-    run.from = run.bodies.map(function (b) { let r = null; try { r = getRot(b); } catch (e) { r = [0, 0, 0, 1]; } return { havok: [f32(b.hkp, BODY.pos), f32(b.hkp, BODY.pos + 4), f32(b.hkp, BODY.pos + 8), 0], rot: r }; });
-    emit({ event: 'phase', phase: name, step: 'start', frame: counts.frames, error: poseError(run.bodies, run.p0), types: typesOf(run.bodies) });
+    // v1.1: the writes' start is each body's own GetPosition (the capture's target is too), so an accessor offset cancels
+    let fromFallback = 0;
+    run.from = run.bodies.map(function (b) {
+      let r = null;
+      let h = null;
+      try { r = getRot(b); } catch (e) { r = [0, 0, 0, 1]; }
+      try { h = getPos(b); } catch (e) { h = [f32(b.hkp, BODY.pos), f32(b.hkp, BODY.pos + 4), f32(b.hkp, BODY.pos + 8), 0]; fromFallback += 1; }
+      return { havok: h, rot: r };
+    });
+    emit({ event: 'phase', phase: name, step: 'start', frame: counts.frames, error: poseError(run.bodies, run.p0), types: typesOf(run.bodies), fromFallback: fromFallback });
   };
   const writeStep = function (k) {
     const t = k / STEPS;
@@ -475,7 +531,7 @@ if (off === undefined || !(FORM_ID > 0)) {
   const step = function () {
     const now = Date.now();
     if (run.done) return;
-    if (!(SCALE > 0)) { finish('no world scale (read ' + scaleRaw + ')'); return; }
+    if (!(SCALE > 0)) { finish('no world scale (GetWorldScaleInverse read ' + scaleInverse + ', GetWorldScale ' + scaleForward + ')'); return; }
     if (now - run.startedAt > TTL_S * 1000) { finish('ttl ' + TTL_S + ' s at stage ' + run.stage); return; }
     if (run.stage === 'find') {
       if (counts.frames % 30 !== 0) return;
@@ -577,13 +633,22 @@ if (off === undefined || !(FORM_ID > 0)) {
   const resolved = {};
   const note = function (name, id, p, mode) { resolved[name] = { id: id, rva: rva(p), at: String(p), mode: mode, bytes: firstBytes(p) }; };
   const updateAt = ptrAt(at('playerVtable'), SLOT.update * Process.pointerSize);
-  const rbSetPos = ptrAt(at('rigidBodyVtable'), SLOT.setPos * Process.pointerSize);
-  const rbSetRot = ptrAt(at('rigidBodyVtable'), SLOT.setRot * Process.pointerSize);
+  // v1.1: slots 0x35 and 0x36 of bhkRigidBody's and bhkRigidBodyT's vtables, each distinct address once
+  const rbSites = {};
+  [['bhkRigidBody', 190275, at('rigidBodyVtable')], ['bhkRigidBodyT', 239275, at('rigidBodyTVtable')]].forEach(function (v) {
+    [['setPos', SLOT.setPos, 'SetPosition'], ['setRot', SLOT.setRot, 'SetRotation']].forEach(function (sl) {
+      const p = ptrAt(v[2], sl[1] * Process.pointerSize);
+      if (isNil(p)) { attachErrors.push(v[0] + ' slot ' + hex(sl[1]) + ': none'); return; }
+      const k = String(p);
+      if (rbSites[k] === undefined) rbSites[k] = { kind: sl[0], fn: sl[2], at: p, classes: [], ids: [] };
+      rbSites[k].classes.push(v[0]);
+      rbSites[k].ids.push(v[1]);
+    });
+  });
   note('PlayerCharacter::Update', 208040, updateAt, 'replace');
   note('havokRead 19535', 19535, at('havokRead'), 'attach');
   note('havokBody 19538', 19538, at('havokBody'), 'attach');
-  note('bhkRigidBody::SetPosition', 190275, rbSetPos, 'attach');
-  note('bhkRigidBody::SetRotation', 190275, rbSetRot, 'attach');
+  Object.keys(rbSites).forEach(function (k) { const site = rbSites[k]; note(site.classes.join('+') + '::' + site.fn, site.ids.join('+'), site.at, 'attach'); });
   note('livePose 36016', 36016, at('livePose'), 'call');
   note('reapply 36014', 36014, at('reapply'), 'call');
 
@@ -600,39 +665,78 @@ if (off === undefined || !(FORM_ID > 0)) {
     },
   });
   attach('19538', at('havokBody'), { onEnter() { counts.havokBody += 1; const r = reads[this.threadId]; if (r !== undefined) r.bodies += 1; } });
-  if (!isNil(rbSetPos)) attach('slot 0x35', rbSetPos, { onEnter() { if (reads[this.threadId] !== undefined) counts.setPos += 1; } });
-  if (!isNil(rbSetRot)) attach('slot 0x36', rbSetRot, { onEnter() { if (reads[this.threadId] !== undefined) counts.setRot += 1; } });
+  Object.keys(rbSites).forEach(function (k) {
+    const site = rbSites[k];
+    const label = site.kind + '@' + site.classes.join('+');
+    counts[label] = 0;
+    attach(label, site.at, { onEnter() { if (reads[this.threadId] !== undefined) { counts[site.kind] += 1; counts[label] += 1; } } });
+  });
 
   let reverted = false;
+  // every finish runs inside the replacement on Main's thread (step's callers alone); while the ragdoll is keyframed it is set back
+  // to kDynamic first, when the body still reads its id and has 3D (no graph is called on a torn-down body)
   const finish = function (why) {
     if (run.done) return;
     run.done = true;
+    if (run.keyframed) {
+      const hasId = !isNil(run.actor) && u32(run.actor, FORM.id) === FORM_ID;
+      const has3D = hasId && !rootOf(run.actor).isNull();
+      if (has3D) {
+        let r = null;
+        try { r = setDriver(MOTION_DYNAMIC); } catch (e) { r = [{ error: String(e) }]; }
+        emit({ event: 'restore', why: why, frame: counts.frames, driver: r, types: typesOf(run.bodies) });
+      } else {
+        emit({ event: 'restore', why: why, frame: counts.frames, skipped: hasId ? 'the body has no 3D' : 'the reference no longer reads its id' });
+        run.keyframed = false;
+      }
+    }
     emit({ event: 'done', why: why, stage: run.stage, frame: counts.frames, counts: JSON.parse(JSON.stringify(counts)) });
     setTimeout(function () { try { Interceptor.revert(updateAt); Interceptor.flush(); reverted = true; emit({ event: 'reverted', frame: counts.frames }); } catch (e) { fail('revert', e); } }, 0);
   };
   let updateReplaced = false;
+  let updateCallback = null; // v1.1: held here and read by the liveness row, so it outlives the revert
+  let offMainSaid = false;
+  let lastStepAt = Date.now();
   if (!isNil(updateAt)) {
     try {
-      const original = new NativeFunction(updateAt, 'void', ['pointer', 'float'], 'win64');
-      Interceptor.replace(updateAt, new NativeCallback(function (self, delta) {
+      // the chain to the original with exceptions 'propagate' (apply-on-demand.js:831): no exceptor scope around the engine's code
+      const original = new NativeFunction(updateAt, 'void', ['pointer', 'float'], { abi: 'win64', exceptions: 'propagate' });
+      updateCallback = new NativeCallback(function (self, delta) {
         original(self, delta);
-        try { counts.frames += 1; step(); } catch (e) { fail('step at ' + run.stage, e); }
-      }, 'void', ['pointer', 'float'], 'win64'));
+        try {
+          const tid = Process.getCurrentThreadId();
+          const main = mainTid();
+          if (tid !== main) {
+            counts.offMain += 1;
+            if (!offMainSaid) { offMainSaid = true; emit({ event: 'thread', tid: tid, mainThread: main, note: 'the update ran off Main\'s thread: no step runs on it' }); }
+            return;
+          }
+          counts.frames += 1;
+          lastStepAt = Date.now();
+          step();
+        } catch (e) { fail('step at ' + run.stage, e); }
+      }, 'void', ['pointer', 'float'], 'win64');
+      Interceptor.replace(updateAt, updateCallback);
       Interceptor.flush();
       updateReplaced = true;
     } catch (e) { attachErrors.push('PlayerCharacter::Update replace: ' + e); }
   } else attachErrors.push('PlayerCharacter::Update: no slot');
 
   emit({
-    event: 'ready', script: 'body-impose.js', version: version, pid: Process.id, base: String(exe.base), mainThread: mainTid(), worldScale: scaleRaw,
+    event: 'ready', script: 'body-impose.js', v: '1.1', version: version, pid: Process.id, base: String(exe.base), mainThread: mainTid(),
+    worldScale: { inverse187407: scaleInverse, forward188105: scaleForward, ok: scaleOk },
     update: { slot: rva(updateAt), byId40447: rva(at('playerUpdateById')), agree: !isNil(updateAt) && updateAt.equals(at('playerUpdateById')), replaced: updateReplaced },
     hooks: resolved, attachErrors: attachErrors,
-    params: { FORM: hex(FORM_ID), PHASES: PHASES, STEPS: STEPS, STEP_MS: STEP_MS, HOLD_MS: HOLD_MS, RELEASE_MS: RELEASE_MS, OBSERVE_MS: OBSERVE_MS, REST_SPEED: REST_SPEED, REST_MS: REST_MS, MOVE_UNITS: MOVE_UNITS, RESET_REFR: RESET_REFR, ROW_EVERY_FRAMES: EVERY, BODIES_MAX: BODIES_MAX, TTL_S: TTL_S },
+    params: { FORM: hex(FORM_ID), PHASES: PHASES, STEPS: STEPS, STEP_MS: STEP_MS, HOLD_MS: HOLD_MS, RELEASE_MS: RELEASE_MS, OBSERVE_MS: OBSERVE_MS, REST_SPEED: REST_SPEED, REST_MS: REST_MS, MOVE_UNITS: MOVE_UNITS, RESET_REFR: RESET_REFR, ROW_EVERY_FRAMES: EVERY, NODES_MAX: NODES_MAX, TTL_S: TTL_S },
   });
-  if (!(SCALE > 0)) emit({ event: 'error', where: 'world scale', error: 'read ' + scaleRaw + ': positions would be wrong; the first step ends the run' });
+  if (!(SCALE > 0)) emit({ event: 'error', where: 'world scale', error: 'GetWorldScaleInverse read ' + scaleInverse + ', GetWorldScale ' + scaleForward + ': not inverses; the first step ends the run' });
   let lastFrames = 0;
+  let stallSaid = false;
   setInterval(function () {
-    emit({ event: 'liveness', pid: Process.id, stage: run.stage, reverted: reverted, counts: JSON.parse(JSON.stringify(counts)), frames10s: counts.frames - lastFrames, mainThread: mainTid() });
+    // Frida's own thread: a report, never an engine call
+    const quiet = Date.now() - lastStepAt;
+    if (run.keyframed && !reverted && quiet > 10000) { if (!stallSaid) { stallSaid = true; emit({ event: 'stalled', stage: run.stage, quietMs: quiet, note: 'the ragdoll is keyframed and no main-thread step ran for 10 s; the restore waits for one' }); } } else stallSaid = false;
+    emit({ event: 'liveness', pid: Process.id, stage: run.stage, reverted: reverted, keyframed: !!run.keyframed, counts: JSON.parse(JSON.stringify(counts)), frames10s: counts.frames - lastFrames, mainThread: mainTid(), replacement: String(updateCallback) });
     lastFrames = counts.frames;
   }, 10000);
 }
