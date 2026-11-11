@@ -5063,9 +5063,10 @@ Decision.
    world quest and which is paid by it; no setting decides what the world is.
 
 2. The axes, each a server setting with its default. The server serves a client's half at login with the rest of its settings, so
-   one file names the paradigm: questScope and questStoryInstances as built ("off" and "seat"); questFragmentLive as built, moved
-   from the client's settings to the server's (proposed default true from the train that moves it: D-F1 C as designed, D-Q10 A's
-   reading); questJournal (new): "shared" (the default, today's), "witnessed" or "own"; questRewards (new): "earner" (the default,
+   one file names the paradigm: questScope and questStoryInstances as built ("off" and "seat"); questPlayerAliasCause as built on
+   fork m4-train-52 8c53b76c ("seat", D-Q9 B, the default; "world", D-Q9 A); questFragmentLive as built, moved from the client's
+   settings to the server's (proposed default true from the train that moves it: D-F1 C as designed, D-Q10 A's reading);
+   questJournal (new): "shared" (the default, today's), "witnessed" or "own"; questRewards (new): "earner" (the default,
    D-R1 C), "joined" or "everyone"; questShare (new): "off" (the default) or "on"; questParadigm (new): a named bundle of the
    axes, any axis overridable after it: "together" (shared, earner: today's), "party" (shared, joined), "personal" (own, earner,
    share on), "witness" (witnessed, joined, share on).
