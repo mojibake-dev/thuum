@@ -358,6 +358,61 @@ look's gate scenario, from x-trap-bone-alarm v1, x-trap-wire-rope v2 and x-trigg
 v1.1 (lab/.cache/probes) retired from the set: its claim that the watcher's own copy never ends "unfired" is false by design under
 D-W1, whose watcher never fires its own wire.
 
+## D-W3 B: an NPC's enter held at its host's load, replayed at its owner's grant (Eli 2026-11-10; fork m4-scripts-5-preload 377edb0a, on m4-scripts-5-second 685f6a24)
+
+Eli's word (docs/DECISIONS.md, rung 5's stage-eve words): D-W3 B, built now: a held entry of an NPC standing inside a WORLD trigger
+at its cell's load is replayed once at its presser's ownership; a trap family trigger with an NPC on it stays unfired until the
+next press. The read (x-trigger-preload v1, 20261110-073038; H-TP1 and H-TP2 hold, on two builds): an NPC standing inside a
+trigger at its host's load enters before the grant, while its owner on that seat is undecided, so the presser rule blanks the
+enter, and no second enter follows while it stays inside, so a replay is the only delivery and the engine will not double it. The
+plan's sketch (docs/research/rung5-quests-2026-11-09.md section 5) replayed nothing as drafted: the host-to-be's load demote sets
+the puppet flag before its grant (Arvel's about 97 ms before his setHosted), and the flag cleared only later in the reconcile pass
+that called setHosted, so ownership is read at a later update, never at the setHosted call, and a puppet flag drops nothing.
+
+- The gate (the platform's FridaHooks.cpp): OwnsPresser becomes OwnerOf (:455-506), three answers by the one rule: this seat;
+  another; undecided, a live game-file actor neither hosted nor a puppet, in a cell this seat does not host (no seat's word reached
+  this seat yet). The gate's own test is unchanged: this seat alone owns.
+- The held store (:564-720): in the ignored branch (:1128-1157) an undecided presser's OnTriggerEnter to a world trigger with an
+  attached script is held per (trigger, presser) and blanked as before: a count per pair, the pair's clock from its first enter,
+  expiring kHeldEntryMs 60000 after it, at most kHeldPairsMax 256 pairs (UNMEASURED: the read's Temple load held four), under its
+  own mutex (the enters reached the gate on four engine threads in the read); holds go on after the grant. A trap family trigger's
+  enter (TrapFamily::IsFamily) is never held: it waits for its next press, so no trap fires at a host's arrival. A leave of a held
+  pair takes one off whatever its presser's owner, the last dropping the pair (the engine raised one presser's enters in twos with
+  no leave between: the oil pool 0x9b0de by 0x383f8). In the owned branch (:1180-1208) an event on a pair still held settles it:
+  an enter drops the held one and passes (the engine's own delivers it), a leave is blanked and takes one off (its enter never
+  reached the script). One atomic read on a trigger event while nothing is held (rule 9); turning the rule off clears the store.
+- The replay (TESModPlatform.ReplayHeldEntries, docs/NATIVES.md; FridaHooks.cpp :749-890, inside callNative under its Override,
+  the platform's mark): the expired pairs dropped with a line; a pair is due when OwnerOf names this seat for its presser (the
+  client's hosting state as told: setHosted, setPuppet, SetCellHosted), its trigger stands in a cell this seat hosts, neither is
+  disabled and the presser is alive and loaded; each due pair is taken under the lock and its OnTriggerEnter sent once, outside
+  it, through ScriptState::SendTrigger (SendTriggerEvent's body: SendEvent, then RelayEvent to the trigger's aliases, as the
+  engine's own sinks do). Its answer: {replayed, refused, expired, held}. World triggers alone: a cell this seat hosts, a scripted
+  trigger, no trap family.
+- The client (activationService.ts :382-452; HostService.ownerFlips, hostService.ts :180): HostService counts its own ownership
+  gains (a cell's gate opened after SetCellHosted, markHosted(true) after setHosted, PuppetService's promote after
+  setPuppet(false), a reload's restore); with the presser rule on, ActivationService asks the native at the update after the one
+  that saw a change, once an update at most while changes keep coming, and again 61 s (HELD_AGAIN_MS) after an answer that still
+  holds some; a platform without the native says so once.
+- Lines: "[verb:traps] <event> to <t> by <p>: held, the presser's owner undecided here (D-W3 B; <n> for the pair, <m> pair(s)
+  held)"; "...: not held, a trap family trigger waits for its next press (D-W3 B)"; "OnTriggerEnter to <t> by <p>: held at the
+  load (no owner then), replayed at its owner's grant" (or "not replayed at its owner's grant: <reason>"); "OnTriggerEnter to <t>
+  by <p>: held at the load, dropped after <s> s with no owner here (D-W3 B)"; "OnTriggerLeave to <t> by <p>: its held enter
+  dropped, the presser left before its owner's grant (D-W3 B)"; the two owned settle lines; the client's "[verb:traps] held
+  trigger entries: <r> replayed, <f> refused, <e> expired, <h> still held (D-W3 B)".
+- Declared limits, not chased: a demote drops nothing (a held pair waits for its presser's owner, a leave or the expiry); a
+  hand-off within 60 s can replay an entry the old host counted (a pair held on a seat another seat out-raced to the grant waits
+  while its presser is that seat's puppet and replays if this seat becomes its owner inside kHeldEntryMs, though the other seat's
+  engine counted its own; bounded by the expiry and by rung 3's script record, which carries a stateful script's done state;
+  UNMEASURED); an enter between a demote and a promote is lost (a presser that is a puppet here reads as another seat's, whose
+  enter is blanked and never held, and no second enter follows: FridaHooks.cpp :1133 holds the undecided alone); puppet draugr
+  never come due (a puppet that never becomes this seat's, the host's ambush draugr in the read, npc-stream's question); and,
+  from the code beside them, a pair replayed at a count of 2 delivers one enter while its two leaves follow, and an owned
+  presser's held enter into a trigger in a cell another seat hosts expires (D-C2 relays live entries alone).
+- HYPOTHESIS until x-trigger-preload v2 (every engine behaviour, its draft by path lab/.cache/drafts/rung5): the replay reaches
+  the trigger's script as the engine's own enter would, its aliases relayed; the update after an owner flip finds the flags
+  landed; the replay line comes once per pair, on the host. R2 (rule 5), as D-C2's relay: the platform's own hold and replay of
+  its engine's enter, no wire and no server judgment.
+
 ## Status
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared
