@@ -256,14 +256,20 @@ positions' age.
   25251, CR06 c18e1, CR05 2522f; 060821 c1.log :222-245, 061001 :222-230):
   the loss tracks that start race, three greens without it and two reds with
   it (HYPOTHESIS: how a scope armed about 25 s before the cast, its arms of
-  10 s, reaches Ghostwalk's own stack is unread). Both reds also cast from a
-  cell c1 did not host (060821 :256, a trigger entry "in a cell this seat
-  does not host") and lost cells 9755, bb8f and bb90 4 s after the cast
-  (:258-260). The settling read reproduces the race on purpose: c2 starts a
-  Companions radiant whose Setup calls Game.GetPlayer, relayed to c1, and c1
-  casts Ghostwalk inside the scope's window and after it, with the gate's
-  OnEffectFinish dispatch traced. A scripting read, after playtest 51 by
-  ADR-067 decision 7's order.
+  10 s, reaches Ghostwalk's own stack is unread). Corrected the same day
+  (x-ghostwalk-race-read's drafter): both reds cast from a cell c1 hosted
+  (060821 c1.log :194, 061001 :192); the "does not host" line (:256) is a
+  trigger on the walk into bbd2, a cell c2 hosted, and that same split was
+  green with no scope in 172354's cast A, so hosting alone is not the cause.
+  The reds' scope also came from a start race the Story Manager allows only
+  at a run's start (c2's stage-1 relay meeting c1's own start of the same
+  quest, D-Q5 A keeping those quests' start words per seat). The settling
+  read arms the scope by x-acting-player's lever instead: c2 sets A Lovely
+  Letter's stage (setstage 74a83 210, then 310), c1 runs its own fragment
+  inside c2's scope with Game.GetPlayer answered, and c1 casts Ghostwalk
+  inside the scope's window and about 24 s after it, in a 2x2 against
+  hosting (x-ghostwalk-race-read, lab/.cache/drafts/reads, 544fb05c); a read
+  of 51's build, run on the idle lab.
   Why is unread (HYPOTHESIS): rung 5's effect-event and acting-scope work
   (fork 9db243a0) is one suspect, the server record carrying the earlier
   run's Eye Fix ability 1a0cb7e1 into the warm run is another. The read that
