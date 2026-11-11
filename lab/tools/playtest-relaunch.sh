@@ -13,9 +13,16 @@
 # (the console is lab-console-logs.txt, where skymp5-client's own lines go:
 # playtest 48 kept none and lost three resets' trap lines); a log that cannot
 # be kept is said and the relaunch goes on.
+# playtest-relaunch.sh <client> stop | start: the two halves apart, so a pair of seats can be stopped together and started
+# one after the other (playtest_setup.py's relaunch_seats, playtest-world.sh's restore; Eli's word of 2026-11-11, "Restore
+# and ready()"): stop keeps the logs, stops the game, sets the playtest's client settings and waits until the player is off
+# the server; start runs the launch task and every wait after it. A seat relaunched alone hands its cells to the other
+# (playtest 46), and two logging in at once let one's Story Manager start race the other's relayed start (b-ghostwalk-look).
 set -euo pipefail
 client=${1:?client: c1 or c2}
+phase=${2:-both}
 case "$client" in c1) vmid=711; profile=1;; c2) vmid=712; profile=2;; *) echo "unknown client $client" >&2; exit 2;; esac
+case "$phase" in both|stop|start) ;; *) echo "the phase is stop or start (or none for both), got $phase" >&2; exit 2;; esac
 jump=${JUMP_HOST:-root@core.gaussing.tv}
 api=${LAB_API:-https://thuum.gaussing.tv/lab}
 srv=${SRV_HOST:-eli@10.10.70.10}
@@ -69,34 +76,60 @@ hold "playtest (playtest-relaunch)"
 # one names the playtest: `PLAYTEST=51 just playtest-relaunch c1`. Read before anything stops, so a profile that does not
 # load leaves the game running.
 settings=""
-if [ -n "${PLAYTEST:-}" ]; then
+if [ "$phase" != start ] && [ -n "${PLAYTEST:-}" ]; then
   root=$(cd "$(dirname "$0")/../.." && pwd)
   b64=$(uv run --project "$root/lab/labapi" python "$root/lab/tools/playtest_setup.py" settings-ps "$PLAYTEST") \
     || { echo "playtest $PLAYTEST's client settings do not load: nothing relaunched" >&2; exit 2; }
   [ -z "$b64" ] || settings=$(printf '%s' "$b64" | base64 -d)
 fi
-keep
-ps='Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 3'
-[ -z "$settings" ] || ps="$ps
+if [ "$phase" = start ]; then
+  # the game was stopped by this script's stop half; only the launch task now
+  ps='Start-ScheduledTask -TaskName sky-lab-launch; "relaunch started " + (Get-Date -Format HH:mm:ss)'
+  want="relaunch started "
+else
+  keep
+  ps='Get-Process SkyrimSE, skse64_loader -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 3'
+  [ -z "$settings" ] || ps="$ps
 $settings"
-ps="$ps"'
+  if [ "$phase" = stop ]; then
+    ps="$ps"'
+"stopped " + (Get-Date -Format HH:mm:ss)'
+    want="stopped "
+  else
+    ps="$ps"'
 Start-ScheduledTask -TaskName sky-lab-launch; "relaunch started " + (Get-Date -Format HH:mm:ss)'
+    want="relaunch started "
+  fi
+fi
 # the guest agent once answered nothing right after a stream started
 # (2026-10-09 11:55, sky-c2: the game stopped, the task never started); the
 # same command again is safe, stopping nothing new and starting the task
 for attempt in 1 2; do
   out=$(ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$ps")" 2>&1 || true)
   line=$(printf '%s' "$out" | python3 -c 'import sys,json; print((json.load(sys.stdin).get("out-data") or "").strip().splitlines()[-1])' 2>/dev/null || true)
-  # the launch task's own line, not just any last line: a settings block's error stops the script after its "set ..." lines
+  # the script's own last line, not just any last line: a settings block's error stops the script after its "set ..." lines
   case "$line" in
-    "relaunch started "*)
+    "$want"*)
       [ -z "$settings" ] || { printf '%s' "$out" | python3 -c 'import sys,json; [print(l) for l in (json.load(sys.stdin).get("out-data") or "").splitlines() if l.startswith("set ")]' || true; }
       echo "$line"; break ;;
   esac
-  echo "the guest agent answered no relaunch line (attempt $attempt): ${out:0:200}" >&2
+  echo "the guest agent answered no '$want' line (attempt $attempt): ${out:0:200}" >&2
   [ "$attempt" = 2 ] && exit 5
   sleep 5
 done
+if [ "$phase" = stop ]; then
+  # off the server's online list before the caller starts any seat (about 18 s, netcode's timeout), judged on reads that
+  # answered: a failed read is no proof the player is gone
+  gone=0
+  for i in $(seq 1 30); do
+    o=$(online) || o=""
+    if [ -n "$o" ] && ! printf '%s' "$o" | grep -q "\"profileId\":$profile}"; then gone=1; break; fi
+    sleep 3
+  done
+  [ "$gone" = 1 ] || { echo "$client (profile $profile) still on the server's online list 90 s after its stop" >&2; exit 4; }
+  echo "$client (profile $profile) is stopped and off the server"
+  exit 0
+fi
 # the game's process within a minute of the task, else the task again, at most twice (playtest 46, 14:34: both seats'
 # tasks ran right after their streams opened, neither game started, nothing crashed or logged an error, and the wait
 # below ran its five minutes out)

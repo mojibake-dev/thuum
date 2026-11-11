@@ -1021,10 +1021,12 @@ canonized into a script instead of hand rolled every time").
     camp, each seat's spells, values, items, perks and bars, the standing
     base.
   - the streams: each kept, replaced (no socket) or opened.
-  - ready: both seats relaunched together, then its checks.
+  - ready: both seats stopped together, then started one after the other,
+    c1 first and c2 once c1 is online again, then its checks. The restore
+    in setup stops and starts them the same way.
   - each interior camp cell's host proven a fresh grant from the server's
-    cell-host lines; an inherited grant relaunches both seats together
-    again, three attempts at most.
+    cell-host lines; an inherited grant runs ready again, three attempts at
+    most.
   - the roles: which seat hosts each camp cell; every other seat in it is a
     guest. The checklist names the guest after this line, not before.
 - `just playtest-record <n>` next, as a tracked background task.
@@ -1053,6 +1055,13 @@ What tonight's playtests taught (45 and 46, 2026-11-04):
   sticks them too. A pillar's state lives in its host's Papyrus alone, never
   fed from the record (ADR-059 decision 5), so this holds until the
   scripting arm lands.
+- Since 2026-11-11 the two stop together and start apart, c1 first (Eli's
+  word, "Restore and ready()"): two logins at once let one seat's Story
+  Manager start race the quest start the other seat relays, the arm under
+  b-ghostwalk-look's warm reds (20261111-060821, 061001). Stopped one after
+  the other, the live game takes the stopped seat's cells (20:55:04 that
+  day, about 20 s), so the stops run at once. playtest-relaunch.sh's stop
+  and start halves are the two steps.
 - An item that relaunches one seat relaunches the guest of the scripted
   cell, never its host.
 - The standing base is sent again after every relaunch: a relaunched game's
