@@ -415,7 +415,10 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   review's fixes): game units by GetWorldScaleInverse's float (187407; v1 read GetWorldScale's, 188105, the inverse), the original
   under exceptions 'propagate', the graphs re-resolved at every driver call, the walk counting every body so H6's 64 can fail,
   slots 0x35 and 0x36 counted on bhkRigidBodyT (239275) too, and the pose errors read memory against memory while the writes go
-  accessor to accessor (bhkRigidBodyT overrides GetPosition and SetPosition). 36014, 36016, 19535 and 19538 are the static
+  accessor to accessor (bhkRigidBodyT overrides GetPosition and SetPosition). v1.2 (its re-review's fix): path B's setPos and
+  setRot totals count at bhkRigidBody's sites alone, since each bhkRigidBodyT setter ends in bhkRigidBody's own (a T SetPosition
+  skips it only for a null hkpRigidBody, which moves no body), so each write that moves a body counts once against 19538's; the
+  bhkRigidBodyT sites' labels are the breakdown, not added to the totals. 36014, 36016, 19535 and 19538 are the static
   read's (HYPOTHESIS); the rest by `just addr` and CommonLibSSE-NG, 2026-11-11. Written 2026-11-11, never run.
 - save-havok.js: ADR-071 rung 0's save read (the plan's "the kHavokMoved block keeps an awake body's velocities"): at a save, the
   Havok block writer 19534 (its bytes the save buffer's between its entry and leave positions, BGSSaveGameBuffer.h:30-32) sliced per
