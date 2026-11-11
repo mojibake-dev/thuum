@@ -211,10 +211,15 @@ seat whose player is no vampire does. Its lines, all in skyrim-platform.log: "[v
 the first override per base, "[verb:appearance] HasOverlays on a figure's base (form id 7, not the player's): the engine's true
 returned false (...)"; and the count every ten seconds while it moves. The fresh review's three nits ride train 52 (fork ff467dab).
 
-The proof: x-vampire-figure-head v2.1 (lab/.cache/drafts/rung5, sha1 891d114c) on the heads stage: c2's Face and Eyes nodes present
-on c1 before the turn, after it with a cell change, after c1's relaunch and after the cure, the install line once, the override
-lines 0 before the turn and at least 1 after it (the count tells a fix from an absent fault). Until it reads green, the mechanism
-above stays HYPOTHESIS.
+The proof: x-vampire-figure-head v2.1 (lab/.cache/drafts/rung5, sha1 891d114c) GREEN on the heads stage, run 20261111-114511
+(fork 24f1cc6a's client; x-werewolf-form green beside it, 115629): c2's Face and Eyes nodes present on c1 before the turn, after
+it with a cell change, after c1's relaunch and after the cure; the install line once in each of c1's games and in c2's. The
+override lines read the mechanism's observable half, CONFIRMED: 0 before the turn (the engine said false for c2's figure base),
+the first-override line once and the count line twice after it (the engine said true, the hook answered false), 0 after c1's
+relaunch as a vampire (its race written to its base at login with no SetRace, so the engine said false; HYPOTHESIS: no overlay
+entry without a SetRace) and 0 after the cure; c2, whose player stayed no vampire, 0 throughout. HasOverlays' internal branch
+(the chargen race, the overlay map) stays unread, HYPOTHESIS; that the local player's turn flips the answer for a figure's base
+and the hook restores the head is read.
 
 Known limit, unchanged by the fix: a vampire figure seen by any seat shows its look's parts, not its race's overlay head parts
 (a non-vampire seat already answered false for it before the fix).
