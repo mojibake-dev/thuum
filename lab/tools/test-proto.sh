@@ -239,7 +239,11 @@ if d.get("weatherSync"):
 # has none of their words (ScriptVariables' login watch, the player-class split, the derived quest scope), so each one
 # was an undeclared divergence in every session: m4-scripts-5-second f6ca339d's T2 of 16:40Z, 413 watch lines over all
 # 52 sessions, where every green T2 before the deploy (013692c7 at 10:29Z) had none. T2 compares the two stacks on
-# what both know, as it pins the load order and the weather; rung 5's own sessions and its T3 prove these keys
+# what both know, as it pins the load order and the weather; no T2 session runs with these keys, so T0 and T3 prove
+# them. The pin also keeps difftest's stdout deadlock out of T2: its run_stack reads c1's stdout to the end before
+# c2's, and a keyed login's ~91 KB of watch lines fill sky-srv's 64 KiB pipe, so c2's script blocks until c1 quits
+# (20 of that T2's 22 declared-but-absent relays; only player-own's two starts were the keys' own, E_QUEST_PLAYER by
+# design). The keys come back with the drain fix (fork m4-difftest-drain 1bb3893b) and the t:81 lines declared
 for k in ("conditionVariables", "playerQuests", "playerQuestVariables", "playerQuestGlobals", "playerQuestCallers",
           "questScope"):
     d.pop(k, None)
