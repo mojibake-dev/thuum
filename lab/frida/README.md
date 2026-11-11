@@ -382,6 +382,17 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   units by bhkWorld's scale, 188105), motion type, the deactivation counters, the island's pointer, size and active bit, its members
   by reference on change. Run on both seats through x-prop-blast v3: the caster's rows read H2, the watcher's H3, the island rows H4.
   Ids by `just addr`, 2026-11-11; 1.6.1170 only. Written 2026-11-11, never run.
+- body-impose.js: ADR-071 rung 0's pose read on one seat (H6): can the engine hold a dead body in a pose it is handed, within 32
+  units a bone. It finds FORM's actor in the process lists, waits for its body to rest, captures each body's position and rotation
+  (bhkRigidBody slots 0x33, 0x34) and the Havok block by the engine's own serializer (36016, the copy freed), then, each time the
+  probe has shouted the body away and it rests again: path A, every animation graph's BSIRagdollDriver::SetMotionType(kKeyframed)
+  and ten writes 100 ms apart toward the capture (slots 0x36, 0x35), a 3 s hold, Dynamic again and 3 s more; path B, the block
+  copied onto the engine heap, the reference's location and angle set back, and the re-apply route 36014 (19535 on the live 3D,
+  its 19538 and slot 0x35 and 0x36 calls counted). Pose rows carry the per-bone error against the capture in game units (max, mean,
+  the root's, the worst three bones) and the motion types, the rotation error at each window's end. Its engine calls run inside a
+  replacement of the player's own update, never inside a listener (the listener guard), and the replacement is reverted when the
+  run ends. It WRITES the body's transforms during its phases: a lab experiment, never a resident. 36014, 36016, 19535 and 19538
+  are the static read's (HYPOTHESIS); the rest by `just addr` and CommonLibSSE-NG, 2026-11-11. Written 2026-11-11, never run.
 - cloak-hostile.js: whether a hostile creature's engine counts the player as
   hostile before any blow (docs/verbs/npc-stream.md slice 6, H-53h). Hooks
   Actor::IsHostileToActor and logs self, other, the answer and the caller's
