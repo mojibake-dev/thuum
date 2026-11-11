@@ -1707,6 +1707,31 @@ class FridaSteps(RunTests):
         self.assertEqual(body["verdict"], "error", body)
         self.assertIn("E_RUN_FRIDA", str(body.get("failures")))
 
+    def test_a_hand_start_refuses_a_script_name_that_could_leave_its_quotes(self):
+        """POST /lab/frida names the script it serves after the upload's file name (or a lab/frida file's), and every
+        PowerShell command about it on the seat holds that name inside single quotes: a ' in it would end the quote in
+        an exec that runs as SYSTEM. Only letters, digits, '.', '_' and '-' pass, not first a '.' (GET
+        /lab/frida/scripts refuses that); anything else is a 400 before a file is written or the seat touched."""
+        from labapi.guests import Guest
+
+        self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        for bad in ("o'brien.js", "x'; Remove-Item C -Recurse; '.js", "two words.js", "$(whoami).js", ".hidden.js"):
+            r = self.client.post("/lab/frida", data={"client": "c1"}, files={"file": (bad, b"send(1);\n", "text/javascript")})
+            self.assertEqual(r.status_code, 400, (bad, r.text))
+            self.assertIn("single quotes", r.json()["detail"])
+        (self.tmp / "frida" / "o'brien.js").write_text("send(1);\n")
+        r = self.client.post("/lab/frida", data={"client": "c1", "script": "o'brien.js"})
+        self.assertEqual(r.status_code, 400, r.text)
+        self.assertEqual(list((self.tmp / "frida" / "uploads").iterdir()), [])
+        self.assertFalse([c for c in pve.calls if c[0] == "exec"], pve.calls)
+        self.assertEqual(self.services.runner.frida_started, [])
+        r = self.client.post("/lab/frida", data={"client": "c1"}, files={"file": ("prop-impulse_v1.1.js", b"send(1);\n", "text/javascript")})
+        self.assertEqual(r.status_code, 200, r.text)
+        (started,) = self.services.runner.frida_started
+        self.assertEqual(started[0], "c1")
+        self.assertTrue(re.fullmatch(r"prop-impulse_v1\.1-hand-\d{8}T\d{6}Z\.js", started[1]), started)
+
     def _traced_seat(self, log):
         """c1 managed, and once a frida step starts its script the script's .log on the seat holds `log` (the fake runs
         no injector), under the name the run gives the step's copy (x-trace-<run>-<step>.js)."""
