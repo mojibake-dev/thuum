@@ -641,6 +641,19 @@ and accepted (r-cell-leave 083700).
   about 60 s more (about 20 game minutes) before the fixed window counts.
   The read that settles it: an npc-state of 0x13483 just before and after
   the scenario's server restart on one matched warm and cold pair.
+  The pair, read 2026-11-11 (x-handoff-cross-timing e32a64c0): cold
+  20261111-174045 (both seats rolled back) RED only at its Alvor claim
+  (no "follows 13482 into cell 9712" nor "now simulates 13482 in cell 9712"),
+  every one of its 66 snapshots in; warm 174935 (both relaunched) GREEN. The
+  sweep's pattern inverted (there warm red, cold green), so the reds are the
+  NPCs' own run-to-run timing against a fixed window, not a warm clone's
+  carried state (CONFIRMED by the pair; the 60 s head-start mechanism was
+  already contradicted by the drafter's read). The restart rewinds the clock
+  by design of the scenario: its server block's gameHour 7.9 is laid again at
+  the restart (174045's p0 at hour 8.684, p1 at 7.944, then running on), so
+  every run's window starts at the same game hour. The fix is the widened
+  window (b-npc-handoff-cross, main d09bc3a4: the follow claim waits up to
+  60 s more, unchanged).
 - Assertions that would fail if the verb silently regressed: a refusal for
   a followed actor; a frozen record while its host's track moves; an epoch
   step over the bound on the west column; no keyframe line before a grant;
