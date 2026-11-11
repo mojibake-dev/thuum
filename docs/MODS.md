@@ -940,6 +940,18 @@ open is paused" no longer holds under the layer, the box is open and the world r
 authors' scripts: the mod makes `Utility.IsInMenuMode()` true while an unpaused menu is open and
 `Utility.Wait()` no longer waits for menus. HYPOTHESIS until the layer's smoke and Eli's play.
 
+**The physics cap (ADR-071 decision 7; Eli, about 17:18Z 2026-11-11: "that works . cap it").** SSE Display Tweaks 0.5.16
+(the Fenestrate row `sse-display-tweaks-0.5.16@1.6.1170`, Eli's own SSEDisplayTweaks.ini) laid its Havok fix in its dynamic
+mode: fMaxTime and fMaxTimeComplex re-set every frame to the framerate between MinimumFramerate 60 and MaximumFramerate 240,
+under a 240 fps limiter of its own (the plugin replaces the game's, so bLockFramerate has no effect, the INI's text). A 144 fps
+seat then stepped Havok at 1/144 and a 47 fps one at 1/60, and rest and settling followed the framerate (the physics leg's
+skeptic, docs/research/physics-leg-2026-11-11.md). Three rows of `lab/layer/ini-patches.tsv` cap every player alike: [Render]
+`FramerateLimit = 60`, [HAVOK] `DynamicMaxTimeScaling = false` (static: both values calculated once from MaximumFramerate) and
+`MaximumFramerate = 60`, so fMaxTime is 1/60 and, with MaxTimeComplexOffset 30 kept, fMaxTimeComplex 1/30, the game's own
+Skyrim.ini defaults (HYPOTHESIS until a seat reads them through Utility.GetINIFloat). [HAVOK] Enabled, PhysicsDamagePatch and the
+vsync settings stay as Eli set them, and his own 144 fps goes with the cap. A seat already below 60 fps stepped at 1/60 before,
+so the lab's seats see no change of step; the cap shows on a machine above 60.
+
 **Realistic Aspen Trees (playtest 26; Eli: "the trees looked fucked up and were missing
 textures"):** Eli's ticked Simply Bigger Trees file is "Simply Bigger Trees SE (Realistic
 Aspen Trees - Loose)" (Nexus 5281 file 11503), whose file description reads "REQUIRES

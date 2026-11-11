@@ -30,6 +30,13 @@ class Rows(unittest.TestCase):
             for k in ("file", "section", "key", "value", "why"):
                 self.assertTrue(r[k].strip(), (r["folder"], k))
 
+    def test_the_physics_cap_rows(self):
+        # ADR-071 decision 7 (Eli, 2026-11-11, "that works . cap it"): Display Tweaks capped at 60 fps with a static Havok step
+        got = {(r["section"], r["key"]): r["value"] for r in rows(ROOT / "lab" / "layer" / "ini-patches.tsv")
+               if r["folder"] == "sse-display-tweaks-0.5.16@1.6.1170" and r["file"] == "SKSE/Plugins/SSEDisplayTweaks.ini"}
+        self.assertEqual(got, {("Render", "FramerateLimit"): "60", ("HAVOK", "DynamicMaxTimeScaling"): "false",
+                               ("HAVOK", "MaximumFramerate"): "60"})
+
 
 class Patch(unittest.TestCase):
     def test_rewrites_a_key_in_its_section_only(self):
