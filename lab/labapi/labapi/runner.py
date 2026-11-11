@@ -2256,7 +2256,7 @@ class Runner:
         sidecar read whole) are the fetches this is meant to serve next."""
         try:
             if size > FETCH_MAX_BYTES:
-                raise ValueError(f"its copy is {size} bytes, past the {FETCH_MAX_BYTES} (64 MiB) a fetch reads")
+                raise ValueError(f"its copy is {size} bytes, past the {FETCH_MAX_BYTES} ({FETCH_MAX_BYTES // (1024 * 1024)} MiB) a fetch reads")
             data = bytearray()
             ranges = -(-size // READ_RANGE_BYTES)
             for k in range(ranges):

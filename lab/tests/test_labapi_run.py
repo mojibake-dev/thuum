@@ -1143,7 +1143,7 @@ class FridaTraces(RunTests):
         for note in ("frida hand-trace.js.log on c1 (fake-c1) not fetched whole: 12 bytes read of its 14: range 1 of 1, "
                      "at 0, came back 12 of its 14",
                      f"frida hand-two.js.log on c2 (fake-c2) not fetched whole: its copy is {FETCH_MAX_BYTES + 1} bytes, "
-                     f"past the {FETCH_MAX_BYTES} (64 MiB) a fetch reads"):
+                     f"past the {FETCH_MAX_BYTES} ({FETCH_MAX_BYTES // (1024 * 1024)} MiB) a fetch reads"):
             self.assertIn(note, body["notes"])
         self.assertFalse([c for c in pve.calls if c[:3] == ("file_read_range", 902, "C:\\sky-lab\\frida\\hand-two.js.log.copy")])
         for name in ("frida/c1-hand-trace.js.before-run.jsonl", "frida/c2-hand-two.js.jsonl"):
@@ -1951,7 +1951,7 @@ class FridaSteps(RunTests):
         script = f"x-trace-{run_id}-1.js"
         self.assertEqual([f["error"] for f in body["failures"]],
                          [f"E_RUN_FRIDA_FETCH: {script}.log on c1 (fake-c1) not fetched whole: its copy is {big} bytes, past "
-                          f"the {FETCH_MAX_BYTES} (64 MiB) a fetch reads"])
+                          f"the {FETCH_MAX_BYTES} ({FETCH_MAX_BYTES // (1024 * 1024)} MiB) a fetch reads"])
         copy = f"C:\\sky-lab\\frida\\{script}.log.copy"
         self.assertFalse([c for c in pve.calls if c[:3] == ("file_read_range", 901, copy)])
         self.assertNotIn(copy, pve.files)
