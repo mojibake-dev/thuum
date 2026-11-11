@@ -49,7 +49,9 @@ if [ -n "${GATE_SET:-}" ]; then
   FORK_DIR="$fork" python3 lab/tools/gate-cite.py --layer "$branch" "$LAYER_RUN" "$GATE_SET" "$TRAIN" | sed 's/^/ /' \
     || { echo "== the citation does not hold (above): nothing merged; layer-merge's own sweep (no GATE_SET) on a stage laid for it" >&2; exit 1; }
   setfile=$(mktemp -t layer-cite)
-  curl -fsS -m 60 "${LAB_API:-https://thuum.gaussing.tv/lab}/runset/$GATE_SET" > "$setfile"
+  # one set, or a chain "<first>+<rest>" that RUNSET_AFTER finished, read as one, as verb-merge keeps it (gate-cite.py
+  # --combine): a chain's id is no run set lab-api knows, and the first layer cited on one got a 404 here (2026-11-11)
+  python3 lab/tools/gate-cite.py --combine "$GATE_SET" > "$setfile"
   sweep="$GATE_SET (cited with $TRAIN, ADR-042a; the layer's own run $LAYER_RUN)"
 else
   echo "== 1. the staged tree"
