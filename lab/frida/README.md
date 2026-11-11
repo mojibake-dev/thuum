@@ -393,6 +393,15 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   replacement of the player's own update, never inside a listener (the listener guard), and the replacement is reverted when the
   run ends. It WRITES the body's transforms during its phases: a lab experiment, never a resident. 36014, 36016, 19535 and 19538
   are the static read's (HYPOTHESIS); the rest by `just addr` and CommonLibSSE-NG, 2026-11-11. Written 2026-11-11, never run.
+- save-havok.js: ADR-071 rung 0's save read (the plan's "the kHavokMoved block keeps an awake body's velocities"): at a save, the
+  Havok block writer 19534 (its bytes the save buffer's between its entry and leave positions, BGSSaveGameBuffer.h:30-32) sliced per
+  body by 19537's entry and leave, each slice decoded by its length (position and rotation, the body flag byte, six velocity floats
+  when active, in game units by the static read); at the load, the reader 19535 as a bracket per thread with its 19538 count and the
+  vectors bhkRigidBody::SetLinearVelocity (78089) and SetAngularVelocity (78090) take inside it, in Havok units and times bhkWorld's
+  scale (188105); a setter outside any 19535 prints its caller (the first 32). FORM names the rolling body; another reference prints
+  only when its block holds an active body's velocities. Attach only, no engine call. Run on a seat that saves and loads (a solo run,
+  x-quit-solo's frame). 19534, 19535, 19537 and 19538 are the adr065 static read's (HYPOTHESIS); 78089 and 78090 CommonLibSSE-NG's;
+  ids by `just addr`, 2026-11-11. Written 2026-11-11, never run.
 - cloak-hostile.js: whether a hostile creature's engine counts the player as
   hostile before any blow (docs/verbs/npc-stream.md slice 6, H-53h). Hooks
   Actor::IsHostileToActor and logs self, other, the answer and the caller's
