@@ -285,7 +285,30 @@ positions' age.
   next read, if wanted, arms that: c2 sets stage 1 of a Companions radiant c1
   is not running, then c1 casts. The risk for play is a run start where both
   seats log in at once, so playtest 51's one-at-a-time logins are unlikely to
-  meet it (HYPOTHESIS).
+  meet it (HYPOTHESIS). Corrected the same day (numidium): 51's logins are not
+  one at a time; ready() relaunches both seats at once (playtest_setup.py
+  :610-611) and so does setup's restore (playtest-world.sh :58-60), the first
+  login on the restored world.
+  x-ghostwalk-race-read v2.1 (b20dc5ac, fresh review READY; R the run's own
+  start, the only moment the radiants can race, since the world's journal
+  folds a recorded stage, ActionListener.cpp :3755 and :3781; S c1 relaunched
+  first, then c2 once c1 is online): three counted tries, 20261111-200503,
+  201347 and 202253, each behind a throwaway smoke run, both seats relaunched
+  in each. R0 red in all three: no stack rooted at the four radiants joined
+  the other seat's scope in either direction (rJoinsC1 and rJoinsC2 0 each
+  try), so the start race did not happen and the read is inconclusive on it;
+  why these starts never raced where 060821, 061001, 072204, 072734, 172354
+  and 182610's first game did is unread (HYPOTHESIS: the logins' spacing, or
+  a recorded stage). S held in tries 1 and 3 (S1 to S3 green: staggered
+  relaunches keep the return); try 2's S read nothing, every S cast swallowed
+  by a MessageBoxMenu open on c1's relaunched game (step 177's dump-state:
+  menus Cursor Menu, HUD Menu, MessageBoxMenu; s1Menu to s3Menu true, the casts'
+  count stayed 3), a premise red, its box unnamed in the logs. Eli's word
+  (in session, about 20:3xZ): 51's logins are staggered at setup's restore
+  and at ready(), S's shape (numidium's tooling branch playtest-stagger);
+  rung 5's start-arm fix, so another seat's stage relay cannot pull a seat's
+  own Story Manager start into its scope, builds right after 51 (no scripting
+  build before 51).
   Why is unread (HYPOTHESIS): rung 5's effect-event and acting-scope work
   (fork 9db243a0) is one suspect, the server record carrying the earlier
   run's Eye Fix ability 1a0cb7e1 into the warm run is another. The read that

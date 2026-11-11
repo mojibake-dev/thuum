@@ -5199,6 +5199,32 @@ and the simulation it networks (vphysics.dll, Valve's modified IVP) ships withou
 REA time goes to it; rung 5's design read takes props.h's physics attacker, physics_prop_ragdoll.cpp's networked bone arrays and
 player_pickup.h's hooks.
 
+Amended (Eli about 20:3xZ 2026-11-11, asked in session on rung 1's build plan, lab/.cache/drafts/physics/rung1-plan.md
+4875f738; recorded 20:37Z by thuum-fa):
+- D-PH1 A ("Bump at rung 1"), decision 6's "one SCHEMA bump" becomes a bump at each rung that changes what an older peer
+  accepts: 45 at rung 1 (PropOwner admits player 0, the cell's host at rest), 46 at rung 2 (the v2 shapes). The reason is a
+  silent drop: a client's transport validates every server message and counts a refusal without a word (wire-transport
+  lib.rs:723-731 at fork c3f9d175), and check_prop_owner refuses player 0 today (wire-validate lib.rs:876-884), so a client
+  built before rung 1 would keep a stale owner with no sign; the handshake's protocol id carries SCHEMA_VERSION
+  (wire-transport lib.rs:191-196), the one guard that fails loudly.
+- D-PH3 A ("Drop it, read the grab"), the 120 s grab cap of ADR-063's props note A2 and A4 is not built: PROP_GRAB_MAX_MS and
+  E_PROP_GRAB_CAP go, so decision 2's "no timers" holds literally (W1a: "never on a timer"). A sample's held is the engine's
+  own grab state, read at each sample through Game.getPlayerGrabbedRef() (a vanilla native Skyrim Platform exposes,
+  skyrimPlatform.ts:2939 at fork c3f9d175), never an event the client tracks, so a missed release cannot strand a prop; a hold
+  ends by the holder's held-false sample or its departure word. x-corpse-grab 20261111-193821 held a corpse's grab 4 min 29 s
+  with no release (no 40557, read-corpse-193821-194559.md), the case the cap would have cut mid-drag.
+- The build plan's other defaults stand inside the accepted model: D-PH2 A (the unload's return words and the Away state as
+  built at fork 147a6cfe) and D-PH4 B (decision 6's 500 ms heartbeat for every awake streamed body from rung 1, on v1 samples).
+- W3, b-prop-push's step 27 (Eli, "Read first, then fix", after asking why a menu would touch physics): the step stays as
+  committed. x-prop-push-souls 20261111-195437 read the drop green with c1's InventoryMenu pausing (all 13 step-27 claims, one
+  copy in c1's cell), and across the frame's 13 runs the 7 pausing ones are green and the 6 under Souls RE's running menu red,
+  each listing the engine's own dropped copy beside the server's, marked deleted and never freed
+  (read-x-prop-push-souls-195437.md): the menu changes when the drop meets a running world, not the physics. Next, b-prop-push
+  as committed on canon's build (the same-build control) and a read of the leftover (drawn, solid, freed, can a player take
+  it); then a fix of the drop service if a player can see or touch it, or a restated count if it is an invisible leaked
+  reference, which comes back to Eli. b-prop-push stays pending until then.
+
 Amends: ADR-064 decision 7 (dated note under it), ADR-063's props note (accepted under it), ADR-058's slices (slice two kept as a
 derived class; slice three is rungs 5 and 6), ADR-067 decision 4 (its final sample is the asleep sample; the built ChangeForm
-apply is the record). W3 stays Eli's at the time: a rewrite of b-prop-push's step 27 if the drop read calls for one.
+apply is the record). W3 stays Eli's at the time: a rewrite of b-prop-push's step 27 if the drop read calls for one (decided
+2026-11-11 in the amendment above: no rewrite; the leftover is read first, then fixed or the count restated by Eli's word).
