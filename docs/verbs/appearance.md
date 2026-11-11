@@ -184,6 +184,41 @@ Rate limit / bounds: one accepted update per race-menu open.
   that faults; arming it never lets one fault so far, so the dump may have to
   come from WER LocalDumps with the in-process handler out of the way.
 
+## A figure's head on a seat whose own player turned vampire (HasOverlays, 2026-11-11)
+
+The fault: on a seat whose own player turned vampire, every other player's figure drew no head, a hollow helmet with the
+background through its eye slits (x-vampire-stage v2.1, run 20261111-035133: c1 after its turn drew c2's figure 0xff000846 so in
+shots 187, 209 and 228); the other seat's view of the vampire stayed right. Rung: R3, the seat's own rendering of a figure.
+
+The cause, by its tags:
+- CONFIRMED-STATIC: a figure's base carries the player's form id 7 from before its first 3D load: SpawnProcess.enable calls
+  applyTints before it enables the reference (skymp5-client spawnProcess.ts:21-32), and applyTints calls setFormIdUnsafe with the
+  player's base id (appearance.ts:126-129), which writes TESForm::formID alone (PapyrusTESModPlatform.cpp:530-537). So a
+  head-parts {other: true} read of a figure lists the reading seat's own parts (lab-api retired head_parts_of for it); a figure's
+  parts are read by node.
+- CONFIRMED-STATIC (data): the vampire race 0x88794 carries kOverlayHeadPartList (CommonLibSSE-NG include/RE/T/TESRace.h:77; its
+  Skyrim.esm DATA flags 0x54a08942); NordRace 0x13746 and OrcRace 0x13747 do not.
+- HYPOTHESIS: TESNPC::HasOverlays (CommonLibSSE-NG include/RE/Offsets.h:532) branches on form id 7 and there reads the local
+  player's chargen race and an overlay-map entry (Address Library 24791, 24792), so the local player's turn flips its answer for
+  every figure; once it is true, GetCurrentHeadPartByType (src/RE/T/TESNPC.cpp:94-97) takes the overlay list, which a figure does
+  not have (:111-123): no Face part, no head. The function's body is unread (the static read had no Ghidra or REA).
+
+The fix, fork m4-scripts-5-heads 24f1cc6a (Skyrim Platform only; its own train ahead of playtest 51): game/Offsets.h's
+Hooks::HasOverlays names CommonLib's RE::Offset::TESNPC::HasOverlays, and FridaHooks.cpp replaces the function through Gum beside
+the two hooks that exist because figures pose as the player: an NPC whose form id reads 7 and that is not the player's own base
+(compared by pointer) gets false where the engine said true, so the engine builds each figure's head from its own parts, as a
+seat whose player is no vampire does. Its lines, all in skyrim-platform.log: "[verb:appearance] HasOverlays hook installed: ...";
+the first override per base, "[verb:appearance] HasOverlays on a figure's base (form id 7, not the player's): the engine's true
+returned false (...)"; and the count every ten seconds while it moves. The fresh review's three nits ride train 52 (fork ff467dab).
+
+The proof: x-vampire-figure-head v2.1 (lab/.cache/drafts/rung5, sha1 891d114c) on the heads stage: c2's Face and Eyes nodes present
+on c1 before the turn, after it with a cell change, after c1's relaunch and after the cure, the install line once, the override
+lines 0 before the turn and at least 1 after it (the count tells a fix from an absent fault). Until it reads green, the mechanism
+above stays HYPOTHESIS.
+
+Known limit, unchanged by the fix: a vampire figure seen by any seat shows its look's parts, not its race's overlay head parts
+(a non-vampire seat already answered false for it before the fix).
+
 ## Status
 
 ADR-025 (2026-10-06) took 1.7.104 out of routine runs: players and the lab

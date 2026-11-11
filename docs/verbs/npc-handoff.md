@@ -623,6 +623,24 @@ and accepted (r-cell-leave 083700).
   `cell: record` (numidium's runner reads the record's cell) and asserts
   the follow's end and the two seats' AI without a cell name. The gate set
   runs on d698fe38; the merge waits on Eli's D6 and D12.
+- Lab note, 2026-11-11 (the rung 5 pair's sweep): b-npc-handoff-cross read
+  red twice on warm clones (20261111-072204 and its relaunched rerun 072734,
+  step 28: server.log_count("follows 1348[23] into cell .* within the pass
+  margin") >= 1 counted 0, and "may not move 13483" 0) and green on the cold
+  rollback 073308, as in the 11-09 layer sweep (020750 red, 021320 green):
+  ADR-027's red, red, cold green. The same sweep read b-ghostwalk-look the
+  same way (ghostwalk.md's Tests), so a relaunched warm clone on this build
+  may carry something the cold rollback clears (HYPOTHESIS, unread); until
+  that read, a red here on a warm clone waits for its cold rerun.
+  Read the same day (artifacts only): not a carried state. The generic
+  "follows ... within the pass margin" line fires warm for other residents;
+  Sigrid 0x13483 reads cell 0x9731 at all eight sampled npc-states in all
+  three runs and crosses once, late, in the green alone. HYPOTHESIS, a timing
+  budget: the cold rollback takes 84 to 93 s against the relaunch's 32 s,
+  and the server ticks from its container's start, so a cold run gives her
+  about 60 s more (about 20 game minutes) before the fixed window counts.
+  The read that settles it: an npc-state of 0x13483 just before and after
+  the scenario's server restart on one matched warm and cold pair.
 - Assertions that would fail if the verb silently regressed: a refusal for
   a followed actor; a frozen record while its host's track moves; an epoch
   step over the bound on the west column; no keyframe line before a grant;
