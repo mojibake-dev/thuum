@@ -1529,6 +1529,13 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   an unrecorded NPC's outfit missing on the fixed server (b-npc-stream-equipment, not e2595d14's path), the close half of the
   D-C2 A body open (b-npc-body-release v5 and c-dungeon-enemies, Eli's word), b-word-wall's guest learning, b-second-hand's
   proc ticks, b-quest-rumor v2 (W1). Next: rung 5's slot 0 after the nightly (about 08:00 PST 11-10), then rung 5's build.
+- STATE 2026-11-11 03:35 PST (numidium): canon fast-forwarded to fork f6ca339d, ADR-068 rung 5 whole (quests under one record: its
+  first head 44ffafc2 by its gate at 15:01Z 11-10, 35 green; its second head by the pair's cited sweep plus a rest set, 139
+  runs, watch); apocrypha's layer tidy merged to main 5f5579c5 by the same sweep (ADR-042a), both clones promoted. Open: the
+  headless figure after a vampire turn (fork m4-scripts-5-heads 24f1cc6a, its own train staging now, for 51), b-second-hand's
+  proc (train 52's effect-helper fix), a spell's end handler lost on a warm relaunch (b-ghostwalk-look, cause unread). Next:
+  heads' merge, train 52's T2, playtest 51 on Eli's go (Ariadne's vampirism in Morthal, shared quests; its setup on thuum
+  playtest-client-settings), then train 52's stage.
 
 ### M5: Progression (4 to 8 weeks, Class A/B). Started 2026-10-31 (the weekend pass)
 

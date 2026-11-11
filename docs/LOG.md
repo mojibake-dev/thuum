@@ -9445,3 +9445,47 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   after plain relaunches and green on its cold third try (the log-count copy came up short, a lab-api read fault, thuum-fa's
   byte-length note next), b-npc-caster red once and green on its rerun. r5-settings (ceb136b0: the settings, W1's two
   scenarios, the pending lines out) and the first head's docs (dae9343f) merged into main after canon moved (9e9f417c).
+- (numidium) guest-task.sh's PowerShell goes through the guest agent's stdin (eefd804c, qm guest exec --pass-stdin behind a
+  short fixed decoder): apocrypha's layer tidy made add-mods.ps1 9,163 bytes, its -EncodedCommand 34,960 characters, past
+  Windows' 32,767, and client-mods' task start failed six of six on both clones. The tidy's layer stage at eb1a1bce (16:41Z
+  to 17:01Z, after thuum-fa's T2 freed sky-srv) then read: T0 green; both clones laid alike through the stdin path (fetched
+  1, the Skyrim Souls RE ini; kept 9,675; owned 0; pruned 0; unpruned 10, the tidy's five dropped files counted twice by an
+  older double count); clean-m1-next "m4-scripts-5-quests client 44ffafc2, then apocrypha/layer-tidy layer eb1a1bce" on
+  both; smoke 20261110-165341 green; b-container-rest v3 20261110-165622 green (Souls' close at 420).
+- thuum-fa's T2 of m4-scripts-5-second f6ca339d went red on difftest at 16:40Z: 413 undeclared ScriptVariables (t:81) watch
+  lines in all 52 sessions, rung 5's six quest keys reaching T2's settings (test-proto copies every deployed key but the
+  load order and the weather, and the legacy stack has none of their words), and 22 declared-but-absent lines. Of the 22,
+  only player-own's two starts were the keys' own (eafd5 in playerQuests, 2ba16's alias 0 filled with the player:
+  E_QUEST_PLAYER as designed); the other 20 were difftest's stdout deadlock (run_stack reads c1's stdout to the end before
+  c2's, and a keyed login's ~91 KB of watch lines fill the 64 KiB pipe; thuum-fa's read). Pinned: T2's settings drop the six
+  keys beside the load-order and weather pins (thuum-fa's 41058a0e, main 4063122d; its comment corrected in 368ff508); the
+  drain fix (fork m4-difftest-drain 1bb3893b) brings them back with train 52, by the head's own declarations (t2-r5-keys).
+  The pinned T2 died in the network outage (ssh to core.gaussing.tv cut at 17:32:31Z, 29 sessions identical by then).
+- b-second-hand's missing proc placed (numidium's static read, H1; thuum-fa's confirmation from the red sweep's own c1.logs,
+  20261110-043108:171 and 062541:173): ADR-068's seam skips WB_CrackleNew_Script's first PlaceAtMe on the other player's
+  figure ("not hosted here (nonLatent)"), so the proc's RemoteCast has no source. Filed in second-hand.md (9a22009f,
+  7aa1eabd); the fix, the seam's owner test counting a call inside the seat player's own effect (ADR-068 decision 6), rides
+  train 52. b-second-hand stays pending until that train's green.
+
+### 2026-11-11
+
+- m4-scripts-5-second merged to fork canon f6ca339d (2026-11-11T11:28Z): the gate 20261111-041437-pair-r5b-tidy+20261111-112310-pair-r5b-rest (cited, ADR-042), 20261111-041437-a-activation-reach to 20261111-111446-t2-fakeclient-restart (139 runs); watch items: b-ghostwalk-look, b-npc-handoff-cross, b-npc-talk, b-quest-report-dedupe, b-relaunch-reports, m0-death, smoke-two-players; T2 skip on skymp-server:m4-scripts-5-second; clones not promoted. Verbs: ADR-068 rung 5's second head (thuum-fa): a quest's plain reward recorded once on its own player (D-R1 C), an NPC standing in a world trigger at its cell's load replayed once at its owner's grant (D-W3 B), quest starts and stops crossing only when a world cause made them (D-Q4 C; the Story Manager's quests per seat, Eli's D-Q5 A), a login replay that no longer re-runs a finished quest's start-up script, and the review's three fixes (Fix A's plain stage line, Fix B's E_SCRIPTCALL_FULL, Fix C's arm line). T2 cited: the pinned T2 of skymp-server:m4-scripts-5-second-f6ca339d, 52 of 52 identical at 03:22Z from main 7aa1eabd (the 4063122d pin). Stage 2 (03:24Z to 04:05Z, from the tidy's worktree ad2d51d9, REUSE_DIST over client-build 20500 at 685f6a24 with skymp5-client.js built at f6ca339d, SkyrimPlatformImpl 8b66a14f2989a7cb): x-quest-cause v2.2 033650, x-acting-player v2.1 034406, x-vampire-stage v2.1 035133, 3 green of 3. b-quest-report-dedupe v1 read red by design four times in the sweep, as thuum-fa predicted before its verdict (D-Q4 C holds 2002b6e's engine-fired stage 0 as the seat's own); Eli's D-Q7 A rewrote the claim (v2, r5b-docs 08040551 alone, merged to main 5a97e1ce and deployed from the tidy's tree a77305dd), and the rest set 20261111-112310-pair-r5b-rest played it green (20261111-112310-b-quest-report-dedupe).
+- apocrypha/layer-tidy (a mod layer) merged to main 5f5579c5 by merge commit (2026-11-11T11:32Z): the full sweep 20261111-041437-pair-r5b-tidy+20261111-112310-pair-r5b-rest (cited with m4-scripts-5-second, ADR-042a; the layer's own run 20261110-165341-smoke-two-players), 20261111-041437-a-activation-reach to 20261111-111446-t2-fakeclient-restart (139 runs); watch items: b-ghostwalk-look, b-npc-handoff-cross, b-npc-talk, b-quest-report-dedupe, b-relaunch-reports, m0-death, smoke-two-players; both clones promoted. Plugins: apocrypha's tidy (seven files: essentials.tsv's five dropped entries, game-owned.tsv's first row, the Skyrim Souls RE ini line, add-mods.ps1's owned rule, persist-mods.sh, its tests, MODS.md). The zero-fetch half read after the sweep (just client-mods 712 from the same tree): fetched 0, kept 9,675, owned 1, pruned 0, unpruned 5, as apocrypha predicted. layer-merge stopped once after its eight checks on lab-api's 404 for the chain's id, nothing merged; fixed in 81dd7dfc (the record through gate-cite.py --combine, as verb-merge keeps it).
+- (numidium) The pair's sweep 20261111-041437-pair-r5b-tidy (127 scenarios, 04:14Z to 11:18Z, from the tidy's worktree on
+  stage 2's build) ended 126 green, red only on b-quest-report-dedupe's design red. Its warm reds read apart (thuum-fa, main
+  b72f3fc5): b-ghostwalk-look is a real script-event loss on a warm relaunch, CONFIRMED from the artifacts
+  (WB_Ghostwalk_Script's OnEffectFinish body never ran on the warm-relaunched c1, 060821 and 061001; green cold 061139), its
+  cause unread, a watch line on playtest 51's checklist; b-npc-handoff-cross (072204, 072734; cold 073308) a timing budget
+  (HYPOTHESIS: Sigrid 0x13483 crosses late, a cold rollback's longer start buys her about 60 s). b-npc-talk, m0-death and
+  smoke-two-players went green on a relaunched rerun, b-relaunch-reports after a lab fault (E_PVE_EXEC_LOST at c2's relaunch).
+  x-trigger-preload v2.2 by path on stage 2's build (040539) read red on its own premise (H-TP4: c1's re-entry raised no
+  OnTriggerEnter; c1.log holds D-W3 B's designed hold and drop), v2.3 next. x-vampire-stage's recorded reads found the
+  headless figure (a seat whose own player turned vampire draws other players' figures with no head), fixed on fork
+  m4-scripts-5-heads 24f1cc6a (a TESNPC::HasOverlays hook), its own train next. The network outage (17:32Z to about 02:40Z)
+  left the pinned T2's test containers up (stopped by thuum-fa) and the MCP clients stale; core found both servers healthy.
+  core's dangling-image prune on sky-srv after the sweep freed 19.3 GB (88% to 58%); the named-tag removal skipped.
+- Playtest 51's world composed: playtest-canon-51-20261111T033258Z, a copy of the canonical playtest-canon-chars-20261107T064547Z
+  (untouched; 1,337 records to 1,329): Arvel 0x39655, Embershard's six recorded bandits and its lookout 0xb6ce1 moved aside;
+  MS13 0x39645's and 0x3ac44's journal stages cleared; the MS13GoldenClaw both characters still carried taken out; both looks
+  byte-identical. Its setup (lab/playtests/51.yaml, questFragmentLive on both seats by Eli's D-Q10 A through a profile's new
+  clientSettings) is on thuum branch playtest-client-settings 8b421d56, reviewed, for main before 51.
