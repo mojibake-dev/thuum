@@ -1786,13 +1786,13 @@ class FridaSteps(RunTests):
         self.assertNotIn(copy, pve.files)
 
     def test_a_copy_that_fails_its_three_tries_makes_the_run_a_lab_fault(self):
-        """The copy is tried three times 10 s apart, as the game check and log-count's copy are (an exec that never
-        ended, a busy agent's "got timeout", a file refused for a moment); after the third the trace is not fetched."""
+        """The copy is tried three times 10 s apart, as the game check and log-count's copy are (an agent not answering,
+        a busy agent's "got timeout", a file refused for a moment); after the third the trace is not fetched."""
         from labapi.proxmox import ExecResult, ProxmoxError
 
         pve = self._traced_seat('{"impulse": 1}\n')
         busy = "The process cannot access the file because it is being used by another process."
-        answers = [ProxmoxError("E_PVE_EXEC: pid 42 on fake-c1 did not exit in 120.0s"),
+        answers = [ProxmoxError("E_PVE_EXEC: fake-c1: ResourceException: 500 Internal Server Error: QEMU guest agent is not running"),
                    ProxmoxError("E_PVE_EXEC: fake-c1: ResourceException: 500 Internal Server Error: VM 901 qga command "
                                 "'guest-exec' failed - got timeout"),
                    ExecResult(1, "", busy)]
@@ -1812,6 +1812,27 @@ class FridaSteps(RunTests):
                           f"10 s apart, the last exit 1: {busy}"])
         self.assertEqual(answers, [])
         self.assertFalse([c for c in pve.calls if c[:3] == ("file_read_range", 901, f"C:\\sky-lab\\frida\\{script}.log.copy")])
+
+    def test_a_copy_that_ran_out_its_time_is_not_tried_again(self):
+        """An exec that ran to its deadline (guest_task_timeout_s, 120 s) held the agent all that time: three such
+        tries and their pauses held a trace's end for up to about 760 s, so a copy that "did not exit in" its time is
+        tried once (the re-review of 5b982dc6, nit 4)."""
+        from labapi.proxmox import ProxmoxError
+
+        pve = self._traced_seat('{"impulse": 1}\n')
+        tries = []
+
+        def answer(guest, res):
+            tries.append(guest.vmid)
+            raise ProxmoxError(f"E_PVE_EXEC: pid 42 on {guest.name} did not exit in 120.0s")
+
+        _log_copy_answers(pve, answer)
+        run_id, body = self._run(FRIDA_ONE)
+        self.assertEqual(body["verdict"], "error", body)
+        self.assertEqual([f["error"] for f in body["failures"]],
+                         [f"E_RUN_FRIDA_FETCH: x-trace-{run_id}-1.js.log on c1 (fake-c1) not fetched whole: its copy ran out "
+                          "its time, not tried again: E_PVE_EXEC: pid 42 on fake-c1 did not exit in 120.0s"])
+        self.assertEqual(tries, [901])
 
     def test_a_copy_shorter_than_its_source_at_its_open_is_tried_again(self):
         """The sources only grow (the script's .log is opened 'a', frida-inject's stdout appends), so a copy whose

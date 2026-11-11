@@ -2198,7 +2198,8 @@ class Runner:
         agent's "got timeout", a file refused for a moment): `answer` reads a finished exec, None for a try that
         failed, and the first good answer is the value; three failed tries are a ValueError naming the last. An exec
         whose answer the agent lost (E_PVE_EXEC_LOST) has ended on the seat, so that ProxmoxError is the caller's at
-        once."""
+        once. An exec that ran to its deadline (it "did not exit in" guest_task_timeout_s) is not tried again: three
+        such tries and their pauses held a trace's end for up to about 760 s (the re-review of 5b982dc6, nit 4)."""
         why = ""
         for attempt in range(3):
             if attempt:
@@ -2208,6 +2209,8 @@ class Runner:
             except ProxmoxError as e:
                 if "E_PVE_EXEC_LOST" in str(e):
                     raise
+                if "did not exit in" in str(e):
+                    raise ValueError(f"{what} ran out its time, not tried again: {e}") from e
                 why = str(e)
                 continue
             got = answer(res)

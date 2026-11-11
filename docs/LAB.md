@@ -375,8 +375,9 @@ API, which caps each read at 16 MiB. A Frida trace comes back in ranges:
 the injector's .out and the script's .log are each copied with a read that
 shares write access (the script still writes its .log), the copy exec
 printing the source's length at its open and the copy's last, as
-log-count's copy does (tried three times, 10 s apart; a copy shorter than
-its source at its open was cut short, the sources only growing, and is made
+log-count's copy does (tried three times, 10 s apart, except an exec that
+ran to its deadline, which is not tried again; a copy shorter than its
+source at its open was cut short, the sources only growing, and is made
 again; a copy whose exec answer the agent lost has its length read from the
 copy itself). The copy is then read by the agent's own
 file-read with offset, count and decode=0 (qemu-server 9.1.5 and later),

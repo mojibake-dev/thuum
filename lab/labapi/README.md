@@ -29,7 +29,7 @@ id>/` with `result.json`, `world-before/`, `world-after/`, `world-diff`,
 scenario lists them. A Frida trace, `frida/<client>-<script>.jsonl` (the
 injector's .out, then the script's .log), is copied on the seat by a read
 that shares write access, the copy exec printing the copy's length (three
-tries, 10 s apart), and read back by Proxmox's own ranged agent file-read
+tries, 10 s apart, but one for an exec that ran to its deadline), and read back by Proxmox's own ranged agent file-read
 (offset, count, decode=0), 512 KiB a call, joined as bytes, checked against
 the copy's length and decoded as UTF-8 once; a copy past 64 MiB is refused
 before its first read, and the copy is removed once read (one the agent
