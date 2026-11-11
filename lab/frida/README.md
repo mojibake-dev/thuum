@@ -360,6 +360,17 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   own console placeatme) in the same run. A launch reads as a jump in vel per push (the push's impulse), a huge massInv (a wrong mass
   after the Dynamic set) or vel growing between pushes (something else moving it). The field offsets are HYPOTHESES until the native
   basket's lines read sane (massInv about 0.3 to 1, a nudge's speed under 100). 2026-10-30.
+- prop-impulse.js: ADR-071 rung 0's impulse read (docs/research/physics-leg-2026-11-11.md H2, H3, H4): which engine call pushes a
+  prop at a spell's or a shout's impact and what names its cause. TESHavokUtilities::AddExplosionImpulse (26005) and
+  ScaleGameplayImpulseForce (26004) are replaced by pass-throughs of their CommonLibSSE-NG signatures, so the forces in xmm2 and xmm0
+  print (REPLACE false attaches them instead, no force); bhkRigidBody::SetLinearImpulse (78091) is attached. Each row carries the
+  body's reference, its motion facts before and after, the HitData's handles resolved, the thread against Main's, and the innermost
+  bracket on its thread: Explosion's Update and FindTargets (209940's slots 0xA3, 0xA4) and every projectile class's ProcessImpacts
+  (slot 0xAC; AddImpact, 0xBD, a row per impact). For POLL_MS (2000) after each call, every named body and its island's members are
+  sampled once a game frame inside the player's own update (rock-motion-trace.js v1.2's idiom): velocity (the body's +0x230, game
+  units by bhkWorld's scale, 188105), motion type, the deactivation counters, the island's pointer, size and active bit, its members
+  by reference on change. Run on both seats through x-prop-blast v3: the caster's rows read H2, the watcher's H3, the island rows H4.
+  Ids by `just addr`, 2026-11-11; 1.6.1170 only. Written 2026-11-11, never run.
 - cloak-hostile.js: whether a hostile creature's engine counts the player as
   hostile before any blow (docs/verbs/npc-stream.md slice 6, H-53h). Hooks
   Actor::IsHostileToActor and logs self, other, the answer and the caller's
