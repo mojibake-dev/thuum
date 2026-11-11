@@ -5170,7 +5170,14 @@ Decision.
    12) is the epoch, conservation (no record under the floor or outside a cell), the speed cap and Rust bounds on every relayed
    float.
 
-7. Every player runs the same physics fix: Display Tweaks' physics fix in the shared mod layer, laid after playtest 51.
+7. Every player runs the same physics fix, and that is already true: the shared layer's row sse-display-tweaks-0.5.16@1.6.1170
+   (lab/layer/essentials.tsv:89) lays SSEDisplayTweaks.dll with Eli's own SSEDisplayTweaks.ini on every seat, [HAVOK] Enabled
+   with DynamicMaxTimeScaling between MinimumFramerate 60 and MaximumFramerate 240 (apocrypha's read of the staging file,
+   2026-11-11). The dynamic mode sets the physics step to the frame's own between 60 and 240 fps and holds it at 1/60 below
+   60, so a 47 fps seat steps at 1/60 and a 144 fps seat at 1/144 (HYPOTHESIS: the rest difference the skeptic named, about
+   0.2 units a step at either rate). Rest is therefore read framerate-independently, by the engine's own deactivation
+   (decision 6), never by a per-frame stir test; nothing is laid. Capping every player at 60 for one step rate would cost
+   Eli's 144 fps and stays Eli's call.
 
 8. Traps' bodies (D-S3) are unified under these rules, their scenarios kept green and unweakened.
 
