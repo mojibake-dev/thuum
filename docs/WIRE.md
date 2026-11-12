@@ -733,6 +733,83 @@ ARMO, BOOK, INGR, ALCH, SCRL, SLGM, WEAP, MISC, KEYM, LIGH) beside MSTT and ACTI
 script set's form has no lifetime: it stands until a Delete row. Fixture 33-CreateActor-3 (an XMarker 0x3b placed at the cobweb,
 placedBy its reporter).
 
+### PropTransform (t 58, wire id 66), PropClaim (t 59, wire id 67) and PropOwner (t 60, wire id 68): the prop stream (prop-physics, M3 and ADR-071's physics rungs 1 to 3)
+
+The three messages since fork m3-prop-physics 879f9e88 (SCHEMA_VERSION 21, 2026-10-29: PropTransform v1 {refr, pos, rot,
+asleep}, PropClaim v1 {refr, touch}); PropOwner's player 0 since physics rung 1's 8d6f92f1 (SCHEMA_VERSION 45) and the v2 shapes
+since rung 2's e8d2251d (SCHEMA_VERSION 46), each bump Eli's D-PH1 A (ADR-071's amendment of 2026-11-11: a bump at each rung that
+changes what an older peer accepts, since a client validates every server message and drops a refusal into a counter without a
+word, and the handshake's protocol id is the one loud guard). Both live on fork branches, m4-physics-1-arbitration d9da7da3 and
+m4-physics-2-sample cc5c44f3 (rung 1's head merged in), unmerged at this writing: canon carries SCHEMA_VERSION 44 with v1's
+shapes and no player 0. Rung 3 (m4-physics-3-impact) changes no shape. The rule and its reasons are docs/verbs/prop-physics.md's.
+
+PropTransform v2 (id 66, MsgType 58), both directions. Client to server from the one seat that simulates the prop: unreliable, at
+most once per prop per 100 ms while the body moves and at least every 500 ms while it is awake or held (the heartbeat, D-PH4 B),
+and one more, reliable, at the read where the engine reports the body's island deactivated (asleep true; a held body never rests
+on the wire). Server to client: the same bytes relayed to the prop's other listeners, unreliable while awake and reliable at the
+rest; a clamped rest re-encoded at the clamped point, reliable; and the server's record answer, reliable, to one seat whose sample
+it refused, right after the word on the ordered channel. `{ refr: u32 (never 0), epoch: u32 (the owner epoch of the word the
+sender holds; 0 for a prop that never had one), seq: u16 (the sender's sample number within (refr, epoch), from 1, wrapping 65535
+to 1; 0 is the record answer), tMs: u32 (the owner's own session clock at the read, ms; 0 in the record answer), pos: [f32; 3]
+(engine units, where the body is drawn), rot: [f32; 3] (Euler degrees, the reference's convention), lin: [f32; 3] (engine units a
+second, the world's frame), ang: [f32; 3] (radians a second, Havok's own, the world's frame), asleep: bool, held: bool (the
+sender's engine holds the body: Game.getPlayerGrabbedRef names it), bones: [{ pos: [f32; 3], quat: [f32; 4] ([x, y, z, w] as
+Havok keeps one) }] (at most 64, cap::PROP_BONES; empty for an item, until a world object's parts at rung 4 and a dead actor's
+bones at rung 5) }`. The record answer is the record's transform at the prop's epoch: seq 0, tMs 0, no velocity, no bones,
+asleep while no live row moves the prop, held as the row's grab, each angle brought within one turn. Validator
+(check_prop_transform): a non-finite value E_VAL_NONFINITE; pos or a bone outside WORLD_ABS_MAX E_VAL_OUT_OF_WORLD;
+E_VAL_RANGE for a refr of 0, an angle past 360 degrees, a lin longer than PROP_MAX_LIN_UNITS_PER_S 6,000 (wire-bridge's test pins
+it to wire-rules' PROP_MAX_SPEED_UNITS_PER_S), an ang longer than PROP_MAX_ANG_RAD_PER_S 1,000 (UNMEASURED), asleep and held
+together, a bone more than PROP_BONE_REACH_UNITS 512 from pos or a quaternion more than PROP_QUAT_NORM_SLACK (1%) off unit
+length; from a client also a seq of 0 (validate's arm after validate_server's shape, so the record answer's mark cannot be
+forged); the prop budget, 128 at once and then 96 a second (UNMEASURED, E_VAL_RATE). Byte cap 2 KiB (1,862 bytes at the longest
+with 64 bones, pinned by a_prop_sample_and_claim_at_their_longest_fit_their_caps); an item's sample is at most 70. Safe to receive
+twice: a repeat is Late. R2: the owner's Havok computes; held, tMs, lin and ang are its word, bounded here and recorded unjudged.
+
+PropClaim v2 (id 67, MsgType 59), client to server, reliable: `{ refrs: [u32] (one to sixteen, cap::PROP_CLAIM_REFRS; none 0,
+each once), touch: u8 (0 a contact of the player's character controller, 1 a grab sent while the claimant's engine holds the
+body, 2 a drop or a hold let go, 3 an impulse whose cause the claimant owns, one claim per impact since rung 3, or a trap body
+its seat's own script set moving) }`. Validator (check_prop_claim): E_VAL_RANGE for no reference, a 0, a reference twice or a
+touch past 3; the claim budget charges one token a message, 8 at once and then 2 a second (UNMEASURED). Byte cap 96 (83 at the
+longest). Each reference is judged alone, with its own outcome, word and line. Safe to receive twice: a repeated claim on a row it
+granted is Same. R0: the server arbitrates.
+
+PropOwner (id 68, MsgType 60), server to client, reliable: `{ refr: u32 (never 0), player: u32 (the seat that simulates; 0 the
+host of the cell the prop's record stands in, whoever that is when the word is read), epoch: u32 (up at every word) }`.
+Validator (check_prop_owner): E_VAL_RANGE for a refr of 0; the transport refuses it from a client by direction. Byte cap 32. Its
+senders: a grant, to every listener; the return to the host, player 0 at the next epoch, at any owner's asleep sample (the host's
+own and a holder's included), at a clamped rest, at the owner's departure and at its unload of the prop's cell; the host's wake of
+a resting prop, naming the host by id; the answer to a refused claim or sample, to its sender alone, once per prop per second; and
+a late listener's word right after the prop's create word whenever its epoch is above 0. A word with an epoch below one already
+applied is dropped and an equal one replaces (a fencing token, one counter per prop: the answer repeats the standing word, so a
+seat that applied it wrongly heals). Ownership changes by this word alone; neither end runs a timer on it.
+
+The rule's judgment (wire-rules props.rs through wire-bridge rules.rs; every E_PROP_* code is a server log line, never a wire
+reason, said at most once per 10 s per seat for its samples and claims together, every refusal counted in the stream counters). A
+claim, per reference: E_PROP_UNKNOWN, E_PROP_KIND, E_PROP_RANGE, E_PROP_UNSEEN (the claimant no listener of the prop: the server
+never sent its game the prop or told it the prop is gone; unanswered) and E_PROP_OUTSIDE (the record in no cell); then the rule's
+E_PROP_HELD, E_PROP_MOVING and E_PROP_AWAY, each answered with the word. A sample: E_PROP_UNKNOWN, E_PROP_KIND (bones on any row
+today, and a world body no impulse claimed), E_PROP_RANGE, E_PROP_FAR (a trap body's tether) and E_PROP_UNSEEN (a wake from no
+listener), all unanswered; then, in the rule's order (ADR-066 decision 4: by the epoch first, never by the position),
+E_PROP_OUTSIDE, E_PROP_FROZEN, E_PROP_AWAY (unanswered), E_PROP_STALE (unanswered when its sender is the prop's live owner),
+E_PROP_FUTURE, E_PROP_NOT_OWNER, Late (counted, no line, no answer), and the step budget: E_PROP_STEP for an awake sample past it,
+the clamp for an asleep one (its sender hears the record, unlimited); each answered refusal of a sample gets the word and then the
+record answer. A pickup (Activate on an item reference) reads the same rows, refused E_PROP_HELD or E_PROP_MOVING and answered
+with the word. Retired at rung 1: E_PROP_CELL and E_PROP_REACH; never built: E_PROP_GRAB_CAP (D-PH3 A).
+
+Fixtures (wire-json, rule 4: each with its C++ struct in one commit, since WireJsonContractTest reads every fixture through the
+C++ MessageSerializer): 58-PropTransform-0 to -4 (an awake sample, a rest, a held sample, the record answer, a sample with two
+body poses), 59-PropClaim-0 to -2 (a contact, a drop, the six Riverwood Trader cabbages 0x1c0c6 to 0x1c0cb by touch 3) and
+60-PropOwner-0 to -2 (-2 player 0 at epoch 2), read through PropTransformMessage.h, PropClaimMessage.h and PropOwnerMessage.h;
+every float an exact f32; v1's two sample shapes no longer decode. The client's interfaces are propTransformMessage.ts,
+propClaimMessage.ts and propOwnerMessage.ts. difftest's prop-physics session (difftest/sessions/prop-physics.yaml at cc5c44f3): c1
+reports the spawn's cell loaded and hosts it; drops a dagger and an ingot and claims both in one PropClaim of two references;
+streams v2 samples, one of them repeated (Late: nothing relayed, nothing answered); the two rests return both drops with player-0
+words at epoch 2; then a stale sample from c1 and a NotOwner one from c2, each answered with the word and the record at seq 0.
+Every row is declared wire-only (the legacy stack knows no MsgType 47, 58, 59 or 60). A pickup's refusal is no row here (rung 1's
+d9da7da3: the legacy C++ fakeclient resolves no `{{created:<baseId>}}` placeholder, and difftest compares a client's exit and
+sends strictly); it is proven at T0 and T3.
+
 ### PlacedRequest (t 61) and PlacedReport (t 62): the caster's engine names the pose (spell-placed-object, M3; ADR-057 shape A, D70)
 
 Shape C's fixed step fell at T3 (D70: the engine stands Raise Wall 206 ahead along a heading the record's yaw does not carry), so
