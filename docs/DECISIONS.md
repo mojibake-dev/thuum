@@ -5248,6 +5248,14 @@ never; the shout's cone pushed from outside every hooked frame, so its cause is 
 it). That a zero result zeroes the push is HYPOTHESIS until a replacement returns 0 in a run; an arrow's push did not follow the
 result (no 78091, the bucket leaving about 66 times faster than the result gives), so an arrow needs its own read.
 
+Amended (Eli in session, 2026-11-12 about 04:3xZ, recorded 04:31Z by thuum-fa; asked whether rung 3 fits playtest 51, Eli chose
+"51 waits for rung 3", over "not in 51" and the smaller ladder): playtest 51 waits until rungs 1, 2, 3a and 3 are merged, so the
+cabbage cart test (b-prop-impulse) is in it; with Eli's earlier "fold the last of m3 into playtest 51" and "if it's done make
+them one test", 51 is one sitting for the current canon, train 52, M3's close rows and the physics leg through rung 3, the
+ladder's P1 and P2 folded into it. Decision 7's cap (apocrypha/layer-havok-cap 50cb6ec2, its proof x-havok-cap-read v2
+65e70e1a) lays before rung 1's merge instead of after 51, since rung 1 rests on havok-props.md's E10 (rest by deactivation), which
+reads only under the cap. Rung 2 stays in (Eli did not take the smaller ladder).
+
 Amends: ADR-064 decision 7 (dated note under it), ADR-063's props note (accepted under it), ADR-058's slices (slice two kept as a
 derived class; slice three is rungs 5 and 6), ADR-067 decision 4 (its final sample is the asleep sample; the built ChangeForm
 apply is the record). W3 stays Eli's at the time: a rewrite of b-prop-push's step 27 if the drop read calls for one (decided
