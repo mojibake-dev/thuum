@@ -255,3 +255,13 @@ call's None return (H-F1, marked so in the code, ScriptNatives.cpp:2223-2240 at 
 build): a call made inside an active effect whose caster is the seat's own player counts as that seat's (ADR-068 decision 6) in
 the seam's owner test (OwnedHere, ScriptNatives.cpp:585-596 at f6ca339d), with the placed helper's record (ScriptPlacement, W3's
 mechanism-only row) settled in its design; b-second-hand stays pending until that fix reads green.
+
+The fix, built in train 52 (fork m4-train-52 ea6da0a1, Fix 2, D-H1 B; in c3f9d175, its stage after playtest 51): the gate's effect
+test moves into one shared function, Frida::PlayersEffect, which the seam asks too. Inside an effect this seat runs for its own
+player, a PlaceAtMe of an activator, a static or a light (the census's helper kinds that simulate nothing) runs whatever its
+subject's owner, and what it places is a local helper that never crosses: nothing is recorded (ScriptPlacement stays
+mechanism-only, since a server copy would double the target seat's own helper), and an action row on a helper runs under the
+script-action mark. No wire change. Known limit: on the target's own seat TheBox sits on that seat's own player, an owned subject,
+so only TheShooter is a helper there; TheBox's latent Disable and Delete keep the owner judgment. The read: x-effect-helper
+(lab/.cache/drafts/train52, sha1 6516c470), b-second-hand's frame with its helper lines claimed, and b-second-hand itself named in
+train 52's gate, where it must read green; its pending line in lab/gate.yaml comes out in its own commit after that green.
