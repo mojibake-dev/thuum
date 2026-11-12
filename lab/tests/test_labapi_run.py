@@ -825,6 +825,34 @@ class ClientLogs(RunTests):
         self.assertIn(held, body["notes"])
         self.assertEqual(self.services.runner.seats["c1"].force, f"its last run ({run_id}) ended in a fault: {held}")
 
+    def test_a_seats_named_log_comes_with_its_seats_one_fetch(self):
+        """c1-console.log read as a client called c1-console ("c1-console is unmanaged or unmapped; log not fetched"),
+        and eight committed scenarios list it beside c1.log: a seat's named log resolves to its seat's fetch, which keeps
+        c1.log, c1-driver.log and c1-console.log, made once however many of them the scenario names."""
+        pve = self._managed_c1()
+        logs = {"c1.log": "platform log\n", "c1-driver.log": "driver\n", "c1-console.log": "console\n"}
+        for name, text in logs.items():
+            pve.files[f"C:\\sky-lab\\{name}"] = text
+        run_id, body = self._run(SOLO_WITH_LOG.replace("artifacts: [server.log, c1.log]",
+                                                       "artifacts: [server.log, c1.log, c1-console.log, c1-driver.log]"))
+        self.assertEqual(body["verdict"], "green", body)
+        for name in logs:
+            self.assertEqual(body["artifacts"].count(name), 1, body["artifacts"])
+        self.assertFalse([n for n in body["notes"] if "unmanaged or unmapped" in n], body["notes"])
+        copies = [c for c in pve.calls if c[0] == "exec" and "[IO.File]::Open($src, 'Open', 'Read', 'ReadWrite')" in " ".join(c[2])]
+        self.assertEqual(len(copies), 3, "each log copied once")
+        # the console log named alone brings the seat's same fetch
+        for name, text in logs.items():
+            pve.files[f"C:\\sky-lab\\{name}"] = text
+        run_id, body = self._run(SOLO_WITH_LOG.replace("artifacts: [server.log, c1.log]", "artifacts: [c1-console.log]"))
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertEqual(sorted(n for n in body["artifacts"] if n in logs), sorted(logs))
+
+    def test_a_seats_named_log_on_an_unmanaged_seat_is_one_note(self):
+        run_id, body = self._run(SOLO_WITH_LOG.replace("artifacts: [server.log, c1.log]", "artifacts: [c1.log, c1-console.log]"))
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertEqual([n for n in body["notes"] if "unmanaged or unmapped" in n], ["c1.log: c1 is unmanaged or unmapped; log not fetched"])
+
     def test_a_log_whose_source_is_not_there_is_a_note_untried_again(self):
         """A source that is not there is said by the copy itself, `missing <path>`, and no try finds it, where three
         tries 10 s apart spent about 25 s on it (the fresh review of e8d8de9b, nit 5): one copy exec, then a note naming

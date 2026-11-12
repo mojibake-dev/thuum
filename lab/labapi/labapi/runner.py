@@ -1952,10 +1952,16 @@ class Runner:
             r = await asyncio.to_thread(self.system.run, self._compose("logs", "--no-color", "--since", rec.started_at, self.s.compose_service))
             (rec.dir / "server.log").write_text(r.stdout)
             rec.artifacts.append("server.log")
+        # a seat's logs come in one fetch whatever the scenario names them: <client>.log, or a log that fetch keeps
+        # beside it (<client>-console.log, <client>-driver.log), which read as a client called "c1-console" and gave
+        # "c1-console is unmanaged or unmapped" notes; eight committed scenarios list c1-console.log beside c1.log
+        fetched: list[str] = []
         for name in wanted:
             if name.endswith(".log") and name != "server.log":
-                client = name[:-4]
-                await self._client_log(rec, client, name)
+                client = self._log_seat(name, rec.scenario.clients)
+                if client not in fetched:
+                    fetched.append(client)
+                    await self._client_log(rec, client, f"{client}.log")
         if "screenshots" in wanted and (rec.dir / "screenshots").is_dir():
             rec.artifacts.append("screenshots")
         if "trace" in wanted:
@@ -2001,6 +2007,16 @@ class Runner:
         unknown = [n for n in wanted if n not in ("server.log", "screenshots", "world-diff", "pcap", "trace") and not n.endswith(".log")]
         for n in unknown:
             rec.notes.append(f"unknown artifact {n!r} ignored")
+
+    @staticmethod
+    def _log_seat(name: str, clients: list[str]) -> str:
+        """The client whose log fetch keeps the artifact `name`: <client>.log's own, else one of the run's seats it is
+        named after, <client>-<log>.log (its console or driver log, which the fetch keeps beside <client>.log), the
+        longest such name; any other name stands for a client of its own, as every .log entry did."""
+        stem = name[:-4]
+        if stem in clients:
+            return stem
+        return max((c for c in clients if stem.startswith(c + "-")), key=len, default=stem)
 
     def _hung_clients(self, rec: RunRecord) -> list[str]:
         """The clients whose seat stopped answering: the board's own timeout, a dump-state before

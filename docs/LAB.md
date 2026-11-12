@@ -757,6 +757,11 @@ run recreated it); lab-up and lab-down keep theirs under
 results/server-before/. After a quiet spell (BEFORE_LOGS_QUIET_S, 600 s) a
 run also keeps each client's Skyrim Platform log as <client>-before.log
 before rolling the clone back; inside a sweep nothing is fetched.
+A scenario's artifacts list <client>.log for a seat's logs: its one fetch
+keeps <client>.log, <client>-driver.log and <client>-console.log, and a
+seat's named log listed itself (c1-console.log) brings the same fetch, made
+once however many of them the list names; such a name once read as a
+client of its own ("c1-console is unmanaged or unmapped").
 Each client log (<client>.log, <client>-driver.log, <client>-console.log,
 <client>-before.log, <client>-launch.log, and a relaunch step's
 <client>-relaunch-<step>.log and -console.log) is fetched as a Frida trace

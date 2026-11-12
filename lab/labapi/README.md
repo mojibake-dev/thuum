@@ -37,7 +37,10 @@ holds open rolls the seat back: in the same run's reset when the fetch came
 before it, else at its next run). A client log (`<client>.log`, `-driver.log`,
 `-console.log`, `-before.log`, `-launch.log`, a relaunch's
 `-relaunch-<step>.log` and `-console.log`) comes back the same way, since the
-game holds its logs open for writing; one not fetched is a note ending
+game holds its logs open for writing. `c1.log` in a scenario's artifacts
+brings c1's one fetch, its driver and console logs with it, and so does a
+seat's named log listed itself (`c1-console.log`, `c1-driver.log`), made once
+however many of them are listed. One not fetched is a note ending
 "(log fetch)" with its code, E_PVE_* or E_RUN_LOG_FETCH, never a failure. The
 SKSE folders' logs are still copied by Copy-Item and read whole. The verdict is green only
 when every assertion held and no step timed out; red when an assertion
