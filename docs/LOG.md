@@ -9599,3 +9599,11 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   such a holder (the game's refusals in 193821, 194559 and 195437 come from something else); both to thuum-fa. A real run
   instead: smoke-two-players 20261112-025117 green on 58502b08, no "(log fetch)", E_PVE or held note, every client log whole
   and valid UTF-8. Both clones rolled back after it.
+- (numidium) lab-api 58502b08's real-seat check, v2 (thuum-fa's logfetch_seatcheck.py 0ec4fd0c, its holder logging itself,
+  Copy-Item a reported read, one restart): PASS on both seats under one hold, 03:07Z to 03:10Z. A 6,292,690-byte stand-in
+  held open for writing by a second process, an e-acute or a euro across each of its 12 range boundaries, came back
+  byte-exact through _fetch_client_file in 3.3 s and 13 ranges on each seat (about 1.8 MB/s), with no note, no fault and
+  nothing left; a missing source made the one "is not there (log fetch)" note in 0.6 s; log-count read both 6 MB logs in
+  6.5 and 6.6 s, 24 lines, "6292690 read of 6292690 copied" twice; the cleanup confirmed. v1's INCONCLUSIVE was a liveness
+  false negative: on both seats the first read's command-line match found no holder while its pid ran and its log stood
+  at "holding". Both clones rolled back after it.
