@@ -328,6 +328,10 @@ class Settings:
     # seconds between one seat's GPU reset (a VM stop or start) and another's (proxmox.GuestControl, core's
     # dual-reset finding of 2026-10-30: every wedge came with both lab cards reset within seconds)
     reset_stagger_s: float = 20.0
+    # how long a guest agent call Proxmox answers "QEMU guest agent is not running" is asked again before it fails
+    # (proxmox.GuestControl._agent): that answer is its 3 s guest-ping unanswered by a busy agent, not a stopped one
+    # (core's host journal, 2026-11-12, daily on both seats)
+    agent_busy_s: float = 30.0
     # how a client seat's VM stops before a rollback (proxmox.GuestControl): "stop" at once, or "shutdown" (an ACPI
     # shutdown PVE forces to a stop after seat_shutdown_timeout_s), for the night's question of 2026-10-30 whether a
     # running NVIDIA driver pulled out from under its GPU matters to the wedges
@@ -435,6 +439,7 @@ class Settings:
             relaunch_rollback_every=int(_env("LAB_RELAUNCH_ROLLBACK_EVERY", str(d.relaunch_rollback_every))),
             relaunch_heartbeat_timeout_s=float(_env("LAB_RELAUNCH_HEARTBEAT_TIMEOUT_S", str(d.relaunch_heartbeat_timeout_s))),
             reset_stagger_s=float(_env("LAB_RESET_STAGGER_S", str(d.reset_stagger_s))),
+            agent_busy_s=float(_env("LAB_AGENT_BUSY_S", str(d.agent_busy_s))),
             seat_stop=_env("LAB_SEAT_STOP", d.seat_stop).strip() or d.seat_stop,  # unset or empty: stop
             seat_shutdown_timeout_s=int(_env("LAB_SEAT_SHUTDOWN_TIMEOUT_S", str(d.seat_shutdown_timeout_s))),
             time_scale=float(_env("TIME_SCALE", str(d.time_scale))),

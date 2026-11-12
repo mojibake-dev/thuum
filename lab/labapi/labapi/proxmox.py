@@ -18,6 +18,12 @@ from .guests import Guest
 
 FILE_READ_MAX = 16 * 1024 * 1024  # the guest-agent file-read cap
 FILE_READ_PAUSES = (2.0, 5.0)  # before a file-read's second and third tries, after a guest agent's "got timeout"
+# Proxmox's answer to an agent call whose guest-ping, sent before the call with a 3 s timeout, went unanswered
+# (qemu-server's PVE/QemuServer/Agent.pm:83, qga_check_running): a busy qemu-ga, which serialises its commands, not a
+# stopped one. core's host journal, 2026-11-12: daily on both seats, an artifact pass the usual cause, every agent call
+# (exec, exec-status, file-read) meeting it. GuestControl._agent asks an exec or a file read so answered again; the
+# exec loop already asks exec-status again whatever it answers (ProxmoxerGuests.exec)
+AGENT_BUSY = "QEMU guest agent is not running"
 
 # Self-service snapshots and promotes of the lab clients (thuum-mundus's
 # recipe and guardrails, 2026-10-05, mirroring `sky-lab client baseline` and
@@ -70,8 +76,12 @@ class GuestControl:
     guest except status, and refuses files past the 16 MiB cap."""
 
     def __init__(self, backend: ProxmoxGuests, reset_stagger_s: float = 0.0, seat_stop: str = "stop",
-                 seat_shutdown_timeout_s: int = 60):
+                 seat_shutdown_timeout_s: int = 60, agent_busy_s: float = 0.0):
         self._b = backend
+        # how long an agent call answered AGENT_BUSY is asked again before it fails as it did (Settings.agent_busy_s; 0
+        # in the tests and fakes): lab-api's rule from 58502b08 read that answer as a dead agent and skipped the seat's
+        # later log fetches, which cost runs their artifacts on a seat that was only busy (_agent)
+        self._busy_s = agent_busy_s
         # how a client seat's VM stops (Settings.seat_stop): "stop" pulls it at once, as every rollback has since the
         # first runner (c87d63a, 2026-09-24, when a rollback discarding the disk made a clean shutdown look worthless);
         # "shutdown" lets Windows and the NVIDIA driver quiesce the GPU before vfio resets it, an ACPI shutdown PVE forces
@@ -105,6 +115,40 @@ class GuestControl:
             raise
         except Exception as e:
             raise ProxmoxError(f"{code}: {guest.name}: {type(e).__name__}: {str(e)[:200]}") from e
+
+    def _agent(self, code: str, guest: Guest, fn, *args, deadline: float | None = None):
+        """One guest agent call through _call, patient with a busy agent: Proxmox answers AGENT_BUSY before the call
+        reaches the agent, so the call is asked again, 1 s after and then twice as long each time, until it gets through
+        or agent_busy_s from the first ask is spent (`deadline`, when a caller's own retries share one: _agent_read),
+        when it fails as it did, saying how long. Each ask's own first step is Proxmox's guest-ping, so the ask that
+        finds the agent answering is the one that runs the call, with no ping of lab-api's beside it to wait in a busy
+        agent's queue. Any other error is the caller's at once (a "got timeout" is the agent's own answer, asked again
+        by _agent_read and the exec loop), as is an exec that started and then ran out its time on a busy exec-status
+        (ProxmoxerGuests.exec's "did not exit in"), which a second ask would run twice (the fresh review of 5771141b,
+        finding 3)."""
+        if deadline is None:
+            deadline = time.monotonic() + self._busy_s
+        pause, tries = 1.0, 1
+        while True:
+            try:
+                return self._call(code, guest, fn, *args)
+            except ProxmoxError as e:
+                if AGENT_BUSY not in str(e) or "did not exit in" in str(e):
+                    raise
+                left = deadline - time.monotonic()
+                if left <= 0:
+                    if tries == 1:
+                        raise
+                    raise ProxmoxError(f"{e} (still busy after {tries} tries over {self._busy_s:g} s)") from e
+                log.info("%s on %s: its guest agent is busy; asked again in %.1f s", code, guest.name, min(pause, left))
+                time.sleep(min(pause, left))
+                pause, tries = pause * 2, tries + 1
+
+    def agent_ping(self, guest: Guest) -> bool:
+        """Whether the guest's agent answers one guest-ping now, Proxmox's own, never asked again: a busy agent reads
+        False (Runner._removed's window waits on it)."""
+        self._managed(guest, "ping the guest agent of")
+        return bool(self._call("E_PVE_AGENT", guest, self._b.agent_ping, guest))
 
     def _card_reset(self, guest: Guest, code: str, fn) -> None:
         """A client seat's stop or start (its GPU's reset), after the other seat's last by reset_stagger_s."""
@@ -154,13 +198,16 @@ class GuestControl:
         self._managed(guest, "exec into")
         if guest.kind != "qemu":
             raise ProxmoxError(f"E_PVE_EXEC: {guest.name} is not a qemu guest; the guest agent is qemu only")
-        return self._call("E_PVE_EXEC", guest, self._b.exec, guest, command, timeout)
+        return self._agent("E_PVE_EXEC", guest, self._b.exec, guest, command, timeout)
 
     def _agent_read(self, guest: Guest, path: str, fn, *args):
-        """One agent file-read of `path` through the backend's `fn`, the whole file's or a range's."""
+        """One agent file-read of `path` through the backend's `fn`, the whole file's or a range's. Its tries share one
+        busy window (_agent's `deadline`), set before the first, where each got a fresh one (the fresh review of
+        5771141b, finding 2)."""
+        deadline = time.monotonic() + self._busy_s
         for pause in (*FILE_READ_PAUSES, None):
             try:
-                return self._call("E_PVE_FILE", guest, fn, guest, path, *args)
+                return self._agent("E_PVE_FILE", guest, fn, guest, path, *args, deadline=deadline)
             except ProxmoxError as e:
                 # A busy guest agent answers a read's open, read or close with "got timeout" now and then
                 # (guest-file-read on 711, guest-file-close on 712, 2026-10-17: train-23's smoke lost
