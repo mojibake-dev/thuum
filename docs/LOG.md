@@ -9623,3 +9623,30 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   hand-off, not taken). Eli's "if it's done make them one test": playtest 51 runs on canon c3f9d175 with 52's checks. On
   the stage lab-api 58502b08's new held-copy fault misfired twice on c1's log-count copies (x-console-arm, x-acting-player),
   a transient lock, costing c1 a rollback each; thuum-fa's labapi-removal-retry is its fix.
+- (numidium) The physics leg's morning on fork canon c3f9d175, train 52 merged. x-sl-aim, rung 1's premise read: v1.3
+  20261112-035558 red at its step 24 premise, the ingot placed at the marker coming to rest 162 units below the strip (both
+  engines agreed: it began inside the strip's collision and fell through once set Dynamic, thuum-fa's read of the consoles);
+  v1.4 041705 green after the anchor was raised 5 to 8 units before the placement, its bands the five reads' PARAMs.
+  lab-api aa686463 deployed at 07:37Z (labapi-removal-retry: a removal tried four times, 1 s apart, before a seat fault).
+  The 60 fps Havok cap layer staged (apocrypha/layer-havok-cap 6bc9120c, main merged in; ADR-071 decision 7, before rung 1's
+  merge): fetched 1 on both clones (the patched SSEDisplayTweaks.ini, 23,400 bytes), owned 1, pruned 0, kept 9,674;
+  smoke-two-players 20261112-075609 and x-havok-cap-read v2 075922 green; it stays staged, to merge with rung 1 in one sweep.
+  physics-3-reads merged to main f7983aa1, main into the cap 25c5ec61, and deploy-srv from it (prop-impulse.js v1.2):
+  x-prop-cone 080520 and x-prop-arrow 080858 green, rung 3's premise reads, for thuum-fa's read. Rung 1's five
+  one-question reads: x-held-touch 081535, x-moving-press 082448, x-late-word 082753 and x-login-overlap 083057 green;
+  x-two-hands 082053 red on a mixed reset (its aim premise), green on its cold rerun 083749. Their notes: a screenshot
+  sidecar still held after four tries (a seat fault, a rollback), and c1's guest agent twice "not running" mid-run, both
+  agents answering a ping after. Rung 1's T2 of f38f5249 green at 09:29Z (information: thuum-fa's read of the five found a
+  server bug, a pickup of a held or moving prop deleting it for everyone, so rung 1 gets a fix commit and a new head; its
+  stage held). x-reanimate-look-u0 v1.1 085636 red on E_RUN_GAME_LOST: c2's game crashed (EXCEPTION_ACCESS_VIOLATION at
+  41762+0x68 under a MovementControllerNPC), a caravan follower's controller and not the reanimation by thuum-fa's read
+  (HYPOTHESIS); its cold rerun follows.
+- m4-shout-once merged to fork canon 6fe5fea0 (2026-11-12T10:19Z): the gate 20261112-094619-merge-m4-shout-once,
+  20261112-094619-smoke-two-players to 20261112-101523-b-npc-caster (10 runs; the watch item b-npc-caster red at 101230 and
+  green on its relaunched rerun 101523); T2 skip on skymp-server:m4-shout-once (its server tree is canon c3f9d175's, whose
+  T2 stands); clones promoted. Verbs: shouts (D-PH8 A, Eli's "Own fix, before 51"): one report per release, keyed on the
+  recovery the release sets, so a far hit landing past reportFromHit's 1200 ms no longer relays the shout twice. Its stage
+  (09:30Z to 09:46Z, from the cap's worktree, the cap kept): x-shout-once v1.1 094158 green, REUSE_DIST_FROM=m4-train-52
+  (gitlab 20605 and skymp5-client.js built at 6fe5fea0, the branch pushed without a Windows build). b-push stays pending
+  (red by design under the essentials layer) and is read alone after. reanimate-return-read merged to main 7d4cebb2
+  (thrall-link.js v1.1, for x-reanimate-return-v1).

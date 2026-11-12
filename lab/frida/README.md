@@ -410,6 +410,16 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   'btSelfTest' reads the backtracer's reach at the first PlayerCharacter::Update; the ready row says scriptVersion '1.2'. Reading
   it (the review): a frame's label is the nearest known start below it, not its function (the helper at 0x7ed640-0x7ed89d reads as
   'Projectile slot 0xbf'); under REPLACE true only a backtrace's frame 1 is sure; SkyrimSE.exe's frames get no symbols (no PDB).
+- thrall-link.js: ADR-060's return to the caster, as amended (Eli, 2026-11-12: "thrall returns to caster obvs"), read before
+  any build (rule 8): can a fresh game take command of a living, already-reanimated thrall through the engine's own command routine,
+  with no death and no get-up? Mode trace attaches hooks only (the add check 34754, ReanimateEffect's start 34750, the command
+  routines 38798 to 38800, 39950's writes). Mode link replaces 40447 and, on the main thread inside the player's own update, runs
+  the static read's recipe on the first eligible frame: 37490(thrall, 1), then 38798(thrall, player, null); a state row every
+  STATE_MS (2000) with the thrall's life state, its commanding actor, kIsCommandedActor, the player's commanded-actor list, its
+  combat target and that target's own; 38800 at the thrall's death, then the replacement reverted. A lab experiment that writes
+  engine state on one seat, never a resident. The refresh 38799 stays off, so a lapsed command is read, not hidden. Its probe is
+  x-reanimate-return v1.1 (by path); the static read is lab/.cache/drafts/reanimate/return-to-caster-read.md. Ids by `just addr`,
+  2026-11-12; 1.6.1170 only. Written 2026-11-12, v1.1 the same day (its fresh review's fixes as written); never run.
 - body-impose.js: ADR-071 rung 0's pose read on one seat (H6): can the engine hold a dead body in a pose it is handed, within 32
   units a bone. It finds FORM's actor in the process lists, waits for its body to rest, captures each body's position and rotation
   (bhkRigidBody slots 0x33, 0x34) and the Havok block by the engine's own serializer (36016, the copy freed), then, each time the
