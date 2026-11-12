@@ -5339,6 +5339,19 @@ And, the same session, of M3's reanimation row (51's M3-2, after M3's paper clos
 never merged): "Finish it before 51": merged onto canon after train 52, its open hypotheses (ADR-060 H1 to H3) settled with its
 probe x-reanimate-claim, staged and merged while the physics rungs build.
 
+Rung 1's two unread rows and the cabbage cart's first run (Eli in numidium's session, 2026-11-12 about 15:00Z, asked as D-PH17 and
+D-PH18; recorded 15:01Z by numidium):
+- D-PH17, the docs/engine/havok-props.md rows rung 1 rests on with no read on any seat, E13's weight limit (grabObjectWeight; the
+  rest of E13 confirmed) and E32 (a stalled stream: the owner's game dead mid-flight, A7's known limit): "Check both before
+  merging" (over declaring both rung 1 limits, and over declaring E13 and reading E32 if in time). Rung 1 merges, with the cap,
+  only once both read on both screens, as decision 7's amendment of ADR-064 says: E13 by a short pick-up probe of a body over the
+  weight limit, E32 by x-prop-stall v1.1 on lab-api's stop-first relaunch {until: stopped} (the kill first, the step back at the
+  kill, the outgoing logs and the new game's start behind it).
+- D-PH18, the first run of Eli's cabbage cart scenario b-prop-impulse v1.2: "Yes, in rung 3's stage" (over a run of its own before
+  rung 3's merge gate). By path in rung 3's stage after x-prop-impact v1.3 and x-prop-blast v4.2, the parts it is assembled from
+  (ADR-064 amendment B), its relaunch lever (c2's propBodyReadLog) included; its green lets it be committed alone for Eli's review
+  (rule 13) before the merge.
+
 Amends: ADR-064 decision 7 (dated note under it), ADR-063's props note (accepted under it), ADR-058's slices (slice two kept as a
 derived class; slice three is rungs 5 and 6), ADR-067 decision 4 (its final sample is the asleep sample; the built ChangeForm
 apply is the record). W3 stays Eli's at the time: a rewrite of b-prop-push's step 27 if the drop read calls for one (decided
