@@ -111,6 +111,10 @@ class FakeProxmox:
             if "Write-Output" in " ".join(command) and self.exec_result.exitcode == 0:
                 n = len(self.files[copied.group(1)].encode("utf-8"))
                 return ExecResult(0, f"{n} {n}\r\n", "")
+        # log-count's tee copy, whose else branch says a tee that is not there (Runner._log_count)
+        absent = re.search(r"\} else \{ Write-Output 'missing ([^']+)' \}", " ".join(command))
+        if absent and not (copied and copied.group(1) in self.files):
+            return ExecResult(0, f"missing {absent.group(1)}\r\n", "")
         # its else branch: a source not yet written leaves an empty copy (a frida script's .log before any line), whose
         # lengths a frida trace's copy prints after both branches (Runner._frida_trace), where log-count's prints none
         empty = re.search(r"Set-Content -Path '([^']+\.copy)' -Value ''", " ".join(command))

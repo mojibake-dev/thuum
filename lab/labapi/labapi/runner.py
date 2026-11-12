@@ -1251,7 +1251,10 @@ class Runner:
         before the tee) counts as empty. The note carries each log's bytes three ways: the file's length on the
         seat when the copy opened it, the copy's length and what lab-api read of the copy, since a copy after a
         plain relaunch counted 0 for a line the run's own artifact holds (b-puzzle-relay 20261110-135219 and
-        135510, step 24; the cold rollback's 135732 counted it), and the three numbers say where the bytes went."""
+        135510, step 24; the cold rollback's 135732 counted it), and the three numbers say where the bytes went.
+        The copies come back as the run's logs do (_seat_copy, _read_back: ranged reads, decoded once, each copy removed
+        once read, one the agent holds open the seat's fault), where the logs were read whole into copies nobody
+        removed or checked, so a read that timed out leaked a handle unseen (the fresh review of e8d8de9b, nit 4)."""
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
             return True, f"log-count skipped: {client} is unmanaged or unmapped"
@@ -1267,6 +1270,7 @@ class Runner:
         texts: list[str] = []
         byte_notes: list[str] = []
         for src, suffix in ((self.s.client_driver_log, ""), (f"{game_dir}\\{self.s.client_console_log}", "-console")):
+            which = "console log" if suffix else "Skyrim Platform log"
             copy = f"{self.s.client_lab_dir}\\logcount-{index:03d}{suffix}.log.copy"
             # the source's length at the open and the copy's after it, printed for the note (single quotes only: the
             # guest agent's argument passing strips double quotes)
@@ -1274,28 +1278,23 @@ class Runner:
                     f"$d = [IO.File]::Create('{copy}'); $s.CopyTo($d); $m = $d.Length; $d.Close(); $s.Close(); "
                     f"Write-Output ([string]$n + ' ' + [string]$m)")
             if suffix:
-                read = f"if (Test-Path '{src}') {{ {read} }} else {{ Set-Content -Path '{copy}' -Value '' -NoNewline }}"
+                # a tee that is not there says so, and counts as empty with no try repeated
+                read = f"if (Test-Path '{src}') {{ {read} }} else {{ Write-Output 'missing {src}' }}"
             cmd = ["powershell", "-NoProfile", "-Command", read]
-            text, why, sizes = None, "", None
-            for attempt in range(3):
-                try:
-                    res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
-                    if res.exitcode == 0:
-                        got = re.search(r"(\d+) (\d+)\s*$", res.out or "")
-                        sizes = (int(got.group(1)), int(got.group(2))) if got else None
-                        text = await asyncio.to_thread(self.control.file_read, g, copy)
-                        break
-                    why = f"the copy exited {res.exitcode}: {res.err.strip()[:200]}"
-                except ProxmoxError as e:
-                    why = str(e)
-                await asyncio.sleep(1.0 * self.s.time_scale if self.s.time_scale else 0.01)
-            if text is None:
-                which = "console log" if suffix else "Skyrim Platform log"
-                return True, f"log-count: {client}'s {which} unread after three tries ({why}); no count kept"
-            texts.append(text)
-            read_bytes = len(text.encode("utf-8"))
-            byte_notes.append(f"{read_bytes} read" if sizes is None
-                              else f"{read_bytes} read of {sizes[1]} copied of {sizes[0]} on the seat")
+            try:
+                seat_n, seat_m = await self._seat_copy(g, cmd, copy)
+                # a range short of the copy's length ends the read rather than failing it: the count is the read's, and
+                # the note's three numbers show a transfer that came up short (b-puzzle-relay 20261110-135219)
+                data = await self._read_back(rec, g, copy, seat_m, f"log-count: {client}'s {which}", whole=False)
+            except SeatFileMissing:
+                texts.append("")
+                byte_notes.append("0 read")
+                continue
+            except (ProxmoxError, ValueError) as e:
+                return True, f"log-count: {client}'s {which} unread after three tries ({e}); no count kept"
+            texts.append(data.decode("utf-8", errors="replace"))
+            byte_notes.append(f"{len(data)} read" if seat_n is None
+                              else f"{len(data)} read of {seat_m} copied of {seat_n} on the seat")
         rx = re.compile(pattern)
         counts = [sum(1 for line in text.splitlines() if rx.search(line)) for text in texts]
         n = sum(counts)
@@ -2221,7 +2220,7 @@ class Runner:
                f"$n = $s.Length; $d = [IO.File]::Create('{copy}'); $s.CopyTo($d); $m = $d.Length; $d.Close(); $s.Close(); "
                f"Write-Output ([string]$n + ' ' + [string]$m)"]
         try:
-            size = await self._seat_copy(g, cmd, copy)
+            _, size = await self._seat_copy(g, cmd, copy)
             data = await self._read_back(rec, g, copy, size, name)
         except (ProxmoxError, ValueError) as e:
             rec.notes.append(f"{name}: {e} (log fetch)" if isinstance(e, ProxmoxError) else f"{name}: E_RUN_LOG_FETCH: {e} (log fetch)")
@@ -2231,7 +2230,7 @@ class Runner:
         (rec.dir / name).write_text(data.decode("utf-8", errors="replace"), encoding="utf-8")
         rec.artifacts.append(name)
 
-    async def _tried(self, g: Guest, cmd: list[str], answer, what: str) -> int:
+    async def _tried(self, g: Guest, cmd: list[str], answer, what: str) -> Any:
         """`cmd` on the seat with three tries 10 s apart, as the game check and log-count's copy try theirs (a busy
         agent's "got timeout", a file refused for a moment): `answer` reads a finished exec, None for a try that
         failed, and the first good answer is the value; three failed tries are a ValueError naming the last, and an
@@ -2258,24 +2257,27 @@ class Runner:
             why = f"exit {res.exitcode}: {(res.err or res.out).strip()[:200]}"
         raise ValueError(f"{what} failed three tries 10 s apart, the last {why}")
 
-    async def _seat_copy(self, g: Guest, cmd: list[str], copy: str) -> int:
+    async def _seat_copy(self, g: Guest, cmd: list[str], copy: str) -> tuple[int | None, int]:
         """A copy `cmd` makes on the seat, whose last stdout line is "<the source's bytes at its open> <the copy's
-        bytes>" as log-count's copy prints them, and the copy's length from that line, three tries 10 s apart (_tried).
+        bytes>" as log-count's copy prints them, and those two lengths from that line, three tries 10 s apart (_tried).
         A copy whose exec answer the agent lost (E_PVE_EXEC_LOST) ran to its end on the seat, so its length then comes
-        from the copy itself, by one length exec under the same tries. A copy shorter than its source at its open was
-        cut short, since the sources only grow (the script's .log is opened 'a', frida_script_text; frida-inject's
-        stdout appends), and is tried again as a failed one is. A copy whose exec printed `missing <path>` instead (a
-        client log's source that is not there, _fetch_client_file) is SeatFileMissing at once: no try finds it."""
-        def copied(res) -> int | None:
+        from the copy itself, by one length exec under the same tries, the source's unknown (None). A copy shorter than
+        its source at its open was cut short, since the sources only grow (the script's .log is opened 'a',
+        frida_script_text; frida-inject's stdout appends), and is tried again as a failed one is. A copy whose exec
+        printed `missing <path>` instead (a client log's source that is not there, _fetch_client_file; log-count's tee
+        not there) is SeatFileMissing at once: no try finds it."""
+        def copied(res) -> tuple[int, int] | None:
             last = _last_line(res.out)
             if res.exitcode == 0 and last.startswith("missing "):
                 raise SeatFileMissing(f"its source {last[len('missing '):]} is not there")
             got = re.fullmatch(r"(\d+) (\d+)", last)
-            return int(got.group(2)) if res.exitcode == 0 and got and int(got.group(2)) >= int(got.group(1)) else None
+            if res.exitcode == 0 and got and int(got.group(2)) >= int(got.group(1)):
+                return int(got.group(1)), int(got.group(2))
+            return None
 
-        def length(res) -> int | None:
+        def length(res) -> tuple[None, int] | None:
             last = _last_line(res.out)
-            return int(last) if res.exitcode == 0 and last.isdigit() else None
+            return (None, int(last)) if res.exitcode == 0 and last.isdigit() else None
 
         try:
             return await self._tried(g, cmd, copied, "its copy")
@@ -2283,12 +2285,14 @@ class Runner:
             cmd = ["powershell", "-NoProfile", "-Command", f"$ErrorActionPreference = 'Stop'; (Get-Item -LiteralPath '{copy}').Length"]
             return await self._tried(g, cmd, length, f"its copy's length, the copy's own answer lost ({str(e)[:120]}),")
 
-    async def _read_back(self, rec: RunRecord, g: Guest, path: str, size: int, what: str) -> bytes:
+    async def _read_back(self, rec: RunRecord, g: Guest, path: str, size: int, what: str, whole: bool = True) -> bytes:
         """The `size` bytes of the file at `path` on the seat, a file the runner made there to read (a shared-read copy
         whose exec printed its length, _seat_copy), through Proxmox's own ranged agent file-reads of READ_RANGE_BYTES
         (GuestControl.file_read_range, whose retry on "got timeout" is the only retry), and then removed. A file past
         FETCH_MAX_BYTES is refused before its first read. Each range must come back whole: one that comes back short
-        met the file's end first, a copy shorter than its length (an offset at or past the end answers no bytes).
+        met the file's end first, a copy shorter than its length (an offset at or past the end answers no bytes),
+        unless `whole` is False, when it ends the read and the bytes so far are the answer (log-count, which counts
+        what came back and says in its note how many bytes that was beside the copy's length).
         The caller decodes the whole once, since a range boundary can fall inside a multibyte character. A
         ProxmoxError (a read refused, a range that came back as no base64) or a ValueError (the cap, a short read) is
         the caller's, after the removal, which runs whatever happened: a copy that will not go is held open in the
@@ -2314,6 +2318,8 @@ class Runner:
                     raise ProxmoxError(f"range {k + 1} of {ranges}: {e}") from e
                 data += got
                 if len(got) != want:
+                    if not whole:
+                        break
                     raise ValueError(f"{len(data)} bytes read of its {size}: range {k + 1} of {ranges}, at {at}, came back "
                                      f"{len(got)} of its {want}")
             came_back = True
@@ -2377,7 +2383,7 @@ class Runner:
                    f"$d = [IO.File]::Create('{copy}'); $s.CopyTo($d); $m = $d.Length; $d.Close(); $s.Close() }} "
                    f"else {{ Set-Content -Path '{copy}' -Value '' -NoNewline; $n = 0; $m = 0 }}; Write-Output ([string]$n + ' ' + [string]$m)"]
             try:
-                size = await self._seat_copy(g, cmd, copy)
+                _, size = await self._seat_copy(g, cmd, copy)
                 # one decode of the whole; a character the copy cut mid-write at its end reads as U+FFFD
                 data = await self._read_back(rec, g, copy, size, f"frida {script}.{ext}")
                 texts.append(data.decode("utf-8", errors="replace"))

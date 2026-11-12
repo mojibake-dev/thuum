@@ -3583,7 +3583,8 @@ class LogCount(RunTests):
 
         def exec_(guest, command, timeout):
             res = real_exec(guest, command, timeout)
-            if any("logcount-" in a and ".log.copy" in a and "-console" not in a for a in command):
+            # the copy itself, its shared-read open (each copy's removal once read names it too)
+            if any("logcount-" in a and ".log.copy" in a and "-console" not in a and "ReadWrite" in a for a in command):
                 copies["n"] += 1
                 land(copies["n"])
             return res
@@ -3627,6 +3628,54 @@ class LogCount(RunTests):
         run_id, body = self._run(LOGCOUNT)
         self.assertEqual(body["verdict"], "green", body)
         self.assertEqual(copies["n"], 1, pve.calls)
+
+    def test_a_log_past_a_range_is_counted_whole_and_its_copies_removed(self):
+        """log-count read each log whole into copies nobody removed or checked (the fresh review of e8d8de9b, nit 4): a
+        log past one range comes back in ranges and is decoded once, so a line whose é straddles the boundary still
+        matches, and each copy leaves the seat once read."""
+        import asyncio
+
+        from labapi.runner import READ_RANGE_BYTES as R
+        from labapi.runner import RunRecord
+        from labapi.scenario import Scenario
+
+        pve = self._seat()
+        platform = "a" * (R - 1) + "é moved\nmoved again\n"
+        pve.files[self.settings.client_driver_log] = platform
+        pve.files[self._console(pve)] = "moved é\n"
+        rec = RunRecord("x", Scenario(id="x", clients=["c1"]), self.tmp, "now")
+        ok, note = asyncio.run(self.services.runner._log_count(rec, 3, "c1", "é"))
+        self.assertTrue(ok, note)
+        self.assertEqual(self.services.board.log_count("c1", "é"), 2, note)
+        n = len(platform.encode("utf-8"))
+        self.assertIn(f"1 in its Skyrim Platform log, 1 in its console log; bytes {n} read of {n} copied of {n} on the seat, "
+                      "9 read of 9 copied of 9 on the seat", note)
+        self.assertEqual([c[3:] for c in pve.calls if c[:3] == ("file_read_range", 901, "C:\\sky-lab\\logcount-003.log.copy")],
+                         [(0, R), (R, n - R)])
+        self.assertFalse([p for p in pve.files if "logcount-" in p], "the copies leave the seat once read")
+        self.assertEqual(rec.notes, [])
+
+    def test_a_log_count_copy_held_open_faults_the_seat(self):
+        """A copy the agent holds after its read is a handle only the seat's restart closes, log-count's as a run log's:
+        a note and the seat's fault, so its next run rolls it back; the count stands, its read having come back whole."""
+        from labapi.proxmox import ExecResult
+
+        pve = self._seat()
+        pve.files[self.settings.client_driver_log] = "claim 13491 sent on E\nclaim 13491 granted\n"
+        plain_exec = pve.exec
+
+        def exec_(guest, command, timeout):
+            if "Remove-Item -LiteralPath 'C:\\sky-lab\\logcount-001.log.copy' -Force" in " ".join(command):
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                return ExecResult(0, "True\r\n", "")  # still there: the agent holds it
+            return plain_exec(guest, command, timeout)
+
+        pve.exec = exec_
+        run_id, body = self._run(LOGCOUNT)
+        self.assertEqual(body["verdict"], "green", body)
+        held = "log-count: c1's Skyrim Platform log: C:\\sky-lab\\logcount-001.log.copy held open in its agent after its read"
+        self.assertIn(held, body["notes"])
+        self.assertEqual(self.services.runner.seats["c1"].force, f"its last run ({run_id}) ended in a fault: {held}")
 
     def test_the_live_patterns_are_named_once_for_the_holders_given(self):
         from labapi.runner import _log_count_patterns
