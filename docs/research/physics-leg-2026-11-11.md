@@ -226,9 +226,9 @@ R0 rungs merge on T0 and T2 alone. There is one Windows runner.
 
 ## Rung 0 results (2026-11-11 and 11-12)
 
-Recorded 00:52Z 2026-11-12 by thuum-fa, from read-only analysts' reads of the runs. Every run is on canon 24f1cc6a: the server
-m4-scripts-5-heads-24f1cc6a, both seats clean-m1-next with the m4-scripts-5-heads client 24f1cc6a. The ladder's rung 0 proof
-(:126):
+Recorded 00:52Z 2026-11-12 by thuum-fa, the v2.1 reads added at 02:18Z, from read-only analysts' reads of the runs. Every run is
+on canon 24f1cc6a: the server m4-scripts-5-heads-24f1cc6a, both seats clean-m1-next with the m4-scripts-5-heads client 24f1cc6a.
+The ladder's rung 0 proof (:126):
 - x-prop-engine v1 (4a11a803) 20261111-190610, green: the rule-free havok-props.md rows, traced on both seats;
 - x-prop-blast v3 (b0c8945e) 20261111-191642, green with its traces back as their ready rows alone (both .log reads timed out),
   and 20261111-223256, green with both traces whole through lab-api 8bd23824's ranged fetch;
@@ -237,10 +237,17 @@ m4-scripts-5-heads-24f1cc6a, both seats clean-m1-next with the m4-scripts-5-head
 - W3's two: b-prop-push as committed, 20261111-204534, the same-build control, red at step 27 on runtime_of 2 and the 64 bound;
   x-drop-leftover v1.1 (296ff33b) 20261111-220150, red at its two Q3 claims (c1Cell, c1Restart), the leftover gone after a cell
   change. Eli's call on them, "Fix the drop", is DECISIONS.md's (ADR-071, W3).
+- The v2.1 reads (2026-11-12): x-corpse-grab v2.1 (9ade4b5a) 20261112-002429, green, both seats rolled back cold: H5 on the
+  watcher's corpse and the release; x-prop-engine v2.1 (c6213c80) 20261112-003027, red on 15 of its 46 claims, every red a setup
+  and none a refuted row (walks across the settled ingot that drew no contact, c2's aim from the south lane holding nothing twice,
+  a hold that ended about 0.2 s before the other seat's touch, and leg 8's ingot settled 21.8 units off the marker before the
+  login), its legs whose setup held reading E2, E12, E13, E15, E16, E24, E26, E27, E28, E29, E30 and E31.
 
 Each row's run ids, seats and verdict are docs/engine/havok-props.md's, and its section 5 names the rows that now read on both
 viewpoints. Of the three deletions, E7 and E19 are deleted; E38 is kept, CONFIRMED for a pausing InventoryMenu by the frame's
-seven pausing runs, so deleting it would lose a confirmed fact, and E39 stands beside it for Souls RE's running menu.
+seven pausing runs, so deleting it would lose a confirmed fact, and E39 stands beside it for Souls RE's running menu. The v2.1
+reads added E40 to E43: the grab outlives its key (E40), the engine can end a hold with no key (E41), a still held body reads
+asleep (E42), and a grab the engine refuses still claims touch 1, which the server grants (E43).
 
 The hypotheses:
 - H1, CONFIRMED by 20261111-223256 on both seats: Hailstone's Shatter, the Fireball's explosion and Unrelenting Force's cone
@@ -253,16 +260,22 @@ The hypotheses:
 - H4, CONFIRMED by 20261111-223256 on c1: the resting pile was one sleeping island before the push, a neighbour joined it on the
   first moving frame, and islands split within 2 to 9 frames and re-merged on contact in flight, Keyframed members included; the
   island claim's rule built on it is HYPOTHESIS.
-- H5, STILL OPEN as written (the watcher's corpse: c2's E met nothing in 20261111-193821); on the host's own corpse (c1) every
-  clause CONFIRMED: one spring on one bone, the 19 bodies already simulated (types 2 and 3) with no SetMotionType, the four grab
-  fields sane, 40552 the entry, canon's activation block no lock; DestroyMouseSprings 40557 never ran.
+- H5, CONFIRMED on both seats. The host's own corpse, 20261111-193821 (c1): one spring on one bone, the 19 bodies already
+  simulated (types 2 and 3) with no SetMotionType, the four grab fields sane, 40552 the entry, canon's activation block no lock.
+  The watcher's corpse, 20261112-002429 (c2): attempts A, B and D grabbed c2's copy, one spring each, from an eye 116 to 151
+  units off at Pitch -54.8, -60.9 and -67.0 (C's pitch passed over it); the copy's 18 bone bodies read types 2 and 3 with no
+  SetMotionType and its weapon body type 4, kKeyframed, on the watcher; the block stopped no grab; the drag moved the copy 53.9
+  units. The release is a second press: the grab outlives its key, 40557 runs only at the next press, and every key-up reached
+  the engine (TalkService's fresh-press counts 2, 4, 6, 8); the host's engine also dropped a hold on its own, mid-press
+  (havok-props.md E40, E41). Canon carries none of the watcher's drag: the copies ended 58.6 units apart and the record never
+  moved.
 - H6, CONFIRMED at rest on the death's simulator, both clauses (20261111-194559, c1): the pose held within 2.1 units by path B,
   and 19 bodies fit 64; path A's keyframe REFUTED as built; a moving pose and a follower's impose STILL OPEN.
-- H7, STILL OPEN: 20261111-190610's E10 is a pre-cap baseline on c1 (BASELINE ONLY) and E14, E15 and E31 met no premise; the
-  read is x-prop-engine v2.1's after the 60 fps cap.
+- H7, STILL OPEN: 20261111-190610's E10 is a pre-cap baseline on c1 (BASELINE ONLY); 20261112-003027 CONFIRMED E15 on both
+  seats and E31's refusal on c2, and missed E14 (c2's aim) and E10 (no kick); E10's read waits for the 60 fps cap.
 - The kHavokMoved block's velocities: save-havok.js is written and did not run in rung 0; nothing depends on it.
 
-What rungs 3 and 5 take, measured:
+What the next rungs take, measured:
 - 26004 is the replacement site (CommonLibSSE-NG TESHavokUtilities.h:18): every prop push on both seats went through it, and
   78091 (bhkRigidBody.h:54) applied its result, |impulse| times 69.99 equal to the result on all 58 pairs (within 0.25 percent
   for results of 100 and more). The cause comes from the enclosing per-thread frame: every impulse call ran on a worker thread,
@@ -295,20 +308,36 @@ What rungs 3 and 5 take, measured:
 - A humanoid has 19 bodies (18 bones and the weapon, a Nord bandit's), so it fits in 64 (fitsIn64 true, 194559); creatures are
   unread.
 - The activation block does not stop a grab: canon's kBlockActivate (ExtraFlags.h:17) was set on c1's corpse at 40552's leave,
-  and the grab took it (193821). So ADR-071 decision 5's one hold for grab and loot rests on the Held answer ending the loser's
-  grab itself and on the loot path refusing a held body (HYPOTHESIS); the watcher's corpse is x-corpse-grab v2.1's.
-- The grab outlives its key, or the key-up was lost (STILL OPEN): 193821's grab held 4 min 29 s after a 3.5 s hold of E, with no
-  40557 and no touch 2. x-corpse-grab v2.1 reads it (an E tap after each hold, TalkService's fresh-press line the key-up's
-  witness); D-PH3 A already ends a hold by the engine's own grab state at each sample, never a timer.
+  and the grab took it (193821), and it was set on the watcher's copy at every grab (002429). So ADR-071 decision 5's one hold
+  for grab and loot rests on the Held answer ending the loser's grab itself and on the loot path refusing a held body
+  (HYPOTHESIS). A press made while holding releases the grab and activates nothing, the blocked corpse under the crosshair
+  included (002429, CONFIRMED), so "swallows its next activation" is the engine's own for the holder.
+- The grab outlives its key (CONFIRMED, E40): 193821's 4 min 29 s hold came of no second press, and 002429's three grabs and
+  003027's props on both seats each ended at the next press, never at a key-up. The engine can also end a hold with no key, on
+  its main thread (E41, twice on c1; the cause HYPOTHESIS: a body that does not follow, or its weight). D-PH3 A's held state,
+  the engine's own grab read at each sample, follows both; a key-based or timed end would follow neither.
 - Two more, for rungs 2 and 3: an owned prop's position comes from its body, never its reference (prop-physics.md, 2026-11-11);
   and one shout reached the watcher as two cones, so caster-only impulses also need one relay per cast (shouts.md, 2026-11-11).
+- For rung 1, from 20261112-003027: a still held body reads asleep on canon's stir test, and the follower rests its copy Dynamic
+  mid-hold (E42), which A6's held stream answers; a grab the engine refuses still claims touch 1, and the server granted it, so a
+  moving row went to a seat that never held it (E43), which A2's grant of a grab over a live row must not do (HYPOTHESIS on the
+  remedy: drop a touch 1 that a touch 2 follows in one update, or take the pair as no grab).
+
+Lab premises the rung 1 reads take, read in these runs (each probe reads its own premise first, so they are no havok-props.md
+rows): both seats pitch 16.43 mouse counts a degree by the player graph's Pitch (002429; about 16 to 17 in 003027), where v2.1
+used 14.7; a lone placement at the marker settles within about 4 units of (133421, -61375), where a walk does not touch it
+(003027, E9).
 
 Follow-ups:
-- x-prop-engine v2.1 (c6213c80) and x-corpse-grab v2.1 (9ade4b5a), by path, their v2 reviews' FIX FIRST items applied as
-  written, for numidium to run: E2, E10's baseline, E13 to E15, E26, E27, E31, E35 and E37 on both seats, and the watcher's
-  corpse with its release.
+- The six one-question probes for rung 1's engine reads, drafted by path under lab/.cache/drafts/physics/rung1-reads and in
+  review (ADR-064 rules A and B): x-sl-aim v1 (7d4ca8e6) runs first, the pitch from each spot that puts each seat's crosshair on
+  its copy; then x-held-touch v1 (3e396be2: E2, E26 and E27 on c1, E27's server half), x-two-hands v1 (09de5037: E14),
+  x-late-word v1 (e6c72434: E35), x-moving-press v1 (b19eb079: E31 on c1, E43 again) and x-login-overlap v1 (2071661b: E37).
+  They rest on E40 and E42, now rows (ADR-064 amendment C).
 - Leg 6 (E32) split out of x-prop-engine v2 as x-prop-stall v1, pending lab-api's stop-first change (a relaunch that stops the
   game, then copies its logs).
+- E41's cause: a corpse on open floor grabbed at several weights, the grab's settings read live by lab-api's c.setting, their
+  names from a static read first.
 - A backtrace at 26004 during a shout, or a bracket on the cone's own update: the cone's cause, before rung 3 can zero it.
 - E10's read after the 60 fps cap (H7); W3's drop fix in physics rung 1's client commit after playtest 51.
 
