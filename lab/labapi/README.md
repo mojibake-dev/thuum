@@ -78,7 +78,10 @@ back through the agent's ranged file-read (512 KiB a call, decoded once
 joined, removed once read, as a client log is: a whole read past about 1 MiB
 is unreliable on a busy seat), a burst's frames likewise, and a
 `request-screenshot` client verb on an unmanaged one; a shot or frame not
-read is the step's note, never a fault.
+read is the step's note, never a fault, but a sidecar held open after its
+read faults the seat (a rollback at its next run, the verdict unchanged), a
+reversal of the 2026-10-30 soft cleaning's leniency, since held files built
+up (docs/LAB.md).
 `wait: N` sleeps N times `TIME_SCALE`. Before an `assert:` block, every
 client the block reads through `.sees()` or `.view()` gets a `dump-state`
 step so the view is fresh. `server.log_count("<regex>")` is counted from the

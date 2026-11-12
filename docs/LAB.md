@@ -560,7 +560,16 @@ ranged file-read, 512 KiB a call, decoded once joined and removed once read.
 Read whole, a file past about 1 MiB is unreliable on a busy seat (a 1.46 MB
 console copy timed out three times in a row on c1, where 512 KiB ranges took
 it whole in 4 s; 20261111-195437 lost three shots at 23 s each). A shot not
-read is the step's note, never a fault. Two lab-api endpoints replace the snapshot round trips to thuum-mundus
+read is the step's note, never a fault, but a sidecar held open after its
+read faults the seat, as a held log or trace copy does: the step's note and
+a rollback at its next run, the verdict unchanged. This reverses, for a
+sidecar the runner finds held at its own read, the 2026-10-30 call that a
+held .png.b64 was not worth a rollback (ADR-036's note of that day; the
+relaunch's cleaning below still takes shots\ as far as it goes and fails no
+try on one): held files were found to build up rather than clear, the
+relaunches' held count growing 11, 17 and 25 around
+20261111-191642-x-prop-blast (6c3b0122).
+Two lab-api endpoints replace the snapshot round trips to thuum-mundus
 (2026-10-05, their recipe and guardrails): `POST /lab/clients/<c>/snapshot
 {name}` takes a cold stacked `clean-m1-<x>` (quiesce, a clean ACPI shutdown
 whose task log holds no timeout or forced stop, a snapshot without RAM,
@@ -916,9 +925,9 @@ in frida\ (*.js.out.copy and *.js.log.copy, the files the agent itself
 reads back in ranges, which leave the seat once read and stay only when the
 agent holds one open), which are cleaned as far as they go: a file a
 timed-out guest-file-read or guest-file-close left open in the agent stays
-until the VM restarts (a copy held after its read also rolls the seat back,
-in the same run's reset when the fetch came before it, else at its next
-run), the note
+until the VM restarts (a copy or sidecar held after its read also rolls the
+seat back, in the same run's reset when the fetch came before it, else at
+its next run), the note
 says "<n> held open left in place", and the next capture writes its own name,
 as the next copy carries its run's script name (b-cloak-fight
 20261030-053144 lost a rollback to two held .png.b64 sidecars, x-quest-mode
