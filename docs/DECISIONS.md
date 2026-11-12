@@ -3818,8 +3818,12 @@ by the server's word, and no estimate of its effect is kept; a full thrall (Dead
 86,313,600 s in the record, 999 days, not the 0 decision 2 read) stays alive on its cell's host and keeps its undead look on every
 screen, the look carried by the record and by the thrall's new simulator (the Undead FX build: the
 server-recorded reanimate effect for vanilla's glow, the mod's decay run on the thrall's simulator). Which side a thrall falls
-on is the record's (its effect's duration or a flag of the record), never a name (ADR-063). Open: what a returning commander does
-with a thrall that stayed (default: nothing; it is its cell's NPC).
+on is the record's (its effect's duration or a flag of the record), never a name (ADR-063). Asked the same session what a returning
+commander does with a thrall that stayed (offered default: nothing, it stays its cell's NPC), Eli verbatim (recorded 07:39Z):
+"thrall returns to caster obvs": a full thrall that stayed is its caster's again when the caster logs back in; the server's row
+keeps the commander through the departure and claims the thrall for the caster's seat at its return, unless the thrall died or
+was raised by another meanwhile. How the returning caster's engine takes command of a living thrall again (its new game holds no
+Dead Thrall effect on it) is unread: HYPOTHESIS, the reanimation branch's next read.
 
 ## ADR-061: A shared container's live view is the menu drawn again whole; exclusive access is the fallback behind a setting
 
