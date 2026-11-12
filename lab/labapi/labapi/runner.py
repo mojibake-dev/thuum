@@ -111,9 +111,9 @@ if ($curl -ne 0) { exit 4 }
 # learn.microsoft.com/windows/win32/wer/collecting-user-mode-dumps; crash-dumps.ps1 sets it). The
 # newest goes up through the inbox curl.exe as the hang dump does. And the exit row Windows wrote
 # for each SkyrimSE.exe that ended since then (Security event 4689, which crash-dumps.ps1's Audit
-# Process Termination turns on): its pid, exit status and the account the row names, read by the
-# event's own field names (Microsoft, "4689(S) A process has exited", learn.microsoft.com), with the
-# count of every 4689 row read, so an empty or unread log is never taken for no exit,
+# Process Termination turns on): its pid and exit status, read by the event's own field names
+# (Microsoft, "4689(S) A process has exited", learn.microsoft.com), with the count of every 4689
+# row read, so an empty or unread log is never taken for no exit,
 # so a game lost with no dump still says how it ended (20261112-130030's c1: 0xC0000005, no WER
 # dump, no Application row). The last stdout line is one JSON object. Placeholders: @DUMP_DIR@
 # @SINCE@ (Unix seconds) @URL@ @UPLOAD_S@.
@@ -144,8 +144,7 @@ try {
     $exits = @($all | ForEach-Object {
             $d = @{}; foreach ($n in ([xml]$_.ToXml()).Event.EventData.Data) { $d[$n.Name] = [string]$n.'#text' }
             if ($d['ProcessName'] -like '*\SkyrimSE.exe') {
-                '{"pid": "' + $d['ProcessId'] + '", "status": "' + $d['Status'] + '", "by": "' + ($d['SubjectUserName'] -replace '[\\"]', '') +
-                    '", "utc": "' + $_.TimeCreated.ToUniversalTime().ToString('o') + '"}'
+                '{"pid": "' + $d['ProcessId'] + '", "status": "' + $d['Status'] + '", "utc": "' + $_.TimeCreated.ToUniversalTime().ToString('o') + '"}'
             } })
 } catch { $exits = @('"unreadable"') }
 Write-Output ('{"games": [' + ($games -join ', ') + '], "dumps": [' + $list + '], "curl": ' + $curl + ', "exits": [' + ($exits -join ', ') +
@@ -160,12 +159,13 @@ _CRASH_LOG_SYSTEM = frozenset({"kernel32.dll", "kernelbase.dll", "ntdll.dll", "u
 def exit_note(seen: dict[str, Any], game: str) -> str:
     """How the run's game ended by Windows' own exit row (_CRASH_PS's exits, Security event 4689),
     for E_RUN_GAME_LOST and E_RUN_GAME_REPLACED: "; Windows logged its exit, 0xC0000005 at
-    2026-11-12T13:03:13Z, account lab (Security 4689)" from the earliest row whose pid is the game's
-    and whose time is not before its start (Windows reuses pids, and Get-WinEvent answers newest
-    first); that no row names it; or that the log went unread (the read failed, or it gave no 4689
-    row at all, which a run's own guest execs always leave). Nothing when the answer carries no
-    exits. The account is the one the row names: HYPOTHESIS, the seat's user for a game that ended
-    itself and the computer account for the guest agent's kill, until a relaunch's row is read."""
+    2026-11-12T13:03:13Z (Security 4689)" from the earliest row whose pid is the game's and whose
+    time is not before its start (Windows reuses pids, and Get-WinEvent answers newest first); that
+    no row names it; or that the log went unread (the read failed, or it gave no 4689 row at all,
+    which a run's own guest execs always leave). Nothing when the answer carries no exits. A kill
+    reads 0xFFFFFFFF and a crash its exception's code: on both seats on 2026-11-12 the stage's
+    Stop-Process kills of the game left 0xFFFFFFFF and 20261112-130030's c1 crash 0xC0000005, each
+    row's account the game's own (lab), so the row's account names no killer and is not read."""
     if "exits" not in seen:
         return ""
     rows = seen.get("exits") or []
@@ -192,7 +192,7 @@ def exit_note(seen: dict[str, Any], game: str) -> str:
         status = f"0x{int(raw, 16):08X}"
     except ValueError:
         status = f"status {raw or 'unnamed'}"
-    return f"; Windows logged its exit, {status} at {str(row.get('utc'))[:19]}Z, account {row.get('by') or 'unnamed'} (Security 4689)"
+    return f"; Windows logged its exit, {status} at {str(row.get('utc'))[:19]}Z (Security 4689)"
 
 
 def crash_logger_signature(run_dir: Path, client: str, game: str) -> str:

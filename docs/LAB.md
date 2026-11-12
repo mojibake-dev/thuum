@@ -861,12 +861,13 @@ Every run's end also reads each managed seat's game:
   launch.ps1 starts the game again when it dies within a minute of its
   window, and the run went on against the new one. Either failure carries
   the old game's own exit from the Security log (event 4689, which
-  crash-dumps.ps1's process-termination auditing writes): its exit status,
-  its time and the account the row names (HYPOTHESIS: the seat's user for a
-  game that ended itself, the computer account for the guest agent's kill,
-  until a relaunch's row is read), or that no row names it, or that the log
-  went unread (a read that failed, or no 4689 row at all). 20261112-130030's
-  c1 left no dump and no Application row, and its 4689 row said 0xC0000005.
+  crash-dumps.ps1's process-termination auditing writes): its exit status
+  and its time, or that no row names it, or that the log went unread (a read
+  that failed, or no 4689 row at all). A kill reads 0xFFFFFFFF and a crash
+  its exception's code: on 2026-11-12 the stage's Stop-Process kills left
+  0xFFFFFFFF on both seats, and 20261112-130030's c1, gone with no dump and
+  no Application row, 0xC0000005. Every row names the game's own account
+  (lab), a kill's too, so the account says nothing about who ended it.
 Any of the three keeps the seat's launch.log as <client>-launch.log and turns
 a run that would have been green into error, which a run set reruns once as
 a lab fault. A red run stays red and gains the failure.

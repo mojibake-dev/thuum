@@ -1393,19 +1393,19 @@ class CrashEvidence(RunTests):
         # 20261112-130030: c1's game gone with no dump, no Application row and no CrashLogger log, where the Security log's
         # 4689 row for its pid said 0xC0000005 0.6 s after its last line. Get-WinEvent answers newest first: a later game
         # under the same pid, another pid's row, and this pid's row from before the game's start are not its exit
-        exits = [{"pid": "0x1092", "status": "0xffffffff", "by": "SKY-CLIENT$", "utc": "2026-10-17T22:05:00.0000000Z"},
-                 {"pid": "0x1093", "status": "0x0", "by": "lab", "utc": "2026-10-17T22:00:30.0000000Z"},
-                 {"pid": "0x1092", "status": "0xc0000005", "by": "lab", "utc": "2026-10-17T22:00:31.5000000Z"},
-                 {"pid": "0x1092", "status": "0x0", "by": "lab", "utc": "2026-10-17T21:59:00.0000000Z"}]
+        exits = [{"pid": "0x1092", "status": "0xffffffff", "utc": "2026-10-17T22:05:00.0000000Z"},
+                 {"pid": "0x1093", "status": "0x0", "utc": "2026-10-17T22:00:30.0000000Z"},
+                 {"pid": "0x1092", "status": "0xc0000005", "utc": "2026-10-17T22:00:31.5000000Z"},
+                 {"pid": "0x1092", "status": "0x0", "utc": "2026-10-17T21:59:00.0000000Z"}]
         scripts = self._seat({"games": [], "dumps": [], "curl": -1, "exits": exits, "exit_rows": 412})
         run_id, body = self._run(self.RUN)
         self.assertEqual(body["verdict"], "error", body)
         self.assertEqual([f["error"] for f in body["failures"]],
                          [f"E_RUN_GAME_LOST: c1's game ({self.WAS}) was not running at the run's end; Windows logged its exit, "
-                          "0xC0000005 at 2026-10-17T22:00:31Z, account lab (Security 4689); CrashLogger wrote no log for pid 4242"])
+                          "0xC0000005 at 2026-10-17T22:00:31Z (Security 4689); CrashLogger wrote no log for pid 4242"])
         # the seat reads event 4689 since the run began, by the event's own field names, and counts every row it read
         self.assertIn("LogName = 'Security'; Id = 4689; StartTime = $since.ToLocalTime()", scripts[0])
-        for field in ("ProcessName", "ProcessId", "Status", "SubjectUserName"):
+        for field in ("ProcessName", "ProcessId", "Status"):
             self.assertIn(f"$d['{field}']", scripts[0])
         self.assertIn("$rows = $all.Count", scripts[0])
         self.assertIn('"exit_rows": ', scripts[0])
@@ -1413,7 +1413,7 @@ class CrashEvidence(RunTests):
 
     def test_a_replaced_game_with_no_exit_row_says_so(self):
         now = "5151@2026-10-17T22:00:40.0000000Z"
-        new_game = {"pid": "0x141f", "status": "0x0", "by": "lab", "utc": "2026-10-17T22:01:00.0000000Z"}  # the new game's own pid
+        new_game = {"pid": "0x141f", "status": "0x0", "utc": "2026-10-17T22:01:00.0000000Z"}  # the new game's own pid
         self._seat({"games": [now], "dumps": [], "curl": -1, "exits": [new_game], "exit_rows": 388})
         run_id, body = self._run(self.RUN)
         self.assertEqual([f["error"] for f in body["failures"]],
@@ -1435,12 +1435,12 @@ class CrashEvidence(RunTests):
         self._unread([], 0, "its exit unread: the Security log gave no exit rows at all since the run began")
 
     def test_an_exit_status_that_is_not_hex_is_kept_as_read(self):
-        row = {"pid": "0x1092", "status": "", "by": "", "utc": "2026-10-17T22:00:31.5000000Z"}
+        row = {"pid": "0x1092", "status": "", "utc": "2026-10-17T22:00:31.5000000Z"}
         self._seat({"games": [], "dumps": [], "curl": -1, "exits": [row], "exit_rows": 12})
         run_id, body = self._run(self.RUN)
         self.assertEqual([f["error"] for f in body["failures"]],
                          [f"E_RUN_GAME_LOST: c1's game ({self.WAS}) was not running at the run's end; Windows logged its exit, "
-                          "status unnamed at 2026-10-17T22:00:31Z, account unnamed (Security 4689); CrashLogger wrote no log for pid 4242"])
+                          "status unnamed at 2026-10-17T22:00:31Z (Security 4689); CrashLogger wrote no log for pid 4242"])
 
     # CrashLogger's log as c1 wrote it on 2026-11-05 (20261105-152648's c1-crash-2026-11-05-07-27-25.log, cut down and
     # moved onto WAS: the seat's clock seven hours behind UTC, the game up 14 s), a system frame put before the plugin's
