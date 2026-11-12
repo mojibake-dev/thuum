@@ -3379,9 +3379,11 @@ holds the commander: the cells table's command is the live owner, rebuilt from t
 `Cells::returning` takes the thrall records of a loaded cell (the actor, its cell, the caster its record names, the record's
 duration, alive) and claims for the reporting player, through claim_commanded, every one that is alive, full, names that
 player its caster, stands in a cell the player's game has loaded and is under no live command (commander_of 0).
-PartOne::OnCellLoaded reads the cell's actors from the grid, not the player's emitters (the server's 3x3 lags the engine's
-5x5, so a thrall two squares out is no emitter yet at its cell's load), sends each claim's word (UpdateHoster, the cast's
-own) and logs it.
+Two triggers, one rule: PartOne::OnCellLoaded reads the reporting player's emitters standing in the loaded cell, and the
+subscribe (onActorSubscribe, ahead of the create word) reads a thrall the grid serves the player's game after that load (the
+server's 3x3 lags the engine's 5x5, so a thrall two squares out is no emitter yet at its cell's load); each claim's word is
+UpdateHoster, the cast's own, and its line is logged. Records saved before fork 2b1f07fc lost the caster of a server's first
+player (ff000000; see Built below), so those thralls never return.
 
 The edges. The thrall died while its caster was away: the record is dead, its next effect tick empties the set
 (MpActor::AdvanceEffects), and `alive` covers the tick before it. Another caster raised it: a living thrall cannot be raised,
@@ -3393,8 +3395,10 @@ its look (no pull to the caster, which would be a new decision). Another player'
 raised names the NPC its caster, so no seat's return claims it.
 
 Rungs. R0: who commands is the server's, from the record (the caster the server stamped at the accepted hit, ActionListener's
-NoteReanimateAccepted, never a client's word). R2: the command on the commander's engine and the thrall's moves, the
-commander's engine computing and the server recording them, unvalidated (rule 5), as the cast's command.
+NoteReanimateAccepted, never a client's word). The trigger is the client's CellLoaded, bounded by the server's own grid (the
+player's emitters, the subscribe), and no owner fact comes from a client (rule 5): a load report only says when to read the
+record. R2: the command on the commander's engine and the thrall's moves, the commander's engine computing and the server
+recording them, unvalidated (rule 5), as the cast's command.
 
 The word. UpdateHoster hands the thrall's simulation over. What a fresh game lacks is which engine commands it: the host of
 a thrall that stayed simulates it too, and only the caster tells the two apart. The record holds the caster, and MagicEffects
@@ -3402,16 +3406,19 @@ a thrall that stayed simulates it too, and only the caster tells the two apart. 
 (docs/WIRE.md's t 43 row; SCHEMA_VERSION 45 on this branch, its number settled at the merge).
 
 The client and the native. magicEffectsService keeps each actor's Reanimate state's caster from its MagicEffects (the state
-with no clock, remaining negative) and every 30 updates asks for each: is this game's player the caster
-(localIdToRemoteId(0x14)), does this game simulate the actor (HostService.isMine), is it alive. While the three hold it calls
-Skyrim Platform's commandActor(refrId, true); once they stop, commandActor(refrId, false). commandActor (FateApi, npc-fate's
+with no clock, remaining negative), noted by the actor's server id (its model's refrId) before its reference is looked for,
+and every 30 updates asks for each, its local id by remoteIdToLocalId: is this game's player the caster
+(localIdToRemoteId(0x14, true), the player's server id; without the second argument it answers 0x14), does this game simulate
+the actor (HostService.isMineLocal), is it alive. While the three hold it calls Skyrim Platform's commandActor(localId, true);
+once they stop, commandActor(localId, false) at the id it was asked of. commandActor (FateApi, npc-fate's
 family of main-thread exports beside resurrectActor) is callable from any JavaScript context and queues one task on the main
 thread through SKSE's UI task queue (QueueFateTask). The task decides by the engine's state, so one call starts, refreshes and
 ends: it leaves a puppet, an actor with its AI off and the engine's own command (the player's commandedActors entry for the
 thrall holding an effect: the original cast's CommandEffect) alone; it starts with 37490(thrall, 1) when the life state is not
-kReanimate, then 38798(thrall, player, null); it refreshes its own entry (no effect) with 38799(thrall, player, null); it ends
-with 38800(thrall, null) on `false` or a thrall that reads dead; and it never links again a thrall whose entry the engine
-removed without its 38800 (40056's eviction). Ids by `just addr`: 37490 0x675130, 38798 0x6c5cb0, 38799 0x6c5da0, 38800
+kReanimate, then 38798(thrall, player, null), marking the thrall linked only when the player's entry with no effect is there
+after it (else one line, and the next call asks again); it refreshes its own entry (no effect) with 38799(thrall, player,
+null); it ends with 38800(thrall, null) on `false` or a thrall that reads dead; and it never links again a thrall whose entry
+the engine removed without its 38800 (40056's eviction), until a call with `false` clears that mark (H-C4-4). Ids by `just addr`: 37490 0x675130, 38798 0x6c5cb0, 38799 0x6c5da0, 38800
 0x6c5fd0, none of them in CommonLibSSE-NG at b93280e8; the signatures are the static read's (return-to-caster-read.md, as
 lab/frida/thrall-link.js:69-77 cites it), exercised by run 20261112-152001. It is no Papyrus native, so NATIVES.md (the ledger
 of Papyrus natives) has no row for it; its rung is this section's R2.
@@ -3423,8 +3430,10 @@ stays, its look kept, until its caster <caster> returns (ADR-060)". The commande
 thread <t> main <m>" (without "37490, " when the life state was kReanimate already), "[verb:npc-fate] commandActor(<id>):
 unlinked (38800; the thrall dead|no longer commanded), the player's entry gone|still there after it, on thread <t> main <m>",
 "[verb:npc-fate] commandActor(<id>): the engine removed it from the player's commanded actors; not linked again",
+"[verb:npc-fate] commandActor(<id>): 38798 left no entry; asked again (the player's entry missing|the engine's) on thread <t>
+main <m>",
 "[verb:npc-fate] commandActor(<id>): waits for its promotion (puppet <b>, AI on <b>)" and "[verb:npc-fate]
-commandActor(<id>): the engine's own command, left alone", each of the last two once per actor. The client's console:
+commandActor(<id>): the engine's own command, left alone", each of the last three once per actor. The client's console:
 "[verb:npc-fate] commandActor <id>: asked, its record's caster <me> is this game's player and this game simulates it (queued
 <b>)" and "[verb:npc-fate] commandActor <id>: ended (<why>; queued <b>)".
 
@@ -3437,20 +3446,26 @@ RunningEffect's caster is an optional FormDesc; a server's first player, 0xff000
 named no caster; the lab's c1 is ff000000. The change form writes the key whenever there is a caster, "0" for 0xff000000; its
 meaning is unchanged and an older server reads "0" as none, as it wrote it, so no migration), 6b2d72b3 (NpcFateTest's return
 cases and the restart's round trip), a2a737ba (difftest's per-client start_ms) and 6b6d42f5 (magic-effects.yaml's and
-poison.yaml's caster, thrall-return.yaml). cargo test --workspace 739 passed, clippy -D warnings and fork-lint clean; the C++
-and the platform not compiled here (the server image at the push, the Windows build). The probe:
-lab/.cache/drafts/reanimate/x-reanimate-return-v2.yaml (sha1 a7be0bfb, a copy in lab/.cache/probes), probe-check ok, its fresh
-review before the first run.
+poison.yaml's caster, thrall-return.yaml); then the branch's fresh review (FIX FIRST), applied as written: e8237d69 (MUST 1:
+the upkeep's player id was localIdToRemoteId(0x14), which answers 0x14, so no caster ever matched; MUST 2: a link marked only
+on its entry; SHOULD 2: a thrall noted by its server id, resolved by remoteIdToLocalId) and 9a0a0914 (SHOULD 1: NpcFateTest's
+subscribe-trigger case). cargo test --workspace 739 passed, clippy -D warnings, fork-lint and tsc --noEmit clean; the C++ and
+the platform not compiled here (the server image at the push, the Windows build). The probe: x-reanimate-return v2.1
+(lab/.cache/drafts/reanimate/x-reanimate-return-v2.1.yaml, sha1 c79dfe5f, a copy in lab/.cache/probes; v2 a7be0bfb kept beside
+it), the probe review's F1 to F3 applied, BUILD m4-reanimate-return 9a0a0914, probe-check ok.
 
 Tests. T0: cells.rs's return cases (at the cell's load and not before it; under another seat's hosting; none for a dead
 thrall, another caster's record, a timed record, 86,399 s against 86,400, a live command by another or its own; a dialogue's
 claim gives way; a second departure is ClaimGone again) and the bridge's; NpcFateTest's return case (the departure keeps the
 full thrall alive with its record's caster, the caster's next login and its load of the cell claim it, the word and
-MagicEffects' caster; killed while away, no return; the change form's round trip into a fresh world, then the return);
+MagicEffects' caster; killed while away, no return; the subscribe trigger, the cell loaded first and the thrall served by the
+grid after it, claimed once with its create word naming the caster; the change form's round trip into a fresh world, then
+the return);
 wire-validate's caster case and the 43 fixture. T2: magic-effects.yaml and poison.yaml declare the caster; thrall-return.yaml
 (Dead Thrall's command kept through the departure with no ThrallExpired; the returning character's load of the cell claims no
-body that never stood). T3: x-reanimate-return v2 (lab/.cache/drafts/reanimate/x-reanimate-return-v2.yaml): Dead Thrall by
-hand, c2 simulating Sven while c1 is away, c1's return with the native in place of thrall-link.js's link.
+body that never stood). T3: x-reanimate-return v2.1 (lab/.cache/drafts/reanimate/x-reanimate-return-v2.1.yaml): Dead Thrall by
+hand, c2 simulating Sven while c1 is away, c1's return with the native in place of thrall-link.js's link; the fight is
+recorded, not claimed (the landing's cell is c2's from leg H on).
 
 Rule 6 (option A, the coordinator for Eli, 2026-11-12): no schema change and no migration, since the return reads the
 record, which keeps its Reanimate state's caster across a restart since 65c40b6f. The restart's proof: NpcFateTest's round
@@ -3465,8 +3480,9 @@ Open (HYPOTHESIS):
 - H-C4-3: 38800 at once on a dead thrall (the read waited 8 s) leaves the death as the engine plays it. Read: F2's rows and the
   server's death lines.
 - H-C4-4 (the static read's G2): 40056 removes an entry with no effect first and without a dispel, so the caster's next raise
-  uncommands the returned thrall where single player kills the old one; the native does not link it again. Read: a second-raise
-  probe; what follows is Eli's.
+  uncommands the returned thrall where single player kills the old one; the native does not link it again, until the client's
+  call with `false` (the thrall another game's to simulate, or dead) clears that mark, so a later return links it again and may
+  evict the newer raise's thrall in turn. Read: a second-raise probe; what follows is Eli's.
 - H-C4-5: the promotion (AI on) lands before the native's first task; the native skips a puppet and an AI-off actor and is asked
   again 30 updates later. Read: v2's link line after the promote line. Twin Souls' limit with an entry that holds no effect
   (G4) goes with H-C4-4.
