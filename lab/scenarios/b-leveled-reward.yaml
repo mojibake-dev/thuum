@@ -1,0 +1,248 @@
+# b-leveled-reward (thuum-fa, 2026-11-12): train 52's Fix 1, D-R1 C's leveled gap closed (a script's AddItem of a leveled list on
+# the seat's own player lands on the server's record and nothing takes it back). GREEN as x-leveled-reward v1 20261112-044101 on
+# train 52's stage (fork m4-train-52 c3f9d175, canon since the gate 20261112-055559-merge-m4-train-52, 20 of 20). Promoted
+# unchanged (rule 13): the id and these first lines differ from the probe (b87e591e), the steps and asserts are byte for byte;
+# the probe's own header follows as this scenario's documentation, its BUILD line the stage's.
+#
+# ONE QUESTION: when a script's AddItem on the seat's own player names a leveled list, does the engine's roll land on the server's
+# record, and does nothing take it back?
+# The subject is Lucan's Golden Claw reward, LvlQuestReward02Medium 0xc0405 (LVLD 0, LVLF 0x00, LLCT 5, every entry Gold001 0xf:
+# x400 at level 1 up to x1200 at 40; lab/esm.py on Skyrim.esm). MS13 0x39645 stage 100 runs QF_MS13_00039645.Fragment_17 (the
+# VMAD's fragment table read with lab/census.py's parse_vmad; the pex from Skyrim - Misc.bsa with lab/tools/bsa-extract.py and
+# lab/pex.py disasm, 2026-11-10): RemoveItem(GoldenClaw, 1) on the player, the LucanClaw alias's Enable, AddItem(LvlQuestReward02Medium,
+# 1, False) on the player, Lucan's and Camilla's SetRelationshipRank toward the player, MS13FIN.Start(), Stop(). The plan reads the
+# same list first where nothing else happens: MS01 0x18b4b's Fragment_56 (stage 39) and Fragment_62 (stage 49) are each one call,
+# Game.GetPlayer().AddItem(LvlQuestReward02Medium, 1, False) (the same disassembly). So leg A is the plan's question, legs B and C
+# the plan's control and non-gold roll, leg L Lucan's own stage, leg K a relaunch: playtest 52's item (plan 1.8: Lucan's reward kept
+# through a relaunch and the 5 s applies) as far as the lab can play it.
+#
+# BUILD: fork m4-train-52-platform 6c9fb1b7 on the server and c1, its one Windows dist (plan section 7 step 11): the server half
+# d9b8554d merged at ebbde5bb (its server tree is d9b8554d's, byte for byte), Fix 1's platform and client 5ee97fef, the client
+# commits 24448f7b and 1c856c66 merged at 6c9fb1b7. SCHEMA_VERSION 44 (fork 4b5d9950): a seat and a server of another schema never
+# connect. lab-api and lab-driver from thuum main (no new grammar). Every line below was read at the commit named; the platform
+# files at 6c9fb1b7 equal 5ee97fef's, so the line numbers hold at both. A later head needs the same check.
+#
+# THE LINES (each pattern below is the text its print site writes):
+#   - c1's platform log, the park's close (ScriptNatives.cpp:1444-1447, the name ParkedName :1318-1327): "[verb:scripts] own
+#     ObjectReference.AddItem <list> on 14 (from <caller>.<handler>), stack <id>: its roll landed <k> base(s) in its AddItemFunctor
+#     (<base> x<n>, ...), reported with the call"; an empty roll's twin at :1435-1437 ("...its roll landed nothing in its
+#     AddItemFunctor, reported with an empty landing"); the first 64 closes and every hundredth;
+#   - c1's platform log, a parked call let go, one line a minute (DropLine :1331-1345): "[verb:scripts] own <name>: <why>, nothing
+#     reported (<n> such since the last line)", why "no AddItemFunctor ran within 60 s" (:1485) or "the native completed with no
+#     functor" (:3114); the slot's read-back warn (:1360-1362);
+#   - c1's platform log at install (:3377-3381): "[verb:scripts] AddItemFunctor's operator() hooked (CommonLibSSE-NG
+#     VTABLE_SkyrimScript____AddItemFunctor slot 01, AE id 218372; the slot held <where>): ..." ("scriptLeveledLandings off: ..."
+#     at :3383 when the switch is off);
+#   - the server (d9b8554d ActionListener.cpp RecordLandings :4746, its line :4754-4758 with the words :4831-4834):
+#     "[verb:quest-stage] <player>'s own ObjectReference.AddItem <list> (from <caller>.<handler>): its roll landed <base> x<n>, ...,
+#     added to its inventory as its seat reported it (D-R1 C, R2; each a base the list can roll, D-R2 B), <m> of <base> held now";
+#     "...: its roll landed nothing" (:4769); a refusal through RefuseStateRow (:4813-4819), E_SCRIPTCALL_ROLL's why at wire-rules
+#     player_own.rs:450, E_SCRIPTCALL_LEVELED's at :453 (a leveled call with no landing); the plain path, leg B's (:5047-5051 and
+#     :5062-5066): "...'s own ObjectReference.AddItem f (from ...): 25 added to its inventory as its seat reported it (D-R1 C, R2),
+#     <n> held now";
+#   - c1's console, the client's apply (sync/inventory.ts:507-509 at 6c9fb1b7; a MISC count in one call, :418-426):
+#     "TESModPlatform.addItemEx(ObjectReference(14), Form(<base>), <count>, ...)": a negative count is an apply taking an item back;
+#   - c1's console, the batch (scriptCallService.ts:156): "[verb:scripts] native ObjectReference.AddItem on 14 state latent: c0405,
+#     1, false from <caller>.<handler>"; the hold of each landed base (holdOwnItem :351-367, its landed branch 5ee97fef's) and the
+#     send's `landed` (:511).
+#
+# THE SHAPE. x-additem-functor's frame (green 3aebdf11 at 20261110-151634), its trace and its harvest left out: c1 alone (c2's game
+# from the run before may reconnect, lab-one-seat-runs-include-c2; nothing here reads it), the clean world, the server's TGM,
+# Riverwood's landing (Tamriel 0x3c, 17225, -47204, -128), the legs by the driver's set-stage (Papyrus Quest.SetCurrentStageID; the
+# stage's fragment runs on its own Stack, the seam's script path; never a typed setstage). x-acting-player's reads (v2.1, 1f1718c6):
+# the gold on both sides before and after each leg, and the revert lines' count before the legs against the count after them.
+#   leg A: MS01 stages 39 and 49, 3 s apart, then 5 s;
+#   leg B, the control: FreeformStonehillsA 0x64958 stage 20 (Gold001 x25);
+#   leg C: FreeformRiften12 0x41fd2 stage 25 (Fragment_4: AddItem(pReward = LItemJewelryRing 0x8757e, 1), then EvaluatePackage on
+#     Wujeeta's alias; LVLF 0x03, 32 entries of eight rings in Skyrim.esm); then 15 s, two of the client's 5 s applies past its 10 s hold
+#     (ownItemHoldMs, scriptCallService.ts:686);
+#   leg L: MS13 stage 100 (start: true only if MS13 is not running; it is Start Game Enabled, DNAM 0x0111), then 20 s;
+#   leg K: c1 relaunched and logged in again, then 12 s of applies: the record serves the reward to a fresh game.
+# The quests' flags (lab/esm.py id): MS01, FreeformStonehillsA and FreeformRiften12 DNAM 0x0011, MS13 0x0111, none with an ENAM.
+#
+# CLAIMED (premises in their own block first, ADR-064 amendment B; then one block per question, each claim with its red):
+#   P. MS01, FreeformStonehillsA and FreeformRiften12 run on c1 and none of their five stages is done;
+#   0. every set reached c1's engine; 1 to 8, the plan's (section 1.8); 9, x-acting-player's revert read: no apply took an item back;
+#   L0 to L4, Lucan's leg; K1, the relaunch.
+# RECORDED, NOT CLAIMED: c1's batch lines for c0405 and 8757e; its drop lines of any why; its stage report lines; every own row the
+# server judged; MS13's other calls (the claw's RemoveItem folds: player_own.rs:478-481 takes at most what the record holds, so a
+# take of what it lacks writes nothing; the standing rows on Lucan and Camilla, whose cell no seat hosts); a screenshot per read.
+#
+# HYPOTHESIS links this probe reads (plan 1.10; ScriptNatives.cpp's comment :1268-1272): H-LR1 (a multi-entry roll lands every entry
+# inside the functor; every roll here is one entry, so H-LR1 is not read, the plan's census query is its Dynamic); H-LR2 (no plugin
+# rewrites slot 01 after the thunk's write; the install line and claim 8's expiry count read it); H-LR3 (operator() and its events on
+# one OS thread; claims 1, 2 and L2 read it, since a landing joins only inside the window's thread_local); H-LR4 (within 60 s while
+# a menu is open; not read, no menu opens); H-RW1, inherited (the hold keeps a landing from the 5 s apply, an apply in the tick before
+# the hold healed by the server's SetInventory echo; claims 7, 9 and L4 read it); the level band (LVLF 0x00 takes the highest entry
+# at or below the player's level alone: claims 5 and L3 bound the count by it). Slot 01's target: UNVERIFIED (Ghidra), the trace's
+# live read standing in for it (plan 1.7).
+#
+# HOW TO READ A RED.
+#   P: a quest not running on c1, or a stage done before the probe: the run stops before the legs (rerun on a clean world, or take
+#     x-additem-functor's runner-up DA11FIN 0x4d217 stage 20 with start: true).
+#   0 red: a set the engine refused (its set-stage answer's ok and stage in the step's note); that leg's claims are unread.
+#   1 at 0 with 2 at 0: no close line at all. Claim 8's install line first (absent: the hook never installed, or the switch is off,
+#     the "scriptLeveledLandings off" line at :3383); then the drop lines ("no AddItemFunctor ran within 60 s": the window never closed
+#     the parked call, H-LR2 or H-LR3 FALSE; "the native completed with no functor": the native answered without queueing one).
+#   1 at 2, 2 at 0: the platform closed both and the server recorded neither: an E_SCRIPTCALL_ line names the code (claim 4);
+#     E_SCRIPTCALL_LEVELED is a call that crossed with no landing (a client older than 5ee97fef's send), E_VAL_ at the edge a shape
+#     wire-validate refused (check_landed, fork 4b5d9950).
+#   1 with "its roll landed nothing": the window closed with no event noted inside it (H-LR3, or the event's newContainer not 0x14).
+#   3 red with 1 and 2 green: the ring's roll landed outside the functor, or as another count (the close line's bases say which).
+#   4 red: the line names the code and the call; E_SCRIPTCALL_ROLL is a base outside the list's reach (a mis-joined event, D-R2 B).
+#   5 red with 2 green: a count outside the level band (the server's line names it); 6 red: the plain path moved (D-R1 C's own,
+#     green in x-acting-player v2.1), not this fix.
+#   7 or 9 red with 2 green: an apply took a roll back. With 7 green and 9 red the echo healed it (a revert line, then the add-back,
+#     H-RW1's healed case); with 7 red the hold lapsed or held the wrong base (the batch line's args and the close line's bases).
+#   8 red: "hooked" absent with "scriptLeveledLandings off" present is the switch, not the code; an expiry line is H-LR2's read.
+#   L0 red: MS13's stage 100 done before the run (the clean world says not). L1 red: the engine refused the set (start: true's
+#     Quest.Start failed: its aliases, the step's note). L2 to L4 red with 1 to 9 green: MS13's deployed fragment is not the vanilla
+#     one read here (USSEP's MS13 is unread, below), or its other calls changed the stack's path (the close line's caller says).
+#   K1 red: the record did not serve the reward at login, or the relaunch's login met a lab fault (a red after a plain relaunch
+#     reads [[lab-logcount-relaunch-miss]] first; this claim reads inventories, not log lines).
+#
+# UNVERIFIED premises: that the deployed MS01, FreeformRiften12 and MS13 fragments are the vanilla ones read here (the deployed load
+# order carries USSEP, whose MS01 record wins per x-additem-functor's census; its scripts were not read this session); that every
+# set's fragment runs on c1 (x-additem-functor's read for MS01 and the control); that MS13 runs on c1 at the landing (Start Game
+# Enabled; leg L asks Quest.Start only if not); the lab character's level (the band, claims 5 and L3); that a relaunch's login serves
+# the recorded inventory before the 12 s read (the apply every 5 s); Fix 1's platform half compiled on Windows only (5ee97fef's
+# message: not compiled off Windows), so every platform line here is its first read. Assertions are evaluated by lab-api only
+# (ADR-009).
+id: b-leveled-reward
+milestone: M4
+clients: [c1]
+server:
+  snapshot: clean
+  netem: null
+  npcEnabled: true
+  gameHour: 7.9
+timeout_s: 900
+artifacts: [server.log, c1.log, c1-console.log, screenshots]
+steps:
+  - c1: connect
+  - wait: 10
+  - c1: close-menu {name: MessageBoxMenu}
+  - c1: server-console {name: TGM}
+  # Riverwood's landing (x-additem-functor's frame)
+  - c1: teleport {cell: "3c:Skyrim.esm", x: 17225, y: -47204, z: -128, rot: [0, 0, 0]}
+  - wait: 20
+  # the premises' reads, the gold on both sides, and the revert lines so far (x-acting-player's baselines)
+  - c1: quest-stage {quests: [0x18b4b, 0x64958, 0x41fd2, 0x39645], stages: [20, 25, 39, 49, 100]}
+  - server: snapshot {name: lucanRunning0, of: "c1.quest(0x39645).running()"}
+  - server: snapshot {name: lucanDone0, of: "c1.quest(0x39645).stageDone(100)"}
+  - c1: inventory {ref: 0x14}
+  - server: snapshot {name: s0GoldSeat, of: 'c1.inventory(0x14).count("Skyrim.esm:Gold001")'}
+  - server: snapshot {name: s0Gold, of: 'server.inventory(c1).count("Skyrim.esm:Gold001")'}
+  - c1: log-count {pattern: "TESModPlatform.addItemEx.ObjectReference.14., Form.[0-9a-f]+., -[0-9]+,"}
+  - server: snapshot {name: c1Revert0, of: 'c1.log_count("TESModPlatform.addItemEx.ObjectReference.14., Form.[0-9a-f]+., -[0-9]+,")'}
+  # P: the plan's premises, their own block ahead of the legs
+  - assert:
+      - c1.quest(0x18b4b).running() == true
+      - c1.quest(0x18b4b).stageDone(39) == false
+      - c1.quest(0x18b4b).stageDone(49) == false
+      - c1.quest(0x64958).running() == true
+      - c1.quest(0x64958).stageDone(20) == false
+      - c1.quest(0x41fd2).running() == true
+      - c1.quest(0x41fd2).stageDone(25) == false
+
+  # leg A, the question: MS01's two reward stages, each one call, AddItem(LvlQuestReward02Medium) on the player
+  - c1: set-stage {quest: 0x18b4b, stage: 39}
+  - wait: 3
+  - c1: set-stage {quest: 0x18b4b, stage: 49}
+  - wait: 5
+  - server: snapshot {name: s1Gold, of: 'server.inventory(c1).count("Skyrim.esm:Gold001")'}
+  # leg B, the control: FreeformStonehillsA's stage 20, AddItem(Gold001, 25) on the player, D-R1 C's plain path
+  - c1: set-stage {quest: 0x64958, stage: 20}
+  - wait: 5
+  - server: snapshot {name: s2Gold, of: 'server.inventory(c1).count("Skyrim.esm:Gold001")'}
+  # leg C, a non-gold roll: FreeformRiften12's stage 25, AddItem(LItemJewelryRing) on the player
+  - c1: set-stage {quest: 0x41fd2, stage: 25}
+  - wait: 5
+  # two of the client's 5 s applies past its 10 s hold, then both sides' gold
+  - wait: 15
+  - c1: inventory {ref: 0x14}
+  - server: snapshot {name: s3GoldSeat, of: 'c1.inventory(0x14).count("Skyrim.esm:Gold001")'}
+  - server: snapshot {name: s3Gold, of: 'server.inventory(c1).count("Skyrim.esm:Gold001")'}
+  - c1: screenshot
+
+  # leg L, Lucan's own: MS13 stage 100, Fragment_17 (the claw taken, the reward rolled, the ranks, MS13FIN started, MS13 stopped)
+  - c1: set-stage {quest: 0x39645, stage: 100, start: true}
+  - wait: 5
+  - c1: quest-stage {quests: [0x18b4b, 0x64958, 0x41fd2, 0x39645], stages: [20, 25, 39, 49, 100]}
+  - wait: 15
+  - c1: inventory {ref: 0x14}
+  - server: snapshot {name: s4GoldSeat, of: 'c1.inventory(0x14).count("Skyrim.esm:Gold001")'}
+  - server: snapshot {name: s4Gold, of: 'server.inventory(c1).count("Skyrim.esm:Gold001")'}
+  - c1: screenshot
+
+  # the lines, claimed (1, 8, 9, L2) and recorded
+  - c1: log-count {pattern: "(?i)own ObjectReference[.]AddItem c0405 on 14 [(]from QF_MS01_00018B4B[.]Fragment_(56|62)[)], stack [0-9]+: its roll landed 1 base[(]s[)] in its AddItemFunctor [(]f x[0-9]+[)], reported with the call"}
+  - c1: log-count {pattern: "AddItemFunctor.s operator[(][)] hooked"}
+  - c1: log-count {pattern: "no AddItemFunctor ran within"}
+  - c1: log-count {pattern: "(?i)own ObjectReference[.]AddItem c0405 on 14 [(]from QF_MS13_00039645[.]Fragment_17[)], stack [0-9]+: its roll landed 1 base[(]s[)] in its AddItemFunctor [(]f x[0-9]+[)], reported with the call"}
+  - c1: log-count {pattern: "TESModPlatform.addItemEx.ObjectReference.14., Form.[0-9a-f]+., -[0-9]+,"}
+  - c1: log-count {pattern: "own ObjectReference[.]AddItem [0-9a-f]+ on 14 .*: its roll landed"}
+  - c1: log-count {pattern: "own ObjectReference[.]AddItem [0-9a-f]+ on 14 .*, nothing reported"}
+  - c1: log-count {pattern: "scriptLeveledLandings off"}
+  - c1: log-count {pattern: "native ObjectReference[.](AddItem|RemoveItem) on 14 state latent: "}
+  - c1: log-count {pattern: "this game set stage (39|49|20|25|100) of shared quest (18b4b|64958|41fd2|39645); reported"}
+  - server: log-count {pattern: "(?i)own ObjectReference[.]AddItem c0405 [(]from QF_MS01_00018B4B[.]Fragment_(56|62)[)]: its roll landed f x[0-9]+, added to its inventory as its seat reported it"}
+  - server: log-count {pattern: "(?i)own ObjectReference[.]AddItem 8757e [(]from QF_FreeformRiften12_00041FD2[.]Fragment_[0-9]+[)]: its roll landed [0-9a-f]+ x1, added to its inventory"}
+  - server: log-count {pattern: "(?i)own ObjectReference[.]AddItem c0405 [(]from QF_MS13_00039645[.]Fragment_17[)]: its roll landed f x[0-9]+, added to its inventory as its seat reported it"}
+  - server: log-count {pattern: "[0-9a-f]+.s own ObjectReference[.](AddItem|RemoveItem) "}
+  - server: log-count {pattern: "E_SCRIPTCALL_[A-Z]+"}
+  - c1: dump-state
+
+  # the plan's question (section 1.8), its claims 1 to 8, with 0 and 9 beside them
+  - assert:
+      # 0. every set reached c1's engine (x-additem-functor's claim 3) [red: the engine refused a set; its leg is unread]
+      - 'c1.quest(0x18b4b).stageDone(39) == true and c1.quest(0x18b4b).stageDone(49) == true and c1.quest(0x64958).stageDone(20) == true and c1.quest(0x41fd2).stageDone(25) == true'
+      # 1. c1 closed each MS01 call with its roll, one gold base [red: no park, no window or no close; read claim 8 and the drop lines]
+      - 'c1.log_count("(?i)own ObjectReference[.]AddItem c0405 on 14 [(]from QF_MS01_00018B4B[.]Fragment_(56|62)[)], stack [0-9]+: its roll landed 1 base[(]s[)] in its AddItemFunctor [(]f x[0-9]+[)], reported with the call") == 2'
+      # 2. the server recorded each landing as a plain grant [red with 1 green: refused at the edge or by player_own; claim 4 names it]
+      - 'server.log_count("(?i)own ObjectReference[.]AddItem c0405 [(]from QF_MS01_00018B4B[.]Fragment_(56|62)[)]: its roll landed f x[0-9]+, added to its inventory as its seat reported it") == 2'
+      # 3. a non-gold roll lands the same way [red with 1 and 2 green: the ring's roll landed outside the window or as another shape]
+      - 'server.log_count("(?i)own ObjectReference[.]AddItem 8757e [(]from QF_FreeformRiften12_00041FD2[.]Fragment_[0-9]+[)]: its roll landed [0-9a-f]+ x1, added to its inventory") == 1'
+      # 4. no leveled call crossed without its roll, none outside its list's reach [red: the line names the code and the call]
+      - 'server.log_count("E_SCRIPTCALL_LEVELED") == 0 and server.log_count("E_SCRIPTCALL_ROLL") == 0'
+      # 5. the record gained two rolls in the level band [red with 2 green: a count outside the band; the server's line names it]
+      - 'snapshot("s1Gold") - snapshot("s0Gold") >= 800 and snapshot("s1Gold") - snapshot("s0Gold") <= 2400'
+      # 6. the plain path is unchanged [red: D-R1 C's own AddItem moved, not this fix]
+      - 'snapshot("s2Gold") - snapshot("s1Gold") == 25'
+      # 7. c1's game holds what the record holds past two applies (H-RW1's read) [red: an apply took a roll back and nothing healed it]
+      - 'snapshot("s3GoldSeat") == snapshot("s3Gold")'
+      # 8. the hook installed and no parked call expired [red: no install line (or the switch off), or a functor that never ran]
+      - 'c1.log_count("AddItemFunctor.s operator[(][)] hooked") == 1 and c1.log_count("no AddItemFunctor ran within") == 0'
+      # 9. no apply took any item back from c1's player, legs A to L [red: a revert line; with 7 green the echo healed it, H-RW1]
+      - 'c1.log_count("TESModPlatform.addItemEx.ObjectReference.14., Form.[0-9a-f]+., -[0-9]+,") == snapshot("c1Revert0")'
+
+  # Lucan's Golden Claw reward: it lands, it is kept on the record, nothing takes it back
+  - assert:
+      # L0. MS13's stage 100 was not done before the set [red: the frame, not the fix; rerun on a clean world]
+      - 'snapshot("lucanDone0") == false'
+      # L1. the set reached c1's engine [red: the engine refused it (Quest.Start's answer when MS13 was not running: the note)]
+      - 'c1.quest(0x39645).stageDone(100) == true'
+      # L2. it lands: c1 closed Fragment_17's call with its roll [red with 1 green: the deployed fragment differs, or no park on it]
+      - 'c1.log_count("(?i)own ObjectReference[.]AddItem c0405 on 14 [(]from QF_MS13_00039645[.]Fragment_17[)], stack [0-9]+: its roll landed 1 base[(]s[)] in its AddItemFunctor [(]f x[0-9]+[)], reported with the call") == 1'
+      # L3. it is kept on the record: one record line, and the record gained one roll in the band [red: refused (claim 4), or another count]
+      - 'server.log_count("(?i)own ObjectReference[.]AddItem c0405 [(]from QF_MS13_00039645[.]Fragment_17[)]: its roll landed f x[0-9]+, added to its inventory as its seat reported it") == 1'
+      - 'snapshot("s4Gold") - snapshot("s3Gold") >= 400 and snapshot("s4Gold") - snapshot("s3Gold") <= 1200'
+      # L4. nothing takes it back: c1's game holds the record's count past two applies (claim 9 counts its revert lines) [red: H-RW1]
+      - 'snapshot("s4GoldSeat") == snapshot("s4Gold")'
+
+  # leg K: c1 relaunched, so its game holds only what the record serves at login
+  - c1: relaunch {until: gone}
+  - c1: connect
+  - wait: 20
+  - c1: close-menu {name: MessageBoxMenu}
+  # god mode after the relaunch, which drops it
+  - c1: server-console {name: TGM}
+  - wait: 12
+  - c1: inventory {ref: 0x14}
+  - server: snapshot {name: s5GoldSeat, of: 'c1.inventory(0x14).count("Skyrim.esm:Gold001")'}
+  - server: snapshot {name: s5Gold, of: 'server.inventory(c1).count("Skyrim.esm:Gold001")'}
+  - c1: screenshot
+  - assert:
+      # K1. the record kept the rewards through c1's relaunch and served them to its fresh game [red: the record lost them, or the
+      # login's apply had not landed within 12 s (read the console's addItemEx lines after the login)]
+      - 'snapshot("s5Gold") == snapshot("s4Gold") and snapshot("s5GoldSeat") == snapshot("s5Gold")'
