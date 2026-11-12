@@ -1191,7 +1191,6 @@ class ClientLogs(RunTests):
 
 
 
-@needs_deps
 def _uncaptured_curl(script, run):
     """What a seat printed before its script's JSON when the script left the upload's curl.exe uncaptured: lab-api's
     answer, which ends in no newline, so the two shared one line (20261112-125536's c1: "crash check c1: no answer
@@ -1201,6 +1200,7 @@ def _uncaptured_curl(script, run):
     return json.dumps({"ok": True, "client": "c1", "run": run, "bytes": 14}, separators=(",", ":"))
 
 
+@needs_deps
 class HangEvidence(RunTests):
     """A seat that stops answering mid-run (the load freeze of 2026-10-16: the game silent after
     PostLoadGame, the first console step timing out) is rolled back by the next run with all its
