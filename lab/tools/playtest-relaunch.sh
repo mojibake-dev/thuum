@@ -44,11 +44,33 @@ print(int(h.get("seconds_left") or 0), h.get("reason") or "")' 2>/dev/null) || s
     -d "$(python3 -c 'import json, sys; print(json.dumps({"minutes": 180, "reason": sys.argv[1]}))' "$reason")" >/dev/null 2>&1 || true
 }
 enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
-# copy_ps <src expression> <copy>: a log the game holds open for writing, copied with read-write sharing as lab-api's runner
-# copies (runner.py's log-count and Frida copies): a plain Copy-Item shares no writes and is refused then ("being used by
-# another process", 193821, 194559, 195437). The old copy goes first and a failed open stops the script, so no stale or
-# empty copy is read as the log
+# copy_ps <src expression> <copy>: a log the game holds open for writing, copied with read-write sharing as lab-api's
+# log-count and Frida copies are (runner.py): a plain Copy-Item shares no writes and is refused then ("being used by
+# another process", 193821, 194559, 195437). The old copy goes first and a failed open stops the script (exit 1) before
+# a new copy is made, so a caller that reads only after a zero exit never takes an older or empty copy for the log
 copy_ps() { printf '%s' "\$ErrorActionPreference = 'Stop'; Remove-Item -LiteralPath '$2' -Force -ErrorAction SilentlyContinue; \$s = [IO.File]::Open($1, 'Open', 'Read', 'ReadWrite'); \$d = [IO.File]::Create('$2'); \$s.CopyTo(\$d); \$d.Close(); \$s.Close()"; }
+# read_ranged <vmid> <guest path> <local file>: a seat's file read back in 512 KiB ranges through Proxmox's own agent
+# file-read (offset, count, decode=0; qemu-server 9.2.15 on core), as lab-api's Runner._read_back reads: one whole-file read
+# of a console past about 1 MiB timed out on a busy seat (c1, 2026-11-12, 1,464,655 bytes: "guest-file-read failed - got
+# timeout"). Each range is asked up to three times and the file ends at the first short range; 1 when a range never came
+# back, the bytes before it kept
+read_ranged() {
+  local at=0 n try part
+  part=$(mktemp); : > "$3"
+  while :; do
+    for try in 1 2 3; do
+      ssh -o BatchMode=yes "$jump" "pvesh get /nodes/core/qemu/$1/agent/file-read --file '$2' --offset $at --count 524288 --decode 0 --output-format json" 2>/dev/null \
+        | python3 -c 'import base64,json,sys; sys.stdout.buffer.write(base64.b64decode(json.load(sys.stdin)["content"] or ""))' > "$part" 2>/dev/null && break
+      [ "$try" = 3 ] && { rm -f "$part"; return 1; }
+      sleep 3
+    done
+    n=$(wc -c < "$part" | tr -d ' ')
+    cat "$part" >> "$3"
+    [ "$n" -eq 524288 ] || break
+    at=$((at + n))
+  done
+  rm -f "$part"
+}
 keep() {  # the logs of the session the stop ends, off the clone, each copied first (copy_ps: the game holds them open)
   local stamp kind src copy name tmp ps
   stamp=$(date -u +%Y%m%dT%H%M%SZ); tmp=$(mktemp)
@@ -61,8 +83,7 @@ keep() {  # the logs of the session the stop ends, off the clone, each copied fi
     # stays far under the answer size that killed sky-c1's agent once (~5.6 MB; playtest 45's c1 log ran to 25k error lines)
     ps="$(copy_ps "$src" "$copy"); \$t = Get-Content -LiteralPath '$copy'; if (\$t.Count -gt 10000) { \$n = \$t.Count; Set-Content -LiteralPath '$copy' -Value (\$t[0..1999] + ('... ' + (\$n - 10000) + ' lines left out by the relaunch keep ...') + \$t[-8000..-1]) }"
     ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$ps")" >/dev/null 2>&1 || true
-    ssh -o BatchMode=yes "$jump" "pvesh get /nodes/core/qemu/$vmid/agent/file-read --file '$copy' --output-format json" 2>/dev/null \
-      | python3 -c 'import json,sys; sys.stdout.write(json.load(sys.stdin).get("content",""))' > "$tmp" 2>/dev/null || true
+    read_ranged "$vmid" "$copy" "$tmp" || true
     if [ -s "$tmp" ] && ssh -o BatchMode=yes -J "$jump" "$srv" "cat > /srv/lab/results/relaunch-logs/$name" < "$tmp"; then
       echo "kept $client's $kind log, $(wc -l < "$tmp" | tr -d ' ') lines: https://thuum.gaussing.tv/results/relaunch-logs/$name"
     else
