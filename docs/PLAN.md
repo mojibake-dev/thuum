@@ -1572,6 +1572,13 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
 - Skills, experience, and leveling from the documented formulas, computed
   R0; the client's own leveling disabled.
 - Perks, enchanting, alchemy, pickpocketing as server transactions.
+- PvP pickpocketing (Eli, 2026-11-12 about 04:1xZ, in thuum-fa's session, verbatim "id like pvp pick pocketing to work for when
+  we get to m5"): one player picks the other's pocket. NEXT when M5 opens. The shape, inventory transfer being R0: the thief's
+  engine opens its pickpocket menu on the other player's figure; each take is a request the server judges, rolling the engine's
+  own chance (skill, the item's value and weight, perks) and moving the item between the two players' records; the thief's
+  Pickpocket XP as leveling.md:100 has it. Eli's calls owed then: whether the victim learns of a success or only of a failure;
+  whether equipped items and gold can be taken; whether it needs a PvP consent between the two; and a caught thief's
+  consequence (a bounty, a fight, or a word).
 - Vampirism and lycanthropy as declared state (R0; Eli's caveat on
   Nature's Balance, 2026-10-18): the race swap accepted from the player's
   game against the known vampire variant of its race and relayed to every
