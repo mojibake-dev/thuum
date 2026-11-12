@@ -771,7 +771,11 @@ whole, the console logs timed out the agent on both seats in
 20261111-191642. A log not fetched is a note naming its code and "(log
 fetch)", an E_PVE_* the agent's or E_RUN_LOG_FETCH the runner's own (a
 copy that failed its tries, a short read, the cap), never the run's
-failure: no verdict reads a log artifact. The SKSE folders' logs are still
+failure: no verdict reads a log artifact. A source that is not there is
+said by the copy itself and not tried again, and once a fetch finds the
+seat's guest agent not running its other log fetches are skipped, with one
+note, until the seat's reset: each would spend three tries on an agent
+only a restart brings back. The SKSE folders' logs are still
 copied by one Copy-Item over their listing and read whole.
 A run in which a seat stopped answering (a step that timed out naming it: the
 load freeze of 2026-10-16, a game silent after PostLoadGame) also keeps that

@@ -181,6 +181,10 @@ class RunnerError(Exception):
     """E_RUN: the lab itself failed; the verdict is error, not red."""
 
 
+class SeatFileMissing(ValueError):
+    """A seat copy's source is not there (its copy exec printed `missing <path>`): no further try finds it."""
+
+
 @dataclass
 class RunRecord:
     run_id: str
@@ -230,6 +234,9 @@ class RunRecord:
     # evidence, which its end must fetch whole or the run is a lab fault (E_RUN_FRIDA_FETCH); a trace started by hand
     # beside it (POST /lab/frida) is not
     frida: set[tuple[str, str]] = field(default_factory=set)
+    # the seats whose guest agent a log fetch found not running, each with that error and whether the skip of its other
+    # log fetches is noted yet: they are skipped until the seat's reset (_fetch_client_file, _skse_logs, _reset_seat)
+    agents_down: dict[str, tuple[str, bool]] = field(default_factory=dict)
 
     def progress(self) -> dict[str, Any]:
         if self.verdict != "running":
@@ -924,6 +931,9 @@ class Runner:
         except RunnerError as e:
             rec.faulted[client] = str(e)
             raise
+        # a reset that finished had the seat's agent answer its relaunch or its VM restart: a log fetch before it that
+        # found the agent not running (a .before-run one) no longer stops the seat's later ones
+        rec.agents_down.pop(client, None)
         seconds = round(self._clock() - t0, 1)
         runs = seat.since_rollback if seat is not None else None
         if reason:
@@ -2123,6 +2133,8 @@ class Runner:
         if client in rec.skse_fetched:
             return
         rec.skse_fetched.add(client)
+        if client in rec.agents_down:
+            return  # its guest agent was found not running, noted once (_fetch_client_file)
         # skyrim-platform.log's folder first, then every other My Games\<folder>\SKSE: a CommonLibSSE-NG
         # plugin can log under My Games\Skyrim.INI\SKSE (the freeze fix's TMS_AIPathingFreezeFix.log does,
         # 2026-10-17); a name already taken by an earlier folder keeps the first. Extension, since -Filter
@@ -2140,6 +2152,8 @@ class Runner:
             res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
         except ProxmoxError as e:
             rec.notes.append(f"{client} SKSE logs: {e}")
+            if "guest agent is not running" in str(e):
+                rec.agents_down.setdefault(client, (str(e), False))
             return
         if res.exitcode != 0:
             rec.notes.append(f"{client} SKSE logs: exit {res.exitcode}: {res.err.strip()[:200]}")
@@ -2187,20 +2201,32 @@ class Runner:
         open the seat's fault): read whole, the console logs timed out the agent on both seats in 20261111-191642, and
         playtest 45's c1 log reached 25k lines. A failure is a note naming its code and "(log fetch)", an E_PVE_* the
         agent's or E_RUN_LOG_FETCH the runner's own (a copy that failed its tries, a short read, the cap), never a
-        failed run."""
+        failed run. A source that is not there is said by the copy itself (`missing <path>`) and not tried again, and
+        once a fetch finds the seat's guest agent not running its other log fetches are skipped until its reset, with
+        one note: each would spend its copy's three tries on an agent only a restart brings back (the fresh review of
+        e8d8de9b: a missing log cost about 25 s, a dead agent about 75 s a seat)."""
+        seat = g.client or g.name
+        down = rec.agents_down.get(seat)
+        if down is not None:
+            if not down[1]:
+                rec.notes.append(f"{name} and {seat}'s other logs after it not fetched: its guest agent was found not running "
+                                 f"({down[0][:160]}) (log fetch)")
+                rec.agents_down[seat] = (down[0], True)
+            return
         copy = f"{self.s.client_lab_dir}\\{name}"
         cmd = ["powershell", "-NoProfile", "-Command",
-               f"$ErrorActionPreference = 'Stop'; $src = {source}; $s = [IO.File]::Open($src, 'Open', 'Read', 'ReadWrite'); "
+               f"$ErrorActionPreference = 'Stop'; $src = {source}; "
+               f"if (-not (Test-Path -LiteralPath $src)) {{ Write-Output ('missing ' + $src); exit 0 }}; "
+               f"$s = [IO.File]::Open($src, 'Open', 'Read', 'ReadWrite'); "
                f"$n = $s.Length; $d = [IO.File]::Create('{copy}'); $s.CopyTo($d); $m = $d.Length; $d.Close(); $s.Close(); "
                f"Write-Output ([string]$n + ' ' + [string]$m)"]
         try:
             size = await self._seat_copy(g, cmd, copy)
             data = await self._read_back(rec, g, copy, size, name)
-        except ProxmoxError as e:
-            rec.notes.append(f"{name}: {e} (log fetch)")
-            return
-        except ValueError as e:
-            rec.notes.append(f"{name}: E_RUN_LOG_FETCH: {e} (log fetch)")
+        except (ProxmoxError, ValueError) as e:
+            rec.notes.append(f"{name}: {e} (log fetch)" if isinstance(e, ProxmoxError) else f"{name}: E_RUN_LOG_FETCH: {e} (log fetch)")
+            if "guest agent is not running" in str(e):
+                rec.agents_down.setdefault(seat, (str(e), False))
             return
         (rec.dir / name).write_text(data.decode("utf-8", errors="replace"), encoding="utf-8")
         rec.artifacts.append(name)
@@ -2208,7 +2234,8 @@ class Runner:
     async def _tried(self, g: Guest, cmd: list[str], answer, what: str) -> int:
         """`cmd` on the seat with three tries 10 s apart, as the game check and log-count's copy try theirs (a busy
         agent's "got timeout", a file refused for a moment): `answer` reads a finished exec, None for a try that
-        failed, and the first good answer is the value; three failed tries are a ValueError naming the last. An exec
+        failed, and the first good answer is the value; three failed tries are a ValueError naming the last, and an
+        answer may raise one itself for a failure no try mends (SeatFileMissing, a source that is not there). An exec
         whose answer the agent lost (E_PVE_EXEC_LOST) has ended on the seat, so that ProxmoxError is the caller's at
         once. An exec that ran to its deadline (it "did not exit in" guest_task_timeout_s) is not tried again: three
         such tries and their pauses held a trace's end for up to about 760 s (the re-review of 5b982dc6, nit 4)."""
@@ -2237,9 +2264,13 @@ class Runner:
         A copy whose exec answer the agent lost (E_PVE_EXEC_LOST) ran to its end on the seat, so its length then comes
         from the copy itself, by one length exec under the same tries. A copy shorter than its source at its open was
         cut short, since the sources only grow (the script's .log is opened 'a', frida_script_text; frida-inject's
-        stdout appends), and is tried again as a failed one is."""
+        stdout appends), and is tried again as a failed one is. A copy whose exec printed `missing <path>` instead (a
+        client log's source that is not there, _fetch_client_file) is SeatFileMissing at once: no try finds it."""
         def copied(res) -> int | None:
-            got = re.fullmatch(r"(\d+) (\d+)", _last_line(res.out))
+            last = _last_line(res.out)
+            if res.exitcode == 0 and last.startswith("missing "):
+                raise SeatFileMissing(f"its source {last[len('missing '):]} is not there")
+            got = re.fullmatch(r"(\d+) (\d+)", last)
             return int(got.group(2)) if res.exitcode == 0 and got and int(got.group(2)) >= int(got.group(1)) else None
 
         def length(res) -> int | None:

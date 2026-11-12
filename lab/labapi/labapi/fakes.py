@@ -90,15 +90,17 @@ class FakeProxmox:
         # Runner._fetch_client_file's shared-read copy of a client log at a path expression ($src), which prints the
         # source's length at its open and the copy's: a literal source the seat holds is copied; a copy a test named
         # itself (C:\sky-lab\<name>, as the log tests have since the copy was Copy-Item's) is the copy of a source it
-        # left unnamed; with neither the source is not there, and [IO.File]::Open throws
-        fetched = re.search(r"\$src = (.+?); \$s = \[IO\.File\]::Open\(\$src, 'Open', 'Read', 'ReadWrite'\);.*"
+        # left unnamed; with neither the source is not there, and the copy says so (`missing <path>`, the expression's
+        # text for a path the fake cannot work out)
+        fetched = re.search(r"\$src = (.+?); if \(-not \(Test-Path -LiteralPath \$src\)\) \{ Write-Output \('missing ' \+ \$src\); "
+                            r"exit 0 \}; \$s = \[IO\.File\]::Open\(\$src, 'Open', 'Read', 'ReadWrite'\);.*"
                             r"\[IO\.File\]::Create\('([^']+)'\)", " ".join(command))
         if fetched:
             literal, copy = re.fullmatch(r"'([^']+)'", fetched.group(1)), fetched.group(2)
             if literal and literal.group(1) in self.files:
                 self.files[copy] = self.files[literal.group(1)]
             elif copy not in self.files:
-                return ExecResult(1, "", 'Exception calling "Open" with "4" argument(s): "Could not find file."')
+                return ExecResult(0, f"missing {literal.group(1) if literal else fetched.group(1)}\r\n", "")
             n = len(self.files[copy].encode("utf-8"))
             return ExecResult(0, f"{n} {n}\r\n", "")
         # the runner's shared-read copy of a file another process still writes

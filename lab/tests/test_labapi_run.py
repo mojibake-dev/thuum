@@ -825,6 +825,36 @@ class ClientLogs(RunTests):
         self.assertIn(held, body["notes"])
         self.assertEqual(self.services.runner.seats["c1"].force, f"its last run ({run_id}) ended in a fault: {held}")
 
+    def test_a_seat_whose_guest_agent_is_not_running_skips_its_other_log_fetches(self):
+        """Each log's copy would spend its three tries on an agent only a restart brings back, about 75 s a seat (the
+        fresh review of e8d8de9b): once a fetch finds the seat's guest agent not running, its other log fetches this run
+        are skipped with one note, the SKSE folder's too."""
+        from labapi.proxmox import ProxmoxError
+
+        pve = self._managed_c1()
+        plain_exec = pve.exec
+
+        def exec_(guest, command, timeout):
+            if "[IO.File]::Open($src, 'Open', 'Read', 'ReadWrite')" in " ".join(command):
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                raise ProxmoxError(f"E_PVE_EXEC: {guest.name}: ResourceException: 500 Internal Server Error: QEMU guest agent is not running")
+            return plain_exec(guest, command, timeout)
+
+        pve.exec = exec_
+        run_id, body = self._run(SOLO_WITH_LOG)
+        self.assertEqual(body["verdict"], "green", body)
+        fetch_notes = [n for n in body["notes"] if n.endswith("(log fetch)")]
+        self.assertEqual(len(fetch_notes), 2, body["notes"])
+        self.assertTrue(fetch_notes[0].startswith("c1.log: E_RUN_LOG_FETCH: its copy failed three tries 10 s apart, the last "
+                                                  "E_PVE_EXEC: fake-c1: ResourceException: 500 Internal Server Error: QEMU guest "
+                                                  "agent is not running"), fetch_notes)
+        self.assertTrue(fetch_notes[1].startswith("c1-driver.log and c1's other logs after it not fetched: its guest agent was "
+                                                  "found not running ("), fetch_notes)
+        copies = [c for c in pve.calls if c[0] == "exec" and "[IO.File]::Open($src, 'Open', 'Read', 'ReadWrite')" in " ".join(c[2])]
+        self.assertEqual(len(copies), 3, "c1.log's three tries, and no copy for the logs after it")
+        self.assertFalse([c for c in pve.calls if c[0] == "exec" and "-Filter '*.log'" in " ".join(c[2])], "nor the SKSE folder's listing")
+        self.assertNotIn("c1.log", body["artifacts"])
+
     def test_a_log_copy_past_the_cap_is_refused_before_its_first_read(self):
         """A runaway log cannot hold up the run's end: a copy past FETCH_MAX_BYTES is refused before any range is read,
         a note naming its size, E_RUN_LOG_FETCH the runner's own code, and the copy leaves the seat."""
