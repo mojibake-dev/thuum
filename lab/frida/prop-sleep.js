@@ -1,4 +1,4 @@
-// prop-sleep.js v3.0 DRAFT (thuum, 2026-11-12; ADR-071 rung 1, E10's read on both seats, docs/engine/havok-props.md:109): v2 puts a
+// prop-sleep.js v3.1 DRAFT (thuum, 2026-11-12; ADR-071 rung 1, E10's read on both seats, docs/engine/havok-props.md:109): v2 puts a
 // body under watch only when its own seat's capsule touches it (79131's layer 4 contact, or 78304's impulse body), so it never sees a
 // body its seat grabbed and then dropped or threw (x-prop-rest-e10 v1's fresh review, finding 1, as v1.1's header states it). v3.0 adds
 // a third entry, at the leave of PlayerCharacter::StartGrabObject (40552: CommonLibSSE-NG include/RE/Offsets.h:452,
@@ -7,7 +7,8 @@
 // prop-grab.js v2.2's FIELDS: PlayerCharacter.h:697 "8C8" plus the 8 bytes of the newer runtime data's start, :793-796) becomes the
 // grabbed reference by LookupReferenceByHandle (12332: Offsets.h:582, RELOCATION_ID(12204, 12332); `just addr 12332` 0x179710; one
 // reference count kept per lookup, as prop-grab.js's is), and its 3D's bodies are found by prop-grab.js v2.2's walk, its code
-// unchanged (locator, isNiNode, nodeName, walkBodies; the layouts cited at the constants below). Each body found, up to
+// unchanged but for two reads on v2's constants, the same words 0x160 and 0x4C (:264-265, prop-grab.js:219-220) (locator,
+// isNiNode, nodeName, walkBodies; the layouts cited at the constants below). Each body found, up to
 // GRAB_WATCH_MAX (8), joins the one watch list and from then on reads as a touched body does: the same per-frame poll, change key,
 // sleep rows and field names, so one hand read covers both. One watch a body: a contact or an impulse on a known address adds
 // nothing, as in v2; a grab of a known address starts a fresh watch row, its earlier entry under `previous`, since a Disable frees
@@ -288,6 +289,8 @@ if (off === undefined) {
   // grab entry past GRAB_WATCH_MAX drops the oldest grab entry first
   const grabWatch = function (x, ref, handle) {
     const k = String(x.hkp);
+    let bodyRef = 0; // findRef first: nothing native between known's read and the write
+    try { bodyRef = formId(findRef(x.hkp.add(COLLIDABLE_IN_WORLD_OBJECT))); } catch (e) { bodyRef = -1; }
     const known = watched[k];
     if (known === undefined || known.via !== 'grab') {
       while (countVia(true) >= GRAB_WATCH_MAX) {
@@ -298,8 +301,6 @@ if (off === undefined) {
         delete watched[oldest];
       }
     }
-    let bodyRef = 0;
-    try { bodyRef = formId(findRef(x.hkp.add(COLLIDABLE_IN_WORLD_OBJECT))); } catch (e) { bodyRef = -1; }
     watched[k] = { body: x.hkp, ref: ref, lastKey: null, lastEmit: 0, errors: 0, via: 'grab', seq: ++watchSeq };
     const row = { event: 'watch', via: 'grab', ref: ref, body: k, facts: sleepFacts(x.hkp), frame: counts.frames, handle: hex(handle), bone: x.name, layer: x.layer, animTargeted: x.animTargeted ? 1 : 0, bodyRef: hex(bodyRef) };
     if (known !== undefined) row.previous = { ref: known.ref, via: known.via, seq: known.seq };
@@ -307,7 +308,7 @@ if (off === undefined) {
   };
   try {
     Interceptor.attach(at('startGrab'), {
-      onEnter(args) { counts.startGrab += 1; this.player = args[0]; },
+      onEnter(args) { counts.startGrab += 1; this.player = args[0]; this.before = isNil(args[0]) ? -1 : u32(args[0], FIELDS.grabbedObject); },
       onLeave(retval) {
         try {
           const handle = isNil(this.player) ? -1 : u32(this.player, FIELDS.grabbedObject);
@@ -317,7 +318,7 @@ if (off === undefined) {
           const bodies = isNil(root) ? [] : walkBodies(root);
           const ref = isNil(refr) ? '0x0' : hex(formId(refr));
           const joined = (ref === '0x0' || ref === '-1') ? [] : bodies.slice(0, GRAB_WATCH_MAX);
-          emit({ event: 'grab', frame: counts.frames, tid: this.threadId, handle: hex(handle), ref: ref, has3D: !isNil(root), nodes: bodies.nodes === undefined ? 0 : bodies.nodes, nodesCapped: !!bodies.nodesCapped, bodies: bodies.length, joined: joined.length, bodyList: joined.map(function (x) { return [x.name, x.type, x.layer, x.animTargeted ? 1 : 0]; }) });
+          emit({ event: 'grab', frame: counts.frames, tid: this.threadId, before: hex(this.before), handle: hex(handle), ref: ref, has3D: !isNil(root), nodes: bodies.nodes === undefined ? 0 : bodies.nodes, nodesCapped: !!bodies.nodesCapped, bodies: bodies.length, joined: joined.length, bodyList: joined.map(function (x) { return [x.name, x.type, x.layer, x.animTargeted ? 1 : 0]; }) });
           joined.forEach(function (x) { grabWatch(x, ref, handle); });
         } catch (e) { emit({ event: 'error', where: 'StartGrabObject leave', error: String(e) }); }
       },
@@ -363,7 +364,7 @@ if (off === undefined) {
       });
     } catch (e) { attachErrors.push('playerUpdate: ' + e); }
   } else attachErrors.push('playerUpdate: no slot');
-  emit({ event: 'ready', script: 'prop-sleep.js', version: version, v: '3.0', raw: RAW, awakeEvery: AWAKE_EVERY, watchMax: WATCH_MAX, grabWatchMax: GRAB_WATCH_MAX, pid: Process.id, base: String(exe.base), mainThread: mainTid(), hooks: hooks, attachErrors: attachErrors });
+  emit({ event: 'ready', script: 'prop-sleep.js', version: version, v: '3.1', raw: RAW, awakeEvery: AWAKE_EVERY, watchMax: WATCH_MAX, grabWatchMax: GRAB_WATCH_MAX, pid: Process.id, base: String(exe.base), mainThread: mainTid(), hooks: hooks, attachErrors: attachErrors });
   let lastFrames = 0;
   setInterval(function () {
     emit({ event: 'liveness', pid: Process.id, counts: JSON.parse(JSON.stringify(counts)), frames10s: counts.frames - lastFrames, sampleMaxMs: sampleMaxMs, watched: Object.keys(watched).length, mainThread: mainTid() });

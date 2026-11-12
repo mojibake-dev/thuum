@@ -390,9 +390,12 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   while a grab of a known address starts a fresh watch row (`previous`
   names the old entry), since a Disable frees a body and a later copy can
   reuse its address. New fields: a `grab` row at every StartGrabObject
-  leave, `via` on watch rows, `body` on sleep rows, an `unwatch` with
+  leave (`before`, the handle at the enter), `via` on watch rows, `body` on sleep rows, an `unwatch` with
   reason 'room for a grab' past GRAB_WATCH_MAX; v2's WATCH_MAX counts the
-  touched entries alone. Never run; a fresh review first.
+  touched entries alone. v3.1: the fresh review's three fixes as written
+  (the bodyRef lookup before the known read, so no contact lands between;
+  the walk's two reads on v2's constants said; `before` on the grab row).
+  Never run.
 - prop-launch.js: prop-contact.js plus the body's motion at each contact and before and after every impulse push (the hkpEntity's
   embedded motion: type, position, linear velocity and its length, angular speed, inverse mass; offsets from hkpEntity.h, hkpMotion.h,
   hkMotionState.h, hkTransform.h), for D73's open item: a resting Dynamic basket thrown out of reach by a standing capsule contact (push
