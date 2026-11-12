@@ -877,11 +877,13 @@ class ClientLogs(RunTests):
         async def sleep(seconds):
             slept.append(seconds)
 
-        self.services.runner.s = dataclasses.replace(self.settings, time_scale=1.0)
+        runner = self.services.runner
+        runner.s = dataclasses.replace(self.settings, time_scale=1.0)
         rec = RunRecord("x", Scenario(id="x", clients=["c1"]), self.tmp, "now")
         g = self.services.tables.guests["fake-c1"]
+        path = "C:\\sky-lab\\c1.log"
         with mock.patch.object(runner_mod, "asyncio", types.SimpleNamespace(to_thread=asyncio.to_thread, sleep=sleep)):
-            asyncio.run(self.services.runner._removed(rec, g, "C:\\sky-lab\\c1.log", "c1.log", read_died=False))
+            asyncio.run(runner._removed(rec, g, lambda: runner._remove_try(g, path), {path: "c1.log"}, set(), "c1.log"))
         self.assertEqual((REMOVE_TRIES, REMOVE_PAUSE_S), (4, 1.0))
         self.assertEqual((self.removals, slept), ([1, 2, 3, 4], [1.0, 1.0, 1.0]))
         self.assertEqual(rec.rollback, {"c1": "c1.log: C:\\sky-lab\\c1.log held open in its agent after its read"})
@@ -1738,18 +1740,32 @@ class BurstSteps(RunTests):
         return step, sorted(shots.glob(f"{step['index']:03d}-c1-*.png")), shots
 
     def _removal_answers(self, answer):
-        """The burst folder's one removal of its sidecars (Runner._remove_frames) answered by answer(guest), an
-        ExecResult, or raising; the other execs pass through."""
+        """The burst folder's removal of its sidecars (Runner._remove_folder_try, one exec a try) answered by
+        answer(guest), an ExecResult, or raising, or passed to the fake for None (which removes them all); the other
+        execs pass through."""
         pve = self.services.control._b
         inner = pve.exec
 
         def exec_(guest, command, timeout):
             if "$stayed = @(Get-ChildItem" in " ".join(command):
-                pve.calls.append(("exec", guest.vmid, tuple(command)))
-                return answer(guest)
+                try:
+                    said = answer(guest)
+                except Exception:
+                    pve.calls.append(("exec", guest.vmid, tuple(command)))
+                    raise
+                if said is not None:
+                    pve.calls.append(("exec", guest.vmid, tuple(command)))
+                    return said
             return inner(guest, command, timeout)
 
         pve.exec = exec_
+
+    def _folder_removals(self, folder):
+        """The execs the run spent removing a burst folder's sidecars: its folder-wide tries and any one-file removal."""
+        pve = self.services.control._b
+        execs = [" ".join(c[2]) for c in pve.calls if c[:2] == ("exec", 901)]
+        return ([e for e in execs if f"$stayed = @(Get-ChildItem -LiteralPath '{folder}'" in e],
+                [e for e in execs if re.search(r"Remove-Item -LiteralPath '" + re.escape(folder) + r"\\[^']+' -Force", e)])
 
     def test_a_burst_films_in_the_seat_s_session_and_reads_every_frame_back(self):
         from labapi import burst
@@ -1795,29 +1811,14 @@ class BurstSteps(RunTests):
         self.assertIn(f"Get-ChildItem -LiteralPath '{folder}' -Filter '*.png.b64'", removals[0])
         self.assertFalse([n for n in body["notes"] if folder in n], body["notes"])
 
-    def _sidecar_removals(self, name, answer):
-        """The one-file removal of the sidecar `name` (Runner._remove_try, the further tries of one the folder's removal
-        named as stayed) answered by answer(guest), an ExecResult, or raising; the other execs pass through."""
-        pve = self.services.control._b
-        inner = pve.exec
-
-        def exec_(guest, command, timeout):
-            if re.search(r"Remove-Item -LiteralPath '[^']+\\" + re.escape(name) + "' -Force", " ".join(command)):
-                pve.calls.append(("exec", guest.vmid, tuple(command)))
-                return answer(guest)
-            return inner(guest, command, timeout)
-
-        pve.exec = exec_
-
     def test_a_sidecar_that_stays_through_every_removal_try_faults_the_seat(self):
-        """The folder's one removal is the first try of each sidecar it names as stayed, and its further tries a plain
-        shot's (Runner._removed): one still there at the fourth is held open in the agent, a note a try before it and
-        the step's note and the seat's fault, a rollback at its next run; the verdict is as it was and the frames kept."""
+        """Each try at the folder's sidecars is one exec for the folder (Runner._removed, _remove_folder_try): a sidecar
+        still there at the fourth is held open in the agent, a note a try before it and then the step's note and the
+        seat's fault, a rollback at its next run; the verdict is as it was and the frames kept."""
         from labapi.proxmox import ExecResult
 
         self._managed_c1(ExecResult(0, self._done() + "\r\n", ""))
-        self._removal_answers(lambda guest: ExecResult(0, "001.png.b64\r\nstayed 1\r\n", ""))
-        self._sidecar_removals("001.png.b64", lambda guest: ExecResult(0, "True\r\n", ""))  # still there: the agent holds it
+        self._removal_answers(lambda guest: ExecResult(0, "001.png.b64\r\nstayed 1\r\n", ""))  # the agent holds it
         run_id, body = self._run(BURST)
         self.assertEqual(body["verdict"], "green", body)
         step, pngs, _ = self._burst(run_id, body)
@@ -1829,21 +1830,47 @@ class BurstSteps(RunTests):
                          [f"screenshot burst {i:03d}-c1 frame 1: {sidecar} still there at its removal's try {k} of 4, tried "
                           "again in 1 s" for k in (1, 2, 3)] + [held])
         self.assertEqual(self.services.runner.seats["c1"].force, f"its last run ({run_id}) ended in a fault: {held}")
+        folder_tries, one_file = self._folder_removals(f"C:\\sky-lab\\shots\\{i:03d}-burst")
+        self.assertEqual((len(folder_tries), one_file), (4, []))
+
+    def test_several_held_sidecars_cost_four_folder_execs_whatever_their_count(self):
+        """A try at a burst's sidecars is one exec for the whole folder, so three sidecars held through every try cost
+        the burst four execs and three pauses in all, where a try a sidecar cost one folder exec and nine one-file
+        removals, and at 40 frames 120 execs and 120 s inside a mid-run step (the review of b1f2ffd4, nit 1); each held
+        sidecar still has its own notes and fault."""
+        from labapi.proxmox import ExecResult
+
+        self._managed_c1(ExecResult(0, self._done() + "\r\n", ""))
+        self._removal_answers(lambda guest: ExecResult(0, "000.png.b64\r\n001.png.b64\r\n002.png.b64\r\nstayed 3\r\n", ""))
+        run_id, body = self._run(BURST)
+        self.assertEqual(body["verdict"], "green", body)
+        step, pngs, _ = self._burst(run_id, body)
+        self.assertEqual(len(pngs), 3)
+        i = step["index"]
+        folder = f"C:\\sky-lab\\shots\\{i:03d}-burst"
+        folder_tries, one_file = self._folder_removals(folder)
+        self.assertEqual((len(folder_tries), one_file), (4, []))
+        held = [n for n in body["notes"] if "held open in its agent" in n]
+        self.assertEqual(held, [f"screenshot burst {i:03d}-c1 frame {k}: {folder}\\{k:03d}.png.b64 held open in its agent after "
+                                "its read" for k in range(3)])
+        self.assertEqual(len([n for n in body["notes"] if "still there at its removal's try" in n]), 9)
+        self.assertEqual(self.services.runner.seats["c1"].force, f"its last run ({run_id}) ended in a fault: {held[0]}")
 
     def test_a_sidecar_the_folder_removal_names_and_the_next_try_removes_is_no_fault(self):
-        """A sidecar the folder's one removal names as stayed goes on through the one removal helper every read file's
-        does (Runner._removed, the folder's removal its first try): gone at the next try, it is no fault, one note naming
+        """A sidecar the folder's removal names as stayed goes on through the one removal helper every read file's does
+        (Runner._removed, a try being one exec for the folder): gone at the next try, it is no fault, one note naming
         the try (train 52's stage: a file scanned just after its write, numidium's HYPOTHESIS)."""
         from labapi.proxmox import ExecResult
 
         self._managed_c1(ExecResult(0, self._done() + "\r\n", ""))
-        self._removal_answers(lambda guest: ExecResult(0, "001.png.b64\r\nstayed 1\r\n", ""))
+        first = ["001.png.b64\r\nstayed 1\r\n"]  # a moment's hold; the next try is the fake's, which removes it
+        self._removal_answers(lambda guest: ExecResult(0, first.pop(), "") if first else None)
         removed = []
         real = self.services.runner._removed
 
-        async def spy(rec, g, path, what, read_died, first=None):
-            removed.append((path, first))
-            return await real(rec, g, path, what, read_died, first)
+        async def spy(rec, g, attempt, whats, died, what):
+            removed.append(sorted(whats))
+            return await real(rec, g, attempt, whats, died, what)
 
         self.services.runner._removed = spy
         run_id, body = self._run(BURST)
@@ -1851,17 +1878,19 @@ class BurstSteps(RunTests):
         step, pngs, _ = self._burst(run_id, body)
         self.assertEqual(len(pngs), 3)
         i = step["index"]
-        sidecar = f"C:\\sky-lab\\shots\\{i:03d}-burst\\001.png.b64"
-        self.assertEqual([r for r in removed if r[0].endswith(".png.b64")], [(sidecar, (True, ""))])
+        folder = f"C:\\sky-lab\\shots\\{i:03d}-burst"
+        sidecar = f"{folder}\\001.png.b64"
+        self.assertIn([f"{folder}\\{k:03d}.png.b64" for k in range(3)], removed)
         self.assertEqual([n for n in body["notes"] if sidecar in n],
                          [f"screenshot burst {i:03d}-c1 frame 1: {sidecar} still there at its removal's try 1 of 4, tried again in 1 s"])
         self.assertEqual(self.services.runner.seats["c1"].force, "")
         self.assertNotIn(sidecar, self.services.control._b.files)
+        self.assertEqual(len(self._folder_removals(folder)[0]), 2)
 
     def test_a_frame_whose_read_died_is_taken_as_held_when_the_removal_confirms_nothing(self):
-        """With the one removal unconfirmed (its exec failed), a frame whose read died goes on through its further tries,
-        as _read_back's does, and none confirming it gone it is taken as held at the fourth: the read that died is what
-        leaves a handle open; the frames read whole are not."""
+        """With the folder's removal unconfirmed (its exec failed), a frame whose read died goes on through the further
+        tries, one exec for the folder each, as _read_back's does, and none confirming it gone it is taken as held at the
+        fourth: the read that died is what leaves a handle open; the frames read whole are not."""
         from unittest import mock
 
         from labapi import proxmox
@@ -1883,7 +1912,6 @@ class BurstSteps(RunTests):
 
         pve.file_read_range = file_read_range
         self._removal_answers(lost)
-        self._sidecar_removals("002.png.b64", lost)
         with mock.patch.object(proxmox, "FILE_READ_PAUSES", (0.0, 0.0)):
             run_id, body = self._run(BURST)
         self.assertEqual(body["verdict"], "green", body)
@@ -1891,17 +1919,16 @@ class BurstSteps(RunTests):
         self.assertEqual(len(pngs), 2)
         self.assertIn("not read: frame 2", step["note"], step)
         i = step["index"]
-        sidecar = f"C:\\sky-lab\\shots\\{i:03d}-burst\\002.png.b64"
+        folder = f"C:\\sky-lab\\shots\\{i:03d}-burst"
+        sidecar = f"{folder}\\002.png.b64"
+        why = f"{folder}'s sidecars on fake-c1 not removed: E_PVE_EXEC: fake-c1: qga command 'guest-exec' failed - got timeout"
         held = [n for n in body["notes"] if "held open" in n]
-        self.assertEqual(len(held), 1, body["notes"])
-        self.assertEqual(held[0], f"screenshot burst {i:03d}-c1 frame 2: {sidecar} held open in its agent after its read (taken "
-                                  f"as held, its read having failed: {sidecar} on fake-c1 not removed: E_PVE_EXEC: fake-c1: qga "
-                                  "command 'guest-exec' failed - got timeout)")
-        tries = [n for n in body["notes"] if "not confirmed gone at its removal's try" in n]
-        self.assertEqual(len(tries), 3, body["notes"])
-        self.assertTrue(tries[0].startswith(f"screenshot burst {i:03d}-c1 frame 2: {sidecar} not confirmed gone at its removal's "
-                                            f"try 1 of 4 (C:\\sky-lab\\shots\\{i:03d}-burst's sidecars on fake-c1 not removed: "
-                                            "E_PVE_EXEC"), tries)
+        self.assertEqual(held, [f"screenshot burst {i:03d}-c1 frame 2: {sidecar} held open in its agent after its read (taken "
+                                f"as held, its read having failed: {why})"])
+        self.assertEqual([n for n in body["notes"] if "not confirmed gone at its removal's try" in n],
+                         [f"screenshot burst {i:03d}-c1 frame 2: {sidecar} not confirmed gone at its removal's try {k} of 4 "
+                          f"({why}), tried again in 1 s" for k in (1, 2, 3)])
+        self.assertEqual((len(self._folder_removals(folder)[0]), self._folder_removals(folder)[1]), (4, []))
         self.assertEqual(self.services.runner.seats["c1"].force, f"its last run ({run_id}) ended in a fault: {held[0][:200]}")
 
     def test_a_frame_not_read_is_the_note_and_the_rest_are_kept(self):
@@ -4155,9 +4182,9 @@ class LogCount(RunTests):
         removed = []
         real = self.services.runner._removed
 
-        async def spy(rec, g, path, what, read_died, first=None):
-            removed.append(path)
-            return await real(rec, g, path, what, read_died, first)
+        async def spy(rec, g, attempt, whats, died, what):
+            removed.extend(whats)
+            return await real(rec, g, attempt, whats, died, what)
 
         self.services.runner._removed = spy
         run_id, body = self._run(LOGCOUNT)

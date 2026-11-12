@@ -642,7 +642,9 @@ five-second frames could not show a stride.
   NNN-<client>-burst.json, the offsets, each frame's sidecar in ranges as a
   plain shot's is (its length from one listing of the burst's folder); once
   every frame is read, one exec removes the folder's sidecars and names any
-  that stayed, where a removal a frame cost an exec each. As with a plain
+  that stayed, where a removal a frame cost an exec each, and each further
+  try is that one exec again, so a burst's removal is four execs and 3 s at
+  most whatever its size. As with a plain
   shot, a burst never fails a run: a frame not filmed or not read is the
   step's note.
 Assertions read `server.actor(c)` (the record, and

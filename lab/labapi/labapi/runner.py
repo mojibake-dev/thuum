@@ -1953,36 +1953,32 @@ class Runner:
 
     async def _remove_frames(self, rec: RunRecord, g: Guest, folder: str, whats: dict[str, str], died: set[str],
                              what: str) -> None:
-        """A burst's .b64 sidecars removed from `folder` on the seat by one exec once every frame is read, which names
-        each one that stayed and then their count, so an answer cut short never reads as none staying. That exec is the
-        first try of each one that stayed, whose further tries are a plain shot's (_removed: a note a try that finds it,
-        the seat's fault only for one still there at the last, named by its frame's `whats` entry or else `what`); with
-        the exec unconfirmed, a frame whose read died (`died`) goes the same way from that first try, as _read_back's
-        does, and otherwise the exec's failure is the run's note."""
+        """A burst's .b64 sidecars removed from `folder` on the seat once every frame is read, by the one helper every
+        read file's removal goes through (_removed), a try being one exec for the whole folder (_remove_folder_try):
+        four execs and three pauses at most, whatever the burst's size, where a try a sidecar gave 40 held frames 120
+        execs and 120 s inside a mid-run step (the review of b1f2ffd4, nit 1). Each sidecar's notes and its fault are its
+        own, named by its frame's `whats` entry (a sidecar's name to its frame) or else `what`; `died` names the frames'
+        sidecars whose read died."""
+        await self._removed(rec, g, lambda: self._remove_folder_try(g, folder),
+                            {f"{folder}\\{name}": w for name, w in whats.items()}, {f"{folder}\\{name}" for name in died}, what)
+
+    async def _remove_folder_try(self, g: Guest, folder: str) -> tuple[set[str] | None, str]:
+        """One try at a burst folder's .b64 sidecars by one exec, which removes every one there and names each one that
+        stayed and then their count, so an answer cut short never reads as none staying: the paths still there (none:
+        all gone), or None and the reason for an exec that failed or answered otherwise."""
         cmd = ["powershell", "-NoProfile", "-Command",
                f"$stayed = @(Get-ChildItem -LiteralPath '{folder}' -Filter '*.png.b64' -File | ForEach-Object {{ "
                f"Remove-Item -LiteralPath $_.FullName -Force -ErrorAction SilentlyContinue; "
                f"if (Test-Path -LiteralPath $_.FullName) {{ $_.Name }} }}); $stayed; Write-Output ('stayed ' + $stayed.Count)"]
-        stayed, unconfirmed = None, ""
         try:
             res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
-            lines = [ln.strip() for ln in (res.out or "").splitlines() if ln.strip()]
-            count = re.fullmatch(r"stayed (\d+)", lines[-1]) if lines else None
-            if res.exitcode == 0 and count and int(count.group(1)) == len(lines) - 1:
-                stayed = lines[:-1]
-            else:
-                unconfirmed = (f"the removal of {folder}'s sidecars on {g.name} answered exit {res.exitcode}: "
-                               f"{(res.err or res.out).strip()[:200]}")
         except ProxmoxError as e:
-            unconfirmed = f"{folder}'s sidecars on {g.name} not removed: {e}"
-        if stayed is not None:
-            for name in stayed:
-                await self._removed(rec, g, f"{folder}\\{name}", whats.get(name, what), name in died, first=(True, ""))
-            return
-        for name in sorted(died):
-            await self._removed(rec, g, f"{folder}\\{name}", whats[name], True, first=(None, unconfirmed))
-        if not died:
-            rec.notes.append(f"{what}: {unconfirmed}")
+            return None, f"{folder}'s sidecars on {g.name} not removed: {e}"
+        lines = [ln.strip() for ln in (res.out or "").splitlines() if ln.strip()]
+        count = re.fullmatch(r"stayed (\d+)", lines[-1]) if lines else None
+        if res.exitcode == 0 and count and int(count.group(1)) == len(lines) - 1:
+            return {f"{folder}\\{name}" for name in lines[:-1]}, ""
+        return None, f"the removal of {folder}'s sidecars on {g.name} answered exit {res.exitcode}: {(res.err or res.out).strip()[:200]}"
 
     async def _mouse(self, rec: RunRecord, index: int, step: Step) -> tuple[bool, str]:
         """A relative mouse move in the seat's own desktop session (scenario.py's mouse; mouse.py): what the
@@ -2457,11 +2453,11 @@ class Runner:
             came_back = True
             return data
         finally:
-            await self._removed(rec, g, path, what, read_died=not came_back)
+            await self._removed(rec, g, lambda: self._remove_try(g, path), {path: what}, set() if came_back else {path}, what)
 
-    async def _remove_try(self, g: Guest, path: str) -> tuple[bool | None, str]:
-        """One removal of the file at `path` on the seat by one exec, Remove-Item and then Test-Path: True for a file
-        still there, False for one gone, None and the reason for an exec that failed or answered neither."""
+    async def _remove_try(self, g: Guest, path: str) -> tuple[set[str] | None, str]:
+        """One try at the file at `path` on the seat by one exec, Remove-Item and then Test-Path: the path still there
+        ({path}, or none for one gone), or None and the reason for an exec that failed or answered neither."""
         cmd = ["powershell", "-NoProfile", "-Command",
                f"Remove-Item -LiteralPath '{path}' -Force -ErrorAction SilentlyContinue; Test-Path -LiteralPath '{path}'"]
         try:
@@ -2471,36 +2467,48 @@ class Runner:
         said = _last_line(res.out)
         if res.exitcode != 0 or said not in ("True", "False"):
             return None, f"the removal of {path} on {g.name} answered exit {res.exitcode}: {(res.err or res.out).strip()[:200]}"
-        return said == "True", ""
+        return ({path} if said == "True" else set()), ""
 
-    async def _removed(self, rec: RunRecord, g: Guest, path: str, what: str, read_died: bool,
-                       first: tuple[bool | None, str] | None = None) -> None:
-        """The file at `path` on the seat, one the runner read, removed: the one helper every removal of a read file
-        goes through (_read_back's, so log-count's and the log fetch's, and the burst's, _remove_frames, whose own
-        removal of its folder is `first`, the first try's finding). Up to REMOVE_TRIES tries (_remove_try) REMOVE_PAUSE_S
-        apart, the pause times time_scale as _tried's is. A try that finds the file still there with tries left is a
-        note naming the try, so the notes show how often a file stays and for how long, and a later try that removes
-        it leaves no fault; only a file still there at the last try is held, the seat's fault (_held). A try that
-        confirms nothing after a read that died (`read_died`) is tried again the same way and taken as held at the last
-        (the fresh review of e8d8de9b, nit 3: a read that died is what leaves a handle open on qemu-server 9.2.10);
-        after a whole read it is a note and not tried again, as is one that ran out its time, since a hung agent would
-        hold the run's end (_tried's rule)."""
+    async def _removed(self, rec: RunRecord, g: Guest, attempt, whats: dict[str, str], died: set[str], what: str) -> None:
+        """Files the runner read on the seat, removed: the one helper every removal of a read file goes through,
+        _read_back's one file (so log-count's, the log fetch's, the traces' and the plain shots') and a burst's
+        sidecars (_remove_frames). `attempt()` is one try, one exec however many files (_remove_try, _remove_folder_try),
+        answering the paths still there (none: all gone) or None and the reason for an exec that confirmed nothing;
+        `whats` names each path's notes (its keys the files removed), `what` the removal's own, and `died` holds the
+        paths whose read died. Up to REMOVE_TRIES tries REMOVE_PAUSE_S apart, the pause times time_scale as _tried's is,
+        each try at every file still there. A try that finds a file still there with tries left is a note naming the
+        try for that file, so the notes show how often a file stays and for how long, and a later try that removes it
+        leaves no fault; only a file still there at the last try is held, the seat's fault (_held). A try that confirms
+        nothing is tried again while a file whose read died may still be there, and each such file is taken as held at
+        the last try (the fresh review of e8d8de9b, nit 3: a read that died is what leaves a handle open on qemu-server
+        9.2.10); with none such it is the removal's note and not tried again, as is one that ran out its time, since a
+        hung agent would hold the run's end (_tried's rule)."""
+        pending = set(whats)
         for k in range(1, REMOVE_TRIES + 1):
-            there, why = first if k == 1 and first is not None else await self._remove_try(g, path)
-            if there is False:
-                return
-            if there is None and (not read_died or "did not exit in" in why):
-                if read_died:
-                    self._held(rec, g, path, what, why)
-                else:
+            stayed, why = await attempt()
+            if stayed is not None:
+                if not stayed:
+                    return
+                pending = set(stayed)
+                if k == REMOVE_TRIES:
+                    for p in sorted(stayed):
+                        self._held(rec, g, p, whats.get(p, what))
+                    return
+                for p in sorted(stayed):
+                    rec.notes.append(f"{whats.get(p, what)}: {p} still there at its removal's try {k} of {REMOVE_TRIES}, "
+                                     f"tried again in {REMOVE_PAUSE_S:g} s")
+            else:
+                suspects = sorted(pending & died)
+                if not suspects:
                     rec.notes.append(f"{what}: {why}")
-                return
-            if k == REMOVE_TRIES:
-                self._held(rec, g, path, what, "" if there else why)
-                return
-            found = "still there" if there else "not confirmed gone"
-            rec.notes.append(f"{what}: {path} {found} at its removal's try {k} of {REMOVE_TRIES}"
-                             + ("" if there else f" ({why})") + f", tried again in {REMOVE_PAUSE_S:g} s")
+                    return
+                if k == REMOVE_TRIES or "did not exit in" in why:
+                    for p in suspects:
+                        self._held(rec, g, p, whats.get(p, what), why)
+                    return
+                for p in suspects:
+                    rec.notes.append(f"{whats.get(p, what)}: {p} not confirmed gone at its removal's try {k} of "
+                                     f"{REMOVE_TRIES} ({why}), tried again in {REMOVE_PAUSE_S:g} s")
             await asyncio.sleep(REMOVE_PAUSE_S * self.s.time_scale)
 
     def _held(self, rec: RunRecord, g: Guest, path: str, what: str, unconfirmed: str = "") -> None:
