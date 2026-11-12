@@ -410,6 +410,12 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   'btSelfTest' reads the backtracer's reach at the first PlayerCharacter::Update; the ready row says scriptVersion '1.2'. Reading
   it (the review): a frame's label is the nearest known start below it, not its function (the helper at 0x7ed640-0x7ed89d reads as
   'Projectile slot 0xbf'); under REPLACE true only a backtrace's frame 1 is sure; SkyrimSE.exe's frames get no symbols (no PDB).
+  v1.3 (2026-11-12, rung 3's stage; its fresh review READY with nits, applied as written): PUSH_ONLY (default false) attaches
+  78091, 78092 and slot 0x14 of the three dynamic motions as native candidates, plus AddImpact, FindTargets and the sampler, and
+  never the rung 3 build's own sites (26004, 26005, Explosion::Update, the five ProcessImpacts sites, HandleHits): a guard refuses an
+  attach at any of them, so the build's Replace and this read never share an entry (v1.2's ATTACH_ONLY still attached the brackets,
+  the e9 collision); the ready row prints each refused site's first bytes; scriptVersion '1.3'. For x-prop-impact v1.2 and
+  x-prop-blast v4.2 on both seats.
 - thrall-link.js: ADR-060's return to the caster, as amended (Eli, 2026-11-12: "thrall returns to caster obvs"), read before
   any build (rule 8): can a fresh game take command of a living, already-reanimated thrall through the engine's own command routine,
   with no death and no get-up? Mode trace attaches hooks only (the add check 34754, ReanimateEffect's start 34750, the command
