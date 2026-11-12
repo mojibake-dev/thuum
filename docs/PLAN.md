@@ -1648,6 +1648,18 @@ Dragons, lycanthropy, vampirism, mounted combat, custom record push to
 clients (TES3MP 0.8 parity), a mod compatibility matrix generated from the
 natives ledger.
 
+- Dragon fights (Eli, 2026-11-12 about 04:2xZ, in thuum-fa's session, verbatim: "everyone in the fight can absorb", "yes,
+  attacks are synced per world", and of a dragon leaving every player's loaded area, "whatever happens in single player i
+  assume, right?"). The shape: a dragon is an NPC whose flight and fighting run on one engine, its owner; it flies across many
+  cells, so its owner follows the actor, not the cell (ADR-066's ActorOwner, d2, not yet built; physics' "a moving body stays
+  with its mover" is the same idea). Its breath rides the shout relay (the double relay of a late hit fixed first, shouts.md).
+  Its soul goes to every player in the fight (the server's shout record, R0; who counts as in the fight is the build's to
+  define, from the combat targets). Dragon attacks happen once for the world, not once per seat: a server rule over the Story
+  Manager's world encounters, which each seat starts on its own today (D-Q5 A's per-seat start words). Out of every player's
+  loaded area: the owner's engine treats it as single player does (an actor past the loaded grid drops to the engine's own
+  low-detail processing, HYPOTHESIS for a dragon's flight, read when built), the server keeps its last record for the other
+  seats, and it freezes only if its owner leaves while it is unloaded (TES3MP's unhosted-cell rule).
+
 ### Stretch: Eli's mods
 
 Acceptance cases for definition of done item 6 and M7's compatibility matrix,
