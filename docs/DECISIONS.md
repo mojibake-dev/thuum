@@ -3128,6 +3128,15 @@ cleaned as far as they go; and that a VM that cannot start
 stops the set with no rerun. Measured: c2 relaunched in 31 to 33 s against 55 to 64 s for a rollback, with zero
 device resets per relaunch by core's count of the host's vfio lines.
 
+Note 2026-11-12 (thuum-fa; recorded 02:58Z, main 58502b08, numidium's review and deploy): the capture folders are still
+cleaned as far as they go, but a file the guest agent still holds after lab-api read it (a trace or log copy, a screenshot's
+.b64 sidecar, a log-count copy) now faults its seat: a rollback at the seat's next reset, the run's verdict unchanged. Why: on
+qemu-server 9.2.10 a timed-out guest-file-read never reached guest-file-close (fixed upstream in 9.2.11, 9017eecbd4; core
+upgraded to 9.2.15 on 11-12), and in x-prop-blast 20261111-191642's sequel runs the held files built up (11, 17, 25 left by
+the relaunches' cleaning) until both seats' agents timed out from step 34 on, so a soft clean alone let a leaked handle
+degrade every later run; only a rollback cleared it. Reads are now 512 KiB ranges (docs/LAB.md), which also makes the leak
+rarer.
+
 ## ADR-054: The developer loop: a client change reaches a running seat in minutes, tests run before a push, and engine-facing code waits for its read
 
 Status: ACCEPTED 00:01 PDT 2026-10-28 (Eli, 2026-10-27 late: "do all of those sans 4", on the six
