@@ -5256,6 +5256,23 @@ ladder's P1 and P2 folded into it. Decision 7's cap (apocrypha/layer-havok-cap 5
 65e70e1a) lays before rung 1's merge instead of after 51, since rung 1 rests on havok-props.md's E10 (rest by deactivation), which
 reads only under the cap. Rung 2 stays in (Eli did not take the smaller ladder).
 
+Rung 3's decisions (Eli in session, 2026-11-12 about 05:3xZ, asked from the rung 3 plan, lab/.cache/drafts/physics/rung3-plan.md
+905bec1d; recorded 05:55Z by thuum-fa):
+- D-PH5, what decision 4's remote-cause zero covers: "Every physics body" (over the plan's recommended items only). A push whose
+  cause is another seat's is zeroed for every Havok body on the receiving engine, props and world objects alike, so a world
+  object such as the Riverwood Trader's hanging sign stays still on the other screen when another player's spell hits it, until
+  rung 4 makes statics shared rows.
+- D-PH6, the shout's cause if the backtrace at 26004 during a shout (x-prop-cone v1) finds no frame: "Read again, then by cones",
+  a second read first; failing that, a push while this engine's own player's shout cone is flying counts as local and any other
+  as the other seat's.
+- D-PH7, the arrow (its push follows no 26004 result): "Read it, else a 51 limit", a short read for the arrow's push site
+  (x-prop-arrow v1); if it lands in time rung 3 intercepts it too, else "an arrow at a bucket" is a declared limit in playtest 51.
+- D-PH8, the double shout (a late hit past hitWindowMs 1200 re-reported, shouts.md): "Own fix, before 51", a small client fix
+  of one report per release, built beside the physics rungs; it leaves 51's known limits.
+And, the same session, of M3's reanimation row (51's M3-2, after M3's paper close found fork m4-reanimate-claim 2dc75ab6, ADR-060,
+never merged): "Finish it before 51": merged onto canon after train 52, its open hypotheses (ADR-060 H1 to H3) settled with its
+probe x-reanimate-claim, staged and merged while the physics rungs build.
+
 Amends: ADR-064 decision 7 (dated note under it), ADR-063's props note (accepted under it), ADR-058's slices (slice two kept as a
 derived class; slice three is rungs 5 and 6), ADR-067 decision 4 (its final sample is the asleep sample; the built ChangeForm
 apply is the record). W3 stays Eli's at the time: a rewrite of b-prop-push's step 27 if the drop read calls for one (decided
