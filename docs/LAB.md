@@ -913,7 +913,9 @@ more, and a second failure rolls the seat back in the same run.
 The cleaning list names folders and patterns, never a wildcard over
 C:\sky-lab: there, frida\ (each run's script and its .out, .err, .log and
 .copy; frida-inject.exe stays), shots\, screenshots\, burst\ and input\ (the
-screenshot, burst and mouse steps' files); each game folder's
+screenshot, burst and mouse steps' files), and in the lab folder itself
+log-count's copies by their pattern alone, logcount-*.log.copy (the code
+before 9e37956b never removed one, so seats carry many); each game folder's
 Data\SKSE\Plugins\CharGen\Presets (thuum-*.jslot and the presets the seat's
 last run saved by name); the Saves folder's TESMODPLATFORM-* (Skyrim
 Platform's generated saves, which a kill before its load settles leaves) and
@@ -926,7 +928,7 @@ rolls the seat back. A file that will not go fails the try, except in the
 capture folders shots\ and screenshots\ and for the runner's trace copies
 in frida\ (*.js.out.copy and *.js.log.copy, the files the agent itself
 reads back in ranges, which leave the seat once read and stay only when the
-agent holds one open), which are cleaned as far as they go: a file a
+agent holds one open) and log-count's copies, which are cleaned as far as they go: a file a
 timed-out guest-file-read or guest-file-close left open in the agent stays
 until the VM restarts (a copy or sidecar held after its read also rolls the
 seat back, in the same run's reset when the fetch came before it, else at

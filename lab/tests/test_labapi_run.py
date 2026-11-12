@@ -4214,6 +4214,8 @@ class ClientResets(RunTests):
         self.assertEqual(at, sorted(at), steps)
         for named in ("Clean (Join-Path $lab 'frida') @('*.js', '*.js.out', '*.js.err', '*.js.log') @()",
                       "Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy') @() -soft",
+                      # log-count's copies by their pattern alone, softly: the code before 9e37956b never removed one
+                      "\nClean $lab @('logcount-*.log.copy') @() -soft\n",
                       "Clean (Join-Path $lab 'shots') @('*.png', '*.png.b64') @('*-burst')",
                       "Clean (Join-Path $lab 'screenshots') @('*.png') @()",
                       "Clean (Join-Path $lab 'burst') @('request.json', 'done.json') @()",

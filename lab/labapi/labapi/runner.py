@@ -2725,6 +2725,8 @@ def _client_relaunch_ps(lab_dir: str, driver_log: str, presets: list[str], stop:
     - frida\\: each run's script and its .out, .err and .log, and, as far as they go, the runner's shared-read .copy
       of the last two (config.frida_exec_template, frida_script_text, Runner._frida_trace, Runner._read_back);
       frida-inject.exe and the tools beside it stay;
+    - the lab folder's logcount-*.log.copy, as far as they go, log-count's shared-read copies (Runner._log_count),
+      by that pattern alone;
     - shots\\ (a screenshot step's copy and its base64 sidecar, a burst's frame folder), screenshots\\
       (screenshot.ps1's captures and latest.png), burst\\ and input\\ (their tasks' request and done files);
     - every recorded game folder's RaceMenu presets: skymp5-client's thuum-*.jslot (raceMenuService.ts) and
@@ -2771,8 +2773,11 @@ def _client_relaunch_ps(lab_dir: str, driver_log: str, presets: list[str], stop:
         # restarts, and failing the try on it cost a rollback (sky-c2, b-cloak-fight 20261030-053144: 025.png.b64 and
         # 032.png.b64; sky-c1, x-quest-mode 20261030-131512: story-location-20261030-131130-x-story-arrival-login-13
         # .js.log.copy); the next capture writes its own name, and a copy carries its run's script name. A copy leaves
-        # the seat once read (Runner._read_back); one here is a copy a timed-out ranged read holds open
+        # the seat once read (Runner._read_back); one here is a copy a timed-out ranged read holds open. log-count's
+        # copies in the lab folder go the same way, by that pattern alone: the code before 9e37956b never removed one,
+        # so seats carry many, and a lost answer's copy is left unread (Runner._log_count)
         "Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy') @() -soft",
+        "Clean $lab @('logcount-*.log.copy') @() -soft",
         "Clean (Join-Path $lab 'shots') @('*.png', '*.png.b64') @('*-burst') -soft",
         "Clean (Join-Path $lab 'screenshots') @('*.png') @() -soft",
         "Clean (Join-Path $lab 'burst') @('request.json', 'done.json') @()",
