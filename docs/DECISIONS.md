@@ -3799,6 +3799,17 @@ round trip, and the deaths2 client's released-body branch (AI off 4 s through th
 read the server's word (isHostedByOther false plus the live word) over its own dead branch. H4: a hosted necromancer's thrall
 (the caster an NPC) claims for the caster's host, which is the body's host already in the common case; no change there.
 
+Amended (Eli in session, 2026-11-12 about 06:3xZ, recorded 06:39Z by thuum-fa; asked whether the command's lease, the record's
+duration plus 10 s, should go, Eli verbatim: "summons and resurrections should obey the timers the level of spell. leaving a cell
+should not kill the thrall."): the command has no server lease from the record's duration, which ignores dual casting, perks and
+the spell's level; it lasts as the caster's engine runs the effect and ends at the thrall's death (the effect's end, the ash), as
+the commander's seat reports it; Dead Thrall's lasts until death. A change of cell does not end it: the commander's crossing of a
+door or a boundary and the thrall's cell unloading on the commander's side keep the command, the commander's engine simulating the
+thrall as its follower, so ownership follows the actor and not the cell (as ADR-071's moving bodies and ADR-066's ActorOwner). The
+commander's departure from the game ends it with a word that returns the thrall to its cell's host (the gap M3's paper close
+found: gone() and unloaded() dropped the row with no decision); what a commanderless thrall does then is open (default: alive on
+the host until its effect would end, HYPOTHESIS for Eli). Built on fork m4-reanimate-claim-2 (train 52 merged in, 315dce28).
+
 ## ADR-061: A shared container's live view is the menu drawn again whole; exclusive access is the fallback behind a setting
 
 Status: ACCEPTED 16:11 PST 2026-11-02 by Eli, verbatim via numidium: "i say take one more deep dive crack at REALLY getting live
