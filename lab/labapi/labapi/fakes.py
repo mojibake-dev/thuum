@@ -129,6 +129,15 @@ class FakeProxmox:
             if length.group(1) not in self.files:
                 return ExecResult(0, f"missing {length.group(1)}\r\n", "")
             return ExecResult(0, f"{len(self.files[length.group(1)].encode('utf-8'))}\r\n", "")
+        # Runner._remove_frames: a burst folder's sidecars removed by one exec, which names each one that stayed and then
+        # their count (ahead of the listing below, whose Get-ChildItem it starts with)
+        swept = re.search(r"\$stayed = @\(Get-ChildItem -LiteralPath '([^']+)' -Filter '\*\.png\.b64' -File \| ForEach-Object",
+                          " ".join(command))
+        if swept:
+            folder = swept.group(1) + "\\"
+            for p in [p for p in self.files if p.startswith(folder) and p.endswith(".png.b64") and "\\" not in p[len(folder):]]:
+                del self.files[p]
+            return ExecResult(0, "stayed 0\r\n", "")
         # Runner._burst's listing of its frames' sidecars, each name and length
         frames = re.search(r"Get-ChildItem -LiteralPath '([^']+)' -Filter '\*\.png\.b64' -File", " ".join(command))
         if frames:

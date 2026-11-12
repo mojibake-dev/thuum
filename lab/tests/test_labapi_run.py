@@ -1576,6 +1576,33 @@ class ScreenshotSteps(RunTests):
         self.assertTrue(shot["note"].startswith("screenshot skipped: range 2 of 2: E_PVE_FILE: fake-c1: ResourceException:"), shot)
         self.assertFalse([p for p in pve.files if p.endswith(".png.b64")], "the sidecar leaves the seat whatever the read did")
 
+    def test_a_sidecar_held_open_after_its_read_faults_the_seat(self):
+        """A shot's sidecar that will not go once read is held open in the agent, a handle only the seat's restart
+        closes: the step's note and the seat's fault, a rollback at its next run; the shot is kept and the verdict is as
+        it was (_held, which a burst's one removal shares)."""
+        from labapi.proxmox import ExecResult
+
+        self._managed_c1(None)
+        pve = self.services.control._b
+        inner = pve.exec
+
+        def exec_(guest, command, timeout):
+            joined = " ".join(command)
+            if "Remove-Item -LiteralPath '" in joined and ".png.b64' -Force" in joined:
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                return ExecResult(0, "True\r\n", "")  # still there: the agent holds it
+            return inner(guest, command, timeout)
+
+        pve.exec = exec_
+        run_id, body = self._run(SHOT)
+        self.assertEqual(body["verdict"], "green", body)
+        shot, pngs = self._shot(run_id, body)
+        self.assertEqual([p.read_bytes() for p in pngs], [b"\x89PNG shot"])
+        i = shot["index"]
+        held = f"screenshot {i:03d}-c1: C:\\sky-lab\\shots\\{i:03d}.png.b64 held open in its agent after its read"
+        self.assertIn(held, body["notes"])
+        self.assertEqual(self.services.runner.seats["c1"].force, f"its last run ({run_id}) ended in a fault: {held}")
+
 
 
 BURST = """
@@ -1628,6 +1655,20 @@ class BurstSteps(RunTests):
         shots = self.tmp / "results" / run_id / "screenshots"
         return step, sorted(shots.glob(f"{step['index']:03d}-c1-*.png")), shots
 
+    def _removal_answers(self, answer):
+        """The burst folder's one removal of its sidecars (Runner._remove_frames) answered by answer(guest), an
+        ExecResult, or raising; the other execs pass through."""
+        pve = self.services.control._b
+        inner = pve.exec
+
+        def exec_(guest, command, timeout):
+            if "$stayed = @(Get-ChildItem" in " ".join(command):
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                return answer(guest)
+            return inner(guest, command, timeout)
+
+        pve.exec = exec_
+
     def test_a_burst_films_in_the_seat_s_session_and_reads_every_frame_back(self):
         from labapi import burst
         from labapi.proxmox import ExecResult
@@ -1653,7 +1694,8 @@ class BurstSteps(RunTests):
 
     def test_each_frames_sidecar_comes_back_in_ranges_and_leaves_the_seat(self):
         """A burst's frames come back as a plain shot's sidecar does: each frame's .b64 in ranges, its length from one
-        listing of the burst's folder, decoded once joined, and removed once read."""
+        listing of the burst's folder, decoded once joined; the folder's sidecars then leave the seat by one exec, not
+        one a frame (x-npc-legs-burst's 40 frames cost 40: the check of 508697c3, nit 1)."""
         from labapi.proxmox import ExecResult
 
         self._managed_c1(ExecResult(0, self._done() + "\r\n", ""))
@@ -1666,6 +1708,64 @@ class BurstSteps(RunTests):
         self.assertEqual(sorted(c[2] for c in pve.calls if c[0] == "file_read_range"), [f"{folder}\\{k:03d}.png.b64" for k in range(3)])
         self.assertFalse([c for c in pve.calls if c[0] == "file_read" and c[2].startswith(folder)], "no whole read")
         self.assertFalse([p for p in pve.files if p.startswith(folder)], "each sidecar leaves the seat once read")
+        removals = [" ".join(c[2]) for c in pve.calls if c[:2] == ("exec", 901) and "Remove-Item" in " ".join(c[2]) and folder in " ".join(c[2])]
+        self.assertEqual(len(removals), 1, removals)
+        self.assertIn(f"Get-ChildItem -LiteralPath '{folder}' -Filter '*.png.b64'", removals[0])
+        self.assertFalse([n for n in body["notes"] if folder in n], body["notes"])
+
+    def test_a_sidecar_that_stays_after_the_one_removal_faults_the_seat(self):
+        """The folder's one removal names each sidecar that stayed: each is held open in the agent as a plain shot's is,
+        the step's note and the seat's fault, a rollback at its next run; the verdict is as it was and the frames kept."""
+        from labapi.proxmox import ExecResult
+
+        self._managed_c1(ExecResult(0, self._done() + "\r\n", ""))
+        self._removal_answers(lambda guest: ExecResult(0, "001.png.b64\r\nstayed 1\r\n", ""))
+        run_id, body = self._run(BURST)
+        self.assertEqual(body["verdict"], "green", body)
+        step, pngs, _ = self._burst(run_id, body)
+        self.assertEqual(len(pngs), 3)
+        i = step["index"]
+        held = f"screenshot burst {i:03d}-c1 frame 1: C:\\sky-lab\\shots\\{i:03d}-burst\\001.png.b64 held open in its agent after its read"
+        self.assertEqual([n for n in body["notes"] if "held open" in n], [held])
+        self.assertEqual(self.services.runner.seats["c1"].force, f"its last run ({run_id}) ended in a fault: {held}")
+
+    def test_a_frame_whose_read_died_is_taken_as_held_when_the_removal_confirms_nothing(self):
+        """With the one removal unconfirmed (its exec failed), a frame whose read died is taken as held, as _read_back
+        takes one: the read that died is what leaves a handle open; the frames read whole are not."""
+        from unittest import mock
+
+        from labapi import proxmox
+        from labapi.proxmox import ExecResult, ProxmoxError
+
+        self._managed_c1(ExecResult(0, self._done() + "\r\n", ""))
+        pve = self.services.control._b
+        plain_range = pve.file_read_range
+
+        def file_read_range(guest, path, offset, count):
+            if path.endswith("\\002.png.b64"):
+                pve.calls.append(("file_read_range", guest.vmid, path, offset, count))
+                raise ProxmoxError(f"E_PVE_FILE: {guest.name}: ResourceException: 500 Internal Server Error: VM {guest.vmid} "
+                                   "qga command 'guest-file-read' failed - got timeout")
+            return plain_range(guest, path, offset, count)
+
+        def lost(guest):
+            raise ProxmoxError(f"E_PVE_EXEC: {guest.name}: qga command 'guest-exec' failed - got timeout")
+
+        pve.file_read_range = file_read_range
+        self._removal_answers(lost)
+        with mock.patch.object(proxmox, "FILE_READ_PAUSES", (0.0, 0.0)):
+            run_id, body = self._run(BURST)
+        self.assertEqual(body["verdict"], "green", body)
+        step, pngs, _ = self._burst(run_id, body)
+        self.assertEqual(len(pngs), 2)
+        self.assertIn("not read: frame 2", step["note"], step)
+        i = step["index"]
+        held = [n for n in body["notes"] if "held open" in n]
+        self.assertEqual(len(held), 1, body["notes"])
+        self.assertTrue(held[0].startswith(f"screenshot burst {i:03d}-c1 frame 2: C:\\sky-lab\\shots\\{i:03d}-burst\\002.png.b64 "
+                                           "held open in its agent after its read (taken as held, its read having failed: "
+                                           f"C:\\sky-lab\\shots\\{i:03d}-burst's sidecars on fake-c1 not removed: E_PVE_EXEC"), held)
+        self.assertEqual(self.services.runner.seats["c1"].force, f"its last run ({run_id}) ended in a fault: {held[0][:200]}")
 
     def test_a_frame_not_read_is_the_note_and_the_rest_are_kept(self):
         from labapi.proxmox import ExecResult

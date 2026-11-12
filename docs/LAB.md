@@ -624,9 +624,11 @@ five-second frames could not show a stride.
   push a frame late.
 - After the burst the frames come back as NNN-<client>-<k>.png beside
   NNN-<client>-burst.json, the offsets, each frame's sidecar in ranges as a
-  plain shot's is (its length from one listing of the burst's folder) and
-  removed once read. As with a plain shot, a burst never fails a run: a frame
-  not filmed or not read is the step's note.
+  plain shot's is (its length from one listing of the burst's folder); once
+  every frame is read, one exec removes the folder's sidecars and names any
+  that stayed, where a removal a frame cost an exec each. As with a plain
+  shot, a burst never fails a run: a frame not filmed or not read is the
+  step's note.
 Assertions read `server.actor(c)` (the record, and
 `appearanceAttempts`, `lastAppearanceRaceId`, `lastAppearanceAllowed`: the
 server's verdicts on the client's race menu results; `shouts`,

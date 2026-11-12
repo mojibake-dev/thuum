@@ -1876,8 +1876,9 @@ class Runner:
     async def _burst(self, rec: RunRecord, index: int, client: str, args: dict[str, Any]) -> tuple[bool, str]:
         """screenshot {count, intervalMs} (scenario.py; burst.py): frames at an animation's rate, filmed in the
         seat's desktop session by one exec and read back after it as NNN-<client>-<k>.png beside
-        NNN-<client>-burst.json (each frame's offset in ms), each frame's .b64 sidecar in ranges and removed once
-        read as a plain shot's is. As a plain shot does, a burst never fails a run: a frame not filmed or not read
+        NNN-<client>-burst.json (each frame's offset in ms), each frame's .b64 sidecar in ranges as a plain shot's is,
+        and the folder's sidecars removed by one exec once all are read (_remove_frames), one that stays the seat's
+        fault as a plain shot's is. As a plain shot does, a burst never fails a run: a frame not filmed or not read
         is the step's note."""
         shots = rec.dir / "screenshots"
         shots.mkdir(exist_ok=True)
@@ -1901,8 +1902,9 @@ class Runner:
                 lost = " (the helper's exec answer was lost; read from its files)"
         except (ProxmoxError, ValueError) as e:
             return True, f"screenshot burst skipped: {e}"
-        # each frame's sidecar comes back as a plain shot's does, in ranges, decoded once joined and removed once read,
-        # its length from one listing of the burst's folder
+        # each frame's sidecar comes back as a plain shot's does, in ranges and decoded once joined, its length from one
+        # listing of the burst's folder; the folder's sidecars then go by one exec, where a removal a frame cost an
+        # exec each (x-npc-legs-burst's 40 frames, 40 execs: the check of 508697c3, nit 1)
         def lengths(res) -> dict[str, int] | None:
             if res.exitcode != 0:
                 return None
@@ -1915,17 +1917,24 @@ class Runner:
             sizes, unlisted = await self._tried(g, listing, lengths, "its frames' listing"), ""
         except (ProxmoxError, ValueError) as e:
             sizes, unlisted = {}, f" (its frames' listing failed: {str(e)[:80]})"
-        got, missing = 0, []
+        got, missing, died, whats = 0, [], set(), {}
         for f in data["frames"]:
-            sidecar = f"{remote}\\{f['file']}.b64"
+            name = f"{f['file']}.b64"
+            sidecar = f"{remote}\\{name}"
+            whats[name] = f"screenshot burst {index:03d}-{client} frame {f['k']}"
             try:
-                if f"{f['file']}.b64" not in sizes:
+                if name not in sizes:
                     raise SeatFileMissing(f"{sidecar} is not there{unlisted}")
-                b64 = await self._read_back(rec, g, sidecar, sizes[f"{f['file']}.b64"], f"screenshot burst {index:03d}-{client} frame {f['k']}")
+                try:
+                    b64 = await self._read_ranges(g, sidecar, sizes[name])
+                except (ProxmoxError, ValueError):
+                    died.add(name)  # a read that died is what leaves a handle open (_read_back)
+                    raise
                 (shots / f"{index:03d}-{client}-{int(f['k'])}.png").write_bytes(base64.b64decode(b64))
                 got += 1
             except (ProxmoxError, ValueError) as e:
                 missing.append(f"frame {f['k']}: {e}"[:120])
+        await self._remove_frames(rec, g, remote, whats, died, f"screenshot burst {index:03d}-{client}")
         (shots / f"{index:03d}-{client}-burst.json").write_text(json.dumps(data, indent=1))
         ms = [int(f["ms"]) for f in data["frames"]]
         note = (f"{got} of {len(ms)} frames over {ms[-1]} ms, {index:03d}-{client}-0.png to {index:03d}-{client}-{len(ms) - 1}.png "
@@ -1933,6 +1942,38 @@ class Runner:
         if missing:
             note += "; not read: " + "; ".join(missing[:3])
         return True, note
+
+    async def _remove_frames(self, rec: RunRecord, g: Guest, folder: str, whats: dict[str, str], died: set[str],
+                             what: str) -> None:
+        """A burst's .b64 sidecars removed from `folder` on the seat by one exec once every frame is read, which names
+        each one that stayed and then their count, so an answer cut short never reads as none staying. Each one that
+        stayed is held open in the agent, as a plain shot's is (_held: the step's note and the seat's fault, named by
+        its frame's `whats` entry or else `what`); with the removal unconfirmed, a frame whose read died (`died`) is
+        taken as held, as _read_back takes one, and otherwise the removal's failure is the run's note."""
+        cmd = ["powershell", "-NoProfile", "-Command",
+               f"$stayed = @(Get-ChildItem -LiteralPath '{folder}' -Filter '*.png.b64' -File | ForEach-Object {{ "
+               f"Remove-Item -LiteralPath $_.FullName -Force -ErrorAction SilentlyContinue; "
+               f"if (Test-Path -LiteralPath $_.FullName) {{ $_.Name }} }}); $stayed; Write-Output ('stayed ' + $stayed.Count)"]
+        stayed, unconfirmed = None, ""
+        try:
+            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+            lines = [ln.strip() for ln in (res.out or "").splitlines() if ln.strip()]
+            count = re.fullmatch(r"stayed (\d+)", lines[-1]) if lines else None
+            if res.exitcode == 0 and count and int(count.group(1)) == len(lines) - 1:
+                stayed = lines[:-1]
+            else:
+                unconfirmed = (f"the removal of {folder}'s sidecars on {g.name} answered exit {res.exitcode}: "
+                               f"{(res.err or res.out).strip()[:200]}")
+        except ProxmoxError as e:
+            unconfirmed = f"{folder}'s sidecars on {g.name} not removed: {e}"
+        if stayed is not None:
+            for name in stayed:
+                self._held(rec, g, f"{folder}\\{name}", whats.get(name, what))
+            return
+        for name in sorted(died):
+            self._held(rec, g, f"{folder}\\{name}", whats[name], unconfirmed)
+        if not died:
+            rec.notes.append(f"{what}: {unconfirmed}")
 
     async def _mouse(self, rec: RunRecord, index: int, step: Step) -> tuple[bool, str]:
         """A relative mouse move in the seat's own desktop session (scenario.py's mouse; mouse.py): what the
@@ -2362,41 +2403,48 @@ class Runner:
                f"if (Test-Path -LiteralPath '{path}') {{ (Get-Item -LiteralPath '{path}').Length }} else {{ 'missing {path}' }}"]
         return await self._tried(g, cmd, length, what, pause_s)
 
-    async def _read_back(self, rec: RunRecord, g: Guest, path: str, size: int, what: str) -> bytes:
+    async def _read_ranges(self, g: Guest, path: str, size: int) -> bytes:
         """The `size` bytes of the file at `path` on the seat, a file the runner made there to read (a shared-read copy
-        whose exec printed its length, _seat_copy), through Proxmox's own ranged agent file-reads of READ_RANGE_BYTES
-        (GuestControl.file_read_range, whose retry on "got timeout" is the only retry), and then removed. A file past
-        FETCH_MAX_BYTES is refused before its first read. Each range must come back whole: one that comes back short
-        met the file's end first, a copy shorter than its length (an offset at or past the end answers no bytes).
-        The caller decodes the whole once, since a range boundary can fall inside a multibyte character. A
-        ProxmoxError (a read refused, a range that came back as no base64) or a ValueError (the cap, a short read) is
-        the caller's, after the removal, which runs whatever happened: a copy that will not go is held open in the
-        agent (qemu-server 9.2.10's file-read leaves a handle open when a read dies, Agent.pm at ec268ede5b lines
-        539-555, and only the seat's restart closes it), so the seat rolls back, in this run's own reset when that is
-        still to come (RunRecord.rollback), else at its next run (RunRecord.faulted, _seat_fault), this run's verdict
-        as it was. After a read that raised, a removal that does not confirm the copy gone counts as one that found it
+        whose exec printed its length, _seat_copy; a helper's .b64 sidecar, _seat_length), through Proxmox's own
+        ranged agent file-reads of READ_RANGE_BYTES (GuestControl.file_read_range, whose retry on "got timeout" is the
+        only retry). A file past FETCH_MAX_BYTES is refused before its first read. Each range must come back whole: one
+        that comes back short met the file's end first, a copy shorter than its length (an offset at or past the end
+        answers no bytes). The caller decodes the whole once, since a range boundary can fall inside a multibyte
+        character, and removes the file: one file by _read_back, a burst's frames by one exec for them all
+        (_remove_frames). A ProxmoxError (a read refused, a range that came back as no base64) or a ValueError (the
+        cap, a short read) is the caller's."""
+        if size > FETCH_MAX_BYTES:
+            raise ValueError(f"its copy is {size} bytes, past the {FETCH_MAX_BYTES} ({FETCH_MAX_BYTES // (1024 * 1024)} MiB) a fetch reads")
+        data = bytearray()
+        ranges = -(-size // READ_RANGE_BYTES)
+        for k in range(ranges):
+            at = k * READ_RANGE_BYTES
+            want = min(READ_RANGE_BYTES, size - at)
+            try:
+                got = await asyncio.to_thread(self.control.file_read_range, g, path, at, want)
+            except ProxmoxError as e:
+                raise ProxmoxError(f"range {k + 1} of {ranges}: {e}") from e
+            data += got
+            if len(got) != want:
+                raise ValueError(f"{len(data)} bytes read of its {size}: range {k + 1} of {ranges}, at {at}, came back "
+                                 f"{len(got)} of its {want}")
+        return bytes(data)
+
+    async def _read_back(self, rec: RunRecord, g: Guest, path: str, size: int, what: str) -> bytes:
+        """The `size` bytes of the file at `path` on the seat in ranges (_read_ranges), and then the file removed. A
+        ProxmoxError or a ValueError from the read is the caller's, after the removal, which runs whatever happened: a
+        copy that will not go is held open in the agent (qemu-server 9.2.10's file-read leaves a handle open when a
+        read dies, Agent.pm at ec268ede5b lines 539-555, and only the seat's restart closes it), the seat's fault
+        (_held). After a read that raised, a removal that does not confirm the copy gone counts as one that found it
         held (the fresh review of e8d8de9b, nit 3): the read that died is what leaves a handle open. The frida traces,
-        the client logs (_fetch_client_file, _log_count) and the screenshots' and bursts' .b64 sidecars come back
-        through it; _skse_logs is the fetch still read whole."""
+        the client logs (_fetch_client_file, _log_count) and the plain screenshots' .b64 sidecars come back through
+        it, a burst's frames through _read_ranges and one removal for them all (_remove_frames); _skse_logs is the
+        fetch still read whole."""
         came_back = False
         try:
-            if size > FETCH_MAX_BYTES:
-                raise ValueError(f"its copy is {size} bytes, past the {FETCH_MAX_BYTES} ({FETCH_MAX_BYTES // (1024 * 1024)} MiB) a fetch reads")
-            data = bytearray()
-            ranges = -(-size // READ_RANGE_BYTES)
-            for k in range(ranges):
-                at = k * READ_RANGE_BYTES
-                want = min(READ_RANGE_BYTES, size - at)
-                try:
-                    got = await asyncio.to_thread(self.control.file_read_range, g, path, at, want)
-                except ProxmoxError as e:
-                    raise ProxmoxError(f"range {k + 1} of {ranges}: {e}") from e
-                data += got
-                if len(got) != want:
-                    raise ValueError(f"{len(data)} bytes read of its {size}: range {k + 1} of {ranges}, at {at}, came back "
-                                     f"{len(got)} of its {want}")
+            data = await self._read_ranges(g, path, size)
             came_back = True
-            return bytes(data)
+            return data
         finally:
             cmd = ["powershell", "-NoProfile", "-Command",
                    f"Remove-Item -LiteralPath '{path}' -Force -ErrorAction SilentlyContinue; Test-Path -LiteralPath '{path}'"]
@@ -2409,22 +2457,29 @@ class Runner:
             except ProxmoxError as e:
                 unconfirmed = f"{path} on {g.name} not removed: {e}"
             if said == "True" or (unconfirmed and not came_back):
-                held = f"{what}: {path} held open in its agent after its read"
-                if said != "True":
-                    held += f" (taken as held, its read having failed: {unconfirmed})"
-                rec.notes.append(held)
-                # a seat the run plays and has not reset yet (a .before-run fetch, ahead of the resets) rolls back in
-                # this run's own reset (_rollback_reason reads rec.rollback); one the run already reset rolls back at
-                # its next run through the fault; one outside the run (a hand trace the end fetched there) through
-                # its remembered state, as anything that touched it does
-                if g.client in rec.scenario.clients and g.client not in rec.reset_started:
-                    rec.rollback.setdefault(g.client, held)
-                elif g.client in rec.scenario.clients:
-                    rec.faulted.setdefault(g.client, held)
-                elif g.client:
-                    self.forget_seats(held, [g.client])
+                self._held(rec, g, path, what, "" if said == "True" else unconfirmed)
             elif unconfirmed:
                 rec.notes.append(f"{what}: {unconfirmed}")
+
+    def _held(self, rec: RunRecord, g: Guest, path: str, what: str, unconfirmed: str = "") -> None:
+        """A file the runner read on the seat that would not go, held open in the agent (or taken as held: a removal
+        that confirmed nothing, `unconfirmed`, after a read that died): the step's note, and the seat rolls back, in
+        this run's own reset when that is still to come (RunRecord.rollback), else at its next run (RunRecord.faulted,
+        _seat_fault), this run's verdict as it was."""
+        held = f"{what}: {path} held open in its agent after its read"
+        if unconfirmed:
+            held += f" (taken as held, its read having failed: {unconfirmed})"
+        rec.notes.append(held)
+        # a seat the run plays and has not reset yet (a .before-run fetch, ahead of the resets) rolls back in this
+        # run's own reset (_rollback_reason reads rec.rollback); one the run already reset rolls back at its next run
+        # through the fault; one outside the run (a hand trace the end fetched there) through its remembered state,
+        # as anything that touched it does
+        if g.client in rec.scenario.clients and g.client not in rec.reset_started:
+            rec.rollback.setdefault(g.client, held)
+        elif g.client in rec.scenario.clients:
+            rec.faulted.setdefault(g.client, held)
+        elif g.client:
+            self.forget_seats(held, [g.client])
 
     async def _frida_trace(self, rec: RunRecord, client: str, script: str, suffix: str = "") -> list[str]:
         """A trace from its seat as frida/<client>-<script><suffix>.jsonl, the injector's .out and then the script's
