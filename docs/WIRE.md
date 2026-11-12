@@ -1387,3 +1387,20 @@ emptied set). No schema change: the field stays an f32, and validate_server's Ma
 (E_VAL_NONFINITE alone; fixture 43-MagicEffects-0 carries negatives), so the validator is unchanged. wire-schema's doc comment on
 MagicEffect::remaining, MagicEffectsMessage.h and the client's magicEffectsMessage.ts say what -1 means; MpActor's MagicEffectsOf
 sends it, magicEffectsService.ts's secondsOf reads it.
+
+### MagicEffects (t 43) gains `caster` (npc-fate C4, ADR-060's return; SCHEMA_VERSION 45)
+
+Since SCHEMA_VERSION 45 (fork m4-reanimate-return 5d5c868a, the contract in one commit as rule 4 asks; docs/verbs/npc-fate.md,
+"C4: the full thrall's return to its caster"; the number is the next after the branch's base, 44, and numidium settles it at
+the merge, where physics rungs 1 and 2 carry their own): each MagicEffect carries `caster: u32`, the server's form id of who
+applied the effect, 0 for none (wire-schema skymp.rs's MagicEffect, `#[serde(default)]`, after `remaining`). The record keeps
+it (RunningEffect's caster, the server's own stamp at the accepted hit), and MpActor's MagicEffectsOf now sends it, a
+shown-once effect's from ApplyEffects' caster. Why: UpdateHoster hands a thrall's simulation over, and a fresh game cannot tell
+whether its engine commands the thrall; the host of a full thrall that stayed simulates it too, and only the caster tells them
+apart, so the game that simulates a thrall whose Reanimate state names its own player commands it (the client's
+magicEffectsService, the platform's commandActor). R0, the server's word. Validator (wire-validate's MagicEffects arm,
+validate_server): any caster validates, so no new reason code; its case a_magic_effects_caster_is_any_form_id_or_none. Fixtures:
+43-MagicEffects-0 gains a caster per effect, and 43-MagicEffects-2 is the C4 shape (Dead Thrall's state, MGEF 0x7e8e0 from
+SPEL 0x7e8df, remaining -1, caster ff000000); the C++ pair is MagicEffectsMessage::Effect's caster (Serialize and operator==),
+the client's magicEffectsMessage.ts the optional `caster`. Netcode's protocol id carries the version, so a schema 44 seat cannot
+connect to a schema 45 server.
