@@ -378,6 +378,21 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   row with its frame, the change key on the thresholds (an awake body every
   15 frames besides); the ready row's pid, base, Main's thread and first
   bytes, a liveness row every 10 s. E10's verdict waits for ADR-071's cap.
+  v3.0 (2026-11-12, E10's read on both seats, havok-props.md:109): v2
+  watches a body only after its own seat's capsule touches it, so a body
+  the seat grabbed and dropped or threw went unwatched (x-prop-rest-e10
+  v1's fresh review). v3.0 adds a watch from the leave of
+  PlayerCharacter::StartGrabObject (40552): the grabbedObject handle
+  (0x8D0) to its reference by LookupReferenceByHandle (12332), that
+  reference's bodies by prop-grab.js v2.2's walk, each (up to
+  GRAB_WATCH_MAX, 8) read by v2's poll into the same sleep rows. One watch
+  a body: a contact or impulse on a known address adds nothing, as in v2,
+  while a grab of a known address starts a fresh watch row (`previous`
+  names the old entry), since a Disable frees a body and a later copy can
+  reuse its address. New fields: a `grab` row at every StartGrabObject
+  leave, `via` on watch rows, `body` on sleep rows, an `unwatch` with
+  reason 'room for a grab' past GRAB_WATCH_MAX; v2's WATCH_MAX counts the
+  touched entries alone. Never run; a fresh review first.
 - prop-launch.js: prop-contact.js plus the body's motion at each contact and before and after every impulse push (the hkpEntity's
   embedded motion: type, position, linear velocity and its length, angular speed, inverse mass; offsets from hkpEntity.h, hkpMotion.h,
   hkMotionState.h, hkTransform.h), for D73's open item: a resting Dynamic basket thrown out of reach by a standing capsule contact (push
