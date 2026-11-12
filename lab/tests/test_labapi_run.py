@@ -2430,7 +2430,7 @@ class RelaunchSteps(RunTests):
         pve = self.services.control._b
         pve.files[r"C:\sky-lab\c1-relaunch-001.log"] = "[verb:cell-host] quit: the client disconnected in 12 ms\n"
         pve.files[r"C:\sky-lab\c1-relaunch-001-console.log"] = "2026-10-24T00:00:00Z [Script] tgm done\n"
-        run_id, body = self._run(RELAUNCH.replace("  - c1: relaunch\n", "  - c1: relaunch {until: stopped}\n  - c1: connect\n"))
+        run_id, body = self._run(RELAUNCH)
         self.assertEqual(body["verdict"], "green", body)
         self.assertIn("c1-relaunch-001.log", body["artifacts"])
         self.assertIn("c1-relaunch-001-console.log", body["artifacts"])
@@ -2443,19 +2443,86 @@ class RelaunchSteps(RunTests):
         self.assertTrue(any("lab-console-logs.txt" in c and "c1-relaunch-001-console.log" in c for c in copies), copies)
 
     def test_a_relaunch_until_stopped_returns_at_the_kill(self):
-        """b-host-kill: the step returns once the guest agent has stopped the game, with the player still on the
-        server's online list, so a scenario times what follows from the kill; the connect after it takes the new
-        game's identity."""
+        """b-host-kill and x-prop-stall: the step's first act is the kill, one exec of cmd.exe's inbox programs (the
+        launch task ended, then the game), and the step returns at it with the player still on the server's online
+        list, so a scenario times what follows from the kill; the outgoing game's two logs are copied behind it and
+        the new game started after them, which the connect after it waits for before it takes the new identity."""
         from labapi.guests import Guest
 
         tables = self.services.tables
         tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        pve.files[r"C:\sky-lab\c1-relaunch-001.log"] = "[verb:props] ff000004 in flight\n"
+        pve.files[r"C:\sky-lab\c1-relaunch-001-console.log"] = "2026-11-12T15:00:00Z [Script] tgm done\n"
         text = RELAUNCH.replace("  - c1: relaunch\n", "  - c1: relaunch {until: stopped}\n  - c1: connect\n")
         run_id, body = self._run(text)
         self.assertEqual(body["verdict"], "green", body)
         step = next(s for s in body["steps"] if s.get("action") == "relaunch")
-        self.assertIn("game stopped, the server not told", str(step.get("note")), step)
+        self.assertRegex(str(step.get("note")), r"^c1's game stopped [0-9.]+s after the step began, the server not told; its new game logs in by itself$")
         self.assertTrue(any("c1 online after" in n for n in body.get("notes", [])), body.get("notes"))
+        execs = [(i, " ".join(c[2])) for i, c in enumerate(pve.calls) if c[0] == "exec" and c[1] == 901]
+        kill = next(i for i, e in execs if e == "cmd.exe /c schtasks /End /TN sky-lab-launch >NUL 2>&1 & taskkill /F /IM SkyrimSE.exe")
+        first_copy = next(i for i, e in execs if "c1-relaunch-001.log" in e)
+        start = next(i for i, e in execs if e == "powershell -NoProfile -Command Start-ScheduledTask -TaskName sky-lab-launch")
+        self.assertLess(kill, first_copy, "the kill comes before the copies")
+        self.assertLess(first_copy, start, "the new game starts after the copies")
+        self.assertFalse([e for i, e in execs if "Stop-Process" in e], "no PowerShell stop: the kill was the stop")
+        self.assertIn("c1-relaunch-001.log", body["artifacts"])
+        self.assertIn("c1-relaunch-001-console.log", body["artifacts"])
+        self.assertTrue(any("outgoing logs kept and its new game started behind the kill" in n for n in body.get("notes", [])), body.get("notes"))
+
+    def _relaunch_seat(self, answer):
+        from labapi.guests import Guest
+        from labapi.proxmox import ExecResult
+
+        self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        plain_exec = pve.exec
+
+        def exec_(guest, command, timeout):
+            got = answer(" ".join(command))
+            if got is None:
+                return plain_exec(guest, command, timeout)
+            pve.calls.append(("exec", guest.vmid, tuple(command)))
+            return ExecResult(*got)
+
+        pve.exec = exec_
+        return pve
+
+    def test_a_relaunch_until_stopped_with_no_game_to_stop_says_so(self):
+        # taskkill answers 128 for no such process: the game was gone before the step, which the scenario's own claims judge
+        self._relaunch_seat(lambda c: (128, "", 'ERROR: The process "SkyrimSE.exe" not found.') if c.startswith("cmd.exe /c") else None)
+        run_id, body = self._run(RELAUNCH.replace("  - c1: relaunch\n", "  - c1: relaunch {until: stopped}\n  - c1: connect\n"))
+        self.assertEqual(body["verdict"], "green", body)
+        step = next(s for s in body["steps"] if s.get("action") == "relaunch")
+        self.assertRegex(str(step.get("note")), r"^no SkyrimSE process on c1 to stop \([0-9.]+s\); its new game logs in by itself$")
+
+    def test_a_kill_that_fails_fails_the_relaunch(self):
+        self._relaunch_seat(lambda c: (1, "", "Access is denied.") if c.startswith("cmd.exe /c") else None)
+        run_id, body = self._run(RELAUNCH.replace("  - c1: relaunch\n", "  - c1: relaunch {until: stopped}\n  - c1: connect\n"))
+        self.assertEqual(body["verdict"], "red", body)
+        self.assertEqual([f["error"] for f in body["failures"]], ["E_RUN_RELAUNCH: fake-c1: the kill: exit 1: Access is denied."])
+
+    def test_a_new_game_that_does_not_start_behind_the_kill_fails_the_connect(self):
+        pve = self._relaunch_seat(lambda c: (1, "", "the task was refused") if c.endswith("-Command Start-ScheduledTask -TaskName sky-lab-launch") else None)
+        run_id, body = self._run(RELAUNCH.replace("  - c1: relaunch\n", "  - c1: relaunch {until: stopped}\n  - c1: connect\n"))
+        self.assertEqual(body["verdict"], "red", body)
+        self.assertEqual([(f["step"], f["error"]) for f in body["failures"]],
+                         [(2, "E_RUN_RELAUNCH: fake-c1: the new game's start behind the kill: exit 1: the task was refused")])
+
+    def test_a_run_that_ends_after_the_kill_finishes_what_is_behind_it(self):
+        # no connect after the kill: the run's end awaits the copies and the start, so they are the run's
+        from labapi.guests import Guest
+
+        self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        pve = self.services.control._b
+        pve.files[r"C:\sky-lab\c1-relaunch-001.log"] = "[verb:props] ff000004 in flight\n"
+        run_id, body = self._run(RELAUNCH.replace("  - c1: relaunch\n  - c1: dump-state\n", "  - c1: relaunch {until: stopped}\n"))
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertIn("c1-relaunch-001.log", body["artifacts"])
+        execs = [" ".join(c[2]) for c in pve.calls if c[0] == "exec" and c[1] == 901]
+        self.assertIn("powershell -NoProfile -Command Start-ScheduledTask -TaskName sky-lab-launch", execs)
+        self.assertTrue(any("outgoing logs kept and its new game started behind the kill" in n for n in body.get("notes", [])), body.get("notes"))
 
     def test_relaunch_needs_a_managed_client(self):
         run_id, body = self._run(RELAUNCH)

@@ -307,6 +307,11 @@ class Settings:
     )
     # a relaunch {frida} starts the game alone: its files step stopped it and the watcher is armed
     relaunch_start_cmd: str = "Start-ScheduledTask -TaskName sky-lab-launch"
+    # relaunch {until: stopped}'s kill, the step's first act (Runner._relaunch): the same order as the stop above, the
+    # launch task ended before the game, by cmd.exe and the two inbox programs rather than a PowerShell to start (schtasks
+    # /end and taskkill, learn.microsoft.com's Windows commands), so a game stopped mid-flight (x-prop-stall, E32) stops
+    # within the exec's own round trip; taskkill answers 128 when no game was there to stop
+    relaunch_kill_cmd: str = "schtasks /End /TN sky-lab-launch >NUL 2>&1 & taskkill /F /IM SkyrimSE.exe"
     relaunch_cmd: str = relaunch_stop_cmd + "; " + relaunch_start_cmd
     relaunch_timeout_s: float = 300.0
     # ADR-036: how a seat starts a run. "rollback" stops its VM, rolls the disk back to its snapshot and boots it,
