@@ -1258,6 +1258,12 @@ class Runner:
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
             return True, f"log-count skipped: {client} is unmanaged or unmapped"
+        down = rec.agents_down.get(client)
+        if down is not None:
+            # a log fetch found the seat's guest agent not running, and only a restart brings it back: nothing is tried
+            # on it until its reset, and the count stays unkept, so a claim on it raises (the re-review of 486e80f3)
+            return True, (f"log-count: {client}'s logs unread, its guest agent found not running ({down[0][:160]}); "
+                          "no count kept")
         # both logs are copied by a read that shares write access, the frida traces' way: Copy-Item's read refuses a
         # file another process holds open for writing, and lab-driver's console tee is open whenever the game prints
         # (b-npc-stream-voice 20261028-063409: step 29's copy failed and read as an empty log, 0 lines, while step 30's
@@ -1293,6 +1299,8 @@ class Runner:
                 byte_notes.append("0 read")
                 continue
             except (ProxmoxError, ValueError) as e:
+                if "guest agent is not running" in str(e):
+                    rec.agents_down.setdefault(client, (str(e), False))  # the seat's other log reads skip it, as a fetch's
                 return True, f"log-count: {client}'s {which} unread after three tries ({e}); no count kept"
             texts.append(data.decode("utf-8", errors="replace"))
             byte_notes.append(f"{len(data)} read" if seat_n is None

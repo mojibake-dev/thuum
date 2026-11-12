@@ -3725,6 +3725,49 @@ class LogCount(RunTests):
         self.assertIn("its copy failed three tries 1 s apart", note)
         self.assertIn("no count kept", note)
 
+    def test_a_log_count_on_a_seat_whose_agent_is_down_keeps_no_count_at_once(self):
+        """A log fetch found the seat's guest agent not running (RunRecord.agents_down): log-count tries nothing on it
+        and keeps no count, so a claim on the seat's count raises (the re-review of 486e80f3, nit 2)."""
+        import asyncio
+
+        from labapi.runner import RunRecord
+        from labapi.scenario import Scenario
+
+        pve = self._seat()
+        pve.files[self.settings.client_driver_log] = "claim 13491 sent on E\n"
+        rec = RunRecord("x", Scenario(id="x", clients=["c1"]), self.tmp, "now")
+        rec.agents_down["c1"] = ("E_PVE_EXEC: fake-c1: ResourceException: 500 Internal Server Error: QEMU guest agent is not running", True)
+        ok, note = asyncio.run(self.services.runner._log_count(rec, 3, "c1", "claim 13491"))
+        self.assertTrue(ok, note)
+        self.assertEqual(note, "log-count: c1's logs unread, its guest agent found not running (E_PVE_EXEC: fake-c1: "
+                               "ResourceException: 500 Internal Server Error: QEMU guest agent is not running); no count kept")
+        self.assertIsNone(self.services.board.log_count("c1", "claim 13491"))
+        self.assertFalse([c for c in pve.calls if c[0] == "exec"], pve.calls)
+
+    def test_a_log_count_that_meets_a_dead_agent_marks_the_seat(self):
+        """A log-count whose copy finds the seat's guest agent not running marks the seat as a log fetch does, so its
+        other log reads skip it until the seat's reset."""
+        import asyncio
+
+        from labapi.proxmox import ProxmoxError
+        from labapi.runner import RunRecord
+        from labapi.scenario import Scenario
+
+        pve = self._seat()
+        plain_exec = pve.exec
+
+        def exec_(guest, command, timeout):
+            if any("logcount-" in a and "ReadWrite" in a for a in command):
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                raise ProxmoxError(f"E_PVE_EXEC: {guest.name}: ResourceException: 500 Internal Server Error: QEMU guest agent is not running")
+            return plain_exec(guest, command, timeout)
+
+        pve.exec = exec_
+        rec = RunRecord("x", Scenario(id="x", clients=["c1"]), self.tmp, "now")
+        ok, note = asyncio.run(self.services.runner._log_count(rec, 3, "c1", "claim 13491"))
+        self.assertIn("no count kept", note)
+        self.assertIn("c1", rec.agents_down)
+
     def test_a_log_count_copy_held_open_faults_the_seat(self):
         """A copy the agent holds after its read is a handle only the seat's restart closes, log-count's as a run log's:
         a note and the seat's fault, so its next run rolls it back; the count stands, its read having come back whole."""
