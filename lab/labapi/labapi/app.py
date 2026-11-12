@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 import time
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
@@ -30,6 +31,12 @@ from .state import RpcStateClient, ServerState, StateError
 from .system import RealSystem, System
 
 log = logging.getLogger("labapi")
+
+# A hand-started script's stem, from the upload's file name or a lab/frida file: the name the seat serves it under goes
+# inside single quotes in every PowerShell command about it (config.frida_exec_template, Runner._frida_trace), so a '
+# there would end the quote in an exec that runs as SYSTEM on the guest; letters, digits, '.', '_' and '-' only, and no
+# leading '.', which GET /frida/scripts/<name> refuses (the fresh review of 77a4279d)
+_SCRIPT_STEM = re.compile(r"[A-Za-z0-9_-][A-Za-z0-9._-]*")
 
 
 @dataclass
@@ -502,6 +509,9 @@ def create_app(services: Services) -> FastAPI:
             text, stem = src.read_text(), src.stem
         else:
             raise HTTPException(400, "give a script name or upload a file")
+        if not _SCRIPT_STEM.fullmatch(stem):
+            raise HTTPException(400, f"script name {stem!r}: letters, digits, '.', '_' and '-' only, not first a '.' (it goes "
+                                     "inside single quotes in the seat's PowerShell)")
         name = f"{stem}-hand-{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}.js"
         (up_dir / name).write_text(frida_script_text(text, s.client_lab_dir, name))
         g = services.tables.guest_for_client(client)

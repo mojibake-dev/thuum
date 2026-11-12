@@ -209,18 +209,25 @@ the neighbouring exterior cells froze until the player crossed a cell border. Th
 detached map (cell id to the time it left the loaded set, persisted with the reload survivor) and for ten minutes reads each such
 cell once a second; a cell standing attached again is added back and reported, with the line "cell <id> re-attached without its load
 event, reported N ms after its detach". Since b8d82f05 the watched set is count-bound to the newest 64 detached cells, as the
-engine's exterior cell buffer is (uExterior Cell Buffer, 36 by default; the eviction order HYPOTHESIS), with the hour's window a
+engine's exterior cell buffer is (uExterior Cell Buffer, 36 by default; its eviction order unread, limit (a) below), with the hour's window a
 backstop, so a stay indoors under an hour brings no gap back and the per-second natives are bounded; a cell detached in the same
 poll is read next second; the event path clears a detach at once. Limits numidium's GO review named (2026-11-03), for after the
 merge: (1) the hour's backstop can reopen P12: a seat inside for over an hour drops its exterior detaches from the watch while the
-engine's buffer still holds them (count-bound with no time purge, HYPOTHESIS), so that exit re-attaches silently again; the count
+engine's buffer still holds them (count-bound with no time purge, unread, limit (b) below), so that exit re-attaches silently again; the count
 bound already caps the reads, so the window buys nothing and should go; (2) the 64-entry watch is the steady state, not the worst
 case: entries leave only by re-attach, the event or the hour, and each border crossing detaches about five cells, so about 13
 crossings fill it, and from then every poll reads 64 forms and 64 attach flags (each a worker round trip) beside the loaded loop's
 50, once a second, UNMEASURED: the poll's cost wants a counted line before a long session relies on it; (3) the lab line means
 "attached before any event", not "no event ever": a cold reload whose attach precedes its cellFullyLoaded would print it too
-(HYPOTHESIS), and the late event then returns at the loaded check; x-warm-exit records the cell events beside the count, so a run
-tells the two apart. The client has no report budget of its own: a re-report shares the
+(unread, limit (c) below), and the late event then returns at the loaded check; x-warm-exit records the cell events beside the count, so a run
+tells the two apart. The named limits of those three (2026-11-11, M3's paper close; no commit since b8d82f05 drops the hour's
+window or counts the poll, and x-warm-exit v2's two greens, 20261103-151537 and 20261103-162731, were warm exits within the
+hour, reading the fix's flip and its line): (a) the buffer's eviction order is unread; the watch's 64 against the buffer's 36
+covers an eviction by age, and a buffer that kept a cell past 64 newer detaches would re-attach it silently, P12's freeze until a
+border crossing; (b) whether the buffer purges by time is unread, and stops mattering when the hour's window goes (follow-up 1):
+until then a stay indoors over an hour can bring P12's freeze back at the exit; (c) the line can print on a cold reload whose
+attach precedes its event, harmless to the table (the late event returns at the loaded check, so the cell is reported once), so a
+claim that counts the line reads the cell events beside it. The client has no report budget of its own: a re-report shares the
 server's bucket (128 burst), and an exit's burst is at most the re-attached cells plus the own cell plus a colliding refresh. No
 wire change. The same buffer keeps the interior's copies' 3D after the warm exit (non-owning-seat.md P13, read from 151537: detached,
 retained, the pose frozen, the puppet flags on; the cold route to another worldspace loses it in about 3.5 s), so a scenario claim
@@ -418,10 +425,9 @@ and b-npc-handoff-door-hosts v23 waits for 0x9731's host after the exit before i
   any packet (renet_netcode's time_since_last_received_packet: a keepalive
   counts, so a game whose network tick runs while its world loads is heard;
   the client's tick rides Skyrim Platform's tick event, so during a load it
-  likely stalls too, HYPOTHESIS until a pcap read: the longest gap between a
-  seat's packets across its Bleak Falls Temple load in x-host-kill 214420's
-  lab.pcap; under a second the client's network tick runs through a load on
-  keepalives, the load's length it stalls) and the time since a message; and
+  may stall too; whether it does was never read from x-host-kill 214420's
+  lab.pcap, and the third read below made it moot, no stale line at either
+  login with both changes) and the time since a message; and
   only a host is marked stale, since a login's first loads come before any
   grant and a silent visitor hosts nothing
   to pass on. The threshold stays 4 s.
@@ -940,6 +946,13 @@ recorded). An R0 (T0 and T2) into the next server train after the arm. That stag
   actor set against the server's; each relayed animation once): npc-stream's
   rows. H8 (r-cell-leave on two seats, the old host's divergence after 60 s
   away): npc-handoff's row. None of the four stands against this verb.
+- The heir about to go stale (Open questions, numidium 2026-11-11; kept open by M3's paper close, the one tag left in this
+  doc): our own code, so the read is a T0 case, not a trace. In wire-rules cells.rs, a departing host's cells with two
+  candidates loaded in them, one silent about 9 s and not yet marked (the note's case: cells.rs :225-232 marks a connection
+  silent only at the server's stale threshold) and one heard within the second: the pick names the heard one, or the case
+  shows the silent one picked and is the R0 fix's test. The live
+  witness is playtest-stagger's server log, 21:19:28Z to 21:19:40Z (the pick at 21:19:33.5Z, "silent 10238 ms" a second
+  later). Owner: agent, after playtest 51.
 - Breakpoint plan for a human session: none needed.
 
 ### Playtest 36, the turbo day (11:36 PDT 2026-10-28): what a plugin reload keeps
@@ -963,7 +976,7 @@ Doc drafted 2026-10-21, before any code.
 - [x] TS handler (HostService, fork m3-cell-host 6ee9cba7 2026-10-21 07:22: the loaded set as CellLoaded from cellFullyLoaded plus Cell.isAttached once a second, reported anew when the player's own actor is created; grants and releases per cell with the monotonic epoch; isHostedHere and isMine for formView, hitService, magicSyncService and sendInputsService; tryHost, hostAttempts.ts and the HostStart/HostStop handlers retired; the cellHost settings key; tsc clean)
 - [x] T2 green (difftest session cell-host.yaml, fork 31199f9c: c1's grant at epoch 1, c2's nothing, c1's unload and departure, c2's grant at epoch 2 at the deadline; "T2 green" at skymp-server:m3-cell-host 259bf390, 33 sessions identical, run beside the merge gate 2026-10-21 and confirmed before parity moved)
 - [x] on fork parity 259bf390 (2026-10-21 13:47, `just verb-merge m3-cell-host b-cell-host`: the gate 20261021-202319-merge-m3-cell-host 8 of 8 green with no rerun (the smoke, a-restart-persistence, b-duel, b-cell-host 203119, a-melee-reach, a-racemenu, b-spell, b-invis-recast), no game lost or replaced; both clones promoted; main 6b593f6 pins it; the lab's settings carry the Survival flags from the next server start)
-- [ ] T3 scenario green, no HYPOTHESIS tags (unticked 15:52 PDT 2026-10-29 by the pass's inventory: sixteen tags written after the tick of run 20261021-201430, ten resolved later in this doc, six resolved nowhere, at lines near the quit path's tail call, the own-cell miss, the watchpoint's read, the lock check and the CIF holder; the earlier tick read: T3 scenario green, no HYPOTHESIS tags (b-cell-host GREEN 20261021-201430 on the 259bf390 stage, all twelve asserts, no crash, the old shape 201045 clean through the handoff too; approved by Eli 11:03; the road there: 184501 red on the CellLoaded budget (fixed 3ea950eb), 192314 red on the scenario's own away-and-back timing (the wait 0.5 s, main e6e9474), 192835 lost c1's game to a copy deleted while the host's engine still ran its movement job (fix 259bf390, disable then delete; the cleaner's guard 0b4b8ed1), 193557 and 194846 held further each time, the freeze block reshaped around relaunch {until: gone} (main 7ef5522); x-cell-attach 185728 green and read; the tags that remained are npc-stream's and npc-handoff's by name, and H5 waits for a third seat))
+- [ ] T3 scenario green, no HYPOTHESIS tags (2026-11-11, M3's paper close: of the six tags open that day, the warm exit's three made named limits (a) to (c), the load stall and the restore lag's code reading deleted as history, and the heir pick kept with a T0 line in the Dynamic plan, so the box stays unticked; seven lines still say CONFIRMED-STATIC with no run on the line (the EnableAI animation stage, the quit path's byte store and its call site, the UI destructor's order, the Loading Menu's teardown order, the 84559 chain, the pre-44 shutdown), open claims under ADR-064 decision 1 that verb-lint counts, the next pass's; unticked 15:52 PDT 2026-10-29 by the pass's inventory: sixteen tags written after the tick of run 20261021-201430, ten resolved later in this doc, six resolved nowhere, at lines near the quit path's tail call, the own-cell miss, the watchpoint's read, the lock check and the CIF holder; the earlier tick read: T3 scenario green, no HYPOTHESIS tags (b-cell-host GREEN 20261021-201430 on the 259bf390 stage, all twelve asserts, no crash, the old shape 201045 clean through the handoff too; approved by Eli 11:03; the road there: 184501 red on the CellLoaded budget (fixed 3ea950eb), 192314 red on the scenario's own away-and-back timing (the wait 0.5 s, main e6e9474), 192835 lost c1's game to a copy deleted while the host's engine still ran its movement job (fix 259bf390, disable then delete; the cleaner's guard 0b4b8ed1), 193557 and 194846 held further each time, the freeze block reshaped around relaunch {until: gone} (main 7ef5522); x-cell-attach 185728 green and read; the tags that remained are npc-stream's and npc-handoff's by name, and H5 waits for a third seat))
 - [x] parity scenario green, or its later list reviewed with it (ADR-031): no parity scenario of this verb's own (the election adds no engine action; the host's NPCs run as the engine alone runs them, the references r-npc-packages, r-npc-fight and r-cell-leave of 2026-10-18 standing); the parity diff of a hosted cell against the engine alone is npc-stream's row, listed there
 - [x] sequences and combinations green, every checklist item with its scenario (ADR-033): the table above, each row with its run; the two rows that name later verbs carry by name
 - [x] ledger and suppression registry updated: no native touched (docs/NATIVES.md unchanged); the Suppress section above is the registry entry (the per-actor ask and grant retired from the senders, the ids kept)
@@ -1102,14 +1115,14 @@ the plugins' leak goes upstream (D24-D).
 c-riverwood, M3's exit scenario, went red once in the union's sweep (211911) on its restart leg alone: Alvor's record, read right
 after the restart against its pre-restart snapshot, lay (27.8, 72.4) off, past the claim's 64 in y; Gerdur's two and Alvor's x held,
 and before it the hand-off held whole (c2 hosting, the residents' AI on c2). The relaunched rerun (212353) was green throughout, so
-the item is a watch (lab/gate.yaml). HYPOTHESIS, from the code (WorldState.cpp TickSaveStorage, union b8a9d4c6): the records reach
-the storage as a write-behind batch of every changed form, one batch in flight at a time (saveStorageBusy), the next taken when the
-storage answers, no interval of its own; a restart that stops the process takes whatever the last answered batch held, so a walking
-resident's record can sit a batch or two behind its host's last accepted sample, 77 units here (about a second of a resident's
-walk, plus the host's 500 ms sample). The claim's 64 is the relay's bound, not the save's. Fix in kind (R0, a small server item for a
-later train): a graceful stop that drains the in-flight batch and writes the pending changes before the process exits, which the
-restart step would then wait on; until then a scenario that restarts under walking residents reads a lag of this size once in a
-while. Not a loosening candidate: the bound stays, the watch closes on a green gate or on the flush.
+the item is a watch (lab/gate.yaml). The claim's 64 is the relay's bound, not the save's. That day's reading from the code
+(WorldState.cpp TickSaveStorage, union b8a9d4c6: a write-behind batch, one in flight, a restart keeping what the last answered
+batch held) is superseded by Open questions' first entry below (23:34 PDT 2026-10-31): the process had no SIGTERM handler, so the
+batch in flight and every edit the 30 s position policy left unsaved were lost. The flush on a graceful stop was built
+(6f39d9a7, merged to parity 77726496 on 2026-11-01) and was inert in the lab until node ran as PID 1 (main 2cb2a857: stdbuf
+swallowed the SIGTERM, c-riverwood 20261101-085158 red with no flush line at its restart). c-riverwood has been pending in
+lab/gate.yaml since, its last runs 20261101-084608 and 20261101-085158; the item closes on its restart leg green with the flush
+line in that run's server log. Not a loosening candidate: the bound stays.
 
 ## Open questions
 
@@ -1121,6 +1134,14 @@ while. Not a loosening candidate: the bound stays, the watch closes on a green g
   ChangeFormGuard marks a skipped edit, MpObjectReference::FlushUnsavedEdit, WorldState::FlushSaveStorage drains the storage within a
   budget, PartOne::FlushSaves, the addon's flushSaves, index.ts's SIGTERM and SIGINT handlers with a 5 s flush; SaveStorageTest's case).
   c-riverwood is pended in lab/gate.yaml until the fix is on parity and a gate plays it.
+- An heir about to go stale (numidium, 2026-11-11, playtest-stagger's live test at 21:19Z; HYPOTHESIS, cells.rs unread): the
+  pick of a departing host's heir seems not to read the heir's own silence. At 21:19:33.5Z the server gave c1's cells to
+  ff000001, whose stale line at 21:19:34.5Z reads "silent 10238 ms", so the heir had been silent about 9.2 s when it was picked;
+  harmless there (both games were down; all nine cells froze unhosted at 21:19:39Z), but in play a seat about to time out could
+  take a departing host's cells for a few seconds and freeze them. Source: that run's server log, 21:19:28Z to 21:19:40Z. The
+  read: cells.rs's heir selection against the silent state (cells.rs :225-232 marks a connection silent only at the server's
+  stale threshold), and whether a candidate's last-message age is in its order. After playtest 51; an R0 fix if it holds. Kept
+  open by M3's paper close (2026-11-11), its read the Dynamic plan's heir line.
 
 ## Playtest 49 (21:13 to 22:57 PST 2026-11-06, 05:13Z to 06:57Z 11-07; fork m4-train-48 75c134ad under apocrypha's layer b2bcc92d)
 

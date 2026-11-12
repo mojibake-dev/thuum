@@ -639,7 +639,7 @@ count's bound, the record's room (the u32 count over the form's stacks and, sinc
 record holds and whether the other container is held open, and nothing else: no property bound, by Eli's choice, so a modified
 seat can add any item of any count to its own player by reporting a call, in at most 4096 stacks, and nobody else hears it (a
 player's inventory goes to its own game alone). Named gaps: a leveled reward (refused by name, its roll reverted at the next apply
-as before; its landing read by the trace below, the fix a later train); AddItem of a reference or a FormList and RemoveItem of a
+as before; its landing read by the trace below, the fix is train 52's); AddItem of a reference or a FormList and RemoveItem of a
 FormList (no item record, E_SCRIPTCALL_ARGS); a removal's receiving side (the container or the NPC); and a reward a giver moves
 into the player (RemoveItem on the giver: the giver's row, no player's own). T0 player_own's cases (the count's bound, a grant as
 reported with no bound, the u32 room, the leveled, kind and count refusals, the removal's clamp, the held-open fold, the skin
@@ -676,7 +676,7 @@ Fragment_2 (stage 20, the control), Gold001 0xf x25 on 0x14; and CarryFurnitureS
   window, 1.6 to 4.5 s after it, the 5 s apply's shape x-acting-frame named; the trace hooks no RemoveItem, so the remover is
   UNVERIFIED), and the server's gold read 140 at all three snapshots.
 
-**The fix's observe point (a later train; not built).** CommonLibSSE-NG's REL::Relocation::write_vfunc (Relocation.h:392, :402) on
+**The fix's observe point (built in train 52, below).** CommonLibSSE-NG's REL::Relocation::write_vfunc (Relocation.h:392, :402) on
 slot 01 of VTABLE_SkyrimScript____AddItemFunctor (Offsets_VTABLE.h:4616, AE id 218372): a thunk `Variable* (DelayFunctor*,
 Variable*)`, the return buffer the trace read, that holds the functor's stackID in a thread_local around the original.
 skyrim-platform's EventHandler::ProcessEvent(TESContainerChangedEvent) (EventHandler.cpp:376-393 at f6ca339d) reads it before
@@ -694,4 +694,262 @@ hold, so it reads nothing of it).
 
 H-RW2 CONFIRMED as a mechanism by x-additem-functor 20261110-151634 (above): a leveled list's roll lands through a
 TESContainerChangedEvent inside AddItemFunctor's operator(), on its thread, with the stack id the seam recorded at the call.
-Nothing reads it yet, so E_SCRIPTCALL_LEVELED stands until the observe point above lands.
+Nothing read it at f6ca339d, so E_SCRIPTCALL_LEVELED stood until train 52 built the observe point above (the next section).
+
+## Train 52: a leveled reward lands with its roll, an effect places its own helper, a server snippet finds its actor (fork m4-train-52 c3f9d175, on m4-scripts-5-second f6ca339d; built 2026-11-11, T3 pending)
+
+Train 52 (its plan, gitignored: lab/.cache/drafts/train52-plan.md, sections 1, 2 and 4.2; its own decisions D-R2 B and D-H1 B,
+defaults Eli may overturn at review, docs/DECISIONS.md's ADR-068 train 52 entry) is pushed with its pipelines green: 5795 at
+ff467dab (the one Windows build, client-build 20605 and server-build 20604) and 5797 at c3f9d175 (server-build 20609, the T0
+below); the client and platform trees are the same at both. Its lab stage follows playtest 51. No seat has run it, so each lab
+claim below is built and T3 pending, with the probe that reads it (by path, lab/.cache/drafts/train52, each READY from its fresh
+review: x-leveled-reward v1 d88b5741, x-effect-helper v1 6516c470, x-acting-player v3 367ecd50), or HYPOTHESIS; the run ids follow
+the stage's green. Line numbers are c3f9d175's.
+
+**Fix 1, the leveled landing (D-R1 C's named gap; the observe point above, built as the trace read it: park, note, close).**
+- Park: OnCall's step (e) parks an AddItem on 0x14 whose first argument's form is a leveled item (CommonLibSSE-NG
+  include/RE/F/FormTypes.h:193), the switch on, by its stack id instead of queueing it (ScriptNatives.cpp:2593-2610). The park
+  table (:1244-1294): its own mutex, its size in an atomic for the lock-free test, at most 64 calls, each let go with a line 60 s
+  after its park when no functor ran (a killed stack, a load mid-wait; 60 s so a VM a menu holds back keeps a real reward,
+  UNMEASURED), swept from Tick and cleared at a load. A stack waits on its latent call, so one stack id names one parked call.
+- Note: Hooks.cpp's AddItemFunctorCall (:244-304, installed from Hooks::Install :614) writes slot 01 of
+  VTABLE_SkyrimScript____AddItemFunctor (Offsets_VTABLE.h:4616, AE id 218372; DelayFunctor.h:35) through
+  REL::Relocation::write_vfunc and opens ScriptNatives::FunctorWindow (ScriptNatives.h:57-81) for the functor's stackID
+  (DelayFunctor.h:43) around the original. operator() returns BSScript::Variable by value, so the thunk takes `this` in RCX and
+  the return buffer in RDX and returns the buffer (the Microsoft x64 convention for an instance method; the trace's rax equal to
+  rdx, six of six). The TESContainerChangedEvent sink calls NoteContainerChange on the event's own thread (EventHandler.cpp:396;
+  ScriptNatives.cpp:3162), one thread_local read outside a window (rule 9), which folds each new item (no old container) into the
+  call's self by base, its count summed with saturation, at most 255 bases; a base past them, or at or above 0xff000000, is
+  counted and never sent. Slot 01's target: UNVERIFIED (Ghidra), the trace's live read standing in.
+- Close: the window's end queues the call into the batch with `landed` (CloseParked, ScriptNatives.cpp:1419-1452), and the
+  platform's line says what landed, the first 64 and every hundredth: "[verb:scripts] own ObjectReference.AddItem <list> on 14
+  (from <caller>.<handler>), stack <id>: its roll landed <k> base(s) in its AddItemFunctor (<base> x<n>, ...), reported with the
+  call", or "...: its roll landed nothing in its AddItemFunctor, reported with an empty landing". A parked call whose native
+  answered anything but kInProgress queued no functor and is let go (:3108-3115, "the native completed with no functor"), one line
+  a minute with the count. The switch scriptLeveledLandings (on unless false in skymp5-client-settings.txt; ClientSetting
+  :2742-2790) is the lab's A/B: off, nothing is parked, the call crosses at its call and the server refuses it
+  E_SCRIPTCALL_LEVELED as before; the install line names what the slot held (:3377-3383).
+- The client (5ee97fef): ScriptCallService holds each landed base's surplus against the 5 s inventory apply for an AddItem that
+  carries `landed`, in place of the list's id, which names no inventory entry (scriptCallService.ts holdOwnItem :351-367), and
+  sends `landed` as { item, count } (:510-511).
+- The wire (4b5d9950, rule 4's one commit): ScriptCall 75's optional `landed`, SCHEMA_VERSION 44, at most cap::SCRIPT_CALL_LANDED
+  255 landings (a leveled list's entry count is one byte, TESLeveledList.h:72), checked at the edge by wire-validate's
+  check_landed (docs/WIRE.md's ScriptCall section: the codes, fixture 75-ScriptCall-5).
+- The server (9d635d6b, D-R2 B): RecordLandings (ActionListener.cpp:4729-4888), called from RecordPlayerOwn for an AddItem that
+  carries `landed` (:4953-4960), takes the call's form as the list (an LVLI, else E_SCRIPTCALL_ARGS, "its <k> landing(s) land on
+  no list") and judges each landing as a plain add of its base after one check: wire-rules player_own's items() (:448-451) refuses
+  first a base the list cannot roll, E_SCRIPTCALL_ROLL, "<base> is no base the leveled list <list> can roll (its entries, nested
+  lists followed): that landing is not recorded". The reach is LeveledListUtils::Reach (LeveledListUtils.cpp:194-237): each
+  entry's form id made global as EvaluateList makes it, nested lists followed to kReachDepth 16 with a set of the lists walked so
+  a cycle ends, an entry no record answers skipped, each base once and never a list; PartOne::LeveledReach keeps each list's reach
+  sorted for a binary search (PartOne.cpp:4567-4583, cleared at AttachEspm). E_SCRIPTCALL_LEVELED stays for a leveled call that
+  carries no landing (player_own.rs:452-454, the seat's switch off), its why saying so. No new persistence: the inventory is the
+  change form's, recorded already (rule 6 not engaged).
+- The one-edit write (1a70a16b; the whole-branch review's SHOULD 1, server work amplification): the record budget spends one token
+  per call (wire-rules natives' BURST_RECORD 128 at once and PER_SECOND_RECORD 32 a second, natives.rs:945-949) and a call carries
+  up to 255 landings, so 9d635d6b's write, a plain AddItem per landing (the facts' scans of the stacks, a change-form edit whose
+  save request copies the whole change form, a serialization of the whole inventory), bought up to 255 plain AddItems' work with
+  one token, and a modified seat can name that many bases a list can roll (215 of the 3,812 LVLIs of the lab's cached Skyrim.esm,
+  Dawnguard.esm and Dragonborn.esm reach 255 or more, 141 of the 3,075 numbered in Skyrim.esm; LootWarlockChestBossBase 0x3515e
+  reaches 4,013; lab/esm.py's walk, c3f9d175's T0 comment). Now the record's facts for every landed base are read in one pass and
+  carried forward as the call's accepted landings move them (each judged as a plain AddItem would be after the ones before it, Fix
+  B's 4096 stacks counted landing by landing), and the accepted landings are written with one MpObjectReference::AddPlainItems
+  (MpObjectReference.cpp:1302-1316: one EditChangeForm, so one save request, one SendInventoryUpdate, then one OnItemAdded per
+  landing in order; Inventory::AddPlainItems, Inventory.cpp:116-151, AddItems' own result for plain items): per call one plain
+  AddItem's work plus a constant per landing, with no wire, rule or budget change. Every OnItemAdded now fires with the whole roll
+  in the record, as the engine's own events reach scripts after its functor. The success line is bounded too, the first eight
+  landings named and the rest counted (ActionListener.cpp:4859-4887): "[verb:quest-stage] <player>'s own ObjectReference.AddItem
+  <list> (from <caller>.<handler>): its roll landed <base> x<n>[, ...][ and <k> more base(s)], added to its inventory as its seat
+  reported it (D-R1 C, R2; each a base the list can roll, D-R2 B), <m> of <base>[, ...] held now", or "...: its roll landed
+  nothing".
+- A correction (rule 2): the plan (section 1.8) read LItemJewelryRing 0x8757e as ten bases; Skyrim.esm has 32 entries of eight
+  rings (lab/esm.py on the lab's cached copy, 2026-11-10; LVLF 0x03), so LeveledListUtilsTest names those eight, each an ARMO, and
+  pins no total (Update.esm is not in that cache).
+
+T0 (CI, pipeline 5797): wire-validate's cases and proptests and wire-codec's bound (docs/WIRE.md); player_own's (a landing in
+reach recorded whole, out of reach refused Roll ahead of every other judgment, the unreported call keeping Leveled, Full at 4096
+stacks, the u32 room) and the bridge's; unit/PlayerOwnTest.cpp on Skyrim.esm (MS01's LvlQuestReward02Medium 0xc0405 x1 with
+`landed` [{0xf, 400}] records 400 gold once, its own game alone hearing it; [{IronSword 0x12eb7, 1}] refused E_SCRIPTCALL_ROLL in
+one line; [] writes nothing and says so; no `landed` keeps E_SCRIPTCALL_LEVELED; 255 landings of LItemSpecialLoot100 0x1031d0 into
+an emptied record, every one in the record before the first of the 255 OnItemAdded, one success line ending "and 247 more base(s)"
+and one SetInventory; the same call into 3,996 tempered daggers, 100 recorded and the rest E_SCRIPTCALL_FULL in one line);
+unit/LeveledListUtilsTest.cpp's Reach (0xc0405, and FavorRewardGoldLarge 0x4a41b through LvlQuestReward03Large 0xc0406, each
+{Gold001}; the eight rings; a non-list form nothing); unit/InventoryTest.cpp (AddPlainItems equal to AddItems, a named case and
+2,000 seeded ones). T2: the difftest session player-own-items (new, docs/WIRE.md), its run pending. T3: x-leveled-reward v1 (c1
+alone at Riverwood's landing, the stages set by the driver: MS01's 39 and 49, the control FreeformStonehillsA 20's Gold001 x25,
+FreeformRiften12 25's ring, Lucan's MS13 100, then a relaunch); b-leveled-reward is promoted from it after its green, in its own
+commit (rule 13).
+
+**R2, unvalidated (rule 5), declared here for the landing:** the seat's word that its engine's roll landed these bases. Checked:
+the shape at the edge (an AddItem on 0x14 alone, load-order items, counts above zero, each base once, at most 255), each base
+against its list's reach in the game files (D-R2 B), and each landing as a plain add (its kind, the count's bound, the u32 room,
+Fix B's 4096 stacks). Not checked: that a roll happened. A modified seat gains nothing D-R1 C does not declare already (it can
+report a plain AddItem of any item), and the reach makes a forged leveled report no wider than its list: a consistency check,
+never a security bound. For a call that carries its landing this closes the leveled gap the declaration above names; a call that
+carries none keeps it.
+
+HYPOTHESIS H-LR1 to H-LR4, the plan's 1.10 (ScriptNatives.cpp:1268-1272 and ScriptNatives.h:68-70 carry them): H-LR1, a list that
+rolls several entries (LVLF 0x04 use all, or 0x02 each item in count) lands every entry inside the functor (the trace read
+one-entry rolls and so do x-leveled-reward's legs, so its read is the plan's Dynamic, a census of the 130 stage fragments that
+AddItem a leveled list on the player for one whose list rolls several, then a leg on that stage); H-LR2, no plugin rewrites slot
+01 after the thunk's write (the read-back's warn line at the first park, ScriptNatives.cpp:1360-1362; the install line and claim
+8's expiry count); H-LR3, operator() and its events run on one OS thread (claims 1, 2 and L2); H-LR4, the functor runs within 60 s
+while a menu is open (unread: no menu opens in the probe); H-RW1, inherited (the hold keeps a landing from the 5 s apply; claims
+7, 9 and L4).
+
+**Where the reach could refuse a genuine roll (the whole-branch review's SHOULD 2): two cases, HYPOTHESIS both.** D-R2 B refuses
+no genuine roll only while the server's reach is the engine's list.
+- HYPOTHESIS H-LR5, an entry a script added at run time: LeveledItem.AddForm adds an entry to the engine's list, and the entries
+  it adds persist through a save and its reload until LeveledItem.Revert removes them (Creation Kit wiki,
+  https://ck.uesp.net/wiki/LeveledItem_Script and https://ck.uesp.net/wiki/AddForm_-_LeveledItem; both answered 403 to the
+  fetcher, read from the search index's summary). The reach reads the game files alone, and AddForm is no row of the seam and is
+  missing on the server VM (docs/NATIVES.md), so a roll that lands a script-added base is refused E_SCRIPTCALL_ROLL and the 5 s
+  apply takes it back, as before train 52. The read that decides it: a census of the load order's scripts that call
+  LeveledItem.AddForm (lab/tools/papyrus-census.py's string-table read for the name, then lab/pex.py's disassembly for the
+  receiver's type) and the lists they grow, against the reward lists the stage fragments name.
+- HYPOTHESIS H-LR6, an entry followed by its COED: libespm reads a list's LLCT count and then that many 18-byte LVLO subrecords as
+  one contiguous array from the byte after LLCT (libespm src/LeveledListBase.cpp:22-24; the Entry, LeveledListBase.h:22-29 and
+  :45), while the record's grammar lets an optional COED (owner, global or rank, item condition) follow each LVLO: xEdit's LVLI
+  definition makes each entry a struct of its LVLO and a COED (TES5Edit dev-4.1.6 d1960eaf, Core/wbDefinitionsTES5.pas:8026-8045),
+  the engine's LEVELED_OBJECT keeps it as itemExtra (CommonLibSSE-NG include/RE/T/TESLeveledList.h:23), and UESP's COED page names
+  LVLI among the records it is associated with (https://en.uesp.net/wiki/Skyrim_Mod:Mod_File_Format/COED_Field; its LVLN page's
+  COED row: "Can appear after each LVLO, only used once (LCharHagravenCompanion)"). A COED is 18 bytes with its header, an LVLO's
+  size, so each one inside the run libespm reads is taken as one more entry (its global or rank read as a form id) and pushes one
+  real entry off the end: Reach misses the list's last entries, and a genuine roll of one is refused E_SCRIPTCALL_ROLL. The
+  server's own rolls read the same array (EvaluateList, LeveledListUtils.cpp:33 and :49-53). The read that decides it: a COED
+  census of the masters (lab/esm.py over Skyrim.esm, Update.esm, Dawnguard.esm, HearthFires.esm and Dragonborn.esm: every LVLI or
+  LVLN with a COED anywhere but after its last LVLO). None, and H-LR6 is moot for the masters; any, and the fix is libespm's
+  reader (the subrecords walked one by one), with its T0 on that list.
+
+**Fix 2, an effect's local helper (ADR-068 decision 6, D-S2 B, D-H1 B; ea6da0a1; docs/verbs/second-hand.md's H1).** The seam
+judged a call by the object it is called on, not by whose effect runs it: WB_CrackleNew_Script's OnEffectStart places TheBox =
+akTarget.PlaceAtMe(FXEmptyActivator) at its target, c2's figure, which no seat hosts, so the nonLatent lever skipped it with None
+returned (CONFIRMED in reds 20261110-043108 and 062541) and RemoteCast had no source. The rule, in two clauses:
+1. Creation inside the player's effect (ScriptNatives.cpp:2525-2560): a PlaceAtMe the owner test refused, of an activator, a
+   static or a light (D-H1 B; FormTypes.h:164, :174 and :171; HelperBaseOfArg0 :2224-2242), on a stack whose root frame's self is
+   an active effect this seat runs for its own player, its target or its caster (EffectPlacementOf :2244-2280), runs its body,
+   counted " (effect)", and the reference it returns (stack->returnValue once the original answers kCompleted, NoteHelper :3034)
+   is this seat's local helper. The effect test is the Papyrus gate's own, moved into Frida::PlayersEffect
+   (FridaHooks.cpp:892-921: HandleIsType(ActiveEffect::VMTYPEID 142), GetObjectForHandle, the target against the player's
+   AsMagicTarget first, then GetCasterActor; CommonLibSSE-NG ActiveEffect.h:31, :100 and :104) and called by both, the gate's
+   behavior and order unchanged (:1361-1370). Line, the first three selves per row per census window: "[verb:scripts]
+   ObjectReference.PlaceAtMe on <self>: run inside this seat's own player's effect (<Script>.<Function>, the player its
+   <caster|target>), its helper <base> (<ACTI|STAT|LIGH>) kept local here (ADR-068 decision 6, R3)".
+2. A helper is its creator's (:2483-2509): any tabled row on a non-actor at or above 0xff000000 the helper table holds runs here,
+   counted " (helper)", and crosses nowhere (never batched, touched or relayed; an action row under the script action's mark, so
+   the engine-level animation hooks leave it too); a PlaceAtMe on a helper of a helper's base makes another helper (TheShooter at
+   TheBox), and a Delete lets one go. Line: "[verb:scripts] ObjectReference.<fn> on <helper>: a helper this seat's own player's
+   effect placed, run here and kept local (R3)". The table (:1043-1140, ActingScope.h's idiom, game-free): a helper counts only
+   while its reference's base is the recorded one, so a recycled dynamic id never inherits it; 10 minutes, at most 256, the oldest
+   first, cleared at a load (ScriptNatives::ClearAtLoad, from PapyrusTESModPlatform.cpp:153).
+
+Everything else on another owner's object keeps its judgment: a PlaceAtMe of an NPC, an item, a container, furniture, a door, an
+explosion or a hazard, and every other row. The switch scriptEffectHelpers (on unless false), its install line at :3353-3356.
+**R3, declared here:** a helper is client-local and every seat that runs the effect makes its own; nothing crosses (no helper is
+batched, and wire-validate refuses a subject at 0xff000000 and up in any case), and the consequence that matters, the proc's hit,
+keeps its channel, the caster's OnHit under second-hand's claim. No wire, server, NativeRows.inc or natives_table.rs change and no
+new native (rule 10 not engaged); no T0 or T2 (the seam has no Linux harness; the helper table and the line slots ran in a scratch
+test). Known limit, named: on the effect's target's own seat the first PlaceAtMe's subject is that seat's own player, an owned
+subject, so TheBox is placed as before and is no helper there; TheBox.PlaceAtMe on it, in a cell that seat may not host, takes
+clause 1 (the player the target), so only TheShooter is a helper there, and TheBox's own latent Disable and Delete keep the owner
+judgment. HYPOTHESIS H-EF1: an effect event's stack roots at the ActiveMagicEffect script's handler with the effect's object as
+its self (x-effect-helper's claim 1). HYPOTHESIS H-EF2: PlaceAtMe's result is in returnValue when the original answers kCompleted
+(claim 3's helper row). HYPOTHESIS H-EF3, inherited: the call order inside OnEffectStart (numidium's pex read; claims 1, 3 and 4).
+T3: x-effect-helper v1 on b-second-hand's frame (c1 casts Crackle 109653 at c2: the effect line, no skip line, the census's effect
+and helper rows, the proc's stream on the server), and b-second-hand itself, unchanged, which leaves lab/gate.yaml's pending list
+on its green. The class's other second-hand spells place their helpers too, so their procs reach the server again: new claims,
+possibly new reds, so b-cloak-apply and b-cloak-fight run in the stage.
+
+**The snippet's ids (24448f7b, client; d9b8554d, server; the plan's 4.2, stage 2's read of x-acting-player 20261111-034406).**
+- The long-id fallback: the server writes a game-file actor it holds by its long id, the form id plus 0x100000000
+  (SpSnippet::MakeLongFormId, SpSnippet.cpp:134-148: a snippet's self at MakeMessage :97-98, an object argument through
+  SerializeArguments, RecordStanding's object_ and PartOne's login serve of the standing), and runMethod resolved it through
+  remoteIdToLocalId, which sends every id at 0xff000000 and up to the view. Since fork daa46851 (2026-10-21, npc-puppet's Stage 1)
+  a game-file actor travels under its own form id and its FormView keeps that short id, so no view answered a long id on any seat,
+  a puppet's or a host's: the view gave 0, Game.getFormEx(0) was null and runMethod threw "Unable to find form with id 0" (c1's
+  relayed SetRelationshipRank on Faendal, 0x10001348c), a line on that client's console and nothing sent back (the catch at
+  spSnippetService.ts:108-110 answers no FinishSpSnippet). So from daa46851 to train 52 every server snippet whose self or object
+  argument was a game-file actor failed on every seat with the server never told: the standing's appliers (SetFactionRank,
+  RemoveFromFaction, RemoveFromAllFactions, SetCrimeFaction, SetRelationshipRank), relayed and served at login, and the server
+  VM's actor-self snippets (PapyrusActor's DelegateToHost for SetActorValue, ModActorValue and ForceActorValue, SetAlpha to the
+  listeners, PapyrusObjectReference's SetPosition and an explosion's PlaceAtMe); NATIVES.md's CONFIRMED for SetActorValue's
+  delegation (x-av-probe 20261008-101643) predates daa46851 and is stale until a read after train 52. The fix, client only:
+  worldViewMisc.ts's gameFileIdOfLongId (:54-57, MakeLongFormId's inverse, 0 unless the carried form id is 1 to 0xfeffffff) and
+  snippetIdToLocalId (:71-73, the view's answer first, as remoteIdToLocalId's, then the game-file reference the long id names,
+  which every seat's engine has from the same files); remoteIdToLocalId is unchanged, its other callers reading 0 as not in my
+  view. SpSnippetService resolves runMethod's self, every object argument (deserializeArg, for runMethod, runStatic and
+  SkympHacks) and SetDisplayName's self through it (localIdOf :443-449), and a fallback says so, the first three a minute for each
+  long id (sayGameFileReference :451-470): "[verb:scripts] snippet <Class>.<fn> on <short>: no view holds its long id <long>, run
+  on the game-file reference", an argument's "snippet <Class>.<fn> with <short>: ..., passed the game-file reference". Rule 5:
+  nothing new (server to client, the server's own word).
+- The listener's own player (d9b8554d): a snippet's object argument naming the listener's own actor reaches its game as 0x14, as
+  its self and SerializeArguments' arguments already did. SpSnippet::ClientFormId (SpSnippet.cpp:103-108: 0x14 for the listener's
+  own actor at 0xff000000 and up, every other form its own id, any form for no listener) is the one rule: SerializeArguments calls
+  it (SpSnippetFunctionGen.cpp:53-56), and MakeMessage, which builds every Execute, Relay and Serve message per listener, applies
+  it to the self and now to each object argument (:89-98). The case it fixes: a relationship recorded toward a player (A Lovely
+  Letter's Fragment_22, SetRelationshipRank(Game.GetPlayer(), 2), run on the NPC's simulator under that player's acting scope)
+  went out with the player's server id as akOther, through MakeLongFormId alone; the player's own seat holds no view of its own
+  actor, so Faendal's rank with that player was never applied there, at the relay or at a relog's serve. T0 unit/StandingTest.cpp
+  on Arvel (ClientFormId's four cases; the relay to the guest as 0x14; a late seat served the guest's actor id; a relog served
+  0x14). No difftest declaration names a receiving client's own actor as an argument, so T2 reads no change.
+- T3: x-acting-player v3: claims 22 to 24 read c1's relayed SetRelationshipRank on Faendal (the fallback's line, "snippet
+  Actor[.]SetRelationshipRank on 1348c: no view holds its long id 10001348c, run on the game-file reference", at least once, and
+  "SpSnippet Actor SetRelationshipRank failed" never), and leg S (S0 to S4, the whole-branch review's SHOULD 4) the server VM's
+  actor-self snippet: c1's server console SetAV on Faendal, delegated to c2, his cell's host, whose line names the fallback and
+  whose engine's health share moves with the base. The 0x14 argument prints no line of its own (UNVERIFIED end to end, the probe's
+  header).
+
+## D-S4 A, the grace read: a departing host's script records land before its successor's grant (stage 2's read; fork m4-train-52 1c856c66, built 2026-11-11, T3 pending)
+
+The read (stage 2 of the second head, 2026-11-11): a departing host's script-state reports were refused E_SCRIPTSTATE_EPOCH after
+each hand-off, 3 in one run and 7 in the other; nothing was lost there, only because the successor's own records covered it. Why,
+by construction: HostService's onHostRelease asks ScriptStateService for the release read (hostService.ts:704-725; onRelease,
+scriptStateService.ts:528, every known reference of the cell read again under the released epoch), and wire-rules script_state
+takes such a read only while nobody hosts the cell (script_state.rs:14-25, the epoch judged first; docs/WIRE.md's ScriptState
+section). When a host's 5 s grace ends with a successor, the cells rule emits the Release and the successor's Grant in one tick
+(cells.rs GRACE_MS :23, tick :644), and ApplyHostDecisions notes the release, then the grant (PartOne.cpp:2296 and :2245,
+script_state's released then granted), so behind a successor every release read is refused. The refused reads carried new bytes,
+since a read whose FNV-1a equals the last sent is never sent: a change no state row touched (a script variable alone), which only
+such a read finds, so a change made inside the report window could be lost to the record. Line numbers are fork c3f9d175's.
+
+**D-S4 A, built (1c856c66, client only; the train 52 plan's section 4.3, its default, docs/DECISIONS.md's ADR-068 train 52
+entry).** When this seat reports a cell it hosts unloaded (HostService.report, hostService.ts:840-859: after the CellLoaded goes
+out, a loaded false for a cell in its hosted set calls onUnloaded), ScriptStateService.onUnloaded (scriptStateService.ts:554-584)
+makes every known reference of the cell due at once, marked grace (noteDue at epoch 0, :645-678, so the read stamps
+epochForActor's epoch while the grant still holds; the mark kept once set and carried to the read's hops, as a release read's
+epoch is). The unload report is the grace's start (cells.rs unloaded :295: the host keeps the cell, its leaving_since_ms set,
+until tick passes GRACE_MS), and through the grace script_state judges the reporter the cell's host at its epoch, so the reads
+land as the owner's. After them the release read finds the bytes already sent and sends nothing, unless the grace changed them; it
+keeps its place for a cell left unhosted, and a grace read the release overtakes goes at the released epoch as the release read.
+Lines: the send, "[verb:scripts] script state <id> sent: <n> script(s), <v> variable(s), fnv <x>, epoch <e> (the grace read)"
+(:1401-1403, every grace send printed, as every release send is), and a trace at the report, "cell <c> reported unloaded while
+hosted here: <n> known reference(s) due for the grace read (D-S4 A)" (:582). Rule 5: nothing loosens; the server's rule is
+unchanged and judges a grace read as any owner's read. No T0 or T2 (client only; tsc --noEmit and webpack clean, and a scratch
+harness over the two services walked the hand-off: a reference changed by a variable alone went out at the host's epoch as the
+grace read and the release read then sent nothing; the same harness on f6ca339d's two files fails four of its ten checks, the
+release read sending the change).
+
+**Its shared send bucket (the whole-branch review's SHOULD 3).** The grace reads spend the one bucket every record read spends
+(scriptStateService.ts SEND_BURST 64 and SEND_PER_S 8, :136-141, wire-validate's script_state_budget mirrored, lib.rs:306), with
+no priority over the other due reads, and a read waits while the bucket is empty (:1335-1340). So inside the 5 s grace a seat
+sends at most 64 + 8 x 5 = 104 changed records from a full bucket, and fewer from one the cell's sweep, its hops or another cell's
+reads spent just before the unload; a grace read still due when the grace ends goes at the released epoch and is refused behind a
+successor, as before. HYPOTHESIS, UNMEASURED: a busy cell can miss the grace this way (no run has counted a cell's changed
+references at its unload report against the bucket).
+
+**The grid case, A's declared gap, and D-S4 B.** The grace read starts at an unload report alone. A host whose exterior cell left
+the server's 3x3 grid while its engine still loads it (the game's 5x5) keeps simulating through the grace and sends no unload
+report, so no grace read starts, and behind a successor its release read is refused as before (scriptStateService.ts's known
+limits, :82-89; a persistent exterior reference's record is read by neither, its parent the worldspace's persistent cell). D-S4 B,
+the grant waiting a bound for the release read after a release whose old host is still connected (a new RELEASE_READ_MS in the
+cells rule, UNMEASURED), would cover the grid case and every other, at the cost of the bound added to every warm hand-off: it
+changes hand-off timing, a feel change, and is Eli's call alone (docs/DECISIONS.md, ADR-068's train 52 entry), put to him only if
+a read shows the grid case.
+
+HYPOTHESIS H-SS1 (in the code, scriptStateService.ts:567-569): at the unload report the cell's references are still readable by
+SerializeScriptState for the grace's reads; one the engine freed at the detach is not read, and its record stays the last sent
+(the release read already read after the detach, five seconds later). T3: x-acting-player v3 (367ecd50, by path,
+lab/.cache/drafts/train52), its leg C a hand-off by a load door with the successor inside the cell, and its 4.3 block: claim 25,
+no E_SCRIPTSTATE_EPOCH on the server; 26, c1's "(the grace read)" send at least once; 27, the "due for the grace read" count; 28
+and 29, the premises (c1 hosted the street's cell and crossed; the successor took it); 30, the door's own grace read. Leg C keeps
+every grid release unhosted, so the grid case stays unread there.

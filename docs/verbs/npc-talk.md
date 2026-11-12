@@ -89,7 +89,8 @@ second (UNMEASURED).
   visible hitch beyond a handoff's) until b-npc-talk's watch, a claim added in its own commit (rule
   13): watch-start on c1 for 0x13491 before the E, watch-stop after the release,
   c1.watched_id(0x13491).maxDisplacement < 64 (the held partner, a handoff's settle of 4 to 6 units
-  at most); the server half read, no refusal and no second word (233908).
+  at most); the server half read, no refusal and no second word (233908). The watch claim is still
+  unwritten (2026-11-11): the Dynamic plan's H-55c line.
 
 Known limits: H-55b, ActivatePickRef on a reference that is no longer the pick, is unexercised (the
 crosshair stayed on him, "crosshair 13491"); the activation runs within 200 ms of the E, and a menu
@@ -101,8 +102,16 @@ stillness reds 215828 and 053717 held Sven as a leg began and read him walking e
 record moved by his host's own reports): a stillness read waits out a whole leg (v7, 24 s; 22:59 PDT 2026-10-30), and the
 verb's own claim never depended on the hold (talkService withdrew it: a held actor cannot turn to face its partner). Then v7's
 24 s read red too (062117, both seats cold, 87 units in the pair; 23:31 PDT 2026-10-30): on 3o-win the hold does not stop him at
-all, every green of the step was an earlier build, so the lab's hold is a build or load-order finding under read (HYPOTHESIS which:
-the flag never set, cleared after, or the host re-moving him), and the stillness pair stays as the finding's claim, not weakened.
+all, every green of the step was an earlier build, and the stillness pair stays as the finding's claim, not weakened. The three
+readings of that night (the flag never set, cleared after, the host re-moving him) were answered by the trace in the Dynamic plan's
+"The hold on 3o-win" (x-npc-hold v4, 20261030-124551): the flag set within a frame and held, no clearer, c1 the only reporter, and
+something other than Actor::Move warped him along his path. The lab's hold (2026-11-11, the paper close): its static read names
+three engine effects no trace has read, 37818 clearing the mover's goal, a hold outliving a save through SetLifeState's change
+mark, and 37356's SetPosition tail moving an actor without consulting lifeState; and v4's eight warps of a held walker have no
+named writer (v5 20261030-135929 armed a MoveTo hook and no warp came). None reaches the verb: talkService holds nothing (its
+unhold sits behind a flag the shipped code never sets), the hold is the lab's fixture for b-npc-talk's premise and is released at
+the scenario's end, and a warp shows only as that scenario's stillness red, a gate watch item. The next run that warps with the
+MoveTo hook armed names the writer.
 
 ## Message contract
 
@@ -211,6 +220,23 @@ c1 hosts the inn, the Dialogue Menu's topics read for the services row).
 - H-55a: if the menu never opens, a Frida read of the activation on the claimant's seat
   (TESObjectREFR::ActivateRef's entry and the dialogue's start, 37347's first pass on the actor
   after the promote); owner: agent.
+- H-55a still, the early close (the Playtest 36 section below; kept open 2026-11-11, the paper close):
+  the menu has failed after a granted claim twice since, b-npc-talk's cold run of 2026-11-02 (no
+  Dialogue Menu) and playtest 42's Hod (the claim released at no menu within 10 s). The read is
+  x-voice-inflight v2 (a probe file never run; the results index holds no run of it): c2's claim on
+  Sven granted while the host's greeting is in flight, the Dialogue Menu still open three seconds
+  on, and the continuation's state, timer and handle lines (e9225dab) beside it; if it closes, the
+  Frida read above names the activation that ended it. Owner: agent.
+- H-55c: b-npc-talk's watch claim (in Suppress), a scenario commit of its own for Eli's review
+  (rule 13): watch-start on c1 for 0x13491 before the E, watch-stop after the release,
+  c1.watched_id(0x13491).maxDisplacement < 64. Green: the old host's copy stops without a hitch
+  beyond a handoff's settle; red names the displacement. Owner: agent, then Eli.
+- H-55f: x-npc-talk-claim v7 (unwritten; v6 233908 was the last run): two log-counts on c2 after the
+  E, "is in dialogue with the player by the engine" >= 1 and "the press consumed" >= 1, the key held
+  as a person holds it (past the grant, so its release lands after the promote). The lab-driver
+  reads no dialogue state today, so the second activation itself is the Frida half: TESNPC::Activate's
+  entries on c2 for 0x13491 across the press and its release, one expected, a second the falsifier.
+  Owner: agent.
 
 ### The hold on 3o-win (2026-10-30): the engine's path, the fork's range, the trace
 
@@ -227,21 +253,26 @@ back through `just addr`):
   Actor_SetDontMove 37489 (rcx Actor*, dl bool).
 - 37489(true) writes lifeState 9 through Actor::SetLifeState 37612
   (src/RE/A/Actor.cpp:1031-1034) and calls StopMoving 37817 (Actor.cpp:1091-1094)
-  then 37818 (HYPOTHESIS: the mover's goal cleared); 37489(false) writes 0 if it
+  then 37818 (the mover's goal cleared, by this read; no trace has read it, a
+  named limit in Known limits); 37489(false) writes 0 if it
   still reads 9. The field: ActorState::actorState1.lifeState, four bits at bit
   21 (include/RE/A/ActorState.h:114, :203), the dword at Actor+0xC8 (ActorState
   at Actor+0xC0 on 1.6.629 and later, Actor.h AsActorState). Value 9 has no
-  CommonLib name (ACTOR_LIFE_STATE ends at kBleedout 8). HYPOTHESIS: 37612 marks
-  the form changed (ChangeFlags::kLifeState), so a hold persists through a save.
+  CommonLib name (ACTOR_LIFE_STATE ends at kBleedout 8). 37612 marks the form
+  changed (ChangeFlags::kLifeState): CONFIRMED for a kill's writes through it
+  (docs/engine/change-forms.md row B1, 20261103-111808); the hold's own value 9
+  is not traced, and whether a hold outlives a save is a named limit.
 - The consumer: Actor::Move 37507 (vtable slot 0xC8, Actor.h:398), called at the
   movement step 37356's tail once per step, computes dontMove = race kImmobile
   || lifeState == 9 and then drives the character controller through 78276 (a
   zero velocity into bhkCharacterController's SetLinearVelocityImpl) instead of
-  78275. HYPOTHESIS: the stop is immediate, every step, not at a leg's end,
-  which is not what x-npc-hold v2 measured (LOG 2617: 3 to 6 s of motion after
-  the hold); the trace settles where that motion comes from. 37356's other
-  tail, SetPosition slot 0xA9 when form flag bit 4 at Actor+0x10 is set, never
-  consults lifeState (HYPOTHESIS: an actor moved that way ignores the hold).
+  78275. The stop is immediate, every step, not at a leg's end: CONFIRMED by
+  x-npc-hold v4 (20261030-124551: every Actor::Move after the hold took 78276,
+  2193 of 2193), so the 3 to 6 s of motion x-npc-hold v2 measured after the
+  hold (LOG 2617) came from another mover, the warps of the reads below. 37356's
+  other tail, SetPosition slot 0xA9 when form flag bit 4 at Actor+0x10 is set,
+  never consults lifeState (by this read an actor moved that way ignores the
+  hold; unread, one of the warps' candidates in Known limits).
   29198 withholds a movement message while lifeState is 9 (its callers unread).
 - Clearers (every caller of 37612 read): 37489(false); Resurrect 37321 (vtable
   0xAD) writes 0 unconditionally, and 40491 (the AIProcess rebuilt, then
@@ -287,9 +318,10 @@ the whole series, no foreign write, no resurrect, and the controller stood
 still in 41 of the 50 held seconds; yet Sven's position jumped eight times by
 100.77 units along his walking heading at 4 s intervals until his path's end
 807 units away, then stayed. So the engine honours the hold and something
-else carries a held walker along his path in quantized warps (ENGINE,
-HYPOTHESIS 0.7: a path follower's warp; UNION 0.2: an unnamed writer of
-+0x54). The server saw only c1's reports and no host change (the door pass
+else carries a held walker along his path in quantized warps (the night's
+weights: ENGINE 0.7, a path follower's warp; UNION 0.2, an unnamed writer of
++0x54; neither read, the warps' writer a named limit in Known limits since
+2026-11-11). The server saw only c1's reports and no host change (the door pass
 is out). x-npc-hold v5 135929 (the trace's v2 with a MoveTo hook, 56626):
 GREEN, the record equal to s10's; 2 MoveTo rows before the hold (0.3-unit
 settles) and none while held, and no warp occurred in that run, so the
@@ -316,7 +348,8 @@ Sven that opened and closed within 400 to 600 ms of the grant (17:55:01Z and 17:
 early close is x-voice-inflight v2's read (by path, unrun: c2's claim on Sven granted and not released within three seconds
 after the host's two lines; HYPOTHESIS H-55a still: a greeting in flight, x-npc-talk-cross 131626 RED reading Hilde's
 greeting 33 ms before the activation, playtest 37's finding 3 naming the puppet's sound-path item in flight drained as
-greetings at the promote, the say's interrupt on m3-face-twelve a4102bf5).
+greetings at the promote, the say's interrupt on m3-face-twelve a4102bf5). Still open on 2026-11-11, with its read in the
+Dynamic plan's "H-55a still" line.
 
 ## Status
 
@@ -329,7 +362,10 @@ Built 14:53 PDT on fork m3-npc-talk 977bfbc6 (off m3-npc-face 2b96ea56 with m3-p
 - [x] native hook + T1: activatePickRef (a CommonLib call, no id; no T1 needed)
 - [x] TS handler: TalkService (npcTalk, talkKey)
 - [x] T2 green (ticked 17:02 PDT 2026-10-29 by the pass: train 55's T2 green on the head's own difftest build, LOG 2026-10-27 16:09 PDT, merged to parity c85dab3d 2026-10-28T02:25Z)
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [ ] T3 scenario green, no HYPOTHESIS tags (2026-11-11, the paper close: b-npc-talk green at T3 as a gate watch item, last
+  20261111-083654 after the red 083435 on the same build, the gate canon f6ca339d merged on; three tags stay open with
+  Dynamic plan lines, H-55a's early close, H-55c's old-host hitch and H-55f's consumed press; the hold's tags settled, two
+  CONFIRMED by 20261030-124551 and 20261103-111808, the rest named limits or history)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated

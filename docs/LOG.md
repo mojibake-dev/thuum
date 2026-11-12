@@ -9490,3 +9490,136 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   byte-identical. Its setup (lab/playtests/51.yaml, questFragmentLive on both seats by Eli's D-Q10 A through a profile's new
   clientSettings) is on thuum branch playtest-client-settings 8b421d56, reviewed, for main before 51.
 - m4-scripts-5-heads merged to fork canon 24f1cc6a (2026-11-11T12:40Z): the gate 20261111-120511-merge-m4-scripts-5-heads, 20261111-120511-smoke-two-players to 20261111-123653-b-npc-caster (12 runs); T2 skip on skymp-server:m4-scripts-5-heads; clones promoted. Verbs: appearance (thuum-fa): a seat whose own player turned vampire drew other players' figures with no head (x-vampire-stage 20261111-035133's recorded reads), since every figure's base reads form id 7 and the engine's TESNPC::HasOverlays answers from the local player's race on that id; one Gum hook in FridaHooks.cpp answers false for an id-7 base that isn't the player's own, the offset named through CommonLibSSE-NG's RE::Offset::TESNPC::HasOverlays (Offsets.h:532). Stage (from a main worktree 5f5579c5, REUSE_DIST over client-build 20578 at the head, SkyrimPlatformImpl a5af631db71da6ca): x-vampire-figure-head v2.1 20261111-114511 and x-werewolf-form 20261111-115629, 2 green of 2. T2 cited: the pinned T2 of f6ca339d (no skymp5-server or skymp-wire file changed). The gate's b-duel read red once (120926, the Flames leg's known first-report flake, 0.7845 against < 0.78) and green on its rerun 121203. The lab's server pinned to skymp-server:m4-scripts-5-heads-24f1cc6a (the bare tag's image, sha256:f75701db), listening 12:41Z.
+- (numidium) The afternoon before playtest 51, which waits on Eli's go (no new scripting or quest builds before it; the
+  physics leg's prework meanwhile, Eli's word relayed by thuum-fa). main took 51's tooling: playtest-client-settings
+  7dc747a6 (a profile's clientSettings set in each stopped game at ready's relaunch and read back), t2-r5-keys 336fab2c
+  (rung 5's six quest keys kept in T2's settings when the head declares their login watch), layer-merge's chain citation
+  81dd7dfc (gate-cite.py --combine; the tidy's first try had stopped on lab-api's 404 for a chain's id), physics-0-reads
+  ffd3feb8 (rung 0's six Frida scripts) and apocrypha's labapi-setting 156fac51 (c.setting(name), for x-havok-cap-read;
+  lab-api not pulled yet). Reads on canon 24f1cc6a, each sequence ending with both clones rolled back to their newest
+  snapshot, the state 51's warm setup expects:
+  - x-ghostwalk-warm-read 20261111-172354 and x-ghostwalk-race-read 182610, both green: a warm relaunch, a stage-relayed
+    scope and hosting each keep Ghostwalk's return (CONFIRMED); the reds' own arm was the run start's race, c2's relayed
+    start of a quest c1 was not running against c1's own Story Manager start (the loss tracks it, HYPOTHESIS). v2.1's
+    three tries (200503, 201347, 202253, each behind a throwaway smoke run so its own start relaunched both seats) never
+    raced at the start (R0 red, inconclusive) and held the staggered logins twice; try 2's casts went into a
+    MessageBoxMenu open on c1. ghostwalk.md (0f5e449d, 1d3e27f5).
+  - x-handoff-cross-timing: 173213 red on its own clock read (labState refused right after the restart; thuum-fa's until,
+    e32a64c0), then the pair 174045 cold red at its Alvor claim (all 66 snapshots in) and 174935 warm green: the sweep's
+    reds are the NPCs' run-to-run timing against a fixed window (npc-handoff.md 2a7af8ae), widened by Eli's word, d09bc3a4.
+  - ADR-071 rung 0, 19:06Z to 20:02Z: x-prop-engine 190610, x-prop-blast 191642, x-corpse-grab 193821, x-body-impose
+    194559 and x-prop-push-souls 195437, five green. x-prop-blast's prop-impulse traces were never fetched (E_PVE_FILE in its
+    notes 49 and 50: lab-api reads each .log in one guest-file-read, and both reads timed out), so its H2 to H4 stay unread
+    until thuum-fa's labapi-frida-fetch lands and v3 b0c8945e runs again.
+- (numidium) playtest-stagger merged to main 7721a6e6: a playtest's seats stop together and start apart, c1 first and c2
+  once c1 is online again, at ready() and at the restore (Eli's word, "Restore and ready()"). playtest-relaunch.sh takes a
+  stop or start phase; relaunch_seats() runs both stops at once and then the starts in turn, holding c2 when c1's start
+  failed; the restore checks the world before any seat stops. Two fresh reviews. The first live test (20:54Z, the stops one
+  after the other) showed the second review's main point: c2's running game took c1's nine cells at 20:55:04Z and held
+  them about 20 s. The final shape live at 21:19Z: both games stopped in the same second (21:19:23Z); the server passed
+  c1's cells to c2's seat when c2 had been silent about 9 s (the heir pick reads no heir's silence, HYPOTHESIS, to
+  thuum-fa), and all nine froze unhosted at 21:19:39Z; c1 took fresh grants on all nine at 21:20:12Z and c2 logged in a
+  guest from 21:21:03Z, questFragmentLive set on both; both clones rolled back. Pipeline 5834 green, labapi-tests'
+  image now with bash for the scripts' stub tests. Open: playtest-restart's reconnects are not staggered (outside the
+  word; the seats reconnect by themselves), turbo-client.sh and turbo-back.sh keep the together relaunch until after 51,
+  and the justfile's playtest-go comment still reads "together" (the shared checkout's justfile hunk first).
+- (numidium) The physics leg's evening reads on canon 24f1cc6a. x-drop-leftover v1.1 (thuum-fa's READY, 296ff33b), W3's
+  read of b-prop-push's step 27: 20261111-220150 red at its main block's two Q3 claims, c1Cell and c1Restart, 27 of 29 held.
+  The leftover Souls RE's running inventory menu leaves at a drop (0xff000947, deleted true, disabled false, 116 north of c1
+  and 124 above its feet) held through time, the copy's removal, c1's presses and the touches, and was gone at c1's first
+  listing after a cell change and return (step 134), so the restart's listing read the same absence. thuum-fa's read of the
+  artifacts: never targeted at six pitches bracketing its bearing, never drawn in either picture, never solid, never listed on
+  c2. An invisible leaked reference that leaving its cell frees (HYPOTHESIS: the cell's detach); W3's next step, step 27's
+  count restated to live references or the drop service fixed, goes to Eli with thuum-fa's memo.
+- (numidium) labapi-frida-fetch merged to main 8bd23824 (thuum-fa; two fresh reviews; pipelines 5838 and 5839 green) and
+  lab-api deployed at 8bd23824 at 22:32Z (it ran 0577d36b, so apocrypha's c.setting, bddde451, went live with it): a Frida
+  trace's copy comes back in 512 KiB ranges through Proxmox's own agent file-read (offset, count and decode=0, qemu-server
+  9.2.10 on core), checked against the length its copy printed; a run's own trace not fetched whole is E_RUN_FRIDA_FETCH, and
+  a copy the agent still holds rolls its seat back. 9.2.10's file-read leaves a timed-out read's handle open (fixed upstream
+  in 9.2.11; the upgrade is Eli's call). The reviewer's real-seat check passed on both seats under a ten-minute hold (a
+  2,097,164-byte file with an e-acute and a euro across range boundaries: the sha equal, the copy removed, both edge reads
+  exact, 3.4 s a seat). x-prop-blast v3 b0c8945e again, 20261111-223256 green, its two prop-impulse traces whole (c1 666 rows,
+  c2 314, where 191642's held only the ready rows), H2 to H4 for thuum-fa's read. Still whole-file: _fetch_client_file's
+  console-log reads (191642's timed out as well), the ranged read's next caller. Both clones rolled back after each run.
+
+### 2026-11-12
+
+- (numidium) core's Proxmox upgrade before playtest 51 (Eli's "Now, before 51", approved in core's session): qemu-server
+  9.2.10 to 9.2.15 at 00:13Z, in one apt transaction with libpve-common-perl 9.2.8, libpve-storage-perl 9.1.15,
+  libpve-guest-common-perl 6.0.7, and swtpm and libtpms 0.10.2 (pve-manager 9.2.20 and pve-qemu-kvm 11.0.3 kept). No VM
+  was touched; the API workers respawned at 00:13:17Z; the rollback point is
+  rpool/ROOT/pve-1@pre-qemu-server-9.2.15-20261112T0013Z. 9.2.15's file-read keeps offset, count and decode and closes its
+  handle when a read fails, the upstream leak behind 191642's held copies. Under a lab hold (00:00:40Z to 00:18:00Z),
+  lab-api 8bd23824's ranged-read check passed again on both seats (c1 3.6 s, c2 3.1 s). Both seats were then cold-started
+  once, by a client rollback to their newest snapshot, so swtpm 0.10.2 met each TPM state before any counted run: c1 back
+  online in 80 s and c2 in 76 s, their new QEMU and swtpm processes from 00:15:09Z and 00:16:29Z, no device-encryption
+  prompt. From core's report, a new lab fact: a VM start now fails early, naming a passed-through PCI device that stopped
+  answering, the GPU wedge's signature, where QEMU used to give "invalid PCI interrupt pin 255". Eli's W3 call, "Fix the
+  drop", is DECISIONS.md's (a32cb7d9): b-prop-push stays pending with step 27 as written, and the drop service's fix rides
+  physics rung 1's client commit after 51.
+- (numidium) x-prop-blast 20261111-223256's read closes on main 855281e3 (thuum-fa): H2, H3 and H4 CONFIRMED. Rung 3's
+  replacement goes on 26004, ScaleGameplayImpulseForce, which carried every prop push on both seats; c2's copy of c1's casts
+  pushed c2's own Dynamic bodies with the caster's numbers, so rung 3's remote-cause zeroing is needed; islands merge before
+  motion and split within 2 to 9 frames. ADR-071 decision 4 reads 26004; havok-props.md's rows carry run ids. Two bugs for
+  after 51, both in 51's checklist as known limits: a shout's hit landing past reportFromHit's 1200 ms window relays the
+  shout twice (shouts.md), and a prop thrown past the 1024-unit put-back leaves its Dynamic body where it landed
+  (prop-physics.md, physics rung 2's body reader).
+- (numidium) The physics leg's two v2.1 reads by path (thuum-fa's READY), canon 24f1cc6a, lab-api 8bd23824:
+  x-corpse-grab-v2 (9ade4b5a) 20261112-002429 green and cold, both prop-grab traces whole (c1 52 rows, c2 75);
+  x-prop-engine-v2 (c6213c80) 20261112-003027 red warm at its final block, 15 claims, every one a setup that missed by
+  thuum-fa's read (the settle walks never touched the ingot, c2's south-lane aim at 1095 with both seats turning 16.43
+  counts a degree, c1's hold ending 0.2 s before c2's touch, leg 8's ingot 21.8 off its mark before c2's login), no engine
+  row refuted. Its findings for rung 1: a grab the engine refuses still sends a touch-1 claim and canon grants it (D-PH3 A
+  cures it: claim only when getPlayerGrabbedRef names the body); a held body standing still reads asleep and the other
+  seat's copy goes Dynamic mid-hold (D-PH4 B's heartbeat); a grab outlasts its key. The rest goes to one-question probes
+  (x-sl-aim first) in idle windows. Both clones rolled back after the pair.
+- (numidium) playtest-log-copies merged to main 64a946fc: playtest 51's own logs, for the first time read the way lab-api
+  now reads a run's. Every seat log the game holds open is copied with read-write sharing (copy_ps, lab-api's log-count
+  and Frida idiom) in playtest-relaunch.sh's keep(), playtest-logs.sh, playtest-record.sh and hang-dump.sh, where Copy-Item
+  was refused ("being used by another process": 193821, 194559 and 195437 lost both consoles so), and read back in 512 KiB
+  ranges (read_ranged, fetch_copy), since one whole-file read of c1's 1,464,655-byte console timed out three times running
+  where the ranges took it in 4 s. Each copy is read only after its exec exits 0, three tries apart, and a short read says
+  so; consoles and keep()'s logs now come whole; the recorder no longer fetches C:\sky-lab\<c>-console.log, lab-api's copy
+  of the last lab run's console. Two fresh reviews (READY with a SHOULD, then FIX FIRST with three SHOULDs, applied in the
+  shapes the reviewer named); live on both seats: playtest-logs.sh's own loop took all ten logs whole in 46 s (c1's console
+  2,678,785 bytes), keep() 21,415 console lines, hang-dump's loop both open logs. Still whole-file reads, after 51:
+  client-launch-test.sh and client-dumps.sh.
+- (numidium) x-sl-aim v1.1 (thuum-fa's READY, 863151e4), rung 1's premise read: 20261112-022655 red at its final block, cold.
+  None of the four sweeps (N and SL on each seat, six pitches each) held the server-placed ingot 0xff000002 in a seat's own
+  MISC listing (all 24 crosshair reads False), and the ingot moved about 23 units during the run (dx -17.4, dy +11.9, dz -9.5
+  between steps 17 and 173); the bands are thuum-fa's to read, and the five one-question probes after it take their PARAMs
+  from them. Both clones rolled back after it.
+- (numidium) labapi-client-log-fetch merged to main 58502b08 (thuum-fa; fresh reviews READY, FIX FIRST twice, READY; pipelines
+  5853 and 5854 green) and lab-api deployed at it, 02:47Z: a run's client logs through a share-read copy and 512 KiB ranges,
+  a failed fetch a "(log fetch)" note, log-count on the same read with its copies removed, screenshots' and bursts' base64 in
+  ranges, a held copy faulting its seat. Its real-seat check (logfetch_seatcheck.py 952b57ed, under a hold) read INCONCLUSIVE
+  on c1: the WMI-started holder was found, then gone 3 s later, so no check ran. Diagnostics the same hour: the holder's exact
+  text on a fresh 6 MB file of the same pattern stayed up six seconds, and Copy-Item copied a file a PowerShell holder held
+  open for writing under either FileShare 'Read' or 'ReadWrite', so the check's "Copy-Item refused" premise cannot be met by
+  such a holder (the game's refusals in 193821, 194559 and 195437 come from something else); both to thuum-fa. A real run
+  instead: smoke-two-players 20261112-025117 green on 58502b08, no "(log fetch)", E_PVE or held note, every client log whole
+  and valid UTF-8. Both clones rolled back after it.
+- (numidium) lab-api 58502b08's real-seat check, v2 (thuum-fa's logfetch_seatcheck.py 0ec4fd0c, its holder logging itself,
+  Copy-Item a reported read, one restart): PASS on both seats under one hold, 03:07Z to 03:10Z. A 6,292,690-byte stand-in
+  held open for writing by a second process, an e-acute or a euro across each of its 12 range boundaries, came back
+  byte-exact through _fetch_client_file in 3.3 s and 13 ranges on each seat (about 1.8 MB/s), with no note, no fault and
+  nothing left; a missing source made the one "is not there (log fetch)" note in 0.6 s; log-count read both 6 MB logs in
+  6.5 and 6.6 s, 24 lines, "6292690 read of 6292690 copied" twice; the cleanup confirmed. v1's INCONCLUSIVE was a liveness
+  false negative: on both seats the first read's command-line match found no holder while its pid ran and its log stood
+  at "holding". Both clones rolled back after it.
+- m4-train-52 merged to fork canon c3f9d175 (2026-11-12T07:11Z): the gate 20261112-055559-merge-m4-train-52,
+  20261112-055559-smoke-two-players to 20261112-070537-b-npc-caster (21 runs; the watch item b-npc-caster red at 070241 and
+  green on its relaunched rerun 070537); T2 skip on skymp-server:m4-train-52 (thuum-fa's T2 of c3f9d175, 2026-11-11 13:26Z,
+  53 of 53); clones promoted (clean-m1 "m4-train-52 client c3f9d175", gitlab client-build 20605 at ff467dab by REUSE_DIST,
+  SkyrimPlatformImpl 333d2a2291486ed5). Verbs: the leveled quest reward lands (Fix 1: ScriptCall 75's landed, SCHEMA 44,
+  E_SCRIPTCALL_ROLL), an effect's local helper (Fix 2, D-H1 B: b-second-hand green in the gate, out of pending), the
+  console arm's one quest-run rule (Fix 3), D-Q9 B's per-player alias cause, the snippet's long-id fallback, D-S4 A's grace
+  read, and the difftest drain with T2's rung 5 keys back on. Its stage (04:28Z to 05:06Z, from main a312a6ee):
+  x-leveled-reward 20261112-044101, x-effect-helper 044616 and x-console-arm 045113 green; x-acting-player v3 red warm
+  (045509) and cold (050846) on server.log_count("E_SCRIPTSTATE_EPOCH") == 0, six refusals a run, each seat's release read
+  of cell 9731's three weapon racks (acd81, acd7f, b6f6a, WeaponRackActivateScript) landing 54 ms after the successor's
+  grant: D-S4 A's premise that nothing changes in the grace is refuted for scripts that change their own state while their
+  cell unloads (thuum-fa's read), merged as a declared limit on Eli's word, "Merge, declare the limit" (D-S4 B, holding the
+  hand-off, not taken). Eli's "if it's done make them one test": playtest 51 runs on canon c3f9d175 with 52's checks. On
+  the stage lab-api 58502b08's new held-copy fault misfired twice on c1's log-count copies (x-console-arm, x-acting-player),
+  a transient lock, costing c1 a rollback each; thuum-fa's labapi-removal-retry is its fix.

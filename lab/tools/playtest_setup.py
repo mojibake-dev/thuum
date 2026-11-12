@@ -536,13 +536,14 @@ def setup(n: int) -> int:
     p = load_profile(n)
     rep = Report()
     print(f"== playtest {n}: {p.get('build', '')}", flush=True)
-    env = dict(os.environ)
+    # the restore's relaunches are the first login on the restored world: they set the profile's clientSettings too
+    env = {**os.environ, "PLAYTEST": str(n)}
     server = p.get("server") or {}
     if server:
         overlay = _lay_overlay(server)
         env["PLAYTEST_SERVER_SETTINGS"] = overlay
         rep.ok(f"server {server} laid over the deployed settings: {overlay}")
-    print(f"== restore {p['world']} (both seats relaunched on it) {time.strftime('%H:%M:%S')}", flush=True)
+    print(f"== restore {p['world']} (both seats relaunched on it, c1 then c2) {time.strftime('%H:%M:%S')}", flush=True)
     r = subprocess.run([str(ROOT / "lab/tools/playtest-world.sh"), "restore", p["world"]], text=True, env=env)
     if r.returncode != 0:
         print("== the restore failed: no setup", flush=True)
@@ -598,6 +599,39 @@ def setup(n: int) -> int:
     return 0 if not rep.bad else 1
 
 
+def relaunch_seats(env: dict[str, str]) -> list[tuple[str, int, list[str]]]:
+    """Both games stopped at once, then c1 started and c2 once c1's player is online again (playtest-relaunch.sh's stop and
+    start halves; start returns once its player is back), as playtest-world.sh's restore does. Stopped together, neither
+    seat hands its cells to the other while it relaunches (playtest 46, go()'s fresh-grant gate); started apart, a seat's
+    own Story Manager start never races the other seat's relayed start, the race under b-ghostwalk-look's warm reds
+    (20261111-060821, 061001: a start arm put c1's game in c2's scope and a spell's end handler did not run). Eli's word of
+    2026-11-11 ("Restore and ready()"); x-ghostwalk-race-read v2.1's S leg held the staggered logins (20261111-200503,
+    202253). Each seat's (client, return code, output lines): a seat whose stop failed is not started, and c2 waits for a
+    hand (return code 9) when c1's start failed, since c1's game may still log in late."""
+    relaunch = str(ROOT / "lab/tools/playtest-relaunch.sh")
+    # the two stops at once, so neither seat's game hosts the other's cells while it waits its turn (the second review:
+    # one stop after the other gave c2's live game c1's cells for 10 to 15 s, cells.rs's grace)
+    procs = {c: subprocess.Popen([relaunch, c, "stop"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=env)
+             for c in ("c1", "c2")}
+    stopped = {}
+    for c, pr in procs.items():
+        out = (pr.communicate()[0] or "").strip().splitlines()
+        stopped[c] = (pr.returncode, out)
+    done = []
+    c1_failed = False
+    for c in ("c1", "c2"):
+        rc, out = stopped[c]
+        if rc == 0 and c == "c2" and c1_failed:
+            # c1's game may still log in late, which is the race the stagger exists to avoid: c2 waits for a hand
+            rc, out = 9, out + ["c2 not started: c1's start failed (start c2 once c1 is online)"]
+        elif rc == 0:
+            r = subprocess.run([relaunch, c, "start"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=env)
+            rc, out = r.returncode, out + (r.stdout or "").strip().splitlines()
+            c1_failed = c1_failed or (c == "c1" and rc != 0)
+        done.append((c, rc, out))
+    return done
+
+
 def ready(n: int) -> int:
     p = load_profile(n)
     rep = Report()
@@ -607,11 +641,8 @@ def ready(n: int) -> int:
     except Exception:
         since = None
     env = {**os.environ, "PLAYTEST": str(n)}  # the relaunch sets the profile's clientSettings in each stopped game, read back
-    procs = [subprocess.Popen([str(ROOT / "lab/tools/playtest-relaunch.sh"), c], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=env)
-             for c in ("c1", "c2")]
-    for c, pr in zip(("c1", "c2"), procs):
-        out = (pr.communicate()[0] or "").strip().splitlines()
-        (rep.ok if pr.returncode == 0 else rep.fail)(f"{c}: {out[-1] if out else 'no output'}")
+    for c, rc, out in relaunch_seats(env):
+        (rep.ok if rc == 0 else rep.fail)(f"{c}: {out[-1] if out else 'no output'}")
         if p.get("clientSettings"):
             got = [line for line in out if line.startswith("set ")]
             (rep.ok if len(got) == len(p["clientSettings"]) else rep.fail)(f"{c}: client settings {'; '.join(got) or 'none set'}")
@@ -942,10 +973,10 @@ def streams(n: int) -> int:
 def go(n: int) -> int:
     """The one way into a playtest (Eli, 2026-11-04 after 46: "that should be canonized into a script instead of hand
     rolled every time"), in a fixed order: the profile's build laid first; setup (the world restored, the server's host
-    table fresh, the camp, the standing base); the streams; ready, which relaunches both seats TOGETHER (a seat
-    relaunched alone hands its hosted cells to a seat that loaded them as a guest); then every interior camp cell's host
-    proven a fresh grant from the server's own lines, both seats relaunched together again when one was inherited (at most
-    twice). The recorder is the caller's next command: `just playtest-record <n>`, in the background."""
+    table fresh, the camp, the standing base); the streams; ready, which stops both seats TOGETHER (a seat
+    relaunched alone hands its hosted cells to a seat that loaded them as a guest) and starts them one after the other,
+    c1 first (relaunch_seats); then every interior camp cell's host proven a fresh grant from the server's own lines, ready
+    again when one was inherited (at most twice). The recorder is the caller's next command: `just playtest-record <n>`, in the background."""
     p = load_profile(n)
     rep = Report()
     print(f"== playtest {n}: go {time.strftime('%H:%M:%S')}", flush=True)
@@ -967,7 +998,7 @@ def go(n: int) -> int:
             roles(n)
             print(f"== playtest {n} ready {time.strftime('%H:%M:%S')}: next `just playtest-record {n}` in the background")
             return 0
-        print(f"   attempt {attempt + 1}: ready exit {rc}, not fresh {bad or 'none'}: both seats relaunched together again", flush=True)
+        print(f"   attempt {attempt + 1}: ready exit {rc}, not fresh {bad or 'none'}: both seats stopped together and started again, c1 first", flush=True)
     print(f"== playtest {n} NOT ready after three attempts")
     return 1
 

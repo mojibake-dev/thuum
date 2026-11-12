@@ -3128,6 +3128,15 @@ cleaned as far as they go; and that a VM that cannot start
 stops the set with no rerun. Measured: c2 relaunched in 31 to 33 s against 55 to 64 s for a rollback, with zero
 device resets per relaunch by core's count of the host's vfio lines.
 
+Note 2026-11-12 (thuum-fa; recorded 02:58Z, main 58502b08, numidium's review and deploy): the capture folders are still
+cleaned as far as they go, but a file the guest agent still holds after lab-api read it (a trace or log copy, a screenshot's
+.b64 sidecar, a log-count copy) now faults its seat: a rollback at the seat's next reset, the run's verdict unchanged. Why: on
+qemu-server 9.2.10 a timed-out guest-file-read never reached guest-file-close (fixed upstream in 9.2.11, 9017eecbd4; core
+upgraded to 9.2.15 on 11-12), and in x-prop-blast 20261111-191642's sequel runs the held files built up (11, 17, 25 left by
+the relaunches' cleaning) until both seats' agents timed out from step 34 on, so a soft clean alone let a leaked handle
+degrade every later run; only a rollback cleared it. Reads are now 512 KiB ranges (docs/LAB.md), which also makes the leak
+rarer.
+
 ## ADR-054: The developer loop: a client change reaches a running seat in minutes, tests run before a push, and engine-facing code waits for its read
 
 Status: ACCEPTED 00:01 PDT 2026-10-28 (Eli, 2026-10-27 late: "do all of those sans 4", on the six
@@ -3789,6 +3798,17 @@ Risks. H1 and H2 above. H3: the commander's engine stands the thrall while the s
 round trip, and the deaths2 client's released-body branch (AI off 4 s through the ragdoll) races the grant: the reconcile must
 read the server's word (isHostedByOther false plus the live word) over its own dead branch. H4: a hosted necromancer's thrall
 (the caster an NPC) claims for the caster's host, which is the body's host already in the common case; no change there.
+
+Amended (Eli in session, 2026-11-12 about 06:3xZ, recorded 06:39Z by thuum-fa; asked whether the command's lease, the record's
+duration plus 10 s, should go, Eli verbatim: "summons and resurrections should obey the timers the level of spell. leaving a cell
+should not kill the thrall."): the command has no server lease from the record's duration, which ignores dual casting, perks and
+the spell's level; it lasts as the caster's engine runs the effect and ends at the thrall's death (the effect's end, the ash), as
+the commander's seat reports it; Dead Thrall's lasts until death. A change of cell does not end it: the commander's crossing of a
+door or a boundary and the thrall's cell unloading on the commander's side keep the command, the commander's engine simulating the
+thrall as its follower, so ownership follows the actor and not the cell (as ADR-071's moving bodies and ADR-066's ActorOwner). The
+commander's departure from the game ends it with a word that returns the thrall to its cell's host (the gap M3's paper close
+found: gone() and unloaded() dropped the row with no decision); what a commanderless thrall does then is open (default: alive on
+the host until its effect would end, HYPOTHESIS for Eli). Built on fork m4-reanimate-claim-2 (train 52 merged in, 315dce28).
 
 ## ADR-061: A shared container's live view is the menu drawn again whole; exclusive access is the fallback behind a setting
 
@@ -5007,6 +5027,46 @@ Rung 5's second head, Eli's later words (2026-11-10, in thuum-fa's session):
     quest's stop is never recorded, so no replayed stop drops it (:249). Unread at T3. Taken over B (a platform path that starts
     an event quest outside the Story Manager for a login replay, a trace first) and C (a declared limit for 51).
 
+Train 52's own decisions, and D-Q9 B built (the train 52 plan, lab/.cache/drafts/train52-plan.md section 6, 2026-11-11; fork
+m4-train-52 c3f9d175, pushed with its pipelines green, its stage after playtest 51). D-R2 B, D-H1 B and D-S4 A are the plan's
+recommendations taken as the train's defaults, not Eli's words: each refines words he accepted (D-R1 C; ADR-068 decision 6 and
+D-S2 B; ADR-066's hand-off), so the merge does not wait on them, and he may overturn any at review, this file then recording
+whichever stands. D-S4 B would change hand-off timing and is his alone. The verb docs record each as built, T3 pending
+(docs/verbs/papyrus-events.md and quest-stage.md, "Train 52"):
+- D-R2 B, a leveled landing's check (inside D-R1 C: the seat's grant is its own record): each landing of a leveled AddItem's roll
+  (ScriptCall's `landed`, SCHEMA_VERSION 44) is checked against the bases its list can roll, read from the game files (the list's
+  entries with nested lists followed, LeveledListUtils::Reach), and a base outside is refused E_SCRIPTCALL_ROLL; built on
+  9d635d6b, its write one record edit a call since 1a70a16b. A consistency check, not a bound: it refuses no genuine roll while
+  the server's reach is the engine's list, which two cases may break, HYPOTHESIS both (an entry LeveledItem.AddForm added at run
+  time, which persists in saves; a COED inside the LVLO run libespm reads as contiguous, a COED census of the masters deciding
+  it). Taken over A (each landing recorded as reported, D-R1 C's letter) and C (the server rolls the list itself, R0: it
+  reimplements what the seat's engine just did, against the design law, and the player sees the engine's number replaced).
+- D-H1 B, what an effect's local helper may be (inside ADR-068 decision 6 and D-S2 B): an activator, a static or a light, the
+  census's helper kinds that simulate nothing (ACTI 10, STAT 7, LIGH 2 of the 19 helper spells); furniture, containers, actors,
+  items, explosions and hazards keep the owner's judgment. A PlaceAtMe of one inside this seat's own player's effect runs whatever
+  its subject's owner and places this seat's local helper, R3 (built on ea6da0a1). Taken over A (an activator alone, Crackle's
+  FXEmptyActivator) and C (no effect rule, b-second-hand's class left broken).
+- D-S4 A, a departing host's release read behind a successor (inside ADR-066's hand-off): the grace read, the cell's known
+  references read at the host's own epoch when it reports the cell unloaded (client only, no timing change; built on 1c856c66). It
+  misses the grid case (a cell that leaves the server's 3x3 while the host's engine still loads it sends no unload report) and,
+  its reads spending the one shared send bucket, can miss a busy cell's grace (HYPOTHESIS). Taken over C (the refusal left as
+  designed and the loss declared). D-S4 B, the grant waiting a bound for the release read after a release whose old host is still
+  connected (the cells rule, a new RELEASE_READ_MS, UNMEASURED), covers every case at the cost of the bound added to every warm
+  hand-off: a feel change, Eli's alone, put to him only if a read shows the grid case.
+  Read and declared (Eli in session, 2026-11-12, "Merge, declare the limit", over D-S4 B and a further read): x-acting-player v3
+  367ecd50 went red twice on train 52's stage (20261112-045509 warm, 050846 cold), the same six E_SCRIPTSTATE_EPOCH lines: at
+  each hand-off of Riverwood's cell 9731 the departing host's grace read ran and sent (D-S4 A held), but three weapon racks
+  (acd81, acd7f, b6f6a; WeaponRackActivateScript.ActivatorSetup) change their script state while their cell unloads, after the
+  grace read, and that change crossed as the release read 54 ms after the successor's grant and was refused (050846 server.log
+  :1865-1867, :2937-2939). The limit: a script that changes its own state while its cell unloads keeps the state recorded before
+  the unload; the successor's own reports cover the rest. Train 52 merged with it (gate 20261112-055559-merge-m4-train-52, canon
+  c3f9d175).
+- D-Q9 B (Eli's, the entry above) built on fork m4-train-52 8c53b76c as the server setting questPlayerAliasCause, "seat" the
+  default (D-Q9 B) and "world" D-Q9 A, ADR-070's axis: under "seat" a world-caused report rooted at OnLocationChange on a script
+  the game files attach to player aliases alone is judged as the seat's own (a run word refused E_QUEST_CAUSE, a report judged a
+  start not recorded, a plain stage crossing as before); server only, no deployed settings file changes. Its T3 waits on a census
+  for a quest whose player alias script handles OnLocationChange and calls Start, Stop or SetStage.
+
 ## ADR-069: Rotfern's Fixes: engine fixes ship to every player as one SKSE DLL, one detour per lab-read site, never as a lab-only patch
 
 Status: ACCEPTED 2026-11-06 by Eli, to apocrypha directly, after asking what the fixes are ("wait so what ARE the engine fixes???
@@ -5135,8 +5195,10 @@ across seats (measured, docs/verbs/push.md:224-232; Monniaux, ACM TOPLAS 30(3), 
 
 Decision.
 
-1. One row, one stream. Every Havok body, an item, a static whose class is derived from its record (type and Havok data, never a
-   per-name list), or a dead actor's ragdoll, is a prop row in wire-rules props.rs, streamed on PropTransform.
+1. One row, one stream. Every Havok body, an item, a static whose class is derived from its base's model (its BSXFlags kDynamic
+   bit, BSXFlags.h:22, read once from the archives or the loaded 3D; never a per-name list: the rung 0 census found the record
+   type no predictor, no STAT and 5 of 27 MSTT near Riverwood carrying a moving body), or a dead actor's ragdoll, is a prop row
+   in wire-rules props.rs, streamed on PropTransform.
 
 2. Ownership is A1 to A7 with no timers: the cell's host owns a resting or stalled body; a claim from the engine that moved it
    (its capsule, its hand, its drop, an impulse whose cause it owns, or island contact with a body it moved) takes it at the next
@@ -5186,11 +5248,83 @@ Decision.
 The ladder (the plan's table): rung 0 the reads (Frida on the impulse site, the grab on a corpse, the pose's two paths and a
 save's Havok block; the three spells' PROJ and EXPL forces; the rule-free havok-props.md rows on both seats); rung 1 props hold
 (A1 to A7 with the refusals' retirement, x-prop-edge for playtest 44, b-prop-push out of pending); rung 2 the sample v2; rung 3
-the impact (b-prop-impulse with Hailstone, Fireball and Unrelenting Force at the mill's cabbages); rung 4 statics (the derived
-class); rung 5 bodies and the drag (b-corpse-drag); rung 6 the rest and reload; rung 7 the chaff, havok-props.md thawed whole.
+the impact (b-prop-impulse with Hailstone, Fireball and Unrelenting Force, two words or more, at the six ALCH cabbages on the
+Riverwood Trader's cart, 0x1c0c6 to 0x1c0cb, from XMarkerHeading 0x96595); rung 4 statics (the class from the model); rung 5 bodies and the drag (b-corpse-drag); rung 6 the rest and reload; rung 7 the chaff, havok-props.md thawed whole.
 Four playtests, P1 to P4, one after each pair of rungs. About 16 stage slots; the smaller ladder (rungs 0, 1, 3a, 3 on v1 samples,
 then bodies as rows with the re-rest) about 8.
 
+Source SDK 2013 is read for design and never copied, as TiltedEvolution under ADR-005 (Eli 2026-11-11, "add those three files to
+rung 5's read"): its Source 1 SDK License grants use only "to develop a modified Valve game running on Valve's Source 1 engine",
+and the simulation it networks (vphysics.dll, Valve's modified IVP) ships without source and is not Skyrim's Havok 2010, so no
+REA time goes to it; rung 5's design read takes props.h's physics attacker, physics_prop_ragdoll.cpp's networked bone arrays and
+player_pickup.h's hooks.
+
+Amended (Eli about 20:3xZ 2026-11-11, asked in session on rung 1's build plan, lab/.cache/drafts/physics/rung1-plan.md
+4875f738; recorded 20:37Z by thuum-fa):
+- D-PH1 A ("Bump at rung 1"), decision 6's "one SCHEMA bump" becomes a bump at each rung that changes what an older peer
+  accepts: 45 at rung 1 (PropOwner admits player 0, the cell's host at rest), 46 at rung 2 (the v2 shapes). The reason is a
+  silent drop: a client's transport validates every server message and counts a refusal without a word (wire-transport
+  lib.rs:723-731 at fork c3f9d175), and check_prop_owner refuses player 0 today (wire-validate lib.rs:876-884), so a client
+  built before rung 1 would keep a stale owner with no sign; the handshake's protocol id carries SCHEMA_VERSION
+  (wire-transport lib.rs:191-196), the one guard that fails loudly.
+- D-PH3 A ("Drop it, read the grab"), the 120 s grab cap of ADR-063's props note A2 and A4 is not built: PROP_GRAB_MAX_MS and
+  E_PROP_GRAB_CAP go, so decision 2's "no timers" holds literally (W1a: "never on a timer"). A sample's held is the engine's
+  own grab state, read at each sample through Game.getPlayerGrabbedRef() (a vanilla native Skyrim Platform exposes,
+  skyrimPlatform.ts:2939 at fork c3f9d175), never an event the client tracks, so a missed release cannot strand a prop; a hold
+  ends by the holder's held-false sample or its departure word. x-corpse-grab 20261111-193821 held a corpse's grab 4 min 29 s
+  with no release (no 40557, read-corpse-193821-194559.md), the case the cap would have cut mid-drag.
+- The build plan's other defaults stand inside the accepted model: D-PH2 A (the unload's return words and the Away state as
+  built at fork 147a6cfe) and D-PH4 B (decision 6's 500 ms heartbeat for every awake streamed body from rung 1, on v1 samples).
+- W3, b-prop-push's step 27 (Eli, "Read first, then fix", after asking why a menu would touch physics): the step stays as
+  committed. x-prop-push-souls 20261111-195437 read the drop green with c1's InventoryMenu pausing (all 13 step-27 claims, one
+  copy in c1's cell), and across the frame's 13 runs the 7 pausing ones are green and the 6 under Souls RE's running menu red,
+  each listing the engine's own dropped copy beside the server's, marked deleted and never freed
+  (read-x-prop-push-souls-195437.md): the menu changes when the drop meets a running world, not the physics. Next, b-prop-push
+  as committed on canon's build (the same-build control) and a read of the leftover (drawn, solid, freed, can a player take
+  it); then a fix of the drop service if a player can see or touch it, or a restated count if it is an invisible leaked
+  reference, which comes back to Eli. b-prop-push stays pending until then.
+  Decided (Eli in session about 23:5xZ 2026-11-11, "Fix the drop", recorded 00:00Z 11-12): the leftover read
+  (x-drop-leftover v1.1 20261111-220150) found it invisible, not solid, not targetable or takeable, unseen by the other seat
+  and freed when its player leaves the cell (HYPOTHESIS: the cell's detach); the count is not restated. The drop service frees
+  the engine's own copy at once even under a running menu (Disable before Delete, HYPOTHESIS until a read shows the reference
+  gone), so step 27 holds as written; a client change with a Windows build, in physics rung 1's client commit beside
+  b-prop-push leaving pending, after playtest 51.
+
+Read (rung 0's x-prop-blast v3, 20261111-223256 on canon 24f1cc6a, both seats' traces whole; recorded 00:54Z 2026-11-12 by
+thuum-fa): decision 4's "26005 or 26004" is 26004. Every prop push on both seats went through ScaleGameplayImpulseForce 26004
+(TESHavokUtilities.h:18), bhkRigidBody::SetLinearImpulse 78091 (bhkRigidBody.h:54) applied its result on all 58 pairs, and
+AddExplosionImpulse 26005 (:14) touched only two animals' ragdolls, with a null HitData. The cause is the enclosing frame's, not
+an argument's: Explosion::actorOwner (Explosion.h:72) for an explosion, ProcessImpacts' shooter for an arrow, HitData::aggressor
+never; the shout's cone pushed from outside every hooked frame, so its cause is unread (a backtrace at 26004 during a shout reads
+it). That a zero result zeroes the push is HYPOTHESIS until a replacement returns 0 in a run; an arrow's push did not follow the
+result (no 78091, the bucket leaving about 66 times faster than the result gives), so an arrow needs its own read.
+
+Amended (Eli in session, 2026-11-12 about 04:3xZ, recorded 04:31Z by thuum-fa; asked whether rung 3 fits playtest 51, Eli chose
+"51 waits for rung 3", over "not in 51" and the smaller ladder): playtest 51 waits until rungs 1, 2, 3a and 3 are merged, so the
+cabbage cart test (b-prop-impulse) is in it; with Eli's earlier "fold the last of m3 into playtest 51" and "if it's done make
+them one test", 51 is one sitting for the current canon, train 52, M3's close rows and the physics leg through rung 3, the
+ladder's P1 and P2 folded into it. Decision 7's cap (apocrypha/layer-havok-cap 50cb6ec2, its proof x-havok-cap-read v2
+65e70e1a) lays before rung 1's merge instead of after 51, since rung 1 rests on havok-props.md's E10 (rest by deactivation), which
+reads only under the cap. Rung 2 stays in (Eli did not take the smaller ladder).
+
+Rung 3's decisions (Eli in session, 2026-11-12 about 05:3xZ, asked from the rung 3 plan, lab/.cache/drafts/physics/rung3-plan.md
+905bec1d; recorded 05:55Z by thuum-fa):
+- D-PH5, what decision 4's remote-cause zero covers: "Every physics body" (over the plan's recommended items only). A push whose
+  cause is another seat's is zeroed for every Havok body on the receiving engine, props and world objects alike, so a world
+  object such as the Riverwood Trader's hanging sign stays still on the other screen when another player's spell hits it, until
+  rung 4 makes statics shared rows.
+- D-PH6, the shout's cause if the backtrace at 26004 during a shout (x-prop-cone v1) finds no frame: "Read again, then by cones",
+  a second read first; failing that, a push while this engine's own player's shout cone is flying counts as local and any other
+  as the other seat's.
+- D-PH7, the arrow (its push follows no 26004 result): "Read it, else a 51 limit", a short read for the arrow's push site
+  (x-prop-arrow v1); if it lands in time rung 3 intercepts it too, else "an arrow at a bucket" is a declared limit in playtest 51.
+- D-PH8, the double shout (a late hit past hitWindowMs 1200 re-reported, shouts.md): "Own fix, before 51", a small client fix
+  of one report per release, built beside the physics rungs; it leaves 51's known limits.
+And, the same session, of M3's reanimation row (51's M3-2, after M3's paper close found fork m4-reanimate-claim 2dc75ab6, ADR-060,
+never merged): "Finish it before 51": merged onto canon after train 52, its open hypotheses (ADR-060 H1 to H3) settled with its
+probe x-reanimate-claim, staged and merged while the physics rungs build.
+
 Amends: ADR-064 decision 7 (dated note under it), ADR-063's props note (accepted under it), ADR-058's slices (slice two kept as a
 derived class; slice three is rungs 5 and 6), ADR-067 decision 4 (its final sample is the asleep sample; the built ChangeForm
-apply is the record). W3 stays Eli's at the time: a rewrite of b-prop-push's step 27 if the drop read calls for one.
+apply is the record). W3 stays Eli's at the time: a rewrite of b-prop-push's step 27 if the drop read calls for one (decided
+2026-11-11 in the amendment above: no rewrite; the leftover is read first, then fixed or the count restated by Eli's word).

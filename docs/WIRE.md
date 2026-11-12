@@ -1023,6 +1023,40 @@ side, and a reward a giver moves into the player (RemoveItem on the giver: the g
 RaceMenuPreset ahead of the appearance (F2), and a quest's alias scripts count as its attachments for the bound (F1, libespm's
 VMAD Alias Scripts Section); no wire change. The difftest sessions are unchanged; T0 unit/PlayerOwnTest.cpp.
 
+Since SCHEMA_VERSION 44 (fork m4-train-52 4b5d9950, the contract in one commit as rule 4 asks, and 9d635d6b, the server; thuum
+train 52, D-R1 C's leveled gap and D-R2 B; docs/verbs/papyrus-events.md, "Train 52"; built, T2 and T3 pending): ScriptCall gains
+the optional `landed: [{ item: u32, count: i32 }]` (wire-schema skymp.rs:2449-2459; lib.rs's ItemDelta, the one inventory-change
+shape the wire has, positive here), on an AddItem whose form is a leveled list on the sender's own player (selfId 0x14) alone:
+what the engine's roll put in that player's inventory, read from the container events inside the call's AddItemFunctor, each base
+once, its count summed, in landing order; empty when the roll landed nothing; absent on every other call. R2, the seat's word,
+delivered once on the reliable channel (a duplicate would grant twice, as a plain own AddItem's would). Cap:
+cap::SCRIPT_CALL_LANDED 255 (lib.rs:283: a leveled list's entry count is one byte, CommonLibSSE-NG
+include/RE/T/TESLeveledList.h:72, and the platform folds the landings by base); a 256th landing is E_WIRE_MALFORMED at decode (the
+bounded Vec's length past its bound, wire-codec's a_reported_rolls_landings_stop_at_255_at_decode) and E_WIRE_CAPACITY at
+construction (bounded.rs, "E_WIRE_CAPACITY: 256 > 255"). Validator (wire-validate check_landed, lib.rs:1473-1501), structural
+only: `landed` on any call but ObjectReference.AddItem (names without case) or on a self other than 0x14 is E_VAL_RANGE, an empty
+list too; a landing's item 0 or at or above 0xff000000 E_VAL_RANGE; a count of 0 E_VAL_ZERO_DELTA (the ItemDelta rule), a negative
+one E_VAL_RANGE; a base twice E_VAL_RANGE. The size row stays 180 KiB: the worst case (script_call_at_its_caps, 255 landings of
+ten varint bytes) is 183,365 bytes of 184,320, and 180,813 with no landing. The server's rule (wire-rules player_own's items(),
+:448-454; the core's RecordLandings): the call's form an LVLI (E_SCRIPTCALL_ARGS otherwise, "its <k> landing(s) land on no list");
+each landing refused first when its base is none the list can roll, E_SCRIPTCALL_ROLL (new: the list's entries with nested lists
+followed to 16 levels over the game files, LeveledListUtils::Reach, D-R2 B), then judged as a plain add of its base (the kind, the
+count, the u32 room, Fix B's 4096 stacks); the accepted ones written in one edit of the record (fork 1a70a16b,
+MpObjectReference::AddPlainItems: one change-form edit, one inventory update at the tick, one OnItemAdded per landing), so one
+record token buys one plain AddItem's server work plus a constant per landing. E_SCRIPTCALL_LEVELED stays for a leveled AddItem
+that carries no `landed` (the seat's scriptLeveledLandings off), so D-R1 C's leveled gap above closes for a call that carries its
+roll. Netcode's protocol id carries the version, so a schema 43 seat cannot connect to a schema 44 server and every seat moves
+with the server. Fixture 75-ScriptCall-5 (MS01's stage 39 reward: AddItem of LvlQuestReward02Medium 0xc0405 x1 on 0x14 from
+QF_MS01_00018B4B.Fragment_56, `landed` [{item 15, count 400}]) with its C++ pair (ScriptCallMessage.h: a nested Landing { item,
+count }, `landed` serialized as "landed"); a codec_decode corpus seed with `landed` at its cap (c788b10b); T0 the validator's
+cases and two proptests, the codec's bound, player_own's and the bridge's cases, unit/PlayerOwnTest.cpp and
+LeveledListUtilsTest.cpp. T2: the difftest session player-own-items (new): c1 (profile 9, 140 Gold001) reports
+FreeformStonehillsA's AddItem(Gold001, 25) at 3 s and MS01's AddItem(LvlQuestReward02Medium, 1) with `landed` [Gold001 x400] at
+3.5 s, declared legacy 0 and wire 1 each as c1's SetInventory with 165 and then 565 gold (the legacy server knows no MsgType 75);
+the same call with no `landed` at 4 s (E_SCRIPTCALL_LEVELED), with `landed` [IronSword 0x12eb7 x1] at 4.5 s (E_SCRIPTCALL_ROLL)
+and a RemoveItem carrying `landed` at 5 s (E_VAL_RANGE at the edge) send nothing on either stack, their names T0's; c2 hears
+nothing of c1's inventory. Its run is pending (the first keyed T2, ScriptVariables below).
+
 ### ScriptState (t 76, wire id 84) and ScriptStateApply (t 77, wire id 85): the script record (ADR-068 rung 3)
 
 Fork m4-scripts-3-record 4f525bad (12:49 PST 2026-11-06, SCHEMA_VERSION 38; ADR-068 rung 3,
@@ -1141,6 +1175,22 @@ watch lists the listed keys, then these, each own; an own entry is recorded on t
 kept), relayed to nobody, and served to that player alone, a form's two registration entries in one message. Settings beside
 it: `playerQuestGlobals` ({"<quest>": ["<glob>", ...]}, composed into playerGlobals) and `playerQuestCallers` ({"<world quest>":
 [stages]}, PQ-3: those stages relayed served). Each is composed only while questScope is "derived".
+
+T2 with rung 5's six keys (fork m4-train-52 63f987b8, on the difftest drain 1bb3893b merged at 35895870; thuum train 52, the
+plan's 5.1): difftest reads every client's stdout on a thread of its own from its spawn (main.rs's drain, :363, taken right after
+each spawn, :341), so a keyed login's watch lines (about 91 KB for the deployed 1,013 keys) no longer stall a fakeclient on a full
+64 KiB pipe (pipe(7)) while the driver waits on another client, which had made the clients run one after the other and lost every
+relay toward the first. skymp-wire/difftest/divergences.yaml declares the login's watch once for every client of every session,
+`{t: 81, served: true}`, legacy 0 and wire 4: ceil(keys / 256), ActionListener.cpp's kScriptVariablesPerMessage (:7009), and no
+value, since a fresh T2 world records none; a census that moves the key count past a multiple of 256 moves the number. The session
+script-variables declares its relay: c1's 2 s report of MS13 0x39645's ::camillaescort_var is a listed key now (the deployed list
+names ::CamillaEscort_var, and keys compare without case), so the wire server records it as the world's and relays it to c2
+(served false), legacy 0 and wire 1; its header no longer says no setting lists it. The session player-own drops its two c2 relays
+of the player-class starts (questScope "derived" makes PlayerVampireQuest 0xeafd5 and PlayerWerewolfQuest 0x2ba16 the player's
+own, so c1's two starts are E_QUEST_PLAYER by design). The keys stay in T2's settings only for a head whose own divergences.yaml
+declares the t:81 watch (thuum lab/tools/test-proto.sh on branch t2-r5-keys, be2e28bd and fdff91e8, unmerged at this writing; an
+older head keeps the pop, with a line saying which). The first keyed T2 is a trial: script-variables' relay assumes c2 logged in
+before c1's 2 s report, as quest-stage's 2 s relay already does. The run on m4-train-52 c3f9d175 is pending.
 
 ### RelayedActivation (t 70): a linked activation the cell's host reported, to the cell's other games (traps, M4)
 

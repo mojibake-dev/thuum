@@ -1377,6 +1377,40 @@ class HeadPartTests(unittest.TestCase):
                 ev.evaluate(expr)
 
 
+class SettingViews(NearViews):
+    """c1's last settings step: Display Tweaks' static Havok step through GetINIFloat and one game setting."""
+
+    def __init__(self):
+        super().__init__()
+        self.read = {"c1": {"ini": {"fMaxTime:HAVOK": 0.016667, "fMaxTimeComplex:HAVOK": 0.033333, "bad:HAVOK": "x"},
+                            "gmst": {"fJumpHeightMin": 76.0, "iTrainingNumAllowedPerLevel": 5}}}
+
+    def settings(self, observer):
+        return self.read.get(observer)
+
+
+@needs_deps
+class SettingTests(unittest.TestCase):
+    def test_an_ini_setting_and_a_game_setting_by_the_name_read(self):
+        """thuum ADR-071 decision 7: the engine's live fMaxTime, the value Display Tweaks' static mode writes"""
+        from labapi.assertions import Evaluator
+        ev = Evaluator(RichServer(), SettingViews(), ["c1", "c2"])
+        self.assertTrue(ev.evaluate('abs(c1.setting("fMaxTime:HAVOK") - 1/60) < 0.0005'))
+        self.assertTrue(ev.evaluate('abs(c1.setting("fMaxTimeComplex:HAVOK") - 1/30) < 0.0005'))
+        self.assertTrue(ev.evaluate('c1.setting("fJumpHeightMin") == 76'))
+        self.assertTrue(ev.evaluate('c1.setting("iTrainingNumAllowedPerLevel") == 5'))
+
+    def test_no_step_an_unread_name_or_a_non_number_is_a_data_error(self):
+        from labapi.assertions import AssertionData, AssertionSyntax, Evaluator
+        ev = Evaluator(RichServer(), SettingViews(), ["c1", "c2"])
+        for expr in ('c2.setting("fMaxTime:HAVOK") > 0', 'c1.setting("fMaxTime:Display") > 0', 'c1.setting("bad:HAVOK") > 0'):
+            with self.subTest(expr=expr), self.assertRaises(AssertionData):
+                ev.evaluate(expr)
+        for expr in ('c1.setting(2) > 0', 'c1.setting() > 0'):
+            with self.subTest(expr=expr), self.assertRaises(AssertionSyntax):
+                ev.evaluate(expr)
+
+
 class NodeRotationViews(NearViews):
     """Each seat's node-rotation reads of one puzzle pillar (0xaa8cb), as the driver answers with the platform's
     deferred read: c1 at a 120-degree turn about z, c2 at the same pose written as another Euler triple, and c2's

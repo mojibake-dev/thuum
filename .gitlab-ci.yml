@@ -77,6 +77,8 @@ labapi-tests:
   image: ghcr.io/astral-sh/uv:python3.12-alpine
   rules: *lab-changes
   script:
+    # bash: test_playtest_setup runs the playtest tools, bash scripts, against stubbed ssh and curl
+    - apk add --no-cache bash
     - uv run --project lab/labapi python -m unittest discover -s lab/tests -v
 
 # ADR-064 decision 3's two-seat contract, the rules a parser can check (lab/tools/scenario-lint.py): a claim that cannot

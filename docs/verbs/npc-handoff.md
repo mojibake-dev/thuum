@@ -40,8 +40,8 @@ playtest-m3-32.md:66-80, :110-119; numidium's live reads of 2026-10-23
 | consequence | seen in | disposition |
 | --- | --- | --- |
 | the new host's engine takes a cell's actors over at the grant: b-npc-puppet step 29 on 6139dc60 (yaml :82-91, run 123325) promotes every resident within the 8 s wait; the restart read (yaml :92-98, run 112222) puts the promote within about 2 s of the grant's line on two machines' clocks (Status); the old host demotes at the form's loss (npc-puppet.md:1202-1224) | b-npc-puppet | native on the new host after the imposition; the position written at the promote is the client's own record today (puppetService.ts:101-117) and the server's keyframe from here (decision c; Impose) |
-| the package resumed from where the actor stands and the hour (TES3MP: the new host "continues from wherever its own copy was lerped to", package progress restarting, tes3mp.md:183-186) | trace r-npc-packages | native on the new host: EvaluatePackage at the promote (PuppetApi.cpp Promote's since 2026-10-27; the Papyrus shape re-ai-puppet.md:335-347); H1 HYPOTHESIS until c-riverwood's claim 2 (lab/scenarios/c-riverwood.yaml, drafted 2026-10-29, unrun): after c1's relaunch and c2's grant within 12 s, Alvor 0x13482 and Gerdur 0x13489 run on c2 each within 128 units of c1's last read, no reset to the placement |
-| the furniture and sit state at a handoff (Alvor between the forge's markers holds a furniture reference, docs/LOG.md's train-33 entries; a puppet's graph refused IdleChairExitStart, fork d0d53bf5) | trace, code | imposed as an observation: the keyframe carries the occupied furniture (Actor::GetOccupiedFurniture, Actor.h:556; sitSleepState, ActorState.h:112) so the lab reads whether the engine re-enters it; nothing forces a sit, the package does; H2 HYPOTHESIS until x-handoff-sit, once npc_state carries sitState: c1 hosts Riverwood at 9.0 with Alvor 0x13482 at the forge, c1 to the lab spawn past the grace, c2 hosts; c2.npc_state(0x13482).sitState read at the promote and 15 s after (re-entered or standing, recorded, not asserted) |
+| the package resumed from where the actor stands and the hour (TES3MP: the new host "continues from wherever its own copy was lerped to", package progress restarting, tes3mp.md:183-186) | trace r-npc-packages | native on the new host: EvaluatePackage at the promote (PuppetApi.cpp Promote's since 2026-10-27; the Papyrus shape re-ai-puppet.md:335-347); H1 CONFIRMED by c-riverwood's claim 2 (20261101-045525, green: after c1's relaunch and c2's grant, Alvor 0x13482 and Gerdur 0x13489 live on c2, Alvor at c1's last read to the unit and Gerdur 12 units from her record at the pass, no reset to the placement; the claim's bounds since 2026-10-31 are 256 for the standing Alvor and the record at the pass for the walker), and in play: playtest 43's item 1, Hod walking home after a D9 pass on rotfern's game (VERIFIED IN PLAY, Eli: "HOD WORKED") |
+| the furniture and sit state at a handoff (Alvor between the forge's markers holds a furniture reference, docs/LOG.md's train-33 entries; a puppet's graph refused IdleChairExitStart, fork d0d53bf5) | trace, code | imposed as an observation: the keyframe carries the occupied furniture (Actor::GetOccupiedFurniture, Actor.h:556; sitSleepState, ActorState.h:112) so the lab reads whether the engine re-enters it; nothing forces a sit, the package does; H2 a named limit (2026-11-11, M3's paper close): whether the new host's engine re-enters the furniture or stands is unread, since x-handoff-sit was never written (npc_state carries no sitState; the driver reads getSitState for the player alone); either outcome is the package's own and nothing in the verb depends on it; the read, if a seated handoff ever matters, stays x-handoff-sit's: c1 hosts Riverwood at 9.0 with Alvor 0x13482 at the forge, c1 to the lab spawn past the grace, c2 hosts; c2.npc_state(0x13482).sitState read at the promote and 15 s after (re-entered or standing, recorded, not asserted) |
 | the combat target across a handoff (TES3MP transfers none; combat by sight existed only on the old host, tes3mp.md:187-191; ADR-035 point 7's StartCombat on the recorded target) | ADR, prior art | imposed when D8 lands: Papyrus StartCombat with npc-stream's recorded target at the promote (skyrimPlatform.ts:2206); H3 a known limit until then: the combat target is not imposed at a promote (D8's keyframe unbuilt; npc-stream.md:518's limit): the record carries none, a handoff drops the fight and the new host's engine re-acquires it by its own senses, TES3MP's shape (tes3mp.md:187-191); c-dungeon-enemies as drafted has no handoff leg, so the re-acquisition stays unread; every number stays npc-fate's |
 | the old host's divergence: the engine keeps a left cell's schedules running in low process (Hod moved while the player was in the inn, readings-17:51-59), and a persistent actor keeps walking on the old host's screen after its reports are refused (the pause then catch-up of playtest-m3-32.md:70-74); its late reports on the unreliable channel (tes3mp.md:194-196; te-npcs.md:70-73) | trace r-cell-leave, playtest 32 | suppressed on the server since cell-host (a non-host's report dropped, ActionListener.cpp:87-99; cells::accepts for npc-stream's state message); the old host's puppets follow the record once the word flips; the gap at its return is measured (x-handoff-return; H7); cell-host's H8 carried here |
 | an NPC walking into a cell nobody hosts while its host's engine still loads it: 105a35, a LvlAmbientCreatures placement, sighted into 9752 by c1, walked home into 9771, which both seats load and neither hosts; 1,254 of c1's moves refused ("hosts neither"); demoted at the form's loss while c1's engine still ran it; its record frozen at its last accepted sample (docs/LOG.md:2248) | playtest 31 | imposed: decision (a), the host follows its actor and the record keeps moving; the freeze (ADR-035 point 8) applies to a cell no game has loaded |
@@ -64,6 +64,8 @@ The parity scenario (ADR-031) is c-riverwood's handoff leg (cell-host.md:
 | two seats walking the west column's boundary at a person's rhythm for two minutes (the flicker) | x-handoff-flicker, b-npc-handoff | |
 | an actor across each boundary: into nobody's cell the host loads (105a35's shape), into the same host's cell, into the other host's cell, through a door into an unloaded interior and out of one by schedule; the boundary wanderer back and forth under D22's margin and the settle | x-handoff-ring; b-npc-handoff (the predator, the night); x-handoff-door; x-handoff-cross | |
 | after a login (a late joiner's CreateActor is its keyframe: transform, animation, equipment, the word; PartOne.cpp:957-1060) and after a restart (every cell unhosted; the split by (f); the records indoors by (g); the first grant's keyframe from the record) | b-npc-handoff | |
+
+Two seats: b-npc-handoff-cross (D9's pass between two live hosts: each seat reads Sigrid on its own game, one live and one a puppet at the end, c1.npc_state and c2.npc_state; each seat walks its own cell), with b-npc-handoff-door, b-npc-handoff-restart and b-npc-handoff-night for the first slice's door, restart and night passes.
 
 ## Authority
 
@@ -261,7 +263,8 @@ each imposition's target is explicit.
   interior without a crash. H7: the returning old host's puppets stand at
   the record within one report. H9: a resident's sighting after a reconnect
   reaches the server and places him outside, so one game puppets him. H1
-  HYPOTHESIS until c-riverwood's claim 2; H2 HYPOTHESIS until x-handoff-sit;
+  CONFIRMED by c-riverwood's claim 2 (20261101-045525); H2 a named limit
+  (unread, x-handoff-sit never written; the Inventory's row);
   H3 a known limit (the target not imposed); H5 CONFIRMED (025527, 054447);
   H7 CONFIRMED: the demoted old host's puppet, bound at its re-entry, within
   150 units of the live Alvor (b-npc-handoff-door leg 4 :84-95, 054447,
@@ -630,17 +633,32 @@ and accepted (r-cell-leave 083700).
   rollback 073308, as in the 11-09 layer sweep (020750 red, 021320 green):
   ADR-027's red, red, cold green. The same sweep read b-ghostwalk-look the
   same way (ghostwalk.md's Tests), so a relaunched warm clone on this build
-  may carry something the cold rollback clears (HYPOTHESIS, unread); until
-  that read, a red here on a warm clone waits for its cold rerun.
+  might carry something the cold rollback clears; that reading is REFUTED by
+  the matched pair below (cold 20261111-174045 red, warm 20261111-174935
+  green: not a carried state).
   Read the same day (artifacts only): not a carried state. The generic
   "follows ... within the pass margin" line fires warm for other residents;
   Sigrid 0x13483 reads cell 0x9731 at all eight sampled npc-states in all
-  three runs and crosses once, late, in the green alone. HYPOTHESIS, a timing
-  budget: the cold rollback takes 84 to 93 s against the relaunch's 32 s,
-  and the server ticks from its container's start, so a cold run gives her
-  about 60 s more (about 20 game minutes) before the fixed window counts.
-  The read that settles it: an npc-state of 0x13483 just before and after
-  the scenario's server restart on one matched warm and cold pair.
+  three runs and crosses once, late, in the green alone. The reading then, a
+  timing budget with a cold run's head start (the cold rollback's 84 to 93 s
+  against the relaunch's 32 s, the server ticking from its container's
+  start, about 60 s more before the fixed window counts), is REFUTED as a
+  mechanism by the same pair (the restart lays the hour again, below); the
+  read it named, a matched warm and cold pair with 0x13483's npc-state
+  around the restart, ran as x-handoff-cross-timing.
+  The pair, read 2026-11-11 (x-handoff-cross-timing e32a64c0): cold
+  20261111-174045 (both seats rolled back) RED only at its Alvor claim
+  (no "follows 13482 into cell 9712" nor "now simulates 13482 in cell 9712"),
+  every one of its 66 snapshots in; warm 174935 (both relaunched) GREEN. The
+  sweep's pattern inverted (there warm red, cold green), so the reds are the
+  NPCs' own run-to-run timing against a fixed window, not a warm clone's
+  carried state (CONFIRMED by the pair; the 60 s head-start mechanism was
+  already contradicted by the drafter's read). The restart rewinds the clock
+  by design of the scenario: its server block's gameHour 7.9 is laid again at
+  the restart (174045's p0 at hour 8.684, p1 at 7.944, then running on), so
+  every run's window starts at the same game hour. The fix is the widened
+  window (b-npc-handoff-cross, main d09bc3a4: the follow claim waits up to
+  60 s more, unchanged).
 - Assertions that would fail if the verb silently regressed: a refusal for
   a followed actor; a frozen record while its host's track moves; an epoch
   step over the bound on the west column; no keyframe line before a grant;
@@ -653,7 +671,9 @@ and accepted (r-cell-leave 083700).
 Of the probes named here, none has been written by path or run as of 2026-10-29 (the pass's inventory): x-handoff-sit
 waits for npc_state's sitState in lab-api's grammar (the driver reads getSitState for the player alone); x-handoff-ring,
 x-handoff-return and x-handoff-flicker belong to D7's knobs and D8's ActorHandoff, unbuilt, and c-riverwood's claim 2
-carries H1 meanwhile.
+carried H1, green since (20261101-045525). Since 2026-11-11 (M3's paper close) the doc holds no open tag: H2 and the
+promote's ordering race are named limits, so nothing below is owed for the first slice; x-handoff-sit is H2's read if a
+seated handoff ever matters, and D8's slice brings its own.
 
 - Frida script: lab/frida/npc-handoff.js (npc-puppet.js's shape and the
   2026-10-21 pitfalls), on the new host's seat at a promote: entries of
@@ -698,13 +718,13 @@ stands in an interior this game has not loaded (Cell.isAttached false) is HIDDEN
 reference, and reconcile never releases a hidden actor to its schedule; when its record is back in a loaded cell (it came out, or this
 game walked in) it is shown (Enable, moved to the record) and reconciled (the house granted makes it live, the word makes it a
 puppet). The host's own reference is never hidden. Unhosted cells freeze; a seat that does not load a cell sees none of its actors:
-the design law's reading of D6 for the viewer. HYPOTHESIS, open until the hide's own probe x-handoff-hide (a draft in lab/.cache/probes, v2 6f7d2025) runs on the hide's branch m4-turbo2-settle a020511c when that branch stages (the hide is not in the system-1 merge m3-system1): the hide fires on the viewer once the
-record stands in a cell it has not loaded, the D11 release never runs on a hidden actor (its copy a puppet 25 s on, no "released ...
-no 3D here" line), and the show's enable-and-move lands within 15 s of the attach (its v2 claims these after ADR-064's fresh review of
-2026-11-03). "Disable holds a puppet-flagged actor" (the server's own snippet did not hold Hilde: that snippet ran while the
-Teleport's move was in flight, and the release re-enabled nothing) stays HYPOTHESIS past that run: this frame makes no ghost (Alvor's
-package keeps him home on c2's engine too) and npc-state has no enabled field, so a ghost premise (Hilde into 1cb84 under a host,
-playtest 40's witness) or an npc-state enabled field is its read; the probe records c2's console getdisabled meanwhile. The same
+the design law's reading of D6 for the viewer. History (2026-11-11, M3's paper close): the hide never shipped. m3-system1's
+re-cut dropped its formView caller (66dcb8fc) and round five removed the inert rest (4ccb4259), so its probe x-handoff-hide (v2
+6f7d2025: the hide on the viewer, no D11 release of a hidden actor, the show within 15 s of the attach) never ran; the stray copy
+is ADR-067 decision 5's move instead, the server telling the seat to move its own copy to the record (x-stray-copy-moved GREEN
+20261103-214134, playtest 43's item 2). The open "Disable holds a puppet-flagged actor" went with it: the server's once-a-minute
+Disable snippet never held a copy because it never reached one ("SpSnippet ObjectReference Disable failed Error: Unable to find
+form with id 0" six times in playtest 42's c2 tee, LOG 13:46 PST 2026-11-03), and the move replaced it. The same
 head carries the furniture hold (movementApply.ts: a puppet in furniture far from its record is told IdleFurnitureExit and, still
 held, placed; the settle loop of f4a39's coffin and ff000d9d's bed in playtest 40).
 
@@ -782,7 +802,9 @@ window. The parent run of v7's leg A (20261103-055217, union-srv-3 b926a7d4, num
 with NO door walk, and the bounce at the house seat's GRANT instead. 05:53:42.417 c1 granted 133c7 at epoch 2; 05:53:42.597 "ff000000
 passes 1348a into cell 9732, which another game hosts (D9)", c1's FIRST report as the new host putting Hod outdoors; 05:53:42.633
 "ff000001 passes 1348a into cell 133c7 (D9)", c2's indoor copy passing him back; then only his speech and state lines for 400 s.
-Reading (HYPOTHESIS): the promote at the grant placed c1's copy at the LAST RELAYED SAMPLE (c2's follow of 05:53:05.698 during its
+Reading (REFUTED below by the instrumented runs 20261103-065955 and 20261103-070357: the stale engine copy is reported before the
+gate's move lands, non-owning-seat.md P8; the last relayed sample, P2a, is not the cause): the promote at the grant placed c1's
+copy at the LAST RELAYED SAMPLE (c2's follow of 05:53:05.698 during its
 visit, when he stepped out and back in: "follows 1348a into cell 9713 (D6)", "may not move 1348a to cell 133c7", "moves 1348a into
 cell 133c7, which it hosts"), not at the record (indoors since 05:53:06.767): the stale placement's mechanism at a grant rather than
 a D9 pass. The swap probe v5 (20261103-060106, the roles swapped: c1 the visit, c2 the house's seat) showed the same at its grant,
@@ -861,7 +883,8 @@ claim the door each leg tests; v8 (c999ebb2) parks leg A's street seat at lab-sp
 alone (a restart keeps the seats' places), bounds the hour above at each premise's end (a late clock would put the exit before the
 baselines), starts the clock at 6.0 and names the mutation's proof: the counts block at 5 s going red. Leg A, the house door at 19:00 by his unconditioned inn package (v10, after 055217 showed no door walk for 400 s to about 9.3 h
 and non-owning-seat.md P7 read his sawmill packages as CONDITIONED on the mill script's variable, with P4's no-package-after-a-
-double-promote the other reading, both HYPOTHESIS; the clock starts at 17.0: the seats come online at 17.19 after a 35 s relaunch
+double-promote the other reading, both open in that doc, P7's cross-seat effect and P4, cited here rather than re-derived (ADR-064
+decision 2), and the premise rests on the unconditioned inn package so neither is read by it; the clock starts at 17.0: the seats come online at 17.19 after a 35 s relaunch
 or 17.69 after a 124 s rollback, the interior seat's premise ends 17.56 to 18.06, the exit comes 169 to 259 s after the baselines
 and the 400 s until ends 141 to 231 s past 19:00, numidium's fit of four runs; c2 the street's seat, c1 the house's, 052100's
 orientation): his record in 0x133c7; the street's seat teleports to the house door's landing (-506, -177, 0), is granted the house
@@ -886,13 +909,18 @@ him out by 0x13419 (the door 13419 line, "passes 1348a into cell 133c6" as the b
 premise's end and past 21.9 at the exit). The exterior cell claim of v5 and v6 is dropped (the record outdoors and
 the 150-unit bound carry it). The by-path probe x-handoff-door-hosts-swap v17 (v19's leg A under the seat substitution, sha1 e9bf42aa) plays leg A with the roles swapped on the parent (a run
 stops at its first red, so the scenario's second leg never reaches the parent); a third run at handoffPassSettleMs 0 reads the
-reliable placement alone. HYPOTHESIS until those runs:
-the mechanism above (every stamp fits it), and that the street seat's copy stands indoors at the promote (the precondition,
-claimed). What the two halves carry (20:13 PST 2026-11-02, the settle branch's fresh review): the playtest's first bounce came about 8 s after
+reliable placement alone. Those runs read it, CONFIRMED: the mechanism above by non-owning-seat.md P3 (20261103-052100, 055217,
+060106) and P8 (20261103-065955), and the stale copy at the promote, claimed as the hold's ask line naming the bed's cell, held in
+door v22's leg A (20261103-134832), with the cure's swap orientation in swap v20 (20261103-135554); the settle-0 run
+(20261103-084329) decided nothing, no pass in its 400 s. What the two halves carry (20:13 PST 2026-11-02, the settle branch's
+fresh review; half (b), the window, never merged: m3-system1 carries half (a) alone, no window, no Stale verdict and no
+handoffPassSettleMs, LOG 2026-11-03, and the hold of m3-system1-r2 places a promoted copy at the record instead): the playtest's first bounce came about 8 s after
 the promote, outside any 1 s window, so the reliable copy of the passing report ahead of the word carries the playtest's case
-alone; the settle window catches the in-flight stale sample and the race the ordering cannot close (remoteServer.ts overwrites
+alone; the settle window would catch the in-flight stale sample and the race the ordering cannot close (remoteServer.ts overwrites
 the model's movement with any movement, so an older unreliable sample landing in the word's frame still gives the promote the
-pre-door point; rare on a LAN, HYPOTHESIS). The window is the server setting handoffPassSettleMs (0 off, the mutation run's switch;
+pre-door point). That race is a named limit since 2026-11-11 (M3's paper close): unread and its rate unmeasured, rare on a LAN by
+this reasoning and unseen in b-npc-handoff-door-hosts, whose claim of no pass back into the house across the grant is its witness
+(green last 20261111-074257); a netem reorder on the house seat's link is its read if a remote seat ever plays. The window was the server setting handoffPassSettleMs (0 off, the mutation run's switch;
 unset PASS_SETTLE_MS 1 s); the pass row remembers the cell the actor came from, so only a report back into it is stale and a move
 onward is judged as any other; the table prunes passes at the tick and the Stale line is one per actor per 10 s. The tenure row
 (ACTOR_TENURE_MS, handoffActorTenureMs) is retired in the settle's favour: one damper, one name. If a fixed window proves blunt the
@@ -914,7 +942,7 @@ first, then its green runs on this head (numidium's order of the night).
 - [x] native hook + T1 (none: no new Address Library id; ticked 17:02 PDT 2026-10-29 by the pass under VERB.md's none rule)
 - [x] TS handler, first slice (formView's door move behind npcHandoff, fork m3-train-40 45713556; HandoffService with keyframes is D8's)
 - [x] T2 green, first slice (train-40's stage 661bc67a: 33 sessions identical, 16:03 PDT; the follow and the cold start send nothing under T2's NPC-less servers, the message layer unchanged)
-- [ ] T3 scenario green, no HYPOTHESIS tags (the template's wording restored and the box unticked 15:52 PDT 2026-10-29 by the pass's inventory: 4 tags with a named read and 9 without, D8 ActorHandoff unbuilt; the earlier tick read: T3 scenario green (09:55 PDT: gate-m3-train-43 155001 on 417cb746, all sixteen; b-npc-handoff-door 161002 four legs, b-npc-handoff-restart 161310, b-npc-handoff-night 161723 after the D11 fixes; T2 green; merge-ready by citation at Eli's D6 and D12) (committed: b-npc-handoff-door, b-npc-handoff-restart, b-npc-handoff-night on main 23885e70, the green probes promoted unchanged; they run at 40's merge gate; the probes: x-handoff-restart GREEN 222408, x-handoff-night GREEN 230913, x-handoff-door v5 GREEN 041126 on d698fe38 (lab-api f90320ff; D6 held in three runs, 025527 by formView's rule, 032354 and 041126 by the server's Teleport; the third leg lands in the record's cell); H5 held; D11 FINDING and fix (03:14 PDT): b-npc-handoff-night red on 43's information gate (092208): at a reconnect the view's loss path demoted every game-file actor it knew, and the native demote cleared the AI of an actor with no 3D, which no engine simulates, so a resident whose record sat in an unhosted house never ran his morning schedule, was never sighted, and the record never moved (13482, 13483 and 1348b, all live on c1 before; the probe's two greens had Alvor never live there). Fixed on m3-train-40 fc7b2718 (forward 41 dd48687b, 42 1b2c67b5, 43 dd76e98b): a lost actor with no 3D keeps its AI and its block, the engine's low-process schedule moves it, the sighting host's roster moves the record, and the server's word rebinds the copy when its cell loads; D11's wording "every engine runs the actor by schedule" is true again for the seat that was live for him. The far seat's unloaded copy wanders by schedule until it is rebound: a snap at re-entry, the engine's own behaviour for unloaded actors. GATE 9 of 9 on d698fe38 (run set 20261024-044200-gate-m3-train-40, 22:12 PDT) and T2 green: the merge of 39 and 40 waits on Eli's D12 and D6 alone; v6 GREEN 054447 on 41's stage (all four legs: the viewer's entry after the grant finds its puppet a unit from the host's live Alvor, and this run had no gap at all; 041126's 500 units were the unloaded-house case, closed once the viewer loads the cell; 22:51 PDT); v6 was written as the viewer's entry after the grant (its puppet, unsubscribed outside, sits where the Teleport put it until the attach binds it: 21:16 PDT); b-npc-handoff itself after the grammar; the gate set 20261023-223340-gate-m3-train-40 GREEN 9/9 stands for the merge by GATE_SET, which waits for Eli's D6 and D12))
+- [x] T3 scenario green, no HYPOTHESIS tags, first slice (ticked 2026-11-11 by M3's paper close: the first slice's scenarios green on the m4-scripts-5-second build, b-npc-handoff-door 20261111-073952, b-npc-handoff-restart 20261111-075913 and b-npc-handoff-night 20261111-075518, with D9's b-npc-handoff-door-hosts 20261111-074257 and b-npc-handoff-cross 20261111-073308, its cold rerun after two warm reds, the window widened since at main d09bc3a4; the twelve tags open that day settled: three CONFIRMED (H1 in the Inventory and in Impose by c-riverwood's claim 2, 20261101-045525; the door bounce's mechanism by 20261103-065955 and 20261103-134832), three REFUTED (the warm clone's carried state and the cold head start by 20261111-174045 and 20261111-174935; the last relayed sample by 20261103-065955), three named limits (H2 in the Inventory and in Impose, x-handoff-sit unwritten; the promote's ordering race), three deleted as history (the hide's two, which never shipped; P4 and P7, cited to docs/engine/non-owning-seat.md where they stay open); D8's ActorHandoff, the second slice, reopens this box with its own tags; the earlier state: the template's wording restored and the box unticked 15:52 PDT 2026-10-29 by the pass's inventory: 4 tags with a named read and 9 without, D8 ActorHandoff unbuilt; the earlier tick read: T3 scenario green (09:55 PDT: gate-m3-train-43 155001 on 417cb746, all sixteen; b-npc-handoff-door 161002 four legs, b-npc-handoff-restart 161310, b-npc-handoff-night 161723 after the D11 fixes; T2 green; merge-ready by citation at Eli's D6 and D12) (committed: b-npc-handoff-door, b-npc-handoff-restart, b-npc-handoff-night on main 23885e70, the green probes promoted unchanged; they run at 40's merge gate; the probes: x-handoff-restart GREEN 222408, x-handoff-night GREEN 230913, x-handoff-door v5 GREEN 041126 on d698fe38 (lab-api f90320ff; D6 held in three runs, 025527 by formView's rule, 032354 and 041126 by the server's Teleport; the third leg lands in the record's cell); H5 held; D11 FINDING and fix (03:14 PDT): b-npc-handoff-night red on 43's information gate (092208): at a reconnect the view's loss path demoted every game-file actor it knew, and the native demote cleared the AI of an actor with no 3D, which no engine simulates, so a resident whose record sat in an unhosted house never ran his morning schedule, was never sighted, and the record never moved (13482, 13483 and 1348b, all live on c1 before; the probe's two greens had Alvor never live there). Fixed on m3-train-40 fc7b2718 (forward 41 dd48687b, 42 1b2c67b5, 43 dd76e98b): a lost actor with no 3D keeps its AI and its block, the engine's low-process schedule moves it, the sighting host's roster moves the record, and the server's word rebinds the copy when its cell loads; D11's wording "every engine runs the actor by schedule" is true again for the seat that was live for him. The far seat's unloaded copy wanders by schedule until it is rebound: a snap at re-entry, the engine's own behaviour for unloaded actors. GATE 9 of 9 on d698fe38 (run set 20261024-044200-gate-m3-train-40, 22:12 PDT) and T2 green: the merge of 39 and 40 waits on Eli's D12 and D6 alone; v6 GREEN 054447 on 41's stage (all four legs: the viewer's entry after the grant finds its puppet a unit from the host's live Alvor, and this run had no gap at all; 041126's 500 units were the unloaded-house case, closed once the viewer loads the cell; 22:51 PDT); v6 was written as the viewer's entry after the grant (its puppet, unsubscribed outside, sits where the Teleport put it until the attach binds it: 21:16 PDT); b-npc-handoff itself after the grammar; the gate set 20261023-223340-gate-m3-train-40 GREEN 9/9 stands for the merge by GATE_SET, which waits for Eli's D6 and D12))
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
@@ -963,7 +991,8 @@ named in the memo under D36.
 4. Does the validator reject the obvious forgery (wrong owner, out of range,
    too frequent)?
 5. Does the restart scenario exist and pass?
-6. Are the HYPOTHESIS tags gone, and were they cleared by evidence?
+6. Are the open engine-claim tags gone, and were they cleared by evidence? (2026-11-11, the first slice: yes, by the runs
+   the Status box's T3 line cites.)
 7. Is the suppression reversible on host handoff?
 8. Did the ledger change if a native did?
 9. Does the Inventory list every consequence of the reference trace and the

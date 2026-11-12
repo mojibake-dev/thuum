@@ -247,6 +247,74 @@ positions' age.
   061001 :222-233), a race between the two seats' logins; both red logins
   were served an empty spell list (060821 c1-console.log :843, 061001 :849),
   so the Eye Fix suspect is unlikely. x-ghostwalk-warm-read reads it.
+  x-ghostwalk-warm-read v1 (4b6b7eaf) GREEN, 20261111-172354, both seats
+  relaunched: the return ran on all three casts, the second after a mid-run
+  relaunch of c1 (bLandings 2, bEyeAdded 2, bSeam 1), so a warm relaunch is
+  not the cause (CONFIRMED). Its start armed no acting scope (aActing0 0,
+  aArmed 0), while both reds' starts ran c2's Companions radiants' Setup in
+  c1's game with Game.GetPlayer swapped for c2's figure (CR02 25185, CR08
+  25251, CR06 c18e1, CR05 2522f; 060821 c1.log :222-245, 061001 :222-230):
+  the loss tracks that start race, three greens without it and two reds with
+  it (HYPOTHESIS: how a scope armed about 25 s before the cast, its arms of
+  10 s, reaches Ghostwalk's own stack is unread). Corrected the same day
+  (x-ghostwalk-race-read's drafter): both reds cast from a cell c1 hosted
+  (060821 c1.log :194, 061001 :192); the "does not host" line (:256) is a
+  trigger on the walk into bbd2, a cell c2 hosted, and that same split was
+  green with no scope in 172354's cast A, so hosting alone is not the cause.
+  The reds' scope also came from a start race the Story Manager allows only
+  at a run's start (c2's stage-1 relay meeting c1's own start of the same
+  quest, D-Q5 A keeping those quests' start words per seat). The settling
+  read arms the scope by x-acting-player's lever instead: c2 sets A Lovely
+  Letter's stage (setstage 74a83 210, then 310), c1 runs its own fragment
+  inside c2's scope with Game.GetPlayer answered, and c1 casts Ghostwalk
+  inside the scope's window and about 24 s after it, in a 2x2 against
+  hosting (x-ghostwalk-race-read, lab/.cache/drafts/reads, 544fb05c); a read
+  of 51's build, run on the idle lab.
+  x-ghostwalk-race-read 544fb05c GREEN, 20261111-182610 (both seats
+  relaunched): all six returns ran. The seam's AddSpell of the Eye Fix from
+  OnEffectFinish counted once more after every cast (1 to 6), and c1's y came
+  back to -299.95 each time. That held with the scope acting in B and D
+  (Game.GetPlayer answered c2's figure in A Lovely Letter's Fragment_10 and
+  Fragment_22) and with c2 hosting the cast cell in C and D. So a
+  stage-relayed scope does not stop the return, inside its window or after,
+  and neither does hosting (CONFIRMED). What the lever did not reproduce is
+  the reds' arm. Theirs was the implicit START arm (setActingPlayer(<quest>,
+  -1, ...), "requested and armed"): c2's stage relay started a quest c1 was
+  not running, racing c1's own Story Manager start of it, while this run's
+  arms were stage arms on a quest both seats ran (bArmed and dArmed 0). The
+  next read, if wanted, arms that: c2 sets stage 1 of a Companions radiant c1
+  is not running, then c1 casts. The risk for play is a run start where both
+  seats log in at once, so playtest 51's one-at-a-time logins are unlikely to
+  meet it (HYPOTHESIS). Corrected the same day (numidium): 51's logins were not
+  one at a time; ready() relaunched both seats at once (playtest_setup.py
+  :610-611 before main 7721a6e6) and so did setup's restore (playtest-world.sh
+  :58-60), the first login on the restored world. Since main 7721a6e6
+  (numidium's playtest-stagger, Eli's word below) both are one at a time:
+  relaunch_seats() stops both games, then starts c1's, then c2's (c2 not
+  started if c1's start fails), and the restore keeps that shape around its
+  swap; live at 21:19Z, c1 took fresh grants on all nine cells and c2 logged
+  in as a guest. Not staggered yet: playtest-restart's reconnects (the seats
+  reconnect by themselves) and turbo-client.sh and turbo-back.sh, after 51.
+  x-ghostwalk-race-read v2.1 (b20dc5ac, fresh review READY; R the run's own
+  start, the only moment the radiants can race, since the world's journal
+  folds a recorded stage, ActionListener.cpp :3755 and :3781; S c1 relaunched
+  first, then c2 once c1 is online): three counted tries, 20261111-200503,
+  201347 and 202253, each behind a throwaway smoke run, both seats relaunched
+  in each. R0 red in all three: no stack rooted at the four radiants joined
+  the other seat's scope in either direction (rJoinsC1 and rJoinsC2 0 each
+  try), so the start race did not happen and the read is inconclusive on it;
+  why these starts never raced where 060821, 061001, 072204, 072734, 172354
+  and 182610's first game did is unread (HYPOTHESIS: the logins' spacing, or
+  a recorded stage). S held in tries 1 and 3 (S1 to S3 green: staggered
+  relaunches keep the return); try 2's S read nothing, every S cast swallowed
+  by a MessageBoxMenu open on c1's relaunched game (step 177's dump-state:
+  menus Cursor Menu, HUD Menu, MessageBoxMenu; s1Menu to s3Menu true, the casts'
+  count stayed 3), a premise red, its box unnamed in the logs. Eli's word
+  (in session, about 20:3xZ): 51's logins are staggered at setup's restore
+  and at ready(), S's shape (numidium's tooling branch playtest-stagger);
+  rung 5's start-arm fix, so another seat's stage relay cannot pull a seat's
+  own Story Manager start into its scope, builds right after 51 (no scripting
+  build before 51).
   Why is unread (HYPOTHESIS): rung 5's effect-event and acting-scope work
   (fork 9db243a0) is one suspect, the server record carrying the earlier
   run's Eye Fix ability 1a0cb7e1 into the warm run is another. The read that
