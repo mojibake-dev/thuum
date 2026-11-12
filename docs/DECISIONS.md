@@ -5223,6 +5223,12 @@ Amended (Eli about 20:3xZ 2026-11-11, asked in session on rung 1's build plan, l
   as committed on canon's build (the same-build control) and a read of the leftover (drawn, solid, freed, can a player take
   it); then a fix of the drop service if a player can see or touch it, or a restated count if it is an invisible leaked
   reference, which comes back to Eli. b-prop-push stays pending until then.
+  Decided (Eli in session about 23:5xZ 2026-11-11, "Fix the drop", recorded 00:00Z 11-12): the leftover read
+  (x-drop-leftover v1.1 20261111-220150) found it invisible, not solid, not targetable or takeable, unseen by the other seat
+  and freed when its player leaves the cell (HYPOTHESIS: the cell's detach); the count is not restated. The drop service frees
+  the engine's own copy at once even under a running menu (Disable before Delete, HYPOTHESIS until a read shows the reference
+  gone), so step 27 holds as written; a client change with a Windows build, in physics rung 1's client commit beside
+  b-prop-push leaving pending, after playtest 51.
 
 Amends: ADR-064 decision 7 (dated note under it), ADR-063's props note (accepted under it), ADR-058's slices (slice two kept as a
 derived class; slice three is rungs 5 and 6), ADR-067 decision 4 (its final sample is the asleep sample; the built ChangeForm
