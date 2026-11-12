@@ -628,11 +628,15 @@ class ArtifactFailures(RunTests):
         tables = self.services.tables
         tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
         pve = self.services.control._b
+        # the log is copied on the seat and read back in ranges (_fetch_client_file), so the agent's reads fail there,
+        # whole and ranged
+        pve.files[self.settings.client_driver_log] = "platform log\n"
 
-        def boom(guest, path):
+        def boom(guest, path, *args):
             raise RuntimeError("500 Internal Server Error: QEMU guest agent is not running")
 
         pve.file_read = boom
+        pve.file_read_range = boom
         run_id, body = self._run(SOLO_WITH_LOG)
         self.assertEqual(body["verdict"], "green", body)
         self.assertTrue(any("c1.log" in n and "QEMU guest agent" in n for n in body["notes"]), body["notes"])
