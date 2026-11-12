@@ -1305,9 +1305,12 @@ class Runner:
                 byte_notes.append("0 read")
                 continue
             except (ProxmoxError, ValueError) as e:
-                if "guest agent is not running" in str(e):
-                    rec.agents_down.setdefault(client, (str(e), False))  # the seat's other log reads skip it, as a fetch's
-                # each failure says how it came, three tries, a lost answer or a short read
+                # a dead agent met here marks nothing: Proxmox says "guest agent is not running" for any guest-ping not
+                # answered in 3 s, checked before every exec (qemu-server's QemuServer/Agent.pm at ec268ede5b, 91-99 and
+                # 123-129), so a busy agent reads as a dead one, and log-count's tries, 1 s apart, would mark a seat on
+                # a busy spell and starve every later count of its run; a log fetch's, 10 s apart, still mark it, and
+                # the read above honours that (the check of 508697c3, SHOULD). Each failure says how it came: three
+                # tries, a lost answer or a short read
                 return True, f"log-count: {client}'s {which} unread ({e}); no count kept"
             texts.append(data.decode("utf-8", errors="replace"))
             byte_notes.append(f"{len(data)} read of {seat_m} copied of {seat_n} on the seat")
