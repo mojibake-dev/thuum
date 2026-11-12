@@ -65,6 +65,8 @@ The parity scenario (ADR-031) is c-riverwood's handoff leg (cell-host.md:
 | an actor across each boundary: into nobody's cell the host loads (105a35's shape), into the same host's cell, into the other host's cell, through a door into an unloaded interior and out of one by schedule; the boundary wanderer back and forth under D22's margin and the settle | x-handoff-ring; b-npc-handoff (the predator, the night); x-handoff-door; x-handoff-cross | |
 | after a login (a late joiner's CreateActor is its keyframe: transform, animation, equipment, the word; PartOne.cpp:957-1060) and after a restart (every cell unhosted; the split by (f); the records indoors by (g); the first grant's keyframe from the record) | b-npc-handoff | |
 
+Two seats: b-npc-handoff-cross (D9's pass between two live hosts: each seat reads Sigrid on its own game, one live and one a puppet at the end, c1.npc_state and c2.npc_state; each seat walks its own cell), with b-npc-handoff-door, b-npc-handoff-restart and b-npc-handoff-night for the first slice's door, restart and night passes.
+
 ## Authority
 
 Rung: R0 for who simulates an actor (the cell's host, a follow, a per-actor
