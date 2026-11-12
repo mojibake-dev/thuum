@@ -554,7 +554,13 @@ takes radians (CommonLibSSE-NG TESObjectREFR::MoveTo_Impl): `rot: [0, 0,
 scenario names headings in degrees (a-melee-cone turns c1 to 30, 135 and
 180).
 `screenshot` is a guest exec on a managed client (request-screenshot is
-the in-game fallback). Two lab-api endpoints replace the snapshot round trips to thuum-mundus
+the in-game fallback): the helper writes the PNG and a base64 sidecar beside
+it, and the sidecar comes back as a client log does, through the agent's
+ranged file-read, 512 KiB a call, decoded once joined and removed once read.
+Read whole, a file past about 1 MiB is unreliable on a busy seat (a 1.46 MB
+console copy timed out three times in a row on c1, where 512 KiB ranges took
+it whole in 4 s; 20261111-195437 lost three shots at 23 s each). A shot not
+read is the step's note, never a fault. Two lab-api endpoints replace the snapshot round trips to thuum-mundus
 (2026-10-05, their recipe and guardrails): `POST /lab/clients/<c>/snapshot
 {name}` takes a cold stacked `clean-m1-<x>` (quiesce, a clean ACPI shutdown
 whose task log holds no timeout or forced stop, a snapshot without RAM,
@@ -617,8 +623,10 @@ five-second frames could not show a stride.
   then a PNG write); each frame's offset is in done.json, since a write can
   push a frame late.
 - After the burst the frames come back as NNN-<client>-<k>.png beside
-  NNN-<client>-burst.json, the offsets. As with a plain shot, a burst never
-  fails a run: a frame not filmed or not read is the step's note.
+  NNN-<client>-burst.json, the offsets, each frame's sidecar in ranges as a
+  plain shot's is (its length from one listing of the burst's folder) and
+  removed once read. As with a plain shot, a burst never fails a run: a frame
+  not filmed or not read is the step's note.
 Assertions read `server.actor(c)` (the record, and
 `appearanceAttempts`, `lastAppearanceRaceId`, `lastAppearanceAllowed`: the
 server's verdicts on the client's race menu results; `shouts`,

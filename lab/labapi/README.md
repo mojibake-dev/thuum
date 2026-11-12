@@ -73,9 +73,12 @@ the rollback (ADR-036; docs/LAB.md, "Between runs"); result.json's
 Server-side verbs (`teleport`, `give`) go to the server's `labCommand` RPC;
 client verbs (`connect`, `reconnect`, `move`, `equip`, `cast`, `activate`,
 `hit`, `dump-state`) are queued for lab-driver; `screenshot` is a guest exec
-plus guest-agent file read on a managed guest (the helper writes a base64
-text file beside the PNG because the guest-agent file API carries text
-only), and a `request-screenshot` client verb on an unmanaged one.
+on a managed guest whose helper writes a base64 sidecar beside the PNG, read
+back through the agent's ranged file-read (512 KiB a call, decoded once
+joined, removed once read, as a client log is: a whole read past about 1 MiB
+is unreliable on a busy seat), a burst's frames likewise, and a
+`request-screenshot` client verb on an unmanaged one; a shot or frame not
+read is the step's note, never a fault.
 `wait: N` sleeps N times `TIME_SCALE`. Before an `assert:` block, every
 client the block reads through `.sees()` or `.view()` gets a `dump-state`
 step so the view is fresh. `server.log_count("<regex>")` is counted from the

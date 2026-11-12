@@ -122,13 +122,20 @@ class FakeProxmox:
             self.files[empty.group(1)] = ""
             if re.search(r"\} else \{[^{}]*\}; Write-Output", " ".join(command)):
                 return ExecResult(0, "0 0\r\n", "")
-        # Runner._seat_copy's length of a copy whose exec answer was lost, its UTF-8 bytes; and Runner._read_back's
-        # removal of a copy once read, which prints whether it is still there
+        # Runner._seat_length's length of a file of the seat's, its UTF-8 bytes, or `missing <path>` for one not there;
+        # and Runner._read_back's removal of a copy once read, which prints whether it is still there
         length = re.search(r"\(Get-Item -LiteralPath '([^']+)'\)\.Length", " ".join(command))
         if length:
             if length.group(1) not in self.files:
-                return ExecResult(1, "", f"Get-Item : Cannot find path '{length.group(1)}' because it does not exist.")
+                return ExecResult(0, f"missing {length.group(1)}\r\n", "")
             return ExecResult(0, f"{len(self.files[length.group(1)].encode('utf-8'))}\r\n", "")
+        # Runner._burst's listing of its frames' sidecars, each name and length
+        frames = re.search(r"Get-ChildItem -LiteralPath '([^']+)' -Filter '\*\.png\.b64' -File", " ".join(command))
+        if frames:
+            folder = frames.group(1) + "\\"
+            listed = [(p[len(folder):], len(t.encode("utf-8"))) for p, t in self.files.items()
+                      if p.startswith(folder) and p.endswith(".png.b64") and "\\" not in p[len(folder):]]
+            return ExecResult(0, "".join(f"{name} {n}\r\n" for name, n in sorted(listed)), "")
         removal = re.search(r"Remove-Item -LiteralPath '([^']+)' -Force -ErrorAction SilentlyContinue; Test-Path", " ".join(command))
         if removal:
             self.files.pop(removal.group(1), None)

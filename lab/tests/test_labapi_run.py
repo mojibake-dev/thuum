@@ -1474,19 +1474,25 @@ steps:
 
 @needs_deps
 class ScreenshotSteps(RunTests):
-    def _managed_c1(self, raise_with):
-        """c1 managed; its screenshot helper writes the shot's .b64, then the exec raises `raise_with`."""
+    def _managed_c1(self, raise_with, png=b"\x89PNG shot"):
+        """c1 managed; its screenshot helper writes the shot's .b64 (of `png`), then the exec raises `raise_with`."""
         from labapi.guests import Guest
 
         self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
         pve = self.services.control._b
         real = pve.exec
+        self.png = png
 
         def exec_(guest, command, timeout):
+            # the helper's own exec (it starts sky-lab-screenshot), not the sidecar's length or removal, which name it too
             m = re.search(r"'([^']+\.png)\.b64'", " ".join(command))
-            if not m:
+            if not m or "sky-lab-screenshot" not in " ".join(command):
                 return real(guest, command, timeout)
-            pve.files[m.group(1) + ".b64"] = base64.b64encode(b"\x89PNG shot").decode()
+            pve.files[m.group(1) + ".b64"] = base64.b64encode(self.png).decode()
+            if raise_with is None:
+                from labapi.proxmox import ExecResult
+
+                return ExecResult(0, "", "")
             raise raise_with
 
         pve.exec = exec_
@@ -1517,6 +1523,58 @@ class ScreenshotSteps(RunTests):
         shot, pngs = self._shot(run_id, body)
         self.assertIn("screenshot skipped: E_PVE_EXEC", shot["note"], shot)
         self.assertEqual(pngs, [])
+
+    def test_a_shot_past_one_range_comes_back_whole_and_its_sidecar_leaves_the_seat(self):
+        """A whole agent file-read past about 1 MiB is unreliable on a busy seat (numidium's measure: a 1.46 MB console
+        copy timed out three times in a row on c1, and 512 KiB ranges took it whole in 4 s; 195437 lost three shots at
+        23 s each): the shot's .b64 sidecar comes back in ranges, joined and decoded once, and leaves the seat once
+        read."""
+        from labapi.runner import READ_RANGE_BYTES as R
+
+        png = bytes(range(256)) * 2500  # 640,000 bytes, a sidecar of 853,336, two ranges
+        self._managed_c1(None, png=png)
+        pve = self.services.control._b
+        run_id, body = self._run(SHOT)
+        self.assertEqual(body["verdict"], "green", body)
+        shot, pngs = self._shot(run_id, body)
+        self.assertEqual([p.read_bytes() for p in pngs], [png])
+        self.assertEqual(shot["note"], pngs[0].name)
+        sidecar = next(c[2] for c in pve.calls if c[0] == "file_read_range")
+        self.assertTrue(sidecar.endswith(".png.b64"), sidecar)
+        n = len(base64.b64encode(png))
+        self.assertEqual([c[3:] for c in pve.calls if c[:3] == ("file_read_range", 901, sidecar)], [(0, R), (R, n - R)])
+        self.assertFalse([c for c in pve.calls if c[0] == "file_read" and c[2].endswith(".png.b64")], "no whole read")
+        self.assertNotIn(sidecar, pve.files, "the sidecar leaves the seat once read")
+
+    def test_a_sidecar_range_still_unread_is_the_steps_note(self):
+        """A shot not read is the step's note, never the run's fault: a range of its sidecar still unread after
+        file_read_range's own retries skips the shot, and the sidecar still leaves the seat."""
+        from unittest import mock
+
+        from labapi import proxmox
+        from labapi.proxmox import ProxmoxError
+        from labapi.runner import READ_RANGE_BYTES as R
+
+        self._managed_c1(None, png=bytes(range(256)) * 2500)
+        pve = self.services.control._b
+        plain_range = pve.file_read_range
+
+        def file_read_range(guest, path, offset, count):
+            if path.endswith(".png.b64") and offset == R:
+                pve.calls.append(("file_read_range", guest.vmid, path, offset, count))
+                raise ProxmoxError(f"E_PVE_FILE: {guest.name}: ResourceException: 500 Internal Server Error: VM {guest.vmid} "
+                                   "qga command 'guest-file-read' failed - got timeout")
+            return plain_range(guest, path, offset, count)
+
+        pve.file_read_range = file_read_range
+        with mock.patch.object(proxmox, "FILE_READ_PAUSES", (0.0, 0.0)):
+            run_id, body = self._run(SHOT)
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertEqual(body["failures"], [])
+        shot, pngs = self._shot(run_id, body)
+        self.assertEqual(pngs, [])
+        self.assertTrue(shot["note"].startswith("screenshot skipped: range 2 of 2: E_PVE_FILE: fake-c1: ResourceException:"), shot)
+        self.assertFalse([p for p in pve.files if p.endswith(".png.b64")], "the sidecar leaves the seat whatever the read did")
 
 
 
@@ -1592,6 +1650,22 @@ class BurstSteps(RunTests):
         self.assertIn('"count": 3, "intervalMs": 200', script)
         self.assertIn(f"$out = 'C:\\sky-lab\\shots\\{i:03d}-burst'", script)
         self.assertGreaterEqual(self.timeouts[0], burst.wait_s({"count": 3, "intervalMs": 200}))
+
+    def test_each_frames_sidecar_comes_back_in_ranges_and_leaves_the_seat(self):
+        """A burst's frames come back as a plain shot's sidecar does: each frame's .b64 in ranges, its length from one
+        listing of the burst's folder, decoded once joined, and removed once read."""
+        from labapi.proxmox import ExecResult
+
+        self._managed_c1(ExecResult(0, self._done() + "\r\n", ""))
+        pve = self.services.control._b
+        run_id, body = self._run(BURST)
+        self.assertEqual(body["verdict"], "green", body)
+        step, pngs, _ = self._burst(run_id, body)
+        self.assertEqual([p.read_bytes() for p in pngs], [b"PNG frame 0", b"PNG frame 1", b"PNG frame 2"])
+        folder = f"C:\\sky-lab\\shots\\{step['index']:03d}-burst"
+        self.assertEqual(sorted(c[2] for c in pve.calls if c[0] == "file_read_range"), [f"{folder}\\{k:03d}.png.b64" for k in range(3)])
+        self.assertFalse([c for c in pve.calls if c[0] == "file_read" and c[2].startswith(folder)], "no whole read")
+        self.assertFalse([p for p in pve.files if p.startswith(folder)], "each sidecar leaves the seat once read")
 
     def test_a_frame_not_read_is_the_note_and_the_rest_are_kept(self):
         from labapi.proxmox import ExecResult

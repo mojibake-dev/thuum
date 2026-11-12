@@ -1846,7 +1846,13 @@ class Runner:
                     if "E_PVE_EXEC_LOST" not in str(e):
                         raise
                     lost = " (the helper's exec answer was lost; read from its file)"
-                b64 = await asyncio.to_thread(self.control.file_read, g, remote + ".b64")
+                # the helper's base64 sidecar comes back in ranges, decoded once joined, and leaves the seat once read:
+                # a whole agent file-read past about 1 MiB is unreliable on a busy seat (numidium's measure: a 1.46 MB
+                # console copy timed out three times in a row on c1, and 512 KiB ranges took it whole in 4 s; 195437
+                # lost three shots at 23 s each)
+                sidecar = remote + ".b64"
+                size = await self._seat_length(g, sidecar, "its sidecar's length")
+                b64 = await self._read_back(rec, g, sidecar, size, f"screenshot {index:03d}-{client}")
                 target.write_bytes(base64.b64decode(b64))
             else:
                 qs = await self.board.run_step(client, "request-screenshot", {}, self.s.step_timeout_s)
@@ -1861,8 +1867,9 @@ class Runner:
     async def _burst(self, rec: RunRecord, index: int, client: str, args: dict[str, Any]) -> tuple[bool, str]:
         """screenshot {count, intervalMs} (scenario.py; burst.py): frames at an animation's rate, filmed in the
         seat's desktop session by one exec and read back after it as NNN-<client>-<k>.png beside
-        NNN-<client>-burst.json (each frame's offset in ms). As a plain shot does, a burst never fails a run: a
-        frame not filmed or not read is the step's note."""
+        NNN-<client>-burst.json (each frame's offset in ms), each frame's .b64 sidecar in ranges and removed once
+        read as a plain shot's is. As a plain shot does, a burst never fails a run: a frame not filmed or not read
+        is the step's note."""
         shots = rec.dir / "screenshots"
         shots.mkdir(exist_ok=True)
         g = self.tables.guest_for_client(client)
@@ -1885,10 +1892,27 @@ class Runner:
                 lost = " (the helper's exec answer was lost; read from its files)"
         except (ProxmoxError, ValueError) as e:
             return True, f"screenshot burst skipped: {e}"
+        # each frame's sidecar comes back as a plain shot's does, in ranges, decoded once joined and removed once read,
+        # its length from one listing of the burst's folder
+        def lengths(res) -> dict[str, int] | None:
+            if res.exitcode != 0:
+                return None
+            pairs = [ln.strip().rsplit(" ", 1) for ln in res.out.splitlines() if ln.strip()]
+            return {p[0]: int(p[1]) for p in pairs if len(p) == 2 and p[1].isdigit()}
+
+        listing = ["powershell", "-NoProfile", "-Command",
+                   f"Get-ChildItem -LiteralPath '{remote}' -Filter '*.png.b64' -File | ForEach-Object {{ $_.Name + ' ' + [string]$_.Length }}"]
+        try:
+            sizes, unlisted = await self._tried(g, listing, lengths, "its frames' listing"), ""
+        except (ProxmoxError, ValueError) as e:
+            sizes, unlisted = {}, f" (its frames' listing failed: {str(e)[:80]})"
         got, missing = 0, []
         for f in data["frames"]:
+            sidecar = f"{remote}\\{f['file']}.b64"
             try:
-                b64 = await asyncio.to_thread(self.control.file_read, g, f"{remote}\\{f['file']}.b64")
+                if f"{f['file']}.b64" not in sizes:
+                    raise SeatFileMissing(f"{sidecar} is not there{unlisted}")
+                b64 = await self._read_back(rec, g, sidecar, sizes[f"{f['file']}.b64"], f"screenshot burst {index:03d}-{client} frame {f['k']}")
                 (shots / f"{index:03d}-{client}-{int(f['k'])}.png").write_bytes(base64.b64decode(b64))
                 got += 1
             except (ProxmoxError, ValueError) as e:
@@ -2303,15 +2327,24 @@ class Runner:
                 return int(got.group(1)), int(got.group(2))
             return None
 
-        def length(res) -> tuple[None, int] | None:
-            last = _last_line(res.out)
-            return (None, int(last)) if res.exitcode == 0 and last.isdigit() else None
-
         try:
             return await self._tried(g, cmd, copied, "its copy", pause_s)
         except ProxmoxError as e:  # E_PVE_EXEC_LOST, the one error _tried passes on
-            cmd = ["powershell", "-NoProfile", "-Command", f"$ErrorActionPreference = 'Stop'; (Get-Item -LiteralPath '{copy}').Length"]
-            return await self._tried(g, cmd, length, f"its copy's length, the copy's own answer lost ({str(e)[:120]}),", pause_s)
+            return None, await self._seat_length(g, copy, f"its copy's length, the copy's own answer lost ({str(e)[:120]}),", pause_s)
+
+    async def _seat_length(self, g: Guest, path: str, what: str, pause_s: float = 10.0) -> int:
+        """The length of the file at `path` on the seat by one exec, three tries `pause_s` apart (_tried): a file a
+        helper wrote for the runner to read (a screenshot's .b64 sidecar, a copy whose exec answer was lost). One that
+        is not there says so, `missing <path>`, and is SeatFileMissing at once."""
+        def length(res) -> int | None:
+            last = _last_line(res.out)
+            if res.exitcode == 0 and last.startswith("missing "):
+                raise SeatFileMissing(f"{last[len('missing '):]} is not there")
+            return int(last) if res.exitcode == 0 and last.isdigit() else None
+
+        cmd = ["powershell", "-NoProfile", "-Command",
+               f"if (Test-Path -LiteralPath '{path}') {{ (Get-Item -LiteralPath '{path}').Length }} else {{ 'missing {path}' }}"]
+        return await self._tried(g, cmd, length, what, pause_s)
 
     async def _read_back(self, rec: RunRecord, g: Guest, path: str, size: int, what: str) -> bytes:
         """The `size` bytes of the file at `path` on the seat, a file the runner made there to read (a shared-read copy
@@ -2326,9 +2359,9 @@ class Runner:
         539-555, and only the seat's restart closes it), so the seat rolls back, in this run's own reset when that is
         still to come (RunRecord.rollback), else at its next run (RunRecord.faulted, _seat_fault), this run's verdict
         as it was. After a read that raised, a removal that does not confirm the copy gone counts as one that found it
-        held (the fresh review of e8d8de9b, nit 3): the read that died is what leaves a handle open. The frida traces
-        and the client logs (_fetch_client_file) come back through it; the screenshot reads (each .b64 sidecar read
-        whole) and _skse_logs are the fetches still read whole."""
+        held (the fresh review of e8d8de9b, nit 3): the read that died is what leaves a handle open. The frida traces,
+        the client logs (_fetch_client_file, _log_count) and the screenshots' and bursts' .b64 sidecars come back
+        through it; _skse_logs is the fetch still read whole."""
         came_back = False
         try:
             if size > FETCH_MAX_BYTES:
