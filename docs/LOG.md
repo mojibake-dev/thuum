@@ -9541,3 +9541,19 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   exact, 3.4 s a seat). x-prop-blast v3 b0c8945e again, 20261111-223256 green, its two prop-impulse traces whole (c1 666 rows,
   c2 314, where 191642's held only the ready rows), H2 to H4 for thuum-fa's read. Still whole-file: _fetch_client_file's
   console-log reads (191642's timed out as well), the ranged read's next caller. Both clones rolled back after each run.
+
+### 2026-11-12
+
+- (numidium) core's Proxmox upgrade before playtest 51 (Eli's "Now, before 51", approved in core's session): qemu-server
+  9.2.10 to 9.2.15 at 00:13Z, in one apt transaction with libpve-common-perl 9.2.8, libpve-storage-perl 9.1.15,
+  libpve-guest-common-perl 6.0.7, and swtpm and libtpms 0.10.2 (pve-manager 9.2.20 and pve-qemu-kvm 11.0.3 kept). No VM
+  was touched; the API workers respawned at 00:13:17Z; the rollback point is
+  rpool/ROOT/pve-1@pre-qemu-server-9.2.15-20261112T0013Z. 9.2.15's file-read keeps offset, count and decode and closes its
+  handle when a read fails, the upstream leak behind 191642's held copies. Under a lab hold (00:00:40Z to 00:18:00Z),
+  lab-api 8bd23824's ranged-read check passed again on both seats (c1 3.6 s, c2 3.1 s). Both seats were then cold-started
+  once, by a client rollback to their newest snapshot, so swtpm 0.10.2 met each TPM state before any counted run: c1 back
+  online in 80 s and c2 in 76 s, their new QEMU and swtpm processes from 00:15:09Z and 00:16:29Z, no device-encryption
+  prompt. From core's report, a new lab fact: a VM start now fails early, naming a passed-through PCI device that stopped
+  answering, the GPU wedge's signature, where QEMU used to give "invalid PCI interrupt pin 255". Eli's W3 call, "Fix the
+  drop", is DECISIONS.md's (a32cb7d9): b-prop-push stays pending with step 27 as written, and the drop service's fix rides
+  physics rung 1's client commit after 51.
