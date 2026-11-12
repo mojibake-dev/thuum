@@ -9607,3 +9607,19 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   6.5 and 6.6 s, 24 lines, "6292690 read of 6292690 copied" twice; the cleanup confirmed. v1's INCONCLUSIVE was a liveness
   false negative: on both seats the first read's command-line match found no holder while its pid ran and its log stood
   at "holding". Both clones rolled back after it.
+- m4-train-52 merged to fork canon c3f9d175 (2026-11-12T07:11Z): the gate 20261112-055559-merge-m4-train-52,
+  20261112-055559-smoke-two-players to 20261112-070537-b-npc-caster (21 runs; the watch item b-npc-caster red at 070241 and
+  green on its relaunched rerun 070537); T2 skip on skymp-server:m4-train-52 (thuum-fa's T2 of c3f9d175, 2026-11-11 13:26Z,
+  53 of 53); clones promoted (clean-m1 "m4-train-52 client c3f9d175", gitlab client-build 20605 at ff467dab by REUSE_DIST,
+  SkyrimPlatformImpl 333d2a2291486ed5). Verbs: the leveled quest reward lands (Fix 1: ScriptCall 75's landed, SCHEMA 44,
+  E_SCRIPTCALL_ROLL), an effect's local helper (Fix 2, D-H1 B: b-second-hand green in the gate, out of pending), the
+  console arm's one quest-run rule (Fix 3), D-Q9 B's per-player alias cause, the snippet's long-id fallback, D-S4 A's grace
+  read, and the difftest drain with T2's rung 5 keys back on. Its stage (04:28Z to 05:06Z, from main a312a6ee):
+  x-leveled-reward 20261112-044101, x-effect-helper 044616 and x-console-arm 045113 green; x-acting-player v3 red warm
+  (045509) and cold (050846) on server.log_count("E_SCRIPTSTATE_EPOCH") == 0, six refusals a run, each seat's release read
+  of cell 9731's three weapon racks (acd81, acd7f, b6f6a, WeaponRackActivateScript) landing 54 ms after the successor's
+  grant: D-S4 A's premise that nothing changes in the grace is refuted for scripts that change their own state while their
+  cell unloads (thuum-fa's read), merged as a declared limit on Eli's word, "Merge, declare the limit" (D-S4 B, holding the
+  hand-off, not taken). Eli's "if it's done make them one test": playtest 51 runs on canon c3f9d175 with 52's checks. On
+  the stage lab-api 58502b08's new held-copy fault misfired twice on c1's log-count copies (x-console-arm, x-acting-player),
+  a transient lock, costing c1 a rollback each; thuum-fa's labapi-removal-retry is its fix.
