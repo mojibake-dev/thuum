@@ -5053,6 +5053,14 @@ whichever stands. D-S4 B would change hand-off timing and is his alone. The verb
   designed and the loss declared). D-S4 B, the grant waiting a bound for the release read after a release whose old host is still
   connected (the cells rule, a new RELEASE_READ_MS, UNMEASURED), covers every case at the cost of the bound added to every warm
   hand-off: a feel change, Eli's alone, put to him only if a read shows the grid case.
+  Read and declared (Eli in session, 2026-11-12, "Merge, declare the limit", over D-S4 B and a further read): x-acting-player v3
+  367ecd50 went red twice on train 52's stage (20261112-045509 warm, 050846 cold), the same six E_SCRIPTSTATE_EPOCH lines: at
+  each hand-off of Riverwood's cell 9731 the departing host's grace read ran and sent (D-S4 A held), but three weapon racks
+  (acd81, acd7f, b6f6a; WeaponRackActivateScript.ActivatorSetup) change their script state while their cell unloads, after the
+  grace read, and that change crossed as the release read 54 ms after the successor's grant and was refused (050846 server.log
+  :1865-1867, :2937-2939). The limit: a script that changes its own state while its cell unloads keeps the state recorded before
+  the unload; the successor's own reports cover the rest. Train 52 merged with it (gate 20261112-055559-merge-m4-train-52, canon
+  c3f9d175).
 - D-Q9 B (Eli's, the entry above) built on fork m4-train-52 8c53b76c as the server setting questPlayerAliasCause, "seat" the
   default (D-Q9 B) and "world" D-Q9 A, ADR-070's axis: under "seat" a world-caused report rooted at OnLocationChange on a script
   the game files attach to player aliases alone is judged as the seat's own (a run word refused E_QUEST_CAUSE, a report judged a
