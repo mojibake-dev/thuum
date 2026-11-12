@@ -34,7 +34,10 @@ tries, 10 s apart, but one for an exec that ran to its deadline), and read back 
 the copy's length and decoded as UTF-8 once; a copy past 64 MiB is refused
 before its first read, and the copy is removed once read (one the agent
 holds open rolls the seat back: in the same run's reset when the fetch came
-before it, else at its next run). A client log (`<client>.log`, `-driver.log`,
+before it, else at its next run). A copy or sidecar counts as held only when
+its removal still finds it at the fourth of four tries 1 s apart, each try
+before that a note, since a scan of a file just written can hold it a moment
+(train 52's stage, numidium's HYPOTHESIS). A client log (`<client>.log`, `-driver.log`,
 `-console.log`, `-before.log`, `-launch.log`, a relaunch's
 `-relaunch-<step>.log` and `-console.log`) comes back the same way, since the
 game holds its logs open for writing. `c1.log` in a scenario's artifacts

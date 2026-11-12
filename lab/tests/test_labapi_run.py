@@ -801,29 +801,90 @@ class ClientLogs(RunTests):
                          [(0, R)] + [(R, 11)] * 3)
         self.assertNotIn("C:\\sky-lab\\c1.log", pve.files, "the copy leaves the seat whatever the read did")
 
-    def test_a_log_copy_held_open_after_its_read_faults_the_seat(self):
-        """qemu-server 9.2.10 leaves a guest-file-read's handle open when a read dies, and only the seat's restart
-        closes it: a log copy the removal leaves is a note and the seat's fault, as a trace copy's is, so its next run
-        rolls it back; the log came back whole, so it is kept and the run's verdict stands."""
-        from labapi.proxmox import ExecResult
-
+    def _c1_log_removals(self, answers):
+        """The c1.log copy's removals answered in turn from `answers` (an ExecResult each; None passes the try to the
+        fake, which removes the copy), every try counted in self.removals."""
         pve = self._managed_c1()
-        pve.files[self.settings.client_driver_log] = "platform log\n"
         plain_exec = pve.exec
+        self.removals = []
 
         def exec_(guest, command, timeout):
             if "Remove-Item -LiteralPath 'C:\\sky-lab\\c1.log' -Force" in " ".join(command):
-                pve.calls.append(("exec", guest.vmid, tuple(command)))
-                return ExecResult(0, "True\r\n", "")  # still there: the agent holds it
+                self.removals.append(len(self.removals) + 1)
+                answer = answers[len(self.removals) - 1] if len(self.removals) <= len(answers) else None
+                if answer is not None:
+                    pve.calls.append(("exec", guest.vmid, tuple(command)))
+                    return answer
             return plain_exec(guest, command, timeout)
 
         pve.exec = exec_
+        return pve
+
+    def test_a_log_copy_held_open_after_its_read_faults_the_seat(self):
+        """qemu-server 9.2.10 leaves a guest-file-read's handle open when a read dies, and only the seat's restart
+        closes it: a log copy still there at all four of its removal's tries, 1 s apart, is a note a try before the
+        last and then the held note and the seat's fault, as a trace copy's is, so its next run rolls it back; the log
+        came back whole, so it is kept and the run's verdict stands."""
+        from labapi.proxmox import ExecResult
+
+        pve = self._c1_log_removals([ExecResult(0, "True\r\n", "")] * 4)  # still there: the agent holds it
+        pve.files[self.settings.client_driver_log] = "platform log\n"
         run_id, body = self._run(SOLO_WITH_LOG)
         self.assertEqual(body["verdict"], "green", body)
         self.assertIn("c1.log", body["artifacts"])
         held = "c1.log: C:\\sky-lab\\c1.log held open in its agent after its read"
-        self.assertIn(held, body["notes"])
+        self.assertEqual(self.removals, [1, 2, 3, 4])
+        self.assertEqual([n for n in body["notes"] if "C:\\sky-lab\\c1.log" in n],
+                         [f"c1.log: C:\\sky-lab\\c1.log still there at its removal's try {k} of 4, tried again in 1 s"
+                          for k in (1, 2, 3)] + [held])
         self.assertEqual(self.services.runner.seats["c1"].force, f"its last run ({run_id}) ended in a fault: {held}")
+
+    def test_a_log_copy_still_there_at_its_first_removal_and_gone_at_the_next_is_no_fault(self):
+        """On qemu-server 9.2.15, which closes its handles, a running game's console log copy stayed a moment after a
+        small read (train 52's stage: x-console-arm's logcount-052-console.log.copy, a 73.1 s rollback at c1's next
+        run, and x-acting-player's at step 133), numidium's HYPOTHESIS a scan of a file just written: a copy still there
+        at its removal's first try and gone at the second is no fault, one note naming the try."""
+        from labapi.proxmox import ExecResult
+
+        pve = self._c1_log_removals([ExecResult(0, "True\r\n", "")])  # a moment's hold; the next try removes it
+        pve.files[self.settings.client_driver_log] = "platform log\n"
+        run_id, body = self._run(SOLO_WITH_LOG)
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertIn("c1.log", body["artifacts"])
+        self.assertEqual(self.removals, [1, 2])
+        self.assertEqual([n for n in body["notes"] if "C:\\sky-lab\\c1.log" in n],
+                         ["c1.log: C:\\sky-lab\\c1.log still there at its removal's try 1 of 4, tried again in 1 s"])
+        self.assertFalse([n for n in body["notes"] if "held open" in n], body["notes"])
+        self.assertEqual(self.services.runner.seats["c1"].force, "")
+        self.assertNotIn("C:\\sky-lab\\c1.log", pve.files)
+
+    def test_a_removals_tries_are_1_s_apart_through_the_time_scale(self):
+        """The removal's four tries are REMOVE_PAUSE_S apart, the pause times time_scale as _tried's is, so the tests
+        run them at once: three pauses of 1 s between four tries at a time_scale of 1."""
+        import asyncio
+        import dataclasses
+        import types
+        from unittest import mock
+
+        from labapi import runner as runner_mod
+        from labapi.proxmox import ExecResult
+        from labapi.runner import REMOVE_PAUSE_S, REMOVE_TRIES, RunRecord
+        from labapi.scenario import Scenario
+
+        self._c1_log_removals([ExecResult(0, "True\r\n", "")] * 4)
+        slept = []
+
+        async def sleep(seconds):
+            slept.append(seconds)
+
+        self.services.runner.s = dataclasses.replace(self.settings, time_scale=1.0)
+        rec = RunRecord("x", Scenario(id="x", clients=["c1"]), self.tmp, "now")
+        g = self.services.tables.guests["fake-c1"]
+        with mock.patch.object(runner_mod, "asyncio", types.SimpleNamespace(to_thread=asyncio.to_thread, sleep=sleep)):
+            asyncio.run(self.services.runner._removed(rec, g, "C:\\sky-lab\\c1.log", "c1.log", read_died=False))
+        self.assertEqual((REMOVE_TRIES, REMOVE_PAUSE_S), (4, 1.0))
+        self.assertEqual((self.removals, slept), ([1, 2, 3, 4], [1.0, 1.0, 1.0]))
+        self.assertEqual(rec.rollback, {"c1": "c1.log: C:\\sky-lab\\c1.log held open in its agent after its read"})
 
     def test_a_seats_named_log_comes_with_its_seats_one_fetch(self):
         """c1-console.log read as a client called c1-console ("c1-console is unmanaged or unmapped; log not fetched"),
@@ -1734,25 +1795,73 @@ class BurstSteps(RunTests):
         self.assertIn(f"Get-ChildItem -LiteralPath '{folder}' -Filter '*.png.b64'", removals[0])
         self.assertFalse([n for n in body["notes"] if folder in n], body["notes"])
 
-    def test_a_sidecar_that_stays_after_the_one_removal_faults_the_seat(self):
-        """The folder's one removal names each sidecar that stayed: each is held open in the agent as a plain shot's is,
+    def _sidecar_removals(self, name, answer):
+        """The one-file removal of the sidecar `name` (Runner._remove_try, the further tries of one the folder's removal
+        named as stayed) answered by answer(guest), an ExecResult, or raising; the other execs pass through."""
+        pve = self.services.control._b
+        inner = pve.exec
+
+        def exec_(guest, command, timeout):
+            if re.search(r"Remove-Item -LiteralPath '[^']+\\" + re.escape(name) + "' -Force", " ".join(command)):
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                return answer(guest)
+            return inner(guest, command, timeout)
+
+        pve.exec = exec_
+
+    def test_a_sidecar_that_stays_through_every_removal_try_faults_the_seat(self):
+        """The folder's one removal is the first try of each sidecar it names as stayed, and its further tries a plain
+        shot's (Runner._removed): one still there at the fourth is held open in the agent, a note a try before it and
         the step's note and the seat's fault, a rollback at its next run; the verdict is as it was and the frames kept."""
         from labapi.proxmox import ExecResult
 
         self._managed_c1(ExecResult(0, self._done() + "\r\n", ""))
         self._removal_answers(lambda guest: ExecResult(0, "001.png.b64\r\nstayed 1\r\n", ""))
+        self._sidecar_removals("001.png.b64", lambda guest: ExecResult(0, "True\r\n", ""))  # still there: the agent holds it
         run_id, body = self._run(BURST)
         self.assertEqual(body["verdict"], "green", body)
         step, pngs, _ = self._burst(run_id, body)
         self.assertEqual(len(pngs), 3)
         i = step["index"]
-        held = f"screenshot burst {i:03d}-c1 frame 1: C:\\sky-lab\\shots\\{i:03d}-burst\\001.png.b64 held open in its agent after its read"
-        self.assertEqual([n for n in body["notes"] if "held open" in n], [held])
+        sidecar = f"C:\\sky-lab\\shots\\{i:03d}-burst\\001.png.b64"
+        held = f"screenshot burst {i:03d}-c1 frame 1: {sidecar} held open in its agent after its read"
+        self.assertEqual([n for n in body["notes"] if sidecar in n],
+                         [f"screenshot burst {i:03d}-c1 frame 1: {sidecar} still there at its removal's try {k} of 4, tried "
+                          "again in 1 s" for k in (1, 2, 3)] + [held])
         self.assertEqual(self.services.runner.seats["c1"].force, f"its last run ({run_id}) ended in a fault: {held}")
 
+    def test_a_sidecar_the_folder_removal_names_and_the_next_try_removes_is_no_fault(self):
+        """A sidecar the folder's one removal names as stayed goes on through the one removal helper every read file's
+        does (Runner._removed, the folder's removal its first try): gone at the next try, it is no fault, one note naming
+        the try (train 52's stage: a file scanned just after its write, numidium's HYPOTHESIS)."""
+        from labapi.proxmox import ExecResult
+
+        self._managed_c1(ExecResult(0, self._done() + "\r\n", ""))
+        self._removal_answers(lambda guest: ExecResult(0, "001.png.b64\r\nstayed 1\r\n", ""))
+        removed = []
+        real = self.services.runner._removed
+
+        async def spy(rec, g, path, what, read_died, first=None):
+            removed.append((path, first))
+            return await real(rec, g, path, what, read_died, first)
+
+        self.services.runner._removed = spy
+        run_id, body = self._run(BURST)
+        self.assertEqual(body["verdict"], "green", body)
+        step, pngs, _ = self._burst(run_id, body)
+        self.assertEqual(len(pngs), 3)
+        i = step["index"]
+        sidecar = f"C:\\sky-lab\\shots\\{i:03d}-burst\\001.png.b64"
+        self.assertEqual([r for r in removed if r[0].endswith(".png.b64")], [(sidecar, (True, ""))])
+        self.assertEqual([n for n in body["notes"] if sidecar in n],
+                         [f"screenshot burst {i:03d}-c1 frame 1: {sidecar} still there at its removal's try 1 of 4, tried again in 1 s"])
+        self.assertEqual(self.services.runner.seats["c1"].force, "")
+        self.assertNotIn(sidecar, self.services.control._b.files)
+
     def test_a_frame_whose_read_died_is_taken_as_held_when_the_removal_confirms_nothing(self):
-        """With the one removal unconfirmed (its exec failed), a frame whose read died is taken as held, as _read_back
-        takes one: the read that died is what leaves a handle open; the frames read whole are not."""
+        """With the one removal unconfirmed (its exec failed), a frame whose read died goes on through its further tries,
+        as _read_back's does, and none confirming it gone it is taken as held at the fourth: the read that died is what
+        leaves a handle open; the frames read whole are not."""
         from unittest import mock
 
         from labapi import proxmox
@@ -1774,6 +1883,7 @@ class BurstSteps(RunTests):
 
         pve.file_read_range = file_read_range
         self._removal_answers(lost)
+        self._sidecar_removals("002.png.b64", lost)
         with mock.patch.object(proxmox, "FILE_READ_PAUSES", (0.0, 0.0)):
             run_id, body = self._run(BURST)
         self.assertEqual(body["verdict"], "green", body)
@@ -1781,11 +1891,17 @@ class BurstSteps(RunTests):
         self.assertEqual(len(pngs), 2)
         self.assertIn("not read: frame 2", step["note"], step)
         i = step["index"]
+        sidecar = f"C:\\sky-lab\\shots\\{i:03d}-burst\\002.png.b64"
         held = [n for n in body["notes"] if "held open" in n]
         self.assertEqual(len(held), 1, body["notes"])
-        self.assertTrue(held[0].startswith(f"screenshot burst {i:03d}-c1 frame 2: C:\\sky-lab\\shots\\{i:03d}-burst\\002.png.b64 "
-                                           "held open in its agent after its read (taken as held, its read having failed: "
-                                           f"C:\\sky-lab\\shots\\{i:03d}-burst's sidecars on fake-c1 not removed: E_PVE_EXEC"), held)
+        self.assertEqual(held[0], f"screenshot burst {i:03d}-c1 frame 2: {sidecar} held open in its agent after its read (taken "
+                                  f"as held, its read having failed: {sidecar} on fake-c1 not removed: E_PVE_EXEC: fake-c1: qga "
+                                  "command 'guest-exec' failed - got timeout)")
+        tries = [n for n in body["notes"] if "not confirmed gone at its removal's try" in n]
+        self.assertEqual(len(tries), 3, body["notes"])
+        self.assertTrue(tries[0].startswith(f"screenshot burst {i:03d}-c1 frame 2: {sidecar} not confirmed gone at its removal's "
+                                            f"try 1 of 4 (C:\\sky-lab\\shots\\{i:03d}-burst's sidecars on fake-c1 not removed: "
+                                            "E_PVE_EXEC"), tries)
         self.assertEqual(self.services.runner.seats["c1"].force, f"its last run ({run_id}) ended in a fault: {held[0][:200]}")
 
     def test_a_frame_not_read_is_the_note_and_the_rest_are_kept(self):
@@ -4015,6 +4131,43 @@ class LogCount(RunTests):
         held = "log-count: c1's Skyrim Platform log: C:\\sky-lab\\logcount-001.log.copy held open in its agent after its read"
         self.assertIn(held, body["notes"])
         self.assertEqual(self.services.runner.seats["c1"].force, f"its last run ({run_id}) ended in a fault: {held}")
+
+    def test_a_log_count_copy_still_there_once_then_gone_is_no_fault(self):
+        """log-count's copies go through the one removal helper every read file's does (Runner._removed):
+        x-console-arm's logcount-052-console.log.copy, still there just after its small read, cost c1 a 73.1 s rollback
+        in train 52's stage. A copy still there at its removal's first try and gone at the second keeps its count and
+        faults nothing, one note naming the try."""
+        from labapi.proxmox import ExecResult
+
+        pve = self._seat()
+        pve.files[self.settings.client_driver_log] = "claim 13491 sent on E\nclaim 13491 granted\n"
+        plain_exec = pve.exec
+        held_once = {"left": 1}
+
+        def exec_(guest, command, timeout):
+            if "Remove-Item -LiteralPath 'C:\\sky-lab\\logcount-001.log.copy' -Force" in " ".join(command) and held_once["left"]:
+                held_once["left"] -= 1
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                return ExecResult(0, "True\r\n", "")  # a moment's hold; the next try removes it
+            return plain_exec(guest, command, timeout)
+
+        pve.exec = exec_
+        removed = []
+        real = self.services.runner._removed
+
+        async def spy(rec, g, path, what, read_died, first=None):
+            removed.append(path)
+            return await real(rec, g, path, what, read_died, first)
+
+        self.services.runner._removed = spy
+        run_id, body = self._run(LOGCOUNT)
+        self.assertEqual(body["verdict"], "green", body)  # LOGCOUNT's claim reads the step's count, kept
+        self.assertIn("C:\\sky-lab\\logcount-001.log.copy", removed)
+        self.assertEqual([n for n in body["notes"] if "logcount-" in n],
+                         ["log-count: c1's Skyrim Platform log: C:\\sky-lab\\logcount-001.log.copy still there at its "
+                          "removal's try 1 of 4, tried again in 1 s"])
+        self.assertEqual(self.services.runner.seats["c1"].force, "")
+        self.assertFalse([p for p in pve.files if "logcount-" in p], "the copy gone at its second try")
 
     def _its_copy_answer_lost(self, leave: str | None) -> str:
         """log-count at step 7 whose Skyrim Platform log copy exec ends with its answer lost (E_PVE_EXEC_LOST), leaving

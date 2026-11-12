@@ -285,6 +285,13 @@ READ_RANGE_BYTES = 512 * 1024
 # The largest copy a fetch reads back, refused before its first read: 128 ranges at most, so a runaway trace cannot hold
 # up the run's end, whose artifacts phase has no deadline
 FETCH_MAX_BYTES = 64 * 1024 * 1024
+# A removal's tries before a file the runner read counts as held, and the pause between them (Runner._removed): on
+# qemu-server 9.2.15, which closes its handles, a running game's console log copy stayed a moment after a small read
+# (train 52's stage: x-console-arm's logcount-052-console.log.copy and x-acting-player's logcount-133-console.log.copy,
+# both on c1, the first a 73.1 s rollback at the next run), while the 6 MB seat check left nothing; numidium's
+# HYPOTHESIS, a scan of a file just written (Defender or the indexer) holding it a moment
+REMOVE_TRIES = 4
+REMOVE_PAUSE_S = 1.0
 
 
 class Runner:
@@ -1947,10 +1954,11 @@ class Runner:
     async def _remove_frames(self, rec: RunRecord, g: Guest, folder: str, whats: dict[str, str], died: set[str],
                              what: str) -> None:
         """A burst's .b64 sidecars removed from `folder` on the seat by one exec once every frame is read, which names
-        each one that stayed and then their count, so an answer cut short never reads as none staying. Each one that
-        stayed is held open in the agent, as a plain shot's is (_held: the step's note and the seat's fault, named by
-        its frame's `whats` entry or else `what`); with the removal unconfirmed, a frame whose read died (`died`) is
-        taken as held, as _read_back takes one, and otherwise the removal's failure is the run's note."""
+        each one that stayed and then their count, so an answer cut short never reads as none staying. That exec is the
+        first try of each one that stayed, whose further tries are a plain shot's (_removed: a note a try that finds it,
+        the seat's fault only for one still there at the last, named by its frame's `whats` entry or else `what`); with
+        the exec unconfirmed, a frame whose read died (`died`) goes the same way from that first try, as _read_back's
+        does, and otherwise the exec's failure is the run's note."""
         cmd = ["powershell", "-NoProfile", "-Command",
                f"$stayed = @(Get-ChildItem -LiteralPath '{folder}' -Filter '*.png.b64' -File | ForEach-Object {{ "
                f"Remove-Item -LiteralPath $_.FullName -Force -ErrorAction SilentlyContinue; "
@@ -1969,10 +1977,10 @@ class Runner:
             unconfirmed = f"{folder}'s sidecars on {g.name} not removed: {e}"
         if stayed is not None:
             for name in stayed:
-                self._held(rec, g, f"{folder}\\{name}", whats.get(name, what))
+                await self._removed(rec, g, f"{folder}\\{name}", whats.get(name, what), name in died, first=(True, ""))
             return
         for name in sorted(died):
-            self._held(rec, g, f"{folder}\\{name}", whats[name], unconfirmed)
+            await self._removed(rec, g, f"{folder}\\{name}", whats[name], True, first=(None, unconfirmed))
         if not died:
             rec.notes.append(f"{what}: {unconfirmed}")
 
@@ -2436,41 +2444,70 @@ class Runner:
         return bytes(data)
 
     async def _read_back(self, rec: RunRecord, g: Guest, path: str, size: int, what: str) -> bytes:
-        """The `size` bytes of the file at `path` on the seat in ranges (_read_ranges), and then the file removed. A
-        ProxmoxError or a ValueError from the read is the caller's, after the removal, which runs whatever happened: a
-        copy that will not go is held open in the agent (qemu-server 9.2.10's file-read leaves a handle open when a
-        read dies, Agent.pm at ec268ede5b lines 539-555, and only the seat's restart closes it), the seat's fault
-        (_held). After a read that raised, a removal that does not confirm the copy gone counts as one that found it
-        held (the fresh review of e8d8de9b, nit 3): the read that died is what leaves a handle open. The frida traces,
-        the client logs (_fetch_client_file, _log_count) and the plain screenshots' .b64 sidecars come back through
-        it, a burst's frames through _read_ranges and one removal for them all (_remove_frames); _skse_logs is the
-        fetch still read whole."""
+        """The `size` bytes of the file at `path` on the seat in ranges (_read_ranges), and then the file removed
+        (_removed). A ProxmoxError or a ValueError from the read is the caller's, after the removal, which runs whatever
+        happened: a copy that will not go is held open in the agent (qemu-server 9.2.10's file-read leaves a handle open
+        when a read dies, Agent.pm at ec268ede5b lines 539-555, and only the seat's restart closes it), the seat's fault
+        (_held), once its removal's tries are spent. The frida traces, the client logs (_fetch_client_file, _log_count)
+        and the plain screenshots' .b64 sidecars come back through it, a burst's frames through _read_ranges and one
+        removal for them all (_remove_frames); _skse_logs is the fetch still read whole."""
         came_back = False
         try:
             data = await self._read_ranges(g, path, size)
             came_back = True
             return data
         finally:
-            cmd = ["powershell", "-NoProfile", "-Command",
-                   f"Remove-Item -LiteralPath '{path}' -Force -ErrorAction SilentlyContinue; Test-Path -LiteralPath '{path}'"]
-            said, unconfirmed = "", ""
-            try:
-                res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
-                said = _last_line(res.out)
-                if res.exitcode != 0 or said not in ("True", "False"):
-                    unconfirmed = f"the removal of {path} on {g.name} answered exit {res.exitcode}: {(res.err or res.out).strip()[:200]}"
-            except ProxmoxError as e:
-                unconfirmed = f"{path} on {g.name} not removed: {e}"
-            if said == "True" or (unconfirmed and not came_back):
-                self._held(rec, g, path, what, "" if said == "True" else unconfirmed)
-            elif unconfirmed:
-                rec.notes.append(f"{what}: {unconfirmed}")
+            await self._removed(rec, g, path, what, read_died=not came_back)
+
+    async def _remove_try(self, g: Guest, path: str) -> tuple[bool | None, str]:
+        """One removal of the file at `path` on the seat by one exec, Remove-Item and then Test-Path: True for a file
+        still there, False for one gone, None and the reason for an exec that failed or answered neither."""
+        cmd = ["powershell", "-NoProfile", "-Command",
+               f"Remove-Item -LiteralPath '{path}' -Force -ErrorAction SilentlyContinue; Test-Path -LiteralPath '{path}'"]
+        try:
+            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+        except ProxmoxError as e:
+            return None, f"{path} on {g.name} not removed: {e}"
+        said = _last_line(res.out)
+        if res.exitcode != 0 or said not in ("True", "False"):
+            return None, f"the removal of {path} on {g.name} answered exit {res.exitcode}: {(res.err or res.out).strip()[:200]}"
+        return said == "True", ""
+
+    async def _removed(self, rec: RunRecord, g: Guest, path: str, what: str, read_died: bool,
+                       first: tuple[bool | None, str] | None = None) -> None:
+        """The file at `path` on the seat, one the runner read, removed: the one helper every removal of a read file
+        goes through (_read_back's, so log-count's and the log fetch's, and the burst's, _remove_frames, whose own
+        removal of its folder is `first`, the first try's finding). Up to REMOVE_TRIES tries (_remove_try) REMOVE_PAUSE_S
+        apart, the pause times time_scale as _tried's is. A try that finds the file still there with tries left is a
+        note naming the try, so the notes show how often a file stays and for how long, and a later try that removes
+        it leaves no fault; only a file still there at the last try is held, the seat's fault (_held). A try that
+        confirms nothing after a read that died (`read_died`) is tried again the same way and taken as held at the last
+        (the fresh review of e8d8de9b, nit 3: a read that died is what leaves a handle open on qemu-server 9.2.10);
+        after a whole read it is a note and not tried again, as is one that ran out its time, since a hung agent would
+        hold the run's end (_tried's rule)."""
+        for k in range(1, REMOVE_TRIES + 1):
+            there, why = first if k == 1 and first is not None else await self._remove_try(g, path)
+            if there is False:
+                return
+            if there is None and (not read_died or "did not exit in" in why):
+                if read_died:
+                    self._held(rec, g, path, what, why)
+                else:
+                    rec.notes.append(f"{what}: {why}")
+                return
+            if k == REMOVE_TRIES:
+                self._held(rec, g, path, what, "" if there else why)
+                return
+            found = "still there" if there else "not confirmed gone"
+            rec.notes.append(f"{what}: {path} {found} at its removal's try {k} of {REMOVE_TRIES}"
+                             + ("" if there else f" ({why})") + f", tried again in {REMOVE_PAUSE_S:g} s")
+            await asyncio.sleep(REMOVE_PAUSE_S * self.s.time_scale)
 
     def _held(self, rec: RunRecord, g: Guest, path: str, what: str, unconfirmed: str = "") -> None:
-        """A file the runner read on the seat that would not go, held open in the agent (or taken as held: a removal
-        that confirmed nothing, `unconfirmed`, after a read that died): the step's note, and the seat rolls back, in
-        this run's own reset when that is still to come (RunRecord.rollback), else at its next run (RunRecord.faulted,
-        _seat_fault), this run's verdict as it was."""
+        """A file the runner read on the seat that would not go, still there at its removal's last try (_removed), held
+        open in the agent (or taken as held: a removal that confirmed nothing, `unconfirmed`, after a read that died):
+        the step's note, and the seat rolls back, in this run's own reset when that is still to come
+        (RunRecord.rollback), else at its next run (RunRecord.faulted, _seat_fault), this run's verdict as it was."""
         held = f"{what}: {path} held open in its agent after its read"
         if unconfirmed:
             held += f" (taken as held, its read having failed: {unconfirmed})"
