@@ -1283,9 +1283,9 @@ class Runner:
             cmd = ["powershell", "-NoProfile", "-Command", read]
             try:
                 seat_n, seat_m = await self._seat_copy(g, cmd, copy)
-                # a range short of the copy's length ends the read rather than failing it: the count is the read's, and
-                # the note's three numbers show a transfer that came up short (b-puzzle-relay 20261110-135219)
-                data = await self._read_back(rec, g, copy, seat_m, f"log-count: {client}'s {which}", whole=False)
+                # read whole or not counted: a log read only in part keeps no count, since a count of part of it could
+                # pass an absence claim (b-race-permit's c1.log_count("E_RACE_PERMIT") == 0, the re-review of 486e80f3)
+                data = await self._read_back(rec, g, copy, seat_m, f"log-count: {client}'s {which}")
             except SeatFileMissing:
                 texts.append("")
                 byte_notes.append("0 read")
@@ -2301,14 +2301,12 @@ class Runner:
             cmd = ["powershell", "-NoProfile", "-Command", f"$ErrorActionPreference = 'Stop'; (Get-Item -LiteralPath '{copy}').Length"]
             return await self._tried(g, cmd, length, f"its copy's length, the copy's own answer lost ({str(e)[:120]}),")
 
-    async def _read_back(self, rec: RunRecord, g: Guest, path: str, size: int, what: str, whole: bool = True) -> bytes:
+    async def _read_back(self, rec: RunRecord, g: Guest, path: str, size: int, what: str) -> bytes:
         """The `size` bytes of the file at `path` on the seat, a file the runner made there to read (a shared-read copy
         whose exec printed its length, _seat_copy), through Proxmox's own ranged agent file-reads of READ_RANGE_BYTES
         (GuestControl.file_read_range, whose retry on "got timeout" is the only retry), and then removed. A file past
         FETCH_MAX_BYTES is refused before its first read. Each range must come back whole: one that comes back short
-        met the file's end first, a copy shorter than its length (an offset at or past the end answers no bytes),
-        unless `whole` is False, when it ends the read and the bytes so far are the answer (log-count, which counts
-        what came back and says in its note how many bytes that was beside the copy's length).
+        met the file's end first, a copy shorter than its length (an offset at or past the end answers no bytes).
         The caller decodes the whole once, since a range boundary can fall inside a multibyte character. A
         ProxmoxError (a read refused, a range that came back as no base64) or a ValueError (the cap, a short read) is
         the caller's, after the removal, which runs whatever happened: a copy that will not go is held open in the
@@ -2334,8 +2332,6 @@ class Runner:
                     raise ProxmoxError(f"range {k + 1} of {ranges}: {e}") from e
                 data += got
                 if len(got) != want:
-                    if not whole:
-                        break
                     raise ValueError(f"{len(data)} bytes read of its {size}: range {k + 1} of {ranges}, at {at}, came back "
                                      f"{len(got)} of its {want}")
             came_back = True

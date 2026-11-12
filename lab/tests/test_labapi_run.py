@@ -3063,8 +3063,9 @@ class CellHostSteps(RunTests):
                       "bytes 13 read of 13 copied of 13 on the seat, 18 read of 18 copied of 18 on the seat", note)
 
     def test_a_short_read_of_a_copy_shows_in_its_bytes(self):
-        """the seat's tee and its copy longer than what lab-api read: the note names all three, and the count is the
-        read's (the transfer, not the tee, came up short)"""
+        """the seat's tee and its copy longer than what lab-api read: a log read only in part keeps no count, so a
+        claim on it raises rather than read part of it as the whole (an absence claim, == 0, would pass on the part:
+        the re-review of 486e80f3), and the note says how much came back"""
         from labapi.proxmox import ExecResult
 
         pve = self.services.control._b
@@ -3078,8 +3079,9 @@ class CellHostSteps(RunTests):
 
         pve.exec = exec_
         pve2, note = self._log_count_on_a_managed_seat({"platform": "a moved line\n", "console": "moved twice\nmoved\n"})
-        self.assertIn("18 read of 40 copied of 40 on the seat", note)
-        self.assertEqual(self.services.board.log_count("c1", "moved"), 3, note)
+        self.assertIn("18 bytes read of its 40", note)
+        self.assertIn("no count kept", note)
+        self.assertIsNone(self.services.board.log_count("c1", "moved"), note)
 
     def test_a_runs_respawn_hours_reach_the_server_through_the_overlay(self):
         """train-42's death reads: a respawn inside a run, the server's npcRespawnHours over the master's 240."""
