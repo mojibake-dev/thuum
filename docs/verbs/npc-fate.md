@@ -3322,8 +3322,8 @@ copy no effect holds), and a full thrall stays alive on its cell's simulator. Th
 record's duration of the spell's Reanimate effect against wire-rules magic::FULL_THRALL_MIN_S, a day: in the masters every
 Reanimate effect lasts 60 to 200 s but Dead Thrall's 86,313,600 s, and their effects' flags are equal (MGEF 0x96d0b and
 0x7e8e0, 0x00401002), so the side is the record's, never a name (ADR-063); no estimate of an effect's end is kept anywhere.
-Not built: the full thrall's return to its caster at the caster's return (C4 of the fresh review of f89115af), and its undead
-look on every screen (the Undead FX build). The returning engine's path is read in run 20261112-152001 (x-reanimate-return
+The full thrall's return to its caster at the caster's return (C4 of the fresh review of f89115af) is built in "C4: the
+full thrall's return to its caster" below; not built here: its undead look on every screen (the Undead FX build). The returning engine's path is read in run 20261112-152001 (x-reanimate-return
 v1.5, GREEN; lab/.cache/drafts/reanimate/read-return-152001.md). c1's fresh game held no effect on the living thrall. On Main,
 inside the player's update, 37490(thrall, 1) and then 38798(thrall, player, null) set the player as its commanding actor, the
 kIsCommandedActor flag and the player's commandedActors entry {thrall, no effect}. 37404's created follow package (procedure
@@ -3331,8 +3331,8 @@ kIsCommandedActor flag and the player's commandedActors entry {thrall, no effect
 CommandEffect::Update running. 38800 undid it 8 s after the thrall's death. The record followed the caster 3,545 units each
 way and on a 990-unit run, as did c2's copy. Open (HYPOTHESIS): that the command makes the thrall fight for its caster (it
 fought the wolf that attacked its caster, but three uncommanded Riverwood residents fought the same wolf); the follow through
-a load door with the refresh; the server half (the dormant row, the re-claim, the native, the client's call at the hand-back)
-and its restart persistence (rule 6). Lines: "[verb:npc-fate] reanimate <spell> by <caster> on <body>:
+a load door with the refresh; the server half and its restart persistence (rule 6) are C4's below, with C4's own
+HYPOTHESIS items. Lines: "[verb:npc-fate] reanimate <spell> by <caster> on <body>:
 <commander> commands it until its engine ends the effect (the record's <N> s) (ADR-060)", "death report: <body> died of ...:
 the command's end: its commander's engine ended the effect (ADR-060)", "<body> died under <commander>'s command: the claim
 ends, <simulator> simulates it (ADR-060)", "the claim on <actor> in cell <cell> ended with its claimant <player>'s departure;
@@ -3364,6 +3364,93 @@ b-reanimate-claim in its own commit. H1 to H3 are kept open by
 M3's paper close (2026-11-11): they rest on fork m4-reanimate-claim 2dc75ab6, built and never merged (PLAN's "ADR-060 built ...
 unrun"), and x-reanimate-claim has never run, so the merged base still carries the reanimate path playtest 41 read broken (the
 thrall up on one screen), the path playtest 51's M3-2 meets; their read is the Dynamic plan's reanimate claim line.
+
+### C4: the full thrall's return to its caster (2026-11-12, fork m4-reanimate-return)
+
+Eli, verbatim (ADR-060's amendment of 2026-11-12): "thrall returns to caster obvs". The plan:
+lab/.cache/drafts/reanimate/c4-plan.md (sha1 10a9ddce), approved by the coordinator with rule 6's option A.
+
+The rule. A full thrall (its Reanimate state's record duration at least wire-rules magic::FULL_THRALL_MIN_S, a day; Dead
+Thrall's 86,313,600 s) that stayed in the world when its caster left is its caster's again when the caster's game reports
+the thrall's cell loaded. The dormant row is the thrall's record: its Reanimate running effect keeps its caster
+(RunningEffect's caster and reanimate key, written to the change form since 65c40b6f), the departure leaves it as it is
+(cells.rs gone() ends the cells table's command and changes no effect), and a restart keeps it (87ac7bce). No second store
+holds the commander: the cells table's command is the live owner, rebuilt from the record at the return. wire-rules cells.rs
+`Cells::returning` takes the thrall records of a loaded cell (the actor, its cell, the caster its record names, the record's
+duration, alive) and claims for the reporting player, through claim_commanded, every one that is alive, full, names that
+player its caster, stands in a cell the player's game has loaded and is under no live command (commander_of 0).
+PartOne::OnCellLoaded reads the cell's actors from the grid, not the player's emitters (the server's 3x3 lags the engine's
+5x5, so a thrall two squares out is no emitter yet at its cell's load), sends each claim's word (UpdateHoster, the cast's
+own) and logs it.
+
+The edges. The thrall died while its caster was away: the record is dead, its next effect tick empties the set
+(MpActor::AdvanceEffects), and `alive` covers the tick before it. Another caster raised it: a living thrall cannot be raised,
+so a death came first and the new raise names the other caster; a live command by another is commander_of nonzero. Another
+seat hosts the thrall's cell: the claim never asks who hosts; the word flips both games, as at the cast, and the cell keeps
+its host. The caster logs in elsewhere: nothing until its game loads the thrall's cell; the thrall stays its cell's NPC with
+its look (no pull to the caster, which would be a new decision). Another player's dialogue claim on the thrall gives way
+(claim_commanded's rule, as at a cast). The caster's own live command is not claimed again. A thrall an NPC necromancer
+raised names the NPC its caster, so no seat's return claims it.
+
+Rungs. R0: who commands is the server's, from the record (the caster the server stamped at the accepted hit, ActionListener's
+NoteReanimateAccepted, never a client's word). R2: the command on the commander's engine and the thrall's moves, the
+commander's engine computing and the server recording them, unvalidated (rule 5), as the cast's command.
+
+The word. UpdateHoster hands the thrall's simulation over. What a fresh game lacks is which engine commands it: the host of
+a thrall that stayed simulates it too, and only the caster tells the two apart. The record holds the caster, and MagicEffects
+(MsgType 43) now carries it: MagicEffect's `caster`, 0 for none, so every effect's caster reaches the games that see its actor
+(docs/WIRE.md's t 43 row; SCHEMA_VERSION 45 on this branch, its number settled at the merge).
+
+The client and the native. magicEffectsService keeps each actor's Reanimate state's caster from its MagicEffects (the state
+with no clock, remaining negative) and every 30 updates asks for each: is this game's player the caster
+(localIdToRemoteId(0x14)), does this game simulate the actor (HostService.isMine), is it alive. While the three hold it calls
+Skyrim Platform's commandActor(refrId, true); once they stop, commandActor(refrId, false). commandActor (FateApi, npc-fate's
+family of main-thread exports beside resurrectActor) is callable from any JavaScript context and queues one task on the main
+thread through SKSE's UI task queue (QueueFateTask). The task decides by the engine's state, so one call starts, refreshes and
+ends: it leaves a puppet, an actor with its AI off and the engine's own command (the player's commandedActors entry for the
+thrall holding an effect: the original cast's CommandEffect) alone; it starts with 37490(thrall, 1) when the life state is not
+kReanimate, then 38798(thrall, player, null); it refreshes its own entry (no effect) with 38799(thrall, player, null); it ends
+with 38800(thrall, null) on `false` or a thrall that reads dead; and it never links again a thrall whose entry the engine
+removed without its 38800 (40056's eviction). Ids by `just addr`: 37490 0x675130, 38798 0x6c5cb0, 38799 0x6c5da0, 38800
+0x6c5fd0, none of them in CommonLibSSE-NG at b93280e8; the signatures are the static read's (return-to-caster-read.md, as
+lab/frida/thrall-link.js:69-77 cites it), exercised by run 20261112-152001. It is no Papyrus native, so NATIVES.md (the ledger
+of Papyrus natives) has no row for it; its rung is this section's R2.
+
+Lines. Server: "[verb:npc-fate] <actor> returns to its caster <player> in cell <cell>: a full thrall its record names (the
+record's <N> s), commanded again (ADR-060)"; the restart's line for a full thrall now ends "it stays, its look kept, until its
+caster <caster> returns (ADR-060)". The commander's platform log: "[verb:npc-fate] commandActor(<id>): linked to the player
+(37490, 38798) on thread <t> main <m>", "[verb:npc-fate] commandActor(<id>): unlinked (38800)", "[verb:npc-fate]
+commandActor(<id>): the engine removed it from the player's commanded actors; not linked again", "[verb:npc-fate]
+commandActor(<id>): the engine's own command, left alone" (once per actor).
+
+Tests. T0: cells.rs's return cases (at the cell's load and not before it; under another seat's hosting; none for a dead
+thrall, another caster's record, a timed record, 86,399 s against 86,400, a live command by another or its own; a dialogue's
+claim gives way; a second departure is ClaimGone again) and the bridge's; NpcFateTest's return case (the departure keeps the
+full thrall alive with its record's caster, the caster's next login and its load of the cell claim it, the word and
+MagicEffects' caster; killed while away, no return; the change form's round trip into a fresh world, then the return);
+wire-validate's caster case and the 43 fixture. T2: magic-effects.yaml and poison.yaml declare the caster; thrall-return.yaml
+(Dead Thrall's command kept through the departure with no ThrallExpired; the returning character's load of the cell claims no
+body that never stood). T3: x-reanimate-return v2 (lab/.cache/drafts/reanimate/x-reanimate-return-v2.yaml): Dead Thrall by
+hand, c2 simulating Sven while c1 is away, c1's return with the native in place of thrall-link.js's link.
+
+Rule 6 (option A, the coordinator for Eli, 2026-11-12): no schema change and no migration, since the return reads the
+record, which keeps its Reanimate state's caster across a restart since 65c40b6f. The restart's proof: NpcFateTest's round
+trip, then a restart probe and b-reanimate-return-restart in its own commit after v2.
+
+Open (HYPOTHESIS):
+- H-C4-1: the recipe behaves from SKSE's UI task on the main thread (UI::ProcessMessages) as it did inside the player's update
+  (thrall-link.js's injection point). Read: v2's trace rows (thrall-link.js in trace mode) at the return, the after state and
+  37404's package once a scene lets the thrall go.
+- H-C4-2: 30 updates of the client's tick keep the follow as the read's 30 frames did. Read: 37404's rows between the hops and
+  npc-state's package.
+- H-C4-3: 38800 at once on a dead thrall (the read waited 8 s) leaves the death as the engine plays it. Read: F2's rows and the
+  server's death lines.
+- H-C4-4 (the static read's G2): 40056 removes an entry with no effect first and without a dispel, so the caster's next raise
+  uncommands the returned thrall where single player kills the old one; the native does not link it again. Read: a second-raise
+  probe; what follows is Eli's.
+- H-C4-5: the promotion (AI on) lands before the native's first task; the native skips a puppet and an AI-off actor and is asked
+  again 30 updates later. Read: v2's link line after the promote line. Twin Souls' limit with an entry that holds no effect
+  (G4) goes with H-C4-4.
 
 ## The non-host's loot at M3's exit (D71, 14:29 PDT 2026-10-30; c-dungeon-enemies on the union b8a9d4c6)
 
