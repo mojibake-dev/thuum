@@ -9,11 +9,11 @@ not merged on canon at a sitting's cut waits for the next one, and a sitting nev
 not a feel. ADR-072's own table is the text Eli accepted and stays as it was; this file has that table with the acceptance's
 corrections applied, and it is the copy that changes.
 
-Three readings taken here are not Eli's word yet (ADR-072's note lists them as open). This file is the first: ADR-072's accepted
-text has the table in DECISIONS.md, and that its changing copy belongs here, as a milestone's close rows do, is auriel's reading
-and Eli's to overrule. A tick made before its leg's lab green stands with its date and build, and DONE waits for both (ADR-067
-decision 8 allows such a playtest). And a leg's DONE also waits for the paper close of its verbs' HYPOTHESIS tags (CLAUDE.md's
-verb rule; M3-CLOSE.md section 2b), agent work beside the sittings.
+Eli kept this file as the copy of ADR-072's table that changes (2026-11-12, "Keep ROUTE-CLOSE.md"; the answered note at
+ADR-072's end). Two readings taken here are not Eli's word yet (ADR-072's note lists them as open). A tick made before its leg's
+lab green stands with its date and build, and DONE waits for both (ADR-067 decision 8 allows such a playtest). And a leg's DONE
+also waits for the paper close of its verbs' HYPOTHESIS tags (CLAUDE.md's verb rule; M3-CLOSE.md section 2b), agent work beside
+the sittings.
 
 ## 1. The legs and the lab's record
 
@@ -74,17 +74,18 @@ loot half, M3-2 row 4 with row 1's reanimate half, M3-3 row 2, M3-4 row 3, M3-5 
 | Along the way | M3-CLOSE row 8 (51's M3-6, Raise Wall); a leveling row, none written yet | Raise Wall unticked; perks ticked in playtest 41 (2026-11-02, docs/verbs/perks.md:275-276) |
 | Later on the route | ADR-071's P3 and P4 items | unticked |
 
-M3-CLOSE row 6 (a), A Lovely Letter starting for both on the walk into Riverwood, is asked in no checklist; under ADR-068's
-D-Q5 A a Story Manager quest starts per seat, so the row is Eli's to keep or strike.
+M3-CLOSE row 6 (a), A Lovely Letter starting for both on the walk into Riverwood, is struck (Eli, 2026-11-12, "Strike row
+6(a)"): under ADR-068's D-Q5 A a Story Manager quest starts per seat, and no checklist asked it.
 
 ## 3. Report
 
 Each sitting that ticks rows is recorded here by date with the build it ran on, as M3-CLOSE.md section 3 does for M3. A run set
 that changes a leg's record is recorded the same way, and section 1's cell is then rewritten to it.
 
-- 2026-11-12: no sitting has ticked a row. Playtest 51 is cut on fork canon 6fe5fea0 by Eli's word of this day (ADR-071's note):
-  it asks the rows of legs 1, 3, 4, 7, 8 and 9 and the Raise Wall row. Legs 2 and 5 are not in it, and leg 6 and the residents
-  have no row yet. M3 stays BUILT after it whatever is ticked: M3-CLOSE's row 4, row 1's reanimate half and row 7 are still owed.
+- 2026-11-12: no sitting has ticked a row. Playtest 51 is cut on fork canon 6fe5fea0 by Eli's word of this day (ADR-071's notes),
+  to be played under the staged 60 fps cap and in one sitting of fifteen rows (Eli's answers of about 17:05Z). It asks the rows
+  of legs 1, 3, 4, 7, 8 and 9 and the Raise Wall row. Legs 2 and 5 are not in it, and leg 6 and the residents have no row yet. M3
+  stays BUILT after it whatever is ticked: M3-CLOSE's row 4, row 1's reanimate half and row 7 are still owed.
 
 ## 4. Off the route, by name
 

@@ -3160,6 +3160,17 @@ shots', bursts', log-count's and the log fetch's copies' names carry their run, 
 next run's. A read that failed is unchanged (a run's own trace not fetched whole is E_RUN_FRIDA_FETCH, which still rolls
 its seat back). The fresh review of 5771141b (FIX FIRST) is applied as written.
 
+Note 2026-11-12 (Eli in auriel's session, about 17:05Z, by AskUserQuestion, "Widen upload route (Recommended)", over "Leave as
+is" and "virtiofs share"; recorded 17:07Z by auriel; to build after playtest 51, in lab-api's lane): a run's logs, screenshots and
+Frida traces are to leave a seat by the seat's own upload to lab-api, the route its crash and hang dumps already take
+(docs/LAB.md's PUT /lab/clients/<client>/hang-dump/<run>), in place of the guest agent's file reads, which stay for small things.
+Four merges of 2026-11-11 and 11-12 exist to cope with those reads as a bulk transport (8bd23824, 58502b08, aa686463, 4f0398a2; a
+whole read of 1.46 MB timed out three times in a row on a busy seat). core's read of the same day ranked the upload first,
+virtiofs second (WinFsp and the viofs driver in the seat image, and a virtiofs line in every snapshot section, since a rollback
+takes the VM's config from the section) and SMB last (a Samba on sky-srv in front of the seats). The seats count as hostile, so
+the route takes a per-run token, a file name from a safe character set and a size cap, and writes only inside its own run's
+directory. The record, with core's sources, is docs/research/closeout-route-2026-11-12.md, section 4.
+
 ## ADR-054: The developer loop: a client change reaches a running seat in minutes, tests run before a push, and engine-facing code waits for its read
 
 Status: ACCEPTED 00:01 PDT 2026-10-28 (Eli, 2026-10-27 late: "do all of those sans 4", on the six
@@ -5416,6 +5427,15 @@ waits for rungs 1, 2, 3a and 3, for the cap's merge or for the reanimation.
   rung 1's merge with the cap, and D-PH18, the cart scenario's first run in rung 3's stage; W3's drop fix in rung 1's client
   commit after 51; rung 2 in the ladder.
 
+Answered (Eli in auriel's session, 2026-11-12 about 17:05Z, by AskUserQuestion; recorded 17:07Z by auriel), the three questions the
+note above left with Eli:
+- The cap: "Under the cap (Recommended)", over "Canon alone". Playtest 51 is played on the seats as promoted, under the staged cap,
+  and its build line says so; main's layer is not laid first. The cap's merge still waits for rung 1 (D-PH17).
+- 51's length: "One sitting (Recommended)", over "Two sittings". 51 stays its checklist's fifteen rows in one sitting, the one
+  sitting over ADR-072 decision 3's eight.
+- The split draft's two withdrawn wordings: "Confirm withdrawals". The eight regrouped rows and the "P1" and "P2" naming are no
+  part of the cut, and W7's four playtests stand as the plan has them.
+
 Amends: ADR-064 decision 7 (dated note under it), ADR-063's props note (accepted under it), ADR-058's slices (slice two kept as a
 derived class; slice three is rungs 5 and 6), ADR-067 decision 4 (its final sample is the asleep sample; the built ChangeForm
 apply is the record). W3 stays Eli's at the time: a rewrite of b-prop-push's step 27 if the drop read calls for one (decided
@@ -5533,6 +5553,10 @@ Open at the acceptance, each Eli's to say (found by the same check; none is deci
 - Decision 6's "at T0 and T2" for clauses 5 and 7 narrows PLAN.md:34, which asks T3 scenarios of all eight clauses.
 - Decision 5's "pickpocketing" beside Eli's PvP pickpocketing of the same day, NEXT when M5 opens (PLAN.md:1575): read here as
   after the walk closes, unless Eli says sooner.
+
+Answered (Eli in auriel's session, 2026-11-12 about 17:05Z, by AskUserQuestion, "Keep ROUTE-CLOSE.md"; recorded 17:07Z by auriel):
+the walk's table that changes is docs/ROUTE-CLOSE.md, laid out as docs/M3-CLOSE.md is, and this ADR's own table stays as accepted.
+The five points above stay open.
 
 Amends: ADR-064 decision 6 and ADR-053 decision 1 (what a playtest is; a dated note under each), the ladders of ADR-068 decision 9
 and ADR-071 (decision 4: one rung built ahead; noted under ADR-071 and under ADR-067 decision 7's amendments, whose order stands),
