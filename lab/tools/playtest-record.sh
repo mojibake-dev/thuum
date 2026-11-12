@@ -55,15 +55,16 @@ copy_ps() { printf '%s' "\$ErrorActionPreference = 'Stop'; Remove-Item -LiteralP
 # read_ranged <vmid> <guest path> <local file>: a seat's file read back in 512 KiB ranges through Proxmox's own agent
 # file-read (offset, count, decode=0; qemu-server 9.2.15 on core), as lab-api's Runner._read_back reads: one whole-file read
 # of a console past about 1 MiB timed out on a busy seat (c1, 2026-11-12, 1,464,655 bytes: "guest-file-read failed - got
-# timeout"). Each range is asked up to three times and the file ends at the first short range; 1 when a range never came
-# back, the bytes before it kept
+# timeout"). Each range's base64 is decoded strictly and checked against its bytes-read, as lab-api's file_read_range
+# checks it, and asked up to three times; the file ends at the first short range; 1 when a range never came back, the
+# bytes before it kept
 read_ranged() {
   local at=0 n try part
   part=$(mktemp); : > "$3"
   while :; do
     for try in 1 2 3; do
       ssh -o BatchMode=yes "$jump" "pvesh get /nodes/core/qemu/$1/agent/file-read --file '$2' --offset $at --count 524288 --decode 0 --output-format json" 2>/dev/null \
-        | python3 -c 'import base64,json,sys; sys.stdout.buffer.write(base64.b64decode(json.load(sys.stdin)["content"] or ""))' > "$part" 2>/dev/null && break
+        | python3 -c 'import base64,json,sys; d=json.load(sys.stdin); b=base64.b64decode(d["content"] or "", validate=True); n=d.get("bytes-read"); sys.exit(1) if n is not None and int(n) != len(b) else sys.stdout.buffer.write(b)' > "$part" 2>/dev/null && break
       [ "$try" = 3 ] && { rm -f "$part"; return 1; }
       sleep 3
     done
@@ -74,22 +75,26 @@ read_ranged() {
   done
   rm -f "$part"
 }
-# tail_ps <src expression> <copy>: a console's last 60,000 lines, so one file-read stays well under the guest agent's limits
-# (a whole console's read timed out on both seats in 191642); Get-Content reads with read-write sharing, and the old copy
-# goes first and a failed read stops the script (exit 1), as copy_ps
-tail_ps() { printf '%s' "\$ErrorActionPreference = 'Stop'; Remove-Item -LiteralPath '$2' -Force -ErrorAction SilentlyContinue; Get-Content -LiteralPath $1 -Tail 60000 | Set-Content -LiteralPath '$2' -Encoding utf8"; }
-# fetch_copy <vmid> <powershell> <copy> <local file>: the copy made, then read in ranges (read_ranged) only after its exec
-# exits 0 (copy_ps, tail_ps), so a failed copy writes an empty file and a reason in $why, never an older copy as the log
+# fetch_copy <vmid> <powershell> <copy> <local file>: the copy made on the seat (copy_ps), then read back in ranges
+# (read_ranged) once its exec exits 0, three tries 3 s apart, since the guest agent's answer is now and then lost or not
+# JSON (client-frametime's captures, 2026-10-19; sky-c2's "PID does not exist", 20261018-204244). A copy never made, or a
+# read cut short, leaves what came back and its reason in $why, so no caller takes an older copy or a short one for the log
 fetch_copy() {
-  local code
-  why=""; : > "$4"
-  code=$(ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$1 qm guest exec $1 --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$2")" 2>/dev/null \
-    | python3 -c 'import json,sys; print(json.load(sys.stdin).get("exitcode"))' 2>/dev/null)
-  if [ "$code" = 0 ]; then
-    read_ranged "$1" "$3" "$4" || why=" (read back short: a range never came back)"
-  else
-    why=" (no copy: its exec exited ${code:-without an answer})"
-  fi
+  local code try
+  why=""
+  for try in 1 2 3; do
+    : > "$4"
+    code=$(ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$1 qm guest exec $1 --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$2")" 2>/dev/null \
+      | python3 -c 'import json,sys; print(json.load(sys.stdin).get("exitcode"))' 2>/dev/null || true)
+    if [ "$code" = 0 ]; then
+      read_ranged "$1" "$3" "$4" && { why=""; return 0; }
+      why=" (read back short after $try tries: a range never came back)"
+    else
+      why=" (no copy after $try tries: its exec exited ${code:-without an answer})"
+    fi
+    [ "$try" = 3 ] || sleep 3
+  done
+  return 1
 }
 gexec() {  # gexec <vmid> <powershell>: its output; read-only work on a clone through the guest agent
   local enc
@@ -255,15 +260,15 @@ for pair in c1:711 c2:712; do
     ssh_srv "cat > $out/$name" < "$tmp/$name" && note "$name: $(wc -l < "$tmp/$name" | tr -d ' ') lines$why"
   done
   # the client's console, where skymp5-client's own lines are (an inventory apply, the hands' re-equip, a say's verdict,
-  # a trap's "fired here"): the game's lab-console-logs.txt for this launch, its last 60,000 lines, so one file-read stays
-  # well under the guest agent's 16 MiB cap (playtest 44, 2026-11-03: the arrows' re-equip could not be read, the recorder
-  # kept no console). C:\sky-lab\<c>-console.log is not fetched: no tee of the playtest but lab-api's copy of the last lab
-  # run's console (runner.py's client-log fetch; labapi-client-log-fetch removes it once read, thuum-fa's review 2026-11-12).
-  # Earlier launches' consoles are kept at each relaunch (playtest-relaunch.sh, relaunch-logs/), listed below.
+  # a trap's "fired here"): the game's lab-console-logs.txt for this launch, whole, since fetch_copy reads it back in
+  # ranges (playtest 44, 2026-11-03, lost its console to one whole-file read, which a 60,000-line tail stood in for). Not
+  # C:\sky-lab\<c>-console.log: no tee of the playtest but lab-api's copy of the last lab run's console (runner.py's
+  # client-log fetch; labapi-client-log-fetch removes it once read, thuum-fa's review 2026-11-12). Earlier launches'
+  # consoles are kept at each relaunch (playtest-relaunch.sh, relaunch-logs/), listed below.
   for spec in "$c-console.log|(Join-Path (Get-Content -LiteralPath 'C:\\sky-lab\\game-dir.txt' -Raw).Trim() 'Data\\Platform\\Logs\\lab-console-logs.txt')"; do
     name=${spec%%|*}; src=${spec#*|}; copy="C:\\sky-lab\\playtest-$n-$name"
-    fetch_copy "$vmid" "$(tail_ps "$src" "$copy")" "$copy" "$tmp/$name"
-    ssh_srv "cat > $out/$name" < "$tmp/$name" && note "$name: $(wc -l < "$tmp/$name" | tr -d ' ') lines (its last 60,000)$why"
+    fetch_copy "$vmid" "$(copy_ps "$src" "$copy")" "$copy" "$tmp/$name"
+    ssh_srv "cat > $out/$name" < "$tmp/$name" && note "$name: $(wc -l < "$tmp/$name" | tr -d ' ') lines$why"
   done
 done
 # every launch the session relaunched away from: its platform, driver and console logs as playtest-relaunch.sh kept them

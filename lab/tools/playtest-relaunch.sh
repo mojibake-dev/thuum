@@ -52,15 +52,16 @@ copy_ps() { printf '%s' "\$ErrorActionPreference = 'Stop'; Remove-Item -LiteralP
 # read_ranged <vmid> <guest path> <local file>: a seat's file read back in 512 KiB ranges through Proxmox's own agent
 # file-read (offset, count, decode=0; qemu-server 9.2.15 on core), as lab-api's Runner._read_back reads: one whole-file read
 # of a console past about 1 MiB timed out on a busy seat (c1, 2026-11-12, 1,464,655 bytes: "guest-file-read failed - got
-# timeout"). Each range is asked up to three times and the file ends at the first short range; 1 when a range never came
-# back, the bytes before it kept
+# timeout"). Each range's base64 is decoded strictly and checked against its bytes-read, as lab-api's file_read_range
+# checks it, and asked up to three times; the file ends at the first short range; 1 when a range never came back, the
+# bytes before it kept
 read_ranged() {
   local at=0 n try part
   part=$(mktemp); : > "$3"
   while :; do
     for try in 1 2 3; do
       ssh -o BatchMode=yes "$jump" "pvesh get /nodes/core/qemu/$1/agent/file-read --file '$2' --offset $at --count 524288 --decode 0 --output-format json" 2>/dev/null \
-        | python3 -c 'import base64,json,sys; sys.stdout.buffer.write(base64.b64decode(json.load(sys.stdin)["content"] or ""))' > "$part" 2>/dev/null && break
+        | python3 -c 'import base64,json,sys; d=json.load(sys.stdin); b=base64.b64decode(d["content"] or "", validate=True); n=d.get("bytes-read"); sys.exit(1) if n is not None and int(n) != len(b) else sys.stdout.buffer.write(b)' > "$part" 2>/dev/null && break
       [ "$try" = 3 ] && { rm -f "$part"; return 1; }
       sleep 3
     done
@@ -71,23 +72,42 @@ read_ranged() {
   done
   rm -f "$part"
 }
+# fetch_copy <vmid> <powershell> <copy> <local file>: the copy made on the seat (copy_ps), then read back in ranges
+# (read_ranged) once its exec exits 0, three tries 3 s apart, since the guest agent's answer is now and then lost or not
+# JSON (client-frametime's captures, 2026-10-19; sky-c2's "PID does not exist", 20261018-204244). A copy never made, or a
+# read cut short, leaves what came back and its reason in $why, so no caller takes an older copy or a short one for the log
+fetch_copy() {
+  local code try
+  why=""
+  for try in 1 2 3; do
+    : > "$4"
+    code=$(ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$1 qm guest exec $1 --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$2")" 2>/dev/null \
+      | python3 -c 'import json,sys; print(json.load(sys.stdin).get("exitcode"))' 2>/dev/null || true)
+    if [ "$code" = 0 ]; then
+      read_ranged "$1" "$3" "$4" && { why=""; return 0; }
+      why=" (read back short after $try tries: a range never came back)"
+    else
+      why=" (no copy after $try tries: its exec exited ${code:-without an answer})"
+    fi
+    [ "$try" = 3 ] || sleep 3
+  done
+  return 1
+}
 keep() {  # the logs of the session the stop ends, off the clone, each copied first (copy_ps: the game holds them open)
-  local stamp kind src copy name tmp ps
+  local stamp kind src copy name tmp
   stamp=$(date -u +%Y%m%dT%H%M%SZ); tmp=$(mktemp)
   ssh -o BatchMode=yes -J "$jump" "$srv" 'sudo mkdir -p /srv/lab/results/relaunch-logs && sudo chown eli:eli /srv/lab/results/relaunch-logs' 2>/dev/null \
     || { echo "could not reach the results site: $client's logs not kept" >&2; rm -f "$tmp"; return 0; }
   for spec in "platform|'$spl'" "driver|(Join-Path (Get-Content -LiteralPath 'C:\\sky-lab\\game-dir.txt' -Raw).Trim() 'Data\\Platform\\Logs\\lab-driver-logs.txt')" \
               "console|(Join-Path (Get-Content -LiteralPath 'C:\\sky-lab\\game-dir.txt' -Raw).Trim() 'Data\\Platform\\Logs\\lab-console-logs.txt')"; do
     kind=${spec%%|*}; src=${spec#*|}; name=$stamp-$client-$kind.log; copy="C:\\sky-lab\\relaunch-$name"
-    # copied, then cut to its first 2,000 and last 8,000 lines when longer, so one file-read through the guest agent
-    # stays far under the answer size that killed sky-c1's agent once (~5.6 MB; playtest 45's c1 log ran to 25k error lines)
-    ps="$(copy_ps "$src" "$copy"); \$t = Get-Content -LiteralPath '$copy'; if (\$t.Count -gt 10000) { \$n = \$t.Count; Set-Content -LiteralPath '$copy' -Value (\$t[0..1999] + ('... ' + (\$n - 10000) + ' lines left out by the relaunch keep ...') + \$t[-8000..-1]) }"
-    ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$ps")" >/dev/null 2>&1 || true
-    read_ranged "$vmid" "$copy" "$tmp" || true
+    # whole, read back in ranges (fetch_copy); it was cut to its first 2,000 and last 8,000 lines while one whole-file read
+    # carried it (playtest 45's c1 log ran to 25k error lines)
+    fetch_copy "$vmid" "$(copy_ps "$src" "$copy")" "$copy" "$tmp" || true
     if [ -s "$tmp" ] && ssh -o BatchMode=yes -J "$jump" "$srv" "cat > /srv/lab/results/relaunch-logs/$name" < "$tmp"; then
-      echo "kept $client's $kind log, $(wc -l < "$tmp" | tr -d ' ') lines: https://thuum.gaussing.tv/results/relaunch-logs/$name"
+      echo "kept $client's $kind log, $(wc -l < "$tmp" | tr -d ' ') lines$why: https://thuum.gaussing.tv/results/relaunch-logs/$name"
     else
-      echo "could not keep $client's $kind log before the relaunch" >&2
+      echo "could not keep $client's $kind log before the relaunch$why" >&2
     fi
   done
   rm -f "$tmp"
