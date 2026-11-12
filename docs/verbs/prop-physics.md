@@ -1,9 +1,11 @@
 # prop-physics
 
-Status: physics rungs 1 to 3 BUILT on fork branches, none staged green and none merged (2026-11-12; ADR-071's ladder, and
-playtest 51 waits for them): rung 1 "props hold" on m4-physics-1-arbitration d9da7da3, rung 2 "sample v2" on
-m4-physics-2-sample cc5c44f3 (rung 1's head merged in), rungs 3a and 3 "the impact" on m4-physics-3-impact 92b032cd (rung 2's
-head merged in), its platform and client review's fixes at 042f6907. The rung sections under Ownership and the Rung, Message
+Status: physics rungs 1 to 3 BUILT on fork branches, none staged green and none merged (2026-11-12; ADR-071's ladder;
+playtest 51 is cut on canon without them, Eli's D-C1 B, and ADR-071's P1 follows rungs 0 and 1, P2 rungs 2 and 3, each in the
+first sitting cut after its rungs merge on canon, ADR-072 decision 3): rung 1 "props hold" on m4-physics-1-arbitration
+d9da7da3, rung 2 "sample v2" on m4-physics-2-sample 22c2466d (rung 1's head merged in; its T2 session's drop order fixed),
+rungs 3a and 3 "the impact" on m4-physics-3-impact 4518ca61 (rung 2's head merged in), its platform and client review's
+fixes at 042f6907. The rung sections under Ownership and the Rung, Message
 contract, Server and Client sections describe those heads; fork canon keeps slice one's rule with its timers. Slice one: MERGED
 to fork parity 4f746162 (04:03Z 2026-11-01, numidium: the gate 20261101-031523-merge-m3-prop-physics 11 of 11,
 b-prop-push green at its first run 032302, T2 green with the prop-physics session identical at 18 declared divergences, both clones
