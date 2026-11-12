@@ -3864,6 +3864,53 @@ class LogCount(RunTests):
         self.assertIn(held, body["notes"])
         self.assertEqual(self.services.runner.seats["c1"].force, f"its last run ({run_id}) ended in a fault: {held}")
 
+    def _its_copy_answer_lost(self, leave: str | None) -> str:
+        """log-count at step 7 whose Skyrim Platform log copy exec ends with its answer lost (E_PVE_EXEC_LOST), leaving
+        `leave` as the copy (None: no copy), the log holding the line an absence claim says never came (the check of
+        508697c3's demos, lost_copy_demo.py and lost_copy_empty_demo.py); the step's note."""
+        import asyncio
+
+        from labapi.proxmox import ProxmoxError
+        from labapi.runner import RunRecord
+        from labapi.scenario import Scenario
+
+        pve = self._seat()
+        pve.files[self.settings.client_driver_log] = "E_RACE_PERMIT refused\n"
+        pve.files[self._console(pve)] = "console\n"
+        copy = "C:\\sky-lab\\logcount-007.log.copy"
+        plain_exec = pve.exec
+
+        def exec_(guest, command, timeout):
+            if f"[IO.File]::Create('{copy}')" in " ".join(command):
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                if leave is not None:
+                    pve.files[copy] = leave
+                raise ProxmoxError(f"E_PVE_EXEC_LOST: pid 42 on {guest.name}: the guest agent no longer knows it; the "
+                                   "command ended and its answer is lost")
+            return plain_exec(guest, command, timeout)
+
+        pve.exec = exec_
+        rec = RunRecord("x", Scenario(id="x", clients=["c1"]), self.tmp, "now")
+        ok, note = asyncio.run(self.services.runner._log_count(rec, 7, "c1", "E_RACE_PERMIT"))
+        self.assertTrue(ok, note)
+        self.assertIsNone(self.services.board.log_count("c1", "E_RACE_PERMIT"), note)
+        self.assertIn("no count kept", note)
+        return note
+
+    def test_a_lost_copy_answer_that_left_no_copy_keeps_no_count(self):
+        """The copy's length read after a lost answer finds no copy, which is a copy that failed, not a source not
+        there: read as the tee's absence (SeatFileMissing), it counted the log as empty, and c1.log_count("E_RACE_PERMIT")
+        == 0 passed on a log that holds the line (the check of 508697c3)."""
+        note = self._its_copy_answer_lost(None)
+        self.assertIn("its copy C:\\sky-lab\\logcount-007.log.copy is not there, the copy's own answer lost (E_PVE_EXEC_LOST", note)
+
+    def test_a_lost_copy_answer_that_left_an_empty_copy_keeps_no_count(self):
+        """log-count's copy runs without Stop, so a source open that failed still creates an empty copy, whose length
+        the lost answer's fallback read as 0: only the copy exec's own "N M" proves a copy whole, so a lost answer
+        keeps no count whatever the copy holds (the check of 508697c3)."""
+        note = self._its_copy_answer_lost("")
+        self.assertIn("c1's Skyrim Platform log unread (its copy's exec answer was lost, so the copy is unchecked)", note)
+
     def test_the_live_patterns_are_named_once_for_the_holders_given(self):
         from labapi.runner import _log_count_patterns
 

@@ -1247,7 +1247,8 @@ class Runner:
         counted in both for c.log_count("<pattern>"). The console log is lab-driver's tee of every console line:
         printConsole, which skymp5-client's logTrace and logError use, reaches no other file, so a count of the
         first alone never saw them (x-handoff-door 20261024-013234). An unmanaged seat or a failed copy of the
-        Skyrim Platform log keeps no count, so the assert raises; a console log not there yet (a driver from
+        Skyrim Platform log keeps no count, so the assert raises, as does a copy of either log whose exec answer the
+        agent lost, which nothing proves whole; a console log not there yet (a driver from
         before the tee) counts as empty. The note carries each log's bytes three ways: the file's length on the
         seat when the copy opened it, the copy's length and what lab-api read of the copy, since a copy after a
         plain relaunch counted 0 for a line the run's own artifact holds (b-puzzle-relay 20261110-135219 and
@@ -1291,6 +1292,11 @@ class Runner:
                 # its tries 1 s apart as they were: eight committed untils poll seat counts in 25 s windows
                 # (b-lever-relay, x-lever-relay, x-lever-furn, x-lever-after-scene), which two 10 s pauses would spend
                 seat_n, seat_m = await self._seat_copy(g, cmd, copy, pause_s=1.0)
+                if seat_n is None:
+                    # only the copy exec's own "N M" with M >= N proves a copy whole: one whose answer the agent lost
+                    # may have failed to open its source, leaving an empty copy (this copy runs without Stop, so its
+                    # Create still runs) whose count of 0 would pass an absence claim (the check of 508697c3)
+                    raise ValueError("its copy's exec answer was lost, so the copy is unchecked")
                 # read whole or not counted: a log read only in part keeps no count, since a count of part of it could
                 # pass an absence claim (b-race-permit's c1.log_count("E_RACE_PERMIT") == 0, the re-review of 486e80f3)
                 data = await self._read_back(rec, g, copy, seat_m, f"log-count: {client}'s {which}")
@@ -1301,10 +1307,10 @@ class Runner:
             except (ProxmoxError, ValueError) as e:
                 if "guest agent is not running" in str(e):
                     rec.agents_down.setdefault(client, (str(e), False))  # the seat's other log reads skip it, as a fetch's
-                return True, f"log-count: {client}'s {which} unread after three tries ({e}); no count kept"
+                # each failure says how it came, three tries, a lost answer or a short read
+                return True, f"log-count: {client}'s {which} unread ({e}); no count kept"
             texts.append(data.decode("utf-8", errors="replace"))
-            byte_notes.append(f"{len(data)} read" if seat_n is None
-                              else f"{len(data)} read of {seat_m} copied of {seat_n} on the seat")
+            byte_notes.append(f"{len(data)} read of {seat_m} copied of {seat_n} on the seat")
         rx = re.compile(pattern)
         counts = [sum(1 for line in text.splitlines() if rx.search(line)) for text in texts]
         n = sum(counts)
@@ -2313,11 +2319,14 @@ class Runner:
         """A copy `cmd` makes on the seat, whose last stdout line is "<the source's bytes at its open> <the copy's
         bytes>" as log-count's copy prints them, and those two lengths from that line, three tries 10 s apart (_tried).
         A copy whose exec answer the agent lost (E_PVE_EXEC_LOST) ran to its end on the seat, so its length then comes
-        from the copy itself, by one length exec under the same tries, the source's unknown (None). A copy shorter than
-        its source at its open was cut short, since the sources only grow (the script's .log is opened 'a',
-        frida_script_text; frida-inject's stdout appends), and is tried again as a failed one is. A copy whose exec
+        from the copy itself, by one length exec under the same tries, the source's unknown (None); such a copy is
+        unchecked, since only the exec's own two lengths prove it whole, and log-count counts none (_log_count). A copy
+        shorter than its source at its open was cut short, since the sources only grow (the script's .log is opened
+        'a', frida_script_text; frida-inject's stdout appends), and is tried again as a failed one is. A copy whose exec
         printed `missing <path>` instead (a client log's source that is not there, _fetch_client_file; log-count's tee
-        not there) is SeatFileMissing at once: no try finds it."""
+        not there) is SeatFileMissing at once: no try finds it. A copy not there after its answer was lost is a plain
+        ValueError, a copy that failed, never SeatFileMissing, which a caller reads as its source not there (log-count's
+        tee then counts as empty: the check of 508697c3)."""
         def copied(res) -> tuple[int, int] | None:
             last = _last_line(res.out)
             if res.exitcode == 0 and last.startswith("missing "):
@@ -2330,7 +2339,11 @@ class Runner:
         try:
             return await self._tried(g, cmd, copied, "its copy", pause_s)
         except ProxmoxError as e:  # E_PVE_EXEC_LOST, the one error _tried passes on
-            return None, await self._seat_length(g, copy, f"its copy's length, the copy's own answer lost ({str(e)[:120]}),", pause_s)
+            lost = f"the copy's own answer lost ({str(e)[:120]})"
+            try:
+                return None, await self._seat_length(g, copy, f"its copy's length, {lost},", pause_s)
+            except SeatFileMissing as gone:
+                raise ValueError(f"its copy {gone}, {lost}") from gone
 
     async def _seat_length(self, g: Guest, path: str, what: str, pause_s: float = 10.0) -> int:
         """The length of the file at `path` on the seat by one exec, three tries `pause_s` apart (_tried): a file a
