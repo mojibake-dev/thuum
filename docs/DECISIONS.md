@@ -3102,6 +3102,14 @@ scenario (minutes); the premise lever library (npc-still, an approach that re-ai
 restart, a judged look; about a day, each timed live first). The first day runs the slots by
 hand with today's tools.
 
+Amended 2026-11-12 (Eli, in auriel's session after plan mode, verbatim "B, accept it, send all
+three messages"; ADR-072 decision 3): decision 1's playtest is a sitting of the closeout's
+route, or a stretch of it, on the current canon, repeated on each new canon until every leg is
+ticked; a system not merged on canon at a sitting's cut waits for the next one, and a sitting
+never waits for a build. The two slots a day and the eight items stand. Playtest 51, cut by the
+same word, is over both the eight and the forty minutes by Eli's fold of M3's rows into it:
+fifteen rows and about five hours under its vampire item's clock.
+
 ## ADR-036: A seat relaunches the game between runs instead of rolling its VM back
 
 Status: ACCEPTED 00:01 PDT 2026-10-28 (Eli, 2026-10-27 late: "do all of those sans 4", the fifth of
@@ -3151,6 +3159,17 @@ more, pinging the agent, each ping it answers bringing another try; every agent 
 shots', bursts', log-count's and the log fetch's copies' names carry their run, so a file left held is never read as the
 next run's. A read that failed is unchanged (a run's own trace not fetched whole is E_RUN_FRIDA_FETCH, which still rolls
 its seat back). The fresh review of 5771141b (FIX FIRST) is applied as written.
+
+Note 2026-11-12 (Eli in auriel's session, about 17:05Z, by AskUserQuestion, "Widen upload route (Recommended)", over "Leave as
+is" and "virtiofs share"; recorded 17:07Z by auriel; to build after playtest 51, in lab-api's lane): a run's logs, screenshots and
+Frida traces are to leave a seat by the seat's own upload to lab-api, the route its crash and hang dumps already take
+(docs/LAB.md's PUT /lab/clients/<client>/hang-dump/<run>), in place of the guest agent's file reads, which stay for small things.
+Four merges of 2026-11-11 and 11-12 exist to cope with those reads as a bulk transport (8bd23824, 58502b08, aa686463, 4f0398a2; a
+whole read of 1.46 MB timed out three times in a row on a busy seat). core's read of the same day ranked the upload first,
+virtiofs second (WinFsp and the viofs driver in the seat image, and a virtiofs line in every snapshot section, since a rollback
+takes the VM's config from the section) and SMB last (a Samba on sky-srv in front of the seats). The seats count as hostile, so
+the route takes a per-run token, a file name from a safe character set and a size cap, and writes only inside its own run's
+directory. The record, with core's sources, is docs/research/closeout-route-2026-11-12.md, section 4.
 
 ## ADR-054: The developer loop: a client change reaches a running seat in minutes, tests run before a push, and engine-facing code waits for its read
 
@@ -4181,6 +4200,11 @@ Decision.
    BROKEN. Nothing else is "done" or "works", in PLAN, the LOG or a report.
 6. Playtests (Eli's call): one per fixed system, at most eight items, each with its green two-seat run id. In an arm, a
    system takes at most one live change, read on two seats first; every seat's logs are kept before any relaunch.
+   Amended 2026-11-12 (Eli, in auriel's session after plan mode, verbatim "B, accept it, send all three messages"; ADR-072
+   decision 3): a sitting is the closeout's route, or a stretch of it, on the current canon, so it may cross systems; at most
+   eight items stands, and a sitting never waits for a build. Playtest 51, cut by the same word, is over the eight by Eli's fold
+   of M3's rows into it (fifteen rows; the note of that day under ADR-071). A leg's DONE (ADR-072 decision 2: green in the lab,
+   then Eli's tick) is the leg's word; decision 5's three stay the verbs'.
 7. The freeze (Eli's call): a reference's life on a non-owning seat, containers and menus, Havok props, the progression
    UI, and state no native reaches take no new code until their system doc is confirmed on both viewpoints and a
    two-player test covers the change. Scripts (ADR-062), tooling and test repair are not frozen.
@@ -5005,6 +5029,12 @@ B 4. B is fine. 5. A 6. B"):
   physics leg of work?"): the physics leg's prework starts now, ahead of rung 6, while playtest 51 waits on Eli; nothing new
   is built on the scripting and quest lines until 51 tests what is built (train 52 stays built and stages after 51; train 53's
   trigger hold, rung 6 and ADR-070's axes wait). The leg starts as the scripting leg did: the research, then a plan for Eli.
+  Amended again (Eli, 2026-11-12: about 04:22Z in thuum-fa's session, "if it's done make them one test", and about 15:42Z in
+  auriel's session, "B, accept it, send all three messages", to the closeout plan's D-C1 and to ADR-072; recorded 16:58Z by
+  auriel): train 52 did not stage after 51: it merged to canon c3f9d175 on 2026-11-12 and is in 51's build. The order stands, and
+  so does the wait of the scripting and quest lines for 51, which is cut now on canon 6fe5fea0 and waits for no physics rung
+  (ADR-071's note of that day). Beside the order, no ladder builds more than one rung beyond the rung the lab is staging (ADR-072
+  decision 4).
 
 Rung 5's second head, Eli's later words (2026-11-10, in thuum-fa's session):
 - D-Q5 A (Eli 17:11Z, verbatim "A for D-Q5"), the Story Manager's quests: every run word (start and stop) of a quest a Story
@@ -5081,6 +5111,11 @@ whichever stands. D-S4 B would change hand-off timing and is his alone. The verb
   the game files attach to player aliases alone is judged as the seat's own (a run word refused E_QUEST_CAUSE, a report judged a
   start not recorded, a plain stage crossing as before); server only, no deployed settings file changes. Its T3 waits on a census
   for a quest whose player alias script handles OnLocationChange and calls Start, Stop or SetStage.
+
+Rung 6's proofs under ADR-072 (Eli in auriel's session, 2026-11-12 about 15:42Z, verbatim "B, accept it, send all three messages";
+recorded 16:58Z by auriel): decision 9's `q-golden-claw` and PLAN.md's `d-bleak-falls` become one scenario family assembled from
+green parts, the route's legs in order, each leg a committed scenario of its own first (ADR-072's consequences; ADR-064 amendment
+B). `q-embershard` and "each green twice before the ADR closes" stand as written; rung 6 still waits for playtest 51.
 
 ## ADR-069: Rotfern's Fixes: engine fixes ship to every player as one SKSE DLL, one detour per lab-read site, never as a lab-only patch
 
@@ -5352,7 +5387,180 @@ D-PH18; recorded 15:01Z by numidium):
   (ADR-064 amendment B), its relaunch lever (c2's propBodyReadLog) included; its green lets it be committed alone for Eli's review
   (rule 13) before the merge.
 
+Amended (Eli in auriel's session, 2026-11-12 about 15:42Z, after plan mode; recorded 16:58Z by auriel; asked as D-C1 of the
+closeout plan, posed in session as "playtest 51: A waits for rung 3 as planned; B cuts it now per the split draft", Eli verbatim:
+"B, accept it, send all three messages"; the plan's record is docs/research/closeout-route-2026-11-12.md, and this D-C1 is not
+ADR-068's): playtest 51 is cut now on fork canon 6fe5fea0 (train 52 c3f9d175 and the double-shout fix m4-shout-once) and no longer
+waits for rungs 1, 2, 3a and 3, for the cap's merge or for the reanimation.
+- "51 waits for rung 3" (the 04:3xZ amendment above) is superseded: the cabbage cart test is not in 51, 51 is not the one sitting
+  for the physics leg through rung 3, and the ladder's P1 and P2 are sittings of their own again.
+- "Finish it before 51" (rung 3's decisions above) is superseded in its "before 51" alone: the reanimation still merges onto canon
+  (fork m4-reanimate-claim-2, staged 0 of 2 on 2026-11-12), and M3's reanimation row (51's M3-2) is played at the first sitting
+  cut after that merge (ADR-072 decision 3; the split draft said "its first green stage"). Eli's later words on the row, in
+  thuum-fa's session and until now in no tracked file, stay its standard and go with it: "add reanimation walking on both screens
+  to 51, but also the undead fx needs to show for both as well. look into that." (06:10Z), and, asked which of the undead look's
+  three pieces go into 51 (the glow, the attached art, the ash pile), "all of it but note we're talking about the mod decay FX"
+  (06:59Z). Eli's two words of the same morning on a thrall whose caster leaves are ADR-060's, on thuum branch reanimate-docs
+  until it merges.
+- "by sat i may have you split them but in the mean time keep it rolling. 4-7 can be playtest 51 too if you catch it in time, but
+  ill divide and cinch it off if the time comes shortly." (Eli 06:32Z 2026-11-12, in thuum-fa's session; recorded here for the
+  first time, from that session's transcript) is superseded: this is that split, two days before Saturday 11-14; rungs 4 to 7 are
+  no part of 51; and "keep it rolling" is now ADR-072 decision 4's one rung built beyond the rung the lab is staging.
+- "fold the last of m3 into playtest 51" (Eli 04:18Z 2026-11-12) stands except for M3-2, so M3's close no longer ends in one
+  sitting: docs/M3-CLOSE.md's row 4, row 1's reanimate half and row 7 (props) are ticked later. 51 as cut is its checklist's items
+  1 to 8 with M3-1 and M3-3 to M3-8 beside them (docs/private/playtest-51.md, recut by thuum-fa the same hour): fifteen rows and
+  about five hours on the vampire item's clock, over ADR-072 decision 3's eight. Whether the M3 rows become the next sitting on
+  the same canon instead is auriel's question to Eli; until an answer the checklist is one sitting.
+- The split draft Eli answered (docs/private/playtest-51-split.md, auriel's) had two wordings auriel withdrew afterwards (to
+  thuum-fa 15:55Z, to numidium 16:24Z), for Eli to confirm: its eight regrouped rows, which left M3-8 out and item 7 unscored,
+  and its "P1" for rungs 1 and 2 and "P2" for rungs 3a and 3. The ladder's "Four playtests, P1 to P4, one after each pair of
+  rungs" (W7, "Four") stands as the plan has it (P1 after rungs 0 and 1, P2 after rungs 2 and 3;
+  docs/research/physics-leg-2026-11-11.md:141, :150), and which rungs share a sitting follows what is merged on canon at its cut
+  (ADR-072 decision 3).
+- D-PH7's "else a 51 limit" follows its item out of 51: an arrow at a bucket is the plan's P2 item 8, so the limit, if rung 3 does
+  not intercept the arrow, is declared at that sitting.
+- Decision 7's cap still lays before rung 1's merge and merges with it (E10; D-PH17), so its merge is after 51's cut again, as
+  decision 7 first had it. It is staged, not merged (apocrypha/layer-havok-cap, not on main 72b881cb), and both seats ran under it
+  in 20261112-102238. Whether 51 is played under the staged cap is auriel's question to Eli.
+- Unchanged: "if it's done make them one test" (train 52 is in canon 6fe5fea0, and a rung not merged at the cut is not done, the
+  case ADR-072 decision 3 states for every sitting); D-PH8 (met: canon 6fe5fea0 is the fix's merge); D-PH17, which still gates
+  rung 1's merge with the cap, and D-PH18, the cart scenario's first run in rung 3's stage; W3's drop fix in rung 1's client
+  commit after 51; rung 2 in the ladder.
+
+Answered (Eli in auriel's session, 2026-11-12 about 17:05Z, by AskUserQuestion; recorded 17:07Z by auriel), the three questions the
+note above left with Eli:
+- The cap: "Under the cap (Recommended)", over "Canon alone". Playtest 51 is played on the seats as promoted, under the staged cap,
+  and its build line says so; main's layer is not laid first. The cap's merge still waits for rung 1 (D-PH17).
+- 51's length: "One sitting (Recommended)", over "Two sittings". 51 stays its checklist's fifteen rows in one sitting, the one
+  sitting over ADR-072 decision 3's eight.
+- The split draft's two withdrawn wordings: "Confirm withdrawals". The eight regrouped rows and the "P1" and "P2" naming are no
+  part of the cut, and W7's four playtests stand as the plan has them.
+
 Amends: ADR-064 decision 7 (dated note under it), ADR-063's props note (accepted under it), ADR-058's slices (slice two kept as a
 derived class; slice three is rungs 5 and 6), ADR-067 decision 4 (its final sample is the asleep sample; the built ChangeForm
 apply is the record). W3 stays Eli's at the time: a rewrite of b-prop-push's step 27 if the drop read calls for one (decided
 2026-11-11 in the amendment above: no rewrite; the leftover is read first, then fixed or the count restated by Eli's word).
+
+## ADR-072: The closeout is one route: the Golden Claw walk is the chart, and a leg is done when Eli has ticked it
+
+Status: ACCEPTED 2026-11-12 about 15:42Z by Eli in auriel's session (the planning session, first listed as thuum-ff), after plan
+mode, verbatim: "B, accept it, send all three messages", to the three questions as posed about 15:31Z: "D-C1, playtest 51: A waits
+for rung 3 as planned; B cuts it now per the split draft. I recommend B. D-C2, ADR-072: accept, amend, or leave it PROPOSED. D-C3,
+the file transport: send the core message or not." D-C2, "accept it": this ADR as written at 894e7b3f; the acceptance changes
+nothing below, and what a fact check then found wrong in it is a dated note at its end. D-C1, "B": playtest 51's cut, Eli's
+separate word, recorded in the dated note under ADR-071 and not decided here. D-C3, "send all three messages": auriel's relays to
+numidium and to thuum-fa and its question to core, sent about 15:47Z; the one to core asks an evaluation and is no decision of
+record. PROPOSED the same day by thuum-ff, from the plan Eli approved in plan mode about 15:29Z (its record
+docs/research/closeout-route-2026-11-12.md; its own D-C2, "the route as the closeout chart", recommended this ADR be written as
+PROPOSED). The D-C labels are that plan's, D-C2 and D-C3 posed again in session once the ADR and the messages were drafted; none
+is ADR-068's D-C1, D-C2 A or D-C3 A.
+
+Context. `just status` on main 72b881cb reads 68 verbs: 1 VERIFIED IN PLAY, 53 MECHANISM ONLY, 14 BROKEN, 407 lines still saying
+HYPOTHESIS. M3 has been BUILT at T3 since 2026-10-31 and none of docs/M3-CLOSE.md's T4 rows has been ticked. The build runs ahead
+of the sittings, and the sittings grow to catch up: playtest 51 holds eight items, M3's seven rows, train 52, the 60 fps cap,
+ADR-071's rungs 1 to 3 and the reanimation rebuild, against the root-cause plan's "one short playtest per fixed system, 8 items
+max" (docs/research/root-cause-plan-2026-11-02.md). Closing by milestone asks each milestone for its own scenario set and its own
+sittings; three of those exits already name the same walk: M4's `d-bleak-falls`, M6's `q-golden-claw` (PLAN.md:1442, :1623), and
+ADR-067 decision 7's cabbage cart, which rung 0 placed at the Riverwood Trader (cell 0x9731), where Lucan gives the quest. Neither
+exit scenario exists in lab/scenarios yet. Prior art for the shape: ADR-068 (scripts as one system) and ADR-071 (physics as one
+system) each replaced a list of per-feature fixes with one ladder and its sittings. Small batches surface faults sooner and place
+them more cheaply (DORA, "Working in small batches", https://dora.dev/capabilities/working-in-small-batches/; Forsgren, Humble and
+Kim, Accelerate, 2018, chapter 4), and one lab is a single-server queue whose waits grow steeply with load and variability
+(https://en.wikipedia.org/wiki/Kingman%27s_formula; Kingman, "The single server queue in heavy traffic", Math. Proc. Cambridge
+Phil. Soc. 57(4), 1961).
+
+Decision.
+
+1. One route. The closeout's chart is one two-player walk: the Riverwood Trader, Embershard, Bleak Falls Barrow, a server restart
+   in the middle, and back to Lucan. PLAN.md keeps the milestones as history and order; this table says what is left.
+2. Three states a leg, in order: green in the lab (its scenarios, on canon), ticked by Eli (a sitting's row), DONE. Nothing
+   skips the middle one (a milestone's DONE already needs its T4 sitting, docs/M3-CLOSE.md section 3; this states it for every leg).
+3. A sitting is the route, or a stretch of it, on the current canon: eight items at most, repeated on each new canon until every
+   leg is ticked. A system that is not merged on canon at a sitting's cut waits for the next one; a sitting never waits for a build.
+4. Built ahead, one rung. A ladder builds at most one rung beyond the rung the lab is staging, so a finding in rung N costs one
+   re-merge, not three.
+5. Off the route is decided once, by name, as a declared limit or after-close work: the crafting benches, pickpocketing, vampirism's
+   cure beyond 51's item, `q-main`, M7 (dragons, lycanthropy, mounts), the stretch mods. Each gets a line here when Eli names it.
+6. The clauses of PLAN's definition of done that no walk can show stay agent work beside the route: 5 (server scripts gate and
+   modify) and 7 (nothing on R0/R1 forged) at T0 and T2; 8 (the wire) is done since M1 (PLAN.md:116).
+
+The route (states as of 2026-11-12, main 72b881cb, fork canon 6fe5fea0; verb states are `just status`'s words):
+
+| Leg | What both screens must show | Verbs (state) | Lab | Eli |
+|---|---|---|---|---|
+| 1. The Trader: the quest | The Golden Claw starts in both journals with its objectives | quest-stage (BROKEN, 7/11), papyrus-events (BROKEN, 8/11) | b-quest-stage, b-story-arrival green in 52's gate 20261112-055559 | 51 item 3, unticked |
+| 2. The Trader: the cart | a spell at the cabbage cart moves the same cabbages to the same rest | prop-physics (BROKEN, 6/11) | b-prop-push pending; ADR-071 rung 1 staged 1 of 2, rungs 2 and 3 unstaged | unticked |
+| 3. Embershard | the roster on a hand-off, arrows that hit, reach and cone, the guest's loot | cell-host, npc-handoff, npc-fate, npc-puppet (BROKEN); npc-stream (MECHANISM ONLY) | c-dungeon-enemies, b-npc-body-release, b-npc-handoff-* on main; b-npc-death on watch | M3-4, M3-5, M3-7 and 51 item 8, unticked |
+| 4. The Temple: bodies and Arvel | found bodies, bodies where they died, the ambush for a guest, Arvel freed, the claw on his body | trigger-entry (BROKEN, 0/11), npc-fate, containers (BROKEN, 6/11) | x-trigger-owner, x-alias-return green by path; no committed scenario | M3-1, M3-3, 51 item 4, unticked |
+| 5. The Temple: reanimation | a raised body stands, walks and fights on both screens with its look | npc-fate, magic-effects | m4-reanimate-claim-2 staged 0 of 2 | M3-2, unticked |
+| 6. The barrow: traps, pillars, locks | every trap, plate, lever and pillar the same on both screens | traps (BROKEN, 9/13), furniture (BROKEN, 0/11), locks (BROKEN, 6/11) | b-bleak-traps, b-trap-look, b-puzzle-relay, b-lever-relay, b-locks on main | unticked |
+| 7. The Sanctum | the claw door for the claw's holder, the word wall teaches | word-wall (MECHANISM ONLY, 6/11) | b-word-wall on main | 51 item 4's end, unticked |
+| 8. The restart | journals, script state, references, traps and props as they were | (each leg's restart half) | b-quest-stage-restart, b-script-state-restart, b-ref-state-restart, b-trap-record-restart on main | 51 item 5, unticked |
+| 9. Back to Lucan | the quest completes in both journals; the reward lands | quest-stage, papyrus-events | b-leveled-reward on main; the reward taken back is 52's declared limit | 51 item 5, unticked |
+| Along the way | skills rise by use, a level and a perk taken | leveling (BROKEN, 5/11), perks (VERIFIED IN PLAY) | p-level-up, b-perk-pick on main | perks ticked; leveling unticked |
+| Later on the route | a dragged body, bodies at the same spot | (ADR-071 rungs 5 and 6, not built) | none | unticked |
+
+The Lab column is what is committed or staged today, not a claim that each is green on canon 6fe5fea0: the first act under this
+ADR is one run set of the route's committed scenarios on canon, whose verdicts replace that column.
+
+Consequences. `d-bleak-falls` and `q-golden-claw` become one scenario family assembled from green parts (ADR-064 amendment B), the
+route's legs in order, each leg a committed scenario of its own first. PLAN.md gains one STATE line pointing here; M3-CLOSE.md's
+rows are legs 3 to 5's Eli column and stay where they are. Playtest 51's cut (the plan's D-C1) is Eli's separate word and is not
+decided by this ADR.
+
+Corrected at the acceptance, premises corrected by the tree and the lab's record (auriel, 2026-11-12, recorded 16:58Z; not new
+decisions; five readers checked the text above and a second reader checked each, their findings in
+docs/research/closeout-route-2026-11-12.md):
+- Leg 9's Lab cell is wrong. Train 52's Fix 1 made the leveled reward land and stay (lab/scenarios/b-leveled-reward.yaml:1-3,
+  green as x-leveled-reward 20261112-044101 on 52's stage); the limit declared at 52's merge is D-S4 A's, a script that changes
+  its own state while its cell unloads (ADR-068's note of 2026-11-12).
+- The Context: playtest 51 had M3-1 to M3-8 when this was written, eight rows, and seven since its cut took M3-2 out. The quoted
+  phrase joins two passages of the root-cause plan; the rule as accepted is ADR-064 decision 6's "one per fixed system, at most
+  eight items". The cart stands by the Riverwood Trader's sign in the exterior cell 0x9731; Lucan gives the quest inside the
+  shop, cell 0x133C9 (docs/research/m3/riverwood-ids.md:27-28, :39). So two milestone exits are the walk, and the cart is on it
+  without being an exit.
+- The Consequences' "M3-CLOSE.md's rows are legs 3 to 5's Eli column": its rows 1 to 5 and 9 are. Row 6 (quests) is legs 1, 8 and
+  9 through 51's items 3 and 5, row 7 (props) is leg 2, and rows 8 (Raise Wall) and 10 (talking the same) were on no leg. The Eli
+  column's M3-n are playtest 51's names for those rows, not M3-CLOSE.md's row numbers.
+- Missing from the table: Raise Wall (spell-placed-object, BROKEN 7/11, b-spell-placed-wall), the one BROKEN verb it never
+  mentions; npc-talk in leg 1; melee-reach, hit-cone and marksman in leg 3, whose scenarios play in the Temple and in Riverwood
+  and none in Embershard; quest-stage, papyrus-events and traps in leg 4, with the spider's drop and Arvel's scene from its show,
+  and its "no committed scenario" true of the ambush, the spider, Arvel and the claw alone (b-cobweb-view, b-body-loot,
+  b-npc-loot and b-container-exclusive play there); trigger-entry in leg 6; the claw door, which is traps' and quest-stage's and
+  not word-wall's, read by path alone (x-golden-claw-alias 20261107-222959) with no committed scenario for its rings or keyhole;
+  the cart's own scenario, b-prop-impulse (a draft by path, its first run in rung 3's stage, D-PH18), b-prop-push being the
+  dropped item's; a row for Riverwood's residents, where npc-handoff's, npc-puppet's and locks' BROKEN lines come from
+  (c-riverwood, pending); and the level-up's attribute pick, which is not built (docs/verbs/leveling.md:33, :329).
+- Decision 4's "not three": two rungs are stacked above rung 1 today (fork m4-physics-2-sample and m4-physics-3-impact).
+- The citations. Accelerate's chapter 4 does list "Work in small batches" among continuous delivery's principles; the sentence
+  nearest this one is chapter 2, p. 16, and the capability's own chapter is 8. Kingman's paper is Proc. Cambridge Philos. Soc.
+  57(4), 902-904, October 1961 (doi:10.1017/S0305004100036094); by its formula the mean wait grows as rho/(1 - rho) with load and
+  in proportion to the squared coefficients of variation of arrivals and run lengths, an analogy for a lab whose few senders pace
+  themselves and not a fit.
+The table with these corrections applied, and the lab's record in its Lab column, is docs/ROUTE-CLOSE.md, laid out as
+docs/M3-CLOSE.md is: auriel's reading of where a table that changes belongs, since this file's rule is append, and Eli's to
+overrule. Until then sittings and run sets are recorded there and the cells above stay as accepted. PLAN.md stays the chart
+(PLAN.md:12): the walk's rows are a close set under it, as M3-CLOSE.md's are.
+
+Open at the acceptance, each Eli's to say (found by the same check; none is decided here):
+- The definition of done's clause 6 (PLAN.md:46-47, mods through the load order) has no place in decisions 5 and 6. The walk
+  plays under the mod layer; the clause's acceptance cases are the stretch mods (PLAN.md:1665), which decision 5 puts off the
+  route.
+- What a tick is worth before its leg's lab green. Playtest 51 is cut ahead of the run set that fills the Lab column, as ADR-067
+  decision 8 allows. ROUTE-CLOSE.md reads decision 2 this way: the tick stands with its date and build, and DONE waits for both.
+- Whether a leg's DONE waits for the paper close of its verbs' HYPOTHESIS tags (CLAUDE.md's verb rule; M3-CLOSE.md section 2b).
+  Decision 2 is silent; ROUTE-CLOSE.md reads it as yes, agent work beside the sittings.
+- Decision 6's "at T0 and T2" for clauses 5 and 7 narrows PLAN.md:34, which asks T3 scenarios of all eight clauses.
+- Decision 5's "pickpocketing" beside Eli's PvP pickpocketing of the same day, NEXT when M5 opens (PLAN.md:1575): read here as
+  after the walk closes, unless Eli says sooner.
+
+Answered (Eli in auriel's session, 2026-11-12 about 17:05Z, by AskUserQuestion, "Keep ROUTE-CLOSE.md"; recorded 17:07Z by auriel):
+the walk's table that changes is docs/ROUTE-CLOSE.md, laid out as docs/M3-CLOSE.md is, and this ADR's own table stays as accepted.
+The five points above stay open.
+
+Amends: ADR-064 decision 6 and ADR-053 decision 1 (what a playtest is; a dated note under each), the ladders of ADR-068 decision 9
+and ADR-071 (decision 4: one rung built ahead; noted under ADR-071 and under ADR-067 decision 7's amendments, whose order stands),
+ADR-068 decision 9's rung 6 proofs with PLAN.md's M4 and M6 exits (`d-bleak-falls` and `q-golden-claw` one scenario family, a
+dated note at ADR-068's end; `q-main` off the route). Not amended here: playtest 51's cut, Eli's separate word under ADR-071; and
+whether a stage's playtest (ADR-040 decision 1) still exists beside the route's sittings, which is not said. Recorded at the
+acceptance by auriel as a reading of the six decisions, not as Eli's words.
