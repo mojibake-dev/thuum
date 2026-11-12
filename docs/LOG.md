@@ -9557,3 +9557,30 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   answering, the GPU wedge's signature, where QEMU used to give "invalid PCI interrupt pin 255". Eli's W3 call, "Fix the
   drop", is DECISIONS.md's (a32cb7d9): b-prop-push stays pending with step 27 as written, and the drop service's fix rides
   physics rung 1's client commit after 51.
+- (numidium) x-prop-blast 20261111-223256's read closes on main 855281e3 (thuum-fa): H2, H3 and H4 CONFIRMED. Rung 3's
+  replacement goes on 26004, ScaleGameplayImpulseForce, which carried every prop push on both seats; c2's copy of c1's casts
+  pushed c2's own Dynamic bodies with the caster's numbers, so rung 3's remote-cause zeroing is needed; islands merge before
+  motion and split within 2 to 9 frames. ADR-071 decision 4 reads 26004; havok-props.md's rows carry run ids. Two bugs for
+  after 51, both in 51's checklist as known limits: a shout's hit landing past reportFromHit's 1200 ms window relays the
+  shout twice (shouts.md), and a prop thrown past the 1024-unit put-back leaves its Dynamic body where it landed
+  (prop-physics.md, physics rung 2's body reader).
+- (numidium) The physics leg's two v2.1 reads by path (thuum-fa's READY), canon 24f1cc6a, lab-api 8bd23824:
+  x-corpse-grab-v2 (9ade4b5a) 20261112-002429 green and cold, both prop-grab traces whole (c1 52 rows, c2 75);
+  x-prop-engine-v2 (c6213c80) 20261112-003027 red warm at its final block, 15 claims, every one a setup that missed by
+  thuum-fa's read (the settle walks never touched the ingot, c2's south-lane aim at 1095 with both seats turning 16.43
+  counts a degree, c1's hold ending 0.2 s before c2's touch, leg 8's ingot 21.8 off its mark before c2's login), no engine
+  row refuted. Its findings for rung 1: a grab the engine refuses still sends a touch-1 claim and canon grants it (D-PH3 A
+  cures it: claim only when getPlayerGrabbedRef names the body); a held body standing still reads asleep and the other
+  seat's copy goes Dynamic mid-hold (D-PH4 B's heartbeat); a grab outlasts its key. The rest goes to one-question probes
+  (x-sl-aim first) in idle windows. Both clones rolled back after the pair.
+- (numidium) playtest-log-copies merged to main 64a946fc: playtest 51's own logs, for the first time read the way lab-api
+  now reads a run's. Every seat log the game holds open is copied with read-write sharing (copy_ps, lab-api's log-count
+  and Frida idiom) in playtest-relaunch.sh's keep(), playtest-logs.sh, playtest-record.sh and hang-dump.sh, where Copy-Item
+  was refused ("being used by another process": 193821, 194559 and 195437 lost both consoles so), and read back in 512 KiB
+  ranges (read_ranged, fetch_copy), since one whole-file read of c1's 1,464,655-byte console timed out three times running
+  where the ranges took it in 4 s. Each copy is read only after its exec exits 0, three tries apart, and a short read says
+  so; consoles and keep()'s logs now come whole; the recorder no longer fetches C:\sky-lab\<c>-console.log, lab-api's copy
+  of the last lab run's console. Two fresh reviews (READY with a SHOULD, then FIX FIRST with three SHOULDs, applied in the
+  shapes the reviewer named); live on both seats: playtest-logs.sh's own loop took all ten logs whole in 46 s (c1's console
+  2,678,785 bytes), keep() 21,415 console lines, hang-dump's loop both open logs. Still whole-file reads, after 51:
+  client-launch-test.sh and client-dumps.sh.
