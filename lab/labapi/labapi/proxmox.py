@@ -116,20 +116,24 @@ class GuestControl:
         except Exception as e:
             raise ProxmoxError(f"{code}: {guest.name}: {type(e).__name__}: {str(e)[:200]}") from e
 
-    def _agent(self, code: str, guest: Guest, fn, *args):
+    def _agent(self, code: str, guest: Guest, fn, *args, deadline: float | None = None):
         """One guest agent call through _call, patient with a busy agent: Proxmox answers AGENT_BUSY before the call
         reaches the agent, so the call is asked again, 1 s after and then twice as long each time, until it gets through
-        or agent_busy_s from the first ask is spent, when it fails as it did, saying how long. Each ask's own first step
-        is Proxmox's guest-ping, so the ask that finds the agent answering is the one that runs the call, with no ping
-        of lab-api's beside it to wait in a busy agent's queue. Any other error is the caller's at once (a "got timeout"
-        is the agent's own answer, asked again by _agent_read and the exec loop)."""
-        deadline = time.monotonic() + self._busy_s
+        or agent_busy_s from the first ask is spent (`deadline`, when a caller's own retries share one: _agent_read),
+        when it fails as it did, saying how long. Each ask's own first step is Proxmox's guest-ping, so the ask that
+        finds the agent answering is the one that runs the call, with no ping of lab-api's beside it to wait in a busy
+        agent's queue. Any other error is the caller's at once (a "got timeout" is the agent's own answer, asked again
+        by _agent_read and the exec loop), as is an exec that started and then ran out its time on a busy exec-status
+        (ProxmoxerGuests.exec's "did not exit in"), which a second ask would run twice (the fresh review of 5771141b,
+        finding 3)."""
+        if deadline is None:
+            deadline = time.monotonic() + self._busy_s
         pause, tries = 1.0, 1
         while True:
             try:
                 return self._call(code, guest, fn, *args)
             except ProxmoxError as e:
-                if AGENT_BUSY not in str(e):
+                if AGENT_BUSY not in str(e) or "did not exit in" in str(e):
                     raise
                 left = deadline - time.monotonic()
                 if left <= 0:
@@ -197,10 +201,13 @@ class GuestControl:
         return self._agent("E_PVE_EXEC", guest, self._b.exec, guest, command, timeout)
 
     def _agent_read(self, guest: Guest, path: str, fn, *args):
-        """One agent file-read of `path` through the backend's `fn`, the whole file's or a range's."""
+        """One agent file-read of `path` through the backend's `fn`, the whole file's or a range's. Its tries share one
+        busy window (_agent's `deadline`), set before the first, where each got a fresh one (the fresh review of
+        5771141b, finding 2)."""
+        deadline = time.monotonic() + self._busy_s
         for pause in (*FILE_READ_PAUSES, None):
             try:
-                return self._agent("E_PVE_FILE", guest, fn, guest, path, *args)
+                return self._agent("E_PVE_FILE", guest, fn, guest, path, *args, deadline=deadline)
             except ProxmoxError as e:
                 # A busy guest agent answers a read's open, read or close with "got timeout" now and then
                 # (guest-file-read on 711, guest-file-close on 712, 2026-10-17: train-23's smoke lost

@@ -399,15 +399,16 @@ finds it a note naming it (on 9.2.15 a running game's console log copy
 stayed a moment after a small read: train 52's stage, x-console-arm and
 x-acting-player on c1; numidium's HYPOTHESIS, a scan of a file just
 written), then over a window: after pauses of 2, 4, 8 and 16 s lab-api
-pings the agent, and the first ping it answers brings one last try. A file
+pings the agent, and each ping it answers brings another try, until the
+file goes or the window is spent. A file
 still there after that is the run's note, naming the file, its seat and
 "held open in the agent", never the seat's fault (c1's shot 076 at
 20261112-081535 and c2's 056 at 101523 cost their seats a rollback each,
 and a mixed reset from one made x-two-hands red at 082053). The seat's next
 reset removes it, a rollback or the relaunch's cleaning (Between runs,
-below), and the next run never reads it: its shots, bursts and log-count
-copies carry its run's name, a trace's copy its script's, and a log
-fetch's copy is proven by its own exec's two lengths. A run's own
+below), whose finding it still held rolls the seat back in that reset, and
+the next run never reads it: its shots, bursts, log-count copies and log
+fetch copies carry its run's name, and a trace's copy its script's. A run's own
 trace not fetched whole is a lab fault, E_RUN_FRIDA_FETCH (the scenario
 runner's run end, below), as before. Proxmox answers "QEMU guest agent is
 not running" whenever its 3 s guest-ping before an agent call goes
@@ -588,7 +589,9 @@ qemu-server 9.2.15, the 2026-10-30 call that a held .png.b64 is not worth a
 rollback (ADR-036's notes): the call of 2026-11-12 02:58Z that a held file
 faults its seat followed held files building up on 9.2.10, the relaunches'
 held count growing 11, 17 and 25 around 20261111-191642-x-prop-blast
-(6c3b0122), where 9.2.15's agent lets go once it works through its queue. A
+(6c3b0122); HYPOTHESIS: on 9.2.15 the hold clears; the next relaunch's held
+count decides, and a file its cleaning still finds held rolls the seat back
+(Between runs, below). A
 shot's file and a burst's folder carry the run's name
 (shots\<run>-<step>.png), so a sidecar left held is never read as the next
 run's shot.
@@ -659,8 +662,9 @@ five-second frames could not show a stride.
   plain shot's is (its length from one listing of the burst's folder); once
   every frame is read, one exec removes the folder's sidecars and names any
   that stayed, where a removal a frame cost an exec each, and each further
-  try is that one exec again, so a burst's removal is five execs at most,
-  the four quick tries and the window's last, whatever its size. As with a plain
+  try is that one exec again, so a burst's removal is eight execs at most,
+  the four quick tries and one after each ping the window's agent answers,
+  whatever its size. As with a plain
   shot, a burst never fails a run: a frame not filmed or not read is the
   step's note.
 Assertions read `server.actor(c)` (the record, and
@@ -941,8 +945,9 @@ C:\sky-lab: there, frida\ (each run's script and its .out, .err, .log and
 screenshot, burst and mouse steps' files), and in the lab folder itself
 log-count's copies by their pattern alone, logcount-*.log.copy (the code
 before 9e37956b never removed one, so seats carry many), and the seat's
-<client>.log and <client>-*.log, the log fetch's copies and the SKSE
-folder logs', which the run that reads one makes anew; each game folder's
+<client>.log, <client>-*.log, *-<client>.log and *-<client>-*.log, the log
+fetch's copies (named by their run since the fresh review of 5771141b) and
+the SKSE folder logs', which the run that reads one makes anew; each game folder's
 Data\SKSE\Plugins\CharGen\Presets (thuum-*.jslot and the presets the seat's
 last run saved by name); the Saves folder's TESMODPLATFORM-* (Skyrim
 Platform's generated saves, which a kill before its load settles leaves) and
@@ -959,8 +964,11 @@ agent holds one open), log-count's copies and the log fetch's, which are cleaned
 timed-out guest-file-read or guest-file-close left open in the agent stays
 until the agent works through its queue (until the VM restarted, on
 qemu-server 9.2.10), and a copy or sidecar held after its read is only a
-note at its run, so this is the reset that removes it; the note
-says "<n> held open left in place", and each capture and log-count copy
+note at its run, so this is the reset that removes it. One the cleaning
+still finds held outlived the run gap: the seat rolls back in the same
+reset ("its cleaning found <n> held open (...), kept past a run gap"), so a
+held note costs a rollback only when the hold outlives the gap, and each
+capture, log-count copy and log fetch copy
 carries its run's name, as each trace copy its run's script name (b-cloak-fight
 20261030-053144 lost a rollback to two held .png.b64 sidecars, x-quest-mode
 20261030-131512 one to a story-location .js.log.copy). A script, its .out,

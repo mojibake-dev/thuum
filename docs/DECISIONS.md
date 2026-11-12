@@ -3139,16 +3139,18 @@ rarer.
 
 Note 2026-11-12 (recorded 11:30Z on branch labapi-held-removal, for numidium's review and deploy; amends the note of
 02:58Z): a file the guest agent still holds after lab-api read it is a note again, never a seat fault, and the seat's
-next reset removes it (a rollback, or the relaunch's cleaning, which now takes the log fetch's copies too). Why: core's
-host journal on 11-12 reads "QEMU guest agent is not running" as Proxmox's 3 s guest-ping unanswered by a busy qemu-ga
-(Agent.pm:83), daily on both seats, and the held .png.b64 sidecars as the same busy agent keeping the handle of a read or
-close that timed out until it works through its queue; on 9.2.15 the hold clears, where 9.2.10's leaked for good. The
-fault cost c1 a rollback at 20261112-081535 (shot 076) and c2 one at 101523 (shot 056), and a mixed reset from one made
-x-two-hands red at 082053. With it: a removal past its four quick tries waits up to 30 s more, pinging the agent, the first
-ping it answers bringing one last try; every agent call so answered is asked again for up to 30 s (LAB_AGENT_BUSY_S), so
-58502b08's skip of a seat's later log fetches fires only for an agent busy past that; and the shots', bursts' and
-log-count copies' names carry their run, so a file left held is never read as the next run's. A read that failed is
-unchanged (a run's own trace not fetched whole is E_RUN_FRIDA_FETCH, which still rolls its seat back).
+next reset removes it (a rollback, or the relaunch's cleaning, which now takes the log fetch's copies too); a file that
+cleaning still finds held outlived the run gap, and the seat rolls back in that same reset. Why: core's host journal on
+11-12 reads "QEMU guest agent is not running" as Proxmox's 3 s guest-ping unanswered by a busy qemu-ga (Agent.pm:83),
+daily on both seats, and the held .png.b64 sidecars as the same busy agent keeping the handle of a read or close that
+timed out until it works through its queue; HYPOTHESIS: on 9.2.15 the hold clears; the next relaunch's held count decides
+(9.2.10's leaked for good). The fault cost c1 a rollback at 20261112-081535 (shot 076) and c2 one at 101523 (shot 056),
+and a mixed reset from one made x-two-hands red at 082053. With it: a removal past its four quick tries waits up to 30 s
+more, pinging the agent, each ping it answers bringing another try; every agent call so answered is asked again for up to
+30 s (LAB_AGENT_BUSY_S), so 58502b08's skip of a seat's later log fetches fires only for an agent busy past that; and the
+shots', bursts', log-count's and the log fetch's copies' names carry their run, so a file left held is never read as the
+next run's. A read that failed is unchanged (a run's own trace not fetched whole is E_RUN_FRIDA_FETCH, which still rolls
+its seat back). The fresh review of 5771141b (FIX FIRST) is applied as written.
 
 ## ADR-054: The developer loop: a client change reaches a running seat in minutes, tests run before a push, and engine-facing code waits for its read
 

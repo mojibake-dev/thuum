@@ -744,12 +744,14 @@ class ClientLogs(RunTests):
         run_id, body = self._run(SOLO_WITH_LOG)
         self.assertEqual(body["verdict"], "green", body)
         self.assertEqual((self.tmp / "results" / run_id / "c1.log").read_text(encoding="utf-8"), "platform log\n")
-        copy = next(" ".join(c[2]) for c in pve.calls if c[0] == "exec" and "[IO.File]::Create('C:\\sky-lab\\c1.log')" in " ".join(c[2]))
+        # the seat's copy named by its run (the fresh review of 5771141b, nit 4), kept as the artifact c1.log
+        copy = f"C:\\sky-lab\\{run_id}-c1.log"
+        made = next(" ".join(c[2]) for c in pve.calls if c[0] == "exec" and f"[IO.File]::Create('{copy}')" in " ".join(c[2]))
         for part in (f"$src = '{self.settings.client_driver_log}'", "[IO.File]::Open($src, 'Open', 'Read', 'ReadWrite')",
                      "$n = $s.Length", "$m = $d.Length", "Write-Output ([string]$n + ' ' + [string]$m)"):
-            self.assertIn(part, copy)
-        self.assertNotIn("Copy-Item", copy)
-        self.assertNotIn("C:\\sky-lab\\c1.log", pve.files, "the copy leaves the seat once read")
+            self.assertIn(part, made)
+        self.assertNotIn("Copy-Item", made)
+        self.assertNotIn(copy, pve.files, "the copy leaves the seat once read")
 
     def test_a_log_larger_than_a_range_comes_back_byte_exact(self):
         """Playtest 45's c1 log reached 25k lines, and read whole the console logs timed out the agent on both seats
@@ -763,9 +765,9 @@ class ClientLogs(RunTests):
         run_id, body = self._run(SOLO_WITH_LOG)
         self.assertEqual(body["verdict"], "green", body)
         self.assertEqual((self.tmp / "results" / run_id / "c1.log").read_bytes(), log.encode("utf-8"))
-        self.assertEqual([c[3:] for c in pve.calls if c[:3] == ("file_read_range", 901, "C:\\sky-lab\\c1.log")],
-                         [(0, R), (R, R), (2 * R, 12)])
-        self.assertFalse([c for c in pve.calls if c[:3] == ("file_read", 901, "C:\\sky-lab\\c1.log")], "no whole read")
+        copy = f"C:\\sky-lab\\{run_id}-c1.log"
+        self.assertEqual([c[3:] for c in pve.calls if c[:3] == ("file_read_range", 901, copy)], [(0, R), (R, R), (2 * R, 12)])
+        self.assertFalse([c for c in pve.calls if c[:3] == ("file_read", 901, copy)], "no whole read")
         self.assertFalse([n for n in body["notes"] if n.startswith("c1.log:")], body["notes"])
 
     def test_a_log_range_still_unread_after_its_retries_is_a_note(self):
@@ -783,7 +785,7 @@ class ClientLogs(RunTests):
         plain_range = pve.file_read_range
 
         def file_read_range(guest, path, offset, count):
-            if path == "C:\\sky-lab\\c1.log" and offset == R:
+            if path.endswith("-c1.log") and offset == R:
                 pve.calls.append(("file_read_range", guest.vmid, path, offset, count))
                 raise ProxmoxError(f"E_PVE_FILE: {guest.name}: ResourceException: 500 Internal Server Error: VM {guest.vmid} "
                                    "qga command 'guest-file-read' failed - got timeout")
@@ -797,19 +799,20 @@ class ClientLogs(RunTests):
         self.assertIn("c1.log: range 2 of 2: E_PVE_FILE: fake-c1: ResourceException: 500 Internal Server Error: VM 901 qga "
                       "command 'guest-file-read' failed - got timeout (log fetch)", body["notes"])
         self.assertNotIn("c1.log", body["artifacts"])
-        self.assertEqual([c[3:] for c in pve.calls if c[:3] == ("file_read_range", 901, "C:\\sky-lab\\c1.log")],
-                         [(0, R)] + [(R, 11)] * 3)
-        self.assertNotIn("C:\\sky-lab\\c1.log", pve.files, "the copy leaves the seat whatever the read did")
+        copy = f"C:\\sky-lab\\{run_id}-c1.log"
+        self.assertEqual([c[3:] for c in pve.calls if c[:3] == ("file_read_range", 901, copy)], [(0, R)] + [(R, 11)] * 3)
+        self.assertNotIn(copy, pve.files, "the copy leaves the seat whatever the read did")
 
     def _c1_log_removals(self, answers):
-        """The c1.log copy's removals answered in turn from `answers` (an ExecResult each; None passes the try to the
-        fake, which removes the copy), every try counted in self.removals."""
+        """The c1.log copy's removals (C:\\sky-lab\\<run>-c1.log, or a path named c1.log) answered in turn from
+        `answers` (an ExecResult each; None passes the try to the fake, which removes the copy), every try counted in
+        self.removals."""
         pve = self._managed_c1()
         plain_exec = pve.exec
         self.removals = []
 
         def exec_(guest, command, timeout):
-            if "Remove-Item -LiteralPath 'C:\\sky-lab\\c1.log' -Force" in " ".join(command):
+            if re.search(r"Remove-Item -LiteralPath 'C:\\sky-lab\\(?:[^']+-)?c1\.log' -Force", " ".join(command)):
                 self.removals.append(len(self.removals) + 1)
                 answer = answers[len(self.removals) - 1] if len(self.removals) <= len(answers) else None
                 if answer is not None:
@@ -824,21 +827,22 @@ class ClientLogs(RunTests):
         """A busy agent keeps the handle of a read or close that timed out until it works through its queue, and Windows
         keeps the file locked (core's host journal, 2026-11-12: c1's shot 076 at 20261112-081535 and c2's 056 at 101523
         faulted their seats, and a mixed reset from one turned x-two-hands red at 082053): a log copy still there at its
-        four quick tries and at the window's last, after the agent answered a ping, is a note naming the file and its
-        seat, never the seat's fault; the seat's next reset removes it, and the log, read whole, is kept."""
+        four quick tries and at a try after each of the window's four pings the agent answers (the fresh review of
+        5771141b, finding 1) is a note naming the file and its seat, never the seat's fault; the seat's next reset
+        removes it, and the log, read whole, is kept."""
         from labapi.proxmox import ExecResult
 
-        pve = self._c1_log_removals([ExecResult(0, "True\r\n", "")] * 5)  # still there: the agent holds it
+        pve = self._c1_log_removals([ExecResult(0, "True\r\n", "")] * 8)  # still there: the agent holds it
         pve.files[self.settings.client_driver_log] = "platform log\n"
         run_id, body = self._run(SOLO_WITH_LOG)
         self.assertEqual(body["verdict"], "green", body)
         self.assertIn("c1.log", body["artifacts"])
-        held = ("c1.log: C:\\sky-lab\\c1.log on c1 (fake-c1) held open in the agent after its read (5 tries over 5 s, the "
-                "last once the agent answered a ping); left to the seat's next reset")
-        self.assertEqual(self.removals, [1, 2, 3, 4, 5])
-        self.assertEqual([n for n in body["notes"] if "C:\\sky-lab\\c1.log" in n],
-                         [f"c1.log: C:\\sky-lab\\c1.log still there at its removal's try {k} of 4, tried again in 1 s"
-                          for k in (1, 2, 3)] + [held])
+        copy = f"C:\\sky-lab\\{run_id}-c1.log"
+        self.assertEqual(self.removals, [1, 2, 3, 4, 5, 6, 7, 8])
+        notes = [n for n in body["notes"] if copy in n]
+        self.assertEqual(notes[:-1], [f"c1.log: {copy} still there at its removal's try {k} of 4, tried again in 1 s"
+                                      for k in (1, 2, 3)])
+        self.assertRegex(notes[-1], "^" + _held_note("c1.log", copy) + "$")
         self.assertEqual(self.services.runner.seats["c1"].force, "")
         self.assertEqual(self.services.runner.runs[run_id].faulted, {})
 
@@ -861,14 +865,13 @@ class ClientLogs(RunTests):
         self.assertIn("c1.log", body["artifacts"])
         self.assertEqual(self.removals, [1, 2, 3, 4, 5])
         self.assertEqual(pings, [])
-        self.assertEqual([n for n in body["notes"] if "C:\\sky-lab\\c1.log" in n],
-                         [f"c1.log: C:\\sky-lab\\c1.log still there at its removal's try {k} of 4, tried again in 1 s"
-                          for k in (1, 2, 3)]
-                         + ["c1.log: C:\\sky-lab\\c1.log gone at its removal's try 5, 17 s after its first, once the agent "
-                            "answered a ping"])
+        copy = f"C:\\sky-lab\\{run_id}-c1.log"
+        self.assertEqual([n for n in body["notes"] if copy in n],
+                         [f"c1.log: {copy} still there at its removal's try {k} of 4, tried again in 1 s" for k in (1, 2, 3)]
+                         + [f"c1.log: {copy} gone at its removal's try 5, 17 s after its first, once the agent answered a ping"])
         self.assertFalse([n for n in body["notes"] if "held open" in n], body["notes"])
         self.assertEqual(self.services.runner.seats["c1"].force, "")
-        self.assertNotIn("C:\\sky-lab\\c1.log", pve.files)
+        self.assertNotIn(copy, pve.files)
 
     def test_a_log_copy_still_there_at_its_first_removal_and_gone_at_the_next_is_no_fault(self):
         """On qemu-server 9.2.15, which closes its handles, a running game's console log copy stayed a moment after a
@@ -883,17 +886,19 @@ class ClientLogs(RunTests):
         self.assertEqual(body["verdict"], "green", body)
         self.assertIn("c1.log", body["artifacts"])
         self.assertEqual(self.removals, [1, 2])
-        self.assertEqual([n for n in body["notes"] if "C:\\sky-lab\\c1.log" in n],
-                         ["c1.log: C:\\sky-lab\\c1.log still there at its removal's try 1 of 4, tried again in 1 s"])
+        copy = f"C:\\sky-lab\\{run_id}-c1.log"
+        self.assertEqual([n for n in body["notes"] if copy in n],
+                         [f"c1.log: {copy} still there at its removal's try 1 of 4, tried again in 1 s"])
         self.assertFalse([n for n in body["notes"] if "held open" in n], body["notes"])
         self.assertEqual(self.services.runner.seats["c1"].force, "")
-        self.assertNotIn("C:\\sky-lab\\c1.log", pve.files)
+        self.assertNotIn(copy, pve.files)
 
     def test_a_removals_tries_and_window_are_paced_through_the_time_scale(self):
         """The removal's four quick tries are REMOVE_PAUSE_S apart and its window's pings REMOVE_BACKOFF_S, every pause
         times time_scale as _tried's is, so the tests run them at once. At a time_scale of 1: three pauses of 1 s, then
-        2 s and a ping the agent answers, its one last try ending the window; with no ping answered, 2, 4, 8 and 16 s,
-        30 s in all, and no fifth try. Either way the copy is a note, and nothing rolls the seat back."""
+        2, 4, 8 and 16 s, 30 s in all, a try after each ping the agent answers (the fresh review of 5771141b, finding 1),
+        none after one it does not. The note counts every try and their whole span on the runner's clock (nit 4), here
+        the pauses alone; either way the copy is a note, and nothing rolls the seat back."""
         import asyncio
         import dataclasses
         import types
@@ -904,15 +909,17 @@ class ClientLogs(RunTests):
         from labapi.runner import REMOVE_BACKOFF_S, REMOVE_PAUSE_S, REMOVE_TRIES, RunRecord
         from labapi.scenario import Scenario
 
-        pve = self._c1_log_removals([ExecResult(0, "True\r\n", "")] * 9)
+        pve = self._c1_log_removals([ExecResult(0, "True\r\n", "")] * 12)
         runner = self.services.runner
         runner.s = dataclasses.replace(self.settings, time_scale=1.0)
+        now = [0.0]
+        runner._clock = lambda: now[0]
         g = self.services.tables.guests["fake-c1"]
         path = "C:\\sky-lab\\c1.log"
         self.assertEqual((REMOVE_TRIES, REMOVE_PAUSE_S, REMOVE_BACKOFF_S), (4, 1.0, (2.0, 4.0, 8.0, 16.0)))
-        for agent_up, removals, pauses, how in (
-                (True, [1, 2, 3, 4, 5], [1.0, 1.0, 1.0, 2.0], "5 tries over 5 s, the last once the agent answered a ping"),
-                (False, [1, 2, 3, 4], [1.0, 1.0, 1.0, 2.0, 4.0, 8.0, 16.0], "4 tries, and no ping answered in the 30 s after")):
+        for agent_up, removals, how in (
+                (True, list(range(1, 9)), "8 tries over 33.0 s, the last once the agent answered a ping"),
+                (False, [1, 2, 3, 4], "4 tries over 33.0 s, and no ping answered in the 30 s after")):
             with self.subTest(agent_up=agent_up):
                 pve.agent_up, slept = agent_up, []
                 self.removals.clear()
@@ -920,15 +927,91 @@ class ClientLogs(RunTests):
 
                 async def sleep(seconds):
                     slept.append(seconds)
+                    now[0] += seconds
 
                 rec = RunRecord("x", Scenario(id="x", clients=["c1"]), self.tmp, "now")
                 with mock.patch.object(runner_mod, "asyncio", types.SimpleNamespace(to_thread=asyncio.to_thread, sleep=sleep)):
                     asyncio.run(runner._removed(rec, g, lambda: runner._remove_try(g, path), {path: "c1.log"}, set(), "c1.log"))
-                self.assertEqual((self.removals, slept), (removals, pauses))
-                self.assertEqual(len([c for c in pve.calls if c[0] == "agent_ping"]), 1 if agent_up else 4)
+                self.assertEqual((self.removals, slept), (removals, [1.0, 1.0, 1.0, 2.0, 4.0, 8.0, 16.0]))
+                self.assertEqual(len([c for c in pve.calls if c[0] == "agent_ping"]), 4)
                 self.assertEqual(rec.notes[-1], f"c1.log: {path} on c1 (fake-c1) held open in the agent after its read "
                                                 f"({how}); left to the seat's next reset")
                 self.assertEqual((rec.rollback, rec.faulted), ({}, {}))
+
+    def _paced_removal(self, answers, died, agent_ping=None):
+        """Runner._removed of C:\\sky-lab\\c1.log on c1 at a time_scale of 1, each try answered in turn from `answers`
+        (stayed, why), the agent pinged by `agent_ping` (the fake's own by default), the pauses recorded and the runner's
+        clock moved by them: the record, the pauses and the pings."""
+        import asyncio
+        import dataclasses
+        import types
+        from unittest import mock
+
+        from labapi import runner as runner_mod
+        from labapi.runner import RunRecord
+        from labapi.scenario import Scenario
+
+        pve = self._managed_c1()
+        pings = []
+
+        def ping(guest):
+            pings.append(guest.vmid)
+            return agent_ping(guest) if agent_ping else True
+
+        pve.agent_ping = ping
+        runner = self.services.runner
+        runner.s = dataclasses.replace(self.settings, time_scale=1.0)
+        now, slept = [0.0], []
+        runner._clock = lambda: now[0]
+
+        async def sleep(seconds):
+            slept.append(seconds)
+            now[0] += seconds
+
+        async def attempt():
+            return answers.pop(0)
+
+        rec = RunRecord("x", Scenario(id="x", clients=["c1"]), self.tmp, "now")
+        g = self.services.tables.guests["fake-c1"]
+        path = "C:\\sky-lab\\c1.log"
+        with mock.patch.object(runner_mod, "asyncio", types.SimpleNamespace(to_thread=asyncio.to_thread, sleep=sleep)):
+            asyncio.run(runner._removed(rec, g, attempt, {path: "c1.log"}, died, "c1.log"))
+        return rec, slept, pings
+
+    def test_a_try_refused_by_an_agent_busy_past_its_patience_goes_to_the_window_at_once(self):
+        """A quick try whose exec GuestControl gave up on, the agent still busy after its 30 s, is not tried again a
+        second on: the removal goes to the window at once, whose pings wait on the agent without an exec each, and the
+        try after the ping it answers decides (an untested path at 5771141b, runner.py:2530). Gone there, it is a note;
+        held through every ping unanswered, it is taken as held after one try ("1 try", nit 4)."""
+        busy = ("C:\\sky-lab\\c1.log on fake-c1 not removed: E_PVE_EXEC: fake-c1: ResourceException: 500 Internal Server "
+                "Error: QEMU guest agent is not running (still busy after 6 tries over 30 s)")
+        path = "C:\\sky-lab\\c1.log"
+        rec, slept, pings = self._paced_removal([(None, busy), (set(), "")], {path})
+        self.assertEqual((slept, len(pings)), ([2.0], 1), "no quick try's 1 s pause after a spent window")
+        self.assertEqual(rec.notes, [f"c1.log: {path} gone at its removal's try 2, 2 s after its first, once the agent "
+                                     "answered a ping"])
+        rec, slept, pings = self._paced_removal([(None, busy)], {path}, agent_ping=lambda guest: False)
+        self.assertEqual((slept, len(pings)), ([2.0, 4.0, 8.0, 16.0], 4))
+        self.assertEqual(rec.notes, [f"c1.log: {path} on c1 (fake-c1) taken as held open in the agent, its read having failed "
+                                     f"(1 try over 30.0 s, and no ping answered in the 30 s after; {busy}); left to the "
+                                     "seat's next reset"])
+        self.assertEqual((rec.rollback, rec.faulted), ({}, {}))
+
+    def test_a_ping_that_raises_reads_as_one_unanswered(self):
+        """GuestControl.agent_ping raises a ProxmoxError for a backend's failure (an untested path at 5771141b,
+        runner.py:2544): the window reads it as a ping unanswered, tries nothing after it, and ends past its 30 s with
+        the held note, nothing escaping the removal."""
+        still = ({"C:\\sky-lab\\c1.log"}, "")
+
+        def ping(guest):
+            raise RuntimeError("500 Internal Server Error: VM 901 not reachable")
+
+        rec, slept, pings = self._paced_removal([still] * 4, set(), agent_ping=ping)
+        self.assertEqual((slept, len(pings)), ([1.0, 1.0, 1.0, 2.0, 4.0, 8.0, 16.0], 4))
+        self.assertRegex(rec.notes[-1], "^" + _held_note("c1.log", "C:\\sky-lab\\c1.log", tries=4,
+                                                         last="and no ping answered in the 30 s after") + "$")
+        self.assertIn("4 tries over 33.0 s", rec.notes[-1])
+        self.assertEqual((rec.rollback, rec.faulted), ({}, {}))
 
     def test_a_seats_named_log_comes_with_its_seats_one_fetch(self):
         """c1-console.log read as a client called c1-console ("c1-console is unmanaged or unmapped; log not fetched"),
@@ -967,7 +1050,7 @@ class ClientLogs(RunTests):
         self.assertEqual(body["verdict"], "green", body)
         self.assertIn(f"c1.log: E_RUN_LOG_FETCH: its source {self.settings.client_driver_log} is not there (log fetch)", body["notes"])
         self.assertNotIn("c1.log", body["artifacts"])
-        copies = [c for c in pve.calls if c[0] == "exec" and "[IO.File]::Create('C:\\sky-lab\\c1.log')" in " ".join(c[2])]
+        copies = [c for c in pve.calls if c[0] == "exec" and f"[IO.File]::Create('C:\\sky-lab\\{run_id}-c1.log')" in " ".join(c[2])]
         self.assertEqual(len(copies), 1, "no try repeated")
         self.assertIn("if (-not (Test-Path -LiteralPath $src)) { Write-Output ('missing ' + $src); exit 0 }", " ".join(copies[0][2]))
 
@@ -1044,8 +1127,10 @@ class ClientLogs(RunTests):
         self.assertEqual(self.services.runner.runs[run_id].agents_down, {})
 
     def test_a_busy_agent_past_its_window_still_skips_the_seats_other_log_fetches(self):
-        """The rule of 58502b08 stands for an agent still busy past its window: each of c1.log's three tries is asked
-        again for agent_busy_s (six asks, 30 s), and only then are the seat's other log fetches skipped, with one note."""
+        """The rule of 58502b08 stands for an agent still busy past its window: c1.log's copy is asked again for
+        agent_busy_s (six asks, 30 s), and its try is not tried again, where each of three tries got a window of its own
+        (18 asks, the fresh review of 5771141b, finding 2); then the seat's other log fetches are skipped, with one
+        note."""
         from unittest import mock
 
         from labapi import proxmox
@@ -1056,11 +1141,13 @@ class ClientLogs(RunTests):
         self.assertEqual(body["verdict"], "green", body)
         fetch_notes = [n for n in body["notes"] if n.endswith("(log fetch)")]
         self.assertEqual(len(fetch_notes), 2, body["notes"])
-        self.assertIn("QEMU guest agent is not running (still busy after 6 tries over 30 s) (log fetch)", fetch_notes[0])
+        self.assertTrue(fetch_notes[0].startswith("c1.log: E_RUN_LOG_FETCH: its copy: its agent stayed busy, not tried again: "
+                                                  "E_PVE_EXEC: fake-c1: ResourceException: 500 Internal Server Error: QEMU "
+                                                  "guest agent is not running (still busy after 6 tries over 30 s)"), fetch_notes)
         self.assertTrue(fetch_notes[1].startswith("c1-driver.log and c1's other logs after it not fetched: its guest agent was "
                                                   "found not running ("), fetch_notes)
-        self.assertEqual(len([c for c in pve.calls if c[0] == "copy"]), 18, "c1.log's three tries, six asks each")
-        self.assertEqual(clock.slept, [1.0, 2.0, 4.0, 8.0, 15.0] * 3)
+        self.assertEqual(len([c for c in pve.calls if c[0] == "copy"]), 6, "c1.log's one try, six asks")
+        self.assertEqual(clock.slept, [1.0, 2.0, 4.0, 8.0, 15.0])
 
     def test_a_log_copy_past_the_cap_is_refused_before_its_first_read(self):
         """A runaway log cannot hold up the run's end: a copy past FETCH_MAX_BYTES is refused before any range is read,
@@ -1071,14 +1158,15 @@ class ClientLogs(RunTests):
         pve = self._managed_c1()
         pve.files[self.settings.client_driver_log] = "platform log\n"
         big = FETCH_MAX_BYTES + 1
-        _log_copy_answers(pve, lambda guest, res: ExecResult(0, f"{big} {big}\r\n", ""), copy=r"C:\\sky-lab\\c1\.log")
+        _log_copy_answers(pve, lambda guest, res: ExecResult(0, f"{big} {big}\r\n", ""), copy=r"C:\\sky-lab\\[^']+-c1\.log")
         run_id, body = self._run(SOLO_WITH_LOG)
         self.assertEqual(body["verdict"], "green", body)
         self.assertIn(f"c1.log: E_RUN_LOG_FETCH: its copy is {big} bytes, past the {FETCH_MAX_BYTES} "
                       f"({FETCH_MAX_BYTES // (1024 * 1024)} MiB) a fetch reads (log fetch)", body["notes"])
         self.assertNotIn("c1.log", body["artifacts"])
-        self.assertFalse([c for c in pve.calls if c[:3] == ("file_read_range", 901, "C:\\sky-lab\\c1.log")])
-        self.assertNotIn("C:\\sky-lab\\c1.log", pve.files)
+        copy = f"C:\\sky-lab\\{run_id}-c1.log"
+        self.assertFalse([c for c in pve.calls if c[:3] == ("file_read_range", 901, copy)])
+        self.assertNotIn(copy, pve.files)
 
     def test_a_log_copy_whose_exec_answer_was_lost_is_a_note(self):
         """log-count's rule for a log too: only the copy exec's own "N M" proves a copy whole, so a copy whose answer the
@@ -1093,13 +1181,13 @@ class ClientLogs(RunTests):
             raise ProxmoxError(f"E_PVE_EXEC_LOST: pid 42 on {guest.name}: the guest agent no longer knows it; the command "
                                "ended and its answer is lost")
 
-        _log_copy_answers(pve, lost, copy=r"C:\\sky-lab\\c1\.log")
+        _log_copy_answers(pve, lost, copy=r"C:\\sky-lab\\[^']+-c1\.log")
         run_id, body = self._run(SOLO_WITH_LOG)
         self.assertEqual(body["verdict"], "green", body)
         self.assertEqual(body["failures"], [])
         self.assertIn("c1.log: E_RUN_LOG_FETCH: its copy's exec answer was lost, so the copy is unchecked (log fetch)", body["notes"])
         self.assertNotIn("c1.log", body["artifacts"])
-        self.assertFalse([c for c in pve.calls if c[:3] == ("file_read_range", 901, "C:\\sky-lab\\c1.log")])
+        self.assertFalse([c for c in pve.calls if c[:3] == ("file_read_range", 901, f"C:\\sky-lab\\{run_id}-c1.log")])
 
 
 
@@ -1558,11 +1646,21 @@ class FridaTraces(RunTests):
         pve.exec = exec_
         run_id, body = self._run(SOLO_WITH_LOG)
         self.assertEqual(body["verdict"], "green", body)
-        held = ("frida hand-two.js.log: C:\\sky-lab\\frida\\hand-two.js.log.copy on c2 (fake-c2) held open in the agent "
-                "after its read (5 tries over 5 s, the last once the agent answered a ping); left to the seat's next reset")
-        self.assertIn(held, body["notes"])
+        held = _held_note("frida hand-two.js.log", "C:\\sky-lab\\frida\\hand-two.js.log.copy", seat="c2 (fake-c2)")
+        self.assertTrue([n for n in body["notes"] if re.fullmatch(held, n)], body["notes"])
         self.assertEqual(self.services.runner.seats["c2"].force, "")
         self.assertIn("frida/c2-hand-two.js.jsonl", body["artifacts"])
+
+
+def _held_note(what, path, seat="c1 (fake-c1)", tries=8, last="the last once the agent answered a ping", taken=""):
+    """Runner._held's note for a file still there past its removal's window, as a regex: its tries and their whole span,
+    which the runner's clock measures, then how the window ended; `taken` the reason a file only taken as held carries."""
+    how = rf"{tries} {'try' if tries == 1 else 'tries'} over \d+\.\d s, {re.escape(last)}"
+    if taken:
+        return (re.escape(f"{what}: {path} on {seat} taken as held open in the agent, its read having failed (") + how
+                + re.escape(f"; {taken}); left to the seat's next reset"))
+    return (re.escape(f"{what}: {path} on {seat} held open in the agent after its read (") + how
+            + re.escape("); left to the seat's next reset"))
 
 
 def _moved_clock():
@@ -1809,10 +1907,8 @@ class ScreenshotSteps(RunTests):
         shot, pngs = self._shot(run_id, body)
         self.assertEqual([p.read_bytes() for p in pngs], [b"\x89PNG shot"])
         i = shot["index"]
-        held = (f"screenshot {i:03d}-c1: C:\\sky-lab\\shots\\{run_id}-{i:03d}.png.b64 on c1 (fake-c1) held open in the "
-                "agent after its read (5 tries over 5 s, the last once the agent answered a ping); left to the seat's next "
-                "reset")
-        self.assertIn(held, body["notes"])
+        held = _held_note(f"screenshot {i:03d}-c1", f"C:\\sky-lab\\shots\\{run_id}-{i:03d}.png.b64")
+        self.assertTrue([n for n in body["notes"] if re.fullmatch(held, n)], body["notes"])
         self.assertEqual(self.services.runner.seats["c1"].force, "")
 
     def test_a_sidecar_left_held_is_never_read_as_the_next_runs_shot(self):
@@ -1972,9 +2068,9 @@ class BurstSteps(RunTests):
 
     def test_a_sidecar_that_stays_through_every_removal_try_is_a_note_and_no_fault(self):
         """Each try at the folder's sidecars is one exec for the folder (Runner._removed, _remove_folder_try): a sidecar
-        still there at the four quick tries and at the window's last is held open in the agent, a note a try before
-        the fourth and then the held note, naming it and its seat, and no fault; the verdict is as it was and the
-        frames kept."""
+        still there at the four quick tries and at a try after each of the window's four pings is held open in the
+        agent, a note a try before the fourth and then the held note, naming it and its seat, and no fault; the verdict
+        is as it was and the frames kept."""
         from labapi.proxmox import ExecResult
 
         self._managed_c1(ExecResult(0, self._done() + "\r\n", ""))
@@ -1986,20 +2082,19 @@ class BurstSteps(RunTests):
         i = step["index"]
         folder = f"C:\\sky-lab\\shots\\{run_id}-{i:03d}-burst"
         sidecar = f"{folder}\\001.png.b64"
-        held = (f"screenshot burst {i:03d}-c1 frame 1: {sidecar} on c1 (fake-c1) held open in the agent after its read (5 "
-                "tries over 5 s, the last once the agent answered a ping); left to the seat's next reset")
-        self.assertEqual([n for n in body["notes"] if sidecar in n],
-                         [f"screenshot burst {i:03d}-c1 frame 1: {sidecar} still there at its removal's try {k} of 4, tried "
-                          "again in 1 s" for k in (1, 2, 3)] + [held])
+        notes = [n for n in body["notes"] if sidecar in n]
+        self.assertEqual(notes[:-1], [f"screenshot burst {i:03d}-c1 frame 1: {sidecar} still there at its removal's try {k} of "
+                                      "4, tried again in 1 s" for k in (1, 2, 3)])
+        self.assertRegex(notes[-1], "^" + _held_note(f"screenshot burst {i:03d}-c1 frame 1", sidecar) + "$")
         self.assertEqual(self.services.runner.seats["c1"].force, "")
         folder_tries, one_file = self._folder_removals(folder)
-        self.assertEqual((len(folder_tries), one_file), (5, []))
+        self.assertEqual((len(folder_tries), one_file), (8, []))
 
-    def test_several_held_sidecars_cost_five_folder_execs_whatever_their_count(self):
+    def test_several_held_sidecars_cost_eight_folder_execs_whatever_their_count(self):
         """A try at a burst's sidecars is one exec for the whole folder, so three sidecars held through every try cost
-        the burst five execs in all, the four quick tries and the window's last, where a try a sidecar cost one folder
-        exec and nine one-file removals, and at 40 frames 120 execs and 120 s inside a mid-run step (the review of
-        b1f2ffd4, nit 1); each held sidecar still has its own notes."""
+        the burst eight execs in all, the four quick tries and one after each of the window's four pings, where a try a
+        sidecar cost one folder exec and nine one-file removals, and at 40 frames 120 execs and 120 s inside a mid-run
+        step (the review of b1f2ffd4, nit 1); each held sidecar still has its own notes."""
         from labapi.proxmox import ExecResult
 
         self._managed_c1(ExecResult(0, self._done() + "\r\n", ""))
@@ -2011,11 +2106,11 @@ class BurstSteps(RunTests):
         i = step["index"]
         folder = f"C:\\sky-lab\\shots\\{run_id}-{i:03d}-burst"
         folder_tries, one_file = self._folder_removals(folder)
-        self.assertEqual((len(folder_tries), one_file), (5, []))
+        self.assertEqual((len(folder_tries), one_file), (8, []))
         held = [n for n in body["notes"] if "held open in the agent" in n]
-        self.assertEqual(held, [f"screenshot burst {i:03d}-c1 frame {k}: {folder}\\{k:03d}.png.b64 on c1 (fake-c1) held open "
-                                "in the agent after its read (5 tries over 5 s, the last once the agent answered a ping); left "
-                                "to the seat's next reset" for k in range(3)])
+        self.assertEqual(len(held), 3, body["notes"])
+        for k, note in enumerate(held):
+            self.assertRegex(note, "^" + _held_note(f"screenshot burst {i:03d}-c1 frame {k}", f"{folder}\\{k:03d}.png.b64") + "$")
         self.assertEqual(len([n for n in body["notes"] if "still there at its removal's try" in n]), 9)
         self.assertEqual(self.services.runner.seats["c1"].force, "")
 
@@ -2052,9 +2147,9 @@ class BurstSteps(RunTests):
 
     def test_a_frame_whose_read_died_is_taken_as_held_when_the_removal_confirms_nothing(self):
         """With the folder's removal unconfirmed (its exec failed), a frame whose read died goes on through the further
-        tries, one exec for the folder each, as _read_back's does, and none confirming it gone, the window's last after
-        a ping the agent answered among them, it is taken as held: the read that died is what leaves a handle open; the
-        frames read whole are not. A note, and no fault."""
+        tries, one exec for the folder each, as _read_back's does, and none confirming it gone, a try after each of the
+        window's pings the agent answered among them, it is taken as held: the read that died is what leaves a handle
+        open; the frames read whole are not. A note, and no fault."""
         from unittest import mock
 
         from labapi import proxmox
@@ -2087,13 +2182,12 @@ class BurstSteps(RunTests):
         sidecar = f"{folder}\\002.png.b64"
         why = f"{folder}'s sidecars on fake-c1 not removed: E_PVE_EXEC: fake-c1: qga command 'guest-exec' failed - got timeout"
         held = [n for n in body["notes"] if "held open" in n]
-        self.assertEqual(held, [f"screenshot burst {i:03d}-c1 frame 2: {sidecar} on c1 (fake-c1) taken as held open in the "
-                                "agent, its read having failed (5 tries over 5 s, the last once the agent answered a ping; "
-                                f"{why}); left to the seat's next reset"])
+        self.assertEqual(len(held), 1, body["notes"])
+        self.assertRegex(held[0], "^" + _held_note(f"screenshot burst {i:03d}-c1 frame 2", sidecar, taken=why) + "$")
         self.assertEqual([n for n in body["notes"] if "not confirmed gone at its removal's try" in n],
                          [f"screenshot burst {i:03d}-c1 frame 2: {sidecar} not confirmed gone at its removal's try {k} of 4 "
                           f"({why}), tried again in 1 s" for k in (1, 2, 3)])
-        self.assertEqual((len(self._folder_removals(folder)[0]), self._folder_removals(folder)[1]), (5, []))
+        self.assertEqual((len(self._folder_removals(folder)[0]), self._folder_removals(folder)[1]), (8, []))
         self.assertEqual(self.services.runner.seats["c1"].force, "")
 
     def test_a_frame_not_read_is_the_note_and_the_rest_are_kept(self):
@@ -2724,8 +2818,8 @@ class FridaSteps(RunTests):
         self.assertEqual(body["verdict"], "green", body)
         self.assertEqual(body["failures"], [])
         copy = f"C:\\sky-lab\\frida\\x-trace-{run_id}-1.js.log.copy"
-        self.assertIn(f"frida x-trace-{run_id}-1.js.log: {copy} on c1 (fake-c1) held open in the agent after its read (5 tries "
-                      "over 5 s, the last once the agent answered a ping); left to the seat's next reset", body["notes"])
+        held = _held_note(f"frida x-trace-{run_id}-1.js.log", copy)
+        self.assertTrue([n for n in body["notes"] if re.fullmatch(held, n)], body["notes"])
         self.assertEqual(self.services.runner.seats["c1"].force, "")
 
     def test_a_removal_that_answers_neither_true_nor_false_is_a_note(self):
@@ -2785,9 +2879,13 @@ class FridaSteps(RunTests):
             run_id, body = self._run(FRIDA_ONE)
         self.assertEqual(body["verdict"], "error", body)  # the trace not fetched whole, the run's own fault
         copy = f"C:\\sky-lab\\frida\\x-trace-{run_id}-1.js.log.copy"
-        self.assertIn(f"frida x-trace-{run_id}-1.js.log: {copy} on c1 (fake-c1) taken as held open in the agent, its read "
-                      f"having failed (1 try over 0 s; {copy} on fake-c1 not removed: E_PVE_EXEC: pid 7 on fake-c1 did not "
-                      "exit in 120.0s); left to the seat's next reset", body["notes"])
+        # its one try's whole span on the runner's clock, the exec's own time with it, where the pauses alone said 0 s
+        # (the fresh review of 5771141b, nit 4)
+        held = (re.escape(f"frida x-trace-{run_id}-1.js.log: {copy} on c1 (fake-c1) taken as held open in the agent, its read "
+                          "having failed (1 try over ") + r"\d+\.\d s; "
+                + re.escape(f"{copy} on fake-c1 not removed: E_PVE_EXEC: pid 7 on fake-c1 did not exit in 120.0s); left to "
+                            "the seat's next reset"))
+        self.assertTrue([n for n in body["notes"] if re.fullmatch(held, n)], body["notes"])
         removals = [c for c in pve.calls if c[0] == "exec" and "Remove-Item" in " ".join(c[2]) and copy in " ".join(c[2])]
         self.assertEqual(len(removals), 1, "a try that ran out its time is not tried again")
         fetch = [f["error"] for f in body["failures"] if f.get("client") == "c1"]
@@ -4239,8 +4337,8 @@ class LogCount(RunTests):
         self.assertIn("3 poll(s)", until["note"], until)
         index = until["index"]
         self.assertEqual(made, [f"C:\\sky-lab\\logcount-{run_id}-{index:03d}-{n}.log.copy" for n in (1, 2, 3)])
-        self.assertIn(f"log-count: c1's Skyrim Platform log: {made[0]} on c1 (fake-c1) held open in the agent after its read "
-                      "(5 tries over 5 s, the last once the agent answered a ping); left to the seat's next reset", body["notes"])
+        held = _held_note("log-count: c1's Skyrim Platform log", made[0])
+        self.assertTrue([n for n in body["notes"] if re.fullmatch(held, n)], body["notes"])
         self.assertEqual(self.services.runner.seats["c1"].force, "")
         for name in (f"logcount-{run_id}-{index:03d}-3.log.copy", f"logcount-{run_id}-{index:03d}-3-console.log.copy",
                      f"logcount-{index:03d}-3.log.copy", "logcount-052-console.log.copy"):
@@ -4403,10 +4501,8 @@ class LogCount(RunTests):
         pve.exec = exec_
         run_id, body = self._run(LOGCOUNT)
         self.assertEqual(body["verdict"], "green", body)
-        held = (f"log-count: c1's Skyrim Platform log: C:\\sky-lab\\logcount-{run_id}-001-1.log.copy on c1 (fake-c1) held open "
-                "in the agent after its read (5 tries over 5 s, the last once the agent answered a ping); left to the seat's "
-                "next reset")
-        self.assertIn(held, body["notes"])
+        held = _held_note("log-count: c1's Skyrim Platform log", f"C:\\sky-lab\\logcount-{run_id}-001-1.log.copy")
+        self.assertTrue([n for n in body["notes"] if re.fullmatch(held, n)], body["notes"])
         self.assertEqual(self.services.runner.seats["c1"].force, "")
 
     def test_a_log_count_copy_still_there_once_then_gone_is_no_fault(self):
@@ -4560,20 +4656,19 @@ class ClientResets(RunTests):
         plain_exec = pve.exec
 
         def exec_(guest, command, timeout):
-            if "Remove-Item -LiteralPath 'C:\\sky-lab\\c1-before.log' -Force" in " ".join(command):
+            if re.search(r"Remove-Item -LiteralPath 'C:\\sky-lab\\[^']+-c1-before\.log' -Force", " ".join(command)):
                 pve.calls.append(("exec", guest.vmid, tuple(command)))
                 return ExecResult(0, "True\r\n", "")  # still there: the agent holds it
             return plain_exec(guest, command, timeout)
 
         pve.exec = exec_
         reset, body = self._reset()
-        held = ("c1-before.log: C:\\sky-lab\\c1-before.log on c1 (fake-c1) held open in the agent after its read (5 tries "
-                "over 5 s, the last once the agent answered a ping); left to the seat's next reset")
+        held = _held_note("c1-before.log", f"C:\\sky-lab\\{body['run']}-c1-before.log")
         self.assertEqual((body["verdict"], reset["kind"], reset["reason"]), ("green", "relaunch", ""), body)
-        self.assertIn(held, body["notes"])
+        self.assertTrue([n for n in body["notes"] if re.fullmatch(held, n)], body["notes"])
         self.assertIn("c1-before.log", body["artifacts"])
         self.assertEqual(len(pve.relaunches), 1)
-        self.assertIn("\nClean $lab @('c1.log', 'c1-*.log') @() -soft\n", pve.relaunches[0])
+        self.assertIn("\nClean $lab @('c1.log', 'c1-*.log', '*-c1.log', '*-c1-*.log') @() -soft\n", pve.relaunches[0])
         self.assertEqual(self.services.runner.seats["c1"].force, "")
 
     def test_a_trace_copy_held_after_a_before_run_fetch_is_a_note_and_the_seat_relaunches(self):
@@ -4595,10 +4690,9 @@ class ClientResets(RunTests):
 
         pve.exec = exec_
         reset, body = self._reset()
-        held = ("frida hand-trace.js.log: C:\\sky-lab\\frida\\hand-trace.js.log.copy on c1 (fake-c1) held open in the agent "
-                "after its read (5 tries over 5 s, the last once the agent answered a ping); left to the seat's next reset")
+        held = _held_note("frida hand-trace.js.log", "C:\\sky-lab\\frida\\hand-trace.js.log.copy")
         self.assertEqual((body["verdict"], reset["kind"], reset["reason"]), ("green", "relaunch", ""), body)
-        self.assertIn(held, body["notes"])
+        self.assertTrue([n for n in body["notes"] if re.fullmatch(held, n)], body["notes"])
         self.assertEqual(len(pve.relaunches), 1)
         self.assertIn("Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy') @() -soft", pve.relaunches[0])
         self.assertEqual(self.services.runner.seats["c1"].force, "")
@@ -4655,7 +4749,7 @@ class ClientResets(RunTests):
                       "\nClean $lab @('logcount-*.log.copy') @() -soft\n",
                       # the log fetch's copies and the SKSE logs' of this seat, softly: a held one is a note now, and
                       # this is the reset that removes it
-                      "\nClean $lab @('c1.log', 'c1-*.log') @() -soft\n",
+                      "\nClean $lab @('c1.log', 'c1-*.log', '*-c1.log', '*-c1-*.log') @() -soft\n",
                       "Clean (Join-Path $lab 'shots') @('*.png', '*.png.b64') @('*-burst')",
                       "Clean (Join-Path $lab 'screenshots') @('*.png') @()",
                       "Clean (Join-Path $lab 'burst') @('request.json', 'done.json') @()",
@@ -4749,32 +4843,43 @@ class ClientResets(RunTests):
                         "the mark is judged before anything stops")
         self.assertTrue(any("a stale hot mark removed (20261029T033547Z 4aa5b774" in n for n in body["notes"]), body["notes"])
 
-    def test_a_capture_file_held_open_is_left_and_the_seat_relaunches(self):
+    def test_a_capture_file_still_held_at_the_relaunch_rolls_the_seat_back(self):
         """sky-c2, b-cloak-fight 20261030-053144: two .png.b64 sidecars a timed-out guest-file-close left open failed
-        both relaunch tries and cost a rollback. The capture folders are cleaned as far as they go."""
+        both relaunch tries and cost a rollback, so the capture folders are cleaned as far as they go, no try failing on
+        one. A held file is now only a note at its own run (Runner._held), so one the next relaunch's cleaning still
+        finds held outlived the run gap: the seat rolls back in that same reset, the held note costing a rollback only
+        then (the fresh review of 5771141b, finding 1)."""
         pve = self._warm()
         pve.relaunch_held = ["C:\\sky-lab\\shots\\025.png.b64", "C:\\sky-lab\\shots\\032.png.b64"]
+        mark = len(pve.calls)
         reset, body = self._reset()
-        self.assertEqual((body["verdict"], reset["kind"]), ("green", "relaunch"), body)
+        self.assertEqual((body["verdict"], reset["kind"]), ("green", "rollback"), body)
+        self.assertEqual(reset["reason"], "its cleaning found 2 held open (C:\\sky-lab\\shots\\025.png.b64, "
+                                          "C:\\sky-lab\\shots\\032.png.b64), kept past a run gap")
+        self.assertEqual(len(pve.relaunches), 1, "the cleaning's find is the rollback's reason, not a relaunch failed")
+        self.assertEqual(self._vm_resets(pve, mark), [("stop", 901), ("rollback", 901, "clean-sp"), ("start", 901)])
         script = pve.relaunches[-1]
         self.assertIn("Clean (Join-Path $lab 'shots') @('*.png', '*.png.b64') @('*-burst') -soft", script)
         self.assertIn("Clean (Join-Path $lab 'screenshots') @('*.png') @() -soft", script)
         self.assertNotIn("CharGen\\Presets') $presets @() -soft", script, "presets and saves still fail the try")
-        self.assertTrue(any("2 held open left in place (C:\\sky-lab\\shots\\025.png.b64" in n for n in body["notes"]), body["notes"])
 
-    def test_a_trace_copy_held_open_is_left_and_the_seat_relaunches(self):
+    def test_a_trace_copy_still_held_at_the_relaunch_rolls_the_seat_back(self):
         """sky-c1, x-quest-mode 20261030-131512: the runner's shared-read copy of the last run's story-location.js log,
         read back through the agent, failed both relaunch tries and cost a rollback. The copies go as far as they
-        will; the scripts and their own outputs still fail the try (one held means a Frida process outlived the stop)."""
+        will, and the scripts and their own outputs still fail the try (one held means a Frida process outlived the
+        stop); a copy the cleaning still finds held outlived the run gap, and rolls the seat back in that reset (the
+        fresh review of 5771141b, finding 1)."""
         pve = self._warm()
         pve.relaunch_held = ["C:\\sky-lab\\frida\\story-location-20261030-131130-x-story-arrival-login-13.js.log.copy"]
         reset, body = self._reset()
-        self.assertEqual((body["verdict"], reset["kind"]), ("green", "relaunch"), body)
+        self.assertEqual((body["verdict"], reset["kind"]), ("green", "rollback"), body)
+        self.assertEqual(reset["reason"], "its cleaning found 1 held open (C:\\sky-lab\\frida\\story-location-20261030-131130-"
+                                          "x-story-arrival-login-13.js.log.copy), kept past a run gap")
         script = pve.relaunches[-1]
         self.assertIn("Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy') @() -soft", script)
         self.assertIn("Clean (Join-Path $lab 'frida') @('*.js', '*.js.out', '*.js.err', '*.js.log') @()\n", script)
-        self.assertTrue(any("1 held open left in place (C:\\sky-lab\\frida\\story-location-20261030-131130" in n
-                            for n in body["notes"]), body["notes"])
+        self.assertTrue(any(n.startswith("c1 rolled back in ") and n.endswith("kept past a run gap") for n in body["notes"]),
+                        body["notes"])
 
     def test_a_hot_push_mark_rolls_the_seat_back_in_the_same_run(self):
         pve = self._warm()

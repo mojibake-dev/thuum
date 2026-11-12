@@ -236,6 +236,24 @@ class GuestControlTests(unittest.TestCase):
         self.assertEqual(str(cm.exception), f"E_PVE_EXEC: sky-c1: RuntimeError: {self.BUSY} (still busy after 6 tries over 30 s)")
         self.assertEqual((len(b.calls), clock.slept), (6, [1.0, 2.0, 4.0, 8.0, 15.0]))
 
+    def test_a_reads_tries_share_one_busy_window(self):
+        """_agent_read's tries share one busy window, set before the first, where each got-timeout retry got a fresh
+        30 s (the fresh review of 5771141b, finding 2): a read busy through four asks, then a got timeout and its 2 s,
+        then busy again is asked only until the one window's end, 30 s from its first ask."""
+        from unittest import mock
+
+        from labapi import proxmox
+        from labapi.proxmox import GuestControl, ProxmoxError
+
+        timeout = "500 Internal Server Error: VM 711 qga command 'guest-file-read' failed - got timeout"
+        clock = self._clock()
+        b = self._answering([RuntimeError(self.BUSY)] * 4 + [RuntimeError(timeout)] + [RuntimeError(self.BUSY)] * 10)
+        with mock.patch.object(proxmox, "time", clock), self.assertRaises(ProxmoxError) as cm:
+            GuestControl(b, agent_busy_s=30.0).file_read(self.c1, "C:\\x")
+        self.assertIn(f"{self.BUSY} (still busy after 5 tries over 30 s)", str(cm.exception))
+        self.assertEqual((len(b.calls), clock.slept), (10, [1.0, 2.0, 4.0, 8.0, proxmox.FILE_READ_PAUSES[0], 1.0, 2.0, 4.0, 6.0]))
+        self.assertEqual(clock.t, 30.0)
+
     def test_any_other_agent_error_is_the_callers_at_once(self):
         """Only the busy answer is asked again: an unrelated 500 (the VM itself not running) and the agent's own "got
         timeout" out of an exec are raised at their first answer, unchanged. With no window, the tests' and fakes'
@@ -361,6 +379,33 @@ class ProxmoxerExecTests(unittest.TestCase):
         self.assertIn("E_PVE_EXEC_LOST: pid 42 on sky-c2", str(cm.exception))
         self.assertIn("does not exist", str(cm.exception))
         self.assertLess(time.monotonic() - t0, 5.0)
+
+    def test_a_started_command_whose_status_stays_busy_is_never_started_again(self):
+        """The exec-status busy string (an untested path at 5771141b; its finding 3): once guest-exec has started the
+        command, an exec-status answering "QEMU guest agent is not running" to the exec's deadline ends as "did not exit
+        in ...; last exec-status error ...", which names the busy answer, and GuestControl._agent must not ask that exec
+        again, which would run the command twice: one guest-exec, the error as the backend gave it."""
+        from unittest import mock
+
+        from labapi.guests import Guest
+        from labapi.proxmox import GuestControl, ProxmoxError
+
+        g = Guest("sky-c2", 712, "10.10.70.22", "qemu", "client", True, "clean-m1", "c2")
+        b = self._backend([RuntimeError("500 Internal Server Error: QEMU guest agent is not running")])
+        agent, started = b._res(g).agent, []
+        plain_post = agent.post
+
+        def post(command):
+            started.append(command)
+            return plain_post(command)
+
+        agent.post = post
+        with mock.patch("labapi.proxmox.time.sleep"), self.assertRaises(ProxmoxError) as cm:
+            GuestControl(b, agent_busy_s=30.0).exec(g, ["cmd"], 0.05)
+        self.assertIn("E_PVE_EXEC: pid 42 on sky-c2 did not exit in 0.05s; last exec-status error RuntimeError: 500 Internal "
+                      "Server Error: QEMU guest agent is not running", str(cm.exception))
+        self.assertNotIn("still busy after", str(cm.exception))
+        self.assertEqual(started, [["cmd"]])
 
     def test_exec_status_that_never_answers_names_the_last_error(self):
         from unittest import mock

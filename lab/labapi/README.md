@@ -36,12 +36,14 @@ before its first read, and the copy is removed once read. Its removal is
 tried four times 1 s apart, each try that still finds it a note, since a
 scan of a file just written can hold it a moment (train 52's stage,
 numidium's HYPOTHESIS), then over a 30 s window, pinging the agent after
-pauses of 2, 4, 8 and 16 s, the first ping it answers bringing one last
-try. A copy or sidecar still there then is held open in the agent, a busy
-agent keeping the handle of a read or close that timed out until it works
-through its queue (core's host journal, 2026-11-12): a note naming the file
-and its seat, never the seat's fault, and the seat's next reset (a rollback,
-or the relaunch's cleaning) removes it. Every agent call Proxmox answers
+pauses of 2, 4, 8 and 16 s, each ping it answers bringing another try. A
+copy or sidecar still there then is held open in the agent, a busy agent
+keeping the handle of a read or close that timed out until it works through
+its queue (core's host journal, 2026-11-12; HYPOTHESIS, the next relaunch's
+held count decides): a note naming the file and its seat, never the seat's
+fault, and the seat's next reset (a rollback, or the relaunch's cleaning)
+removes it; a file that cleaning still finds held rolls the seat back in
+that reset. Every agent call Proxmox answers
 "QEMU guest agent is not running", its 3 s guest-ping unanswered by a busy
 agent, is asked again for up to 30 s (`LAB_AGENT_BUSY_S`) before it fails
 as it did. A client log (`<client>.log`, `-driver.log`,
