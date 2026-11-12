@@ -9650,3 +9650,29 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   (gitlab 20605 and skymp5-client.js built at 6fe5fea0, the branch pushed without a Windows build). b-push stays pending
   (red by design under the essentials layer) and is read alone after. reanimate-return-read merged to main 7d4cebb2
   (thrall-link.js v1.1, for x-reanimate-return-v1).
+- (numidium) The afternoon on fork canon 6fe5fea0. reads3 (10:22Z to 10:41Z, server m4-shout-once): x-reanimate-look-u0 v1.1
+  20261112-102238 red, c2's game lost again (U0's second crash on canon; U0 does not rerun on canon); x-reanimate-return-v1
+  v1.1 103005 red at step 90, Sven never reaching the caster (thrall-link.js v1.1 never linked: slot 0xAD held
+  TrueDirectionalMovement.dll's function); b-push alone 103711 red at step 26, its known pending red.
+  reanimate-return-read-2 merged to main eb1327ce (thrall-link.js v1.3); x-reanimate-return v1.3 123225 red at step 44: none
+  of the three Dead Thrall bolts reached Sven, whose body lay 52.8 degrees below c1's eye (the aim, thuum-fa's
+  read-return-123225.md). labapi-held-removal merged to main 4f0398a2 (12:35Z) and live: an agent call Proxmox answers "QEMU
+  guest agent is not running" asked again for up to 30 s, a removal a patient window, a file still held a note. Rung 1's T2
+  of 1af7641d (the pickup fix) red at 11:38Z on prop-physics (c2.rc legacy -1 | wire 0): the legacy fakeclient cannot
+  express the pickup, so d9da7da3 reverts that T2 row; the T2 of d9da7da3 green at 13:54Z (53 sessions identical), its stage
+  from 13:55Z from the cap's worktree (x-prop-arbitration v14.3, x-prop-edge v1.3 by path). The reanimation head
+  m4-reanimate-claim-2 0065ae6e: its T2 refused at 11:40Z (the difftest artifact older than the branch's skymp-wire), API
+  pipeline 5902, then green at 12:31Z; staged 12:43Z to 13:04Z from the cap's worktree (49b3cf3f, main 4f0398a2 merged in),
+  0 of 2. x-reanimate-claim v2.2 125536 red at step 54: c1's game 6408 died right after npc-fate's resurrect of 0x35534
+  (Windows Error Reporting's dump, 83,914,780 bytes, kept as c1-SkyrimSE-crash.dmp; c2's game lost too, no dump).
+  x-reanimate-look v1.1 130030 red at step 38: c1's game 10468 gone 0.6 s after an Actor.resurrect, with no dump, no
+  Application event and no CrashLogger log; the Security log's 4689 row gives its exit, 0xC0000005 at 13:03:13Z. thuum-fa's
+  read (read-stage-125536.md 25dff0d5): c1 crashed in the head's new ApplyArtObject native (Address Library 22769 returns no
+  effect on 1.6.1170, and the native wrote through it), 130030 most likely the same through the atronach's cloak look; the
+  server crashed too ("User with id 2 doesn't exist": a departing commander's ClaimGone named that commander as its thrall's
+  simulator); both fixes building, the head held. The heap trace for c2 was never armed (numidium's outside poll of /status
+  got no answer during the run); corpse-lay-heap-pool.js v1.1 now arms from the probe's own frida step. The crash check had
+  read 125536's crash as "no answer", a seat fault: its curl.exe upload was uncaptured, so lab-api's answer and the check's
+  JSON shared one line. Merged to main: labapi-crash-curl 162364ff (the seats' curl.exe answers captured, its fresh review's
+  two findings applied), physics-3-impulse-v1.3 41727edc (prop-impulse.js v1.3, PUSH_ONLY, for rung 3's stage) and
+  reanimate-heap-trace b8bd6162 (corpse-lay-heap-pool.js v1.1).
