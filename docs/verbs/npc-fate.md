@@ -3417,11 +3417,30 @@ lab/frida/thrall-link.js:69-77 cites it), exercised by run 20261112-152001. It i
 of Papyrus natives) has no row for it; its rung is this section's R2.
 
 Lines. Server: "[verb:npc-fate] <actor> returns to its caster <player> in cell <cell>: a full thrall its record names (the
-record's <N> s), commanded again (ADR-060)"; the restart's line for a full thrall now ends "it stays, its look kept, until its
-caster <caster> returns (ADR-060)". The commander's platform log: "[verb:npc-fate] commandActor(<id>): linked to the player
-(37490, 38798) on thread <t> main <m>", "[verb:npc-fate] commandActor(<id>): unlinked (38800)", "[verb:npc-fate]
-commandActor(<id>): the engine removed it from the player's commanded actors; not linked again", "[verb:npc-fate]
-commandActor(<id>): the engine's own command, left alone" (once per actor).
+record's <N> s), commanded again (ADR-060)"; the restart's line for a full thrall whose record keeps a caster now ends "it
+stays, its look kept, until its caster <caster> returns (ADR-060)". The commander's platform log (<client>.log):
+"[verb:npc-fate] commandActor(<id>): linked to the player (37490, 38798; the player's entry with no effect, commanded true) on
+thread <t> main <m>" (without "37490, " when the life state was kReanimate already), "[verb:npc-fate] commandActor(<id>):
+unlinked (38800; the thrall dead|no longer commanded), the player's entry gone|still there after it, on thread <t> main <m>",
+"[verb:npc-fate] commandActor(<id>): the engine removed it from the player's commanded actors; not linked again",
+"[verb:npc-fate] commandActor(<id>): waits for its promotion (puppet <b>, AI on <b>)" and "[verb:npc-fate]
+commandActor(<id>): the engine's own command, left alone", each of the last two once per actor. The client's console:
+"[verb:npc-fate] commandActor <id>: asked, its record's caster <me> is this game's player and this game simulates it (queued
+<b>)" and "[verb:npc-fate] commandActor <id>: ended (<why>; queued <b>)".
+
+Built on fork m4-reanimate-return (from m4-reanimate-claim-2 8464f322, 2026-11-12, unpushed): 29258b56 (wire-rules cells.rs
+returning, its T0, the bridge's ThrallRecord), 5d5c868a (MagicEffects' caster, SCHEMA_VERSION 45, rule 4 in one commit),
+51e73ea4 (PartOne::ReturnThralls at OnCellLoaded and at the subscribe, the return line, the restart line), 0ba43ed7 (FateApi's
+commandActor, game/Offsets.h's four ids, the TS declarations, magicEffectsService's upkeep), 2b1f07fc (a found fault, fixed:
+RunningEffect's caster is an optional FormDesc; a server's first player, 0xff000000, has the FormDesc an empty one has, so
+"none" as an empty desc dropped that player's caster at the effect rule's first rewrite of the record and its thrall's record
+named no caster; the lab's c1 is ff000000. The change form writes the key whenever there is a caster, "0" for 0xff000000; its
+meaning is unchanged and an older server reads "0" as none, as it wrote it, so no migration), 6b2d72b3 (NpcFateTest's return
+cases and the restart's round trip), a2a737ba (difftest's per-client start_ms) and 6b6d42f5 (magic-effects.yaml's and
+poison.yaml's caster, thrall-return.yaml). cargo test --workspace 739 passed, clippy -D warnings and fork-lint clean; the C++
+and the platform not compiled here (the server image at the push, the Windows build). The probe:
+lab/.cache/drafts/reanimate/x-reanimate-return-v2.yaml (sha1 a7be0bfb, a copy in lab/.cache/probes), probe-check ok, its fresh
+review before the first run.
 
 Tests. T0: cells.rs's return cases (at the cell's load and not before it; under another seat's hosting; none for a dead
 thrall, another caster's record, a timed record, 86,399 s against 86,400, a live command by another or its own; a dialogue's
