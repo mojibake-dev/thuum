@@ -398,7 +398,18 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   Run on both seats through x-prop-blast v3: the caster's rows read H2, the watcher's H3, the island rows H4. The originals run under
   exceptions 'propagate'; the replacements are reverted after TTL_S (1800) from Frida's own thread, and until then a second
   instance on the same game falls back to attaching 26005 and 26004 with no forces: relaunch the seat before a rerun inside the
-  half hour. Ids by `just addr`, 2026-11-11; 1.6.1170 only. Written 2026-11-11, v1.1 the same day (its review's fixes); never run.
+  half hour. Ids by `just addr`, 2026-11-11; 1.6.1170 only. Written 2026-11-11, v1.1 the same day (its review's fixes), run in
+  x-prop-blast v3 (20261111-223256). v1.2 (2026-11-12, ADR-071 rung 3's premise reads; its fresh review READY, its glib include
+  applied as written): BACKTRACE (default false, x-prop-cone v1) takes an accurate backtrace at a 26004 or 26005 call with no
+  projectile bracket, the cone's UpdateImpl, HandleHits and ProcessImpacts (slots 0xAB, 0xBE, 0xAC) brackets too, with a 'cone' and
+  a 'coneEnd' row a cone; ARROW (default false, x-prop-arrow v1) attaches bhkRigidBody's push candidates (78089, 78090, 78092 and
+  the motions' velocity and impulse slots) in native code, each row with the velocities before and after, the caller and a stack
+  scan; ATTACH_ONLY (default false, rung 3's own probes) leaves 26004 and 26005 unhooked, since the rung 3 build replaces 26004 in
+  the platform's own Gum. The brackets keep per-thread stacks in a CModule and never cross into JavaScript (rule 9); the watch is
+  keyed by body and prints a world's fixed island without its members; liveness carries a Sleep pulse and the native counters;
+  'btSelfTest' reads the backtracer's reach at the first PlayerCharacter::Update; the ready row says scriptVersion '1.2'. Reading
+  it (the review): a frame's label is the nearest known start below it, not its function (the helper at 0x7ed640-0x7ed89d reads as
+  'Projectile slot 0xbf'); under REPLACE true only a backtrace's frame 1 is sure; SkyrimSE.exe's frames get no symbols (no PDB).
 - body-impose.js: ADR-071 rung 0's pose read on one seat (H6): can the engine hold a dead body in a pose it is handed, within 32
   units a bone. It finds FORM's actor in the process lists, waits for its body to rest, captures each body's position and rotation
   (bhkRigidBody slots 0x33, 0x34) and the Havok block by the engine's own serializer (36016, the copy freed), then, each time the
