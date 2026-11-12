@@ -394,7 +394,12 @@ read. A copy that will not go is held open in the agent (qemu-server
 9.2.10's file-read leaves a handle open when a read dies), which only the
 seat's restart closes, so the seat rolls back: in this run's own reset when
 the fetch came before it (a hand-started trace fetched before the
-rollback), else at its next run. A run's own
+rollback), else at its next run. A copy or sidecar counts as held only when
+its removal still finds it at the fourth of four tries 1 s apart, each try
+before that a note naming it, since on 9.2.15, which closes its handles, a
+running game's console log copy stayed a moment after a small read (train
+52's stage: x-console-arm and x-acting-player on c1; numidium's HYPOTHESIS,
+a scan of a file just written). A run's own
 trace not fetched whole is a lab fault, E_RUN_FRIDA_FETCH (the scenario
 runner's run end, below). The token has no FileWrite privilege.
 
@@ -637,7 +642,9 @@ five-second frames could not show a stride.
   NNN-<client>-burst.json, the offsets, each frame's sidecar in ranges as a
   plain shot's is (its length from one listing of the burst's folder); once
   every frame is read, one exec removes the folder's sidecars and names any
-  that stayed, where a removal a frame cost an exec each. As with a plain
+  that stayed, where a removal a frame cost an exec each, and each further
+  try is that one exec again, so a burst's removal is four execs and 3 s at
+  most whatever its size. As with a plain
   shot, a burst never fails a run: a frame not filmed or not read is the
   step's note.
 Assertions read `server.actor(c)` (the record, and

@@ -237,6 +237,10 @@ class RunRecord:
     # the seats whose guest agent a log fetch found not running, each with that error and whether the skip of its other
     # log fetches is noted yet: they are skipped until the seat's reset (_fetch_client_file, _skse_logs, _reset_seat)
     agents_down: dict[str, tuple[str, bool]] = field(default_factory=dict)
+    # the log-count counts taken at each step index, so each count's copies carry their own number
+    # (logcount-<index>-<n>.log.copy, _log_count): a copy still held after its removal's last try spoils that one count,
+    # where one name a step made every later poll of its until fail its Create (the review of b1f2ffd4, nit 2)
+    log_counts: dict[int, int] = field(default_factory=dict)
 
     def progress(self) -> dict[str, Any]:
         if self.verdict != "running":
@@ -285,6 +289,13 @@ READ_RANGE_BYTES = 512 * 1024
 # The largest copy a fetch reads back, refused before its first read: 128 ranges at most, so a runaway trace cannot hold
 # up the run's end, whose artifacts phase has no deadline
 FETCH_MAX_BYTES = 64 * 1024 * 1024
+# A removal's tries before a file the runner read counts as held, and the pause between them (Runner._removed): on
+# qemu-server 9.2.15, which closes its handles, a running game's console log copy stayed a moment after a small read
+# (train 52's stage: x-console-arm's logcount-052-console.log.copy and x-acting-player's logcount-133-console.log.copy,
+# both on c1, the first a 73.1 s rollback at the next run), while the 6 MB seat check left nothing; numidium's
+# HYPOTHESIS, a scan of a file just written (Defender or the indexer) holding it a moment
+REMOVE_TRIES = 4
+REMOVE_PAUSE_S = 1.0
 
 
 class Runner:
@@ -1276,9 +1287,12 @@ class Runner:
             return True, f"log-count: {client}'s game folder unread: {e}"
         texts: list[str] = []
         byte_notes: list[str] = []
+        # each count's copies named by its step and its number there (RunRecord.log_counts): an until polls the same step
+        # index, and a copy held open spoils its own count alone
+        n = rec.log_counts[index] = rec.log_counts.get(index, 0) + 1
         for src, suffix in ((self.s.client_driver_log, ""), (f"{game_dir}\\{self.s.client_console_log}", "-console")):
             which = "console log" if suffix else "Skyrim Platform log"
-            copy = f"{self.s.client_lab_dir}\\logcount-{index:03d}{suffix}.log.copy"
+            copy = f"{self.s.client_lab_dir}\\logcount-{index:03d}-{n}{suffix}.log.copy"
             # the source's length at the open and the copy's after it, printed for the note (single quotes only: the
             # guest agent's argument passing strips double quotes)
             read = (f"$s = [IO.File]::Open('{src}', 'Open', 'Read', 'ReadWrite'); $n = $s.Length; "
@@ -1946,35 +1960,32 @@ class Runner:
 
     async def _remove_frames(self, rec: RunRecord, g: Guest, folder: str, whats: dict[str, str], died: set[str],
                              what: str) -> None:
-        """A burst's .b64 sidecars removed from `folder` on the seat by one exec once every frame is read, which names
-        each one that stayed and then their count, so an answer cut short never reads as none staying. Each one that
-        stayed is held open in the agent, as a plain shot's is (_held: the step's note and the seat's fault, named by
-        its frame's `whats` entry or else `what`); with the removal unconfirmed, a frame whose read died (`died`) is
-        taken as held, as _read_back takes one, and otherwise the removal's failure is the run's note."""
+        """A burst's .b64 sidecars removed from `folder` on the seat once every frame is read, by the one helper every
+        read file's removal goes through (_removed), a try being one exec for the whole folder (_remove_folder_try):
+        four execs and three pauses at most, whatever the burst's size, where a try a sidecar gave 40 held frames 120
+        execs and 120 s inside a mid-run step (the review of b1f2ffd4, nit 1). Each sidecar's notes and its fault are its
+        own, named by its frame's `whats` entry (a sidecar's name to its frame) or else `what`; `died` names the frames'
+        sidecars whose read died."""
+        await self._removed(rec, g, lambda: self._remove_folder_try(g, folder),
+                            {f"{folder}\\{name}": w for name, w in whats.items()}, {f"{folder}\\{name}" for name in died}, what)
+
+    async def _remove_folder_try(self, g: Guest, folder: str) -> tuple[set[str] | None, str]:
+        """One try at a burst folder's .b64 sidecars by one exec, which removes every one there and names each one that
+        stayed and then their count, so an answer cut short never reads as none staying: the paths still there (none:
+        all gone), or None and the reason for an exec that failed or answered otherwise."""
         cmd = ["powershell", "-NoProfile", "-Command",
                f"$stayed = @(Get-ChildItem -LiteralPath '{folder}' -Filter '*.png.b64' -File | ForEach-Object {{ "
                f"Remove-Item -LiteralPath $_.FullName -Force -ErrorAction SilentlyContinue; "
                f"if (Test-Path -LiteralPath $_.FullName) {{ $_.Name }} }}); $stayed; Write-Output ('stayed ' + $stayed.Count)"]
-        stayed, unconfirmed = None, ""
         try:
             res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
-            lines = [ln.strip() for ln in (res.out or "").splitlines() if ln.strip()]
-            count = re.fullmatch(r"stayed (\d+)", lines[-1]) if lines else None
-            if res.exitcode == 0 and count and int(count.group(1)) == len(lines) - 1:
-                stayed = lines[:-1]
-            else:
-                unconfirmed = (f"the removal of {folder}'s sidecars on {g.name} answered exit {res.exitcode}: "
-                               f"{(res.err or res.out).strip()[:200]}")
         except ProxmoxError as e:
-            unconfirmed = f"{folder}'s sidecars on {g.name} not removed: {e}"
-        if stayed is not None:
-            for name in stayed:
-                self._held(rec, g, f"{folder}\\{name}", whats.get(name, what))
-            return
-        for name in sorted(died):
-            self._held(rec, g, f"{folder}\\{name}", whats[name], unconfirmed)
-        if not died:
-            rec.notes.append(f"{what}: {unconfirmed}")
+            return None, f"{folder}'s sidecars on {g.name} not removed: {e}"
+        lines = [ln.strip() for ln in (res.out or "").splitlines() if ln.strip()]
+        count = re.fullmatch(r"stayed (\d+)", lines[-1]) if lines else None
+        if res.exitcode == 0 and count and int(count.group(1)) == len(lines) - 1:
+            return {f"{folder}\\{name}" for name in lines[:-1]}, ""
+        return None, f"the removal of {folder}'s sidecars on {g.name} answered exit {res.exitcode}: {(res.err or res.out).strip()[:200]}"
 
     async def _mouse(self, rec: RunRecord, index: int, step: Step) -> tuple[bool, str]:
         """A relative mouse move in the seat's own desktop session (scenario.py's mouse; mouse.py): what the
@@ -2436,41 +2447,82 @@ class Runner:
         return bytes(data)
 
     async def _read_back(self, rec: RunRecord, g: Guest, path: str, size: int, what: str) -> bytes:
-        """The `size` bytes of the file at `path` on the seat in ranges (_read_ranges), and then the file removed. A
-        ProxmoxError or a ValueError from the read is the caller's, after the removal, which runs whatever happened: a
-        copy that will not go is held open in the agent (qemu-server 9.2.10's file-read leaves a handle open when a
-        read dies, Agent.pm at ec268ede5b lines 539-555, and only the seat's restart closes it), the seat's fault
-        (_held). After a read that raised, a removal that does not confirm the copy gone counts as one that found it
-        held (the fresh review of e8d8de9b, nit 3): the read that died is what leaves a handle open. The frida traces,
-        the client logs (_fetch_client_file, _log_count) and the plain screenshots' .b64 sidecars come back through
-        it, a burst's frames through _read_ranges and one removal for them all (_remove_frames); _skse_logs is the
-        fetch still read whole."""
+        """The `size` bytes of the file at `path` on the seat in ranges (_read_ranges), and then the file removed
+        (_removed). A ProxmoxError or a ValueError from the read is the caller's, after the removal, which runs whatever
+        happened: a copy that will not go is held open in the agent (qemu-server 9.2.10's file-read leaves a handle open
+        when a read dies, Agent.pm at ec268ede5b lines 539-555, and only the seat's restart closes it), the seat's fault
+        (_held), once its removal's tries are spent. The frida traces, the client logs (_fetch_client_file, _log_count)
+        and the plain screenshots' .b64 sidecars come back through it, a burst's frames through _read_ranges and one
+        removal for them all (_remove_frames); _skse_logs is the fetch still read whole."""
         came_back = False
         try:
             data = await self._read_ranges(g, path, size)
             came_back = True
             return data
         finally:
-            cmd = ["powershell", "-NoProfile", "-Command",
-                   f"Remove-Item -LiteralPath '{path}' -Force -ErrorAction SilentlyContinue; Test-Path -LiteralPath '{path}'"]
-            said, unconfirmed = "", ""
-            try:
-                res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
-                said = _last_line(res.out)
-                if res.exitcode != 0 or said not in ("True", "False"):
-                    unconfirmed = f"the removal of {path} on {g.name} answered exit {res.exitcode}: {(res.err or res.out).strip()[:200]}"
-            except ProxmoxError as e:
-                unconfirmed = f"{path} on {g.name} not removed: {e}"
-            if said == "True" or (unconfirmed and not came_back):
-                self._held(rec, g, path, what, "" if said == "True" else unconfirmed)
-            elif unconfirmed:
-                rec.notes.append(f"{what}: {unconfirmed}")
+            await self._removed(rec, g, lambda: self._remove_try(g, path), {path: what}, set() if came_back else {path}, what)
+
+    async def _remove_try(self, g: Guest, path: str) -> tuple[set[str] | None, str]:
+        """One try at the file at `path` on the seat by one exec, Remove-Item and then Test-Path: the path still there
+        ({path}, or none for one gone), or None and the reason for an exec that failed or answered neither."""
+        cmd = ["powershell", "-NoProfile", "-Command",
+               f"Remove-Item -LiteralPath '{path}' -Force -ErrorAction SilentlyContinue; Test-Path -LiteralPath '{path}'"]
+        try:
+            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+        except ProxmoxError as e:
+            return None, f"{path} on {g.name} not removed: {e}"
+        said = _last_line(res.out)
+        if res.exitcode != 0 or said not in ("True", "False"):
+            return None, f"the removal of {path} on {g.name} answered exit {res.exitcode}: {(res.err or res.out).strip()[:200]}"
+        return ({path} if said == "True" else set()), ""
+
+    async def _removed(self, rec: RunRecord, g: Guest, attempt, whats: dict[str, str], died: set[str], what: str) -> None:
+        """Files the runner read on the seat, removed: the one helper every removal of a read file goes through,
+        _read_back's one file (so log-count's, the log fetch's, the traces' and the plain shots') and a burst's
+        sidecars (_remove_frames). `attempt()` is one try, one exec however many files (_remove_try, _remove_folder_try),
+        answering the paths still there (none: all gone) or None and the reason for an exec that confirmed nothing;
+        `whats` names each path's notes (its keys the files removed), `what` the removal's own, and `died` holds the
+        paths whose read died. Up to REMOVE_TRIES tries REMOVE_PAUSE_S apart, the pause times time_scale as _tried's is,
+        each try at every file still there. A try that finds a file still there with tries left is a note naming the
+        try for that file, so the notes show how often a file stays and for how long, and a later try that removes it
+        leaves no fault; only a file still there at the last try is held, the seat's fault (_held). A try that confirms
+        nothing is tried again while a file whose read died may still be there, and each such file is taken as held at
+        the last try (the fresh review of e8d8de9b, nit 3: a read that died is what leaves a handle open on qemu-server
+        9.2.10); with none such it is the removal's note and not tried again, as is one that ran out its time, since a
+        hung agent would hold the run's end (_tried's rule)."""
+        pending = set(whats)
+        for k in range(1, REMOVE_TRIES + 1):
+            stayed, why = await attempt()
+            if stayed is not None:
+                if not stayed:
+                    return
+                pending = set(stayed)
+                if k == REMOVE_TRIES:
+                    for p in sorted(stayed):
+                        self._held(rec, g, p, whats.get(p, what))
+                    return
+                for p in sorted(stayed):
+                    rec.notes.append(f"{whats.get(p, what)}: {p} still there at its removal's try {k} of {REMOVE_TRIES}, "
+                                     f"tried again in {REMOVE_PAUSE_S:g} s")
+            else:
+                suspects = sorted(pending & died)
+                if not suspects:
+                    rec.notes.append(f"{what}: {why}")
+                    return
+                if k == REMOVE_TRIES or "did not exit in" in why:
+                    for p in suspects:
+                        self._held(rec, g, p, whats.get(p, what), why)
+                    return
+                for p in suspects:
+                    rec.notes.append(f"{whats.get(p, what)}: {p} not confirmed gone at its removal's try {k} of "
+                                     f"{REMOVE_TRIES} ({why}), tried again in {REMOVE_PAUSE_S:g} s")
+            await asyncio.sleep(REMOVE_PAUSE_S * self.s.time_scale)
 
     def _held(self, rec: RunRecord, g: Guest, path: str, what: str, unconfirmed: str = "") -> None:
-        """A file the runner read on the seat that would not go, held open in the agent (or taken as held: a removal
-        that confirmed nothing, `unconfirmed`, after a read that died): the step's note, and the seat rolls back, in
-        this run's own reset when that is still to come (RunRecord.rollback), else at its next run (RunRecord.faulted,
-        _seat_fault), this run's verdict as it was."""
+        """A file the runner read on the seat that would not go, still there at its removal's last try (_removed), held
+        open in the agent (or taken as held: a removal that confirmed nothing, `unconfirmed`, after a read that died):
+        the step's note, and the seat rolls back, in this run's own reset when that is still to come
+        (RunRecord.rollback), else at its next run (RunRecord.faulted, _seat_fault), this run's verdict as it was."""
         held = f"{what}: {path} held open in its agent after its read"
         if unconfirmed:
             held += f" (taken as held, its read having failed: {unconfirmed})"
@@ -2726,8 +2778,8 @@ def _client_relaunch_ps(lab_dir: str, driver_log: str, presets: list[str], stop:
     - frida\\: each run's script and its .out, .err and .log, and, as far as they go, the runner's shared-read .copy
       of the last two (config.frida_exec_template, frida_script_text, Runner._frida_trace, Runner._read_back);
       frida-inject.exe and the tools beside it stay;
-    - the lab folder's logcount-*.log.copy, as far as they go, log-count's shared-read copies (Runner._log_count),
-      by that pattern alone;
+    - the lab folder's logcount-*.log.copy, as far as they go, log-count's shared-read copies (Runner._log_count,
+      logcount-<index>-<n>.log.copy and its -console twin, and the older logcount-<index> ones), by that pattern alone;
     - shots\\ (a screenshot step's copy and its base64 sidecar, a burst's frame folder), screenshots\\
       (screenshot.ps1's captures and latest.png), burst\\ and input\\ (their tasks' request and done files);
     - every recorded game folder's RaceMenu presets: skymp5-client's thuum-*.jslot (raceMenuService.ts) and

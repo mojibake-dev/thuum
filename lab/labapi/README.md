@@ -34,7 +34,10 @@ tries, 10 s apart, but one for an exec that ran to its deadline), and read back 
 the copy's length and decoded as UTF-8 once; a copy past 64 MiB is refused
 before its first read, and the copy is removed once read (one the agent
 holds open rolls the seat back: in the same run's reset when the fetch came
-before it, else at its next run). A client log (`<client>.log`, `-driver.log`,
+before it, else at its next run). A copy or sidecar counts as held only when
+its removal still finds it at the fourth of four tries 1 s apart, each try
+before that a note, since a scan of a file just written can hold it a moment
+(train 52's stage, numidium's HYPOTHESIS). A client log (`<client>.log`, `-driver.log`,
 `-console.log`, `-before.log`, `-launch.log`, a relaunch's
 `-relaunch-<step>.log` and `-console.log`) comes back the same way, since the
 game holds its logs open for writing. `c1.log` in a scenario's artifacts
@@ -95,7 +98,9 @@ than its `every`. A known cost: every pattern copies the seat's two logs
 anew, where one copy a seat a poll could serve all its patterns; that saving
 is left for later. The copies come back as the
 run's logs do, in ranges, each removed once read (a copy, a ranged read and a
-removal a log), and one the agent holds open is the seat's fault; a range
+removal a log), and one the agent holds open is the seat's fault; each count's
+copies carry their step and their number there (logcount-<index>-<n>), so one
+held open spoils its own poll alone, not the rest of its until; a range
 that comes back short keeps no count, as does a copy whose exec answer the
 agent lost, since only that exec's own lengths prove a copy whole. An `assert:` counts no
 seat's log itself: it reads the last count taken, a `log-count` step's or an
