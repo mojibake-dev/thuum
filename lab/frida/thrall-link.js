@@ -1,3 +1,14 @@
+// thrall-link.js v1.3 DRAFT (thuum, 2026-11-12; the fresh review lab/.cache/drafts/reanimate/review-return-v1.2.md b42630b1 applied as
+// written, ADR-064 amendment A): its fix 1 (the step runs only when the update's this is 401069's player, counts.notPlayer the
+// others, run.player that pointer), its nits 4 (the liveness row's slot), 5 (the slot's current target named where 40447 was),
+// 6 (HYPOTHESIS on "38799 put it back") and 8 (38786 filtered on Dead Thrall 0x7e8df). v1.2's header follows.
+// thrall-link.js v1.2 DRAFT (thuum, 2026-11-12; the read of run 20261112-103005, lab/.cache/drafts/reanimate/read-return-103005.md
+// a1597065: RED, the link never ran, since v1.1 replaced PlayerCharacter::Update only when VTABLE_PlayerCharacter slot 0xAD held
+// 40447, and on c1 it held another module's function). Its decisions as taken: D1 A, whatever slot 0xAD holds is replaced,
+// body-impose.js's idiom, the original called through the slot's prior target, and the ready row names the slot's module (name,
+// base, offset); D2 B, the 38799 refresh armed by the probe (REFRESH_FRAMES 30); D3 A, the thrall's scene (slot 0x4A) in every
+// state row, the probe's hops waiting for the intro scene's end. A fresh review comes before the run (ADR-064 amendment A). v1.1's
+// header follows.
 // thrall-link.js v1.1 DRAFT (thuum, 2026-11-12; the fresh review lab/.cache/drafts/reanimate/review-return-v1.md c8d82512 applied as
 // written, ADR-064 amendment A): its fix 4 (the link rows read the thrall's combat target and that target's own, so the fight tells
 // defence of c1 from self-defence: ACTOR.combatTarget, the state row's combatTarget and targetsTarget), its fix 5 (the reference
@@ -20,21 +31,26 @@
 //     commanded-actor limit (40056, which may dispel the player's oldest commanded actor's effect; a fresh game holds none), the
 //     ability of default object 25 kCommandedActorAbility (Actor::AddSpell 38716) and a created follow package targeting the
 //     player (37404, PutCreatedPackage);
-//   - 38799(thrall, player, null) every REFRESH_FRAMES frames while linked, only when REFRESH_FRAMES > 0 (0 by default, and the
-//     probe leaves it 0 so the memo's gap G1 is read): CommandEffect::Update's re-link and follow-package rebuild;
+//   - 38799(thrall, player, null) every REFRESH_FRAMES frames while linked, only when REFRESH_FRAMES > 0 (0 by default; since v1.2
+//     the probe passes 30, the static read's section 8 "every 30th frame", read-return-103005.md D2 B: in run 103005's leg B
+//     Sven's schedule took the follow package within 1.8 s of the get-up and 38799 put it back, HYPOTHESIS: read-return-103005.md
+//     :290-291): CommandEffect::Update's re-link and
+//     follow-package rebuild;
 //   - 38800(thrall, null) once, UNLINK_AFTER_MS after the thrall first reads dying or dead: the inverse (39950 with the null
 //     handle, the entry removed by 40057, Actor::RemoveSpell 38717 of default object 25, 29507 on the current package, the
 //     kEvpBuffered bit, Actor.h:175);
 //   - and, as body-impose.js's lookups do, one reference count kept on each object a handle resolves to (12332: every actor the
 //     process-list scan meets before the thrall, the commanding handle, the player's entries and the combat targets, once each;
 //     the seat's next relaunch or rollback frees them).
-// The replacement of 40447 is reverted from Frida's own thread when the run's link is done (the unlink's rows written), at TTL_S,
+// The replacement of slot 0xAD's current target (40447, or another module's function in its place) is reverted from Frida's own
+// thread when the run's link is done (the unlink's rows written), at TTL_S,
 // or by the liveness timer when TTL_S plus 30 s pass with no frame. Nothing is restored: the command, the ability and the package
 // stay as the engine leaves them until the unlink, and the life state stays as the engine writes it. The seat's next relaunch or
 // rollback ends all of it.
 //
 // MODES (LAB_PARAMS.MODE):
-//   trace: ATTACH ONLY, writes nothing, never replaces 40447, so a link run in the same game holds the one replacement Frida allows
+//   trace: ATTACH ONLY, writes nothing, never replaces slot 0xAD's current target (40447, or another module's function in its
+//     place), so a link run in the same game holds the one replacement Frida allows
 //     per function (serialize-on-demand-actor.js's "one replacement per game process"). Every hook counts its calls before its
 //     filter; the filtered rows name FORM (the thrall) or the player. Armed by a frida step before the raise (leg B, the baseline
 //     the link rebuilds) and by the relaunch's frida arm for the fresh game (F0, F1, F2).
@@ -63,12 +79,14 @@
 //                    body-impose.js calls it
 //   Read (both modes):
 //   208040 0x18ab9c0 VTABLE_PlayerCharacter[0] (Offsets_VTABLE.h:2231); slot 0xAD Update(float) (A/Actor.h:371), REPLACED in link
-//                    mode with a NativeCallback of that signature that calls the original first; printed beside 40447 0x732660
+//                    mode with a NativeCallback of that signature that calls the original first; printed beside 40447 0x732660.
+//                    v1.2: whatever the slot holds is replaced (on the lab's seats another module's function, not 40447: run
+//                    103005), the original called through that prior target; the ready row names the slot's module and offset
 //   400315 0x20f69b0 ProcessLists** (src/RE/P/ProcessLists.cpp:13); the four handle arrays +0x30 +0x48 +0x60 +0x78
 //                    (P/ProcessLists.h:69-72), each a BSTArray: data +0x00, size +0x10
 //   403449 0x31872c0 Main** (Offsets.h:383); threadID +0x28 (M/Main.h:87)
-//   403521 0x31874f8 PlayerCharacter's singleton, a NiPointer (Offsets.h:451, src/RE/P/PlayerCharacter.cpp:16-19): the ready
-//                    row's cross-check that the update's this is the player
+//   403521 0x31874f8 PlayerCharacter's singleton, a NiPointer (Offsets.h:451, src/RE/P/PlayerCharacter.cpp:16-19): printed beside
+//                    401069, whose player the step requires as the update's this (counts.notPlayer)
 //   401069 0x3137698 the player pointer 38798 compares its commander against (memo table, "by use"; d2 0x1406c5cb0.c's
 //                    DAT_143137698): printed beside 403521's
 //   207511 0x189d870 VTABLE_Actor[0] and 207886 0x18a5558 VTABLE_Character[0] (Offsets_VTABLE.h:2142, :2215): slot 0x10E KillImpl
@@ -129,8 +147,9 @@
 // null effect and the player commands a living thrall (the state rows' commanding handle resolving to the player, the flag, the
 // player's entry {thrall, 0}); that 37404's package makes it follow; that the command makes it fight the player's enemies; that it
 // follows through a load door with no per-update refresh (the memo's G1); that 38800 undoes the command on a dead thrall with no
-// fault; that the player's update runs once a frame on the main thread. 38786's this is the MagicTarget at Actor+0xA0: its
-// pseudocode opens with param_1 + -0xa0 (d14/0x1406c50a0.c).
+// fault; that the player's update, through whatever function slot 0xAD holds (v1.2), runs once a frame on the main thread
+// (body-impose.js's replacement did through that module: read-corpse-193821-194559.md:224-226). 38786's this is the MagicTarget at
+// Actor+0xA0: its pseudocode opens with param_1 + -0xa0 (d14/0x1406c50a0.c).
 //
 // Rows (console.log and send(); lab-api's preamble flushes console.log to the trace's .log every 250 ms; send is then a no-op):
 //   {event:'ready'} once: script, v, mode, runtime version, pid (against the run's games and c<N>-skyrim-platform-pid<N>.log: the
@@ -144,11 +163,13 @@
 //     form, packType, procedureType), 37490 and 37612 and 38820 (the argument, lifeState before and after), 42880, 37316, 37896
 //     (attacker, sendEvent, lifeState before and after), 38716 and 38717 (spell form and type, ret), 15330 and 15331 (form and
 //     type), 39577 (caster, spell). {event:'liveness'} every 10 s: every site's calls and rows, sleep and sleep10s, 38799's calls
-//     for FORM and their 10 s delta (the memo's G1 read: none after the relaunch while REFRESH_FRAMES is 0).
+//     for FORM and their 10 s delta (none in the fresh game before the link; after it, the link's own refreshes, its
+//     counts.refreshes, and any more is a refresh the script did not make).
 //   link mode: {event:'gate'} once while the thrall is not yet linkable; {event:'state', phase} before and after the link
 //     ('before', 'after'), every STATE_MS while linked ('linked'), at the first dying or dead read and every 2 s after ('dead'),
 //     around the unlink ('before unlink', 'unlinked'): lifeState, reanimating, isCommanded, boolFlags, processLevel, the commanding
-//     handle resolved (form, isPlayer), the running package, the player's commandedActors resolved (size, {handle, form,
+//     handle resolved (form, isPlayer), the running package, the scene holding the thrall (v1.2, slot 0x4A), the player's
+//     commandedActors resolved (size, {handle, form,
 //     isThrall, effect}), inCombat, the thrall's and the player's positions and their distance, both parent cells;
 //     {event:'link', call} after each engine call; {event:'thread'} once if the update ran off Main; {event:'done'}, then
 //     {event:'reverted'}; {event:'liveness'} every 10 s (stage, reverted, counts, frames10s, the replacement held).
@@ -225,7 +246,7 @@ const AE = { caster: 0x34, spell: 0x40, target: 0x50, elapsed: 0x70, flags: 0x7c
 const EFFECT_BASE = 0x10;
 const ATD = { caster: 0x00, magicItem: 0x08, effect: 0x10 };
 const IS_COMMANDED = 1 << 16;
-const SLOT = { update: 0xad, isInCombat: 0xe3, killImpl: 0x10e, addTarget: 0x01 };
+const SLOT = { update: 0xad, isInCombat: 0xe3, killImpl: 0x10e, addTarget: 0x01, currentScene: 0x4a /* GetCurrentScene: T/TESObjectREFR.h:270, A/Actor.h:292 */ };
 const LISTS = [0x30, 0x48, 0x60, 0x78];
 const LIFE_NAMES = ['alive', 'dying', 'dead', 'unconscious', 'reanimate', 'recycle', 'restrained', 'essentialDown', 'bleedout', 'nine (SetDontMove)'];
 const PLAYER_FORM = 0x14;
@@ -301,7 +322,7 @@ const exe = Process.getModuleByName('SkyrimSE.exe');
 const version = fileVersion(exe.path);
 const off = OFFSETS[version];
 if (off === undefined || !(FORM_ID > 0) || (MODE !== 'trace' && MODE !== 'link')) {
-  emit({ event: 'ready', script: 'thrall-link.js', v: '1.1', mode: MODE, error: off === undefined ? 'no offsets for this runtime' : (!(FORM_ID > 0) ? 'FORM is required' : 'MODE is trace or link'), version: version, pid: Process.id });
+  emit({ event: 'ready', script: 'thrall-link.js', v: '1.3', mode: MODE, error: off === undefined ? 'no offsets for this runtime' : (!(FORM_ID > 0) ? 'FORM is required' : 'MODE is trace or link'), version: version, pid: Process.id });
 } else {
   const at = function (name) { return exe.base.add(off[name]); };
   const rva = function (p) { try { return hex(p.sub(exe.base).toUInt32()); } catch (e) { return String(p); } };
@@ -313,6 +334,10 @@ if (off === undefined || !(FORM_ID > 0) || (MODE !== 'trace' && MODE !== 'link')
   const fail = function (where, e) { if (failed[where]) return; failed[where] = true; emit({ event: 'error', where: where, error: String(e) }); };
   const slotOf = function (vt, slot) { return ptrAt(vt, slot * Process.pointerSize); };
   const updateAt = slotOf(at('playerVtable'), SLOT.update);
+  // the module that owns an address, its base and the offset in it (v1.2: slot 0xAD's owner, read-return-103005.md D1 A)
+  const moduleOf = function (p) {
+    try { const m = Process.findModuleByAddress(p); return m === null ? null : { name: m.name, base: String(m.base), offset: hex(p.sub(m.base).toUInt32()) }; } catch (e) { return { error: String(e) }; }
+  };
   const checks = function () {
     const addTargetSlot = slotOf(at('characterMagicTarget'), SLOT.addTarget);
     const killActor = slotOf(at('actorVtable'), SLOT.killImpl);
@@ -320,7 +345,7 @@ if (off === undefined || !(FORM_ID > 0) || (MODE !== 'trace' && MODE !== 'link')
     const single = ptrAt(at('playerSingleton'), 0);
     const compared = ptrAt(at('playerCompared'), 0);
     return {
-      update: { slot: rva(updateAt), byId40447: rva(at('playerUpdateById')), agree: !isNil(updateAt) && updateAt.equals(at('playerUpdateById')) },
+      update: { slot: String(updateAt), slotModule: moduleOf(updateAt), byId40447: rva(at('playerUpdateById')), agree: !isNil(updateAt) && updateAt.equals(at('playerUpdateById')) },
       addTarget: { characterSlot1: rva(addTargetSlot), byId38786: rva(at('actorAddTarget')), agree: !isNil(addTargetSlot) && addTargetSlot.equals(at('actorAddTarget')) },
       killImpl: { actorSlot: rva(killActor), characterSlot: rva(killCharacter), byId37896: rva(at('killImpl')) },
       player: { singleton403521: String(single), compared401069: String(compared), agree: !isNil(single) && single.equals(compared), form: hex(formOf(single)) },
@@ -374,6 +399,9 @@ if (off === undefined || !(FORM_ID > 0) || (MODE !== 'trace' && MODE !== 'link')
         const actor = args[0].sub(ACTOR.magicTarget);
         if (formOf(actor) !== FORM_ID) return;
         const d = args[1];
+        // v1.3 (review-return-v1.2.md 8): Dead Thrall's bolt alone (SPEL 0x7e8df), so other spells' rows (cloaks, run 103005's
+        // T51:213) do not use up ROWS_MAX before F0's
+        if (formOf(ptrAt(d, ATD.magicItem)) !== 0x7e8df) return;
         const eff = ptrAt(d, ATD.effect);
         this.keep = { caster: formOf(ptrAt(d, ATD.caster)), spell: formOf(ptrAt(d, ATD.magicItem)), mgef: isNil(eff) ? -1 : formOf(ptrAt(eff, EFFECT_BASE)), life: lifeOf(actor) };
       },
@@ -467,7 +495,7 @@ if (off === undefined || !(FORM_ID > 0) || (MODE !== 'trace' && MODE !== 'link')
       note('sleep', 'kernel32!Sleep', sleep, 'attach');
     } catch (e) { attachErrors.push('sleep: ' + e); }
 
-    emit({ event: 'ready', script: 'thrall-link.js', v: '1.1', mode: 'trace', version: version, pid: Process.id, base: String(exe.base), mainThread: mainTid(), checks: checks(), hooks: resolved, attachErrors: attachErrors, params: { MODE: MODE, FORM: hex(FORM_ID), ROWS_MAX: ROWS_MAX } });
+    emit({ event: 'ready', script: 'thrall-link.js', v: '1.3', mode: 'trace', version: version, pid: Process.id, base: String(exe.base), mainThread: mainTid(), checks: checks(), hooks: resolved, attachErrors: attachErrors, params: { MODE: MODE, FORM: hex(FORM_ID), ROWS_MAX: ROWS_MAX } });
     setInterval(function () {
       // Frida's own thread: a report, never an engine call
       emit({ event: 'liveness', mode: 'trace', pid: Process.id, counts: JSON.parse(JSON.stringify(counts)), rows: JSON.parse(JSON.stringify(rows)), sleep: pulse.n, sleep10s: pulse.n - pulse.last, refresh38799ForForm: form38799.n, refresh38799ForForm10s: form38799.n - form38799.last });
@@ -478,7 +506,7 @@ if (off === undefined || !(FORM_ID > 0) || (MODE !== 'trace' && MODE !== 'link')
 
   // ---------------------------------------------------------------- link mode: replace only, the recipe on Main
   const linkMode = function () {
-    const counts = { frames: 0, offMain: 0, scans: 0, lookups: 0, refreshes: 0 };
+    const counts = { frames: 0, offMain: 0, notPlayer: 0, scans: 0, lookups: 0, refreshes: 0 };
     const run = { stage: 'find', actor: NULL, player: NULL, deadAt: 0, lastState: 0, done: false, startedAt: Date.now(), gateSaid: false };
     const nf = {
       lookup: new NativeFunction(at('lookupRef'), 'bool', ['pointer', 'pointer'], 'win64'),
@@ -545,12 +573,15 @@ if (off === undefined || !(FORM_ID > 0) || (MODE !== 'trace' && MODE !== 'link')
       const list = rawListOf(ptrAt(p, ACTOR.process));
       let inCombat = null;
       try { inCombat = virtualFn(a, SLOT.isInCombat, 'uint8', ['pointer'])(a) !== 0; } catch (e) { inCombat = 'error: ' + e; }
+      // v1.2 (read-return-103005.md D3 A): the scene that holds the thrall, slot 0x4A, null for none; 37404 puts no package while one does
+      let scene = null;
+      try { const s = virtualFn(a, SLOT.currentScene, 'pointer', ['pointer'])(a); scene = isNil(s) ? null : hex(formOf(s)); } catch (e) { scene = 'error: ' + e; }
       const pos = posOf(a);
       const ppos = posOf(p);
       emit({
         event: 'state', phase: phase, frame: counts.frames, msSinceStart: Date.now() - run.startedAt, form: hex(formOf(a)),
         lifeState: life, lifeName: lifeName(life), reanimating: reanimatingOf(a), isCommanded: commandedFlagOf(a), boolFlags: hex(u32(a, ACTOR.boolFlags)),
-        processLevel: isNil(proc) ? null : u8(proc, PROC.level), commanding: cmdH < 0 ? null : named(cmdH), package: packageOf(a),
+        processLevel: isNil(proc) ? null : u8(proc, PROC.level), commanding: cmdH < 0 ? null : named(cmdH), package: packageOf(a), scene: scene,
         playerList: list === null ? null : { size: list.size, entries: list.entries.map(function (x) { const n = named(x.handle); n.effect = x.effect; return n; }) },
         inCombat: inCombat, combatTarget: named(u32(a, ACTOR.combatTarget)), targetsTarget: (function () { const t = resolve(u32(a, ACTOR.combatTarget)); return isNil(t) ? null : named(u32(t, ACTOR.combatTarget)); })(), pos: pos.map(r1), playerPos: ppos.map(r1), distance: r1(dist3(pos, ppos)),
         cell: hex(formOf(ptrAt(a, REFR.cell))), playerCell: hex(formOf(ptrAt(p, REFR.cell))),
@@ -626,7 +657,11 @@ if (off === undefined || !(FORM_ID > 0) || (MODE !== 'trace' && MODE !== 'link')
     let updateReplaced = false;
     let updateCallback = null; // held here and read by the liveness row, so it outlives the revert (body-impose.js v1.1)
     let offMainSaid = false;
-    if (!isNil(updateAt) && updateAt.equals(at('playerUpdateById'))) {
+    // v1.2 (read-return-103005.md D1 A): whatever slot 0xAD holds is replaced, body-impose.js's idiom (body-impose.js:642,
+    // :710-729), and the original is called through the slot's prior target. On the lab's seats that is another module's function,
+    // not 40447 (run 103005: 0x7ffaaa55b8b0, outside SkyrimSE.exe; five physics reads since 11-11); v1.1's equality guard refused it,
+    // so its link never ran. The ready row's checks.update names the slot's module (Process.findModuleByAddress).
+    if (!isNil(updateAt)) {
       try {
         // the chain to the original with exceptions 'propagate' (apply-on-demand.js:831): no exceptor scope around the engine's code
         const original = new NativeFunction(updateAt, 'void', ['pointer', 'float'], { abi: 'win64', exceptions: 'propagate' });
@@ -640,8 +675,10 @@ if (off === undefined || !(FORM_ID > 0) || (MODE !== 'trace' && MODE !== 'link')
               if (!offMainSaid) { offMainSaid = true; emit({ event: 'thread', tid: tid, mainThread: main, note: 'the update ran off Main\'s thread: no step runs on it' }); }
               return;
             }
+            const pc = ptrAt(at('playerCompared'), 0);
+            if (isNil(pc) || !self.equals(pc)) { counts.notPlayer += 1; return; }
             counts.frames += 1;
-            if (isNil(run.player)) run.player = self;
+            if (isNil(run.player)) run.player = pc;
             step();
           } catch (e) { fail('step at ' + run.stage, e); }
         }, 'void', ['pointer', 'float'], 'win64');
@@ -649,10 +686,10 @@ if (off === undefined || !(FORM_ID > 0) || (MODE !== 'trace' && MODE !== 'link')
         Interceptor.flush();
         updateReplaced = true;
       } catch (e) { attachErrors.push('PlayerCharacter::Update replace: ' + e); }
-    } else attachErrors.push('PlayerCharacter::Update: slot 0xAD ' + rva(updateAt) + ' is not 40447 ' + rva(at('playerUpdateById')) + ': nothing replaced');
+    } else attachErrors.push('PlayerCharacter::Update: no slot 0xAD');
 
     emit({
-      event: 'ready', script: 'thrall-link.js', v: '1.1', mode: 'link', version: version, pid: Process.id, base: String(exe.base), mainThread: mainTid(),
+      event: 'ready', script: 'thrall-link.js', v: '1.3', mode: 'link', version: version, pid: Process.id, base: String(exe.base), mainThread: mainTid(),
       checks: checks(), replaced: updateReplaced, hooks: resolved, attachErrors: attachErrors,
       params: { MODE: MODE, FORM: hex(FORM_ID), SET_REANIMATE: SET_REANIMATE, UNLINK_AFTER_MS: UNLINK_AFTER_MS, REFRESH_FRAMES: REFRESH_FRAMES, STATE_MS: STATE_MS, TTL_S: TTL_S },
     });
@@ -664,7 +701,7 @@ if (off === undefined || !(FORM_ID > 0) || (MODE !== 'trace' && MODE !== 'link')
         emit({ event: 'done', why: 'ttl with no frame to finish on', stage: run.stage, frame: counts.frames, counts: JSON.parse(JSON.stringify(counts)) });
         revert();
       }
-      emit({ event: 'liveness', mode: 'link', pid: Process.id, stage: run.stage, reverted: reverted, counts: JSON.parse(JSON.stringify(counts)), frames10s: counts.frames - lastFrames, mainThread: mainTid(), replacement: String(updateCallback) });
+      emit({ event: 'liveness', mode: 'link', pid: Process.id, stage: run.stage, reverted: reverted, counts: JSON.parse(JSON.stringify(counts)), frames10s: counts.frames - lastFrames, mainThread: mainTid(), slot: String(slotOf(at('playerVtable'), SLOT.update)), replacement: String(updateCallback) });
       lastFrames = counts.frames;
     }, 10000);
   };

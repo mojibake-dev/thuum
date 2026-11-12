@@ -419,7 +419,13 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   combat target and that target's own; 38800 at the thrall's death, then the replacement reverted. A lab experiment that writes
   engine state on one seat, never a resident. The refresh 38799 stays off, so a lapsed command is read, not hidden. Its probe is
   x-reanimate-return v1.1 (by path); the static read is lab/.cache/drafts/reanimate/return-to-caster-read.md. Ids by `just addr`,
-  2026-11-12; 1.6.1170 only. Written 2026-11-12, v1.1 the same day (its fresh review's fixes as written); never run.
+  2026-11-12; 1.6.1170 only. Written 2026-11-12, v1.1 the same day (its fresh review's fixes as written). v1.1 ran in
+  20261112-103005 and never linked: it replaced PlayerCharacter::Update only while VTABLE_PlayerCharacter slot 0xAD still held 40447,
+  and on c1 another module's function sat there (read-return-103005.md). v1.2 (the read's decisions) replaces whatever the slot
+  holds and calls through it, as body-impose.js does, naming the slot's module, base and offset in the ready row; runs the 38799
+  refresh every 30 frames; and its probe waits for Sven's intro scene (quest 954d9) to end. v1.3 (its fresh review, as written):
+  a step runs only when the update's this is 401069's player (counts.notPlayer otherwise), the liveness row prints the slot's
+  current target, and the cast rows filter on Dead Thrall's spell 0x7e8df.
 - body-impose.js: ADR-071 rung 0's pose read on one seat (H6): can the engine hold a dead body in a pose it is handed, within 32
   units a bone. It finds FORM's actor in the process lists, waits for its body to rest, captures each body's position and rotation
   (bhkRigidBody slots 0x33, 0x34) and the Havok block by the engine's own serializer (36016, the copy freed), then, each time the
