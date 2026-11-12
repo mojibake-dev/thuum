@@ -3823,7 +3823,9 @@ commander does with a thrall that stayed (offered default: nothing, it stays its
 "thrall returns to caster obvs": a full thrall that stayed is its caster's again when the caster logs back in; the server's row
 keeps the commander through the departure and claims the thrall for the caster's seat at its return, unless the thrall died or
 was raised by another meanwhile. How the returning caster's engine takes command of a living thrall again (its new game holds no
-Dead Thrall effect on it) is unread: HYPOTHESIS, the reanimation branch's next read.
+Dead Thrall effect on it) is read in run 20261112-152001 (x-reanimate-return v1.5, GREEN; lab/.cache/drafts/reanimate/
+read-return-152001.md): on Main, 37490 then 38798 on the returning engine, 38799 every 30 frames while the thrall lives, 38800
+at its death. The server half and whether the command makes the thrall fight are unbuilt and unread (HYPOTHESIS).
 
 ## ADR-061: A shared container's live view is the menu drawn again whole; exclusive access is the fallback behind a setting
 

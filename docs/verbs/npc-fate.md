@@ -3322,9 +3322,17 @@ copy no effect holds), and a full thrall stays alive on its cell's simulator. Th
 record's duration of the spell's Reanimate effect against wire-rules magic::FULL_THRALL_MIN_S, a day: in the masters every
 Reanimate effect lasts 60 to 200 s but Dead Thrall's 86,313,600 s, and their effects' flags are equal (MGEF 0x96d0b and
 0x7e8e0, 0x00401002), so the side is the record's, never a name (ADR-063); no estimate of an effect's end is kept anywhere.
-Not built: the full thrall's return to its caster at the caster's return (C4 of the fresh review of f89115af; HYPOTHESIS: how
-the returning engine takes command of a living thrall it holds no effect on is the engine read running now, rule 8), and its
-undead look on every screen (the Undead FX build). Lines: "[verb:npc-fate] reanimate <spell> by <caster> on <body>:
+Not built: the full thrall's return to its caster at the caster's return (C4 of the fresh review of f89115af), and its undead
+look on every screen (the Undead FX build). The returning engine's path is read in run 20261112-152001 (x-reanimate-return
+v1.5, GREEN; lab/.cache/drafts/reanimate/read-return-152001.md). c1's fresh game held no effect on the living thrall. On Main,
+inside the player's update, 37490(thrall, 1) and then 38798(thrall, player, null) set the player as its commanding actor, the
+kIsCommandedActor flag and the player's commandedActors entry {thrall, no effect}. 37404's created follow package (procedure
+46) took over once the intro scene released the thrall. 38799(thrall, player, null) every 30 frames kept it, with no
+CommandEffect::Update running. 38800 undid it 8 s after the thrall's death. The record followed the caster 3,545 units each
+way and on a 990-unit run, as did c2's copy. Open (HYPOTHESIS): that the command makes the thrall fight for its caster (it
+fought the wolf that attacked its caster, but three uncommanded Riverwood residents fought the same wolf); the follow through
+a load door with the refresh; the server half (the dormant row, the re-claim, the native, the client's call at the hand-back)
+and its restart persistence (rule 6). Lines: "[verb:npc-fate] reanimate <spell> by <caster> on <body>:
 <commander> commands it until its engine ends the effect (the record's <N> s) (ADR-060)", "death report: <body> died of ...:
 the command's end: its commander's engine ended the effect (ADR-060)", "<body> died under <commander>'s command: the claim
 ends, <simulator> simulates it (ADR-060)", "the claim on <actor> in cell <cell> ended with its claimant <player>'s departure;
