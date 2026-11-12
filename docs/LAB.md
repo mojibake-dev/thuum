@@ -851,7 +851,10 @@ Every run's end also reads each managed seat's game:
 - The crash dumps Windows Error Reporting wrote for SkyrimSE.exe since the run
   began (LocalDumps under C:\sky-lab\dumps, set by crash-dumps.ps1). The seat
   uploads the newest through the same PUT as <client>-SkyrimSE-crash.dmp
-  (E_RUN_CRASH).
+  (E_RUN_CRASH). The script captures curl.exe's answer, as the hang dump's
+  does: left uncaptured, lab-api's answer shared the last line with the
+  check's JSON, so c1's crash in 20261112-125536 read as no answer, a seat
+  fault with its dump kept but unnamed.
 - The game process against the one the version check found, as pid@start
   (`games` in result.json), or the one a relaunch step started. A game gone
   at the end is E_RUN_GAME_LOST. A different one is E_RUN_GAME_REPLACED:

@@ -410,6 +410,12 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   'btSelfTest' reads the backtracer's reach at the first PlayerCharacter::Update; the ready row says scriptVersion '1.2'. Reading
   it (the review): a frame's label is the nearest known start below it, not its function (the helper at 0x7ed640-0x7ed89d reads as
   'Projectile slot 0xbf'); under REPLACE true only a backtrace's frame 1 is sure; SkyrimSE.exe's frames get no symbols (no PDB).
+  v1.3 (2026-11-12, rung 3's stage; its fresh review READY with nits, applied as written): PUSH_ONLY (default false) attaches
+  78091, 78092 and slot 0x14 of the three dynamic motions as native candidates, plus AddImpact, FindTargets and the sampler, and
+  never the rung 3 build's own sites (26004, 26005, Explosion::Update, the five ProcessImpacts sites, HandleHits): a guard refuses an
+  attach at any of them, so the build's Replace and this read never share an entry (v1.2's ATTACH_ONLY still attached the brackets,
+  the e9 collision); the ready row prints each refused site's first bytes; scriptVersion '1.3'. For x-prop-impact v1.2 and
+  x-prop-blast v4.2 on both seats.
 - thrall-link.js: ADR-060's return to the caster, as amended (Eli, 2026-11-12: "thrall returns to caster obvs"), read before
   any build (rule 8): can a fresh game take command of a living, already-reanimated thrall through the engine's own command routine,
   with no death and no get-up? Mode trace attaches hooks only (the add check 34754, ReanimateEffect's start 34750, the command
@@ -709,6 +715,19 @@ TURN_SIGN) that ramps lockAngle with the pick snapped: HYPOTHESIS that the menu'
   count before its filter, a kernel32!Sleep pulse and emptyNames (above 0 says the hook runs after
   the gate). Ids by `just addr`; the event and argument layouts are Ghidra's static read
   (HYPOTHESIS until a run's rows agree). Written 2026-11-07; never run. 1.6.1170 only.
+- corpse-lay-heap-pool.js: the watcher crash on canon (x-reanimate-look-u0 2 of 2, 20261112-085636 and 102238;
+  lab/.cache/drafts/reanimate/read-u0-085636.md section 7): both faults on c2 were victims of one corrupted 0x20-byte MemoryManager
+  pool, its free list walked through MovementMessagePathComplete's vtable. Read-only to the engine; CModule listeners (rule 9) on the
+  pool's allocate, free and reallocate, the post-death lay and its 3D drop, the reanimate start, resurrect and reanimation calls
+  (34750, 37321, 38820), and every equip, unequip and RemoveItem on a watched, laid or dead actor (RemoveItem's list is its sixth
+  argument: 37797 returns through a hidden pointer). Rows: heap inImage (the poisoned pop), link, twice, double (both freers with a
+  stack), lay and set3D, the raise rows, the equip rows with each list's record and the actor's equip queue, a layWindow summary
+  per lay, liveness every 10 s, ready and ttl. It holds a thread 600 ms only inside a lay that shows an in-image or a critical
+  row. Verdict: a double or twice row inside a lay's window, on a block that is a list from that window's rows or with 37797, 19689,
+  38901, 39814 or 39822 on its stack, points at the lay; a reanimateStart row with why `ref` means the watcher's raise refusal
+  failed; a fault with no anomaly row means the trace was blind. Run on c2 from a probe's frida step right after it connects; TTL
+  1200 s. Ids by `just addr`, 2026-11-12; 1.6.1170 only. Written 2026-11-12, v1.1 the same day (its fresh review's fixes as
+  written); never run.
 - corpse-lay-heap.js: an ActorMediator sink add or remove against the engine heap's recent frees
   through a corpse lay on a loaded leveled actor, for playtest 49's c1 crash (2026-11-06
   22:20:47 PST: 70199+0x7 on the background loader cloning draugr 0x380b8's skeleton 54 ms after

@@ -1191,6 +1191,15 @@ class ClientLogs(RunTests):
 
 
 
+def _uncaptured_curl(script, run):
+    """What a seat printed before its script's JSON when the script left the upload's curl.exe uncaptured: lab-api's
+    answer, which ends in no newline, so the two shared one line (20261112-125536's c1: "crash check c1: no answer
+    ({"ok":true,...}{"games": ...")). Nothing once every curl.exe call in the script is captured."""
+    if not re.search(r'^\s*&\s*"\$env:SystemRoot\\System32\\curl\.exe"', script, re.M):
+        return ""
+    return json.dumps({"ok": True, "client": "c1", "run": run, "bytes": 14}, separators=(",", ":"))
+
+
 @needs_deps
 class HangEvidence(RunTests):
     """A seat that stops answering mid-run (the load freeze of 2026-10-16: the game silent after
@@ -1239,7 +1248,7 @@ class HangEvidence(RunTests):
             # the seat's own upload, as curl.exe makes it: into the run named in the URL
             run = re.search(r"/clients/c1/hang-dump/([^']+)'", script).group(1)
             (self.tmp / "results" / run / "c1-SkyrimSE.dmp").write_bytes(b"MDMP fake dump")
-            return ExecResult(0, '{"dumped": true, "pid": 4242, "bytes": 14, "dump_ms": 1, "upload_ms": 1, "curl": 0}\r\n', "")
+            return ExecResult(0, _uncaptured_curl(script, run) + '{"dumped": true, "pid": 4242, "bytes": 14, "dump_ms": 1, "upload_ms": 1, "curl": 0}\r\n', "")
 
         pve.exec = exec_
         run_id, body = self._hung_run(self.HUNG)
@@ -1341,6 +1350,7 @@ class CrashEvidence(RunTests):
             if upload:  # the seat's own upload into the run named in the URL, as curl.exe makes it
                 run = re.search(r"/clients/c1/hang-dump/([^?']+)\?name=SkyrimSE-crash\.dmp'", script).group(1)
                 (self.tmp / "results" / run / "c1-SkyrimSE-crash.dmp").write_bytes(b"MDMP crash")
+                return ExecResult(0, _uncaptured_curl(script, run) + json.dumps(answer) + "\r\n", "")
             return ExecResult(0, json.dumps(answer) + "\r\n", "")
 
         pve.exec = exec_

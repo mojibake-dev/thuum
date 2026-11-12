@@ -1,3 +1,66 @@
+// prop-impulse.js v1.3 DRAFT (thuum, 2026-11-12; ADR-071 rung 3's stage probes x-prop-impact v1.2 and x-prop-blast v4.2, by path
+// in lab/.cache/drafts/physics/rung3-stage; the R10 call of lab/.cache/drafts/physics/rung3-plan.md 6dff3374 section B11). A DRAFT
+// outside lab/frida: lab-api serves scripts from lab/frida on main alone, so this file goes to main on its own thuum branch
+// (lab/frida/prop-impulse.js and lab/frida/README.md, nothing else), with a fresh review (ADR-064 amendment A), the merge and
+// deploy-srv, before either probe runs. What changed from v1.2 (file sha1 3feba2b9 at main 67a21bf1), and nothing else:
+//   1. PUSH_ONLY (param, default false; rung 3's own probes). The rung 3 build (fork m4-physics-3-impact: the platform's bebaccc5,
+//      unchanged at the client's 6190c370) replaces ScaleGameplayImpulseForce 26004 and AddExplosionImpulse 26005 and attaches
+//      Explosion::Update (slot 0xA3), every distinct ProcessImpacts (0xAC, five addresses) and ConeProjectile::HandleHits (0xBE) in
+//      Skyrim Platform's own Gum (FridaHooks.cpp:4223-4227, :4256, :4264, :4294 at bebaccc5). v1.2's ATTACH_ONLY still attaches
+//      Explosion::Update and the ProcessImpacts sites, natively (v1.2's :1181, :1186) or by its JavaScript fallback (:1477, :1505),
+//      and under BACKTRACE the cone's two slots (:1189): a second Gum on an entry the build patched first, its ready row's first
+//      bytes e9. PUSH_ONLY hooks none of the six: 26004 and 26005 are not hooked (ATTACH_ONLY is implied), no bracket site is added
+//      natively or in JavaScript, the cone table and its poll stay off, ARROW's setters never attach, and every attach first asks
+//      whether its address is one of the six (piBuildHooks: a body two slots share included). It hooks:
+//      - bhkRigidBody::SetLinearImpulse 78091 (B/bhkRigidBody.h:54; src/RE/B/bhkRigidBody.cpp:22, RELOCATION_ID(76261, 78091)), v1.2's
+//        JavaScript attach as it stands (it runs at impulses alone: 223256's 58 pairs, none between the legs);
+//      - bhkRigidBody::SetAngularImpulse 78092 (:52; src :8, RELOCATION_ID(76262, 78092)) and slot 0x14, ApplyPointImpulse
+//        (H/hkpMotion.h:60), of the dynamic motions' vtables VTABLE_hkpSphereMotion 227971, VTABLE_hkpBoxMotion 227973 and
+//        VTABLE_hkpThinBoxMotion 227975 (include/RE/Offsets_VTABLE.h:5002-5004), one native site per distinct address (an address
+//        folded under 0x14 and another slot skipped and listed, v1.2's rule), each a new kind of candidate, candidateAny (0x11);
+//      - Explosion::FindTargets (209940's slot 0xA4, E/Explosion.h:54) as a row, every distinct Projectile::AddImpact (slot 0xBD,
+//        P/Projectile.h:225) and the per-frame sampler on PlayerCharacter::Update (208040's slot 0xAD), as v1.2 has them. None is a
+//        site the build hooks: its hooks at 6190c370 (FridaHooks.cpp) are SendEvent, the draw and sheathe pair, SendAnimation,
+//        PlayAnimation, ProjectileInitVelocity, PlaceAreaEffect, RuneDecal, ProjectileLaunch, PerformAction, QueueNinodeUpdate,
+//        ApplyMasksToRenderTargets, HasOverlays, RenderCursorMenu, DamageActor, UseSkill, SendTopicInfoEvent, QuestStageSink,
+//        Reanimate, CharProxyContactPointAdded and the impulse six (the same set at the branch's head 446eb9be). The build's
+//        other hooks touch none of v1.3's sites either (their files unchanged from bebaccc5 to 446eb9be): PuppetHooks (41370,
+//        37356), FateHooks (14752, 16155, 16128), ChangeForm (35928), Hooks.cpp's vtable writes (VTABLE_PlayerCharacter[4] slot 0x1,
+//        VTABLE_SkyrimScript____AddItemFunctor's 0x1, VTABLE_PlayerCharacter[0] slot 0x104, VTABLE_Character[0] slot 0xAB, the
+//        VM's 0x18) and FrameUpdate (36564 +0x6e, commented out of Hooks::Install, Hooks.cpp:607), and VPrint's and
+//        QuitShutdownCall's call thunks and ScriptNatives' 104651 besides: by `just addr` and the unpacked exe's vtables
+//        (lab/.cache/game/exe-1.6.1170, read 2026-11-12), the nearest patch lies 0x3e360 bytes from a v1.3 site, and no slot
+//        written is one v1.3 reads (its slot targets: the sphere motion's 0x14 at 0xb4c7e0, the box's and the thin box's at
+//        0xb4cb40, PlayerCharacter's 0xAD at 0x732660, FindTargets at 0x7d0e60, AddImpact at seven addresses).
+//   2. The native filter for a candidateAny (rule 9: the motions' slots serve every dynamic body in the world). Its C listener,
+//      v1.2's pi_cand_enter, checks the body's vtables before any read through an argument and crosses into JavaScript inside an
+//      open bracket on its own thread (none under PUSH_ONLY), on a watched body, or while its site has passed fewer than ANY_ROWS
+//      calls (param, default 64; the shared memory's any_rows, the pad slot at 0x68, so no offset moves): a cold push call is read
+//      whole with no bracket and no watch (080858 on c1: 78092 never ran and ApplyPointImpulse ran once, by the native counts), and
+//      a hot one costs its checks alone past the budget. The watch, v1.2's PI_WATCH round robin for WATCH_MS, is written under
+//      PUSH_ONLY by each 78091 row (the pushed body's wrapper and motion) and each AddImpact (the hit body: the collidable's own
+//      entity, hkpWorldObject's collidable at +0x20, H/hkpWorldObject.h:67, when it reads as an hkpRigidBody, 227984; else the
+//      target's root body), so a push call on a body an impact or a linear impulse just named crosses past the budget too. Without
+//      the CModule (neither variant compiles) no candidate attaches, and the read is 78091's rows, AddImpact's and the sampler's.
+//   3. Under PUSH_ONLY the six sites are noted, never hooked, with the mode 'left: the rung 3 build hooks it', so the ready row's
+//      first bytes show the build's own patch on each (e9 expected) beside the attached sites' (none e9 expected).
+//   4. A candidate row says how it crossed: crossed 'watched', 'bracket' or 'first calls'.
+//   5. scriptVersion '1.3'; the ready row's params carry PUSH_ONLY and ANY_ROWS.
+// Every id is v1.2's, resolved again by `just addr` from the thuum checkout on 2026-11-12 (lab/addr.py over addrlib/, runtime
+// 1.6.1170.0, 428461 entries; never from memory, CLAUDE.md rule 1): 78091 0xe93380, 78092 0xe93420, 227971 0x196bc98, 227973
+// 0x196bd70, 227975 0x196be48, 227963 0x196b998 (the keyframed motion, read for the vtable check alone), 227984 0x196c058, 190275
+// 0x17aeb58, 239275 0x19e7a68, 26004 0x3fd450 and 26005 0x3fd570 (noted, never hooked, under PUSH_ONLY), 209925 0x18bf900, 209940
+// 0x18c06a8. Read-only to the engine: attaches and memory reads; its engine calls are v1.2's two lookups (26003, 12332).
+// HYPOTHESIS until a run reads as expected (rule 2): that the build leaves 78091, 78092, the motions' slot 0x14, AddImpact,
+// FindTargets and PlayerCharacter::Update's slot target unpatched (the ready row's bytes say); that a zero result at 26004 either
+// skips the push call or passes it a zero vector (the read this mode exists for, x-prop-impact v1.2's TRACE); that ApplyPointImpulse
+// stays cold where a player walks into clutter (the liveness row's native calls per site say).
+// The fresh review of 9b536d69 with the stage's probes (lab/.cache/drafts/physics/rung3-stage/review-impulse-v1.3-probes.md,
+// sha1 0315972e: READY with nits) asked one header line: item 1's last sentence and the parenthesis before it, as written
+// (ADR-064 amendment A); the code is 9b536d69's, so the version stays 1.3 (9b536d69 beside this file, prop-impulse.9b536d69.js).
+//
+// v1.2's header follows, as it stands.
+//
 // prop-impulse.js v1.2 DRAFT (thuum, 2026-11-12; ADR-071 rung 3's premise reads, lab/.cache/drafts/physics/rung3-plan.md 905bec1d
 // section B2 and its four v1.2 changes; Eli's rung 3 decisions at origin/main de8604a1, docs/DECISIONS.md: D-PH5 "Every physics
 // body", D-PH6 "Read again, then by cones", D-PH7 "Read it, else a 51 limit"). For x-prop-cone v1 and x-prop-arrow v1
@@ -225,7 +288,7 @@ const num = function (v, d) { return (v === undefined || v === null) ? d : Numbe
 const idList = function (v) {
   return (Array.isArray(v) ? v : []).map(function (x) { return typeof x === 'string' ? parseInt(x, 16) : Number(x); }).filter(function (x) { return x > 0; });
 };
-const SCRIPT_VERSION = '1.2';
+const SCRIPT_VERSION = '1.3';
 const POLL_MS = num(PARAMS.POLL_MS, 2000);
 const EVERY = num(PARAMS.ROW_EVERY_FRAMES, 6);
 const ROWS = num(PARAMS.ROWS, 400);
@@ -237,6 +300,10 @@ const TTL_S = num(PARAMS.TTL_S, 1800);
 const BACKTRACE = !!PARAMS.BACKTRACE;
 const ARROW = !!PARAMS.ARROW;
 const ATTACH_ONLY = !!PARAMS.ATTACH_ONLY;
+// v1.3: PUSH_ONLY, the push calls alone beside the rung 3 build's own hooks, and the first calls each of its candidates passes
+// with no bracket and no watch
+const PUSH_ONLY = !!PARAMS.PUSH_ONLY;
+const ANY_ROWS = num(PARAMS.ANY_ROWS, 64);
 const BT_ROWS = num(PARAMS.BT_ROWS, 64);
 const BT_DEPTH = num(PARAMS.BT_DEPTH, 24);
 const SCAN_QWORDS = num(PARAMS.SCAN_QWORDS, 512);
@@ -316,10 +383,11 @@ const SLOT = { update: 0xad, explosionUpdate: 0xa3, findTargets: 0xa4, processIm
 // v1.2: the CModule's shared memory, PiShared below, laid out by hand on both sides (x64 natural alignment; the sizes are checked
 // by the C side's comments and by the ready row's layout field)
 const PI_THREADS = 64, PI_DEPTH = 8, PI_CONES = 16, PI_WATCH = 8, PI_SITES = 48, PI_RING = 64;
-const PI_KIND = { explosion: 1, impacts: 2, cone: 3, candidate: 0x10 };
+const PI_KIND = { explosion: 1, impacts: 2, cone: 3, candidate: 0x10, candidateAny: 0x11 };
+const piIsCandidate = function (k) { return k === PI_KIND.candidate || k === PI_KIND.candidateAny; };
 const PI_KIND_NAMES = { 1: 'explosion', 2: 'impacts', 3: 'cone' };
 const PS = { threads: 0x00, cones: 0x04, open: 0x08, ring: 0x0c, mainTid: 0x10, lost: 0x14, nWatch: 0x18, coneFull: 0x1c, pulse: 0x20,
-  motionVt: 0x28, hkpVt: 0x48, bhkVt: 0x50, coneVt: 0x60, w: 0xa0, s: 0x160, t: 0x760, c: 0x4b60, h: 0x4f60, size: 0x7f60 };
+  motionVt: 0x28, hkpVt: 0x48, bhkVt: 0x50, coneVt: 0x60, anyRows: 0x68, w: 0xa0, s: 0x160, t: 0x760, c: 0x4b60, h: 0x4f60, size: 0x7f60 };
 const PW = { bhk: 0x00, motion: 0x08, until: 0x10, size: 0x18 };
 const PSI = { at: 0x00, kind: 0x08, shape: 0x0c, bhk: 0x10, coneSlot: 0x14, calls: 0x18, passed: 0x1c, size: 0x20 };
 const PT = { tid: 0x00, depth: 0x04, overflow: 0x08, f: 0x10, size: 0x110 };
@@ -340,6 +408,7 @@ const PI_C_HEAD = `
 #define PI_KIND_EXPLOSION 1
 #define PI_KIND_IMPACTS 2
 #define PI_KIND_CONE 3
+#define PI_KIND_CAND_ANY 0x11
 
 #define PI_FORM_ID 0x14
 #define PI_REFR_BASE 0x40
@@ -417,7 +486,7 @@ struct _PiWatch
 struct _PiSite
 {
   guint64 at;       /* 0x00 the hooked function */
-  guint32 kind;     /* 0x08 a bracket kind, or 0x10 a candidate */
+  guint32 kind;     /* 0x08 a bracket kind, 0x10 a candidate, 0x11 one passing its first any_rows calls unwatched (v1.3) */
   guint32 shape;    /* 0x0c a candidate's argument shape */
   guint32 bhk;      /* 0x10 1 when a candidate's this is a bhkRigidBody, 0 an hkpMotion */
   guint32 cone_slot; /* 0x14 */
@@ -461,7 +530,8 @@ struct _PiShared
   guint64 hkp_vt;        /* 0x48 */
   guint64 bhk_vt[2];     /* 0x50 */
   guint64 cone_vt;       /* 0x60 */
-  guint64 pad[7];        /* 0x68 */
+  guint64 any_rows;      /* 0x68 v1.3: a kind 0x11 candidate's calls passed with no bracket and no watch (JavaScript) */
+  guint64 pad[6];        /* 0x70 */
   PiWatch w[PI_WATCH];   /* 0xa0 */
   PiSite s[PI_SITES];    /* 0x160 */
   PiThread t[PI_THREADS]; /* 0x760 */
@@ -655,7 +725,8 @@ pi_copy4 (volatile guint32 * dst, const guint8 * src)
 
 /* a candidate's enter: a load and a compare while no bracket is open anywhere and no body is watched; otherwise the body's
    vtables are checked before any read through an argument, then the call crosses only inside an open bracket on its own thread
-   or on a watched body */
+   or on a watched body. v1.3: a kind 0x11 candidate (PUSH_ONLY's, with no bracket to open) also crosses while its site has passed
+   fewer than any_rows calls, so a cold push call is read with no bracket and no watch, and a hot one costs its checks alone */
 static void
 pi_cand_enter (GumInvocationContext * ic, guint32 site)
 {
@@ -666,15 +737,16 @@ pi_cand_enter (GumInvocationContext * ic, guint32 site)
   guint8 * vec;
   guint8 * pt = NULL;
   guint64 vt, now = 0;
-  guint32 tid, depth = 0, k, shape, watched = 0, slot;
+  guint32 tid, depth = 0, k, shape, watched = 0, slot, kind;
   volatile PiThread * t = NULL;
   volatile PiHit * h;
 
   call = GUM_IC_GET_INVOCATION_DATA (ic, PiCall);
   call->pushed = 0;
   call->slot = 0;
+  kind = pi_shared.s[site].kind;
   pi_shared.s[site].calls++;
-  if (pi_shared.open == 0 && pi_shared.n_watch == 0)
+  if (pi_shared.open == 0 && pi_shared.n_watch == 0 && kind != PI_KIND_CAND_ANY)
     return;
   self = (guint8 *) gum_invocation_context_get_nth_argument (ic, 0);
   if (self == NULL)
@@ -721,7 +793,8 @@ pi_cand_enter (GumInvocationContext * ic, guint32 site)
       }
     }
   }
-  if (depth == 0 && watched == 0)
+  if (depth == 0 && watched == 0
+      && !(kind == PI_KIND_CAND_ANY && (guint64) pi_shared.s[site].passed < pi_shared.any_rows))
     return;
   pi_shared.s[site].passed++;
   if (now == 0)
@@ -1129,17 +1202,36 @@ if (off === undefined) {
   // the live first bytes of every site, read before any attach or replacement
   const resolved = {};
   const note = function (name, id, p, mode) { resolved[name] = { id: id, rva: rva(p), at: String(p), mode: mode, bytes: firstBytes(p) }; };
-  const hook26004 = !ATTACH_ONLY;
+  const hook26004 = !ATTACH_ONLY && !PUSH_ONLY;
+  // v1.3: under PUSH_ONLY the build's own sites are noted, never hooked, so the ready row's first bytes show the build's hook on
+  // each (26004 and 26005 replaced, Explosion::Update, the ProcessImpacts sites and the cone's HandleHits attached: fork bebaccc5
+  // FridaHooks.cpp:4223-4227, :4256, :4264, :4294)
+  const LEFT = 'left: the rung 3 build hooks it';
+  // v1.3: the build's six sites by address, so under PUSH_ONLY no attach can land on one, a body two slots share included
+  const buildSiteAt = {};
+  if (PUSH_ONLY) {
+    [at('addExplosionImpulse'), at('scaleImpulseForce'), ptrAt(at('explosionVtable'), SLOT.explosionUpdate * Process.pointerSize),
+      ptrAt(at('coneVtable'), SLOT.handleHits * Process.pointerSize)].forEach(function (p) { if (!isNil(p)) buildSiteAt[String(p)] = true; });
+    (PROJECTILE_VTABLES[version] || []).forEach(function (pair) {
+      const p = ptrAt(exe.base.add(pair[1]), SLOT.processImpacts * Process.pointerSize);
+      if (!isNil(p)) buildSiteAt[String(p)] = true;
+    });
+  }
+  const piBuildHooks = function (p) { return PUSH_ONLY && !isNil(p) && buildSiteAt[String(p)] === true; };
+  const LEFT_AT = ': left, the rung 3 build hooks this address';
   if (hook26004) {
     note('AddExplosionImpulse', 26005, at('addExplosionImpulse'), REPLACE ? 'replace' : 'attach');
     note('ScaleGameplayImpulseForce', 26004, at('scaleImpulseForce'), REPLACE ? 'replace' : 'attach');
+  } else if (PUSH_ONLY) {
+    note('AddExplosionImpulse', 26005, at('addExplosionImpulse'), LEFT);
+    note('ScaleGameplayImpulseForce', 26004, at('scaleImpulseForce'), LEFT);
   }
   note('SetLinearImpulse', 78091, at('setLinearImpulse'), 'attach');
   const updateAt = ptrAt(at('playerVtable'), SLOT.update * Process.pointerSize);
   note('PlayerCharacter::Update', 208040, updateAt, 'attach');
   const explosionSlots = [['Explosion::Update', SLOT.explosionUpdate], ['Explosion::FindTargets', SLOT.findTargets]].map(function (s) {
     const p = ptrAt(at('explosionVtable'), s[1] * Process.pointerSize);
-    note(s[0], 209940, p, 'attach');
+    note(s[0], 209940, p, PUSH_ONLY && s[1] === SLOT.explosionUpdate ? LEFT : 'attach');
     return { name: s[0], slot: s[1], at: p };
   });
   const projectileSites = {}; // address -> { slot, classes }
@@ -1148,7 +1240,7 @@ if (off === undefined) {
       const p = ptrAt(exe.base.add(pair[1]), s[1] * Process.pointerSize);
       if (isNil(p)) return;
       const k = String(p);
-      if (projectileSites[k] === undefined) { projectileSites[k] = { slot: s[0], at: p, classes: [] }; note(s[0] + '@' + rva(p), 'vtable slot ' + hex(s[1]), p, 'attach'); }
+      if (projectileSites[k] === undefined) { projectileSites[k] = { slot: s[0], at: p, classes: [] }; note(s[0] + '@' + rva(p), 'vtable slot ' + hex(s[1]), p, PUSH_ONLY && s[1] === SLOT.processImpacts ? LEFT : 'attach'); }
       projectileSites[k].classes.push(pair[0]);
     });
   });
@@ -1172,30 +1264,41 @@ if (off === undefined) {
   const piSites = [];
   const piSkipped = [];
   const piAddSite = function (site) {
+    if (piBuildHooks(site.at)) { piSkipped.push({ label: site.label, why: 'the rung 3 build hooks this address' }); return; }
     if (piSites.length >= PI_SITES) { piSkipped.push({ label: site.label, why: 'past PI_SITES' }); return; }
     site.i = piSites.length;
     site.bytes = firstBytes(site.at);
     piSites.push(site);
   };
   const explosionUpdate = explosionSlots[0];
-  if (!isNil(explosionUpdate.at)) piAddSite({ label: 'Explosion::Update@' + rva(explosionUpdate.at), at: explosionUpdate.at, kind: PI_KIND.explosion, shape: 0, bhk: 0, coneSlot: 0 });
+  if (!PUSH_ONLY && !isNil(explosionUpdate.at)) piAddSite({ label: 'Explosion::Update@' + rva(explosionUpdate.at), at: explosionUpdate.at, kind: PI_KIND.explosion, shape: 0, bhk: 0, coneSlot: 0 });
   Object.keys(projectileSites).forEach(function (k) {
     const site = projectileSites[k];
-    if (site.slot !== 'ProcessImpacts') return;
+    if (PUSH_ONLY || site.slot !== 'ProcessImpacts') return;
     const coneOnly = site.classes.length === 1 && site.classes[0] === 'ConeProjectile';
     piAddSite({ label: 'ProcessImpacts@' + rva(site.at), at: site.at, classes: site.classes, kind: (BACKTRACE && coneOnly) ? PI_KIND.cone : PI_KIND.impacts, shape: 0, bhk: 0, coneSlot: 2 });
   });
-  if (BACKTRACE) {
+  if (BACKTRACE && !PUSH_ONLY) {
     [['ConeProjectile::UpdateImpl', SLOT.updateImpl, 0], ['ConeProjectile::HandleHits', SLOT.handleHits, 1]].forEach(function (s) {
       const p = ptrAt(at('coneVtable'), s[1] * Process.pointerSize);
       if (isNil(p)) { attachErrors.push(s[0] + ': no slot'); return; }
       piAddSite({ label: s[0] + '@' + rva(p), at: p, kind: PI_KIND.cone, shape: 0, bhk: 0, coneSlot: s[2] });
     });
   }
-  if (ARROW) {
-    [['setLinearVelocity', '78089 bhkRigidBody::SetLinearVelocity'], ['setAngularVelocity', '78090 bhkRigidBody::SetAngularVelocity'],
-      ['setAngularImpulse', '78092 bhkRigidBody::SetAngularImpulse']].forEach(function (pair) {
-      piAddSite({ label: pair[1] + '@' + rva(at(pair[0])), at: at(pair[0]), kind: PI_KIND.candidate, shape: 0, bhk: 1, coneSlot: 0, slot: 'bhk' });
+  if (PUSH_ONLY) {
+    const hitsAt = ptrAt(at('coneVtable'), SLOT.handleHits * Process.pointerSize);
+    if (!isNil(hitsAt)) note('ConeProjectile::HandleHits', 209925, hitsAt, LEFT);
+  }
+  if (ARROW || PUSH_ONLY) {
+    // v1.3: PUSH_ONLY attaches the push calls alone, 78092 and the dynamic motions' slot 0x14, as kind candidateAny (each passes
+    // its first ANY_ROWS calls with no bracket and no watch, then a watched body's alone); ARROW's setters (78089, 78090 and slots
+    // 0x10 and 0x11, thousands of calls a second in 080858) and its other impulse and force slots never attach under it
+    const candKind = PUSH_ONLY ? PI_KIND.candidateAny : PI_KIND.candidate;
+    const bhkCands = PUSH_ONLY ? [['setAngularImpulse', '78092 bhkRigidBody::SetAngularImpulse']]
+      : [['setLinearVelocity', '78089 bhkRigidBody::SetLinearVelocity'], ['setAngularVelocity', '78090 bhkRigidBody::SetAngularVelocity'],
+        ['setAngularImpulse', '78092 bhkRigidBody::SetAngularImpulse']];
+    bhkCands.forEach(function (pair) {
+      piAddSite({ label: pair[1] + '@' + rva(at(pair[0])), at: at(pair[0]), kind: candKind, shape: 0, bhk: 1, coneSlot: 0, slot: 'bhk' });
     });
     const byAddress = {};
     (MOTION_VTABLES[version] || []).forEach(function (pair) {
@@ -1212,11 +1315,14 @@ if (off === undefined) {
       const a = byAddress[k];
       const slots = Object.keys(a.slots);
       const label = a.classes[0] + '@' + rva(a.at);
+      // v1.3: PUSH_ONLY keeps an address that carries slot 0x14 of a dynamic motion alone; every slot is still read above, so one
+      // folded under 0x14 and another slot is told apart and skipped below
+      if (PUSH_ONLY && (a.slots[0x14] === undefined || a.classes.every(function (c) { return c.indexOf('hkpKeyframedRigidMotion::') === 0; }))) return;
       if (slots.length > 1) { piSkipped.push({ label: label, why: 'one address under slots ' + slots.map(function (x) { return hex(Number(x)); }).join(', '), classes: a.classes }); return; }
       const bytes = firstBytes(a.at);
       if (bytes.indexOf('c3') === 0 || bytes.indexOf('c2') === 0) { piSkipped.push({ label: label, why: 'begins with ret: ' + bytes, classes: a.classes }); return; }
       const ms = a.slots[slots[0]];
-      piAddSite({ label: label, at: a.at, classes: a.classes, kind: PI_KIND.candidate, shape: ms[2], bhk: 0, coneSlot: 0, slot: hex(ms[0]) });
+      piAddSite({ label: label, at: a.at, classes: a.classes, kind: candKind, shape: ms[2], bhk: 0, coneSlot: 0, slot: hex(ms[0]) });
     });
   }
 
@@ -1229,6 +1335,7 @@ if (off === undefined) {
     try { if (piCandidateRow === null) { piHits.capped += 1; return; } piCandidateRow(h); } catch (e) { fail('candidate row', e); }
   }, 'void', ['pointer'], 'win64');
   piShared.add(PS.mainTid).writeU32(mainThread >>> 0);
+  piShared.add(PS.anyRows).writeU64(PUSH_ONLY ? ANY_ROWS : 0);
   (MOTION_VTABLES[version] || []).forEach(function (pair, i) { piShared.add(PS.motionVt + i * 8).writePointer(exe.base.add(pair[1])); });
   piShared.add(PS.hkpVt).writePointer(at('hkpRigidBodyVtable'));
   piShared.add(PS.bhkVt).writePointer(at('bhkRigidBodyVtable'));
@@ -1243,7 +1350,7 @@ if (off === undefined) {
     e.add(PSI.coneSlot).writeU32(s.coneSlot);
   });
   const piSource = PI_C_HEAD + piSites.map(function (s) {
-    return s.kind === PI_KIND.candidate
+    return piIsCandidate(s.kind)
       ? 'void\npi_c' + s.i + ' (GumInvocationContext * ic)\n{\n  pi_cand_enter (ic, ' + s.i + ');\n}\n'
       : 'void\npi_b' + s.i + ' (GumInvocationContext * ic)\n{\n  pi_enter (ic, ' + s.i + ');\n}\n';
   }).join('');
@@ -1258,7 +1365,7 @@ if (off === undefined) {
   if (piNative) {
     piSites.forEach(function (s) {
       try {
-        const callbacks = s.kind === PI_KIND.candidate ? { onEnter: piCm['pi_c' + s.i], onLeave: piCm.pi_cand_leave } : { onEnter: piCm['pi_b' + s.i], onLeave: piCm.pi_leave };
+        const callbacks = piIsCandidate(s.kind) ? { onEnter: piCm['pi_c' + s.i], onLeave: piCm.pi_cand_leave } : { onEnter: piCm['pi_b' + s.i], onLeave: piCm.pi_leave };
         piListeners.push(Interceptor.attach(s.at, callbacks));
         hooks.attached.push(s.label);
       } catch (e) { attachErrors.push(s.label + ' (native): ' + e); }
@@ -1302,20 +1409,22 @@ if (off === undefined) {
     const f = t.add(PT.f + (depth - 1) * PF.size);
     return piFrameSummary(f.add(PF.kind).readU32(), f.add(PF.site).readU32(), f.add(PF.self).readPointer(), f.add(PF.handle).readU32(), depth, f.add(PF.tick).readU64().toNumber());
   };
-  // ARROW: a projectile-bracketed 26004's body, watched in C for WATCH_MS (round robin over PI_WATCH; the until is written last)
+  // ARROW: a projectile-bracketed 26004's body, watched in C for WATCH_MS (round robin over PI_WATCH; the until is written last).
+  // v1.3: PUSH_ONLY watches the body a 78091 pushes and the body an AddImpact hits the same way (piWatchMotion; an AddImpact's
+  // wrapper is unknown, so its entry is the motion alone, which the C side matches for both kinds of candidate)
   let piWatchNext = 0;
-  const piWatchBody = function (bhk) {
-    if (!piNative || isNil(bhk)) return;
-    const hkp = ptrAt(bhk, REFERENCED);
+  const piWatchMotion = function (bhk, hkp) {
+    if (!piNative || (isNil(bhk) && isNil(hkp))) return;
     const k = piWatchNext % PI_WATCH;
     piWatchNext += 1;
     const w = piShared.add(PS.w + k * PW.size);
     w.add(PW.until).writeU64(0);
-    w.add(PW.bhk).writePointer(bhk);
+    w.add(PW.bhk).writePointer(isNil(bhk) ? NULL : bhk);
     w.add(PW.motion).writePointer(isNil(hkp) ? NULL : hkp.add(ENTITY.motion));
     w.add(PW.until).writeU64(ticks() + WATCH_MS);
     piShared.add(PS.nWatch).writeU32(Math.min(piWatchNext, PI_WATCH));
   };
+  const piWatchBody = function (bhk) { if (!isNil(bhk)) piWatchMotion(bhk, ptrAt(bhk, REFERENCED)); };
   const piWantsBacktrace = function (row) {
     const k = row.bracket === null ? 'none' : row.bracket.kind;
     if (BACKTRACE && (k === 'none' || k === 'cone')) return true;
@@ -1444,7 +1553,8 @@ if (off === undefined) {
       emit({ event: 'reverted', ids: out, ttl_s: TTL_S, frame: counts.frames });
     }, TTL_S * 1000);
   }
-  try {
+  if (piBuildHooks(at('setLinearImpulse'))) attachErrors.push('78091' + LEFT_AT);
+  else try {
     Interceptor.attach(at('setLinearImpulse'), {
       onEnter(args) {
         counts.SetLinearImpulse = (counts.SetLinearImpulse || 0) + 1;
@@ -1464,6 +1574,8 @@ if (off === undefined) {
           this.hkp = hkp;
           watch(hkp, refr, 'impulse');
           openWindow();
+          // v1.3: the pushed body watched natively, so a 78092 or 0x14 on it past ANY_ROWS still crosses
+          if (PUSH_ONLY) piWatchMotion(args[0], hkp);
         } catch (e) { fail('78091 enter', e); }
       },
       onLeave() { try { if (this.row) { this.row.after = bodyFacts(this.hkp); emitCapped(this.row); } } catch (e) { fail('78091 leave', e); } },
@@ -1474,7 +1586,8 @@ if (off === undefined) {
   // the brackets: native above; without the CModule, v1.1's JavaScript stack per thread; FindTargets a JavaScript row either way
   explosionSlots.forEach(function (s) {
     if (isNil(s.at)) { attachErrors.push(s.name + ': no slot'); return; }
-    if (piNative && s.slot === SLOT.explosionUpdate) return;
+    if ((piNative || PUSH_ONLY) && s.slot === SLOT.explosionUpdate) return;
+    if (piBuildHooks(s.at)) { attachErrors.push(s.name + LEFT_AT); return; }
     try {
       Interceptor.attach(s.at, {
         onEnter(args) {
@@ -1482,12 +1595,12 @@ if (off === undefined) {
           try {
             seq += 1;
             const e = args[0];
-            if (piNative) { emitCapped({ fn: 'findTargets', seq: seq, tid: this.threadId, main: this.threadId === mainThread, frame: counts.frames, tick: ticks(), ref: hex(idOf(e)), base: hex(baseOf(e)), owner: resolveHandle(u32(e, EXPLOSION.owner)), radius: r2(f32(e, EXPLOSION.radius)) }); return; }
+            if (piNative || PUSH_ONLY) { emitCapped({ fn: 'findTargets', seq: seq, tid: this.threadId, main: this.threadId === mainThread, frame: counts.frames, tick: ticks(), ref: hex(idOf(e)), base: hex(baseOf(e)), owner: resolveHandle(u32(e, EXPLOSION.owner)), radius: r2(f32(e, EXPLOSION.radius)) }); return; }
             push(brackets, this.threadId, { kind: 'explosion', slot: s.name, seq: seq, ref: hex(idOf(e)), base: hex(baseOf(e)), owner: resolveHandle(u32(e, EXPLOSION.owner)), radius: r2(f32(e, EXPLOSION.radius)), impulses: 0, frame: counts.frames });
           } catch (err) { fail(s.name + ' enter', err); }
         },
         onLeave() {
-          if (piNative) return;
+          if (piNative || PUSH_ONLY) return;
           try {
             const b = top(brackets, this.threadId);
             pop(brackets, this.threadId);
@@ -1501,9 +1614,10 @@ if (off === undefined) {
   Object.keys(projectileSites).forEach(function (k) {
     const site = projectileSites[k];
     const label = site.slot + '@' + rva(site.at);
+    if (site.slot !== 'ProcessImpacts' && piBuildHooks(site.at)) { attachErrors.push(label + LEFT_AT); return; }
     try {
       if (site.slot === 'ProcessImpacts') {
-        if (piNative) return;
+        if (piNative || PUSH_ONLY) return;
         Interceptor.attach(site.at, {
           onEnter(args) {
             counts[label] = (counts[label] || 0) + 1;
@@ -1542,6 +1656,14 @@ if (off === undefined) {
                 bracket: piInnermost(this.threadId),
               });
               if (!isNil(target)) { const b = bodyOfRefr(target); if (!isNil(b)) { watch(b, target, 'impact'); openWindow(); } }
+              // v1.3: PUSH_ONLY watches the hit body natively too: the collidable's own entity (hkpWorldObject's collidable at +0x20,
+              // H/hkpWorldObject.h:67) when it reads as an hkpRigidBody (227984), else the target's root body
+              if (PUSH_ONLY) {
+                let hitBody = isNil(coll) ? NULL : coll.sub(COLLIDABLE);
+                if (!isNil(hitBody) && !ptrAt(hitBody, 0).equals(at('hkpRigidBodyVtable'))) hitBody = NULL;
+                if (isNil(hitBody) && !isNil(target)) hitBody = bodyOfRefr(target);
+                if (!isNil(hitBody)) piWatchMotion(NULL, hitBody);
+              }
             } catch (err) { fail(label, err); }
           },
         });
@@ -1580,6 +1702,7 @@ if (off === undefined) {
       ang0: raw3(ang0), ang1: raw3(ang1), dAng: raw3(sub3(ang1, ang0)),
       ret: piWhere(h.add(PH.ret).readPointer()), scan: piScan(h.add(PH.rsp).readPointer().add(8)),
       depth: h.add(PH.depth).readU32(), watched: h.add(PH.watched).readU32() === 1,
+      crossed: h.add(PH.watched).readU32() === 1 ? 'watched' : (h.add(PH.depth).readU32() > 0 ? 'bracket' : 'first calls'),
       bracket: topKind === 0 ? null : piFrameSummary(topKind, h.add(PH.top + PF.site).readU32(), h.add(PH.top + PF.self).readPointer(), h.add(PH.top + PF.handle).readU32(), h.add(PH.depth).readU32(), h.add(PH.top + PF.tick).readU64().toNumber()),
     };
     emit(row);
@@ -1588,7 +1711,7 @@ if (off === undefined) {
   // v1.2 (BACKTRACE): the cone table, read from Frida's own thread every 250 ms; duplicates by pointer and id merged
   const piCones = {};
   let piConePoll = null;
-  if (piNative && BACKTRACE) {
+  if (piNative && BACKTRACE && !PUSH_ONLY) {
     piConePoll = setInterval(function () {
       try {
         const n = Math.min(piShared.add(PS.cones).readS32(), PI_CONES);
@@ -1667,7 +1790,8 @@ if (off === undefined) {
       }
     });
   };
-  if (!isNil(updateAt)) {
+  if (piBuildHooks(updateAt)) attachErrors.push('PlayerCharacter::Update' + LEFT_AT);
+  else if (!isNil(updateAt)) {
     try {
       Interceptor.attach(updateAt, {
         onEnter() {
@@ -1703,7 +1827,7 @@ if (off === undefined) {
     worldScale: { inverse187407: scaleInverse, forward188105: scaleForward, ok: scaleOk, units: UNITS }, update: { slot: rva(updateAt), byId40447: rva(at('playerUpdateById')), agree: !isNil(updateAt) && updateAt.equals(at('playerUpdateById')) },
     hooks: resolved, replaced: hooks.replaced, attached: hooks.attached,
     native: { ok: piNative, variant: piVariant, errors: piErrors, layout: { shared: hex(PS.size), thread: hex(PT.size), hit: hex(PH.size) }, sites: piSites.map(function (s) { return { i: s.i, label: s.label, kind: s.kind, shape: s.shape, bhk: s.bhk, coneSlot: s.coneSlot, rva: rva(s.at), bytes: s.bytes, classes: s.classes || null }; }), skipped: piSkipped },
-    params: { POLL_MS: POLL_MS, ROW_EVERY_FRAMES: EVERY, ROWS: ROWS, REPLACE: REPLACE, WATCH: WATCH.map(hex), WATCH_MAX: WATCH_MAX, ISLAND_MAX: ISLAND_MAX, TTL_S: TTL_S, BACKTRACE: BACKTRACE, ARROW: ARROW, ATTACH_ONLY: ATTACH_ONLY, BT_ROWS: BT_ROWS, BT_DEPTH: BT_DEPTH, SCAN_QWORDS: SCAN_QWORDS, CAND_ROWS: CAND_ROWS, WATCH_MS: WATCH_MS },
+    params: { POLL_MS: POLL_MS, ROW_EVERY_FRAMES: EVERY, ROWS: ROWS, REPLACE: REPLACE, WATCH: WATCH.map(hex), WATCH_MAX: WATCH_MAX, ISLAND_MAX: ISLAND_MAX, TTL_S: TTL_S, BACKTRACE: BACKTRACE, ARROW: ARROW, ATTACH_ONLY: ATTACH_ONLY, PUSH_ONLY: PUSH_ONLY, ANY_ROWS: ANY_ROWS, BT_ROWS: BT_ROWS, BT_DEPTH: BT_DEPTH, SCAN_QWORDS: SCAN_QWORDS, CAND_ROWS: CAND_ROWS, WATCH_MS: WATCH_MS },
     attachErrors: attachErrors,
   });
   // v1.2: dbghelp warmed on Frida's own thread after the ready (its first symbol lookup loads the modules' symbol state), so no
