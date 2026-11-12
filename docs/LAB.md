@@ -390,18 +390,32 @@ on both seats when a large trace was read whole
 must come to the copy's length, and they are decoded as UTF-8 once, so a
 range boundary inside a multibyte character splits nothing; a copy past
 64 MiB is refused before its first read; the copy leaves the seat once
-read. A copy that will not go is held open in the agent (qemu-server
-9.2.10's file-read leaves a handle open when a read dies), which only the
-seat's restart closes, so the seat rolls back: in this run's own reset when
-the fetch came before it (a hand-started trace fetched before the
-rollback), else at its next run. A copy or sidecar counts as held only when
-its removal still finds it at the fourth of four tries 1 s apart, each try
-before that a note naming it, since on 9.2.15, which closes its handles, a
-running game's console log copy stayed a moment after a small read (train
-52's stage: x-console-arm and x-acting-player on c1; numidium's HYPOTHESIS,
-a scan of a file just written). A run's own
+read. A copy that will not go is held open in the agent: a busy agent keeps
+the handle of a read or close that timed out until it works through its
+queue, and Windows keeps the file locked meanwhile (core's host journal,
+2026-11-12; on qemu-server 9.2.10 a read that died left it until the seat
+restarted). Its removal is tried four times 1 s apart, each try that still
+finds it a note naming it (on 9.2.15 a running game's console log copy
+stayed a moment after a small read: train 52's stage, x-console-arm and
+x-acting-player on c1; numidium's HYPOTHESIS, a scan of a file just
+written), then over a window: after pauses of 2, 4, 8 and 16 s lab-api
+pings the agent, and the first ping it answers brings one last try. A file
+still there after that is the run's note, naming the file, its seat and
+"held open in the agent", never the seat's fault (c1's shot 076 at
+20261112-081535 and c2's 056 at 101523 cost their seats a rollback each,
+and a mixed reset from one made x-two-hands red at 082053). The seat's next
+reset removes it, a rollback or the relaunch's cleaning (Between runs,
+below), and the next run never reads it: its shots, bursts and log-count
+copies carry its run's name, a trace's copy its script's, and a log
+fetch's copy is proven by its own exec's two lengths. A run's own
 trace not fetched whole is a lab fault, E_RUN_FRIDA_FETCH (the scenario
-runner's run end, below). The token has no FileWrite privilege.
+runner's run end, below), as before. Proxmox answers "QEMU guest agent is
+not running" whenever its 3 s guest-ping before an agent call goes
+unanswered (qemu-server's PVE/QemuServer/Agent.pm:83), which a busy agent
+does daily on both seats, so lab-api asks such a call again, 1 s after and
+twice as long each time, for up to 30 s from the first ask
+(LAB_AGENT_BUSY_S; proxmox.GuestControl), before it fails as it did. The
+token has no FileWrite privilege.
 
 ## Scenario runner (lab-api on sky-srv)
 
@@ -567,15 +581,17 @@ ranged file-read, 512 KiB a call, decoded once joined and removed once read.
 Read whole, a file past about 1 MiB is unreliable on a busy seat (a 1.46 MB
 console copy timed out three times in a row on c1, where 512 KiB ranges took
 it whole in 4 s; 20261111-195437 lost three shots at 23 s each). A shot not
-read is the step's note, never a fault, but a sidecar held open after its
-read faults the seat, as a held log or trace copy does: the step's note and
-a rollback at its next run, the verdict unchanged. This reverses, for a
-sidecar the runner finds held at its own read, the 2026-10-30 call that a
-held .png.b64 was not worth a rollback (ADR-036's note of that day; the
-relaunch's cleaning below still takes shots\ as far as it goes and fails no
-try on one): held files were found to build up rather than clear, the
-relaunches' held count growing 11, 17 and 25 around
-20261111-191642-x-prop-blast (6c3b0122).
+read is the step's note, never a fault, and a sidecar held open past its
+removal's window is a note too, as a held log or trace copy is (the client
+template's section above), the verdict unchanged. That restores, on
+qemu-server 9.2.15, the 2026-10-30 call that a held .png.b64 is not worth a
+rollback (ADR-036's notes): the call of 2026-11-12 02:58Z that a held file
+faults its seat followed held files building up on 9.2.10, the relaunches'
+held count growing 11, 17 and 25 around 20261111-191642-x-prop-blast
+(6c3b0122), where 9.2.15's agent lets go once it works through its queue. A
+shot's file and a burst's folder carry the run's name
+(shots\<run>-<step>.png), so a sidecar left held is never read as the next
+run's shot.
 Two lab-api endpoints replace the snapshot round trips to thuum-mundus
 (2026-10-05, their recipe and guardrails): `POST /lab/clients/<c>/snapshot
 {name}` takes a cold stacked `clean-m1-<x>` (quiesce, a clean ACPI shutdown
@@ -643,8 +659,8 @@ five-second frames could not show a stride.
   plain shot's is (its length from one listing of the burst's folder); once
   every frame is read, one exec removes the folder's sidecars and names any
   that stayed, where a removal a frame cost an exec each, and each further
-  try is that one exec again, so a burst's removal is four execs and 3 s at
-  most whatever its size. As with a plain
+  try is that one exec again, so a burst's removal is five execs at most,
+  the four quick tries and the window's last, whatever its size. As with a plain
   shot, a burst never fails a run: a frame not filmed or not read is the
   step's note.
 Assertions read `server.actor(c)` (the record, and
@@ -799,7 +815,7 @@ logs open for writing and Copy-Item's read refused the console log
 length at its open and the copy's (three tries, 10 s apart), then read back
 through the agent's own ranged file-read, 512 KiB a call, checked against
 the copy's length, decoded as UTF-8 once, refused past 64 MiB, and the copy
-removed once read (one the agent holds open rolls the seat back). Read
+removed once read (one the agent holds open is a note). Read
 whole, the console logs timed out the agent on both seats in
 20261111-191642. A log not fetched is a note naming its code and "(log
 fetch)", an E_PVE_* the agent's or E_RUN_LOG_FETCH the runner's own (a
@@ -809,7 +825,10 @@ failure: no verdict reads a log artifact. A source that is not there is
 said by the copy itself and not tried again, and once a fetch finds the
 seat's guest agent not running its other log fetches are skipped, with one
 note, until the seat's reset: each would spend three tries on an agent
-only a restart brings back. The SKSE folders' logs are still
+that answered none. Since that answer is as often a busy agent's (the
+client template's section above), each try's call is first asked again for
+up to 30 s, so the skip comes only for an agent busy past that and a busy
+spell no longer silences a seat. The SKSE folders' logs are still
 copied by one Copy-Item over their listing and read whole.
 A run in which a seat stopped answering (a step that timed out naming it: the
 load freeze of 2026-10-16, a game silent after PostLoadGame) also keeps that
@@ -847,9 +866,8 @@ script, the seat and the reason, and it turns a would-be green into error
 the same way, so a run set's rerun starts the trace again; a red stays red
 and gains it. The failure names the seat, so its next run rolls it back, as
 after any E_RUN_* naming it, which also closes a handle a timed-out read
-left open in its agent; a copy held open after a whole read rolls the seat
-back too, with this run's verdict as it was: in this run's own reset when
-the fetch came before it, else at its next run. An exception
+left open in its agent; a copy held open after a whole read is a note,
+with this run's verdict as it was, and the seat's next reset removes it. An exception
 that escapes the artifacts phase is an internal failure, and a run that
 would have been green is error, since what it skipped may be the run's own
 traces; a red stays red and gains it, and its seats roll back at their next
@@ -922,7 +940,9 @@ C:\sky-lab: there, frida\ (each run's script and its .out, .err, .log and
 .copy; frida-inject.exe stays), shots\, screenshots\, burst\ and input\ (the
 screenshot, burst and mouse steps' files), and in the lab folder itself
 log-count's copies by their pattern alone, logcount-*.log.copy (the code
-before 9e37956b never removed one, so seats carry many); each game folder's
+before 9e37956b never removed one, so seats carry many), and the seat's
+<client>.log and <client>-*.log, the log fetch's copies and the SKSE
+folder logs', which the run that reads one makes anew; each game folder's
 Data\SKSE\Plugins\CharGen\Presets (thuum-*.jslot and the presets the seat's
 last run saved by name); the Saves folder's TESMODPLATFORM-* (Skyrim
 Platform's generated saves, which a kill before its load settles leaves) and
@@ -935,13 +955,13 @@ rolls the seat back. A file that will not go fails the try, except in the
 capture folders shots\ and screenshots\ and for the runner's trace copies
 in frida\ (*.js.out.copy and *.js.log.copy, the files the agent itself
 reads back in ranges, which leave the seat once read and stay only when the
-agent holds one open) and log-count's copies, which are cleaned as far as they go: a file a
+agent holds one open), log-count's copies and the log fetch's, which are cleaned as far as they go: a file a
 timed-out guest-file-read or guest-file-close left open in the agent stays
-until the VM restarts (a copy or sidecar held after its read also rolls the
-seat back, in the same run's reset when the fetch came before it, else at
-its next run), the note
-says "<n> held open left in place", and the next capture writes its own name,
-as the next copy carries its run's script name (b-cloak-fight
+until the agent works through its queue (until the VM restarted, on
+qemu-server 9.2.10), and a copy or sidecar held after its read is only a
+note at its run, so this is the reset that removes it; the note
+says "<n> held open left in place", and each capture and log-count copy
+carries its run's name, as each trace copy its run's script name (b-cloak-fight
 20261030-053144 lost a rollback to two held .png.b64 sidecars, x-quest-mode
 20261030-131512 one to a story-location .js.log.copy). A script, its .out,
 .err or .log still held means a Frida process outlived the stop, and fails

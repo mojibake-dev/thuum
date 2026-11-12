@@ -56,7 +56,8 @@ def build_real(settings: Settings) -> Services:
 
     tables = load_tables(settings.guests_file)
     control = GuestControl(ProxmoxerGuests(settings.pve_url, settings.pve_token_id, settings.pve_token_secret, settings.pve_node, settings.pve_verify_ssl, settings.guest_task_timeout_s, http_timeout=settings.pve_timeout_s), reset_stagger_s=settings.reset_stagger_s,
-                           seat_stop=settings.seat_stop, seat_shutdown_timeout_s=settings.seat_shutdown_timeout_s)
+                           seat_stop=settings.seat_stop, seat_shutdown_timeout_s=settings.seat_shutdown_timeout_s,
+                           agent_busy_s=settings.agent_busy_s)
     system = RealSystem()
     state = ServerState(RpcStateClient(settings.server_state_url), tables.profile_ids, tables.base_id, tables)
     board = StepBoard()
