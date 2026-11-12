@@ -5230,6 +5230,15 @@ Amended (Eli about 20:3xZ 2026-11-11, asked in session on rung 1's build plan, l
   gone), so step 27 holds as written; a client change with a Windows build, in physics rung 1's client commit beside
   b-prop-push leaving pending, after playtest 51.
 
+Read (rung 0's x-prop-blast v3, 20261111-223256 on canon 24f1cc6a, both seats' traces whole; recorded 00:54Z 2026-11-12 by
+thuum-fa): decision 4's "26005 or 26004" is 26004. Every prop push on both seats went through ScaleGameplayImpulseForce 26004
+(TESHavokUtilities.h:18), bhkRigidBody::SetLinearImpulse 78091 (bhkRigidBody.h:54) applied its result on all 58 pairs, and
+AddExplosionImpulse 26005 (:14) touched only two animals' ragdolls, with a null HitData. The cause is the enclosing frame's, not
+an argument's: Explosion::actorOwner (Explosion.h:72) for an explosion, ProcessImpacts' shooter for an arrow, HitData::aggressor
+never; the shout's cone pushed from outside every hooked frame, so its cause is unread (a backtrace at 26004 during a shout reads
+it). That a zero result zeroes the push is HYPOTHESIS until a replacement returns 0 in a run; an arrow's push did not follow the
+result (no 78091, the bucket leaving about 66 times faster than the result gives), so an arrow needs its own read.
+
 Amends: ADR-064 decision 7 (dated note under it), ADR-063's props note (accepted under it), ADR-058's slices (slice two kept as a
 derived class; slice three is rungs 5 and 6), ADR-067 decision 4 (its final sample is the asleep sample; the built ChangeForm
 apply is the record). W3 stays Eli's at the time: a rewrite of b-prop-push's step 27 if the drop read calls for one (decided
