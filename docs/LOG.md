@@ -9584,3 +9584,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   shapes the reviewer named); live on both seats: playtest-logs.sh's own loop took all ten logs whole in 46 s (c1's console
   2,678,785 bytes), keep() 21,415 console lines, hang-dump's loop both open logs. Still whole-file reads, after 51:
   client-launch-test.sh and client-dumps.sh.
+- (numidium) x-sl-aim v1.1 (thuum-fa's READY, 863151e4), rung 1's premise read: 20261112-022655 red at its final block, cold.
+  None of the four sweeps (N and SL on each seat, six pitches each) held the server-placed ingot 0xff000002 in a seat's own
+  MISC listing (all 24 crosshair reads False), and the ingot moved about 23 units during the run (dx -17.4, dy +11.9, dz -9.5
+  between steps 17 and 173); the bands are thuum-fa's to read, and the five one-question probes after it take their PARAMs
+  from them. Both clones rolled back after it.
+- (numidium) labapi-client-log-fetch merged to main 58502b08 (thuum-fa; fresh reviews READY, FIX FIRST twice, READY; pipelines
+  5853 and 5854 green) and lab-api deployed at it, 02:47Z: a run's client logs through a share-read copy and 512 KiB ranges,
+  a failed fetch a "(log fetch)" note, log-count on the same read with its copies removed, screenshots' and bursts' base64 in
+  ranges, a held copy faulting its seat. Its real-seat check (logfetch_seatcheck.py 952b57ed, under a hold) read INCONCLUSIVE
+  on c1: the WMI-started holder was found, then gone 3 s later, so no check ran. Diagnostics the same hour: the holder's exact
+  text on a fresh 6 MB file of the same pattern stayed up six seconds, and Copy-Item copied a file a PowerShell holder held
+  open for writing under either FileShare 'Read' or 'ReadWrite', so the check's "Copy-Item refused" premise cannot be met by
+  such a holder (the game's refusals in 193821, 194559 and 195437 come from something else); both to thuum-fa. A real run
+  instead: smoke-two-players 20261112-025117 green on 58502b08, no "(log fetch)", E_PVE or held note, every client log whole
+  and valid UTF-8. Both clones rolled back after it.
