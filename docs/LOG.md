@@ -9686,3 +9686,19 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   cc5c44f3 from 14:33Z, the reanimation head's fix m4-reanimate-claim-2 581bc461 pushed beside it (pipeline 5918, its builds
   kept off the seats' probes). labapi-exit-status merged to main 2a4a58ff: its real-seat check on both seats at 14:37Z read
   130030's c1 exit 0xC0000005, the stage's Stop-Process kills 0xFFFFFFFF, and every row's account the game's own.
+- (numidium) The evening. Eli in numidium's session about 15:00Z: D-PH17 "Check both before merging" (rung 1 merges only
+  once E13's weight limit and E32's stalled stream read on both screens) and D-PH18 "Yes, in rung 3's stage" (b-prop-impulse
+  v1.2), main 72b881cb. Rung 2's T2 on cc5c44f3 red at 15:17Z on prop-physics (c2's figure ff000004 on the wire stack,
+  ff000005 on legacy: the ingot's drop raced c2's login); thuum-fa's 22c2466d moves the drops ahead of the login, pushed by
+  numidium with CLIENT_BUILD_WINDOWS=0 (rung 3's merge of it 4518ca61): rung 2's T2 green at 16:28Z and rung 3's at 17:12Z
+  (53 sessions each), then rung 2's stage stopped at step 1b, the Formatting check of 22c2466d red (a session file alone
+  changed; to rerun). numidium ran rung 3's T2 past Eli's word to set 51 up after rung 2's T2, 44 minutes of sky-srv. The
+  reanimation head 581bc461's thrall-departure T2 (15:18Z): 15 differences, a typed id converted by hand (217395, a DIAL,
+  for Hilde's NPC_ 0x35533), thuum-fa's 8464f322 fixes the session (unpushed). x-reanimate-return v1.5 20261112-152001 GREEN
+  on rung 1's build (132 steps): Sven raised, commanded by c1's fresh game and followed by the record and c2's copy, the
+  hand-back still the Frida script's (C4, m4-reanimate-return 9a0a0914, built for after 51). lab-api: labapi-stop-first
+  e7efd019 (relaunch {until: stopped} kills first, in-guest 50 ms on sky-c1) in its fresh review's fixes. Eli in auriel's
+  session about 15:42Z: playtest 51 cut now on fork canon 6fe5fea0 (D-C1 B), M3-2 and every physics item out, and ADR-072
+  accepted; about 17:05Z: 51 under the staged cap, one sitting. The profile recut (905826c1) and docs-closeout-route and
+  physics-sleep-v3 merged; the lab goes back to canon for 51: both clones to clean-m1, the server to
+  skymp-server:m4-shout-once-6fe5fea0.
