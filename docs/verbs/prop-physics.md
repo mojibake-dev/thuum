@@ -148,6 +148,44 @@ declared, the probe's v2 (the return line's real pattern, server baselines, move
 either-or under E20). Open: PROP_MOVING_MS UNMEASURED; the stalled stream (A7) in no probe; E10, E31, E14 and E15 of
 docs/engine/havok-props.md unread; the scenario b-prop-arbitration after the probe's read.
 
+### A pickup is a take (ADR-071 rung 1, D1 A; 02:34 PST 2026-11-12, fork m4-physics-1-arbitration a539bded, 7f4f1506, 1aa78a86)
+
+Why: a grab the engine refuses in its own frame ends in a pickup at the key's release (docs/engine/havok-props.md E16 and E28),
+and the server's pickup read no prop row: ProcessActivateNormal's pickable branch gives the item and deletes a 0xff reference for
+any activator (MpObjectReference.cpp:2273-2289). In x-moving-press 20261112-082448 c1's key-up picked up the ingot c2's engine
+was moving, deleted for every seat (c1-console.log:1701, server.log:947); rung 1's f38f5249 removed the refused grab's grant
+(readHolds) but not the pickup (lab/.cache/drafts/physics/read-rung1-premises.md fed3f9cf, section 7, D1).
+
+The rule (R0: a pickup is an inventory transfer the server computes; ADR-071 decision 2's table: held, taken by nothing; moving,
+taken by a grab alone; resting, any claim). A player's first activation of an item reference is a take. A prop another player
+holds grabbed is taken by nothing, so the pickup is refused E_PROP_HELD; one another seat streams awake is taken by a grab alone,
+so the pickup is refused E_PROP_MOVING; the picker's own row and a prop at rest, stalled or unclaimed are taken as before, and the
+pickup changes no row. A refused pickup does nothing else: OnActivate returns after the reach gate (no hazard note, no relay, no
+Activate), so nothing reaches the picker's inventory, the reference stands for every seat, and the picker's game hears the
+current word, once per prop per second (A5). The picker is the reporting game's player, the id the rows name, so a hosted
+caster's pickup is its host's take. Built: the rule's pickup in wire-rules props.rs (a539bded), ActionListener::RefusePropPickup
+called from OnActivate (7f4f1506), and T2's prop-physics session, where c2's pickup of the dagger c1 streams awake is refused
+E_PROP_MOVING and answered with the standing word (1aa78a86).
+
+Its two lines, logged at warn for every refusal (the claim's shape, no rate limit; no stream counter counts an activation's
+refusal), ActionListener.cpp:4037 at 7f4f1506:
+- `[verb:prop-physics] E_PROP_HELD: <seat> picks up prop <id>; another player holds it grabbed`
+- `[verb:prop-physics] E_PROP_MOVING: <seat> picks up prop <id>; another seat streams it awake: a pickup takes a prop at rest, a grab takes it at once`
+
+The picker's own game after a refusal, HYPOTHESIS until a run reads it (x-prop-arbitration v14.3's leg 3d, its kept3d and
+inv3d claims): unchanged, and no restore is needed. dealWithRef blocks the engine's activation of every item copy the server
+sends (skymp5-client objectReferenceEx.ts:134-141: blockActivation(!lifted), lifted for ACTI and MSTT in a hosted cell alone);
+the block withholds the engine's default processing, the pickup itself, while the activate event still fires and carries the
+Activate to the server. The item reaches an inventory and the copy leaves a world only by the server's pickup, and a refused one
+sends neither. The answer word repeats the standing one at its epoch, which onOwner applies (an equal epoch replaces), so the
+picker's copy keeps following its owner's stream.
+
+Declared limits (rung 1):
+- After a successful pickup the prop's row stays in the props table, since the pickup changes no row: for a server-made 0xff
+  prop the row belongs to a deleted reference.
+- A game-file item whose create message has not reached the picker is not blocked (dealWithRef runs once the create message's
+  reference loads, remoteServer.ts:597-603), so a refused pickup there leaves the item in the picker's game.
+
 ## Rung
 
 Rung: R2 for the transform (the simulating seat's Havok, the server records), R0 for the claim (the server decides who simulates).
