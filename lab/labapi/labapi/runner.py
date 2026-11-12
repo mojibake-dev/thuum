@@ -2117,8 +2117,9 @@ class Runner:
         hypothesis ties to the hang (thuum-magnus, 2026-10-17), and each SKSE plugin writes its
         own log there (TMS_AIPathingFreezeFix.log is the freeze fix layer's evidence), so a new
         layer's log needs no edit here. skyrim-platform.log itself is <client>.log. Copied into
-        the lab directory first, as _fetch_client_file does, then read one by one; a failure is
-        a note, never a failed run."""
+        the lab directory by one Copy-Item over the listing, then read one by one whole; a failure
+        is a note, never a failed run. Not on _fetch_client_file's ranged read yet: these logs are
+        small, and one exec copies them all where a ranged fetch costs three agent calls a log."""
         if client in rec.skse_fetched:
             return
         rec.skse_fetched.add(client)
@@ -2162,9 +2163,9 @@ class Runner:
         """<client>.log is Skyrim Platform's log; <client>-driver.log is
         lab-driver's own (writeLogs), and <client>-console.log every line the
         game's console printed (lab-driver's tee), both found under the game
-        directory the client recorded at install. Both are copied first: the game holds its logs
-        open without read sharing, which the agent's file-read cannot get past,
-        and PowerShell's Copy-Item can."""
+        directory the client recorded at install. Each is copied first, by a read
+        that shares write access since the game holds its logs open for writing,
+        and read back in ranges (_fetch_client_file)."""
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
             rec.notes.append(f"{name}: {client} is unmanaged or unmapped; log not fetched")
@@ -2177,21 +2178,32 @@ class Runner:
         await self._skse_logs(rec, g, client)
 
     async def _fetch_client_file(self, rec: RunRecord, g: Guest, name: str, source: str) -> None:
-        """Copy the file at the PowerShell path expression `source` on the
-        client into the lab directory as `name`, read it back and store it as
-        an artifact; a failure is a note, never a failed run."""
+        """Copy the file at the PowerShell path expression `source` on the client into the lab directory as `name` and
+        keep it as an artifact, decoded as UTF-8 once. The copy is a read that shares write access, as the frida traces'
+        and log-count's are, since the game holds its logs open for writing and Copy-Item's read refused them (the c1.log
+        entry's console copy in 20261111-193821, 194559 and 195437); it prints the source's length at its open and the
+        copy's, three tries 10 s apart (_seat_copy). The copy then comes back through Proxmox's ranged file-reads
+        (_read_back: 512 KiB a call, the length check, the 64 MiB cap, the copy removed once read, one the agent holds
+        open the seat's fault): read whole, the console logs timed out the agent on both seats in 20261111-191642, and
+        playtest 45's c1 log reached 25k lines. A failure is a note naming its code and "(log fetch)", an E_PVE_* the
+        agent's or E_RUN_LOG_FETCH the runner's own (a copy that failed its tries, a short read, the cap), never a
+        failed run."""
+        copy = f"{self.s.client_lab_dir}\\{name}"
+        cmd = ["powershell", "-NoProfile", "-Command",
+               f"$ErrorActionPreference = 'Stop'; $src = {source}; $s = [IO.File]::Open($src, 'Open', 'Read', 'ReadWrite'); "
+               f"$n = $s.Length; $d = [IO.File]::Create('{copy}'); $s.CopyTo($d); $m = $d.Length; $d.Close(); $s.Close(); "
+               f"Write-Output ([string]$n + ' ' + [string]$m)"]
         try:
-            copy = f"{self.s.client_lab_dir}\\{name}"
-            cmd = ["powershell", "-NoProfile", "-Command", f"Copy-Item -LiteralPath {source} -Destination '{copy}' -Force"]
-            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
-            if res.exitcode != 0:
-                rec.notes.append(f"{name}: copy exited {res.exitcode}: {res.err.strip()[:200]}")
-                return
-            text = await asyncio.to_thread(self.control.file_read, g, copy)
-            (rec.dir / name).write_text(text)
-            rec.artifacts.append(name)
+            size = await self._seat_copy(g, cmd, copy)
+            data = await self._read_back(rec, g, copy, size, name)
         except ProxmoxError as e:
-            rec.notes.append(f"{name}: {e}")
+            rec.notes.append(f"{name}: {e} (log fetch)")
+            return
+        except ValueError as e:
+            rec.notes.append(f"{name}: E_RUN_LOG_FETCH: {e} (log fetch)")
+            return
+        (rec.dir / name).write_text(data.decode("utf-8", errors="replace"), encoding="utf-8")
+        rec.artifacts.append(name)
 
     async def _tried(self, g: Guest, cmd: list[str], answer, what: str) -> int:
         """`cmd` on the seat with three tries 10 s apart, as the game check and log-count's copy try theirs (a busy
@@ -2252,8 +2264,8 @@ class Runner:
         agent (qemu-server 9.2.10's file-read leaves a handle open when a read dies, Agent.pm at ec268ede5b lines
         539-555, and only the seat's restart closes it), so the seat rolls back, in this run's own reset when that is
         still to come (RunRecord.rollback), else at its next run (RunRecord.faulted, _seat_fault), this run's verdict
-        as it was. _fetch_client_file's copies and the screenshot reads (each .b64
-        sidecar read whole) are the fetches this is meant to serve next."""
+        as it was. The frida traces and the client logs (_fetch_client_file) come back through it; the screenshot
+        reads (each .b64 sidecar read whole) and _skse_logs are the fetches still read whole."""
         try:
             if size > FETCH_MAX_BYTES:
                 raise ValueError(f"its copy is {size} bytes, past the {FETCH_MAX_BYTES} ({FETCH_MAX_BYTES // (1024 * 1024)} MiB) a fetch reads")

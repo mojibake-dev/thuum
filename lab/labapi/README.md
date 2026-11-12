@@ -34,7 +34,12 @@ tries, 10 s apart, but one for an exec that ran to its deadline), and read back 
 the copy's length and decoded as UTF-8 once; a copy past 64 MiB is refused
 before its first read, and the copy is removed once read (one the agent
 holds open rolls the seat back: in the same run's reset when the fetch came
-before it, else at its next run). The verdict is green only
+before it, else at its next run). A client log (`<client>.log`, `-driver.log`,
+`-console.log`, `-before.log`, `-launch.log`, a relaunch's
+`-relaunch-<step>.log` and `-console.log`) comes back the same way, since the
+game holds its logs open for writing; one not fetched is a note ending
+"(log fetch)" with its code, E_PVE_* or E_RUN_LOG_FETCH, never a failure. The
+SKSE folders' logs are still copied by Copy-Item and read whole. The verdict is green only
 when every assertion held and no step timed out; red when an assertion
 failed, a step timed out, or the server refused a command; error when the
 lab itself failed (no snapshot, the server never became ready, a client

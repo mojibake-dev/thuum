@@ -757,6 +757,22 @@ run recreated it); lab-up and lab-down keep theirs under
 results/server-before/. After a quiet spell (BEFORE_LOGS_QUIET_S, 600 s) a
 run also keeps each client's Skyrim Platform log as <client>-before.log
 before rolling the clone back; inside a sweep nothing is fetched.
+Each client log (<client>.log, <client>-driver.log, <client>-console.log,
+<client>-before.log, <client>-launch.log, and a relaunch step's
+<client>-relaunch-<step>.log and -console.log) is fetched as a Frida trace
+is: copied by a read that shares write access, since the game holds its
+logs open for writing and Copy-Item's read refused the console log
+(20261111-193821, 194559, 195437), the copy exec printing the source's
+length at its open and the copy's (three tries, 10 s apart), then read back
+through the agent's own ranged file-read, 512 KiB a call, checked against
+the copy's length, decoded as UTF-8 once, refused past 64 MiB, and the copy
+removed once read (one the agent holds open rolls the seat back). Read
+whole, the console logs timed out the agent on both seats in
+20261111-191642. A log not fetched is a note naming its code and "(log
+fetch)", an E_PVE_* the agent's or E_RUN_LOG_FETCH the runner's own (a
+copy that failed its tries, a short read, the cap), never the run's
+failure: no verdict reads a log artifact. The SKSE folders' logs are still
+copied by one Copy-Item over their listing and read whole.
 A run in which a seat stopped answering (a step that timed out naming it: the
 load freeze of 2026-10-16, a game silent after PostLoadGame) also keeps that
 seat's skse64.log as <client>-skse64.log and a full dump of its game as
