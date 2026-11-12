@@ -46,6 +46,12 @@ assist() {  # assist <client> <action> <args json>: the step's answer as lab-api
   curl -sS -m 120 -X POST "$api/clients/$1/assist" -H 'content-type: application/json' -d "{\"action\":\"$2\",\"args\":$3}"
 }
 note() { echo "$(date +%H:%M:%S) $*" | tee -a "$tmp/summary.txt"; }
+enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
+# copy_ps <src expression> <copy>: a log the game holds open for writing, copied with read-write sharing as lab-api's runner
+# copies (runner.py's log-count and Frida copies): a plain Copy-Item shares no writes and is refused then ("being used by
+# another process", 193821, 194559, 195437). The old copy goes first and a failed open stops the script, so no stale or
+# empty copy is read as the log
+copy_ps() { printf '%s' "\$ErrorActionPreference = 'Stop'; Remove-Item -LiteralPath '$2' -Force -ErrorAction SilentlyContinue; \$s = [IO.File]::Open($1, 'Open', 'Read', 'ReadWrite'); \$d = [IO.File]::Create('$2'); \$s.CopyTo(\$d); \$d.Close(); \$s.Close()"; }
 gexec() {  # gexec <vmid> <powershell>: its output; read-only work on a clone through the guest agent
   local enc
   enc=$(printf '%s' "$2" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n')
@@ -202,23 +208,22 @@ ssh_srv "cat > $out/server.log" < "$tmp/server.log" && note "server.log: $(wc -l
 ended=$(date +%s)
 for pair in c1:711 c2:712; do
   c=${pair%%:*}; vmid=${pair#*:}
-  # copied first, as lab-api's runner does: the game holds its logs open without read sharing
+  # each copied first (copy_ps): the game holds its logs open for writing
   for spec in "$c.log|'$spl'" "$c-driver.log|(Join-Path (Get-Content -LiteralPath 'C:\\sky-lab\\game-dir.txt' -Raw).Trim() 'Data\\Platform\\Logs\\lab-driver-logs.txt')" "$c-sunshine.log|'C:\\Program Files\\Sunshine\\config\\sunshine.log'"; do
     name=${spec%%|*}; src=${spec#*|}
     copy="C:\\sky-lab\\playtest-$n-$name"
-    ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 60 -- powershell -NoProfile -Command \"Copy-Item -LiteralPath $src -Destination '$copy' -Force\"" > /dev/null 2>&1
+    ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$(copy_ps "$src" "$copy")")" > /dev/null 2>&1
     ssh -o BatchMode=yes "$jump" "pvesh get /nodes/core/qemu/$vmid/agent/file-read --file '$copy' --output-format json" 2>/dev/null \
       | python3 -c 'import json,sys; sys.stdout.write(json.load(sys.stdin).get("content",""))' > "$tmp/$name" 2>/dev/null
     ssh_srv "cat > $out/$name" < "$tmp/$name" && note "$name: $(wc -l < "$tmp/$name" | tr -d ' ') lines"
   done
   # the client's console, where skymp5-client's own lines are (an inventory apply, the hands' re-equip, a say's verdict,
-  # a trap's "fired here"): the game's lab-console-logs.txt for this launch, and the lab's console tee beside it, which only
-  # a lab run writes (playtest 48's tee held the layer smoke's minute and its game console was never fetched). Each its
-  # last 60,000 lines, so one file-read stays well under the guest agent's 16 MiB cap (playtest 44, 2026-11-03: the
-  # arrows' re-equip could not be read, the recorder kept no console). Earlier launches' consoles are kept at each
-  # relaunch (playtest-relaunch.sh, relaunch-logs/), listed below.
-  for spec in "$c-console.log|(Join-Path (Get-Content -LiteralPath 'C:\\sky-lab\\game-dir.txt' -Raw).Trim() 'Data\\Platform\\Logs\\lab-console-logs.txt')" \
-              "$c-console-tee.log|'C:\\sky-lab\\$c-console.log'"; do
+  # a trap's "fired here"): the game's lab-console-logs.txt for this launch, its last 60,000 lines, so one file-read stays
+  # well under the guest agent's 16 MiB cap (playtest 44, 2026-11-03: the arrows' re-equip could not be read, the recorder
+  # kept no console). C:\sky-lab\<c>-console.log is not fetched: no tee of the playtest but lab-api's copy of the last lab
+  # run's console, which its ranged fetch removes once read (thuum-fa's review, labapi-client-log-fetch, 2026-11-12).
+  # Earlier launches' consoles are kept at each relaunch (playtest-relaunch.sh, relaunch-logs/), listed below.
+  for spec in "$c-console.log|(Join-Path (Get-Content -LiteralPath 'C:\\sky-lab\\game-dir.txt' -Raw).Trim() 'Data\\Platform\\Logs\\lab-console-logs.txt')"; do
     name=${spec%%|*}; src=${spec#*|}; copy="C:\\sky-lab\\playtest-$n-$name"
     ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 60 -- powershell -NoProfile -Command \"Get-Content -LiteralPath $src -Tail 60000 | Set-Content -LiteralPath '$copy' -Encoding utf8\"" > /dev/null 2>&1
     ssh -o BatchMode=yes "$jump" "pvesh get /nodes/core/qemu/$vmid/agent/file-read --file '$copy' --output-format json" 2>/dev/null \
