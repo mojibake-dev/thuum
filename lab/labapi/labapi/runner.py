@@ -1282,7 +1282,9 @@ class Runner:
                 read = f"if (Test-Path '{src}') {{ {read} }} else {{ Write-Output 'missing {src}' }}"
             cmd = ["powershell", "-NoProfile", "-Command", read]
             try:
-                seat_n, seat_m = await self._seat_copy(g, cmd, copy)
+                # its tries 1 s apart as they were: eight committed untils poll seat counts in 25 s windows
+                # (b-lever-relay, x-lever-relay, x-lever-furn, x-lever-after-scene), which two 10 s pauses would spend
+                seat_n, seat_m = await self._seat_copy(g, cmd, copy, pause_s=1.0)
                 # read whole or not counted: a log read only in part keeps no count, since a count of part of it could
                 # pass an absence claim (b-race-permit's c1.log_count("E_RACE_PERMIT") == 0, the re-review of 486e80f3)
                 data = await self._read_back(rec, g, copy, seat_m, f"log-count: {client}'s {which}")
@@ -2246,18 +2248,19 @@ class Runner:
         (rec.dir / name).write_text(data.decode("utf-8", errors="replace"), encoding="utf-8")
         rec.artifacts.append(name)
 
-    async def _tried(self, g: Guest, cmd: list[str], answer, what: str) -> Any:
+    async def _tried(self, g: Guest, cmd: list[str], answer, what: str, pause_s: float = 10.0) -> Any:
         """`cmd` on the seat with three tries 10 s apart, as the game check and log-count's copy try theirs (a busy
         agent's "got timeout", a file refused for a moment): `answer` reads a finished exec, None for a try that
         failed, and the first good answer is the value; three failed tries are a ValueError naming the last, and an
         answer may raise one itself for a failure no try mends (SeatFileMissing, a source that is not there). An exec
         whose answer the agent lost (E_PVE_EXEC_LOST) has ended on the seat, so that ProxmoxError is the caller's at
         once. An exec that ran to its deadline (it "did not exit in" guest_task_timeout_s) is not tried again: three
-        such tries and their pauses held a trace's end for up to about 760 s (the re-review of 5b982dc6, nit 4)."""
+        such tries and their pauses held a trace's end for up to about 760 s (the re-review of 5b982dc6, nit 4). The
+        tries are `pause_s` apart, 10 s but for log-count's 1 s (an until polls seat counts in 25 s windows)."""
         why = ""
         for attempt in range(3):
             if attempt:
-                await asyncio.sleep(10 * self.s.time_scale)
+                await asyncio.sleep(pause_s * self.s.time_scale)
             try:
                 res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
             except ProxmoxError as e:
@@ -2271,9 +2274,9 @@ class Runner:
             if got is not None:
                 return got
             why = f"exit {res.exitcode}: {(res.err or res.out).strip()[:200]}"
-        raise ValueError(f"{what} failed three tries 10 s apart, the last {why}")
+        raise ValueError(f"{what} failed three tries {pause_s:g} s apart, the last {why}")
 
-    async def _seat_copy(self, g: Guest, cmd: list[str], copy: str) -> tuple[int | None, int]:
+    async def _seat_copy(self, g: Guest, cmd: list[str], copy: str, pause_s: float = 10.0) -> tuple[int | None, int]:
         """A copy `cmd` makes on the seat, whose last stdout line is "<the source's bytes at its open> <the copy's
         bytes>" as log-count's copy prints them, and those two lengths from that line, three tries 10 s apart (_tried).
         A copy whose exec answer the agent lost (E_PVE_EXEC_LOST) ran to its end on the seat, so its length then comes
@@ -2296,10 +2299,10 @@ class Runner:
             return (None, int(last)) if res.exitcode == 0 and last.isdigit() else None
 
         try:
-            return await self._tried(g, cmd, copied, "its copy")
+            return await self._tried(g, cmd, copied, "its copy", pause_s)
         except ProxmoxError as e:  # E_PVE_EXEC_LOST, the one error _tried passes on
             cmd = ["powershell", "-NoProfile", "-Command", f"$ErrorActionPreference = 'Stop'; (Get-Item -LiteralPath '{copy}').Length"]
-            return await self._tried(g, cmd, length, f"its copy's length, the copy's own answer lost ({str(e)[:120]}),")
+            return await self._tried(g, cmd, length, f"its copy's length, the copy's own answer lost ({str(e)[:120]}),", pause_s)
 
     async def _read_back(self, rec: RunRecord, g: Guest, path: str, size: int, what: str) -> bytes:
         """The `size` bytes of the file at `path` on the seat, a file the runner made there to read (a shared-read copy

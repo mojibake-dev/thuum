@@ -3698,6 +3698,33 @@ class LogCount(RunTests):
         self.assertFalse([p for p in pve.files if "logcount-" in p], "the copies leave the seat once read")
         self.assertEqual(rec.notes, [])
 
+    def test_a_log_count_copy_is_tried_again_1_s_apart(self):
+        """Eight committed untils poll seat counts in 25 s windows (b-lever-relay's two, x-lever-relay, x-lever-furn,
+        x-lever-after-scene), and two 10 s pauses would spend about 20 s of one poll: log-count's copy is tried again
+        1 s apart as it was, where the other fetches' tries are 10 s apart (the re-review of 486e80f3)."""
+        import asyncio
+        import dataclasses
+        import types
+        from unittest import mock
+
+        from labapi import runner as runner_mod
+        from labapi.runner import RunRecord
+        from labapi.scenario import Scenario
+
+        self._seat()  # no Skyrim Platform log on the seat: its copy fails each try
+        slept = []
+
+        async def sleep(seconds):
+            slept.append(seconds)
+
+        self.services.runner.s = dataclasses.replace(self.settings, time_scale=1.0)
+        rec = RunRecord("x", Scenario(id="x", clients=["c1"]), self.tmp, "now")
+        with mock.patch.object(runner_mod, "asyncio", types.SimpleNamespace(to_thread=asyncio.to_thread, sleep=sleep)):
+            ok, note = asyncio.run(self.services.runner._log_count(rec, 3, "c1", "moved"))
+        self.assertEqual(slept, [1.0, 1.0])
+        self.assertIn("its copy failed three tries 1 s apart", note)
+        self.assertIn("no count kept", note)
+
     def test_a_log_count_copy_held_open_faults_the_seat(self):
         """A copy the agent holds after its read is a handle only the seat's restart closes, log-count's as a run log's:
         a note and the seat's fault, so its next run rolls it back; the count stands, its read having come back whole."""
