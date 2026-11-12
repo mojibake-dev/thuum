@@ -2187,6 +2187,42 @@ class FridaSteps(RunTests):
         self.assertFalse([n for n in body["notes"] if "held open in its agent" in n], body["notes"])
         self.assertEqual(self.services.runner.seats["c1"].force, "")
 
+    def test_a_removal_unconfirmed_after_a_failed_read_takes_the_copy_as_held(self):
+        """A read that died is what leaves a handle open (qemu-server 9.2.10 closes none whose read died), so after one a
+        removal that does not confirm the copy gone counts as one that found it held: the seat is faulted, its next run
+        rolls it back (the fresh review of e8d8de9b, nit 3)."""
+        from unittest import mock
+
+        from labapi import proxmox
+        from labapi.proxmox import ProxmoxError
+
+        pve = self._traced_seat('{"impulse": 1}\n')
+        plain_range, plain_exec = pve.file_read_range, pve.exec
+
+        def file_read_range(guest, path, offset, count):
+            if path.endswith(".js.log.copy"):
+                pve.calls.append(("file_read_range", guest.vmid, path, offset, count))
+                raise ProxmoxError(f"E_PVE_FILE: {guest.name}: ResourceException: 500 Internal Server Error: VM {guest.vmid} "
+                                   "qga command 'guest-file-read' failed - got timeout")
+            return plain_range(guest, path, offset, count)
+
+        def exec_(guest, command, timeout):
+            if re.search(r"Remove-Item -LiteralPath '[^']+\.js\.log\.copy' -Force", " ".join(command)):
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                raise ProxmoxError(f"E_PVE_EXEC: pid 7 on {guest.name} did not exit in 120.0s")
+            return plain_exec(guest, command, timeout)
+
+        pve.file_read_range, pve.exec = file_read_range, exec_
+        with mock.patch.object(proxmox, "FILE_READ_PAUSES", (0.0, 0.0)):
+            run_id, body = self._run(FRIDA_ONE)
+        self.assertEqual(body["verdict"], "error", body)  # the trace not fetched whole, the run's own fault
+        copy = f"C:\\sky-lab\\frida\\x-trace-{run_id}-1.js.log.copy"
+        held = f"frida x-trace-{run_id}-1.js.log: {copy} held open in its agent after its read"
+        self.assertIn(f"{held} (taken as held, its read having failed: {copy} on fake-c1 not removed: E_PVE_EXEC: pid 7 on "
+                      "fake-c1 did not exit in 120.0s)", body["notes"])
+        self.assertTrue(self.services.runner.seats["c1"].force.startswith(f"its last run ({run_id}) ended in a fault: {held}"),
+                        self.services.runner.seats["c1"].force)
+
     def test_an_exception_out_of_the_artifacts_is_an_internal_failure(self):
         """An exception that escapes the artifacts phase is a bug in lab-api, and what it skipped may be the run's own
         traces (here the trace artifact raised, ahead of their fetch): the internal failure's shape, and a run that

@@ -2295,8 +2295,11 @@ class Runner:
         agent (qemu-server 9.2.10's file-read leaves a handle open when a read dies, Agent.pm at ec268ede5b lines
         539-555, and only the seat's restart closes it), so the seat rolls back, in this run's own reset when that is
         still to come (RunRecord.rollback), else at its next run (RunRecord.faulted, _seat_fault), this run's verdict
-        as it was. The frida traces and the client logs (_fetch_client_file) come back through it; the screenshot
-        reads (each .b64 sidecar read whole) and _skse_logs are the fetches still read whole."""
+        as it was. After a read that raised, a removal that does not confirm the copy gone counts as one that found it
+        held (the fresh review of e8d8de9b, nit 3): the read that died is what leaves a handle open. The frida traces
+        and the client logs (_fetch_client_file) come back through it; the screenshot reads (each .b64 sidecar read
+        whole) and _skse_logs are the fetches still read whole."""
+        came_back = False
         try:
             if size > FETCH_MAX_BYTES:
                 raise ValueError(f"its copy is {size} bytes, past the {FETCH_MAX_BYTES} ({FETCH_MAX_BYTES // (1024 * 1024)} MiB) a fetch reads")
@@ -2313,31 +2316,36 @@ class Runner:
                 if len(got) != want:
                     raise ValueError(f"{len(data)} bytes read of its {size}: range {k + 1} of {ranges}, at {at}, came back "
                                      f"{len(got)} of its {want}")
+            came_back = True
             return bytes(data)
         finally:
             cmd = ["powershell", "-NoProfile", "-Command",
                    f"Remove-Item -LiteralPath '{path}' -Force -ErrorAction SilentlyContinue; Test-Path -LiteralPath '{path}'"]
+            said, unconfirmed = "", ""
             try:
                 res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
                 said = _last_line(res.out)
                 if res.exitcode != 0 or said not in ("True", "False"):
-                    rec.notes.append(f"{what}: the removal of {path} on {g.name} answered exit {res.exitcode}: "
-                                     f"{(res.err or res.out).strip()[:200]}")
-                elif said == "True":
-                    held = f"{what}: {path} held open in its agent after its read"
-                    rec.notes.append(held)
-                    # a seat the run plays and has not reset yet (a .before-run fetch, ahead of the resets) rolls back in
-                    # this run's own reset (_rollback_reason reads rec.rollback); one the run already reset rolls back at
-                    # its next run through the fault; one outside the run (a hand trace the end fetched there) through
-                    # its remembered state, as anything that touched it does
-                    if g.client in rec.scenario.clients and g.client not in rec.reset_started:
-                        rec.rollback.setdefault(g.client, held)
-                    elif g.client in rec.scenario.clients:
-                        rec.faulted.setdefault(g.client, held)
-                    elif g.client:
-                        self.forget_seats(held, [g.client])
+                    unconfirmed = f"the removal of {path} on {g.name} answered exit {res.exitcode}: {(res.err or res.out).strip()[:200]}"
             except ProxmoxError as e:
-                rec.notes.append(f"{what}: {path} on {g.name} not removed: {e}")
+                unconfirmed = f"{path} on {g.name} not removed: {e}"
+            if said == "True" or (unconfirmed and not came_back):
+                held = f"{what}: {path} held open in its agent after its read"
+                if said != "True":
+                    held += f" (taken as held, its read having failed: {unconfirmed})"
+                rec.notes.append(held)
+                # a seat the run plays and has not reset yet (a .before-run fetch, ahead of the resets) rolls back in
+                # this run's own reset (_rollback_reason reads rec.rollback); one the run already reset rolls back at
+                # its next run through the fault; one outside the run (a hand trace the end fetched there) through
+                # its remembered state, as anything that touched it does
+                if g.client in rec.scenario.clients and g.client not in rec.reset_started:
+                    rec.rollback.setdefault(g.client, held)
+                elif g.client in rec.scenario.clients:
+                    rec.faulted.setdefault(g.client, held)
+                elif g.client:
+                    self.forget_seats(held, [g.client])
+            elif unconfirmed:
+                rec.notes.append(f"{what}: {unconfirmed}")
 
     async def _frida_trace(self, rec: RunRecord, client: str, script: str, suffix: str = "") -> list[str]:
         """A trace from its seat as frida/<client>-<script><suffix>.jsonl, the injector's .out and then the script's
