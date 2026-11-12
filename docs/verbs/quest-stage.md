@@ -191,7 +191,9 @@ it names a connected player; wordStages are the server's read of the record. Scr
 - T2: difftest/sessions/quest-stage.yaml (c1's stage 10 of FreeformRiverwood01 recorded and relayed to c2, the same
   again a no-op, MQ102's refused as unlisted) and the login list in divergences.yaml.
 - T3 scenario id: lab/scenarios/b-quest-stage.yaml (after lab-api's quest-stage read: `c.quest(id).stage()` and
-  `.stageDone(n)`), b-quest-stage-restart.yaml.
+  `.stageDone(n)`), b-quest-stage-restart.yaml, and b-leveled-reward.yaml (train 52's Fix 1, D-R1 C's leveled gap: a quest
+  script's AddItem of a leveled list on the seat's own player lands on the record and nothing takes it back; x-leveled-reward v1
+  b87e591e green 20261112-044101 on train 52's stage, promoted unchanged at main 3e2ad0cd).
 - Assertions that would fail if the verb silently regressed: c2's GetStage of the listed quest equals c1's within the
   relay's lag after c1's setstage; the server log holds the record line and no refusal; after the restart and a login,
   GetStage on a fresh seat equals the record.
