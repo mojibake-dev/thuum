@@ -237,6 +237,10 @@ class RunRecord:
     # the seats whose guest agent a log fetch found not running, each with that error and whether the skip of its other
     # log fetches is noted yet: they are skipped until the seat's reset (_fetch_client_file, _skse_logs, _reset_seat)
     agents_down: dict[str, tuple[str, bool]] = field(default_factory=dict)
+    # the log-count counts taken at each step index, so each count's copies carry their own number
+    # (logcount-<index>-<n>.log.copy, _log_count): a copy still held after its removal's last try spoils that one count,
+    # where one name a step made every later poll of its until fail its Create (the review of b1f2ffd4, nit 2)
+    log_counts: dict[int, int] = field(default_factory=dict)
 
     def progress(self) -> dict[str, Any]:
         if self.verdict != "running":
@@ -1283,9 +1287,12 @@ class Runner:
             return True, f"log-count: {client}'s game folder unread: {e}"
         texts: list[str] = []
         byte_notes: list[str] = []
+        # each count's copies named by its step and its number there (RunRecord.log_counts): an until polls the same step
+        # index, and a copy held open spoils its own count alone
+        n = rec.log_counts[index] = rec.log_counts.get(index, 0) + 1
         for src, suffix in ((self.s.client_driver_log, ""), (f"{game_dir}\\{self.s.client_console_log}", "-console")):
             which = "console log" if suffix else "Skyrim Platform log"
-            copy = f"{self.s.client_lab_dir}\\logcount-{index:03d}{suffix}.log.copy"
+            copy = f"{self.s.client_lab_dir}\\logcount-{index:03d}-{n}{suffix}.log.copy"
             # the source's length at the open and the copy's after it, printed for the note (single quotes only: the
             # guest agent's argument passing strips double quotes)
             read = (f"$s = [IO.File]::Open('{src}', 'Open', 'Read', 'ReadWrite'); $n = $s.Length; "
@@ -2771,8 +2778,8 @@ def _client_relaunch_ps(lab_dir: str, driver_log: str, presets: list[str], stop:
     - frida\\: each run's script and its .out, .err and .log, and, as far as they go, the runner's shared-read .copy
       of the last two (config.frida_exec_template, frida_script_text, Runner._frida_trace, Runner._read_back);
       frida-inject.exe and the tools beside it stay;
-    - the lab folder's logcount-*.log.copy, as far as they go, log-count's shared-read copies (Runner._log_count),
-      by that pattern alone;
+    - the lab folder's logcount-*.log.copy, as far as they go, log-count's shared-read copies (Runner._log_count,
+      logcount-<index>-<n>.log.copy and its -console twin, and the older logcount-<index> ones), by that pattern alone;
     - shots\\ (a screenshot step's copy and its base64 sidecar, a burst's frame folder), screenshots\\
       (screenshot.ps1's captures and latest.png), burst\\ and input\\ (their tasks' request and done files);
     - every recorded game folder's RaceMenu presets: skymp5-client's thuum-*.jslot (raceMenuService.ts) and

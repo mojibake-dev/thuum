@@ -3392,7 +3392,7 @@ class CellHostSteps(RunTests):
         self.assertEqual(self.services.board.log_count("c1", "moved"), 3, note)
         self.assertIn("1 in its Skyrim Platform log, 2 in its console log", note)
         copies = [" ".join(c[2]) for c in pve.calls if c[0] == "exec" and c[1] == 901]
-        self.assertTrue(any("lab-console-logs.txt" in c and "logcount-003-console.log" in c for c in copies), copies)
+        self.assertTrue(any("lab-console-logs.txt" in c and "logcount-003-1-console.log" in c for c in copies), copies)
 
     def test_a_snapshot_keeps_a_seats_count_as_the_board_holds_it(self):
         """a seat's fact as a baseline: the log-count step sets the board's count, and the snapshot keeps that read"""
@@ -3433,7 +3433,7 @@ class CellHostSteps(RunTests):
 
         def exec_(guest, command, timeout):
             res = real_exec(guest, command, timeout)
-            if any("logcount-003-console.log.copy" in a and "Write-Output" in a for a in command):
+            if any("logcount-003-1-console.log.copy" in a and "Write-Output" in a for a in command):
                 return ExecResult(0, "40 40\r\n", "")
             return res
 
@@ -4016,6 +4016,56 @@ class LogCount(RunTests):
         self.assertEqual(copies["n"], 3, "one copy of the log a poll, though two expressions name the pattern")
         self.assertEqual(self.services.board.log_count("c1", "scene [0-9a-f]+ started"), 1)  # kept as a step's count is
 
+    def test_a_copy_held_for_good_spoils_one_poll_of_its_until(self):
+        """Every poll of an until counts at the same step index, and its copies shared one name a step, so a copy still
+        there after its removal's last try made every later poll's Create of that name fail and the until could never
+        hold. Each count's copies now carry their own number (logcount-<index>-<n>), so a copy held for good spoils its
+        own poll alone: the seat's fault, and the until still holds on a later poll (the review of b1f2ffd4, nit 2). The
+        relaunch's soft cleaning (logcount-*.log.copy) takes the new names."""
+        import fnmatch
+
+        from labapi.proxmox import ExecResult
+
+        pve = self._seat()
+        log = self.settings.client_driver_log
+        pve.files[log] = "nothing yet\n"
+        plain_exec = pve.exec
+        held, made = set(), []
+
+        def exec_(guest, command, timeout):
+            joined = " ".join(command)
+            create = re.search(r"\[IO\.File\]::Create\('([^']+\\logcount-[^']+)'\)", joined)
+            if create and create.group(1) in held:  # a file held open refuses a Create on the seat
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                return ExecResult(1, "", "The process cannot access the file because it is being used by another process.")
+            if create and "-console" not in create.group(1):
+                made.append(create.group(1))
+            removal = re.search(r"Remove-Item -LiteralPath '([^']+)' -Force", joined)
+            if removal and made and removal.group(1) == made[0]:  # the first poll's copy, held for good
+                held.add(made[0])
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                return ExecResult(0, "True\r\n", "")
+            return plain_exec(guest, command, timeout)
+
+        pve.exec = exec_
+
+        def land(n):
+            if n == 2:  # the line lands after the second poll's copy
+                pve.files[log] += "scene 7e3b1 started on 13483\n"
+
+        self._counting(pve, land)
+        run_id, body = self._run(UNTIL_LOGCOUNT)
+        self.assertEqual(body["verdict"], "green", body)
+        until = next(s for s in body["steps"] if s.get("kind") == "until")
+        self.assertIn("held after", until["note"], until)
+        self.assertIn("3 poll(s)", until["note"], until)
+        index = until["index"]
+        self.assertEqual(made, [f"C:\\sky-lab\\logcount-{index:03d}-{n}.log.copy" for n in (1, 2, 3)])
+        self.assertIn(f"log-count: c1's Skyrim Platform log: {made[0]} held open in its agent after its read", body["notes"])
+        self.assertTrue(self.services.runner.seats["c1"].force.startswith(f"its last run ({run_id}) ended in a fault: "))
+        for name in (f"logcount-{index:03d}-3.log.copy", f"logcount-{index:03d}-3-console.log.copy", "logcount-052-console.log.copy"):
+            self.assertTrue(fnmatch.fnmatch(name, "logcount-*.log.copy"), name)
+
     def test_an_assert_reads_its_log_count_step_and_counts_nothing(self):
         """an assert keeps the seat's last log-count step: a line that lands after the step is not counted, and the
         assert copies no log (LOGCOUNT claims the step's 2)."""
@@ -4053,7 +4103,7 @@ class LogCount(RunTests):
         n = len(platform.encode("utf-8"))
         self.assertIn(f"1 in its Skyrim Platform log, 1 in its console log; bytes {n} read of {n} copied of {n} on the seat, "
                       "9 read of 9 copied of 9 on the seat", note)
-        self.assertEqual([c[3:] for c in pve.calls if c[:3] == ("file_read_range", 901, "C:\\sky-lab\\logcount-003.log.copy")],
+        self.assertEqual([c[3:] for c in pve.calls if c[:3] == ("file_read_range", 901, "C:\\sky-lab\\logcount-003-1.log.copy")],
                          [(0, R), (R, n - R)])
         self.assertFalse([p for p in pve.files if "logcount-" in p], "the copies leave the seat once read")
         self.assertEqual(rec.notes, [])
@@ -4147,7 +4197,7 @@ class LogCount(RunTests):
         plain_exec = pve.exec
 
         def exec_(guest, command, timeout):
-            if "Remove-Item -LiteralPath 'C:\\sky-lab\\logcount-001.log.copy' -Force" in " ".join(command):
+            if "Remove-Item -LiteralPath 'C:\\sky-lab\\logcount-001-1.log.copy' -Force" in " ".join(command):
                 pve.calls.append(("exec", guest.vmid, tuple(command)))
                 return ExecResult(0, "True\r\n", "")  # still there: the agent holds it
             return plain_exec(guest, command, timeout)
@@ -4155,7 +4205,7 @@ class LogCount(RunTests):
         pve.exec = exec_
         run_id, body = self._run(LOGCOUNT)
         self.assertEqual(body["verdict"], "green", body)
-        held = "log-count: c1's Skyrim Platform log: C:\\sky-lab\\logcount-001.log.copy held open in its agent after its read"
+        held = "log-count: c1's Skyrim Platform log: C:\\sky-lab\\logcount-001-1.log.copy held open in its agent after its read"
         self.assertIn(held, body["notes"])
         self.assertEqual(self.services.runner.seats["c1"].force, f"its last run ({run_id}) ended in a fault: {held}")
 
@@ -4172,7 +4222,7 @@ class LogCount(RunTests):
         held_once = {"left": 1}
 
         def exec_(guest, command, timeout):
-            if "Remove-Item -LiteralPath 'C:\\sky-lab\\logcount-001.log.copy' -Force" in " ".join(command) and held_once["left"]:
+            if "Remove-Item -LiteralPath 'C:\\sky-lab\\logcount-001-1.log.copy' -Force" in " ".join(command) and held_once["left"]:
                 held_once["left"] -= 1
                 pve.calls.append(("exec", guest.vmid, tuple(command)))
                 return ExecResult(0, "True\r\n", "")  # a moment's hold; the next try removes it
@@ -4189,9 +4239,9 @@ class LogCount(RunTests):
         self.services.runner._removed = spy
         run_id, body = self._run(LOGCOUNT)
         self.assertEqual(body["verdict"], "green", body)  # LOGCOUNT's claim reads the step's count, kept
-        self.assertIn("C:\\sky-lab\\logcount-001.log.copy", removed)
+        self.assertIn("C:\\sky-lab\\logcount-001-1.log.copy", removed)
         self.assertEqual([n for n in body["notes"] if "logcount-" in n],
-                         ["log-count: c1's Skyrim Platform log: C:\\sky-lab\\logcount-001.log.copy still there at its "
+                         ["log-count: c1's Skyrim Platform log: C:\\sky-lab\\logcount-001-1.log.copy still there at its "
                           "removal's try 1 of 4, tried again in 1 s"])
         self.assertEqual(self.services.runner.seats["c1"].force, "")
         self.assertFalse([p for p in pve.files if "logcount-" in p], "the copy gone at its second try")
@@ -4209,7 +4259,7 @@ class LogCount(RunTests):
         pve = self._seat()
         pve.files[self.settings.client_driver_log] = "E_RACE_PERMIT refused\n"
         pve.files[self._console(pve)] = "console\n"
-        copy = "C:\\sky-lab\\logcount-007.log.copy"
+        copy = "C:\\sky-lab\\logcount-007-1.log.copy"
         plain_exec = pve.exec
 
         def exec_(guest, command, timeout):
@@ -4234,7 +4284,7 @@ class LogCount(RunTests):
         there: read as the tee's absence (SeatFileMissing), it counted the log as empty, and c1.log_count("E_RACE_PERMIT")
         == 0 passed on a log that holds the line (the check of 508697c3)."""
         note = self._its_copy_answer_lost(None)
-        self.assertIn("its copy C:\\sky-lab\\logcount-007.log.copy is not there, the copy's own answer lost (E_PVE_EXEC_LOST", note)
+        self.assertIn("its copy C:\\sky-lab\\logcount-007-1.log.copy is not there, the copy's own answer lost (E_PVE_EXEC_LOST", note)
 
     def test_a_lost_copy_answer_that_left_an_empty_copy_keeps_no_count(self):
         """log-count's copy runs without Stop, so a source open that failed still creates an empty copy, whose length

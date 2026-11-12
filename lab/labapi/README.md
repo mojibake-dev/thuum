@@ -98,7 +98,9 @@ than its `every`. A known cost: every pattern copies the seat's two logs
 anew, where one copy a seat a poll could serve all its patterns; that saving
 is left for later. The copies come back as the
 run's logs do, in ranges, each removed once read (a copy, a ranged read and a
-removal a log), and one the agent holds open is the seat's fault; a range
+removal a log), and one the agent holds open is the seat's fault; each count's
+copies carry their step and their number there (logcount-<index>-<n>), so one
+held open spoils its own poll alone, not the rest of its until; a range
 that comes back short keeps no count, as does a copy whose exec answer the
 agent lost, since only that exec's own lengths prove a copy whole. An `assert:` counts no
 seat's log itself: it reads the last count taken, a `log-count` step's or an
