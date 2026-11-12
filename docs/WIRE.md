@@ -1375,3 +1375,15 @@ strips it with the launch (E_SPELL_ORIGIN). Each observer's game hands it to the
 player's; the relayed runes pass no registration). wire-legacy LEGACY_ABSENT ("SpellCastData", "decal"); fixture 23-SpellCast-1
 carries one. The C++ struct SpellCastDecal (SpellCastMessage.h), the client's SpellCastDecal (spellCastMessage.ts),
 castSpellImmediate's five trailing arguments (hasDecal, the normal, the material id).
+
+### MagicEffects (t 43): `remaining` is -1 for a state with no clock (magic-effects; ADR-060 as amended, the reanimate's look)
+
+Since fork m4-reanimate-claim-2 89bcbe43 (2026-11-12; the platform half's fresh review of 3a31c05a, F5): an effect's `remaining`
+is -1 when its state has no clock, a thrall's Reanimate state (wire-rules magic::EffectKind::Reanimate, timed or full), whose
+end is its actor's death alone, the commander's engine its timer. Before, its record's seconds left read 0 past them, and the
+client shows a 0 for 1.5 s: a flash on a dual-cast thrall, or on a game that loads one after its 60 s. The client reads any
+negative as -1, no end: the hit shader and the hit art play until the server's set no longer holds the effect (the death's
+emptied set). No schema change: the field stays an f32, and validate_server's MagicEffects rule already takes any finite number
+(E_VAL_NONFINITE alone; fixture 43-MagicEffects-0 carries negatives), so the validator is unchanged. wire-schema's doc comment on
+MagicEffect::remaining, MagicEffectsMessage.h and the client's magicEffectsMessage.ts say what -1 means; MpActor's MagicEffectsOf
+sends it, magicEffectsService.ts's secondsOf reads it.
