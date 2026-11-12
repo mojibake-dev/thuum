@@ -1,6 +1,11 @@
 # prop-physics
 
-Status: MERGED to fork parity 4f746162 (04:03Z 2026-11-01, numidium: the gate 20261101-031523-merge-m3-prop-physics 11 of 11,
+Status: physics rungs 1 to 3 BUILT on fork branches, none staged green and none merged (2026-11-12; ADR-071's ladder, and
+playtest 51 waits for them): rung 1 "props hold" on m4-physics-1-arbitration d9da7da3, rung 2 "sample v2" on
+m4-physics-2-sample cc5c44f3 (rung 1's head merged in), rungs 3a and 3 "the impact" on m4-physics-3-impact 92b032cd (rung 2's
+head merged in), its platform and client review's fixes at 042f6907. The rung sections under Ownership and the Rung, Message
+contract, Server and Client sections describe those heads; fork canon keeps slice one's rule with its timers. Slice one: MERGED
+to fork parity 4f746162 (04:03Z 2026-11-01, numidium: the gate 20261101-031523-merge-m3-prop-physics 11 of 11,
 b-prop-push green at its first run 032302, T2 green with the prop-physics session identical at 18 declared divergences, both clones
 promoted; slice one whole: the drop at the drop point, D73's rest, D75's persistence, the walk's nudge on both seats and across a
 restart). Earlier: DRAFT (the weekend pass, thuum-magnus; ADR-058). Slice one's server half BUILT 14:54 PDT 2026-10-29 on fork m3-prop-physics
@@ -19,14 +24,23 @@ one screen alone (skymp5-client/src/extensions/objectReferenceEx.ts, view/spawnP
 
 ## Ownership (ADR-063: ownership, not permission; written 18:52 PST 2026-11-02, before any code moves again)
 
-Owner: the cell's host by default; whoever touches a prop owns it while it moves; a grabber owns it until its release. Ownership
-passes by the server's PropOwner word alone: a grant at a claim the rule admits, the return to the host at the owner's own asleep
-sample, the departure's return. No seat infers ownership from a timer, a silence or who it can see.
-Channel: PropTransform (the owner's samples, the asleep one reliable) and PropOwner (the server's word, player 0 the host default);
-the claim PropClaim with its touch kind. No new message.
-Content-specific code: none. The movable-static list (prop-statics) names what is a prop, not who may touch it.
+Owner: the cell's host by default, for a resting or stalled body; the engine that set a prop moving (its capsule, its hand, its
+drop, an impulse whose cause it owns) while it moves; a grabber until its release, its rest, its departure or its unload.
+Ownership passes by the server's PropOwner word alone: a grant at a claim the rule admits, the return to the host at the owner's
+own asleep sample, the host's wake by id, the departure's and the unload's returns. No seat infers ownership from a timer, a
+silence or who it can see, and since rung 1 the server runs no timer on it either.
+Channel: PropTransform (the owner's samples, the asleep one reliable; v2 since rung 2, under the owner's epoch with a sequence, its
+clock and both velocities, and the server's record answer at seq 0) and PropOwner (the server's word, player 0 the host default
+since rung 1); the claim PropClaim with its touch kind (v2: one to sixteen references). No new message: v2 is a change of shape
+(SCHEMA_VERSION 46), and the platform's propContact and (rung 3) propImpulse events are a seat's own.
+Content-specific code: none. The movable-static list (propStatics) named what is a prop, not who may touch it; no code on canon
+ever read it (f07ba07e's reader never merged), it leaves the deploy with rung 1's merge, and ADR-071 decision 1 derives a static's
+class from its model at rung 4 (D-PH9).
 Two seats: b-prop-arbitration (from x-prop-arbitration by path), the touches from both seats, a carry handed over, a blast beside a
-prop the other seat streams.
+prop the other seat streams; for rung 1 also x-prop-edge (playtest 44's cell edge), for rung 2 b-prop-follow (from x-prop-follow:
+the follower's screen through a roll, a loss leg and a take-over) and for rung 3 b-prop-impulse (the Riverwood Trader cart's
+cabbages under Hailstone, Fireball and Unrelenting Force from down the road, each claim on the other seat's screen and the
+record); none promoted yet.
 
 ### The arbitration rule (18:52 PST 2026-11-02; ADR-063 decision 4's row for props, after playtest 41's close)
 
@@ -148,7 +162,119 @@ declared, the probe's v2 (the return line's real pattern, server baselines, move
 either-or under E20). Open: PROP_MOVING_MS UNMEASURED; the stalled stream (A7) in no probe; E10, E31, E14 and E15 of
 docs/engine/havok-props.md unread; the scenario b-prop-arbitration after the probe's read.
 
-### A pickup is a take (ADR-071 rung 1, D1 A; 02:34 PST 2026-11-12, fork m4-physics-1-arbitration a539bded, 7f4f1506, 1aa78a86)
+### Rung 1: A1 to A7 as built, with no timers (ADR-071 rung 1 "props hold"; fork m4-physics-1-arbitration d9da7da3, 2026-11-12)
+
+The rule above, rebuilt by hand on train 52's c3f9d175 (its step allowance kept) from m4-prop-arbitration 147a6cfe, with Eli's
+answers of 2026-11-11 (ADR-071's amendment: D-PH1 A, D-PH2 A, D-PH3 A, D-PH4 B and W3) and the fresh reviews' fixes
+(lab/.cache/drafts/physics/rung1-plan.md d3398741; for its probes review-v14-edge.md ca57d58a and review-v14.2-edge1.2.md
+4c8ddb5c): fork d463d367 the rule, 8d6f92f1 the wire, 715e0b8b the server, 95363b6c the T2 session, b7151a42 the client, then
+7d9741e1, 1458d977, 1496634e, a872cf12, 46a7bfa4 and f38f5249, and the pickup below (a539bded, 7f4f1506). Where the build departs
+from the text of 2026-11-02:
+
+- No timer at all (D-PH3 A, "Drop it, read the grab"). PROP_LEASE_MS, PROP_SILENCE_MS and the grab's cap (PROP_GRAB_MAX_MS,
+  E_PROP_GRAB_CAP and the tick that worded it) are not built, so a row is live while it is held or awake and for no other reason
+  (PropRow::live), and who owns a prop is a function of the words alone (A1). A hold ends by the holder's release, its rest, its
+  departure or its unload. The client reads its engine's grab once an update (Game.getPlayerGrabbedRef, readHolds), claims touch 1
+  only while the engine names the body, so a grab the engine refuses in its own frame claims nothing (docs/engine/havok-props.md
+  E43), and claims touch 2 when the hold ends; grabRelease is no longer read. HYPOTHESIS (the class comment): the native names the
+  body for exactly as long as the engine's grab holds it (E40 and E41 read the grab's ends, never this native).
+- The moving window (A3): PROP_MOVING_MS on the server and STREAM_LIVE_MS on the client, both 1,600 ms and kept equal, about three
+  heartbeat intervals and a frame, so one or two lost unreliable beats never read a live stream stalled (1458d977: one lost beat
+  left a gap of 1,000 to 1,066 ms, past the 2026-11-02 text's 1,000). UNMEASURED both (E10 sizes them). A judgment of a claim,
+  never a return; the cost is a stalled stream taking 1.6 s, not 1, to be the next touch's.
+- The heartbeat (D-PH4 B, ADR-071 decision 6's 500 ms, on v1 samples): every awake body a seat streams sends a sample at least
+  every STREAM_HEARTBEAT_MS 500, moved or not, a held one included, and a held body never sends the asleep sample (A6), so the
+  server never reads a live stream stalled and no follower rests its copy mid-stream (E42 read a still held body asleep under the
+  stir test; E44 a still hold at its rest pose at speed 0). A hand that takes a resting body this seat simulates opens the stream
+  at once ("stream <id> started: held").
+- A new grab ends the claimant's hold of any other prop, whatever the new prop's own verdict (f38f5249, over 46a7bfa4's
+  E_PROP_HELD_TWO refusal): the engine holds one grabbed object per player (CommonLibSSE-NG P/PlayerCharacter.h:697), so the claim
+  itself says the old hold is over, whether or not the server heard it end (a release inside the grab claim's round trip, the
+  engine's own drop, E41). The grab mark alone goes: the old row stays the player's awake row, streamed, or past PROP_MOVING_MS
+  stalled and anyone's. No seat holds two props at once (the proptest a_player_never_holds_two_props).
+- The listener check, E_PROP_UNSEEN, replaces E_PROP_CELL and E_PROP_REACH (ADR-071 decision 2; 715e0b8b): a claimant must be a
+  listener of the prop (IsPropListener: the server sent its game the prop's create word and has not told it the prop is gone, the
+  subscription the 3x3 grid squares of 4,096 units around the reference keep), and so must a sample's sender with no live row of
+  its own (a host's wake); a live owner's stream passes wherever it lands. A consistency fact of the server's own state, never a
+  judgment of where the claimant stands (ADR-063 decision 4). Refused "E_PROP_UNSEEN: X claims prop Y by touch T; the claimant is
+  no listener of the prop (its game was never sent it, or was told it is gone)" with no word, since that game has no copy to heal.
+  The claimant's cell and distance are no gate (playtest 41's carried bucket and playtest 44's kettle at the mill's cell edge were
+  refused against records the carrier had already moved); the prop's own cell is the row's key, and a record in no cell is
+  E_PROP_OUTSIDE. The check is coarser than the reach it replaces: one square either way, against 256, 512 and 2,048 units.
+- A sample's old cell refusal splits in two: E_PROP_OUTSIDE (no cell at the sample's point, ADR-071 decision 6's conservation,
+  whoever sends it) and E_PROP_FROZEN (a resting prop in a cell nobody hosts, the design law's freeze).
+- PropOwner admits player 0 (8d6f92f1, SCHEMA_VERSION 45 by D-PH1 A): the host of the cell the prop's record stands in, whoever
+  that is when the word is read. Every return is a player-0 word (a rest, a departure, an unload), and a late listener hears the
+  current word after the create word whenever the prop's epoch is above 0, the live owner by id or 0. The bump is the loud guard: a
+  client built before it would drop each player-0 word into its transport's counter and keep a stale owner with no sign.
+- Every refusal is answered (A5): AnswerPropWord, once per prop per second per seat, for E_PROP_NOT_OWNER (a sample) and
+  E_PROP_HELD, E_PROP_MOVING and E_PROP_AWAY (claims); the client applies an equal epoch, so the answer heals a seat that applied
+  the standing word wrongly. Every refusal counts in the stream counters.
+- The unload as a state (D-PH2 A, rounds five to eight as built at 147a6cfe): a seat's unload report returns its live rows in the
+  cell with a word each, and its grants and wakes there are refused E_PROP_AWAY until its load report or the cell's return to its
+  reach; a live owner's own stream passes.
+- A final sample past the step budget took the rest and left the record standing (RestRefused, with the player-0 word); rung 2
+  replaces it with the clamp.
+- The traps' world bodies under the one rule (ADR-071 decision 8): claim_world_body and host_changed are deleted; a trap body's
+  impulse is a claim by touch 3, the first firing winning by A3's E_PROP_MOVING and its rest returning it by A4's word, so
+  b60e7f31's lapse retires with the lease mirror.
+- The client's words (b7151a42, 7d9741e1, 1496634e): ownerOf reads the word and hostsCell alone (the lease mirror, the presence set
+  and the lapse are gone); a seat that does not host says "prop <id> owner 0 epoch N (host of cell C)" after a rest, a departure or
+  an unload word (R1's read at a cell edge); a seat the word makes the simulator follows on until REST_DYNAMIC_MS after the rest it
+  heard, so its copy takes the rest pose before it goes Dynamic; a hand that loses a double grab (a word naming another seat after
+  this hand's grab: the Held answer) goes Keyframed and says "prop <id>: another seat owns it while this hand held it; the hold
+  ends", and that hold's end sends no release.
+- W3 ("Fix the drop", ADR-071's amendment): the drop service disables the engine's own dropped copy and deletes it once the disable
+  has run (the Creation Kit's order; a refused delete reaches the catch and is logged, a872cf12), where a delete alone left it
+  listed, deleted and never freed under Skyrim Souls RE's running InventoryMenu (E39). HYPOTHESIS until a read shows the reference
+  gone at once under the running menu: b-prop-push's step 27, unchanged, reads it.
+
+Its server lines, which the probes count: "[verb:prop-physics] X claims prop Y by touch T: granted, epoch N; K listener(s) told";
+"prop Y rests on X's screen at (x, y, z): the host's again at epoch N; ..."; "prop Y woken by its host X at (x, y, z): the host's by
+name at epoch N; ..."; "prop Y: its simulator X left; the host's again at epoch N; ..." and "prop Y: its simulator X unloaded cell
+C; the host's again at epoch N; ..."; each refusal "E_PROP_<CODE>: X claims prop Y by touch T; <why>" or "E_PROP_<CODE>: X moves
+prop Y; <why>". The client's: "prop Y owner P epoch N (mine|theirs|the host)" and "(host of cell C)", "stream Y started" ("at the
+grant", ": held"), "stream Y asleep", "prop Y held: the engine's grab names it", "prop Y let go: <why>", "contact Y layer L motion
+M: claimed" ("owned, no claim", "another seat streams it awake, no claim").
+
+Declared limits (rung 1; the plan's sections 2 and 7, the premise reads in lab/.cache/drafts/physics/read-rung1-premises.md
+fed3f9cf, the fork's declared notes):
+- The login shove: a copy whose record lies inside a player's capsule at its first placement is put back inside the capsule and
+  shoved, since placeAtRecord has no capsule test. x-login-overlap v1.4 20261112-083057 moved the record 81.0 units in the plane by
+  the surface pass's 46 pushes over 2 s, 44 of them after the placement put the copy back inside c2's capsule (E37). ADR-071
+  decision 3's "no copy is placed inside a capsule" is rung 6's, D-PH13: such a copy is held Keyframed at its record until no
+  capsule holds it, then D73's rest.
+- Player 0 at a cell edge (the plan's R1): each seat resolves player 0 by its own copy's parent cell and the server by the record's,
+  so at an exterior edge two seats can both read themselves the host, or neither, and the answer repeats player 0 and cannot heal
+  it. x-prop-edge v1.3's leg D records each seat's "(host of cell C)" line; a fix needs a cell-at-position lookup the client lacks.
+- The knocked body (R2): a resting body that a moving body knocks on a follower's engine is woken by that seat when it hosts the
+  cell (A7's wake) or moves unstreamed, so the island has a second owner; the server knows no island's members. Rung 3's island
+  claims take the mover's own island; a follower's knock stays.
+- The host's wake against the guest's claim (R3): whichever reaches the server first owns the push, where the newest touch always
+  gave it to the guest.
+- A wake or a grant after a blast (R12): a first sample past the step budget's 600 units is refused E_PROP_STEP and the record
+  stands until the rest; rung 3a's first-sample allowance answers it.
+- The double grab's third order (S2): the host's held stream opens at its grab, so its first sample can set the guest's copy
+  Keyframed before the guest's grab threshold passes; the guest's grab then closes in its own frame (E28), readHolds claims nothing
+  and no "the hold ends" line comes, and the guest's key-up is a pickup the rule refuses (E_PROP_HELD, below).
+- A claim or a late final sample racing an unsubscription (a Disable unsubscribes every listener; the lab's teleport moves the
+  record before the client hears) reads E_PROP_UNSEEN; the probes count only the unexpected ones (review-v14-edge.md, finding 1).
+- A stalled stream (the owner's client still connected, no asleep sample) leaves the follower's copy where the last sample put it
+  until STREAM_LIVE_MS, then Dynamic; whether it then stands or settles is E32, unread.
+- The untrack gap without a cell change (TRACK_MAX pushing a held prop out of the tracked set: no release and no final sample)
+  holds the prop against every other seat until the seat's next grab, its unload of the cell or its departure (f38f5249's note).
+- Rest is still the client's stir test at rung 1 (500 ms under 0.25 units, held in menu mode) against the engine's deactivation
+  (E10, unread under the cap); rung 2 replaces it.
+
+Tests (rung 1): T0 in wire-rules props.rs (the rebuilt cases, a_players_new_grab_ends_its_hold_of_another_prop, the pickup's, and
+the three-seat proptest against an oracle of the stream: the record moves for the owner alone, every word raises the epoch by one,
+no contact, drop or impulse takes a held row or one inside its moving window), the bridge's codes, wire-validate's player 0 and
+unit/PropTest.cpp's eight cases with the pickup's; T2, the prop-physics session's two player-0 return words, green on f38f5249 at
+09:29Z 2026-11-12 (numidium), 1af7641d's red on the pickup's row reverted at d9da7da3; T3 by path, x-prop-arbitration v14.3 and
+x-prop-edge v1.3 (lab/.cache/drafts/physics/rung1-stage, unrun on the build; its five premise reads green by 20261112-083749),
+then b-prop-arbitration in its own commit, and b-prop-push out of pending with W3's read.
+
+### A pickup is a take (ADR-071 rung 1, D1 A; 02:34 PST 2026-11-12, fork m4-physics-1-arbitration a539bded, 7f4f1506; its T2 row 1aa78a86 reverted at d9da7da3)
 
 Why: a grab the engine refuses in its own frame ends in a pickup at the key's release (docs/engine/havok-props.md E16 and E28),
 and the server's pickup read no prop row: ProcessActivateNormal's pickable branch gives the item and deletes a 0xff reference for
@@ -163,9 +289,12 @@ so the pickup is refused E_PROP_MOVING; the picker's own row and a prop at rest,
 pickup changes no row. A refused pickup does nothing else: OnActivate returns after the reach gate (no hazard note, no relay, no
 Activate), so nothing reaches the picker's inventory, the reference stands for every seat, and the picker's game hears the
 current word, once per prop per second (A5). The picker is the reporting game's player, the id the rows name, so a hosted
-caster's pickup is its host's take. Built: the rule's pickup in wire-rules props.rs (a539bded), ActionListener::RefusePropPickup
-called from OnActivate (7f4f1506), and T2's prop-physics session, where c2's pickup of the dagger c1 streams awake is refused
-E_PROP_MOVING and answered with the standing word (1aa78a86).
+caster's pickup is its host's take. Built: the rule's pickup in wire-rules props.rs (a539bded) and
+ActionListener::RefusePropPickup called from OnActivate (7f4f1506), proven at T0 (props.rs's pickup cases and proptest,
+PropTest's case), with x-prop-arbitration v14.3's leg 3d its T3 read (unrun). T2's row of it (1aa78a86: c2's pickup of the dagger c1 streams
+awake, refused E_PROP_MOVING and answered) went red on 1af7641d and is reverted (d9da7da3): the legacy stack's C++ fakeclient
+resolves no {{created:80254}} placeholder, so its Activate fails that client, and difftest compares a client's exit and sends
+strictly, which no declaration covers.
 
 Its two lines, logged at warn for every refusal (the claim's shape, no rate limit; no stream counter counts an activation's
 refusal), ActionListener.cpp:4037 at 7f4f1506:
@@ -186,15 +315,242 @@ Declared limits (rung 1):
 - A game-file item whose create message has not reached the picker is not blocked (dealWithRef runs once the create message's
   reference loads, remoteServer.ts:597-603), so a refused pickup there leaves the item in the picker's game.
 
+### Rung 2: the sample v2 (ADR-071 decision 6, rung 2 "sample v2"; fork m4-physics-2-sample cc5c44f3, 2026-11-12)
+
+Built on rung 1's head, merged in and never rebased (lab/.cache/drafts/physics/rung2-plan.md 7912ad16; its fresh reviews
+review-3892415e-server.md 97d5f5b8 and review-3892415e-platform.md 8f35b128): fork a8c36dd2 the rule, e8d2251d the wire
+(SCHEMA_VERSION 46), ccadfced and 3dc4904b the server, e1afd811 and 70563920 the T2 session, 6009b024, 5d6d5259 and 4c9ff632 the
+platform, 3b141876 and 6e405ab8 the client, 9fc1e8f7 the server review's fixes. The shapes are the Message contract's below and
+docs/WIRE.md's; what the rung changes:
+
+- A sample is judged by its epoch first, then the owner table, then its order, never by its position (ADR-066 decision 4): after
+  rung 1's Outside, Frozen and Away, an epoch below the prop's is E_PROP_STALE (a sample of an earlier tenure) and one above it
+  E_PROP_FUTURE, whoever sent it; then E_PROP_NOT_OWNER; then a sequence not newer than the row's last at the epoch is Late
+  (serial-number arithmetic on the u16; accessible: Fiedler, "Reliable Ordered Messages", gafferongames.com, 2016; foundational:
+  Elz and Bush, "Serial Number Arithmetic", RFC 1982, 1996), dropped and counted with no line and no answer; then the step budget.
+  ADR-066's ack (d5) and its grace are not built.
+- The step budget is one clock per prop, the generic cell rate algorithm's virtual scheduling (accessible: "Generic cell rate
+  algorithm", Wikipedia; foundational: ITU-T Recommendation I.371). The distance bucket, refilled at PROP_MAX_SPEED_UNITS_PER_S
+  6,000 units a second and holding one step (PROP_STEP_ALLOWANCE_UNITS 600), is the prop's, and so is its clock: an epoch's first
+  sample brings the clock to the server's time, and each later one moves it by the owner's own elapsed time since its last
+  accepted sample (tMs; nothing for a clock that ran backwards), held between PROP_CLOCK_LAG_MS 1,000 behind the server's clock
+  and PROP_CLOCK_SLACK_MS 250 ahead of it; an epoch rise starts no fresh slack. So an honest stream whose arrivals bunch after a
+  stall is taken whole, and whatever tMs claims, over any window of the server's time the record travels no farther than the cap
+  allows for that window, PROP_CLOCK_LAG_MS and the slack, plus the one step: 14,100 units in a second, 8,100 at one instant
+  (Trust, below). Both clock constants UNMEASURED. The plan's first form, a credit counted from each epoch's first sample, banked
+  a whole epoch (60,000 units in a second in a8c36dd2's simulation).
+- An awake sample past the budget is E_PROP_STEP, answered with the word and the record; an asleep one past it is clamped and taken
+  (ADR-071 decision 6; Clamped replaces rung 1's RestRefused): the record moves the budget's distance from where it stands toward
+  the sample, the other listeners hear that rest re-encoded (never the sender's bytes, which name the far point), the prop returns
+  to the host with the player-0 word, the sender hears the record, unlimited, and the server's line is the rest's with ", clamped
+  from (x, y, z)".
+- Every answered refusal of a sample (E_PROP_NOT_OWNER, E_PROP_STALE, E_PROP_FUTURE, E_PROP_STEP, E_PROP_OUTSIDE, E_PROP_FROZEN)
+  gets the word and then the record, PropTransform at seq 0 (AnswerPropRecord, behind rung 1's once per prop per second per
+  seat), so a divergent word and copy heal; but the live owner's own stale sample is said and not answered (3dc4904b: its newer
+  word is already on the reliable channel and the record lags its body, which an answer would rewind), so a record answer is
+  always a place its receiver puts its copy. E_PROP_AWAY, E_PROP_UNSEEN, E_PROP_KIND, E_PROP_RANGE and E_PROP_FAR stay
+  unanswered. A sample with bones is refused E_PROP_KIND before the rule: no row takes a body's parts until rungs 4 and 5.
+- The engine's grab rides the sample (D-PH3 A on the wire): an accepted awake sample sets the row's grab to its held flag, so the
+  first held-false sample ends a hold with no release claim; one hand a player holds (a late held sample of a hold the player's
+  next grab ended never takes the hand back).
+- A claim names one to sixteen references, each judged alone through rung 1's gates with its own verdict, word and line (the
+  granted line a lone reference's, which b-trap-look and the rung 1 probes count); refusal lines share the samples' 10 s limit per
+  seat, now kept on the connection (9fc1e8f7).
+- The owner reads its body, never its reference (E21): one readBodies(simulated ids, false) an update, a platform export
+  (6009b024, PuppetApi.cpp) answering each found body's awake bit, motion type, the 3D root's world pose (rot by the platform's own
+  EulerDegreesXYZ, E45) and lin and ang from the entity's motion, filtered in native (rule 9: a body answered while awake and once
+  at the read its island fell), on the JS thread under no lock (4c9ff632: a JS thread waiting on the world's lock could hang
+  against an engine thread waiting on the JS thread). A sample is due at 2 units or 2 degrees or a hand change, at most every
+  SEND_MIN_MS 100, and at the heartbeat; its seq runs from 1 at each epoch; tMs is the service's one clock (performance.now()
+  where the embedded Node has it, named at startup, "samples timed by ..."); lin and ang are the read's, scaled within the wire's
+  bounds. A priority accumulator holds the sends inside a mirror of the server's prop budget (128 at once, 80 a second), the rests
+  first and always, the rest by the time since each body's last sample weighted by its speed (accessible: Fiedler, "State
+  Synchronization", gafferongames.com, 2015; foundational: Frohnmayer and Gift, "The TRIBES Engine Networking Model", GDC 2000).
+- Rest is the engine's deactivation plus the heartbeat: the asleep sample goes reliable at the read where readBodies' awake bit
+  falls with no hand ("stream <id> asleep (deactivated, seq S)"), or once an open stream's body has read inactive for a heartbeat
+  ("(inactive, seq S)"); a held body never rests on the wire. The stir test, SLEEP_AFTER_MS, REST_READ_MS and the menu-mode hold
+  are deleted (a paused world steps no Havok, so its island stays awake on the wire's terms). HYPOTHESIS: havok-props.md E46, and
+  E10 under the cap.
+- The follower renders the stream three samples behind the owner's clock and never extrapolates (ADR-071 decision 3;
+  sync/propFollow.ts, a pure module): the render clock is this seat's clock less the stream's offset (the least arrival less tMs
+  over its last 16 samples, NTP's clock filter's choice; accessible: Mills, "The NTP Clock Filter Algorithm"; foundational: Mills,
+  "Internet time synchronization: the Network Time Protocol", IEEE Trans. Communications 39(10), 1991) less propFollowDelayMs, a
+  client setting, default 300 and at most 600 (the 8-sample buffer at the owner's cadence, less the pair the render clock is in);
+  the render clock never steps back. One keyframed translate a segment, toward the pair's end, at the speed that covers what is
+  left of the segment on the owner's clock (at least SEGMENT_MIN_MS 50); past the newest sample the copy holds and the frame counts
+  dry; a target JUMP_UNITS 256 or farther lands within JUMP_MS 100; the asleep sample applies when the render clock reaches it, and
+  D73's Dynamic set follows REST_DYNAMIC_MS 300 later; the stream is quiet at two heartbeats past its newest awake sample on the
+  render clock (FOLLOW_QUIET_MS 1,000; with the delay, a gap between arrivals of 1,300 ms by default, inside the server's 1,600). A
+  word naming another seat sets the copy Keyframed before any sample; a record answer ends the stream and places the copy at the
+  record. Accessible: Fiedler, "Snapshot Interpolation", gafferongames.com, 2014; foundational: Bernier, "Latency Compensating
+  Methods in Client/Server In-game Protocol Design and Optimization", GDC 2001. STREAM_LIVE_MS and the one-interval glide
+  (GLIDE_MIN_MS, GLIDE_MAX_MS) are deleted.
+- The take-over: a word naming this seat while its copy follows a live stream (a departure's or an unload's return to the host, a
+  stalled row's claim) places the copy at the stream's newest sample by a keyframed translate, sets it Dynamic and, in that set's
+  answer, hands it the sample's velocities through the platform's setBodyVelocity (CommonLib's bhkRigidBody::SetLinearVelocity
+  and SetAngularVelocity, queued to the main thread): "took over <id> at seq S moving N units a second, J units ahead (velocity
+  handed)". HYPOTHESIS: havok-props.md E47.
+- E21's remedy: placeAtRecord reads the body against the record and sets a Dynamic body Keyframed before its keyframed translate
+  (HYPOTHESIS: E48).
+- A woken host's rest that its wake's word overtook (its one asleep sample named the old epoch: Stale, and unanswered as the live
+  owner's own) is sent again under the new word when the body still reads asleep ("stream <id> asleep (re-sent under the new
+  epoch, seq S)"; 6e405ab8, the server review's finding 1).
+
+Declared limits (rung 2):
+- The render delay: every follower shows the owner's body about propFollowDelayMs (300 ms) late, by design, since nothing
+  predicts; a slow body's samples come at the heartbeat's 500 ms, and the copy holds at the newest between them.
+- The woken host's dropped sample: A7's wake raises the epoch, so a sample the host sent before its wake's word came back reads
+  Stale and is dropped, about one a wake at the lab's round trips; no grace is built (the plan's DEF-2b; ADR-066 decision 4 as
+  written), and under loss more is the design (a lost reliable word waits for renet's 300 ms resend). x-prop-follow v1.2 records
+  E_PROP_STALE from the woken host.
+- A clamp's visible jump: the owner's copy goes back to the clamped record at the record answer (rare once rung 3a's first-sample
+  allowance covers a blasted body's flight).
+- PROP_CLOCK_LAG_MS and PROP_CLOCK_SLACK_MS are unmeasured: x-prop-follow's loss leg is netem on sky-srv, which shapes only
+  sky-srv's outgoing traffic, so the seats' own samples reach the server unshaped and the arrival bunching the clock must forgive
+  goes unread.
+- readBodies runs on the JS thread under no lock: HYPOTHESIS that the JS tick never overlaps Havok's step on the worker threads
+  (E2), a torn read at most one step's motion; if a read shows one, the read moves to the game thread (gameThrQ), never to a lock.
+
+Tests (rung 2): T0 in props.rs (a_sample_is_judged_by_its_epoch_first, a_late_or_repeated_seq_spends_nothing,
+the_owners_clock_takes_a_bunched_honest_stream, a_crafted_clock_buys_no_more_than_the_servers_time_and_its_slack,
+a_still_clock_banks_no_more_than_the_lag_and_the_slack, an_epoch_rise_starts_no_fresh_slack,
+a_rest_past_the_bucket_is_clamped_and_returns_the_prop, the_samples_held_flag_holds_and_ends_the_grab, and the proptests),
+wire-validate (a_v2_prop_sample_bounds_every_float, a_prop_claim_names_one_to_sixteen_references_once_each), wire-schema's size
+test, the bridge's speed-cap pin and PropTest's v2 cases; T2, the prop-physics session at cc5c44f3 (docs/WIRE.md); T3 by path,
+x-body-read v1.2 and x-prop-follow v1.2 (lab/.cache/drafts/physics/rung2-stage, unrun), then b-prop-follow in its own commit.
+
+### Rungs 3a and 3: the impact (ADR-071 decision 4, W5 "caster only"; fork m4-physics-3-impact 92b032cd and 042f6907, 2026-11-12)
+
+Built on rung 2's head (lab/.cache/drafts/physics/rung3-plan.md 6dff3374 and its addendum, from the premise reads x-prop-cone v1
+20261112-080520 and x-prop-arrow v1 20261112-080858, read in read-rung3-premises-080520-080858.md eb5cdad4) with Eli's D-PH5 to
+D-PH8 (ADR-071's rung 3 decisions): fork d603ea09 and d3afb0da rung 3a, 92b032cd its bound on rung 2's final head; 07e0f47b the
+server, bebaccc5 the platform, 6190c370 the client; 042f6907 the platform and client review's fixes (review-92b032cd-platform.md
+52f149cf).
+
+Rung 3a, the first sample's allowance (R0, server only): an epoch's first sample (none yet at its epoch: after a grant, a return,
+a wake) may spend up to PROP_FIRST_SAMPLE_UNITS 3,000, half a second at the cap, of the time the prop's one clock has run since
+the row's last write; any accepted sample leaves the bucket one step at most; nothing is banked (the mark is rung 2's last_seq 0,
+so a seat that raises the epoch as fast as it can is held to the bound of one that never does). A blasted body flies before the
+word naming its mover reaches that seat: the cabbage 0x1c0c6 left at 1,353.7 units a second under Unrelenting Force
+(20261111-223256 on c1), one step in 0.44 s and this in 2.2 s. From a grant on a new row the record travels at most the cap for
+the server's elapsed time and the slack, plus PROP_FIRST_SAMPLE_UNITS once: 10,500 units in a second; over any window rung 2's
+14,100 a second and 8,100 at one instant stand. UNMEASURED: x-prop-impact v1.1 records each caster's impact-to-first-sample time.
+
+The impulse rule (W5): a seat applies a Havok push only from a cause it owns.
+- The sites: Gum replacements (HookHandler::Replace, the DamageActor shape) of TESHavokUtilities::ScaleGameplayImpulseForce 26004,
+  which sizes every prop's and every static's push (havok-props.md E20, E50, E51), and AddExplosionImpulse 26005, which pushes
+  ragdolls (E52), each installed from its RELOCATION_ID in game/Offsets.h's Hooks idiom with CommonLib's own signature.
+- The cause: the innermost of three bracket kinds open on the impulse's thread (a thread-local stack): Explosion::Update (its
+  actorOwner), Projectile::ProcessImpacts (its shooter; an arrow's push runs inside it) and ConeProjectile::HandleHits (the cone's
+  shooter: the frame 20261112-080520 read on both seats, so D-PH6 is settled by the read). A shooter that is no actor (none, a
+  trap's dart, a caster activator) is the world's, its cell host's, as an explosion no actor owns (042f6907). The owner is the
+  platform's one taxonomy (CauseOwner, the presser rule's PresserOwner renamed): this seat's player or an actor hosted here;
+  another seat's figure or puppet; undecided.
+- The verdict, in native code (rule 9): another seat's cause, 26004 answers 0.0 and 26005 returns, neither calling its original,
+  counted; this seat's, the original, the pushed reference joining the frame's impact set; undecided, the original, counted, no
+  claim; no bracket open, the original, counted as outside any bracket. Sound and visuals play everywhere.
+- D-PH5, "every physics body": another seat's cause is zeroed for every Havok body on the receiving engine, props, statics and
+  ragdolls alike, so the Riverwood Trader's sign stays still on the other screen when another player's spell hits it, until rung 4
+  streams statics.
+- The kill switch: off by default in the platform (setImpulseCauseRule, setTriggerPresserRule's shape); the client turns it on
+  while propPhysics is on and its setting propImpulseCause is not false (default on), and says which: "impulse rule on: another
+  seat's cause is zeroed here, this seat's claims what it moved", or "... on, but the platform's impulse replacement did not go in:
+  no push is zeroed here".
+- Its lines, at each frame's leave: "impulse zeroed: N bodies, cause C (kind S), another seat's (26004 a, 26005 b; thread T)";
+  "impulse applied: N bodies, cause C (kind S), this seat's: claim raised, impact K, M references ..." or "...: no reference to
+  claim"; "impulse undecided: N bodies, cause C (kind S), no seat's word on it here: applied, no claim"; and, once a second while
+  they come, "impulse outside any bracket: N calls, applied (T so far)".
+
+The propImpulse event: for this seat's cause with a reference pushed, one event on the next tick (AddTickTask into
+EventsApi::SendEvent, the propContact idiom), { impact, kind (explosion, impacts or cone), cause, refrs: { refrId, formType } },
+at most 16 references an event.
+
+One claim per impact: the client claims the event's rows it does not own in one PropClaim v2 by touch 3, "claim <ids> touch 3
+(impact K: kind, cause C)", its rows the items (FormTypeEx.isItem of the event's form type) and the trap bodies this seat knows,
+and nothing else: a static or a ragdoll is no row before rungs 4 and 5. A cone raises a new impact number at each HandleHits frame
+that pushed, so its events fold by cause for CONE_BATCH_MS 100 (UNMEASURED; 042f6907); an explosion's or a projectile's impact is
+claimed on the update its event comes. A row another seat streams awake stays home (A3), and a row this seat owns streams the push
+as its own wake (A7). The island: readBodies' islands answer each awake simulated body's Dynamic island members by reference (at
+most 16, the world's fixed island skipped), and the client claims, per island, the members it does not own and has not claimed in
+CLAIM_EVERY_MS 2,000, "(island of <id>)" (HYPOTHESIS: havok-props.md E53).
+
+Tracking at any distance: the tracked set is the nearest TRACK_MAX within TRACK_RADIUS and the trap bodies as before, plus, while
+its 3D is loaded in the player's world or cell, every prop this seat owns, holds or streams, every stream it follows and every prop
+it claimed in the last CLAIM_EVERY_MS; an awake relayed sample of an untracked prop tracks it in place on the next update; and once
+a rescan, an untracked item past TRACK_RADIUS in a cell this seat hosts that its own engine woke is tracked ("rescan: N far
+item(s) this seat's engine woke in a cell it hosts, tracked"). On the server, the listener keep (07e0f47b, npc-handoff D6's keep
+for a prop): a live row's owner and its prop stay a pair where the grid would part them, on both sides of the subscription (the
+prop's pass keeps its owner, the owner's pass every live prop of its), so a body the third word throws past the 3x3 squares around
+its caster keeps the caster subscribed; at its rest the next grid pass parts them as the grid would.
+
+Deleted (the plan's B6): the proximity stand-in (TOUCH_RADIUS, TOUCH_QUIET_MS, TOUCH_READ_MS and the setting
+propContactFallback); objectReferenceEx's Keyframing of every item on arrival, which with canon's 1,024-unit Keyframing
+(havok-props.md E34) was the remote blast's shield, so every game-file item rests Dynamic as the game files make it (D73 for every
+item); and untrack's Keyframed park of a body this seat simulated.
+
+Declared limits (rung 3):
+- Statics and ragdolls are zeroed for another seat's cause but not streamed until rungs 4 and 5: the caster's engine moves them,
+  and every other seat's copy stays still.
+- Two owners in contact: another seat's moving body meeting this seat's is refused E_PROP_MOVING, and each engine meets the other's
+  copy Keyframed.
+- The arrow (D-PH7): its push is ApplyPointImpulse sized by 26004's result (E51), so the zero at 26004 covers it, HYPOTHESIS until a
+  zero result reads (E49); no second site is built.
+- Spawned copies stay Keyframed (spawnProcess.ts's set for the view's spawn), so a server-made copy such as a dropped item takes no
+  push where no seat tracks it (E27): a far cast moves a dropped item on no seat.
+- A rest whose write crosses a square drops the owner before its word: the rest sample's own write moves the record across a grid
+  square and parts the owner in that write's subscription pass, so the owner hears the DestroyActor and not the word (its next
+  subscription brings the current word, A5's path).
+- An impact body beyond the claimant's 3x3 squares gets E_PROP_UNSEEN: an island member the flying body meets two squares from its
+  caster, or a body the caster's engine moves that far before its claim, was never sent to the caster's game (the keep covers the
+  owner's own rows).
+- A puppet's or an unhosted NPC's walk into a far item moves it with no claim, since every item rests Dynamic (the plan's R6).
+
+Tests (rungs 3a and 3): T0 in props.rs (a_blasted_props_first_sample_after_a_grant_has_half_a_second_of_flight,
+a_first_samples_allowance_is_one_an_epoch_and_never_banked, a_wake_and_rest_cycle_buys_no_first_allowance_the_clock_has_not_run,
+a_first_sample_spends_no_more_of_a_lagging_clock_than_its_allowance, and the cap's proptest over three seats' grabs, rests and
+wakes) and PropTest's first-sample case, the keep's case and one impact's claim; T2, no session change; T3 by path, x-prop-impact
+v1.1 and x-prop-blast v4.1 (lab/.cache/drafts/physics/rung3-stage, unrun), then b-prop-impulse in its own commit.
+
 ## Rung
 
-Rung: R2 for the transform (the simulating seat's Havok, the server records), R0 for the claim (the server decides who simulates).
+Rung: R2 for the transform (the simulating seat's Havok computes, the server records), R0 for the claim and the pickup (the server
+decides who simulates a prop and who takes it).
 
-- The transform: R2. The simulating seat's Havok computes, the server records the last transform and the asleep flag. Not R1:
-  the server has nothing to validate a position against but a speed bound (a budget row, UNMEASURED), which it applies as the
-  movement budgets do; not R0: ADR-002 forbids server physics.
-- The claim: R0. The server decides who simulates, on a toucher's report, newest touch by epoch; the cell's host by default.
+- The transform: R2. The owner's Havok computes; the server records the last transform and the rest, judging a sample only for
+  consistency (its epoch, its owner, its order, conservation, the step budget: Trust, below). Not R1: the server has nothing to
+  validate a position against but a speed bound, which it applies as the movement budgets do; not R0: ADR-002 forbids server
+  physics.
+- The claim: R0. The server decides who simulates by A1 to A7 (ADR-071 decision 2, rung 1): the cell's host owns a resting or
+  stalled body; a claim from the engine that moved it takes it at the next epoch; a moving body stays with its mover and a grab
+  alone takes it (E_PROP_MOVING); a held body is its grabber's (E_PROP_HELD); it returns to the host only by the owner's asleep
+  sample or a departure or unload word.
+- The pickup: R0, an inventory transfer the server computes, judged by the claim's rows (A pickup is a take, above).
+- The push (rung 3): the cause's owner's engine alone applies it (W5, "caster only"); another seat's cause is zeroed in native
+  code, and the push itself stays the owner's Havok (R2).
 - Why not one rung higher for the transform: validation needs a physics the server has not got.
+
+### Trust: what the server judges, and what it records on the owner's word (rules 5 and 12; physics rungs 1 to 3a)
+
+- Judged, for consistency alone (ADR-063 decision 4: nothing judges a position against another seat's): the epoch (E_PROP_STALE,
+  E_PROP_FUTURE), the owner at the epoch (E_PROP_NOT_OWNER), the order (Late), the listener check (E_PROP_UNSEEN), conservation
+  (E_PROP_OUTSIDE) and an unhosted cell's freeze (E_PROP_FROZEN), a trap body's tether (E_PROP_FAR), the kind (E_PROP_KIND), and
+  the step budget below.
+- Bounded in Rust before anything sees the bytes (rule 12; wire-validate's check_prop_transform and check_prop_claim): every
+  relayed float finite and inside the world, each angle within one turn, lin at most 6,000 units a second and ang at most 1,000
+  radians a second in length, a bone within 512 units of pos and its quaternion within 1% of unit length, never asleep and held
+  together, seq 0 refused from a client, a claim's one to sixteen references, and the budgets.
+- Recorded on the owner's word, unvalidated (R2, rule 5): `held` (the owner's engine's grab: an accepted sample sets the row's grab
+  to it, so a held flag holds the prop against every other seat's claim; a crafted seat's flag holds one row at a time, one hand a
+  player), `tMs` (the owner's clock, which refills the step budget only within the server's, below), `lin` and `ang` (relayed to
+  the followers, who use them only at a take-over's hand-off; never checked against the displacement), and the position and
+  rotation themselves inside the step budget. A claim's touch kind is the claimant's word too, bounded by the contract and the
+  listener check: under A1 to A7 only a grab differs from the rest (a touch 3 takes no more than a touch 0).
+- The step budget, one clock per prop (rung 2, the generic cell rate algorithm; Rung 2, above): over any window of the server's
+  time the record travels no farther than the cap allows for that window (6,000 units a second), PROP_CLOCK_LAG_MS 1,000 and
+  PROP_CLOCK_SLACK_MS 250, plus one step: 14,100 units in a second and 8,100 at one instant (review-3892415e-server.md 97d5f5b8,
+  finding 2). Rung 3a's first sample adds nothing to that bound over a window; from a grant on a new row it is 10,500 units in a
+  second. A lie is a hop, never a teleport (ADR-063's H1 accepts the lie class on a friends' server). PROP_CLOCK_LAG_MS and
+  PROP_CLOCK_SLACK_MS are UNMEASURED.
 
 ## Engine surface (CommonLibSSE-NG headers; cite before use, rule 1)
 
@@ -208,42 +564,88 @@ Rung: R2 for the transform (the simulating seat's Havok, the server records), R0
 | the motion type set | N/NiAVObject.h:126-135; T/TESObjectREFR.h:468 | SetMotionType Keyframed, Dynamic |
 | write a position | T/TESObjectREFR.h:469-470, :456, :259 | SetPosition and MoveTo through MoveTo_Impl; Update3DPosition |
 | the touch | B/bhkCharProxyController.h:22-25; H/hkpCharacterProxyListener.h:49 (slot 2); H/hkpRootCdPoint.h:16; H/hkpCollidable.h:54-69; T/TESHavokUtilities.h:15 | READ 15:37 PDT (docs/research/m3/re-havok-contact.md): the player's proxy controller's ContactPointAddedCallback, Address Library 79131 (just addr), fires for Keyframed bodies too; the reference by FindCollidableRef 26003; HYPOTHESIS until lab/frida/prop-contact.js |
+| the hand (rung 1) | Game.getPlayerGrabbedRef (Skyrim Platform's vanilla native, skyrimPlatform.ts:2939 at fork c3f9d175); the engine's grabbedObject, P/PlayerCharacter.h:558, :697 | read once an update; HYPOTHESIS that it names the body exactly while the engine's grab holds it (havok-props.md E40, E41, E43) |
 | a drop | A/Actor.h:401 | DropObject returns the handle; a dropped item is a prop from its first frame |
 | what is a prop | B/BSXFlags.h:17; C/CollisionLayers.h:8-36 | the model's Havok flag and the body's layer (kClutter 4, kProps 10) |
-| Skyrim Platform today | skyrimPlatform.ts: getPositionX/Y/Z, setPosition, setAngle, translateTo, applyHavokImpulse, setMotionType, getMass, dropObject, Cell.getNthRef | no velocity, no sleep state, no contact event |
+| Skyrim Platform today | skyrimPlatform.ts: getPositionX/Y/Z, setPosition, setAngle, translateTo, applyHavokImpulse, setMotionType, getMass, dropObject, Cell.getNthRef | no velocity, no sleep state, no contact event in the published platform; the fork's own exports add them (the propContact event, readBodies and setBodyVelocity at rung 2, propImpulse and setImpulseCauseRule at rung 3) |
+| a body's pose, velocity and rest (rung 2) | the platform's readBodies (fork 6009b024, 5d6d5259, 4c9ff632): T/TESForm.h:210-227, T/TESObjectREFR.h:375; the body by src/RE/N/NiAVObject.cpp:61-75's walk (N/NiAVObject.h:156, B/bhkNiCollisionObject.h:56, B/bhkRefObject.h:26), else the first child's (N/NiNode.h:57-65); N/NiAVObject.h:158; H/hkpEntity.h:92, :99; H/hkpMotion.h:77, :84-85; H/hkpSimulationIsland.h:41, :53; B/bhkWorld.h:48-52 | the root's world pose, rot by the platform's EulerDegreesXYZ (CommonLib's ToEulerAnglesXYZ misreads through NiFastATan2, src/RE/N/NiMath.cpp:23-71); no lock on the JS thread; islands since rung 3 (H/hkpWorld.h:97 the fixed island skipped); havok-props.md E45, E46, E53 |
+| a body's velocity set (rung 2) | the platform's setBodyVelocity (6009b024): SKSE's AddUITask (include/SKSE/Interfaces.h:198); B/bhkRigidBody.h:55 SetLinearVelocity (src/RE/B/bhkRigidBody.cpp:26-31, RELOCATION_ID(76259, 78089)), :53 SetAngularVelocity (.cpp:12-17, RELOCATION_ID(76260, 78090)); B/bhkWorld.h:42-46 | queued to the main thread; the take-over's hand-off; havok-props.md E47 |
+| the impulse sites (rung 3) | T/TESHavokUtilities.h:18 ScaleGameplayImpulseForce (src/RE/T/TESHavokUtilities.cpp:38, RELOCATION_ID(25467, 26004)), :14 AddExplosionImpulse (.cpp:10, RELOCATION_ID(25468, 26005)); fork bebaccc5's FridaHooks.cpp and game/Offsets.h | Gum replacements with CommonLib's own signatures; havok-props.md E20, E49, E52 |
+| the impulse's cause (rung 3) | E/Explosion.h:53 Update, :72 actorOwner (the accessor :89-97); P/Projectile.h:208 ProcessImpacts, :254 shooter (the accessor :291-299); P/Projectile.h:226 and C/ConeProjectile.h:43 HandleHits; each slot read from its vtable at install (include/RE/Offsets_VTABLE.h:2771-2788) | three bracket kinds on a thread-local stack; havok-props.md E50, E51 |
 
 ## Observe, impose, suppress
 
-- Observe (the simulator): each frame, the awake props within reach (the cell's references with a Havok body on the clutter or
-  props layer; the player's grabbed reference; a dropped item's handle): position, rotation, awake. A sample goes out when the
-  body moved more than 2 units or turned more than 2 degrees since the last, at most every 100 ms, and once more when it sleeps.
-- Impose (every other seat): the stream's transform on a Keyframed body, interpolated over the sample interval; at sleep, the
-  final transform once.
-- Suppress (every other seat): the body's dynamics (Keyframed); the engine's own settle (kDontHavokSettle where it applies).
-- The claim: the seat whose player touched a prop it does not simulate sends PropClaim; the server grants the newest touch (epoch)
-  and tells every listener (PropOwner); the old simulator's body goes Keyframed, the new one's Dynamic with the last velocity.
+- Observe (the simulator): each update, readBodies over the bodies this seat simulates (rung 2; the body, never the reference): a
+  sample at 2 units or 2 degrees or a change of hand, at most every 100 ms, at least every 500 ms while awake or held (the
+  heartbeat, rung 1), and once more, reliable, when the engine deactivates the body (never while held). The engine's grab is read
+  once an update (Game.getPlayerGrabbedRef). The touches: the proxy controller's contact (the propContact event), the grab, the
+  drop, and since rung 3 the propImpulse event of this seat's own cause and the island's members.
+- Impose (every other seat): the stream on a Keyframed copy, rendered three samples behind the owner's clock and never
+  extrapolated (rung 2's follower); the rest when the render clock reaches it, then D73's Dynamic; the server's record answer
+  places the copy at the record.
+- Suppress (every other seat): the body's dynamics while another seat streams it awake (Keyframed, and at a word naming another
+  seat before any sample); since rung 3, another seat's cause's push on every Havok body (the replacements at 26004 and 26005
+  return nothing), its sound and visuals kept.
+- The claim: a seat whose engine moved a prop it does not own claims it (PropClaim); the server judges by A1 to A7 and tells every
+  listener (PropOwner); a word naming this seat mid-flight takes the body over with the stream's last velocities (rung 2).
 
-## Message contract (wire-schema, validators in the same commit)
+## Message contract (wire-schema, validators in the same commit; docs/WIRE.md's prop section)
 
-- PropTransform {refr: u32, pos: Vec3, rot: Vec3, asleep: bool}: C2S from the simulator (bounded: one per prop per 100 ms by the
-  validator's budget, finite, and inside the rule's step budget against the record), S2C to the cell's other listeners.
-- PropClaim {refr: u32, touch: u8} (contact 0, grab 1, drop 2, impulse 3): C2S; refused when the claimant is not in the prop's
-  cell or holds no listener of it.
-- PropOwner {refr: u32, player: u32, epoch: u32}: S2C to every listener at each change.
+- PropTransform v2 (MsgType 58, wire id 66; rung 2, SCHEMA_VERSION 46) {refr: u32, epoch: u32, seq: u16, tMs: u32, pos: Vec3, rot:
+  Vec3, lin: Vec3, ang: Vec3, asleep: bool, held: bool, bones: Vec<PropBone, 64>}: C2S from the simulator, unreliable while awake
+  (at most one per prop per 100 ms while it moves, at least one per 500 ms while awake or held), reliable at its rest; S2C the same
+  bytes to the prop's other listeners, a clamped rest re-encoded, and the record answer at seq 0 to a refused sender.
+- PropClaim v2 (MsgType 59, wire id 67; rung 2) {refrs: Vec<u32, 16>, touch: u8}: C2S, reliable; one to sixteen references, none
+  0, each once; touch 0 a contact, 1 a grab while the engine holds the body, 2 a drop or a hold let go, 3 an impulse (one claim per
+  impact since rung 3) or a trap body's firing; each reference judged alone.
+- PropOwner (MsgType 60, wire id 68) {refr: u32, player: u32, epoch: u32}: S2C, reliable; player 0 the host of the cell the record
+  stands in (rung 1, SCHEMA_VERSION 45); at every owner change, as every refusal's answer and to a late listener.
+- Validator rules: Trust, above; E_VAL_RANGE, E_VAL_NONFINITE, E_VAL_OUT_OF_WORLD and E_VAL_RATE as docs/WIRE.md lists them. The
+  rule's E_PROP_* codes are server log lines, never wire reasons.
+- Idempotency / ordering: a repeated or overtaken sample is Late; a repeated claim on a granted row is Same; a word below an applied
+  epoch is dropped and an equal one replaces; reliable sends keep their order, so a refused sample's word comes before its record
+  answer.
+- Contract doc updated: yes (docs/WIRE.md, 2026-11-12). Slice one's v1 (879f9e88, SCHEMA_VERSION 21) was {refr, pos, rot, asleep}
+  and {refr, touch}; canon still carries it.
 
 ## Server (Rust first, ADR-010)
 
-wire-rules props.rs: the owner table row kind "prop" (refr, owner, epoch, lease until), the claim rule (newest touch wins; the
-cell's host when the lease lapses or the owner leaves), the transform's acceptance (owner only, the budget), the record write (the
-reference's locationalData and asleep). C++: the handlers call the rules; the loader keeps items as today, admits MSTT in slice two.
+- Where the logic lives: wire-rules props.rs (rungs 1 to 3a): the owner table's row kind "prop" (owner, epoch, cell, asleep,
+  grabbed, the last sample's time, the step budget's allowance and its clock, the epoch's last seq and tMs) beside the epoch table;
+  claim (Granted, Held, Same, Moving, Away), pickup (Taken, Held, Moving), transform (Outside, Frozen, Away, Stale, Future,
+  NotOwner, Late, TooFast, Clamped, Returned, Woken, Accepted), unloaded, gone, loaded and reached; no clock changes a row.
+  wire-bridge rules.rs crosses them as codes (a sample's outcome {code, epoch, allowed}). The C++ gathers the facts and acts on the
+  codes: ActionListener's OnPropClaim (per reference), OnPropTransform (the record by the movement path's SetPos and SetAngle, the
+  relay, the words) and RefusePropPickup from OnActivate; PartOne's SendPropOwnerWord, AnswerPropWord and AnswerPropRecord (one
+  limiter, once per prop per second per seat), SendPropRecord, the departure's and the unload's words and the late listener's
+  word; and since rung 3 the listener keep in MpObjectReference::ForceSubscriptionsUpdate (WorldState's propLiveOwnerOf).
+- DB fields / migration: none. The rows and the epochs live in memory and start at 0 after a restart, as each client's table does
+  at its create word; the record's place is the reference's record (an asleep sample saves at once, SetPosMode::Other).
+- Restart behavior: as slice one's (D75, havok-props.md E36): the record's rest returns on both screens at the load, every prop
+  asleep and the host's by default.
+- Papyrus natives touched: none (no docs/NATIVES.md row; the platform's exports are no Papyrus natives).
 
 ## Client (TypeScript)
 
-PropSimService: the awake-prop scan and the stream on the simulator; the Keyframed apply with interpolation on the others; the
-claim on a grab (grabRelease event), a drop (the drop's handle), a contact (the native when it lands; proximity until then).
+- TS handler: PropService (skymp5-client propService.ts) and sync/propFollow.ts (rung 2's follower, a pure module): the owner's
+  stream from readBodies with the heartbeat, the rest at deactivation and the priority accumulator (rung 2); the word by ownerOf and
+  hostsCell, an equal epoch applied, a rest the word overtook sent again (rungs 1 and 2); the touches, the contact event held while
+  another seat's stream is live here (A3), the hand from Game.getPlayerGrabbedRef, the drop, and since rung 3 propImpulse's one
+  claim per impact and the island's claims; the follower's render clock and the take-over's hand-off (rung 2); the tracked set,
+  the nearest 64 within 1,024 units, and since rung 3 every prop kept at any distance while loaded and the far wakes. The drop
+  service frees the engine's own dropped copy by Disable before Delete (W3, rung 1).
+- SP binding: the fork's own exports beside setPropFollowed, never Papyrus natives: the propContact event (slice one), readBodies
+  and setBodyVelocity (rung 2), propImpulse, setImpulseCauseRule and readBodies' islands (rung 3), declared in codegen's
+  Definitions.txt and typed for the client in clientListener.ts's module augmentation.
+- Kill switch config keys: propPhysics (the verb); propImpulseCause (rung 3's impulse rule, default on); propFollowDelayMs (the
+  render delay, default 300, 0 to 600); propBodyReadLog (the "body" lines, off by default). propContactFallback is deleted at
+  rung 3.
 
 ## Tests
 
+- Physics rungs 1 to 3 (2026-11-12): each rung's Tests line under Ownership. T0 and T2 run on each head (rung 1's T2 green on
+  f38f5249; the later heads' at their stages); the T3 probes are drafts by path, unrun on the builds, and the gate scenarios
+  b-prop-arbitration, b-prop-follow and b-prop-impulse are promoted only from their green legs, each in its own commit (rule 13).
 - T0: the owner rule (claim, lease, host default, epoch), the validator's bounds and budget (wire-test fixtures per row).
 - T2: a difftest session with a transform stream and a claim; the legacy core has no rows, so the session's divergences are declared.
 - T3: x-prop-push (c1 walks into a basket at lab-spawn; within 2 s c2's basket is within 32 units of c1's and rests where c1's
@@ -268,19 +670,27 @@ touch and 78304 every step with bumpedBody the basket; on the other seat 79131 f
 stream's first sample within 100 ms of the first contact on the owner's seat. The thread the callback runs on decides whether the
 hook's event send hops to the JS thread.
 
+Physics rungs 2 and 3 (2026-11-12): each new HYPOTHESIS row of docs/engine/havok-props.md names its read, all by path, each with a
+fresh review before its first run (ADR-064 amendment A): x-body-read v1.2 (E45 at P0, E46 at leg A, E48 at leg B) and
+x-prop-follow v1.2 (E47 at leg D) from lab/.cache/drafts/physics/rung2-stage; x-prop-impact v1.1 (E49 at I1 and I2, E52 and E53 at
+I2) and x-prop-blast v4.1 (E51's watcher half at leg C) from rung3-stage, with prop-impulse.js ATTACH_ONLY on rung 3's seats, since
+Frida takes one replacement a function a process. Owner: agent (the lab).
+
 ## Status
 
-- [x] doc complete, inventory listed with a disposition per row, rung declared (ticked 17:36 PDT 2026-10-29 by the pass: the Engine surface table and the Observe, Impose, Suppress split carry a disposition per row; Rung R2 for the transform, R0 for the claim, declared at the top; the reference trace is the stage's, lab/references/prop-push.json when x-prop-push runs under the recorder)
-- [x] engine surface cited or delegated (ticked 17:36 PDT 2026-10-29 by the pass: every row cites CommonLibSSE-NG by file:line; the touch was delegated to the re-analyst and read, docs/research/m3/re-havok-contact.md, its ids 79131, 78304 and 26003 by `just addr`, HYPOTHESIS until lab/frida/prop-contact.js)
-- [x] message contract in wire-schema with validators and fixtures (same commit; 879f9e88)
-- [x] server rule in Rust with T0 (8699e3c8; the C++ T0 PropTest runs on CI)
-- [ ] native hook + T1 (the contact hook BUILT, fork m3-prop-physics be76cf80: a Gum on-enter detour on 79131 filtered to the player's proxy controller and the clutter and props layers, one propContact event per prop per 250 ms through the tick queue; T1 none, the trace at the stage; the transform read and the Keyframed set are the platform's own natives)
-- [x] SP binding and TS service (the TS PropService, bb4e9f9f; no new SP binding in slice one: setMotionType, translateTo, setPosition from the platform's own surface)
+- [x] doc complete, inventory listed with a disposition per row, rung declared (ticked 17:36 PDT 2026-10-29 by the pass: the Engine surface table and the Observe, Impose, Suppress split carry a disposition per row; Rung R2 for the transform, R0 for the claim, declared at the top; the reference trace is the stage's, lab/references/prop-push.json when x-prop-push runs under the recorder; physics rungs 1 to 3's rules, lines and declared limits under Ownership, 2026-11-12)
+- [x] engine surface cited or delegated (ticked 17:36 PDT 2026-10-29 by the pass: every row cites CommonLibSSE-NG by file:line; the touch was delegated to the re-analyst and read, docs/research/m3/re-havok-contact.md, its ids 79131, 78304 and 26003 by `just addr`, HYPOTHESIS until lab/frida/prop-contact.js; rungs 2 and 3's surface by CommonLib file:line, their engine claims docs/engine/havok-props.md E45 to E53, 2026-11-12)
+- [x] message contract in wire-schema with validators and fixtures (same commit; 879f9e88; on fork branches, 2026-11-12: player 0 at 8d6f92f1, SCHEMA_VERSION 45, and v2 at e8d2251d, SCHEMA_VERSION 46, each with its validators, fixtures, C++ structs and TS interfaces)
+- [x] server rule in Rust with T0 (8699e3c8; the C++ T0 PropTest runs on CI; on fork branches, 2026-11-12: A1 to A7 at d463d367 with the pickup a539bded, v2 at a8c36dd2, rung 3a at d603ea09 and 92b032cd, each with its T0)
+- [ ] native hook + T1 (the contact hook BUILT, fork m3-prop-physics be76cf80: a Gum on-enter detour on 79131 filtered to the player's proxy controller and the clutter and props layers, one propContact event per prop per 250 ms through the tick queue; T1 none, the trace at the stage; the transform read and the Keyframed set are the platform's own natives; on fork branches, 2026-11-12: readBodies and setBodyVelocity, 6009b024, 5d6d5259 and 4c9ff632; the 26004 and 26005 replacements, the three brackets and propImpulse, bebaccc5 and 042f6907; T1 none)
+- [x] SP binding and TS service (the TS PropService, bb4e9f9f; no new SP binding in slice one: setMotionType, translateTo, setPosition from the platform's own surface; on fork branches, 2026-11-12: the clients of rungs 1 to 3, b7151a42, 3b141876 and 6190c370, with their fixes)
 - [x] T2 green (ticked 20:09 PDT 2026-10-29: P3 f61a2b39's T2 GREEN at 03:08Z, numidium, its own difftest job 14395; the prop-physics
       session identical to legacy with its 14 declared divergences, the kept server log without an E_PROP line; the union P3-win
-      72c44f04's T2 is the last before the stage)
+      72c44f04's T2 is the last before the stage; the physics rungs, 2026-11-12: rung 1's T2 of f38f5249 green at 09:29Z, 1af7641d's red on
+      the pickup's row reverted at d9da7da3; the later heads' at their stages)
 - [ ] T3 scenario green (b-prop-push GREEN at the gate 20261101-032302 on 4f746162; x-prop-push v16 GREEN 20261101-014442 on b763e3ac with the restart leg; pass v13 and (UNTICKED 19:02 PST 2026-11-02: 30 open engine claim lines over it, the root-cause plan's W5 and VERB.md's rule; ticked again when each claim cites a run or trace id, lab/tools/verb-lint.py)
-      grab v9 green on 222a7471, rerun on b763e3ac at the stage; b-prop-push on thuum main 703eabcf, its first run at the train's gate)
+      grab v9 green on 222a7471, rerun on b763e3ac at the stage; b-prop-push on thuum main 703eabcf, its first run at the train's gate;
+      the physics rungs' gate scenarios, 2026-11-12: b-prop-arbitration, b-prop-follow and b-prop-impulse unpromoted, their probes unrun on the builds)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green (ADR-033)
 - [ ] ledger and suppression registry updated
@@ -432,19 +842,30 @@ T2 runs again on 88e72156.
 
 | number | value | where | what sizes it |
 | --- | --- | --- | --- |
-| PROP_LEASE_MS | 3000 | wire-rules props | how long a toucher keeps a sleeping prop before the host does; the hand-over's visible seam |
-| PROP_SILENCE_MS | 3000 | wire-rules props | an awake row with no sample lapses; a creeping body (under 2 units per 100 ms) sends every 2 units, so its gaps bound it |
-| PROP_GRAB_MAX_MS | 120000 | wire-rules props | a grab nobody released; the longest a player holds an object in play |
+| PROP_LEASE_MS | 3000 | wire-rules props; RETIRED at physics rung 1 (d463d367: A1 to A7, no timer) | how long a toucher keeps a sleeping prop before the host does; the hand-over's visible seam |
+| PROP_SILENCE_MS | 3000 | wire-rules props; RETIRED at physics rung 1 (d463d367) | an awake row with no sample lapses; a creeping body (under 2 units per 100 ms) sends every 2 units, so its gaps bound it |
+| PROP_GRAB_MAX_MS | 120000 | wire-rules props; RETIRED at physics rung 1 (D-PH3 A: no grab cap) | a grab nobody released; the longest a player holds an object in play |
 | PROP_MAX_SPEED_UNITS_PER_S | 6000 | wire-rules props | the fastest a kicked or shouted body flies between accepted samples (E_PROP_STEP counts in the server log) |
-| PROP_STEP_FLOOR_UNITS | 128 | wire-rules props | the first sample after a grant (the record's distance from the body); REPLACED on fork m4-scripts-2b-traps (ADR-068 D-S3's hardening) by a per-row distance allowance, a token bucket refilled at PROP_MAX_SPEED_UNITS_PER_S and capped at 600 units (UNMEASURED), owned by the prop and carried across grants, so over any window the record moves at most 600 + 6000 x seconds (a crafted 96 Hz stream cut from 122,880 to 60,416 units in 10 s); a body more than 600 units ahead of its record cannot catch up until it rests near the record again, which m4-prop-blast's 3000-unit first sample must reconcile |
-| PROP_FIRST_SAMPLE_UNITS | 3000 (PROP_MAX_SPEED x 0.5 s) | wire-rules props | a simulator's first sample of a prop with no live row (the host's of a resting prop, a lapsed row's): half a second of flight, since a blast moves the prop before the first sample (playtest 41's cabbages; fork m4-prop-blast 020de9ab) |
+| PROP_STEP_FLOOR_UNITS | 128 | wire-rules props | the first sample after a grant (the record's distance from the body); REPLACED on fork m4-scripts-2b-traps (ADR-068 D-S3's hardening) by a per-row distance allowance, a token bucket refilled at PROP_MAX_SPEED_UNITS_PER_S and capped at 600 units (UNMEASURED), owned by the prop and carried across grants, so over any window the record moves at most 600 + 6000 x seconds (a crafted 96 Hz stream cut from 122,880 to 60,416 units in 10 s); a body more than 600 units ahead of its record cannot catch up until it rests near the record again, which m4-prop-blast's 3000-unit first sample must reconcile (reconciled by rung 3a's PROP_FIRST_SAMPLE_UNITS below; the bucket's capacity is PROP_STEP_ALLOWANCE_UNITS) |
+| PROP_FIRST_SAMPLE_UNITS | 3000 (PROP_MAX_SPEED x 0.5 s) | wire-rules props (physics rung 3a, d603ea09 and 92b032cd, on rung 2's clock from 020de9ab's number) | an epoch's first sample takes at most this much of the prop's clock time; any accepted sample leaves one step at most; 10,500 a second from a new row's grant; rung 2's 14,100 and 8,100 stand over any window. Half a second of flight, since a blast moves the prop before the word naming its mover arrives (playtest 41's cabbages; 0x1c0c6 at 1,353.7 units a second in 20261111-223256); x-prop-impact v1.1 reads the impact-to-first-sample time |
 | kWorldBodyTether | 2048 (UNMEASURED: a fall's extent) | ActionListener (m4-scripts-2b-traps) | a trap body's sample farther than this from its game-file position is refused E_PROP_FAR (ADR-068 D-S3: a world body is claimed by impulse, touch 3, alone; the first firing wins, E_PROP_MOVING) |
-| kPropTouchReach, kPropDropReach, kPropImpulseReach | 256, 512, 2048 | ActionListener | the claimant's distance to the record at a contact or grab, a drop, an impulse (E_PROP_REACH); the client sends touch IMPULSE for a prop that moves by itself within IMPULSE_WINDOW_MS 1500 of its own shout or cast release (propService, playtest 41; fork m4-prop-blast-client 81c8cb0f, in the chest bundle 8415e637) |
+| kPropTouchReach, kPropDropReach, kPropImpulseReach | 256, 512, 2048 | ActionListener; RETIRED at physics rung 1 (715e0b8b: the listener check, E_PROP_UNSEEN; the client's IMPULSE_WINDOW_MS of 81c8cb0f never reached canon, and rung 3's propImpulse event is the impulse's claim) | the claimant's distance to the record at a contact or grab, a drop, an impulse (E_PROP_REACH); the client sends touch IMPULSE for a prop that moves by itself within IMPULSE_WINDOW_MS 1500 of its own shout or cast release (propService, playtest 41; fork m4-prop-blast-client 81c8cb0f, in the chest bundle 8415e637) |
 | SEND_MIN_MS, SAMPLE_UNITS, SAMPLE_DEGREES | 100, 2, 2 | PropService | the stream's cadence and dead band; the follower's glide reads as motion a sample behind |
-| STIR_UNITS, SLEEP_AFTER_MS | 0.25, 500 | PropService | the sleep stand-in (the platform exposes no Havok state); too short and a slowing body sleeps early, too long and the lease starts late |
-| REST_READ_MS | 100 | PropService | a resting simulated body's read cadence; the cost of sixty-four host-default props at rest |
+| STIR_UNITS, SLEEP_AFTER_MS | 0.25, 500 | PropService; DELETED at physics rung 2 (3b141876: rest is readBodies' awake bit, the engine's deactivation) | the sleep stand-in (the platform exposes no Havok state); too short and a slowing body sleeps early, too long and the lease starts late |
+| REST_READ_MS | 100 | PropService; DELETED at physics rung 2 (3b141876) | a resting simulated body's read cadence; the cost of sixty-four host-default props at rest |
 | TRACK_RADIUS, TRACK_MAX, RESCAN_MS | 1024, 64, 500 | PropService | which props a seat tracks; the rescan's native count |
-| GLIDE_MIN_MS, GLIDE_MAX_MS, JUMP_UNITS | 50, 300, 256 | PropService | the follower's interpolation window and its snap threshold |
+| GLIDE_MIN_MS, GLIDE_MAX_MS, JUMP_UNITS | 50, 300, 256 | PropService; the glide DELETED at physics rung 2 (the follower's segments, SEGMENT_MIN_MS 50), JUMP_UNITS kept | the follower's interpolation window and its snap threshold |
+| PROP_MOVING_MS, STREAM_LIVE_MS | 1600, 1600 | wire-rules props, PropService | physics rung 1 (1458d977): the window in which no contact, drop or impulse takes another seat's awake stream, and the follower's live window, kept equal: about three heartbeat intervals and a frame; STREAM_LIVE_MS DELETED at rung 2 for the render clock's quiet (FOLLOW_QUIET_MS). UNMEASURED: E10 sizes them |
+| STREAM_HEARTBEAT_MS | 500 | PropService | physics rung 1 (D-PH4 B): an awake or held body's sample at least this often, moved or not |
+| PROP_STEP_ALLOWANCE_UNITS | 600 (PROP_MAX_SPEED x 0.1 s) | wire-rules props | the step budget's capacity for any sample after an epoch's first (63ead9b2's bucket), and since rung 3a the most any accepted sample leaves it |
+| PROP_CLOCK_LAG_MS, PROP_CLOCK_SLACK_MS | 1000, 250 | wire-rules props | physics rung 2's one clock per prop (the generic cell rate algorithm): how far behind and ahead of the server's clock the step budget's own may run; the bound over any window, 14,100 units a second and 8,100 at one instant. UNMEASURED: x-prop-follow's loss leg, whose netem shapes only sky-srv's outgoing traffic |
+| PROP_MAX_LIN_UNITS_PER_S, PROP_MAX_ANG_RAD_PER_S | 6000, 1000 | wire-validate | physics rung 2: a sample's lin (pinned to PROP_MAX_SPEED_UNITS_PER_S by wire-bridge) and ang in length; x-prop-follow's tumbling leg reads the largest ang. UNMEASURED |
+| PROP_BONE_REACH_UNITS, PROP_QUAT_NORM_SLACK, cap::PROP_BONES | 512, 1%, 64 | wire-validate, wire-schema | physics rung 2: a body pose's distance from pos, its quaternion's slack, the poses one sample carries (a humanoid's 19 bodies, 20261111-194559). UNMEASURED |
+| cap::PROP_CLAIM_REFRS | 16 | wire-schema | physics rung 2: the references one claim names (the cart's blast moved at most eight with every item Dynamic) |
+| FOLLOW_DELAY_MS (propFollowDelayMs), FOLLOW_DELAY_MAX_MS | 300, 600 | PropService | physics rung 2: the follower's render delay behind the owner's clock, a client setting, and its most (the 8-sample buffer less the pair it renders). UNMEASURED |
+| FOLLOW_QUIET_MS | 1000 | PropService | physics rung 2: two heartbeats past the newest awake sample on the render clock, the stream quiet and D73's rest (with the delay, a gap of 1,300 ms between arrivals by default) |
+| SEND_BUDGET_BURST, SEND_BUDGET_PER_S, PRIORITY_SPEED_FLOOR | 128, 80, 100 | PropService | physics rung 2's priority accumulator: the mirror of the server's prop budget (128 at once, 96 a second) with margin, and the speed a still held body's heartbeat counts at. UNMEASURED |
+| CONE_BATCH_MS | 100 | PropService | physics rung 3: a cone's impact events folded by cause before its one claim (the cone crosses the cart in about 70 ms). UNMEASURED: x-prop-impact's leg I2 |
 
 ## The candidate set (07:06 PDT 2026-10-30; the stage's read of x-prop-push 133010, x-prop-pass 133232, x-prop-drop 132737)
 
