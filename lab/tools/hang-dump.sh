@@ -53,7 +53,7 @@ echo "== $client: the dump into $run $(date +%H:%M:%S)"
 guest "$dump" 900 | tail -1 || echo "   the dump script did not end cleanly"
 dir='C:\Users\lab\Documents\My Games\Skyrim Special Edition\SKSE'
 for name in skse64.log skyrim-platform.log; do
-  ps="$(copy_ps "'$dir\\$name'" "C:\\sky-lab\\$client-hang-$name"); \$ErrorActionPreference = 'Continue'; & \"\$env:SystemRoot\\System32\\curl.exe\" --fail --silent --show-error --upload-file 'C:\\sky-lab\\$client-hang-$name' '$url?name=$name'; 'curl ' + \$LASTEXITCODE"
+  ps="$(copy_ps "'$dir\\$name'" "C:\\sky-lab\\$client-hang-$name"); \$ErrorActionPreference = 'Continue'; \$null = & \"\$env:SystemRoot\\System32\\curl.exe\" --fail --silent --show-error --upload-file 'C:\\sky-lab\\$client-hang-$name' '$url?name=$name'; 'curl ' + \$LASTEXITCODE"
   echo "   $name: $(guest "$(enc "$ps")" | tail -1)"
 done
 echo "== $client evidence at https://thuum.gaussing.tv/results/$run/ ($client-SkyrimSE.dmp, $client-skse64.log, $client-skyrim-platform.log)"

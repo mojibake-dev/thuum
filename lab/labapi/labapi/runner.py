@@ -94,7 +94,9 @@ $bytes = (Get-Item -LiteralPath $path).Length
 # would end the script there with the dump left on the disk
 $ErrorActionPreference = 'Continue'
 $sw.Restart()
-& "$env:SystemRoot\System32\curl.exe" --fail --silent --show-error --max-time @UPLOAD_S@ --upload-file $path '@URL@'
+# curl.exe's answer captured: a native program left uncaptured writes to the script's stdout itself, and lab-api's
+# {"ok": true, ...}, which ends in no newline, would share the last line with the JSON below (20261112-125536's c1)
+$null = & "$env:SystemRoot\System32\curl.exe" --fail --silent --show-error --max-time @UPLOAD_S@ --upload-file $path '@URL@'
 $curl = $LASTEXITCODE
 $upMs = $sw.ElapsedMilliseconds
 Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
@@ -122,7 +124,9 @@ $list = @($dumps | ForEach-Object { '{"name": "' + $_.Name + '", "bytes": ' + $_
 $curl = -1
 if ($dumps.Count -gt 0) {
     $ErrorActionPreference = 'Continue'
-    & "$env:SystemRoot\System32\curl.exe" --fail --silent --show-error --max-time @UPLOAD_S@ --upload-file $dumps[-1].FullName '@URL@'
+    # captured, as the hang dump's: uncaptured, lab-api's answer and this script's JSON shared one line, which read as no
+    # answer, the seat a fault and the crash unnamed (20261112-125536, c1's SkyrimSE.exe.6408.dmp)
+    $null = & "$env:SystemRoot\System32\curl.exe" --fail --silent --show-error --max-time @UPLOAD_S@ --upload-file $dumps[-1].FullName '@URL@'
     $curl = $LASTEXITCODE
 }
 Write-Output ('{"games": [' + ($games -join ', ') + '], "dumps": [' + $list + '], "curl": ' + $curl + '}')
