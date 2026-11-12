@@ -5324,6 +5324,28 @@ And, the same session, of M3's reanimation row (51's M3-2, after M3's paper clos
 never merged): "Finish it before 51": merged onto canon after train 52, its open hypotheses (ADR-060 H1 to H3) settled with its
 probe x-reanimate-claim, staged and merged while the physics rungs build.
 
+Rungs 4 to 7's decisions (Eli in session, 2026-11-12 about 07:38Z, recorded 07:40Z by thuum-fa; asked from the rung plans,
+lab/.cache/drafts/physics/rung4-plan.md 907df505, rung5-plan.md 171b9bfb and rung67-plan.md 4f579381, each recommending A; Eli
+verbatim: "all A"):
+- D-PH9, where the static class is read: on every seat, from its loaded 3D (the root's BSX kDynamic through one export, cached per
+  binding); the server holds every MSTT reference and admits a world body by any touch, bounded by its kind gate, the listener
+  check, the step allowance and the tether; a STAT with a dynamic model stays no row (over a class table built from the archives,
+  and over no class at all).
+- D-PH10, a world object of several bodies (the Riverwood Trader's sign: seven bodies on a Fixed anchor): rung 4 builds the bodies'
+  stream and impose (bones for a world body, the route read first by x-body-impose v2), and rung 5 reuses it for ragdolls; the
+  sign swings on both screens from rung 4.
+- D-PH11, the epoch a body's record names: ChangeForm's epoch becomes the epoch of the owner word the sender holds for the form
+  (the cell's grant for a hosted actor, the dead row's PropOwner word for a body), ADR-066 decision 3's meaning, in SCHEMA 47.
+- D-PH12, a body's rest: the engine's deactivation from rung 5, for the death's fall and a drag alike (one rest, the asleep
+  sample, the record sent before it); CORPSE_REST_* deleted at rung 5, the server's settle window kept to rung 6 as the backstop.
+- D-PH13, a copy whose record lies inside a player's capsule at its placement: held Keyframed at its record until no capsule
+  holds it, then D73's rest (HYPOTHESIS: the character controller steps the player out of a Keyframed body as off a moving
+  platform).
+- D-PH14, gate.yaml's pending list at rung 7: the leg empties its own entries and names the five others with their owners in
+  the thaw's commit, left pending.
+- D-PH15, the thaw with rows the lab has not read: a player-visible row still HYPOTHESIS at rung 7 becomes a declared limit with
+  its Dynamic section (rule 8), named in the thaw's note, and havok-props.md thaws for the rest.
+
 Amends: ADR-064 decision 7 (dated note under it), ADR-063's props note (accepted under it), ADR-058's slices (slice two kept as a
 derived class; slice three is rungs 5 and 6), ADR-067 decision 4 (its final sample is the asleep sample; the built ChangeForm
 apply is the record). W3 stays Eli's at the time: a rewrite of b-prop-push's step 27 if the drop read calls for one (decided
