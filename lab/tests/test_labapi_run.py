@@ -1389,6 +1389,33 @@ class CrashEvidence(RunTests):
                           "CrashLogger wrote no log for pid 4242"])
         self.assertIn("c1-launch.log", body["artifacts"])
 
+    def test_a_lost_games_exit_row_says_how_it_ended(self):
+        # 20261112-130030: c1's game gone with no dump, no Application row and no CrashLogger log, where the Security log's
+        # 4689 row for its pid said 0xC0000005 0.6 s after its last line. A row of another pid, and one of this pid from
+        # before the game's start (Windows reuses pids), are not its exit
+        exits = [{"pid": "0x1093", "status": "0x0", "by": "lab", "utc": "2026-10-17T22:00:30.0000000Z"},
+                 {"pid": "0x1092", "status": "0x0", "by": "SYSTEM", "utc": "2026-10-17T21:59:00.0000000Z"},
+                 {"pid": "0x1092", "status": "0xc0000005", "by": "lab", "utc": "2026-10-17T22:00:31.5000000Z"}]
+        scripts = self._seat({"games": [], "dumps": [], "curl": -1, "exits": exits})
+        run_id, body = self._run(self.RUN)
+        self.assertEqual(body["verdict"], "error", body)
+        self.assertEqual([f["error"] for f in body["failures"]],
+                         [f"E_RUN_GAME_LOST: c1's game ({self.WAS}) was not running at the run's end; Windows logged its exit, "
+                          "0xC0000005 at 2026-10-17T22:00:31Z, asked for by lab (Security 4689); CrashLogger wrote no log for pid 4242"])
+        # the seat reads event 4689 since the run began, by the event's own field names
+        self.assertIn("LogName = 'Security'; Id = 4689; StartTime = $since.ToLocalTime()", scripts[0])
+        for field in ("ProcessName", "ProcessId", "Status", "SubjectUserName"):
+            self.assertIn(f"$d['{field}']", scripts[0])
+
+    def test_a_replaced_game_with_no_exit_row_says_so(self):
+        now = "5151@2026-10-17T22:00:40.0000000Z"
+        new_game = {"pid": "0x141f", "status": "0x0", "by": "lab", "utc": "2026-10-17T22:01:00.0000000Z"}  # the new game's own pid
+        self._seat({"games": [now], "dumps": [], "curl": -1, "exits": [new_game]})
+        run_id, body = self._run(self.RUN)
+        self.assertEqual([f["error"] for f in body["failures"]],
+                         [f"E_RUN_GAME_REPLACED: c1's game was {self.WAS} at the version check and {now} at the run's end; "
+                          "Windows logged no exit for it since the run began (Security 4689); CrashLogger wrote no log for pid 4242"])
+
     # CrashLogger's log as c1 wrote it on 2026-11-05 (20261105-152648's c1-crash-2026-11-05-07-27-25.log, cut down and
     # moved onto WAS: the seat's clock seven hours behind UTC, the game up 14 s), a system frame put before the plugin's
     CRASH_LOG = (

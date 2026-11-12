@@ -109,8 +109,13 @@ if ($curl -ne 0) { exit 4 }
 # Windows Error Reporting wrote for SkyrimSE.exe since the run began. LocalDumps names them
 # <exe>.<pid>.dmp under its DumpFolder (Microsoft, "Collecting User-Mode Dumps",
 # learn.microsoft.com/windows/win32/wer/collecting-user-mode-dumps; crash-dumps.ps1 sets it). The
-# newest goes up through the inbox curl.exe as the hang dump does. The last stdout line is one
-# JSON object. Placeholders: @DUMP_DIR@ @SINCE@ (Unix seconds) @URL@ @UPLOAD_S@.
+# newest goes up through the inbox curl.exe as the hang dump does. And the exit row Windows wrote
+# for each SkyrimSE.exe that ended since then (Security event 4689, which crash-dumps.ps1's Audit
+# Process Termination turns on): its pid, exit status and the account that asked for the exit, read
+# by the event's own field names (Microsoft, "4689(S) A process has exited", learn.microsoft.com),
+# so a game lost with no dump still says how it ended (20261112-130030's c1: 0xC0000005, no WER
+# dump, no Application row). The last stdout line is one JSON object. Placeholders: @DUMP_DIR@
+# @SINCE@ (Unix seconds) @URL@ @UPLOAD_S@.
 _CRASH_PS = r"""
 $ErrorActionPreference = 'Stop'
 $since = [DateTimeOffset]::FromUnixTimeSeconds(@SINCE@).UtcDateTime
@@ -129,12 +134,46 @@ if ($dumps.Count -gt 0) {
     $null = & "$env:SystemRoot\System32\curl.exe" --fail --silent --show-error --max-time @UPLOAD_S@ --upload-file $dumps[-1].FullName '@URL@'
     $curl = $LASTEXITCODE
 }
-Write-Output ('{"games": [' + ($games -join ', ') + '], "dumps": [' + $list + '], "curl": ' + $curl + '}')
+$ErrorActionPreference = 'Continue'
+$exits = @()
+try {
+    $exits = @(Get-WinEvent -FilterHashtable @{LogName = 'Security'; Id = 4689; StartTime = $since.ToLocalTime()} -ErrorAction SilentlyContinue |
+        ForEach-Object {
+            $d = @{}; foreach ($n in ([xml]$_.ToXml()).Event.EventData.Data) { $d[$n.Name] = [string]$n.'#text' }
+            if ($d['ProcessName'] -like '*\SkyrimSE.exe') {
+                '{"pid": "' + $d['ProcessId'] + '", "status": "' + $d['Status'] + '", "by": "' + ($d['SubjectUserName'] -replace '[\\"]', '') +
+                    '", "utc": "' + $_.TimeCreated.ToUniversalTime().ToString('o') + '"}'
+            } })
+} catch { $exits = @() }
+Write-Output ('{"games": [' + ($games -join ', ') + '], "dumps": [' + $list + '], "curl": ' + $curl + ', "exits": [' + ($exits -join ', ') + ']}')
 """
 
 # the modules a CrashLogger call stack passes through below any plugin, never the plugin it names
 _CRASH_LOG_SYSTEM = frozenset({"kernel32.dll", "kernelbase.dll", "ntdll.dll", "ucrtbase.dll", "vcruntime140.dll",
                                "vcruntime140_1.dll", "msvcp140.dll"})
+
+
+def exit_note(seen: dict[str, Any], game: str) -> str:
+    """How the run's game ended by Windows' own exit row (_CRASH_PS's exits, Security event 4689),
+    for E_RUN_GAME_LOST and E_RUN_GAME_REPLACED: "; Windows logged its exit, 0xC0000005 at
+    2026-11-12T13:03:13Z, asked for by lab (Security 4689)", the row whose pid is the game's and
+    whose time is not before its start (Windows reuses pids), or that no row names it. Nothing when
+    the seat's answer carries no exits. The account is the one that asked for the exit: the seat's
+    own user for a game that ended itself, SYSTEM for the guest agent's kill."""
+    if "exits" not in seen:
+        return ""
+    pid, _, start = game.partition("@")
+    for row in seen.get("exits") or []:
+        if not isinstance(row, dict):
+            continue
+        try:
+            row_pid, status = int(str(row.get("pid")), 16), int(str(row.get("status")), 16)
+        except ValueError:
+            continue
+        utc = str(row.get("utc") or "")
+        if str(row_pid) == pid and utc[:19] >= start[:19]:
+            return f"; Windows logged its exit, 0x{status:08X} at {utc[:19]}Z, asked for by {row.get('by') or 'no named account'} (Security 4689)"
+    return "; Windows logged no exit for it since the run began (Security 4689)"
 
 
 def crash_logger_signature(run_dir: Path, client: str, game: str) -> str:
@@ -2227,9 +2266,10 @@ class Runner:
         games = [x for x in seen.get("games") or [] if isinstance(x, str)]
         if was and "unreadable" not in games:
             if not games:
-                errors.append(f"E_RUN_GAME_LOST: {client}'s game ({was}) was not running at the run's end")
+                errors.append(f"E_RUN_GAME_LOST: {client}'s game ({was}) was not running at the run's end" + exit_note(seen, was))
             elif was not in games:
-                errors.append(f"E_RUN_GAME_REPLACED: {client}'s game was {was} at the version check and {', '.join(games)} at the run's end")
+                errors.append(f"E_RUN_GAME_REPLACED: {client}'s game was {was} at the version check and {', '.join(games)} at the run's end"
+                              + exit_note(seen, was))
         if not errors:
             return False
         added = [{"step": "end", "kind": "lab", "client": client, "error": error} for error in errors]
