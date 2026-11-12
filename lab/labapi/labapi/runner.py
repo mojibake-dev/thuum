@@ -1487,8 +1487,9 @@ class Runner:
         # server.log_count("<regex>") is live: the run's server log counted anew before each evaluation, an
         # until's every poll included (x-host-quit: the leave's line inside the until right after the quit). In an
         # until a seat's c.log_count("<regex>") is live too: each poll copies that seat's logs anew by a log-count
-        # step's own path (_log_count, its count kept as the step's is), each pattern once a poll and about 1.5 s of
-        # guest-agent reads a pattern, so a line that lands mid-until holds it (x-npc-death-freeze, x-scene-guest).
+        # step's own path (_log_count, its count kept as the step's is), each pattern once a poll and its guest-agent
+        # time a pattern to be measured (the copies, ranged reads and removals since 9e37956b; the log fetch's seat check
+        # times it), so a line that lands mid-until holds it (x-npc-death-freeze, x-scene-guest).
         # An assert counts no seat's log: it reads the last count taken (a log-count step's, or an until's last
         # poll's), the moment its scenario chose to count at
         holders = ["server", *(rec.scenario.clients if seat_counts else [])]
