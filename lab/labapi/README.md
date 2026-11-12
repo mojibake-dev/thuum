@@ -88,9 +88,10 @@ step so the view is fresh. `server.log_count("<regex>")` is counted from the
 run's server log anew before every `assert:` and every poll of an `until:`. A
 seat's `c1.log_count("<regex>")` is counted anew before each poll of an
 `until:` that names it, by a `log-count {pattern}` step's own copies of the
-seat's logs: each pattern once a poll, its guest-agent time a pattern to be
-measured (the log fetch's seat check times it), so a poll takes that much
-longer than its `every`. A known cost: every pattern copies the seat's two logs
+seat's logs: each pattern once a poll, its guest-agent time measured by the log
+fetch's seat check (2026-11-12, both seats: 6.5 to 6.6 s for two 6 MB logs, about
+1.8 MB/s; a run's own logs are far smaller), so a poll takes that much longer
+than its `every`. A known cost: every pattern copies the seat's two logs
 anew, where one copy a seat a poll could serve all its patterns; that saving
 is left for later. The copies come back as the
 run's logs do, in ranges, each removed once read (a copy, a ranged read and a
