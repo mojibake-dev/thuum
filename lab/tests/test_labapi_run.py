@@ -628,11 +628,15 @@ class ArtifactFailures(RunTests):
         tables = self.services.tables
         tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
         pve = self.services.control._b
+        # the log is copied on the seat and read back in ranges (_fetch_client_file), so the agent's reads fail there,
+        # whole and ranged
+        pve.files[self.settings.client_driver_log] = "platform log\n"
 
-        def boom(guest, path):
+        def boom(guest, path, *args):
             raise RuntimeError("500 Internal Server Error: QEMU guest agent is not running")
 
         pve.file_read = boom
+        pve.file_read_range = boom
         run_id, body = self._run(SOLO_WITH_LOG)
         self.assertEqual(body["verdict"], "green", body)
         self.assertTrue(any("c1.log" in n and "QEMU guest agent" in n for n in body["notes"]), body["notes"])
@@ -675,15 +679,22 @@ class ClientLogs(RunTests):
         self.assertEqual((run_dir / "c1-driver.log").read_text(), "2026-10-01T00:00:00Z loaded\n")
         self.assertEqual((run_dir / "c1-skse64.log").read_text(), "imagebase = 00007FF7AB420000\n")
         self.assertEqual((run_dir / "c1-TMS_AIPathingFreezeFix.log").read_text(), "patched 1 call\n")
-        copies = [c for c in pve.calls if c[0] == "exec" and "Copy-Item" in " ".join(c[2])]
-        self.assertEqual(len(copies), 4, pve.calls)
-        self.assertIn("game-dir.txt", " ".join(copies[1][2]))
-        self.assertIn("lab-driver-logs.txt", " ".join(copies[1][2]))
-        self.assertIn("game-dir.txt", " ".join(copies[2][2]))
-        self.assertIn("lab-console-logs.txt", " ".join(copies[2][2]))
+        # the three logs are each copied by a read that shares write access, since the game holds its logs open for
+        # writing (Copy-Item's read refused the console log, 20261111-193821), the SKSE folder's by one Copy-Item over
+        # its listing
+        copies = [" ".join(c[2]) for c in pve.calls if c[0] == "exec" and "[IO.File]::Open($src, 'Open', 'Read', 'ReadWrite')" in " ".join(c[2])]
+        self.assertEqual(len(copies), 3, pve.calls)
+        self.assertIn(f"$src = '{self.settings.client_driver_log}'", copies[0])
+        self.assertIn("game-dir.txt", copies[1])
+        self.assertIn("lab-driver-logs.txt", copies[1])
+        self.assertIn("game-dir.txt", copies[2])
+        self.assertIn("lab-console-logs.txt", copies[2])
+        self.assertFalse([c for c in copies if "Copy-Item" in c])
+        listings = [c for c in pve.calls if c[0] == "exec" and "Copy-Item" in " ".join(c[2])]
+        self.assertEqual(len(listings), 1, pve.calls)
         # one listing: the folder skyrim-platform.log is in, itself left out (it is c1.log), then every other
         # My Games\<folder>\SKSE (the freeze fix logs under Skyrim.INI\SKSE), a name kept from its first folder
-        listing = " ".join(copies[3][2])
+        listing = " ".join(listings[0][2])
         self.assertIn(r"$main = 'C:\Users\lab\Documents\My Games\Skyrim Special Edition\SKSE'", listing)
         self.assertIn("Join-Path $_.FullName 'SKSE'", listing)
         self.assertIn("-Filter '*.log'", listing)
@@ -717,6 +728,212 @@ class ClientLogs(RunTests):
         self.assertEqual(body2["verdict"], "green", body2)
         self.assertNotIn("c1-before.log", body2["artifacts"])
         self.assertFalse(any(c[0] == "exec" and "c1-before.log" in " ".join(c[2]) for c in pve.calls))
+
+    def _managed_c1(self):
+        from labapi.guests import Guest
+
+        self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
+        return self.services.control._b
+
+    def test_a_log_is_copied_by_a_read_that_shares_write_access(self):
+        """The game holds its logs open for writing, and Copy-Item's read refused them (the c1.log entry's console
+        copy in 20261111-193821, 194559 and 195437): a log is copied as the frida traces and log-count copy theirs,
+        [IO.File]::Open sharing read and write, the copy exec printing the source's length at its open and the copy's."""
+        pve = self._managed_c1()
+        pve.files[self.settings.client_driver_log] = "platform log\n"
+        run_id, body = self._run(SOLO_WITH_LOG)
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertEqual((self.tmp / "results" / run_id / "c1.log").read_text(encoding="utf-8"), "platform log\n")
+        copy = next(" ".join(c[2]) for c in pve.calls if c[0] == "exec" and "[IO.File]::Create('C:\\sky-lab\\c1.log')" in " ".join(c[2]))
+        for part in (f"$src = '{self.settings.client_driver_log}'", "[IO.File]::Open($src, 'Open', 'Read', 'ReadWrite')",
+                     "$n = $s.Length", "$m = $d.Length", "Write-Output ([string]$n + ' ' + [string]$m)"):
+            self.assertIn(part, copy)
+        self.assertNotIn("Copy-Item", copy)
+        self.assertNotIn("C:\\sky-lab\\c1.log", pve.files, "the copy leaves the seat once read")
+
+    def test_a_log_larger_than_a_range_comes_back_byte_exact(self):
+        """Playtest 45's c1 log reached 25k lines, and read whole the console logs timed out the agent on both seats
+        (20261111-191642): a log comes back through Proxmox's ranged file-reads of READ_RANGE_BYTES, joined as bytes
+        and decoded once, so a range boundary inside a multibyte character splits nothing."""
+        from labapi.runner import READ_RANGE_BYTES as R
+
+        log = "a" * (R - 1) + "é" + "b" * (R - 3) + "€" + "c" * 10 + "\n"
+        pve = self._managed_c1()
+        pve.files[self.settings.client_driver_log] = log
+        run_id, body = self._run(SOLO_WITH_LOG)
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertEqual((self.tmp / "results" / run_id / "c1.log").read_bytes(), log.encode("utf-8"))
+        self.assertEqual([c[3:] for c in pve.calls if c[:3] == ("file_read_range", 901, "C:\\sky-lab\\c1.log")],
+                         [(0, R), (R, R), (2 * R, 12)])
+        self.assertFalse([c for c in pve.calls if c[:3] == ("file_read", 901, "C:\\sky-lab\\c1.log")], "no whole read")
+        self.assertFalse([n for n in body["notes"] if n.startswith("c1.log:")], body["notes"])
+
+    def test_a_log_range_still_unread_after_its_retries_is_a_note(self):
+        """A log is evidence for a reader, not for the verdict: a range whose read still times out after
+        file_read_range's own retries leaves the log out with a note naming its code and "(log fetch)", the run's
+        verdict as it was."""
+        from unittest import mock
+
+        from labapi import proxmox
+        from labapi.proxmox import ProxmoxError
+        from labapi.runner import READ_RANGE_BYTES as R
+
+        pve = self._managed_c1()
+        pve.files[self.settings.client_driver_log] = "x" * (R + 10) + "\n"
+        plain_range = pve.file_read_range
+
+        def file_read_range(guest, path, offset, count):
+            if path == "C:\\sky-lab\\c1.log" and offset == R:
+                pve.calls.append(("file_read_range", guest.vmid, path, offset, count))
+                raise ProxmoxError(f"E_PVE_FILE: {guest.name}: ResourceException: 500 Internal Server Error: VM {guest.vmid} "
+                                   "qga command 'guest-file-read' failed - got timeout")
+            return plain_range(guest, path, offset, count)
+
+        pve.file_read_range = file_read_range
+        with mock.patch.object(proxmox, "FILE_READ_PAUSES", (0.0, 0.0)):
+            run_id, body = self._run(SOLO_WITH_LOG)
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertEqual(body["failures"], [])
+        self.assertIn("c1.log: range 2 of 2: E_PVE_FILE: fake-c1: ResourceException: 500 Internal Server Error: VM 901 qga "
+                      "command 'guest-file-read' failed - got timeout (log fetch)", body["notes"])
+        self.assertNotIn("c1.log", body["artifacts"])
+        self.assertEqual([c[3:] for c in pve.calls if c[:3] == ("file_read_range", 901, "C:\\sky-lab\\c1.log")],
+                         [(0, R)] + [(R, 11)] * 3)
+        self.assertNotIn("C:\\sky-lab\\c1.log", pve.files, "the copy leaves the seat whatever the read did")
+
+    def test_a_log_copy_held_open_after_its_read_faults_the_seat(self):
+        """qemu-server 9.2.10 leaves a guest-file-read's handle open when a read dies, and only the seat's restart
+        closes it: a log copy the removal leaves is a note and the seat's fault, as a trace copy's is, so its next run
+        rolls it back; the log came back whole, so it is kept and the run's verdict stands."""
+        from labapi.proxmox import ExecResult
+
+        pve = self._managed_c1()
+        pve.files[self.settings.client_driver_log] = "platform log\n"
+        plain_exec = pve.exec
+
+        def exec_(guest, command, timeout):
+            if "Remove-Item -LiteralPath 'C:\\sky-lab\\c1.log' -Force" in " ".join(command):
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                return ExecResult(0, "True\r\n", "")  # still there: the agent holds it
+            return plain_exec(guest, command, timeout)
+
+        pve.exec = exec_
+        run_id, body = self._run(SOLO_WITH_LOG)
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertIn("c1.log", body["artifacts"])
+        held = "c1.log: C:\\sky-lab\\c1.log held open in its agent after its read"
+        self.assertIn(held, body["notes"])
+        self.assertEqual(self.services.runner.seats["c1"].force, f"its last run ({run_id}) ended in a fault: {held}")
+
+    def test_a_seats_named_log_comes_with_its_seats_one_fetch(self):
+        """c1-console.log read as a client called c1-console ("c1-console is unmanaged or unmapped; log not fetched"),
+        and eight committed scenarios list it beside c1.log: a seat's named log resolves to its seat's fetch, which keeps
+        c1.log, c1-driver.log and c1-console.log, made once however many of them the scenario names."""
+        pve = self._managed_c1()
+        logs = {"c1.log": "platform log\n", "c1-driver.log": "driver\n", "c1-console.log": "console\n"}
+        for name, text in logs.items():
+            pve.files[f"C:\\sky-lab\\{name}"] = text
+        run_id, body = self._run(SOLO_WITH_LOG.replace("artifacts: [server.log, c1.log]",
+                                                       "artifacts: [server.log, c1.log, c1-console.log, c1-driver.log]"))
+        self.assertEqual(body["verdict"], "green", body)
+        for name in logs:
+            self.assertEqual(body["artifacts"].count(name), 1, body["artifacts"])
+        self.assertFalse([n for n in body["notes"] if "unmanaged or unmapped" in n], body["notes"])
+        copies = [c for c in pve.calls if c[0] == "exec" and "[IO.File]::Open($src, 'Open', 'Read', 'ReadWrite')" in " ".join(c[2])]
+        self.assertEqual(len(copies), 3, "each log copied once")
+        # the console log named alone brings the seat's same fetch
+        for name, text in logs.items():
+            pve.files[f"C:\\sky-lab\\{name}"] = text
+        run_id, body = self._run(SOLO_WITH_LOG.replace("artifacts: [server.log, c1.log]", "artifacts: [c1-console.log]"))
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertEqual(sorted(n for n in body["artifacts"] if n in logs), sorted(logs))
+
+    def test_a_seats_named_log_on_an_unmanaged_seat_is_one_note(self):
+        run_id, body = self._run(SOLO_WITH_LOG.replace("artifacts: [server.log, c1.log]", "artifacts: [c1.log, c1-console.log]"))
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertEqual([n for n in body["notes"] if "unmanaged or unmapped" in n], ["c1.log: c1 is unmanaged or unmapped; log not fetched"])
+
+    def test_a_log_whose_source_is_not_there_is_a_note_untried_again(self):
+        """A source that is not there is said by the copy itself, `missing <path>`, and no try finds it, where three
+        tries 10 s apart spent about 25 s on it (the fresh review of e8d8de9b, nit 5): one copy exec, then a note naming
+        the path, E_RUN_LOG_FETCH and "(log fetch)"."""
+        pve = self._managed_c1()
+        run_id, body = self._run(SOLO_WITH_LOG)
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertIn(f"c1.log: E_RUN_LOG_FETCH: its source {self.settings.client_driver_log} is not there (log fetch)", body["notes"])
+        self.assertNotIn("c1.log", body["artifacts"])
+        copies = [c for c in pve.calls if c[0] == "exec" and "[IO.File]::Create('C:\\sky-lab\\c1.log')" in " ".join(c[2])]
+        self.assertEqual(len(copies), 1, "no try repeated")
+        self.assertIn("if (-not (Test-Path -LiteralPath $src)) { Write-Output ('missing ' + $src); exit 0 }", " ".join(copies[0][2]))
+
+    def test_a_seat_whose_guest_agent_is_not_running_skips_its_other_log_fetches(self):
+        """Each log's copy would spend its three tries on an agent only a restart brings back, about 75 s a seat (the
+        fresh review of e8d8de9b): once a fetch finds the seat's guest agent not running, its other log fetches this run
+        are skipped with one note, the SKSE folder's too."""
+        from labapi.proxmox import ProxmoxError
+
+        pve = self._managed_c1()
+        plain_exec = pve.exec
+
+        def exec_(guest, command, timeout):
+            if "[IO.File]::Open($src, 'Open', 'Read', 'ReadWrite')" in " ".join(command):
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                raise ProxmoxError(f"E_PVE_EXEC: {guest.name}: ResourceException: 500 Internal Server Error: QEMU guest agent is not running")
+            return plain_exec(guest, command, timeout)
+
+        pve.exec = exec_
+        run_id, body = self._run(SOLO_WITH_LOG)
+        self.assertEqual(body["verdict"], "green", body)
+        fetch_notes = [n for n in body["notes"] if n.endswith("(log fetch)")]
+        self.assertEqual(len(fetch_notes), 2, body["notes"])
+        self.assertTrue(fetch_notes[0].startswith("c1.log: E_RUN_LOG_FETCH: its copy failed three tries 10 s apart, the last "
+                                                  "E_PVE_EXEC: fake-c1: ResourceException: 500 Internal Server Error: QEMU guest "
+                                                  "agent is not running"), fetch_notes)
+        self.assertTrue(fetch_notes[1].startswith("c1-driver.log and c1's other logs after it not fetched: its guest agent was "
+                                                  "found not running ("), fetch_notes)
+        copies = [c for c in pve.calls if c[0] == "exec" and "[IO.File]::Open($src, 'Open', 'Read', 'ReadWrite')" in " ".join(c[2])]
+        self.assertEqual(len(copies), 3, "c1.log's three tries, and no copy for the logs after it")
+        self.assertFalse([c for c in pve.calls if c[0] == "exec" and "-Filter '*.log'" in " ".join(c[2])], "nor the SKSE folder's listing")
+        self.assertNotIn("c1.log", body["artifacts"])
+
+    def test_a_log_copy_past_the_cap_is_refused_before_its_first_read(self):
+        """A runaway log cannot hold up the run's end: a copy past FETCH_MAX_BYTES is refused before any range is read,
+        a note naming its size, E_RUN_LOG_FETCH the runner's own code, and the copy leaves the seat."""
+        from labapi.proxmox import ExecResult
+        from labapi.runner import FETCH_MAX_BYTES
+
+        pve = self._managed_c1()
+        pve.files[self.settings.client_driver_log] = "platform log\n"
+        big = FETCH_MAX_BYTES + 1
+        _log_copy_answers(pve, lambda guest, res: ExecResult(0, f"{big} {big}\r\n", ""), copy=r"C:\\sky-lab\\c1\.log")
+        run_id, body = self._run(SOLO_WITH_LOG)
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertIn(f"c1.log: E_RUN_LOG_FETCH: its copy is {big} bytes, past the {FETCH_MAX_BYTES} "
+                      f"({FETCH_MAX_BYTES // (1024 * 1024)} MiB) a fetch reads (log fetch)", body["notes"])
+        self.assertNotIn("c1.log", body["artifacts"])
+        self.assertFalse([c for c in pve.calls if c[:3] == ("file_read_range", 901, "C:\\sky-lab\\c1.log")])
+        self.assertNotIn("C:\\sky-lab\\c1.log", pve.files)
+
+    def test_a_log_copy_whose_exec_answer_was_lost_is_a_note(self):
+        """log-count's rule for a log too: only the copy exec's own "N M" proves a copy whole, so a copy whose answer the
+        agent lost is not kept as the log, a note naming E_RUN_LOG_FETCH and "(log fetch)", the verdict as it was (the
+        final check of 7ebf12a7)."""
+        from labapi.proxmox import ProxmoxError
+
+        pve = self._managed_c1()
+        pve.files[self.settings.client_driver_log] = "platform log\n"
+
+        def lost(guest, res):
+            raise ProxmoxError(f"E_PVE_EXEC_LOST: pid 42 on {guest.name}: the guest agent no longer knows it; the command "
+                               "ended and its answer is lost")
+
+        _log_copy_answers(pve, lost, copy=r"C:\\sky-lab\\c1\.log")
+        run_id, body = self._run(SOLO_WITH_LOG)
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertEqual(body["failures"], [])
+        self.assertIn("c1.log: E_RUN_LOG_FETCH: its copy's exec answer was lost, so the copy is unchecked (log fetch)", body["notes"])
+        self.assertNotIn("c1.log", body["artifacts"])
+        self.assertFalse([c for c in pve.calls if c[:3] == ("file_read_range", 901, "C:\\sky-lab\\c1.log")])
 
 
 
@@ -1180,14 +1397,15 @@ class FridaTraces(RunTests):
         self.assertIn("frida/c2-hand-two.js.jsonl", body["artifacts"])
 
 
-def _log_copy_answers(pve, answer):
-    """A trace's .log copy exec on the fake seat answering `answer(guest, the fake's own answer)`, every other exec as
-    the fake answers it: a seat whose copy reports another length than the bytes it holds."""
+def _log_copy_answers(pve, answer, copy=r"[^']+\.js\.log\.copy"):
+    """A copy exec on the fake seat answering `answer(guest, the fake's own answer)`, a trace's .log copy unless `copy`
+    (a regex) names another, every other exec as the fake answers it: a seat whose copy reports another length than the
+    bytes it holds."""
     plain_exec = pve.exec
 
     def exec_(guest, command, timeout):
         res = plain_exec(guest, command, timeout)
-        if re.search(r"\[IO\.File\]::Create\('[^']+\.js\.log\.copy'\)", " ".join(command)):
+        if re.search(r"\[IO\.File\]::Create\('" + copy + r"'\)", " ".join(command)):
             return answer(guest, res)
         return res
 
@@ -1277,19 +1495,25 @@ steps:
 
 @needs_deps
 class ScreenshotSteps(RunTests):
-    def _managed_c1(self, raise_with):
-        """c1 managed; its screenshot helper writes the shot's .b64, then the exec raises `raise_with`."""
+    def _managed_c1(self, raise_with, png=b"\x89PNG shot"):
+        """c1 managed; its screenshot helper writes the shot's .b64 (of `png`), then the exec raises `raise_with`."""
         from labapi.guests import Guest
 
         self.services.tables.guests["fake-c1"] = Guest("fake-c1", 901, "127.0.0.1", "qemu", "client", True, "clean-sp", "c1")
         pve = self.services.control._b
         real = pve.exec
+        self.png = png
 
         def exec_(guest, command, timeout):
+            # the helper's own exec (it starts sky-lab-screenshot), not the sidecar's length or removal, which name it too
             m = re.search(r"'([^']+\.png)\.b64'", " ".join(command))
-            if not m:
+            if not m or "sky-lab-screenshot" not in " ".join(command):
                 return real(guest, command, timeout)
-            pve.files[m.group(1) + ".b64"] = base64.b64encode(b"\x89PNG shot").decode()
+            pve.files[m.group(1) + ".b64"] = base64.b64encode(self.png).decode()
+            if raise_with is None:
+                from labapi.proxmox import ExecResult
+
+                return ExecResult(0, "", "")
             raise raise_with
 
         pve.exec = exec_
@@ -1320,6 +1544,85 @@ class ScreenshotSteps(RunTests):
         shot, pngs = self._shot(run_id, body)
         self.assertIn("screenshot skipped: E_PVE_EXEC", shot["note"], shot)
         self.assertEqual(pngs, [])
+
+    def test_a_shot_past_one_range_comes_back_whole_and_its_sidecar_leaves_the_seat(self):
+        """A whole agent file-read past about 1 MiB is unreliable on a busy seat (numidium's measure: a 1.46 MB console
+        copy timed out three times in a row on c1, and 512 KiB ranges took it whole in 4 s; 195437 lost three shots at
+        23 s each): the shot's .b64 sidecar comes back in ranges, joined and decoded once, and leaves the seat once
+        read."""
+        from labapi.runner import READ_RANGE_BYTES as R
+
+        png = bytes(range(256)) * 2500  # 640,000 bytes, a sidecar of 853,336, two ranges
+        self._managed_c1(None, png=png)
+        pve = self.services.control._b
+        run_id, body = self._run(SHOT)
+        self.assertEqual(body["verdict"], "green", body)
+        shot, pngs = self._shot(run_id, body)
+        self.assertEqual([p.read_bytes() for p in pngs], [png])
+        self.assertEqual(shot["note"], pngs[0].name)
+        sidecar = next(c[2] for c in pve.calls if c[0] == "file_read_range")
+        self.assertTrue(sidecar.endswith(".png.b64"), sidecar)
+        n = len(base64.b64encode(png))
+        self.assertEqual([c[3:] for c in pve.calls if c[:3] == ("file_read_range", 901, sidecar)], [(0, R), (R, n - R)])
+        self.assertFalse([c for c in pve.calls if c[0] == "file_read" and c[2].endswith(".png.b64")], "no whole read")
+        self.assertNotIn(sidecar, pve.files, "the sidecar leaves the seat once read")
+
+    def test_a_sidecar_range_still_unread_is_the_steps_note(self):
+        """A shot not read is the step's note, never the run's fault: a range of its sidecar still unread after
+        file_read_range's own retries skips the shot, and the sidecar still leaves the seat."""
+        from unittest import mock
+
+        from labapi import proxmox
+        from labapi.proxmox import ProxmoxError
+        from labapi.runner import READ_RANGE_BYTES as R
+
+        self._managed_c1(None, png=bytes(range(256)) * 2500)
+        pve = self.services.control._b
+        plain_range = pve.file_read_range
+
+        def file_read_range(guest, path, offset, count):
+            if path.endswith(".png.b64") and offset == R:
+                pve.calls.append(("file_read_range", guest.vmid, path, offset, count))
+                raise ProxmoxError(f"E_PVE_FILE: {guest.name}: ResourceException: 500 Internal Server Error: VM {guest.vmid} "
+                                   "qga command 'guest-file-read' failed - got timeout")
+            return plain_range(guest, path, offset, count)
+
+        pve.file_read_range = file_read_range
+        with mock.patch.object(proxmox, "FILE_READ_PAUSES", (0.0, 0.0)):
+            run_id, body = self._run(SHOT)
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertEqual(body["failures"], [])
+        shot, pngs = self._shot(run_id, body)
+        self.assertEqual(pngs, [])
+        self.assertTrue(shot["note"].startswith("screenshot skipped: range 2 of 2: E_PVE_FILE: fake-c1: ResourceException:"), shot)
+        self.assertFalse([p for p in pve.files if p.endswith(".png.b64")], "the sidecar leaves the seat whatever the read did")
+
+    def test_a_sidecar_held_open_after_its_read_faults_the_seat(self):
+        """A shot's sidecar that will not go once read is held open in the agent, a handle only the seat's restart
+        closes: the step's note and the seat's fault, a rollback at its next run; the shot is kept and the verdict is as
+        it was (_held, which a burst's one removal shares)."""
+        from labapi.proxmox import ExecResult
+
+        self._managed_c1(None)
+        pve = self.services.control._b
+        inner = pve.exec
+
+        def exec_(guest, command, timeout):
+            joined = " ".join(command)
+            if "Remove-Item -LiteralPath '" in joined and ".png.b64' -Force" in joined:
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                return ExecResult(0, "True\r\n", "")  # still there: the agent holds it
+            return inner(guest, command, timeout)
+
+        pve.exec = exec_
+        run_id, body = self._run(SHOT)
+        self.assertEqual(body["verdict"], "green", body)
+        shot, pngs = self._shot(run_id, body)
+        self.assertEqual([p.read_bytes() for p in pngs], [b"\x89PNG shot"])
+        i = shot["index"]
+        held = f"screenshot {i:03d}-c1: C:\\sky-lab\\shots\\{i:03d}.png.b64 held open in its agent after its read"
+        self.assertIn(held, body["notes"])
+        self.assertEqual(self.services.runner.seats["c1"].force, f"its last run ({run_id}) ended in a fault: {held}")
 
 
 
@@ -1373,6 +1676,20 @@ class BurstSteps(RunTests):
         shots = self.tmp / "results" / run_id / "screenshots"
         return step, sorted(shots.glob(f"{step['index']:03d}-c1-*.png")), shots
 
+    def _removal_answers(self, answer):
+        """The burst folder's one removal of its sidecars (Runner._remove_frames) answered by answer(guest), an
+        ExecResult, or raising; the other execs pass through."""
+        pve = self.services.control._b
+        inner = pve.exec
+
+        def exec_(guest, command, timeout):
+            if "$stayed = @(Get-ChildItem" in " ".join(command):
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                return answer(guest)
+            return inner(guest, command, timeout)
+
+        pve.exec = exec_
+
     def test_a_burst_films_in_the_seat_s_session_and_reads_every_frame_back(self):
         from labapi import burst
         from labapi.proxmox import ExecResult
@@ -1395,6 +1712,81 @@ class BurstSteps(RunTests):
         self.assertIn('"count": 3, "intervalMs": 200', script)
         self.assertIn(f"$out = 'C:\\sky-lab\\shots\\{i:03d}-burst'", script)
         self.assertGreaterEqual(self.timeouts[0], burst.wait_s({"count": 3, "intervalMs": 200}))
+
+    def test_each_frames_sidecar_comes_back_in_ranges_and_leaves_the_seat(self):
+        """A burst's frames come back as a plain shot's sidecar does: each frame's .b64 in ranges, its length from one
+        listing of the burst's folder, decoded once joined; the folder's sidecars then leave the seat by one exec, not
+        one a frame (x-npc-legs-burst's 40 frames cost 40: the check of 508697c3, nit 1)."""
+        from labapi.proxmox import ExecResult
+
+        self._managed_c1(ExecResult(0, self._done() + "\r\n", ""))
+        pve = self.services.control._b
+        run_id, body = self._run(BURST)
+        self.assertEqual(body["verdict"], "green", body)
+        step, pngs, _ = self._burst(run_id, body)
+        self.assertEqual([p.read_bytes() for p in pngs], [b"PNG frame 0", b"PNG frame 1", b"PNG frame 2"])
+        folder = f"C:\\sky-lab\\shots\\{step['index']:03d}-burst"
+        self.assertEqual(sorted(c[2] for c in pve.calls if c[0] == "file_read_range"), [f"{folder}\\{k:03d}.png.b64" for k in range(3)])
+        self.assertFalse([c for c in pve.calls if c[0] == "file_read" and c[2].startswith(folder)], "no whole read")
+        self.assertFalse([p for p in pve.files if p.startswith(folder)], "each sidecar leaves the seat once read")
+        removals = [" ".join(c[2]) for c in pve.calls if c[:2] == ("exec", 901) and "Remove-Item" in " ".join(c[2]) and folder in " ".join(c[2])]
+        self.assertEqual(len(removals), 1, removals)
+        self.assertIn(f"Get-ChildItem -LiteralPath '{folder}' -Filter '*.png.b64'", removals[0])
+        self.assertFalse([n for n in body["notes"] if folder in n], body["notes"])
+
+    def test_a_sidecar_that_stays_after_the_one_removal_faults_the_seat(self):
+        """The folder's one removal names each sidecar that stayed: each is held open in the agent as a plain shot's is,
+        the step's note and the seat's fault, a rollback at its next run; the verdict is as it was and the frames kept."""
+        from labapi.proxmox import ExecResult
+
+        self._managed_c1(ExecResult(0, self._done() + "\r\n", ""))
+        self._removal_answers(lambda guest: ExecResult(0, "001.png.b64\r\nstayed 1\r\n", ""))
+        run_id, body = self._run(BURST)
+        self.assertEqual(body["verdict"], "green", body)
+        step, pngs, _ = self._burst(run_id, body)
+        self.assertEqual(len(pngs), 3)
+        i = step["index"]
+        held = f"screenshot burst {i:03d}-c1 frame 1: C:\\sky-lab\\shots\\{i:03d}-burst\\001.png.b64 held open in its agent after its read"
+        self.assertEqual([n for n in body["notes"] if "held open" in n], [held])
+        self.assertEqual(self.services.runner.seats["c1"].force, f"its last run ({run_id}) ended in a fault: {held}")
+
+    def test_a_frame_whose_read_died_is_taken_as_held_when_the_removal_confirms_nothing(self):
+        """With the one removal unconfirmed (its exec failed), a frame whose read died is taken as held, as _read_back
+        takes one: the read that died is what leaves a handle open; the frames read whole are not."""
+        from unittest import mock
+
+        from labapi import proxmox
+        from labapi.proxmox import ExecResult, ProxmoxError
+
+        self._managed_c1(ExecResult(0, self._done() + "\r\n", ""))
+        pve = self.services.control._b
+        plain_range = pve.file_read_range
+
+        def file_read_range(guest, path, offset, count):
+            if path.endswith("\\002.png.b64"):
+                pve.calls.append(("file_read_range", guest.vmid, path, offset, count))
+                raise ProxmoxError(f"E_PVE_FILE: {guest.name}: ResourceException: 500 Internal Server Error: VM {guest.vmid} "
+                                   "qga command 'guest-file-read' failed - got timeout")
+            return plain_range(guest, path, offset, count)
+
+        def lost(guest):
+            raise ProxmoxError(f"E_PVE_EXEC: {guest.name}: qga command 'guest-exec' failed - got timeout")
+
+        pve.file_read_range = file_read_range
+        self._removal_answers(lost)
+        with mock.patch.object(proxmox, "FILE_READ_PAUSES", (0.0, 0.0)):
+            run_id, body = self._run(BURST)
+        self.assertEqual(body["verdict"], "green", body)
+        step, pngs, _ = self._burst(run_id, body)
+        self.assertEqual(len(pngs), 2)
+        self.assertIn("not read: frame 2", step["note"], step)
+        i = step["index"]
+        held = [n for n in body["notes"] if "held open" in n]
+        self.assertEqual(len(held), 1, body["notes"])
+        self.assertTrue(held[0].startswith(f"screenshot burst {i:03d}-c1 frame 2: C:\\sky-lab\\shots\\{i:03d}-burst\\002.png.b64 "
+                                           "held open in its agent after its read (taken as held, its read having failed: "
+                                           f"C:\\sky-lab\\shots\\{i:03d}-burst's sidecars on fake-c1 not removed: E_PVE_EXEC"), held)
+        self.assertEqual(self.services.runner.seats["c1"].force, f"its last run ({run_id}) ended in a fault: {held[0][:200]}")
 
     def test_a_frame_not_read_is_the_note_and_the_rest_are_kept(self):
         from labapi.proxmox import ExecResult
@@ -1579,7 +1971,7 @@ class RelaunchSteps(RunTests):
         self.assertIn("c1-relaunch-001-console.log", body["artifacts"])
         run_dir = self.tmp / "results" / run_id
         self.assertIn("quit: the client disconnected", (run_dir / "c1-relaunch-001.log").read_text())
-        copies = [" ".join(c[2]) for c in pve.calls if c[0] == "exec" and "Copy-Item" in " ".join(c[2])]
+        copies = [" ".join(c[2]) for c in pve.calls if c[0] == "exec" and "[IO.File]::Open($src, 'Open', 'Read', 'ReadWrite')" in " ".join(c[2])]
         kill = next(i for i, c in enumerate(pve.calls) if c[0] == "exec" and "sky-lab-launch" in " ".join(c[2]))
         first_copy = next(i for i, c in enumerate(pve.calls) if c[0] == "exec" and "c1-relaunch-001.log" in " ".join(c[2]))
         self.assertLess(first_copy, kill, "the copy comes before the relaunch's stop and start")
@@ -1882,28 +2274,50 @@ class FridaSteps(RunTests):
         self.assertEqual([c[3:] for c in pve.calls if c[:3] == ("file_read_range", 901, copy)], [(0, 45)])
         self.assertEqual((self.tmp / "results" / run_id / "frida" / f"c1-{script}.jsonl").read_text(encoding="utf-8"), log)
 
-    def test_a_copy_whose_exec_answer_was_lost_is_read_by_its_own_length(self):
-        """An exec whose answer the agent lost has ended on the seat (E_PVE_EXEC_LOST, run 20261018-204244): the copy
-        is made, so its length comes from the copy itself by one length exec, and the read goes on, the copy not made
-        again over a .log the script still writes."""
+    def _its_copy_answer_lost(self, empty: bool):
+        """FRIDA_ONE with its trace's .log copy exec ending E_PVE_EXEC_LOST (run 20261018-204244) after the fake made the
+        copy whole, or left it `empty` (the copy runs without Stop, so a source open that failed still creates one); the
+        run's id and body, and the seat."""
         from labapi.proxmox import ProxmoxError
 
-        log = '{"impulse": 1}\n' * 3
-        pve = self._traced_seat(log)
+        pve = self._traced_seat('{"impulse": 1}\n' * 3)
 
         def answer(guest, res):
+            if empty:
+                for p in [p for p in pve.files if p.endswith(".js.log.copy")]:
+                    pve.files[p] = ""
             raise ProxmoxError(f"E_PVE_EXEC_LOST: pid 42 on {guest.name}: the guest agent no longer knows it (RuntimeError: "
                                "PID 42 does not exist); the command ended and its answer is lost")
 
         _log_copy_answers(pve, answer)
         run_id, body = self._run(FRIDA_ONE)
-        self.assertEqual(body["verdict"], "green", body)
+        return run_id, body, pve
+
+    def test_a_copy_whose_exec_answer_was_lost_makes_the_run_a_lab_fault(self):
+        """An exec whose answer the agent lost has ended on the seat, but only the copy exec's own "N M" proves its copy
+        whole, as log-count's rule has it: the run's own trace is its evidence, so a lost answer is a trace not fetched
+        whole, E_RUN_FRIDA_FETCH, and the would-be green is error, which a run set reruns (the final check of
+        7ebf12a7); the copy is not made again over a .log the script still writes, nor read."""
+        run_id, body, pve = self._its_copy_answer_lost(empty=False)
+        self.assertEqual(body["verdict"], "error", body)
         script = f"x-trace-{run_id}-1.js"
         copy = f"C:\\sky-lab\\frida\\{script}.log.copy"
+        self.assertEqual([(f["kind"], f["client"], f["error"]) for f in body["failures"]],
+                         [("lab", "c1", f"E_RUN_FRIDA_FETCH: {script}.log on c1 (fake-c1) not fetched whole: its copy's exec "
+                                        "answer was lost, so the copy is unchecked")])
         execs = [" ".join(c[2]) for c in pve.calls if c[:2] == ("exec", 901)]
         self.assertEqual(len([e for e in execs if f"[IO.File]::Create('{copy}')" in e]), 1)
-        self.assertEqual(len([e for e in execs if f"(Get-Item -LiteralPath '{copy}').Length" in e]), 1)
-        self.assertEqual((self.tmp / "results" / run_id / "frida" / f"c1-{script}.jsonl").read_text(encoding="utf-8"), log)
+        self.assertFalse([c for c in pve.calls if c[:3] == ("file_read_range", 901, copy)])
+
+    def test_a_lost_copy_answer_that_left_an_empty_copy_is_a_lab_fault(self):
+        """The final check of 7ebf12a7's demo: the copy exec's answer lost and an empty copy left, as a source open that
+        failed leaves one, was read by its own length as 0 bytes, an empty trace for a source that holds lines and no
+        fault."""
+        run_id, body, _ = self._its_copy_answer_lost(empty=True)
+        self.assertEqual(body["verdict"], "error", body)
+        self.assertEqual([f["error"] for f in body["failures"]],
+                         [f"E_RUN_FRIDA_FETCH: x-trace-{run_id}-1.js.log on c1 (fake-c1) not fetched whole: its copy's exec "
+                          "answer was lost, so the copy is unchecked"])
 
     def test_a_size_mismatch_makes_the_run_a_lab_fault(self):
         """The ranges must come to the copy's length: a copy holding fewer bytes than its exec said meets its end
@@ -2030,6 +2444,42 @@ class FridaSteps(RunTests):
                       "in use", body["notes"])
         self.assertFalse([n for n in body["notes"] if "held open in its agent" in n], body["notes"])
         self.assertEqual(self.services.runner.seats["c1"].force, "")
+
+    def test_a_removal_unconfirmed_after_a_failed_read_takes_the_copy_as_held(self):
+        """A read that died is what leaves a handle open (qemu-server 9.2.10 closes none whose read died), so after one a
+        removal that does not confirm the copy gone counts as one that found it held: the seat is faulted, its next run
+        rolls it back (the fresh review of e8d8de9b, nit 3)."""
+        from unittest import mock
+
+        from labapi import proxmox
+        from labapi.proxmox import ProxmoxError
+
+        pve = self._traced_seat('{"impulse": 1}\n')
+        plain_range, plain_exec = pve.file_read_range, pve.exec
+
+        def file_read_range(guest, path, offset, count):
+            if path.endswith(".js.log.copy"):
+                pve.calls.append(("file_read_range", guest.vmid, path, offset, count))
+                raise ProxmoxError(f"E_PVE_FILE: {guest.name}: ResourceException: 500 Internal Server Error: VM {guest.vmid} "
+                                   "qga command 'guest-file-read' failed - got timeout")
+            return plain_range(guest, path, offset, count)
+
+        def exec_(guest, command, timeout):
+            if re.search(r"Remove-Item -LiteralPath '[^']+\.js\.log\.copy' -Force", " ".join(command)):
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                raise ProxmoxError(f"E_PVE_EXEC: pid 7 on {guest.name} did not exit in 120.0s")
+            return plain_exec(guest, command, timeout)
+
+        pve.file_read_range, pve.exec = file_read_range, exec_
+        with mock.patch.object(proxmox, "FILE_READ_PAUSES", (0.0, 0.0)):
+            run_id, body = self._run(FRIDA_ONE)
+        self.assertEqual(body["verdict"], "error", body)  # the trace not fetched whole, the run's own fault
+        copy = f"C:\\sky-lab\\frida\\x-trace-{run_id}-1.js.log.copy"
+        held = f"frida x-trace-{run_id}-1.js.log: {copy} held open in its agent after its read"
+        self.assertIn(f"{held} (taken as held, its read having failed: {copy} on fake-c1 not removed: E_PVE_EXEC: pid 7 on "
+                      "fake-c1 did not exit in 120.0s)", body["notes"])
+        self.assertTrue(self.services.runner.seats["c1"].force.startswith(f"its last run ({run_id}) ended in a fault: {held}"),
+                        self.services.runner.seats["c1"].force)
 
     def test_an_exception_out_of_the_artifacts_is_an_internal_failure(self):
         """An exception that escapes the artifacts phase is a bug in lab-api, and what it skipped may be the run's own
@@ -2830,8 +3280,9 @@ class CellHostSteps(RunTests):
                       "bytes 13 read of 13 copied of 13 on the seat, 18 read of 18 copied of 18 on the seat", note)
 
     def test_a_short_read_of_a_copy_shows_in_its_bytes(self):
-        """the seat's tee and its copy longer than what lab-api read: the note names all three, and the count is the
-        read's (the transfer, not the tee, came up short)"""
+        """the seat's tee and its copy longer than what lab-api read: a log read only in part keeps no count, so a
+        claim on it raises rather than read part of it as the whole (an absence claim, == 0, would pass on the part:
+        the re-review of 486e80f3), and the note says how much came back"""
         from labapi.proxmox import ExecResult
 
         pve = self.services.control._b
@@ -2845,8 +3296,9 @@ class CellHostSteps(RunTests):
 
         pve.exec = exec_
         pve2, note = self._log_count_on_a_managed_seat({"platform": "a moved line\n", "console": "moved twice\nmoved\n"})
-        self.assertIn("18 read of 40 copied of 40 on the seat", note)
-        self.assertEqual(self.services.board.log_count("c1", "moved"), 3, note)
+        self.assertIn("18 bytes read of its 40", note)
+        self.assertIn("no count kept", note)
+        self.assertIsNone(self.services.board.log_count("c1", "moved"), note)
 
     def test_a_runs_respawn_hours_reach_the_server_through_the_overlay(self):
         """train-42's death reads: a respawn inside a run, the server's npcRespawnHours over the master's 240."""
@@ -3391,7 +3843,8 @@ class LogCount(RunTests):
 
         def exec_(guest, command, timeout):
             res = real_exec(guest, command, timeout)
-            if any("logcount-" in a and ".log.copy" in a and "-console" not in a for a in command):
+            # the copy itself, its shared-read open (each copy's removal once read names it too)
+            if any("logcount-" in a and ".log.copy" in a and "-console" not in a and "ReadWrite" in a for a in command):
                 copies["n"] += 1
                 land(copies["n"])
             return res
@@ -3435,6 +3888,180 @@ class LogCount(RunTests):
         run_id, body = self._run(LOGCOUNT)
         self.assertEqual(body["verdict"], "green", body)
         self.assertEqual(copies["n"], 1, pve.calls)
+
+    def test_a_log_past_a_range_is_counted_whole_and_its_copies_removed(self):
+        """log-count read each log whole into copies nobody removed or checked (the fresh review of e8d8de9b, nit 4): a
+        log past one range comes back in ranges and is decoded once, so a line whose é straddles the boundary still
+        matches, and each copy leaves the seat once read."""
+        import asyncio
+
+        from labapi.runner import READ_RANGE_BYTES as R
+        from labapi.runner import RunRecord
+        from labapi.scenario import Scenario
+
+        pve = self._seat()
+        platform = "a" * (R - 1) + "é moved\nmoved again\n"
+        pve.files[self.settings.client_driver_log] = platform
+        pve.files[self._console(pve)] = "moved é\n"
+        rec = RunRecord("x", Scenario(id="x", clients=["c1"]), self.tmp, "now")
+        ok, note = asyncio.run(self.services.runner._log_count(rec, 3, "c1", "é"))
+        self.assertTrue(ok, note)
+        self.assertEqual(self.services.board.log_count("c1", "é"), 2, note)
+        n = len(platform.encode("utf-8"))
+        self.assertIn(f"1 in its Skyrim Platform log, 1 in its console log; bytes {n} read of {n} copied of {n} on the seat, "
+                      "9 read of 9 copied of 9 on the seat", note)
+        self.assertEqual([c[3:] for c in pve.calls if c[:3] == ("file_read_range", 901, "C:\\sky-lab\\logcount-003.log.copy")],
+                         [(0, R), (R, n - R)])
+        self.assertFalse([p for p in pve.files if "logcount-" in p], "the copies leave the seat once read")
+        self.assertEqual(rec.notes, [])
+
+    def test_a_log_count_copy_is_tried_again_1_s_apart(self):
+        """Eight committed untils poll seat counts in 25 s windows (b-lever-relay's two, x-lever-relay, x-lever-furn,
+        x-lever-after-scene), and two 10 s pauses would spend about 20 s of one poll: log-count's copy is tried again
+        1 s apart as it was, where the other fetches' tries are 10 s apart (the re-review of 486e80f3)."""
+        import asyncio
+        import dataclasses
+        import types
+        from unittest import mock
+
+        from labapi import runner as runner_mod
+        from labapi.runner import RunRecord
+        from labapi.scenario import Scenario
+
+        self._seat()  # no Skyrim Platform log on the seat: its copy fails each try
+        slept = []
+
+        async def sleep(seconds):
+            slept.append(seconds)
+
+        self.services.runner.s = dataclasses.replace(self.settings, time_scale=1.0)
+        rec = RunRecord("x", Scenario(id="x", clients=["c1"]), self.tmp, "now")
+        with mock.patch.object(runner_mod, "asyncio", types.SimpleNamespace(to_thread=asyncio.to_thread, sleep=sleep)):
+            ok, note = asyncio.run(self.services.runner._log_count(rec, 3, "c1", "moved"))
+        self.assertEqual(slept, [1.0, 1.0])
+        self.assertIn("its copy failed three tries 1 s apart", note)
+        self.assertIn("no count kept", note)
+
+    def test_a_log_count_on_a_seat_whose_agent_is_down_keeps_no_count_at_once(self):
+        """A log fetch found the seat's guest agent not running (RunRecord.agents_down): log-count tries nothing on it
+        and keeps no count, so a claim on the seat's count raises (the re-review of 486e80f3, nit 2)."""
+        import asyncio
+
+        from labapi.runner import RunRecord
+        from labapi.scenario import Scenario
+
+        pve = self._seat()
+        pve.files[self.settings.client_driver_log] = "claim 13491 sent on E\n"
+        rec = RunRecord("x", Scenario(id="x", clients=["c1"]), self.tmp, "now")
+        rec.agents_down["c1"] = ("E_PVE_EXEC: fake-c1: ResourceException: 500 Internal Server Error: QEMU guest agent is not running", True)
+        ok, note = asyncio.run(self.services.runner._log_count(rec, 3, "c1", "claim 13491"))
+        self.assertTrue(ok, note)
+        self.assertEqual(note, "log-count: c1's logs unread, its guest agent found not running (E_PVE_EXEC: fake-c1: "
+                               "ResourceException: 500 Internal Server Error: QEMU guest agent is not running); no count kept")
+        self.assertIsNone(self.services.board.log_count("c1", "claim 13491"))
+        self.assertFalse([c for c in pve.calls if c[0] == "exec"], pve.calls)
+
+    def test_a_log_count_that_meets_a_dead_agent_marks_nothing(self):
+        """Proxmox says "guest agent is not running" for any guest-ping not answered in 3 s, checked before every exec
+        (qemu-server's QemuServer/Agent.pm at ec268ede5b, 91-99 and 123-129), so a busy agent reads as a dead one: a
+        log-count whose three tries, 1 s apart, all meet it keeps no count and marks nothing, since a mark would starve
+        every later count of the run, and the next count reads the seat (the check of 508697c3, SHOULD)."""
+        import asyncio
+
+        from labapi.proxmox import ProxmoxError
+        from labapi.runner import RunRecord
+        from labapi.scenario import Scenario
+
+        pve = self._seat()
+        pve.files[self.settings.client_driver_log] = "claim 13491 sent on E\n"
+        plain_exec = pve.exec
+        busy = {"left": 3}
+
+        def exec_(guest, command, timeout):
+            if busy["left"] and any("logcount-" in a and "ReadWrite" in a for a in command):
+                busy["left"] -= 1
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                raise ProxmoxError(f"E_PVE_EXEC: {guest.name}: ResourceException: 500 Internal Server Error: QEMU guest agent is not running")
+            return plain_exec(guest, command, timeout)
+
+        pve.exec = exec_
+        rec = RunRecord("x", Scenario(id="x", clients=["c1"]), self.tmp, "now")
+        ok, note = asyncio.run(self.services.runner._log_count(rec, 3, "c1", "claim 13491"))
+        self.assertIn("its copy failed three tries 1 s apart, the last E_PVE_EXEC", note)
+        self.assertIn("no count kept", note)
+        self.assertNotIn("c1", rec.agents_down)
+        self.assertIsNone(self.services.board.log_count("c1", "claim 13491"), note)
+        ok, note = asyncio.run(self.services.runner._log_count(rec, 4, "c1", "claim 13491"))
+        self.assertEqual(self.services.board.log_count("c1", "claim 13491"), 1, note)
+
+    def test_a_log_count_copy_held_open_faults_the_seat(self):
+        """A copy the agent holds after its read is a handle only the seat's restart closes, log-count's as a run log's:
+        a note and the seat's fault, so its next run rolls it back; the count stands, its read having come back whole."""
+        from labapi.proxmox import ExecResult
+
+        pve = self._seat()
+        pve.files[self.settings.client_driver_log] = "claim 13491 sent on E\nclaim 13491 granted\n"
+        plain_exec = pve.exec
+
+        def exec_(guest, command, timeout):
+            if "Remove-Item -LiteralPath 'C:\\sky-lab\\logcount-001.log.copy' -Force" in " ".join(command):
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                return ExecResult(0, "True\r\n", "")  # still there: the agent holds it
+            return plain_exec(guest, command, timeout)
+
+        pve.exec = exec_
+        run_id, body = self._run(LOGCOUNT)
+        self.assertEqual(body["verdict"], "green", body)
+        held = "log-count: c1's Skyrim Platform log: C:\\sky-lab\\logcount-001.log.copy held open in its agent after its read"
+        self.assertIn(held, body["notes"])
+        self.assertEqual(self.services.runner.seats["c1"].force, f"its last run ({run_id}) ended in a fault: {held}")
+
+    def _its_copy_answer_lost(self, leave: str | None) -> str:
+        """log-count at step 7 whose Skyrim Platform log copy exec ends with its answer lost (E_PVE_EXEC_LOST), leaving
+        `leave` as the copy (None: no copy), the log holding the line an absence claim says never came (the check of
+        508697c3's demos, lost_copy_demo.py and lost_copy_empty_demo.py); the step's note."""
+        import asyncio
+
+        from labapi.proxmox import ProxmoxError
+        from labapi.runner import RunRecord
+        from labapi.scenario import Scenario
+
+        pve = self._seat()
+        pve.files[self.settings.client_driver_log] = "E_RACE_PERMIT refused\n"
+        pve.files[self._console(pve)] = "console\n"
+        copy = "C:\\sky-lab\\logcount-007.log.copy"
+        plain_exec = pve.exec
+
+        def exec_(guest, command, timeout):
+            if f"[IO.File]::Create('{copy}')" in " ".join(command):
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                if leave is not None:
+                    pve.files[copy] = leave
+                raise ProxmoxError(f"E_PVE_EXEC_LOST: pid 42 on {guest.name}: the guest agent no longer knows it; the "
+                                   "command ended and its answer is lost")
+            return plain_exec(guest, command, timeout)
+
+        pve.exec = exec_
+        rec = RunRecord("x", Scenario(id="x", clients=["c1"]), self.tmp, "now")
+        ok, note = asyncio.run(self.services.runner._log_count(rec, 7, "c1", "E_RACE_PERMIT"))
+        self.assertTrue(ok, note)
+        self.assertIsNone(self.services.board.log_count("c1", "E_RACE_PERMIT"), note)
+        self.assertIn("no count kept", note)
+        return note
+
+    def test_a_lost_copy_answer_that_left_no_copy_keeps_no_count(self):
+        """The copy's length read after a lost answer finds no copy, which is a copy that failed, not a source not
+        there: read as the tee's absence (SeatFileMissing), it counted the log as empty, and c1.log_count("E_RACE_PERMIT")
+        == 0 passed on a log that holds the line (the check of 508697c3)."""
+        note = self._its_copy_answer_lost(None)
+        self.assertIn("its copy C:\\sky-lab\\logcount-007.log.copy is not there, the copy's own answer lost (E_PVE_EXEC_LOST", note)
+
+    def test_a_lost_copy_answer_that_left_an_empty_copy_keeps_no_count(self):
+        """log-count's copy runs without Stop, so a source open that failed still creates an empty copy, whose length
+        the lost answer's fallback read as 0: only the copy exec's own "N M" proves a copy whole, so a lost answer
+        keeps no count whatever the copy holds (the check of 508697c3)."""
+        note = self._its_copy_answer_lost("")
+        self.assertIn("c1's Skyrim Platform log unread (its copy's exec answer was lost, so the copy is unchecked)", note)
 
     def test_the_live_patterns_are_named_once_for_the_holders_given(self):
         from labapi.runner import _log_count_patterns
@@ -3488,6 +4115,30 @@ class ClientResets(RunTests):
     @staticmethod
     def _vm_resets(pve, since=0):
         return [c for c in pve.calls[since:] if c[0] in ("stop", "rollback", "start")]
+
+    def test_a_before_log_copy_held_after_its_read_rolls_the_seat_back_in_this_run(self):
+        """After a quiet spell a run keeps the seat's log as <client>-before.log before the resets: a copy the agent then
+        holds open takes rec.rollback, so this run's own reset rolls the seat back with it as the reason, as a held
+        trace copy fetched before the rollback does (the fresh review of e8d8de9b, nit 5)."""
+        from labapi.proxmox import ExecResult
+
+        pve = self._warm(before_logs_quiet_s=600.0)
+        self.services.runner._last_run_ended_wall = None  # a quiet spell, as after lab-api's start
+        pve.files["C:\\sky-lab\\c1-before.log"] = "the playtest's platform log\n"
+        plain_exec = pve.exec
+
+        def exec_(guest, command, timeout):
+            if "Remove-Item -LiteralPath 'C:\\sky-lab\\c1-before.log' -Force" in " ".join(command):
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                return ExecResult(0, "True\r\n", "")  # still there: the agent holds it
+            return plain_exec(guest, command, timeout)
+
+        pve.exec = exec_
+        reset, body = self._reset()
+        held = "c1-before.log: C:\\sky-lab\\c1-before.log held open in its agent after its read"
+        self.assertEqual((body["verdict"], reset["kind"], reset["reason"]), ("green", "rollback", held), body)
+        self.assertIn("c1-before.log", body["artifacts"])
+        self.assertEqual(self.services.runner.seats["c1"].force, "")
 
     def test_a_trace_copy_held_after_a_before_run_fetch_rolls_the_seat_back_in_this_run(self):
         """A hand-started trace is fetched before the seats' resets (_traces_before_rollback): a copy the agent then
@@ -3563,6 +4214,8 @@ class ClientResets(RunTests):
         self.assertEqual(at, sorted(at), steps)
         for named in ("Clean (Join-Path $lab 'frida') @('*.js', '*.js.out', '*.js.err', '*.js.log') @()",
                       "Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy') @() -soft",
+                      # log-count's copies by their pattern alone, softly: the code before 9e37956b never removed one
+                      "\nClean $lab @('logcount-*.log.copy') @() -soft\n",
                       "Clean (Join-Path $lab 'shots') @('*.png', '*.png.b64') @('*-burst')",
                       "Clean (Join-Path $lab 'screenshots') @('*.png') @()",
                       "Clean (Join-Path $lab 'burst') @('request.json', 'done.json') @()",

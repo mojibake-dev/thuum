@@ -128,7 +128,9 @@ class Settings:
     # The client log artifact (c1.log): Skyrim Platform's own log, which always
     # exists and carries plugin load, JavaScript exceptions and latent-call
     # traces. lab-driver's writeLogs sink (Data\Platform\Logs\lab-driver-logs.txt
-    # in the game directory) only appears once the driver logs an error.
+    # in the game directory) exists whenever the driver loaded: its log() writes
+    # through printConsole and writeLogs (lab/driver/src/index.ts:93), and it
+    # logs "loaded" at load (:3462).
     client_driver_log: str = r"C:\Users\lab\Documents\My Games\Skyrim Special Edition\SKSE\skyrim-platform.log"
     # lab-driver's own log (Skyrim Platform's writeLogs), relative to the game
     # directory the client recorded in {client_lab_dir}\game-dir.txt at install;

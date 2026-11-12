@@ -378,8 +378,10 @@ printing the source's length at its open and the copy's last, as
 log-count's copy does (tried three times, 10 s apart, except an exec that
 ran to its deadline, which is not tried again; a copy shorter than its
 source at its open was cut short, the sources only growing, and is made
-again; a copy whose exec answer the agent lost has its length read from the
-copy itself). The copy is then read by the agent's own
+again; a copy whose exec answer the agent lost is not fetched whole, as
+log-count keeps no count of one, since only that exec's own two lengths
+prove a copy whole: the copy runs without Stop, so a source open that
+failed leaves an empty copy). The copy is then read by the agent's own
 file-read with offset, count and decode=0 (qemu-server 9.1.5 and later),
 512 KiB a call: Proxmox reads a file in guest-file-read calls of its
 read_size, 1 MiB (qemu-server's Agent.pm), and calls of that size timed out
@@ -554,7 +556,22 @@ takes radians (CommonLibSSE-NG TESObjectREFR::MoveTo_Impl): `rot: [0, 0,
 scenario names headings in degrees (a-melee-cone turns c1 to 30, 135 and
 180).
 `screenshot` is a guest exec on a managed client (request-screenshot is
-the in-game fallback). Two lab-api endpoints replace the snapshot round trips to thuum-mundus
+the in-game fallback): the helper writes the PNG and a base64 sidecar beside
+it, and the sidecar comes back as a client log does, through the agent's
+ranged file-read, 512 KiB a call, decoded once joined and removed once read.
+Read whole, a file past about 1 MiB is unreliable on a busy seat (a 1.46 MB
+console copy timed out three times in a row on c1, where 512 KiB ranges took
+it whole in 4 s; 20261111-195437 lost three shots at 23 s each). A shot not
+read is the step's note, never a fault, but a sidecar held open after its
+read faults the seat, as a held log or trace copy does: the step's note and
+a rollback at its next run, the verdict unchanged. This reverses, for a
+sidecar the runner finds held at its own read, the 2026-10-30 call that a
+held .png.b64 was not worth a rollback (ADR-036's note of that day; the
+relaunch's cleaning below still takes shots\ as far as it goes and fails no
+try on one): held files were found to build up rather than clear, the
+relaunches' held count growing 11, 17 and 25 around
+20261111-191642-x-prop-blast (6c3b0122).
+Two lab-api endpoints replace the snapshot round trips to thuum-mundus
 (2026-10-05, their recipe and guardrails): `POST /lab/clients/<c>/snapshot
 {name}` takes a cold stacked `clean-m1-<x>` (quiesce, a clean ACPI shutdown
 whose task log holds no timeout or forced stop, a snapshot without RAM,
@@ -617,8 +634,12 @@ five-second frames could not show a stride.
   then a PNG write); each frame's offset is in done.json, since a write can
   push a frame late.
 - After the burst the frames come back as NNN-<client>-<k>.png beside
-  NNN-<client>-burst.json, the offsets. As with a plain shot, a burst never
-  fails a run: a frame not filmed or not read is the step's note.
+  NNN-<client>-burst.json, the offsets, each frame's sidecar in ranges as a
+  plain shot's is (its length from one listing of the burst's folder); once
+  every frame is read, one exec removes the folder's sidecars and names any
+  that stayed, where a removal a frame cost an exec each. As with a plain
+  shot, a burst never fails a run: a frame not filmed or not read is the
+  step's note.
 Assertions read `server.actor(c)` (the record, and
 `appearanceAttempts`, `lastAppearanceRaceId`, `lastAppearanceAllowed`: the
 server's verdicts on the client's race menu results; `shouts`,
@@ -757,6 +778,32 @@ run recreated it); lab-up and lab-down keep theirs under
 results/server-before/. After a quiet spell (BEFORE_LOGS_QUIET_S, 600 s) a
 run also keeps each client's Skyrim Platform log as <client>-before.log
 before rolling the clone back; inside a sweep nothing is fetched.
+A scenario's artifacts list <client>.log for a seat's logs: its one fetch
+keeps <client>.log, <client>-driver.log and <client>-console.log, and a
+seat's named log listed itself (c1-console.log) brings the same fetch, made
+once however many of them the list names; such a name once read as a
+client of its own ("c1-console is unmanaged or unmapped").
+Each client log (<client>.log, <client>-driver.log, <client>-console.log,
+<client>-before.log, <client>-launch.log, and a relaunch step's
+<client>-relaunch-<step>.log and -console.log) is fetched as a Frida trace
+is: copied by a read that shares write access, since the game holds its
+logs open for writing and Copy-Item's read refused the console log
+(20261111-193821, 194559, 195437), the copy exec printing the source's
+length at its open and the copy's (three tries, 10 s apart), then read back
+through the agent's own ranged file-read, 512 KiB a call, checked against
+the copy's length, decoded as UTF-8 once, refused past 64 MiB, and the copy
+removed once read (one the agent holds open rolls the seat back). Read
+whole, the console logs timed out the agent on both seats in
+20261111-191642. A log not fetched is a note naming its code and "(log
+fetch)", an E_PVE_* the agent's or E_RUN_LOG_FETCH the runner's own (a
+copy that failed its tries or whose exec answer was lost, a short read,
+the cap), never the run's
+failure: no verdict reads a log artifact. A source that is not there is
+said by the copy itself and not tried again, and once a fetch finds the
+seat's guest agent not running its other log fetches are skipped, with one
+note, until the seat's reset: each would spend three tries on an agent
+only a restart brings back. The SKSE folders' logs are still
+copied by one Copy-Item over their listing and read whole.
 A run in which a seat stopped answering (a step that timed out naming it: the
 load freeze of 2026-10-16, a game silent after PostLoadGame) also keeps that
 seat's skse64.log as <client>-skse64.log and a full dump of its game as
@@ -786,7 +833,7 @@ a lab fault. A red run stays red and gains the failure.
 The end also fetches every Frida trace started on a seat, in ranges (the
 client template's section above). One the run's own steps started, a frida
 step's or a relaunch's frida arm's, is the run's evidence: not fetched whole
-(its copy failed three tries, a range still unread after the file read's
+(its copy failed three tries or its exec answer was lost, a range still unread after the file read's
 retries, a range that came back as no base64, bytes that do not come to the
 copy's length, a copy past 64 MiB) it is E_RUN_FRIDA_FETCH, naming the
 script, the seat and the reason, and it turns a would-be green into error
@@ -866,7 +913,9 @@ more, and a second failure rolls the seat back in the same run.
 The cleaning list names folders and patterns, never a wildcard over
 C:\sky-lab: there, frida\ (each run's script and its .out, .err, .log and
 .copy; frida-inject.exe stays), shots\, screenshots\, burst\ and input\ (the
-screenshot, burst and mouse steps' files); each game folder's
+screenshot, burst and mouse steps' files), and in the lab folder itself
+log-count's copies by their pattern alone, logcount-*.log.copy (the code
+before 9e37956b never removed one, so seats carry many); each game folder's
 Data\SKSE\Plugins\CharGen\Presets (thuum-*.jslot and the presets the seat's
 last run saved by name); the Saves folder's TESMODPLATFORM-* (Skyrim
 Platform's generated saves, which a kill before its load settles leaves) and
@@ -879,11 +928,11 @@ rolls the seat back. A file that will not go fails the try, except in the
 capture folders shots\ and screenshots\ and for the runner's trace copies
 in frida\ (*.js.out.copy and *.js.log.copy, the files the agent itself
 reads back in ranges, which leave the seat once read and stay only when the
-agent holds one open), which are cleaned as far as they go: a file a
+agent holds one open) and log-count's copies, which are cleaned as far as they go: a file a
 timed-out guest-file-read or guest-file-close left open in the agent stays
-until the VM restarts (a copy held after its read also rolls the seat back,
-in the same run's reset when the fetch came before it, else at its next
-run), the note
+until the VM restarts (a copy or sidecar held after its read also rolls the
+seat back, in the same run's reset when the fetch came before it, else at
+its next run), the note
 says "<n> held open left in place", and the next capture writes its own name,
 as the next copy carries its run's script name (b-cloak-fight
 20261030-053144 lost a rollback to two held .png.b64 sidecars, x-quest-mode
