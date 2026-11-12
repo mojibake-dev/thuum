@@ -46,9 +46,59 @@ assist() {  # assist <client> <action> <args json>: the step's answer as lab-api
   curl -sS -m 120 -X POST "$api/clients/$1/assist" -H 'content-type: application/json' -d "{\"action\":\"$2\",\"args\":$3}"
 }
 note() { echo "$(date +%H:%M:%S) $*" | tee -a "$tmp/summary.txt"; }
+enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
+# copy_ps <src expression> <copy>: a log the game holds open for writing, copied with read-write sharing as lab-api's
+# log-count and Frida copies are (runner.py): a plain Copy-Item shares no writes and is refused then ("being used by
+# another process", 193821, 194559, 195437). The old copy goes first and a failed open stops the script (exit 1) before
+# a new copy is made, so a caller that reads only after a zero exit never takes an older or empty copy for the log
+copy_ps() { printf '%s' "\$ErrorActionPreference = 'Stop'; Remove-Item -LiteralPath '$2' -Force -ErrorAction SilentlyContinue; \$s = [IO.File]::Open($1, 'Open', 'Read', 'ReadWrite'); \$d = [IO.File]::Create('$2'); \$s.CopyTo(\$d); \$d.Close(); \$s.Close()"; }
+# read_ranged <vmid> <guest path> <local file>: a seat's file read back in 512 KiB ranges through Proxmox's own agent
+# file-read (offset, count, decode=0; qemu-server 9.2.15 on core), as lab-api's Runner._read_back reads: one whole-file read
+# of a console past about 1 MiB timed out on a busy seat (c1, 2026-11-12, 1,464,655 bytes: "guest-file-read failed - got
+# timeout"). Each range's base64 is decoded strictly and checked against its bytes-read, as lab-api's file_read_range
+# checks it, and asked up to three times; the file ends at the first short range; 1 when a range never came back, the
+# bytes before it kept
+read_ranged() {
+  local at=0 n try part
+  part=$(mktemp); : > "$3"
+  while :; do
+    for try in 1 2 3; do
+      ssh -o BatchMode=yes "$jump" "pvesh get /nodes/core/qemu/$1/agent/file-read --file '$2' --offset $at --count 524288 --decode 0 --output-format json" 2>/dev/null \
+        | python3 -c 'import base64,json,sys; d=json.load(sys.stdin); b=base64.b64decode(d["content"] or "", validate=True); n=d.get("bytes-read"); sys.exit(1) if n is not None and int(n) != len(b) else sys.stdout.buffer.write(b)' > "$part" 2>/dev/null && break
+      [ "$try" = 3 ] && { rm -f "$part"; return 1; }
+      sleep 3
+    done
+    n=$(wc -c < "$part" | tr -d ' ')
+    cat "$part" >> "$3"
+    [ "$n" -eq 524288 ] || break
+    at=$((at + n))
+  done
+  rm -f "$part"
+}
+# fetch_copy <vmid> <powershell> <copy> <local file>: the copy made on the seat (copy_ps), then read back in ranges
+# (read_ranged) once its exec exits 0, three tries 3 s apart, since the guest agent's answer is now and then lost or not
+# JSON (client-frametime's captures, 2026-10-19; sky-c2's "PID does not exist", 20261018-204244). A copy never made, or a
+# read cut short, leaves what came back and its reason in $why, so no caller takes an older copy or a short one for the log
+fetch_copy() {
+  local code try
+  why=""
+  for try in 1 2 3; do
+    : > "$4"
+    code=$(ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$1 qm guest exec $1 --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$2")" 2>/dev/null \
+      | python3 -c 'import json,sys; print(json.load(sys.stdin).get("exitcode"))' 2>/dev/null || true)
+    if [ "$code" = 0 ]; then
+      read_ranged "$1" "$3" "$4" && { why=""; return 0; }
+      why=" (read back short after $try tries: a range never came back)"
+    else
+      why=" (no copy after $try tries: its exec exited ${code:-without an answer})"
+    fi
+    [ "$try" = 3 ] || sleep 3
+  done
+  return 1
+}
 gexec() {  # gexec <vmid> <powershell>: its output; read-only work on a clone through the guest agent
   local enc
-  enc=$(printf '%s' "$2" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n')
+  enc=$(enc "$2")
   ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$1 qm guest exec $1 --timeout 60 -- powershell -NoProfile -NonInteractive -EncodedCommand $enc" 2>/dev/null \
     | python3 -c 'import json,sys; print(json.load(sys.stdin).get("out-data",""))' 2>/dev/null
 }
@@ -202,28 +252,23 @@ ssh_srv "cat > $out/server.log" < "$tmp/server.log" && note "server.log: $(wc -l
 ended=$(date +%s)
 for pair in c1:711 c2:712; do
   c=${pair%%:*}; vmid=${pair#*:}
-  # copied first, as lab-api's runner does: the game holds its logs open without read sharing
+  # each copied first (copy_ps): the game holds its logs open for writing
   for spec in "$c.log|'$spl'" "$c-driver.log|(Join-Path (Get-Content -LiteralPath 'C:\\sky-lab\\game-dir.txt' -Raw).Trim() 'Data\\Platform\\Logs\\lab-driver-logs.txt')" "$c-sunshine.log|'C:\\Program Files\\Sunshine\\config\\sunshine.log'"; do
     name=${spec%%|*}; src=${spec#*|}
     copy="C:\\sky-lab\\playtest-$n-$name"
-    ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 60 -- powershell -NoProfile -Command \"Copy-Item -LiteralPath $src -Destination '$copy' -Force\"" > /dev/null 2>&1
-    ssh -o BatchMode=yes "$jump" "pvesh get /nodes/core/qemu/$vmid/agent/file-read --file '$copy' --output-format json" 2>/dev/null \
-      | python3 -c 'import json,sys; sys.stdout.write(json.load(sys.stdin).get("content",""))' > "$tmp/$name" 2>/dev/null
-    ssh_srv "cat > $out/$name" < "$tmp/$name" && note "$name: $(wc -l < "$tmp/$name" | tr -d ' ') lines"
+    fetch_copy "$vmid" "$(copy_ps "$src" "$copy")" "$copy" "$tmp/$name"
+    ssh_srv "cat > $out/$name" < "$tmp/$name" && note "$name: $(wc -l < "$tmp/$name" | tr -d ' ') lines$why"
   done
   # the client's console, where skymp5-client's own lines are (an inventory apply, the hands' re-equip, a say's verdict,
-  # a trap's "fired here"): the game's lab-console-logs.txt for this launch, and the lab's console tee beside it, which only
-  # a lab run writes (playtest 48's tee held the layer smoke's minute and its game console was never fetched). Each its
-  # last 60,000 lines, so one file-read stays well under the guest agent's 16 MiB cap (playtest 44, 2026-11-03: the
-  # arrows' re-equip could not be read, the recorder kept no console). Earlier launches' consoles are kept at each
-  # relaunch (playtest-relaunch.sh, relaunch-logs/), listed below.
-  for spec in "$c-console.log|(Join-Path (Get-Content -LiteralPath 'C:\\sky-lab\\game-dir.txt' -Raw).Trim() 'Data\\Platform\\Logs\\lab-console-logs.txt')" \
-              "$c-console-tee.log|'C:\\sky-lab\\$c-console.log'"; do
+  # a trap's "fired here"): the game's lab-console-logs.txt for this launch, whole, since fetch_copy reads it back in
+  # ranges (playtest 44, 2026-11-03, lost its console to one whole-file read, which a 60,000-line tail stood in for). Not
+  # C:\sky-lab\<c>-console.log: no tee of the playtest but lab-api's copy of the last lab run's console (runner.py's
+  # client-log fetch; labapi-client-log-fetch removes it once read, thuum-fa's review 2026-11-12). Earlier launches'
+  # consoles are kept at each relaunch (playtest-relaunch.sh, relaunch-logs/), listed below.
+  for spec in "$c-console.log|(Join-Path (Get-Content -LiteralPath 'C:\\sky-lab\\game-dir.txt' -Raw).Trim() 'Data\\Platform\\Logs\\lab-console-logs.txt')"; do
     name=${spec%%|*}; src=${spec#*|}; copy="C:\\sky-lab\\playtest-$n-$name"
-    ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 60 -- powershell -NoProfile -Command \"Get-Content -LiteralPath $src -Tail 60000 | Set-Content -LiteralPath '$copy' -Encoding utf8\"" > /dev/null 2>&1
-    ssh -o BatchMode=yes "$jump" "pvesh get /nodes/core/qemu/$vmid/agent/file-read --file '$copy' --output-format json" 2>/dev/null \
-      | python3 -c 'import json,sys; sys.stdout.write(json.load(sys.stdin).get("content",""))' > "$tmp/$name" 2>/dev/null
-    ssh_srv "cat > $out/$name" < "$tmp/$name" && note "$name: $(wc -l < "$tmp/$name" | tr -d ' ') lines (its last 60,000)"
+    fetch_copy "$vmid" "$(copy_ps "$src" "$copy")" "$copy" "$tmp/$name"
+    ssh_srv "cat > $out/$name" < "$tmp/$name" && note "$name: $(wc -l < "$tmp/$name" | tr -d ' ') lines$why"
   done
 done
 # every launch the session relaunched away from: its platform, driver and console logs as playtest-relaunch.sh kept them

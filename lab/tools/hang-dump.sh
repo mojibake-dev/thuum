@@ -26,7 +26,7 @@ New-Item -ItemType Directory -Force -Path 'C:\\sky-lab\\dumps' | Out-Null
 \$g = Get-Process SkyrimSE -ErrorAction SilentlyContinue | Select-Object -First 1; if (-not \$g) { 'no SkyrimSE running'; exit 1 }
 & \$pd -accepteula -mp \$g.Id 'C:\\sky-lab\\dumps\\$client-hang-$stamp.dmp' | Out-Null
 \$d = 'C:\\Users\\lab\\Documents\\My Games\\Skyrim Special Edition\\SKSE'
-foreach (\$n in 'skse64.log', 'skyrim-platform.log') { Copy-Item -LiteralPath (Join-Path \$d \$n) -Destination ('C:\\sky-lab\\dumps\\$client-hang-$stamp-' + \$n) -Force }
+foreach (\$n in 'skse64.log', 'skyrim-platform.log') { try { \$s = [IO.File]::Open((Join-Path \$d \$n), 'Open', 'Read', 'ReadWrite'); \$o = [IO.File]::Create('C:\\sky-lab\\dumps\\$client-hang-$stamp-' + \$n); \$s.CopyTo(\$o); \$o.Close(); \$s.Close() } catch { \$n + ' not copied: ' + \$_.Exception.Message } }
 Get-ChildItem 'C:\\sky-lab\\dumps' -Filter '$client-hang-$stamp*' | ForEach-Object { \$_.Name + ' ' + \$_.Length }"
   echo "== $client: no finished run to upload into; ProcDump dump kept on the seat $(date +%H:%M:%S)"
   ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout 600 -- powershell -NoProfile -NonInteractive -EncodedCommand $(enc "$ps")" \
@@ -36,6 +36,11 @@ Get-ChildItem 'C:\\sky-lab\\dumps' -Filter '$client-hang-$stamp*' | ForEach-Obje
 fi
 url="$seat_api/clients/$client/hang-dump/$run"
 enc() { printf '%s' "$1" | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n'; }
+# copy_ps <src expression> <copy>: a log the game holds open for writing, copied with read-write sharing as lab-api's
+# log-count and Frida copies are (runner.py): a plain Copy-Item shares no writes and is refused then ("being used by
+# another process", 193821, 194559, 195437). The old copy goes first and a failed open stops the script (exit 1) before
+# a new copy is made, so a caller that reads only after a zero exit never takes an older or empty copy for the log
+copy_ps() { printf '%s' "\$ErrorActionPreference = 'Stop'; Remove-Item -LiteralPath '$2' -Force -ErrorAction SilentlyContinue; \$s = [IO.File]::Open($1, 'Open', 'Read', 'ReadWrite'); \$d = [IO.File]::Create('$2'); \$s.CopyTo(\$d); \$d.Close(); \$s.Close()"; }
 guest() { ssh -o BatchMode=yes "$jump" "flock -w 90 /run/lock/qga-$vmid qm guest exec $vmid --timeout ${2:-120} -- powershell -NoProfile -NonInteractive -EncodedCommand $1" \
   | python3 -c 'import json,sys; d=json.load(sys.stdin); print((d.get("out-data") or "").strip()); sys.exit(0 if d.get("exitcode") == 0 else 1)'; }
 dump=$(cd "$here" && uv run --project lab/labapi python -c '
@@ -48,7 +53,7 @@ echo "== $client: the dump into $run $(date +%H:%M:%S)"
 guest "$dump" 900 | tail -1 || echo "   the dump script did not end cleanly"
 dir='C:\Users\lab\Documents\My Games\Skyrim Special Edition\SKSE'
 for name in skse64.log skyrim-platform.log; do
-  ps="Copy-Item -LiteralPath '$dir\\$name' -Destination 'C:\\sky-lab\\$client-hang-$name' -Force; & \"\$env:SystemRoot\\System32\\curl.exe\" --fail --silent --show-error --upload-file 'C:\\sky-lab\\$client-hang-$name' '$url?name=$name'; 'curl ' + \$LASTEXITCODE"
+  ps="$(copy_ps "'$dir\\$name'" "C:\\sky-lab\\$client-hang-$name"); \$ErrorActionPreference = 'Continue'; & \"\$env:SystemRoot\\System32\\curl.exe\" --fail --silent --show-error --upload-file 'C:\\sky-lab\\$client-hang-$name' '$url?name=$name'; 'curl ' + \$LASTEXITCODE"
   echo "   $name: $(guest "$(enc "$ps")" | tail -1)"
 done
 echo "== $client evidence at https://thuum.gaussing.tv/results/$run/ ($client-SkyrimSE.dmp, $client-skse64.log, $client-skyrim-platform.log)"
