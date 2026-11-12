@@ -146,7 +146,12 @@ Rung: R0 for the fate (the roll, the death, the body's point, the respawn, the l
   (counted, never applied, H5); and, since ADR-062 decision 2 (slice 1b,
   2026-11-03), a host-run script's kill reported as cause 3: the host's
   word, recorded and applied as the death, never validated (not MayDie, not
-  the body's distance to the record: owner checks, ADR-063 decision 4). R3,
+  the body's distance to the record: owner checks, ADR-063 decision 4); and,
+  since ADR-060 as amended (2026-11-12), a commanded thrall's end its
+  commander reports (cause 0) and the thrall's moves under the command: the
+  commander's word, recorded, never validated and with no bound in time or
+  cell (not MayDie; the body's distance to the record kept), the ADR-060
+  section's "The command as amended". R3,
   declared: each game's death camera and
   kill move choice, the dying line's audio, the Papyrus and story-manager
   events a kill fires in that game.
@@ -1464,19 +1469,28 @@ limits) or history.
   client's pick. On the canon it claims the re-roll on Main with no deferral.
   Falsified by a VM-thread free in the lifetime ring before the 78536 walk, a
   constructor write with no free, or any deferral on the canon. Owner: agent.
-- Reanimation by a non-host, ADR-060's H1 to H3 (M3-CLOSE's rows 1 and 4;
-  playtest 51's M3-2): x-reanimate-claim v1 (a probe file never run) on fork
-  m4-reanimate-claim 2dc75ab6 or its successor, once the branch is staged,
-  since the merged base carries none of it: c2 casts Reanimate Corpse at
-  Hilde 0x35534, hosted and killed on c1. Claims: "ff000001 commands it for
-  70 s (ADR-060)", isDead false on both seats, c2 aiEnabled true and c1
-  aiEnabled false, the record alive within 15 s of the command. H1 holds if
-  c1's copy stands only at the server's live word with its AI off, H2 if c2's
-  copy stands at its own hit before the promote and stays up, H3 if c2's copy
-  is live after the grant; a version that casts inside the ragdoll's 4 s
-  reads H3's race. Falsified by c1's copy standing on its own effect, the
-  record still dead 15 s after the command, or c2's copy dead or AI-off after
-  the promote. Owner: agent.
+- Reanimation by a non-host, ADR-060's H1 to H3 and the command as amended
+  (M3-CLOSE's rows 1 and 4; playtest 51's M3-2): x-reanimate-claim v2.1 (by
+  path, lab/.cache/probes/x-reanimate-claim-v2.yaml, sha1 cc234c58, never
+  run) on fork m4-reanimate-claim-2 b67416d9 or its successor, once the
+  branch is staged, since the merged base carries none of it: c2 casts
+  Reanimate Corpse at Hilde 0x35534, hosted and killed on c1; c1 raises Sven
+  with Dead Thrall, takes him through his door and back, raises the cow
+  0x60b22 with Reanimate Corpse and quits. Claims: "ff000001 commands it until
+  its engine ends the effect (the record's 60 s) (ADR-060)", the record alive
+  within 15 s, c1's copy standing with its AI off, her end on the
+  commander's own timer read as "the command's end" with no lease line;
+  Sven's command through the door and back, c2's copy alive outside; at c1's
+  departure Sven alive and run by c2, the cow dead by the server's word on
+  the record and on c2. Every claim reads the other seat or the server
+  (ADR-064); the commander's own copy is recorded. H1 holds if c1's copy
+  stands only at the server's live word with its AI off, H2 if c2's copy
+  stands at its own hit before the promote and stays up, H3 if c2's copy is
+  live after the grant; a version that casts inside the ragdoll's 4 s reads
+  H3's race. Falsified by c1's copy standing on its own effect, the record
+  still dead 15 s after the command, c2's copy dead or AI-off after the
+  promote, a command ended by a door or an unload, a full thrall dead or a
+  timed one alive after its commander's departure. Owner: agent.
 - Playtest 49's corpse lay crash: x-corpse-lay-crash v1 (a draft in
   lab/.cache/probes, its fresh review first) with lab/frida/corpse-lay-heap.js
   on c1, its first run as `just frida lab/frida/corpse-lay-heap.js c1`. It
@@ -3281,17 +3295,50 @@ cast the spell" and "weird reanimating sven just puts him back on his normal pat
 snippet above (the server's own Spell.Cast on the body's host, CastReanimateOnHost) ran the Reanimate effect in the HOST's
 engine with the caster's figure as the commander: the get-up and the shader played there alone, and a commanded actor whose
 commander is a figure (no intent behind it) fell back to its packages. Built on fork m4-reanimate-claim 2dc75ab6 (server
-only): the accepted reanimate hit claims the body for the caster's seat (the caster when a user plays it, else the caster's
-host) through the cells rule's new commanded claim (wire-rules cells.rs FollowKind::Commanded beside ADR-052's Claim;
-claim_commanded with the lease the effect's EFIT duration plus 10 s, 0 for good; release_any_claim at the thrall's death in
-PartOne::OnDeathState, the commander's departure in gone(), or the lease in tick()); UpdateHoster is the word, so the caster's
+only), then m4-reanimate-claim-2 to b67416d9 (train 52 merged in at 315dce28): the accepted reanimate hit claims the body for
+the caster's seat (the caster when a user plays it, else the caster's host) through the cells rule's commanded claim
+(wire-rules cells.rs FollowKind::Commanded beside ADR-052's Claim, claim_commanded); UpdateHoster is the word, so the caster's
 puppet of the body becomes its live actor and the former host's live actor becomes a puppet; the snippet and RelayCast's skip
-of the body's host are gone, the former host hears the relayed cast as any cast's look. Lines: "[verb:npc-fate] reanimate
-<spell> by <caster> on <body>: <commander> commands it for <N> s (ADR-060)", "<body> died under <commander>'s command: the
-claim ends, <simulator> simulates it (ADR-060)", E_COMMAND_UNLOADED. T0: NpcFateTest's reanimate case on the claim (the
-caster's seat simulates the body from the hit, both games hear the word, no snippet, the relay reaches the host, the body's
-death ends the claim; the host's own cast keeps the body its own), cells.rs's commanded test (the lease, the death, the
-departure, a dialogue claim giving way).
+of the body's host are gone, the former host hears the relayed cast as any cast's look.
+
+The command as amended (ADR-060's amendments of 2026-11-12, Eli verbatim: "summons and resurrections should obey the timers
+the level of spell. leaving a cell should not kill the thrall.", then "'but as a plain resident with no undead look' should
+simply die, but if it's a full thrall at 999 days, should just stay. i want it to keep it's undead look though", then "thrall
+returns to caster obvs"; fork 13747f6a, f89115af, 330a10ee and b67416d9). It has no lease; the 70 s of 2dc75ab6 (the record's
+duration plus 10 s) is gone. Rung R2, declared: the command's end and the thrall's moves are its commander's word, recorded
+and never validated (rule 5), with no bound in time or in cell. Its end is the thrall's death on the commander's engine, on
+that engine's own timer (dual casting, perks, the spell's level), which the commander's seat reports as cause 0 at any time
+("the command's end"); the essential and protected rules (MpActor::MayDie) are a check on the owner there and do not refuse
+it, as for a host-run script's kill (ADR-063 decision 4); the body's distance to the record is still checked (E_DEATH_FAR).
+Its moves: the row follows the thrall, not a cell: simulator_of names the commander in any cell, the commander's report of
+the thrall into any cell is accepted and moves the row, and the commander's unload of the thrall's cell, a load door and
+another seat's grant there keep it. It ends besides at the thrall's death by any other path (OnDeathState), at any respawn
+its commander's engine did not stand (the fate's sweep, the console's Resurrect, the lab's respawn-ref; only the stand-up on
+the commander's own sample, PartOne::ResurrectByHost, keeps a claim through it), at the commander's report of a body already
+dead, and at a newer command. The departure rule: the commander's departure from the game ends every claim it holds with a
+word (ClaimGone: the cell's simulator takes the actor back, never a puppet nobody simulates); a timed thrall dies at once by
+the server's word (ThrallExpired, ahead of its word, so the cell's simulator is handed a body and never promotes a living
+copy no effect holds), and a full thrall stays alive on its cell's simulator. The line between full and timed is the
+record's duration of the spell's Reanimate effect against wire-rules magic::FULL_THRALL_MIN_S, a day: in the masters every
+Reanimate effect lasts 60 to 200 s but Dead Thrall's 86,313,600 s, and their effects' flags are equal (MGEF 0x96d0b and
+0x7e8e0, 0x00401002), so the side is the record's, never a name (ADR-063); no estimate of an effect's end is kept anywhere.
+Not built: the full thrall's return to its caster at the caster's return (C4 of the fresh review of f89115af; HYPOTHESIS: how
+the returning engine takes command of a living thrall it holds no effect on is the engine read running now, rule 8), and its
+undead look on every screen (the Undead FX build). Lines: "[verb:npc-fate] reanimate <spell> by <caster> on <body>:
+<commander> commands it until its engine ends the effect (the record's <N> s) (ADR-060)", "death report: <body> died of ...:
+the command's end: its commander's engine ended the effect (ADR-060)", "<body> died under <commander>'s command: the claim
+ends, <simulator> simulates it (ADR-060)", "the claim on <actor> in cell <cell> ended with its claimant <player>'s departure;
+<simulator> simulates it (ADR-052, ADR-060)", "<actor> dies at its commander <player>'s departure: a timed thrall, its
+effect no engine's now, ends by the server's word (ADR-060)", "<actor> stands again by a respawn its simulator's engine did
+not make: <former>'s claim ends, <simulator> simulates it (ADR-060)", "[verb:npc-talk] <commander> talks to its thrall
+<actor> in cell <cell>; the command stands, no lease (ADR-060)" and its close's line, E_COMMAND_UNLOADED. T0: NpcFateTest's
+reanimate case (the caster's seat simulates the body from the hit, both games hear the word, no snippet, the relay reaches
+the host; the stand-up on the commander's live sample keeps the command; the thrall's death, the commander's cause-0 report
+past every window, the unload with no word, the disconnect's timed death ahead of its word, a Dead Thrall's thrall alive
+through the disconnect and a tick past its record, a never-stood command ended by a respawn and by its commander's report of
+the dead body; the host's own cast keeps the body its own) and its protected case (Jenassa 0xe1ba9, HirelingJenassa);
+cells.rs's commanded tests (no lease, the walk, the door, the grant, the departure's decisions, the line at 86,399 and
+86,400 s).
 
 HYPOTHESIS H1 (ADR-060): the former host's engine, whose copy of the body is a puppet (AI off) from the grant on, does not
 stand its copy by its own effect from the relayed cast; the copy stands by the server's live word and follows the stream.
@@ -3304,7 +3351,8 @@ the puppet's deferred kill (a puppet standing against a dead record) and the gra
 ragdoll) races the grant; the reconcile must read the server's word over its own dead branch. Probe x-reanimate-claim (c1
 kills a c2-hosted resident, c1 casts Reanimate Corpse at the body: the claim line and the UpdateHoster pair, c1's actor mine
 and alive within 3 s, c2's puppet Resurrect, npc-state isDead false on both, the thrall's server distance to c1 shrinking as
-c1 walks away, hosting back to c2 at 60 s plus the margin), then b-reanimate-claim in its own commit. H1 to H3 are kept open by
+c1 walks away, hosting back to c2 at the thrall's death with no lease; v2.1's legs are the Dynamic plan's line), then
+b-reanimate-claim in its own commit. H1 to H3 are kept open by
 M3's paper close (2026-11-11): they rest on fork m4-reanimate-claim 2dc75ab6, built and never merged (PLAN's "ADR-060 built ...
 unrun"), and x-reanimate-claim has never run, so the merged base still carries the reanimate path playtest 41 read broken (the
 thrall up on one screen), the path playtest 51's M3-2 meets; their read is the Dynamic plan's reanimate claim line.
