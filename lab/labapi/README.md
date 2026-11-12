@@ -32,12 +32,21 @@ that shares write access, the copy exec printing the copy's length (three
 tries, 10 s apart, but one for an exec that ran to its deadline), and read back by Proxmox's own ranged agent file-read
 (offset, count, decode=0), 512 KiB a call, joined as bytes, checked against
 the copy's length and decoded as UTF-8 once; a copy past 64 MiB is refused
-before its first read, and the copy is removed once read (one the agent
-holds open rolls the seat back: in the same run's reset when the fetch came
-before it, else at its next run). A copy or sidecar counts as held only when
-its removal still finds it at the fourth of four tries 1 s apart, each try
-before that a note, since a scan of a file just written can hold it a moment
-(train 52's stage, numidium's HYPOTHESIS). A client log (`<client>.log`, `-driver.log`,
+before its first read, and the copy is removed once read. Its removal is
+tried four times 1 s apart, each try that still finds it a note, since a
+scan of a file just written can hold it a moment (train 52's stage,
+numidium's HYPOTHESIS), then over a 30 s window, pinging the agent after
+pauses of 2, 4, 8 and 16 s, each ping it answers bringing another try. A
+copy or sidecar still there then is held open in the agent, a busy agent
+keeping the handle of a read or close that timed out until it works through
+its queue (core's host journal, 2026-11-12; HYPOTHESIS, the next relaunch's
+held count decides): a note naming the file and its seat, never the seat's
+fault, and the seat's next reset (a rollback, or the relaunch's cleaning)
+removes it; a file that cleaning still finds held rolls the seat back in
+that reset. Every agent call Proxmox answers
+"QEMU guest agent is not running", its 3 s guest-ping unanswered by a busy
+agent, is asked again for up to 30 s (`LAB_AGENT_BUSY_S`) before it fails
+as it did. A client log (`<client>.log`, `-driver.log`,
 `-console.log`, `-before.log`, `-launch.log`, a relaunch's
 `-relaunch-<step>.log` and `-console.log`) comes back the same way, since the
 game holds its logs open for writing. `c1.log` in a scenario's artifacts
@@ -81,10 +90,10 @@ back through the agent's ranged file-read (512 KiB a call, decoded once
 joined, removed once read, as a client log is: a whole read past about 1 MiB
 is unreliable on a busy seat), a burst's frames likewise, and a
 `request-screenshot` client verb on an unmanaged one; a shot or frame not
-read is the step's note, never a fault, but a sidecar held open after its
-read faults the seat (a rollback at its next run, the verdict unchanged), a
-reversal of the 2026-10-30 soft cleaning's leniency, since held files built
-up (docs/LAB.md).
+read is the step's note, never a fault, and so is a sidecar held open past
+its removal's window. A shot's file and a burst's folder carry the run's
+name (`shots\<run>-<step>.png`), so a sidecar left held is never read as
+the next run's shot (docs/LAB.md).
 `wait: N` sleeps N times `TIME_SCALE`. Before an `assert:` block, every
 client the block reads through `.sees()` or `.view()` gets a `dump-state`
 step so the view is fresh. `server.log_count("<regex>")` is counted from the
@@ -98,9 +107,10 @@ than its `every`. A known cost: every pattern copies the seat's two logs
 anew, where one copy a seat a poll could serve all its patterns; that saving
 is left for later. The copies come back as the
 run's logs do, in ranges, each removed once read (a copy, a ranged read and a
-removal a log), and one the agent holds open is the seat's fault; each count's
-copies carry their step and their number there (logcount-<index>-<n>), so one
-held open spoils its own poll alone, not the rest of its until; a range
+removal a log), and one the agent holds open is a note; each count's copies
+carry their run, their step and their number there
+(logcount-<run>-<index>-<n>), so one held open spoils its own poll alone,
+not the rest of its until nor a later run's count; a range
 that comes back short keeps no count, as does a copy whose exec answer the
 agent lost, since only that exec's own lengths prove a copy whole. An `assert:` counts no
 seat's log itself: it reads the last count taken, a `log-count` step's or an

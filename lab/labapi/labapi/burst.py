@@ -5,7 +5,7 @@ One plain screenshot is a guest exec, the sky-lab-screenshot task and a 3.8 MB r
 a shot (x-npc-legs 20261022-190831), while a puppet's walk lasts 1 to 3 s. A burst is one exec: BURST_PS1 runs as
 the lab user through the on-demand task sky-lab-burst, registered with -Force at each use as mouse.py's sky-lab-input
 is (nothing for a snapshot to carry), headless, and captures `count` frames `intervalMs` apart on one stopwatch into
-shots\\<NNN>-burst\\<k>.png, each frame's offset in done.json (a PNG write can push a frame late; the offset says
+shots\\<run>-<NNN>-burst\\<k>.png, each frame's offset in done.json (a PNG write can push a frame late; the offset says
 when it was taken) from `started`, the guest's UTC clock at frame 0. Once the task has written done.json, the exec writes a base64 sidecar beside each frame for the
 agent's text-only file API and prints done.json; the runner reads the frames back after it.
 """
