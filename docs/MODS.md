@@ -948,7 +948,8 @@ seat then stepped Havok at 1/144 and a 47 fps one at 1/60, and rest and settling
 skeptic, docs/research/physics-leg-2026-11-11.md). Three rows of `lab/layer/ini-patches.tsv` cap every player alike: [Render]
 `FramerateLimit = 60`, [HAVOK] `DynamicMaxTimeScaling = false` (static: both values calculated once from MaximumFramerate) and
 `MaximumFramerate = 60`, so fMaxTime is 1/60 and, with MaxTimeComplexOffset 30 kept, fMaxTimeComplex 1/30, the game's own
-Skyrim.ini defaults (HYPOTHESIS until a seat reads them through Utility.GetINIFloat). [HAVOK] Enabled, PhysicsDamagePatch and the
+Skyrim.ini defaults, read green on both seats through Utility.GetINIFloat (x-havok-cap-read v2 20261112-075922 on the cap's
+stage, fork canon c3f9d175: within 0.0005 of each at two reads 10 s apart, the second equal to the first). [HAVOK] Enabled, PhysicsDamagePatch and the
 vsync settings stay as Eli set them, and his own 144 fps goes with the cap. A seat already below 60 fps stepped at 1/60 before,
 so the lab's seats see no change of step; the cap shows on a machine above 60.
 
