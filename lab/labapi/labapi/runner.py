@@ -2300,8 +2300,8 @@ class Runner:
         (_read_back: 512 KiB a call, the length check, the 64 MiB cap, the copy removed once read, one the agent holds
         open the seat's fault): read whole, the console logs timed out the agent on both seats in 20261111-191642, and
         playtest 45's c1 log reached 25k lines. A failure is a note naming its code and "(log fetch)", an E_PVE_* the
-        agent's or E_RUN_LOG_FETCH the runner's own (a copy that failed its tries, a short read, the cap), never a
-        failed run. A source that is not there is said by the copy itself (`missing <path>`) and not tried again, and
+        agent's or E_RUN_LOG_FETCH the runner's own (a copy that failed its tries or whose exec answer was lost, a short
+        read, the cap), never a failed run. A source that is not there is said by the copy itself (`missing <path>`) and not tried again, and
         once a fetch finds the seat's guest agent not running its other log fetches are skipped until its reset, with
         one note: each would spend its copy's three tries on an agent only a restart brings back (the fresh review of
         e8d8de9b: a missing log cost about 25 s, a dead agent about 75 s a seat)."""
@@ -2321,7 +2321,10 @@ class Runner:
                f"$n = $s.Length; $d = [IO.File]::Create('{copy}'); $s.CopyTo($d); $m = $d.Length; $d.Close(); $s.Close(); "
                f"Write-Output ([string]$n + ' ' + [string]$m)"]
         try:
-            _, size = await self._seat_copy(g, cmd, copy)
+            seat_n, size = await self._seat_copy(g, cmd, copy)
+            if seat_n is None:
+                # log-count's rule (_log_count): only the copy exec's own "N M" proves a copy whole
+                raise ValueError("its copy's exec answer was lost, so the copy is unchecked")
             data = await self._read_back(rec, g, copy, size, name)
         except (ProxmoxError, ValueError) as e:
             rec.notes.append(f"{name}: {e} (log fetch)" if isinstance(e, ProxmoxError) else f"{name}: E_RUN_LOG_FETCH: {e} (log fetch)")
@@ -2364,7 +2367,8 @@ class Runner:
         bytes>" as log-count's copy prints them, and those two lengths from that line, three tries 10 s apart (_tried).
         A copy whose exec answer the agent lost (E_PVE_EXEC_LOST) ran to its end on the seat, so its length then comes
         from the copy itself, by one length exec under the same tries, the source's unknown (None); such a copy is
-        unchecked, since only the exec's own two lengths prove it whole, and log-count counts none (_log_count). A copy
+        unchecked, since only the exec's own two lengths prove it whole, and no caller takes it: log-count counts none,
+        a log fetch is a note, a trace is not fetched whole (_log_count, _fetch_client_file, _frida_trace). A copy
         shorter than its source at its open was cut short, since the sources only grow (the script's .log is opened
         'a', frida_script_text; frida-inject's stdout appends), and is tried again as a failed one is. A copy whose exec
         printed `missing <path>` instead (a client log's source that is not there, _fetch_client_file; log-count's tee
@@ -2511,7 +2515,12 @@ class Runner:
                    f"$d = [IO.File]::Create('{copy}'); $s.CopyTo($d); $m = $d.Length; $d.Close(); $s.Close() }} "
                    f"else {{ Set-Content -Path '{copy}' -Value '' -NoNewline; $n = 0; $m = 0 }}; Write-Output ([string]$n + ' ' + [string]$m)"]
             try:
-                _, size = await self._seat_copy(g, cmd, copy)
+                seat_n, size = await self._seat_copy(g, cmd, copy)
+                if seat_n is None:
+                    # log-count's rule (_log_count): only the copy exec's own "N M" proves a copy whole; this copy runs
+                    # without Stop, so a lost answer's copy may be the empty one a failed open left, an empty trace
+                    # with no fault (the final check of 7ebf12a7)
+                    raise ValueError("its copy's exec answer was lost, so the copy is unchecked")
                 # one decode of the whole; a character the copy cut mid-write at its end reads as U+FFFD
                 data = await self._read_back(rec, g, copy, size, f"frida {script}.{ext}")
                 texts.append(data.decode("utf-8", errors="replace"))

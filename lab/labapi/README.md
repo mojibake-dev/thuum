@@ -50,7 +50,7 @@ never heartbeated, the scenario timed out, an assertion that is not in the
 language, an exception out of the artifacts phase in a run not already red, a trace the run's own
 frida step or relaunch arm started that its end could not fetch whole).
 That last is E_RUN_FRIDA_FETCH, naming the script, the seat and the reason
-(its copy failed three tries, a range still unread after the file read's
+(its copy failed three tries or its exec answer was lost, a range still unread after the file read's
 retries, a range that came back as no base64, bytes that do not come to the
 copy's length, a copy past 64 MiB); as for a crash at the end, a red run
 stays red and gains the failure. A trace started by hand (POST /lab/frida)

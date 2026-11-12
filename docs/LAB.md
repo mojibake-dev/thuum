@@ -378,8 +378,10 @@ printing the source's length at its open and the copy's last, as
 log-count's copy does (tried three times, 10 s apart, except an exec that
 ran to its deadline, which is not tried again; a copy shorter than its
 source at its open was cut short, the sources only growing, and is made
-again; a copy whose exec answer the agent lost has its length read from the
-copy itself). The copy is then read by the agent's own
+again; a copy whose exec answer the agent lost is not fetched whole, as
+log-count keeps no count of one, since only that exec's own two lengths
+prove a copy whole: the copy runs without Stop, so a source open that
+failed leaves an empty copy). The copy is then read by the agent's own
 file-read with offset, count and decode=0 (qemu-server 9.1.5 and later),
 512 KiB a call: Proxmox reads a file in guest-file-read calls of its
 read_size, 1 MiB (qemu-server's Agent.pm), and calls of that size timed out
@@ -794,7 +796,8 @@ removed once read (one the agent holds open rolls the seat back). Read
 whole, the console logs timed out the agent on both seats in
 20261111-191642. A log not fetched is a note naming its code and "(log
 fetch)", an E_PVE_* the agent's or E_RUN_LOG_FETCH the runner's own (a
-copy that failed its tries, a short read, the cap), never the run's
+copy that failed its tries or whose exec answer was lost, a short read,
+the cap), never the run's
 failure: no verdict reads a log artifact. A source that is not there is
 said by the copy itself and not tried again, and once a fetch finds the
 seat's guest agent not running its other log fetches are skipped, with one
@@ -830,7 +833,7 @@ a lab fault. A red run stays red and gains the failure.
 The end also fetches every Frida trace started on a seat, in ranges (the
 client template's section above). One the run's own steps started, a frida
 step's or a relaunch's frida arm's, is the run's evidence: not fetched whole
-(its copy failed three tries, a range still unread after the file read's
+(its copy failed three tries or its exec answer was lost, a range still unread after the file read's
 retries, a range that came back as no base64, bytes that do not come to the
 copy's length, a copy past 64 MiB) it is E_RUN_FRIDA_FETCH, naming the
 script, the seat and the reason, and it turns a would-be green into error

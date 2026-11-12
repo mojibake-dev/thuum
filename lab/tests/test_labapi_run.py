@@ -914,6 +914,27 @@ class ClientLogs(RunTests):
         self.assertFalse([c for c in pve.calls if c[:3] == ("file_read_range", 901, "C:\\sky-lab\\c1.log")])
         self.assertNotIn("C:\\sky-lab\\c1.log", pve.files)
 
+    def test_a_log_copy_whose_exec_answer_was_lost_is_a_note(self):
+        """log-count's rule for a log too: only the copy exec's own "N M" proves a copy whole, so a copy whose answer the
+        agent lost is not kept as the log, a note naming E_RUN_LOG_FETCH and "(log fetch)", the verdict as it was (the
+        final check of 7ebf12a7)."""
+        from labapi.proxmox import ProxmoxError
+
+        pve = self._managed_c1()
+        pve.files[self.settings.client_driver_log] = "platform log\n"
+
+        def lost(guest, res):
+            raise ProxmoxError(f"E_PVE_EXEC_LOST: pid 42 on {guest.name}: the guest agent no longer knows it; the command "
+                               "ended and its answer is lost")
+
+        _log_copy_answers(pve, lost, copy=r"C:\\sky-lab\\c1\.log")
+        run_id, body = self._run(SOLO_WITH_LOG)
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertEqual(body["failures"], [])
+        self.assertIn("c1.log: E_RUN_LOG_FETCH: its copy's exec answer was lost, so the copy is unchecked (log fetch)", body["notes"])
+        self.assertNotIn("c1.log", body["artifacts"])
+        self.assertFalse([c for c in pve.calls if c[:3] == ("file_read_range", 901, "C:\\sky-lab\\c1.log")])
+
 
 
 @needs_deps
@@ -2253,28 +2274,50 @@ class FridaSteps(RunTests):
         self.assertEqual([c[3:] for c in pve.calls if c[:3] == ("file_read_range", 901, copy)], [(0, 45)])
         self.assertEqual((self.tmp / "results" / run_id / "frida" / f"c1-{script}.jsonl").read_text(encoding="utf-8"), log)
 
-    def test_a_copy_whose_exec_answer_was_lost_is_read_by_its_own_length(self):
-        """An exec whose answer the agent lost has ended on the seat (E_PVE_EXEC_LOST, run 20261018-204244): the copy
-        is made, so its length comes from the copy itself by one length exec, and the read goes on, the copy not made
-        again over a .log the script still writes."""
+    def _its_copy_answer_lost(self, empty: bool):
+        """FRIDA_ONE with its trace's .log copy exec ending E_PVE_EXEC_LOST (run 20261018-204244) after the fake made the
+        copy whole, or left it `empty` (the copy runs without Stop, so a source open that failed still creates one); the
+        run's id and body, and the seat."""
         from labapi.proxmox import ProxmoxError
 
-        log = '{"impulse": 1}\n' * 3
-        pve = self._traced_seat(log)
+        pve = self._traced_seat('{"impulse": 1}\n' * 3)
 
         def answer(guest, res):
+            if empty:
+                for p in [p for p in pve.files if p.endswith(".js.log.copy")]:
+                    pve.files[p] = ""
             raise ProxmoxError(f"E_PVE_EXEC_LOST: pid 42 on {guest.name}: the guest agent no longer knows it (RuntimeError: "
                                "PID 42 does not exist); the command ended and its answer is lost")
 
         _log_copy_answers(pve, answer)
         run_id, body = self._run(FRIDA_ONE)
-        self.assertEqual(body["verdict"], "green", body)
+        return run_id, body, pve
+
+    def test_a_copy_whose_exec_answer_was_lost_makes_the_run_a_lab_fault(self):
+        """An exec whose answer the agent lost has ended on the seat, but only the copy exec's own "N M" proves its copy
+        whole, as log-count's rule has it: the run's own trace is its evidence, so a lost answer is a trace not fetched
+        whole, E_RUN_FRIDA_FETCH, and the would-be green is error, which a run set reruns (the final check of
+        7ebf12a7); the copy is not made again over a .log the script still writes, nor read."""
+        run_id, body, pve = self._its_copy_answer_lost(empty=False)
+        self.assertEqual(body["verdict"], "error", body)
         script = f"x-trace-{run_id}-1.js"
         copy = f"C:\\sky-lab\\frida\\{script}.log.copy"
+        self.assertEqual([(f["kind"], f["client"], f["error"]) for f in body["failures"]],
+                         [("lab", "c1", f"E_RUN_FRIDA_FETCH: {script}.log on c1 (fake-c1) not fetched whole: its copy's exec "
+                                        "answer was lost, so the copy is unchecked")])
         execs = [" ".join(c[2]) for c in pve.calls if c[:2] == ("exec", 901)]
         self.assertEqual(len([e for e in execs if f"[IO.File]::Create('{copy}')" in e]), 1)
-        self.assertEqual(len([e for e in execs if f"(Get-Item -LiteralPath '{copy}').Length" in e]), 1)
-        self.assertEqual((self.tmp / "results" / run_id / "frida" / f"c1-{script}.jsonl").read_text(encoding="utf-8"), log)
+        self.assertFalse([c for c in pve.calls if c[:3] == ("file_read_range", 901, copy)])
+
+    def test_a_lost_copy_answer_that_left_an_empty_copy_is_a_lab_fault(self):
+        """The final check of 7ebf12a7's demo: the copy exec's answer lost and an empty copy left, as a source open that
+        failed leaves one, was read by its own length as 0 bytes, an empty trace for a source that holds lines and no
+        fault."""
+        run_id, body, _ = self._its_copy_answer_lost(empty=True)
+        self.assertEqual(body["verdict"], "error", body)
+        self.assertEqual([f["error"] for f in body["failures"]],
+                         [f"E_RUN_FRIDA_FETCH: x-trace-{run_id}-1.js.log on c1 (fake-c1) not fetched whole: its copy's exec "
+                          "answer was lost, so the copy is unchecked"])
 
     def test_a_size_mismatch_makes_the_run_a_lab_fault(self):
         """The ranges must come to the copy's length: a copy holding fewer bytes than its exec said meets its end
