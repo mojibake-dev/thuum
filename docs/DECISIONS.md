@@ -3810,6 +3810,17 @@ commander's departure from the game ends it with a word that returns the thrall 
 found: gone() and unloaded() dropped the row with no decision); what a commanderless thrall does then is open (default: alive on
 the host until its effect would end, HYPOTHESIS for Eli). Built on fork m4-reanimate-claim-2 (train 52 merged in, 315dce28).
 
+Amended (Eli in session, 2026-11-12 about 07:24Z, recorded 07:29Z by thuum-fa; told that the default left a commanderless thrall
+alive on its cell's host until its effect would end, "but as a plain resident with no undead look", and that Dead Thrall's record
+lasts about 999 days, Eli verbatim: "'but as a plain resident with no undead look' should simply die, but if it's a full thrall
+at 999 days, should just stay. i want it to keep it's undead look though"): the commander's departure kills a timed thrall at once,
+by the server's word, and no estimate of its effect is kept; a full thrall (Dead Thrall, whose Reanimate effect item lasts
+86,313,600 s in the record, 999 days, not the 0 decision 2 read) stays alive on its cell's host and keeps its undead look on every
+screen, the look carried by the record and by the thrall's new simulator (the Undead FX build: the
+server-recorded reanimate effect for vanilla's glow, the mod's decay run on the thrall's simulator). Which side a thrall falls
+on is the record's (its effect's duration or a flag of the record), never a name (ADR-063). Open: what a returning commander does
+with a thrall that stayed (default: nothing; it is its cell's NPC).
+
 ## ADR-061: A shared container's live view is the menu drawn again whole; exclusive access is the fallback behind a setting
 
 Status: ACCEPTED 16:11 PST 2026-11-02 by Eli, verbatim via numidium: "i say take one more deep dive crack at REALLY getting live
