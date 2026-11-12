@@ -5356,3 +5356,61 @@ Amends: ADR-064 decision 7 (dated note under it), ADR-063's props note (accepted
 derived class; slice three is rungs 5 and 6), ADR-067 decision 4 (its final sample is the asleep sample; the built ChangeForm
 apply is the record). W3 stays Eli's at the time: a rewrite of b-prop-push's step 27 if the drop read calls for one (decided
 2026-11-11 in the amendment above: no rewrite; the leftover is read first, then fixed or the count restated by Eli's word).
+
+## ADR-072: The closeout is one route: the Golden Claw walk is the chart, and a leg is done when Eli has ticked it
+
+Status: PROPOSED 2026-11-12 (thuum-ff, from the plan Eli approved in plan mode the same day,
+~/.claude/plans/federated-brewing-iverson.md, whose D-C2 recommended this ADR be written as PROPOSED). Acceptance is Eli's word.
+
+Context. `just status` on main 72b881cb reads 68 verbs: 1 VERIFIED IN PLAY, 53 MECHANISM ONLY, 14 BROKEN, 407 lines still saying
+HYPOTHESIS. M3 has been BUILT at T3 since 2026-10-31 and none of docs/M3-CLOSE.md's T4 rows has been ticked. The build runs ahead
+of the sittings, and the sittings grow to catch up: playtest 51 holds eight items, M3's seven rows, train 52, the 60 fps cap,
+ADR-071's rungs 1 to 3 and the reanimation rebuild, against the root-cause plan's "one short playtest per fixed system, 8 items
+max" (docs/research/root-cause-plan-2026-11-02.md). Closing by milestone asks each milestone for its own scenario set and its own
+sittings; three of those exits already name the same walk: M4's `d-bleak-falls`, M6's `q-golden-claw` (PLAN.md:1442, :1623), and
+ADR-067 decision 7's cabbage cart, which rung 0 placed at the Riverwood Trader (cell 0x9731), where Lucan gives the quest. Neither
+exit scenario exists in lab/scenarios yet. Prior art for the shape: ADR-068 (scripts as one system) and ADR-071 (physics as one
+system) each replaced a list of per-feature fixes with one ladder and its sittings. Small batches surface faults sooner and place
+them more cheaply (DORA, "Working in small batches", https://dora.dev/capabilities/working-in-small-batches/; Forsgren, Humble and
+Kim, Accelerate, 2018, chapter 4), and one lab is a single-server queue whose waits grow steeply with load and variability
+(https://en.wikipedia.org/wiki/Kingman%27s_formula; Kingman, "The single server queue in heavy traffic", Math. Proc. Cambridge
+Phil. Soc. 57(4), 1961).
+
+Decision.
+
+1. One route. The closeout's chart is one two-player walk: the Riverwood Trader, Embershard, Bleak Falls Barrow, a server restart
+   in the middle, and back to Lucan. PLAN.md keeps the milestones as history and order; this table says what is left.
+2. Three states a leg, in order: green in the lab (its scenarios, on canon), ticked by Eli (a sitting's row), DONE. Nothing
+   skips the middle one (a milestone's DONE already needs its T4 sitting, docs/M3-CLOSE.md section 3; this states it for every leg).
+3. A sitting is the route, or a stretch of it, on the current canon: eight items at most, repeated on each new canon until every
+   leg is ticked. A system that is not merged on canon at a sitting's cut waits for the next one; a sitting never waits for a build.
+4. Built ahead, one rung. A ladder builds at most one rung beyond the rung the lab is staging, so a finding in rung N costs one
+   re-merge, not three.
+5. Off the route is decided once, by name, as a declared limit or after-close work: the crafting benches, pickpocketing, vampirism's
+   cure beyond 51's item, `q-main`, M7 (dragons, lycanthropy, mounts), the stretch mods. Each gets a line here when Eli names it.
+6. The clauses of PLAN's definition of done that no walk can show stay agent work beside the route: 5 (server scripts gate and
+   modify) and 7 (nothing on R0/R1 forged) at T0 and T2; 8 (the wire) is done since M1 (PLAN.md:116).
+
+The route (states as of 2026-11-12, main 72b881cb, fork canon 6fe5fea0; verb states are `just status`'s words):
+
+| Leg | What both screens must show | Verbs (state) | Lab | Eli |
+|---|---|---|---|---|
+| 1. The Trader: the quest | The Golden Claw starts in both journals with its objectives | quest-stage (BROKEN, 7/11), papyrus-events (BROKEN, 8/11) | b-quest-stage, b-story-arrival green in 52's gate 20261112-055559 | 51 item 3, unticked |
+| 2. The Trader: the cart | a spell at the cabbage cart moves the same cabbages to the same rest | prop-physics (BROKEN, 6/11) | b-prop-push pending; ADR-071 rung 1 staged 1 of 2, rungs 2 and 3 unstaged | unticked |
+| 3. Embershard | the roster on a hand-off, arrows that hit, reach and cone, the guest's loot | cell-host, npc-handoff, npc-fate, npc-puppet (BROKEN); npc-stream (MECHANISM ONLY) | c-dungeon-enemies, b-npc-body-release, b-npc-handoff-* on main; b-npc-death on watch | M3-4, M3-5, M3-7 and 51 item 8, unticked |
+| 4. The Temple: bodies and Arvel | found bodies, bodies where they died, the ambush for a guest, Arvel freed, the claw on his body | trigger-entry (BROKEN, 0/11), npc-fate, containers (BROKEN, 6/11) | x-trigger-owner, x-alias-return green by path; no committed scenario | M3-1, M3-3, 51 item 4, unticked |
+| 5. The Temple: reanimation | a raised body stands, walks and fights on both screens with its look | npc-fate, magic-effects | m4-reanimate-claim-2 staged 0 of 2 | M3-2, unticked |
+| 6. The barrow: traps, pillars, locks | every trap, plate, lever and pillar the same on both screens | traps (BROKEN, 9/13), furniture (BROKEN, 0/11), locks (BROKEN, 6/11) | b-bleak-traps, b-trap-look, b-puzzle-relay, b-lever-relay, b-locks on main | unticked |
+| 7. The Sanctum | the claw door for the claw's holder, the word wall teaches | word-wall (MECHANISM ONLY, 6/11) | b-word-wall on main | 51 item 4's end, unticked |
+| 8. The restart | journals, script state, references, traps and props as they were | (each leg's restart half) | b-quest-stage-restart, b-script-state-restart, b-ref-state-restart, b-trap-record-restart on main | 51 item 5, unticked |
+| 9. Back to Lucan | the quest completes in both journals; the reward lands | quest-stage, papyrus-events | b-leveled-reward on main; the reward taken back is 52's declared limit | 51 item 5, unticked |
+| Along the way | skills rise by use, a level and a perk taken | leveling (BROKEN, 5/11), perks (VERIFIED IN PLAY) | p-level-up, b-perk-pick on main | perks ticked; leveling unticked |
+| Later on the route | a dragged body, bodies at the same spot | (ADR-071 rungs 5 and 6, not built) | none | unticked |
+
+The Lab column is what is committed or staged today, not a claim that each is green on canon 6fe5fea0: the first act under this
+ADR is one run set of the route's committed scenarios on canon, whose verdicts replace that column.
+
+Consequences. `d-bleak-falls` and `q-golden-claw` become one scenario family assembled from green parts (ADR-064 amendment B), the
+route's legs in order, each leg a committed scenario of its own first. PLAN.md gains one STATE line pointing here; M3-CLOSE.md's
+rows are legs 3 to 5's Eli column and stay where they are. Playtest 51's cut (the plan's D-C1) is Eli's separate word and is not
+decided by this ADR.
