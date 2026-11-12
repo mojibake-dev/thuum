@@ -1576,9 +1576,17 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   we get to m5"): one player picks the other's pocket. NEXT when M5 opens. The shape, inventory transfer being R0: the thief's
   engine opens its pickpocket menu on the other player's figure; each take is a request the server judges, rolling the engine's
   own chance (skill, the item's value and weight, perks) and moving the item between the two players' records; the thief's
-  Pickpocket XP as leveling.md:100 has it. Eli's calls owed then: whether the victim learns of a success or only of a failure;
-  whether equipped items and gold can be taken; whether it needs a PvP consent between the two; and a caught thief's
-  consequence (a bounty, a fight, or a word).
+  Pickpocket XP as leveling.md:100 has it. Eli's calls (2026-11-12 about 04:18Z, verbatim): "only on failure (X is
+  pickpocketing you)"; "equipped can be taken but only with the perk"; "no opt in, defualt"; "bounty if in town, no fight but
+  like, perhaps the pickpocket goes hostile so the victim can attack with impunity". So:
+  - the victim is told only of a failure, by name ("<thief> is pickpocketing you"); a success is silent;
+  - equipped items are takeable only with the engine's own perks for them (vanilla's Misdirection for equipped weapons and
+    Perfect Touch for other equipped items, read from the perk records when built), the server checking the same rule the
+    engine's menu shows; carried items and gold need no perk;
+  - on by default for every player, no consent;
+  - a failure in a hold's town is a crime: the thief gains that hold's pickpocket bounty (the engine's own amount and crime
+    faction, read when built); no fight is started, but the thief turns hostile to the victim, so the victim's attacks on the
+    thief raise no assault crime. Open for the build: how long that hostility lasts (until the two part, a timer, or a death).
 - Vampirism and lycanthropy as declared state (R0; Eli's caveat on
   Nature's Balance, 2026-10-18): the race swap accepted from the player's
   game against the known vampire variant of its race and relayed to every
