@@ -825,6 +825,19 @@ class ClientLogs(RunTests):
         self.assertIn(held, body["notes"])
         self.assertEqual(self.services.runner.seats["c1"].force, f"its last run ({run_id}) ended in a fault: {held}")
 
+    def test_a_log_whose_source_is_not_there_is_a_note_untried_again(self):
+        """A source that is not there is said by the copy itself, `missing <path>`, and no try finds it, where three
+        tries 10 s apart spent about 25 s on it (the fresh review of e8d8de9b, nit 5): one copy exec, then a note naming
+        the path, E_RUN_LOG_FETCH and "(log fetch)"."""
+        pve = self._managed_c1()
+        run_id, body = self._run(SOLO_WITH_LOG)
+        self.assertEqual(body["verdict"], "green", body)
+        self.assertIn(f"c1.log: E_RUN_LOG_FETCH: its source {self.settings.client_driver_log} is not there (log fetch)", body["notes"])
+        self.assertNotIn("c1.log", body["artifacts"])
+        copies = [c for c in pve.calls if c[0] == "exec" and "[IO.File]::Create('C:\\sky-lab\\c1.log')" in " ".join(c[2])]
+        self.assertEqual(len(copies), 1, "no try repeated")
+        self.assertIn("if (-not (Test-Path -LiteralPath $src)) { Write-Output ('missing ' + $src); exit 0 }", " ".join(copies[0][2]))
+
     def test_a_seat_whose_guest_agent_is_not_running_skips_its_other_log_fetches(self):
         """Each log's copy would spend its three tries on an agent only a restart brings back, about 75 s a seat (the
         fresh review of e8d8de9b): once a fetch finds the seat's guest agent not running, its other log fetches this run
@@ -3729,6 +3742,30 @@ class ClientResets(RunTests):
     @staticmethod
     def _vm_resets(pve, since=0):
         return [c for c in pve.calls[since:] if c[0] in ("stop", "rollback", "start")]
+
+    def test_a_before_log_copy_held_after_its_read_rolls_the_seat_back_in_this_run(self):
+        """After a quiet spell a run keeps the seat's log as <client>-before.log before the resets: a copy the agent then
+        holds open takes rec.rollback, so this run's own reset rolls the seat back with it as the reason, as a held
+        trace copy fetched before the rollback does (the fresh review of e8d8de9b, nit 5)."""
+        from labapi.proxmox import ExecResult
+
+        pve = self._warm(before_logs_quiet_s=600.0)
+        self.services.runner._last_run_ended_wall = None  # a quiet spell, as after lab-api's start
+        pve.files["C:\\sky-lab\\c1-before.log"] = "the playtest's platform log\n"
+        plain_exec = pve.exec
+
+        def exec_(guest, command, timeout):
+            if "Remove-Item -LiteralPath 'C:\\sky-lab\\c1-before.log' -Force" in " ".join(command):
+                pve.calls.append(("exec", guest.vmid, tuple(command)))
+                return ExecResult(0, "True\r\n", "")  # still there: the agent holds it
+            return plain_exec(guest, command, timeout)
+
+        pve.exec = exec_
+        reset, body = self._reset()
+        held = "c1-before.log: C:\\sky-lab\\c1-before.log held open in its agent after its read"
+        self.assertEqual((body["verdict"], reset["kind"], reset["reason"]), ("green", "rollback", held), body)
+        self.assertIn("c1-before.log", body["artifacts"])
+        self.assertEqual(self.services.runner.seats["c1"].force, "")
 
     def test_a_trace_copy_held_after_a_before_run_fetch_rolls_the_seat_back_in_this_run(self):
         """A hand-started trace is fetched before the seats' resets (_traces_before_rollback): a copy the agent then
