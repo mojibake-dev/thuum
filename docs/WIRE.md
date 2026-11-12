@@ -808,7 +808,7 @@ streams v2 samples, one of them repeated (Late: nothing relayed, nothing answere
 words at epoch 2; then a stale sample from c1 and a NotOwner one from c2, each answered with the word and the record at seq 0.
 Every row is declared wire-only (the legacy stack knows no MsgType 47, 58, 59 or 60). A pickup's refusal is no row here (rung 1's
 d9da7da3: the legacy C++ fakeclient resolves no `{{created:<baseId>}}` placeholder, and difftest compares a client's exit and
-sends strictly); it is proven at T0 and T3.
+sends strictly); it is proven at T0, and x-prop-arbitration v14.3's leg 3d is its T3 read (unrun).
 
 ### PlacedRequest (t 61) and PlacedReport (t 62): the caster's engine names the pose (spell-placed-object, M3; ADR-057 shape A, D70)
 
