@@ -1559,12 +1559,14 @@ class Runner:
         mpClientPlugin (docs/LAB.md). A restart empties the server's list, so
         presence after one is a fresh login. A relaunch {until: stopped}'s work behind its kill (the outgoing logs, the
         new game's start) is awaited first, and its error fails the step."""
-        behind = rec.behind.pop(client, None)
+        behind = rec.behind.get(client)
         if behind is not None:
-            error = await behind
+            # shielded: a scenario timeout cancelling this connect leaves the task running for the run's end to await
+            kind, error = await asyncio.shield(behind)
+            rec.behind.pop(client, None)
             if error:
-                rec.failures.append({"step": index, "kind": "lab", "client": client, "error": error})
-                rec.verdict = "red"
+                rec.failures.append({"step": index, "kind": kind, "client": client, "error": error})
+                rec.verdict = "error" if kind == "internal" else "red"
                 return False, error
         started = self._clock()
         deadline = started + self.s.connect_timeout_s
@@ -1766,11 +1768,12 @@ class Runner:
                 return False, f"{len(failed)} of {len(step.assertions)} did not hold within {step.seconds:g}s" + (f" ({read})" if read else "")
             await asyncio.sleep((step.every or 1.0) * self.s.time_scale if self.s.time_scale else 0.01)
 
-    async def _relaunch_behind(self, rec: RunRecord, index: int, client: str, g: Guest) -> str | None:
+    async def _relaunch_behind(self, rec: RunRecord, index: int, client: str, g: Guest) -> tuple[str, str | None]:
         """What a relaunch {until: stopped} leaves behind its kill: the outgoing game's Skyrim Platform and console logs,
         copied now that nothing writes them (a failure a note, as before the kill), then the launch task's start, so the
-        new game logs in by itself. The client's next connect awaits it and fails with the error this returns, if any;
-        the run's end awaits it too."""
+        new game logs in by itself. Its answer is (kind, error): ("lab", ...) for a start the seat refused, ("internal",
+        ...) for a bug of lab-api's here, which execute reports the same way; the client's next connect, a second
+        relaunch of the client and the run's end await it, and record the error as that kind of failure."""
         try:
             game_dir = f"(Get-Content -LiteralPath '{self.s.client_lab_dir}\\game-dir.txt' -Raw).Trim()"
             await self._fetch_client_file(rec, g, f"{client}-relaunch-{index:03d}.log", f"'{self.s.client_driver_log}'")
@@ -1779,13 +1782,13 @@ class Runner:
             res = await asyncio.to_thread(self.control.exec, g, ["powershell", "-NoProfile", "-Command", self.s.relaunch_start_cmd],
                                           self.s.guest_task_timeout_s)
             if res.exitcode != 0:
-                return f"E_RUN_RELAUNCH: {g.name}: the new game's start behind the kill: exit {res.exitcode}: {(res.err or res.out).strip()[:200]}"
+                return "lab", f"E_RUN_RELAUNCH: {g.name}: the new game's start behind the kill: exit {res.exitcode}: {(res.err or res.out).strip()[:200]}"
         except ProxmoxError as e:
-            return f"E_RUN_RELAUNCH: {g.name}: the new game's start behind the kill: {e}"
-        except Exception as e:  # a bug here must not leave the connect waiting on nothing
-            return f"E_RUN_RELAUNCH: {g.name}: behind the kill: {type(e).__name__}: {e}"
+            return "lab", f"E_RUN_RELAUNCH: {g.name}: the new game's start behind the kill: {e}"
+        except Exception as e:  # lab-api's own bug: the awaiting step or the run's end records it as internal, the run error
+            return "internal", f"behind the kill on {client}: {type(e).__name__}: {e}"
         rec.notes.append(f"step {index}: {client}'s outgoing logs kept and its new game started behind the kill")
-        return None
+        return "lab", None
 
     async def _relaunch(self, rec: RunRecord, index: int, client: str, files: list[dict[str, Any]] | None = None,
                         until: str | None = None, frida: dict[str, Any] | None = None) -> tuple[bool, str]:
@@ -1809,6 +1812,15 @@ class Runner:
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
             return fail(f"E_RUN_RELAUNCH: {client} is not a managed client")
+        prior = rec.behind.pop(client, None)
+        if prior is not None:
+            # an earlier relaunch {until: stopped} of this client that no connect took: its copies and its new game's start
+            # finish first (shielded, as the connect's), and its error fails this step
+            kind, error = await asyncio.shield(prior)
+            if error:
+                rec.failures.append({"step": index, "kind": kind, "client": client, "error": error})
+                rec.verdict = "error" if kind == "internal" else "red"
+                return False, error
         if until == "stopped" and not files and not frida:
             # the kill first, the step back at it: x-prop-stall stops a game mid-flight (E32), where the two log copies
             # before the stop cost seconds (20261111-190610's relaunch stopped c1 after the ingot's asleep sample, 0.88 s
@@ -1819,7 +1831,7 @@ class Runner:
                 return fail("E_RUN_RELAUNCH: until: stopped leaves a new game to log in by itself, which a solo seat never does")
             began = self._clock()
             try:
-                res = await asyncio.to_thread(self.control.exec, g, ["cmd.exe", "/c", self.s.relaunch_kill_cmd], self.s.guest_task_timeout_s)
+                res = await asyncio.to_thread(self.control.exec, g, ["cmd.exe", "/d", "/c", self.s.relaunch_kill_cmd], self.s.guest_task_timeout_s)
             except ProxmoxError as e:
                 return fail(f"E_RUN_RELAUNCH: {g.name}: the kill: {e}")
             took = self._clock() - began
@@ -1829,10 +1841,14 @@ class Runner:
             rec.pending_identity.add(client)
             rec.behind[client] = asyncio.create_task(self._relaunch_behind(rec, index, client, g))
             if res.exitcode == 128:
-                # taskkill's answer for no such process: the game was already gone when the step began
-                stopped = f"no SkyrimSE process on {client} to stop ({took:.2f}s); its new game logs in by itself"
-            else:
-                stopped = f"{client}'s game stopped {took:.2f}s after the step began, the server not told; its new game logs in by itself"
+                # taskkill's answer for no such process: the game was gone before the kill, as _crash_check reads a lost
+                # game, a lab fault, and what the scenario would time from the kill never happened
+                lost = f"E_RUN_GAME_LOST: {client}'s game was not running when the kill came (taskkill 128)"
+                rec.failures.append({"step": index, "kind": "lab", "client": client, "error": lost})
+                rec.verdict = "error"
+                return False, lost
+            # took is the exec's round trip, its exec-status polls included (GuestControl): the kill came within it
+            stopped = f"{client}'s game stopped within {took:.2f}s of the step's start, the server not told; its new game logs in by itself"
             rec.notes.append(f"step {index}: {stopped}")
             return True, stopped
         # the outgoing game's own logs, kept before the new game truncates them: its Skyrim Platform log and its
@@ -2166,10 +2182,14 @@ class Runner:
     async def _artifacts(self, rec: RunRecord, capture: Capture | None) -> None:
         rec.phase = "artifacts"
         # a relaunch {until: stopped} the run never reconnected: its log copies and the new game's start finish first,
-        # so the copies are the run's and no task outlives it; an error there is a note now, the run already over
+        # so the copies are the run's and no task outlives it (a second kill of the client awaits the first's; a connect a
+        # timeout cancelled left its task here, shielded); a seat's refusal is a note now, a bug of lab-api's the run's error
         for client, behind in list(rec.behind.items()):
-            error = await behind
-            if error:
+            kind, error = await behind
+            if kind == "internal" and error:
+                rec.failures.append({"step": "end", "kind": "internal", "client": client, "error": error})
+                rec.verdict = "error"
+            elif error:
                 rec.notes.append(f"{client}: {error}")
         rec.behind.clear()
         wanted = list(rec.scenario.artifacts)

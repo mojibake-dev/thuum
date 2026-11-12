@@ -511,7 +511,7 @@ def _relaunch_args(args: dict[str, Any]) -> dict[str, Any]:
     # until: stopped returns as soon as the guest agent has stopped the game, the server not yet told, so what
     # follows is timed from the kill itself (b-host-kill: the stale rule's pass inside the grace plus the
     # threshold, which gone's netcode timeout of about 18 s would hide). With neither files nor frida the kill is
-    # the step's first act and the outgoing logs and the new game's start follow behind it (Runner._relaunch), so
+    # the step's first act and the outgoing logs and the new game's start follow behind it (Runner._relaunch_behind), so
     # a game stops mid-flight (x-prop-stall, E32); with either, the kill comes after the copies and the lever
     until = args.get("until")
     if until is not None and until not in ("gone", "stopped"):
