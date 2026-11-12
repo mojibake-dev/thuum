@@ -9676,3 +9676,13 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   JSON shared one line. Merged to main: labapi-crash-curl 162364ff (the seats' curl.exe answers captured, its fresh review's
   two findings applied), physics-3-impulse-v1.3 41727edc (prop-impulse.js v1.3, PUSH_ONLY, for rung 3's stage) and
   reanimate-heap-trace b8bd6162 (corpse-lay-heap-pool.js v1.1).
+- (numidium) Rung 1's stage on fork m4-physics-1-arbitration d9da7da3 (13:55Z to 14:28Z, from the cap's worktree 49b3cf3f,
+  REUSE_DIST gitlab 20919 at f38f5249 with skymp5-client.js built at the head, lab-api 4f0398a2): x-prop-edge v1.3
+  20261112-142009 green; x-prop-arbitration v14.3 140518 red, 14 claims of step 439's final assert across legs 1, 3c, 3d, 4
+  and 7, with the edge probe green on the same seats (thuum-fa reading, a shared cause more likely than rung 1's rules; no
+  rerun; both runs are E10's candidates under the cap). x-reanimate-return v1.4 142746 (on rung 1's build, both seats
+  relaunched warm) red at step 45: Sven still dead 20 s after c1's third rung (pitch -60.9), its thrall-link and
+  lamp-shot-trace traces whole. Main 253981e5 into the cap as 3aad0a65 (both remotes, apocrypha told). Rung 2's T2 on
+  cc5c44f3 from 14:33Z, the reanimation head's fix m4-reanimate-claim-2 581bc461 pushed beside it (pipeline 5918, its builds
+  kept off the seats' probes). labapi-exit-status merged to main 2a4a58ff: its real-seat check on both seats at 14:37Z read
+  130030's c1 exit 0xC0000005, the stage's Stop-Process kills 0xFFFFFFFF, and every row's account the game's own.
