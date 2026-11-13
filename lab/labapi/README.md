@@ -180,7 +180,12 @@ does too).
 save at the next login) and holds until the new game is in and logged in;
 `relaunch {until: gone}` returns as soon as the player is off the server's
 online list, so a scenario can read the server while that game is down, and a
-later `- c2: connect` waits for the new game's login. `relaunch {files: [...]}`
+later `- c2: connect` waits for the new game's login. `relaunch {until:
+stopped}` kills the game as the step's first act and returns at the kill, the
+server not told, so what follows is timed from the kill (b-host-kill's stale
+pass, x-prop-stall's game stopped mid-flight); the outgoing game's logs and the
+new game's start follow behind it, and the next connect waits for them. With
+files or frida it kills after them, as `gone` does. `relaunch {files: [...]}`
 changes the run's game folder while the game is stopped, for what loads only
 at a launch: `{rename: <path>, to: <name>}`, `{ini: <path>, section, key,
 value}` for a key the ini has, or `{json: <path>, key, value}` to set or add a
