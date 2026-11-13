@@ -110,8 +110,8 @@ three engine effects no trace has read, 37818 clearing the mover's goal, a hold 
 mark, and 37356's SetPosition tail moving an actor without consulting lifeState; and v4's eight warps of a held walker have no
 named writer (v5 20261030-135929 armed a MoveTo hook and no warp came). None reaches the verb: talkService holds nothing (its
 unhold sits behind a flag the shipped code never sets), the hold is the lab's fixture for b-npc-talk's premise and is released at
-the scenario's end, and a warp shows only as that scenario's stillness red, a gate watch item. The next run that warps with the
-MoveTo hook armed names the writer.
+the scenario's end, and a warp shows only as that scenario's stillness red: a recurring premise red, not an ADR-027 watch item
+(the note of 2026-11-13 under "The hold on 3o-win"). The next run that warps with the MoveTo hook armed names the writer.
 
 ## Message contract
 
@@ -333,6 +333,30 @@ login's duration decides (relaunch mode logs in faster, so the hold lands
 earlier in his schedule). Known limit for b-npc-talk v7's 24 s pair until a
 driver-side settle or a stillness fact exists.
 
+The recurring red (2026-11-13: auriel's read of the route run set, numidium's
+word). Since v7 the stillness pair has gone red on the scenario's first run in
+a run set and green on its rerun: 20261029-215828, 20261030-053717 and 062117;
+the sweep 20261102-064754 (Sven's walk around the hold on relaunched seats, LOG
+02:18 PST 2026-11-02); 20261111-083435 (rerun 083654 green, the sweep on canon
+f6ca339d); 20261113-021752 (rerun 022104 green, the route run set on canon
+6fe5fea0). That is not ADR-027's shape: its watch item is a lone red that
+reruns green twice, and the same item red again within two sweeps is a bug
+(docs/DECISIONS.md:700-706). It is a premise red of the lab's fixture, which
+the verb's claim never depends on (Known limits), so b-npc-talk takes no line
+in lab/gate.yaml's watch list: a watch item would hold every merge whose gate
+runs it on a red in an unrelated fixture, and lab-api's lone-red reruns
+(lab/labapi/labapi/runset.py:34) already let a run set pass on the rerun.
+The leg: auriel read 100.78 units in the pair both times (83.0 in x and 57.1
+in y in 021752, 87.9 and 49.4 in 083435, headings 5 degrees apart), and the
+run that led to x-npc-hold v2, 20261027-232338, has 85 in x and 53 in y in the
+3 s from 2 s after the call (x-npc-hold's v2 note; 100.2 units at 31.9
+degrees, between the two). So the same leg of about 100 units on one heading,
+2 s after the hold there and past 24 s here: one fixed leg of his schedule,
+not a random walk, by auriel's reading and not a measurement; why it starts
+that late on a first run is unread. The read: x-npc-hold v5 (by path; dontmove-trace.js v2's MoveTo hook,
+56626) as the first run of its set, in numidium's queue after playtest 51; a
+warp in it names the writer. The stillness pair stays unweakened.
+
 ### Playtest 36, the turbo day (11:36 PDT 2026-10-28; fork m3-turbo-knobs 71e5def3 over 56's stage)
 Eli ticked items 1 and 2: "the claiming SEEMS to work but check logs"; "rotfern walked to embershard mine, prisoner was
 still talking to sven". The logs: eight claims granted on Sven, Hilde and Sigrid's household, every one released at the
@@ -362,8 +386,9 @@ Built 14:53 PDT on fork m3-npc-talk 977bfbc6 (off m3-npc-face 2b96ea56 with m3-p
 - [x] native hook + T1: activatePickRef (a CommonLib call, no id; no T1 needed)
 - [x] TS handler: TalkService (npcTalk, talkKey)
 - [x] T2 green (ticked 17:02 PDT 2026-10-29 by the pass: train 55's T2 green on the head's own difftest build, LOG 2026-10-27 16:09 PDT, merged to parity c85dab3d 2026-10-28T02:25Z)
-- [ ] T3 scenario green, no HYPOTHESIS tags (2026-11-11, the paper close: b-npc-talk green at T3 as a gate watch item, last
-  20261111-083654 after the red 083435 on the same build, the gate canon f6ca339d merged on; three tags stay open with
+- [ ] T3 scenario green, no HYPOTHESIS tags (2026-11-11, the paper close: b-npc-talk green at T3 on a lone-red rerun, last
+  20261111-083654 after the red 083435 on the same build, the gate canon f6ca339d merged on; the stillness red recurs, a
+  premise red of the lab's hold and not an ADR-027 watch item, the note of 2026-11-13 under "The hold on 3o-win"; three tags stay open with
   Dynamic plan lines, H-55a's early close, H-55c's old-host hitch and H-55f's consumed press; the hold's tags settled, two
   CONFIRMED by 20261030-124551 and 20261103-111808, the rest named limits or history)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
