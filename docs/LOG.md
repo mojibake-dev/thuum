@@ -9750,3 +9750,12 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   playtest-record-stop 21:17Z, playtest-pt51-end-20261113T211830Z (1,700 records), lab-release 21:18:36Z. The ten breaks' fixes
   go through the gate as a batch ahead of the rest of the queue; the retry sitting replays items 1 to 5 and M3-6. Not reached:
   the ambush for a guest, item 8, M3-1, M3-3, M3-4, M3-5 and M3-7.
+- m4-fix-lease-move merged to fork canon 78551e27 (2026-11-13T23:58Z): the gate 20261113-231741-merge-m4-fix-lease-move,
+  20261113-231741-smoke-two-players to 20261113-235440-b-npc-caster (11 runs, 11 green); T2 skip on
+  skymp-server:m4-fix-lease-move (its full T2 green at 23:00:21Z); clones not promoted (server only). Verbs: containers,
+  playtest 51's break 4 (Gorm's letter): ContainerMoveByOccupant also takes a move in or out of a living NPC by the game
+  WorldState::HostOf names, its cell's host or its claimant (a talk lease counts, cells simulator_of reading the claim first;
+  ADR-063), every other mover refused as before. thuum-magnus built it; numidium's review READY. Its stage from the cap:
+  x-lease-give v1 20261113-231102 green (c2's claim of Sven, its take of an IronDagger out of him logged as the simulator's
+  move with no E_CONTAINER_OCCUPANT, c2's record 1 to 2 and Sven's 3 to 2, both kept through c2's relaunch). Canon was
+  6fe5fea0; m4-fix-absorb merges canon in for its own stage and merge.
