@@ -101,6 +101,20 @@ that changes a leg's record is recorded the same way, and section 1's cell is th
   (numidium, 00:26Z to 03:53Z): 43 of 43 committed scenarios green in 44 runs, b-npc-talk on its rerun after a first-run red at
   its stillness pair, as in the last sweep; b-prop-push and c-riverwood left out as pending. Section 1's record is rewritten to
   it. No row is ticked.
+- 2026-11-13: playtest 51, one sitting on fork canon 6fe5fea0 under the staged cap (20:14Z to 21:18Z; numidium's findings in
+  docs/private/playtest-51-findings.md, LOG 502641ae). No row is ticked.
+  - Leg 1: item 3 started the Golden Claw in both journals, but Camilla walked back inside instead of to the bridge (a cell-host
+    hand-off), and the argument came after the quest was taken. M3-8 was not reported.
+  - Leg 4: Arvel stood out of his web and took no hit, so the claw and the leg could not go on. The pillar room's gate opened on
+    both screens.
+  - Leg 7: not reached (it needs the claw).
+  - Leg 8: the restart kept the quests on Ariadne's game; rotfern's journal had lost them, likely at its crash relaunch before
+    the restart (HYPOTHESIS, the findings' break 10).
+  - Leg 9: not reached (it needs the claw).
+  - Leg 3: not reached (item 8, M3-4, M3-5 and M3-7).
+  - Along the way: Raise Wall's wall stood on both screens without its rise.
+  - Eli's word at the end: "nah just run all the fixes and lmk when ready". The fixes go through the gate as one batch, and the
+    next sitting replays these rows on the fixed canon.
 
 ## 4. Off the route, by name
 
