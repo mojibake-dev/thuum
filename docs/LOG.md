@@ -9717,3 +9717,36 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   flake). The joint unit's stage-j1 from the cap a5131ebd: x-body-read v1.4 alone, 20261113-040607 red at step 130 (the
   tracked prop ff000004 994 units off on x, no 0x12fe7 within 400 on either seat), so the seven wait for thuum-magnus's
   read.
+
+### 2026-11-13
+
+- (numidium) The morning's lab after the route set. The reanimation head m4-reanimate-claim-2 27ea0e3d: its thrall-departure
+  T2 session identical (04:58Z) and its full T2 green (05:43Z); its stage 0 of 2 (x-reanimate-claim 20261113-075144 red,
+  x-reanimate-look 075817 red), read by thuum-magnus as the probes' premises (claim v2.3 and look v1.3 to come). A network
+  outage from about 06:00Z to 06:45Z (GitLab's reads timing out, api.github.com unreachable, the jump host resetting ssh) cost
+  a T2, a stage and the lab's prep; chain-r and chain-m reran them, each step after the network and an idle lab read. Rung 5a
+  m4-physics-5a-bodies-srv 9dd4d74a: T2 green (07:41Z) and stage green (x-corpse-record v6.1 20261113-081816, 1 of 1), to merge
+  on its own gate before rung 4 (D-PH27 A). C4 m4-reanimate-return 7eaffba3: its thrall-return session 7 differences (08:08Z),
+  sent to thuum-magnus for declaration. The lab back on canon 6fe5fea0 under the staged cap for 51 (08:34Z to 08:46Z:
+  turbo-srv m4-shout-once-6fe5fea0, turbo-dist of gitlab 20605 at ff467dab, turbo-client 6fe5fea0, clean-m1-next retaken on
+  both clones).
+- (numidium) Playtest 51, one sitting on fork canon 6fe5fea0 under the staged cap, on Eli's "ready when you are" (20:02Z):
+  `just playtest-go 51` from a tree at main (every check ok, 20:14:38Z) and `just playtest-record 51` from 20:15:34Z (12
+  cycles; the playtest-m2-51.md link and the worktree's docs/private made first). The build stayed frozen through it. The
+  findings are docs/private/playtest-51-findings.md (gitignored): every item in Eli's words and ten breaks with their
+  evidence, each sent to thuum-magnus as it came. Verified in play: Gorm's quest-variable dialogue (item 2), the Golden Claw in
+  both journals (item 3), both rumors in both journals (item 6, from Jonna), rotfern's Beast Form and its end (item 7), the
+  pillar room's gate on both screens, and a running quest through `just playtest-restart 51` (21:09Z, +0 records) on
+  Ariadne's game, never relaunched. Broken: the vampires' drain takes no health (EffectFactsOf drops the Absorb archetype;
+  item 1 dropped by Eli, "if the spell doesnt work let's sort that fro everyone"); Gorm's letter refused by
+  E_CONTAINER_OCCUPANT and gone after rotfern's relaunch; Azura's map marker the asker's alone; the Golden Claw's argument late
+  (the new host's own trigger entry set nothing) and Camilla's lead lost to a cell-host hand-off; Raise Wall's rise (Eli's yes
+  to the spec's open question); Arvel out of his web and unhittable, which blocked item 4's claw and Sanctum and item 5's
+  hand-in; a pillar turn refused mid-turn on the guest; rotfern's journal without the night's quests after the restart
+  (HYPOTHESIS: lost at its crash relaunch). c1 crashed 1.2 s after a coc into Bleak Falls Temple (20:37Z; CrashLogger: an
+  execute at 0x013400000000 on a BSJobs thread, AnimationFileManagerSingleton in RBP), its logs kept by `just playtest-logs`
+  and `just playtest-relaunch c1` (rc 0, 20:41Z). Beast Form given by `just playtest-console 1 addspell 20 0x92c48`
+  (20:43:38Z). Offered a turbo arm, Eli: "nah just run all the fixes and lmk when ready", so 51 closed on canon alone:
+  playtest-record-stop 21:17Z, playtest-pt51-end-20261113T211830Z (1,700 records), lab-release 21:18:36Z. The ten breaks' fixes
+  go through the gate as a batch ahead of the rest of the queue; the retry sitting replays items 1 to 5 and M3-6. Not reached:
+  the ambush for a guest, item 8, M3-1, M3-3, M3-4, M3-5 and M3-7.
