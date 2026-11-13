@@ -671,12 +671,13 @@ with C4's claim gate (23:22 PST 2026-11-12; fork b50b738f, the C4 section's
 conditions fail on its target (H-C4-6, HYPOTHESIS: Dead Thrall at an animal
 under the masters' record stands nothing), unread, since the lab never plays
 that record: Odin's override of 0x7e8e0 asks MagicNoReanimate == 0 alone
-(lab/.cache/drafts/reanimate-fx.md:308-311, over the clients' order,
-:293-298) and the lab's server loads Odin too
+(lab/.cache/drafts/reanimate-fx.md:308-311, over the clients' order, :293-298)
+and the lab's server loads Odin too
 (lab/deploy/sky-srv/server-settings.json:34), so there the gate and the record
 both take a creature without MagicNoReanimate, and only the unit tests' data,
-which carries the masters' ActorTypeNPC row, reaches the refusal (pipeline
-5939's failing row).
+which carries the masters' ActorTypeNPC row, reaches the refusal (the gate's
+T0, NpcFateTest.cpp:1576-1580, green in pipeline 5944's job 21211; the row
+itself in pipeline 5939's job 21195, at the stand-up's EffectConditionsHold).
 
 ## Message contract
 
@@ -3350,15 +3351,15 @@ ends, <simulator> simulates it (ADR-060)", "the claim on <actor> in cell <cell> 
 <simulator> simulates it (ADR-052, ADR-060)", "<actor> dies at its commander <player>'s departure: a timed thrall, its
 effect no engine's now, ends by the server's word (ADR-060)", "<actor> stands again by a respawn its simulator's engine did
 not make: <former>'s claim ends, <simulator> simulates it (ADR-060)", "[verb:npc-talk] <commander> talks to its thrall
-<actor> in cell <cell>; the command stands, no lease (ADR-060)" and its close's line, E_COMMAND_UNLOADED. T0: NpcFateTest's
-reanimate case (the caster's seat simulates the body from the hit, both games hear the word, no snippet, the relay reaches
-the host; the stand-up on the commander's live sample keeps the command; the thrall's death, the commander's cause-0 report
-past every window, the unload with no word, the disconnect's timed death ahead of its word, a Dead Thrall's thrall alive
-through the disconnect and a tick past its record (since fork dafcac67 in the full thrall case of its own, on a Nord bandit,
-C4's Tests below), a never-stood command ended by a respawn and by its commander's report of
-the dead body; the host's own cast keeps the body its own) and its protected case (Jenassa 0xe1ba9, HirelingJenassa);
-cells.rs's commanded tests (no lease, the walk, the door, the grant, the departure's decisions, the line at 86,399 and
-86,400 s).
+<actor> in cell <cell>; the command stands, no lease (ADR-060)" and its close's line, E_COMMAND_UNLOADED, and since fork
+b50b738f the claim gate's refusal (C4's Lines below). T0: NpcFateTest's reanimate case (the caster's seat simulates the body
+from the hit, both games hear the word, no snippet, the relay reaches the host; the stand-up on the commander's live sample
+keeps the command; the thrall's death, the commander's cause-0 report past every window, the unload with no word, the
+disconnect's timed death ahead of its word, a Dead Thrall's thrall alive through the disconnect and a tick past its record
+(since fork dafcac67 in the full thrall case of its own, on a Nord bandit, C4's Tests below), a never-stood command ended by
+a respawn and by its commander's report of the dead body; the host's own cast keeps the body its own) and its protected case
+(Jenassa 0xe1ba9, HirelingJenassa); cells.rs's commanded tests (no lease, the walk, the door, the grant, the departure's
+decisions, the line at 86,399 and 86,400 s).
 
 HYPOTHESIS H1 (ADR-060): the former host's engine, whose copy of the body is a puppet (AI off) from the grant on, does not
 stand its copy by its own effect from the relayed cast; the copy stands by the server's live word and follows the stream.
@@ -3407,40 +3408,46 @@ its look (no pull to the caster, which would be a new decision). Another player'
 raised names the NPC its caster, so no seat's return claims it.
 
 The claim's gate (ADR-039; fork b50b738f and 7eaffba3, 2026-11-12). A reanimate's accepted hit commands its body only where
-the spell's Reanimate effect's own conditions hold on it, read as the stand-up's ApplyEffects reads them (OnHostedActorState).
-ClaimReanimated, after the player's-body guard and ahead of the commander, asks MpActor::EffectConditionsHold of that effect
-with the caster as the aggressor and no dual cast (fork ActionListener.cpp:10574-10610 at 7eaffba3; ActionListener.h:503-510);
-on a refusal it logs its line (Lines below) and returns, so no command, no UpdateHoster and no full thrall in cells.rs stand
-where the record can take no Reanimate state, and the body stays its cell's host's. The accepted stamp stays
-(NoteReanimateAccepted, set just ahead of the claim, ActionListener.cpp:10147-10150): a stand-up it admits comes from the
-body's simulator alone (ActorUpdatableBy), which a refusal leaves where it was. Why: pipeline 5939's unit job 21195 (1 of 745
-cases red) drew two answers to one hit. Dead Thrall at the forest's predator 0x85547 logged "reanimate 7e8df by ff000d36 on
-85547: ff000d36 commands it until its engine ends the effect (the record's 86313600 s)" and cells.rs marked a full thrall,
-while the stand-up's "MpActor::EffectConditionsHold - effect 7e8e0 of 7e8df by ff000d36 at 85547: its conditions fail; not
-applied (thuum ADR-039); failing: HasKeyword(0x13794, 0x0) on Subject == 1: got 0" put only 0x8bb2a on the record ("its
-effects on the record (8bb2a for 86400 s)"), so the departure's rule and the return (GetReanimateCaster) read no caster.
-Dead Thrall's ReanimateThrallFFAimed 0x7e8e0 wants HasKeyword ActorTypeNPC (Skyrim.esm 0x13794) == 1 beside MagicNoReanimate
-== 0 (lab/.cache/drafts/reanimate-fx.md:39), and the predator, an animal, lacks ActorTypeNPC (5939's failing row; the gate's
-T0 asserts it, NpcFateTest.cpp:1566-1567). Both reanimate effects' rows in the masters are keyword rows (the same draft :31,
-:39), which answer on the dead body as on the living one. In the same run the hit loop's own evaluation refused a Reanimate
-effect only at 0x7e8e0 on 85547 (eight lines), never 0x96d0b (on 85547, Jenassa e1ba9, the placed body 3b9ea) nor 0x7e8e0 on
-the server-made bandit ff000d3a, with no E_CONDITION_UNKNOWN (b50b738f's read of 5939's log). The lab's load order is not
-the masters' here: Odin's override of 0x7e8e0 keeps MagicNoReanimate == 0 and drops the ActorTypeNPC row
-(lab/.cache/drafts/reanimate-fx.md:308-311, its 6.1, over the clients' order, :293-298), and the lab's server loads Odin
-(lab/deploy/sky-srv/server-settings.json:34), so on the lab the gate takes Dead Thrall at a creature without
-MagicNoReanimate as the record does; the unit tests' data carries the masters' row and refuses it (5939's failing row).
-HYPOTHESIS (H-C4-6 below; the fork's comment,
-ActionListener.cpp:10589-10592): the engine itself refuses Dead Thrall at an animal under the masters' record, as UESP's
-Skyrim:Dead_Thrall has it ("Only works on people.", its Spell Summary's desc; https://en.uesp.net/wiki/Skyrim:Dead_Thrall),
-in agreement with 0x7e8e0's own row; unread on the lab.
+the spell's Reanimate effect's own conditions hold on it, read as the stand-up's ApplyEffects reads them
+(OnHostedActorState). ClaimReanimated, after the player's-body guard and ahead of the commander, asks
+MpActor::EffectConditionsHold of that effect with the caster as the aggressor and no dual cast (fork
+ActionListener.cpp:10574-10610 at 7eaffba3; ActionListener.h:503-510); on a refusal it logs its line (Lines below) and
+returns, so no command, no UpdateHoster and no full thrall in cells.rs stand where the record can take no Reanimate state,
+and the body stays its cell's host's. The accepted stamp stays (NoteReanimateAccepted, set just ahead of the claim,
+ActionListener.cpp:10147-10150): a stand-up it admits comes from the body's simulator alone (ActorUpdatableBy), which a
+refusal leaves where it was. Why: pipeline 5939's server-build job 21195 (its unit step) (1 of 745 cases red) drew two
+answers to one hit. Dead Thrall at the forest's predator 0x85547 logged "reanimate 7e8df by ff000d36 on 85547: ff000d36
+commands it until its engine ends the effect (the record's 86313600 s)" and cells.rs marked a full thrall, while the
+stand-up's "MpActor::EffectConditionsHold - effect 7e8e0 of 7e8df by ff000d36 at 85547: its conditions fail; not applied
+(thuum ADR-039); failing: HasKeyword(0x13794, 0x0) on Subject == 1: got 0" put only 0x8bb2a on the record ("its effects on
+the record (8bb2a for 86400 s)"), so the departure's rule and the return (GetReanimateCaster) read no caster. Dead Thrall's
+ReanimateThrallFFAimed 0x7e8e0 wants HasKeyword ActorTypeNPC (Skyrim.esm 0x13794) == 1 beside MagicNoReanimate == 0
+(lab/.cache/drafts/reanimate-fx.md:39), and the predator, an animal, lacks ActorTypeNPC (5939's failing row; the gate's T0
+asserts it, NpcFateTest.cpp:1566-1567). Both reanimate effects' rows in the masters are keyword rows (the same draft :31,
+:39), which answer on the dead body as on the living one. In the same run EffectConditionsHold refused a Reanimate effect
+only at 0x7e8e0 on 85547 (eight lines, a pair in each of that build's four Dead Thrall sections, NpcFateTest.cpp:1873, :1906,
+:1983 and :2015 at 9a0a0914: one from the hit's stagger loop, ActionListener.cpp:10159-10168 at 9a0a0914 (:10161-10170 at
+7eaffba3), ahead of its "OnSpellHit" line, the hit's own ApplyEffects taking none on the dead body, MpActor.cpp:4724; one
+from the stand-up's ApplyEffects, ActionListener.cpp:1090-1092, ahead of its "stands by reanimate" line), never 0x96d0b (on
+85547, Jenassa e1ba9, the placed body 3b9ea) nor 0x7e8e0 on the server-made bandit ff000d3a, with no E_CONDITION_UNKNOWN (job
+21195's log). The lab's load order is not the masters' here: Odin's override of 0x7e8e0 keeps MagicNoReanimate == 0 and drops
+the ActorTypeNPC row (lab/.cache/drafts/reanimate-fx.md:308-311, its 6.1, over the clients' order, :293-298), and the lab's
+server loads Odin (lab/deploy/sky-srv/server-settings.json:34), and the winning SPEL 0x7e8df's entries
+(SpellAbsorptionAndTwinSoulsFix_SE.esp's, reanimate-fx.md:306-307, loaded after Odin at server-settings.json:38) carry no
+condition of their own, as in Skyrim.esm (lab/esm.py on lab/.cache/mods/fenestrate's copy, 2026-11-13; EffectConditionsHold
+reads both halves, MpActor.cpp:4643-4656), so on the lab the gate takes Dead Thrall at a creature without MagicNoReanimate as
+the record does; the unit tests' data carries the masters' row and refuses it (the gate's T0, NpcFateTest.cpp:1576-1580,
+green in pipeline 5944's job 21211; the row itself in 5939's job 21195, at the stand-up's EffectConditionsHold). HYPOTHESIS
+(H-C4-6 below; the fork's comment, ActionListener.cpp:10589-10592): the engine itself refuses Dead Thrall at an animal under
+the masters' record, as UESP's Skyrim:Dead_Thrall has it ("Only works on people.", its Spell Summary's desc;
+https://en.uesp.net/wiki/Skyrim:Dead_Thrall), in agreement with 0x7e8e0's own row; unread on the lab.
 
 Rungs. R0: who commands is the server's, from the record (the caster the server stamped at the accepted hit, ActionListener's
 NoteReanimateAccepted, never a client's word), and whether the hit commands at all is the server's own evaluation of its load
-order's rows on its record of the body (the gate; no client fact). The trigger is the client's CellLoaded, bounded by
-the server's own grid (the
-player's emitters, the subscribe), and no owner fact comes from a client (rule 5): a load report only says when to read the
-record. R2: the command on the commander's engine and the thrall's moves, the commander's engine computing and the server
-recording them, unvalidated (rule 5), as the cast's command.
+order's rows on its record of the body (the gate; no client fact). The trigger is the client's CellLoaded, bounded by the
+server's own grid (the player's emitters, the subscribe), and no owner fact comes from a client (rule 5): a load report only
+says when to read the record. R2: the command on the commander's engine and the thrall's moves, the commander's engine
+computing and the server recording them, unvalidated (rule 5), as the cast's command.
 
 The word. UpdateHoster hands the thrall's simulation over. What a fresh game lacks is which engine commands it: the host of
 a thrall that stayed simulates it too, and only the caster tells the two apart. The record holds the caster, and MagicEffects
@@ -3467,54 +3474,57 @@ of Papyrus natives) has no row for it; its rung is this section's R2.
 
 Lines. Server: "[verb:npc-fate] <actor> returns to its caster <player> in cell <cell>: a full thrall its record names (the
 record's <N> s), commanded again (ADR-060)"; the restart's line for a full thrall whose record keeps a caster now ends "it
-stays, its look kept, until its caster <caster> returns (ADR-060)"; the claim's refusal (b50b738f, ActionListener.cpp:10601-10607
-at 7eaffba3): "[verb:npc-fate] reanimate <spell> by <caster> on <body>: its Reanimate effect <effect>'s conditions fail on the
-body (failing: <rows>); no command, the body stays its cell's (thuum ADR-039)", with "(EffectConditionsHold's line names
-why)" in place of "(failing: <rows>)" when the evaluator names no row; the gate's T0 reads it as "[verb:npc-fate] reanimate
-7e8df by ff000d36 on 85547: its Reanimate effect 7e8e0's conditions fail on the body (failing: HasKeyword(0x13794, 0x0) on
-Subject == 1: got 0); no command, the body stays its cell's" (NpcFateTest.cpp:1576-1580). The commander's platform log
-(<client>.log):
-"[verb:npc-fate] commandActor(<id>): linked to the player (37490, 38798; the player's entry with no effect, commanded true) on
-thread <t> main <m>" (without "37490, " when the life state was kReanimate already), "[verb:npc-fate] commandActor(<id>):
-unlinked (38800; the thrall dead|no longer commanded), the player's entry gone|still there after it, on thread <t> main <m>",
-"[verb:npc-fate] commandActor(<id>): the engine removed it from the player's commanded actors; not linked again",
-"[verb:npc-fate] commandActor(<id>): 38798 left no entry; asked again (the player's entry missing|the engine's) on thread <t>
-main <m>",
-"[verb:npc-fate] commandActor(<id>): waits for its promotion (puppet <b>, AI on <b>)" and "[verb:npc-fate]
-commandActor(<id>): the engine's own command, left alone", each of the last three once per actor. The client's console:
-"[verb:npc-fate] commandActor <id>: asked, its record's caster <me> is this game's player and this game simulates it (queued
-<b>)" and "[verb:npc-fate] commandActor <id>: ended (<why>; queued <b>)".
+stays, its look kept, until its caster <caster> returns (ADR-060)"; the claim's refusal (b50b738f,
+ActionListener.cpp:10601-10607 at 7eaffba3): "[verb:npc-fate] reanimate <spell> by <caster> on <body>: its Reanimate
+effect <effect>'s conditions fail on the body (failing: <rows>); no command, the body stays its cell's (thuum ADR-039)", with
+"(EffectConditionsHold's line names why)" in place of "(failing: <rows>)" when the evaluator names no row; the gate's T0
+reads it as "[verb:npc-fate] reanimate 7e8df by ff000d36 on 85547: its Reanimate effect 7e8e0's conditions fail on the body
+(failing: HasKeyword(0x13794, 0x0) on Subject == 1: got 0); no command, the body stays its cell's"
+(NpcFateTest.cpp:1576-1580). The commander's platform log (<client>.log): "[verb:npc-fate] commandActor(<id>): linked to the
+player (37490, 38798; the player's entry with no effect, commanded true) on thread <t> main <m>" (without "37490, " when the
+life state was kReanimate already), "[verb:npc-fate] commandActor(<id>): unlinked (38800; the thrall dead|no longer
+commanded), the player's entry gone|still there after it, on thread <t> main <m>", "[verb:npc-fate] commandActor(<id>): the
+engine removed it from the player's commanded actors; not linked again", "[verb:npc-fate] commandActor(<id>): 38798 left no
+entry; asked again (the player's entry missing|the engine's) on thread <t> main <m>", "[verb:npc-fate] commandActor(<id>):
+waits for its promotion (puppet <b>, AI on <b>)" and "[verb:npc-fate] commandActor(<id>): the engine's own command, left
+alone", each of the last three once per actor. The client's console: "[verb:npc-fate] commandActor <id>: asked, its record's
+caster <me> is this game's player and this game simulates it (queued <b>)" and "[verb:npc-fate] commandActor <id>: ended
+(<why>; queued <b>)".
 
 Built on fork m4-reanimate-return (from m4-reanimate-claim-2 8464f322, 2026-11-12; pushed, its head 7eaffba3 on both remotes
-by ls-remote at 23:22 PST 2026-11-12): 29258b56 (wire-rules cells.rs
-returning, its T0, the bridge's ThrallRecord), 5d5c868a (MagicEffects' caster, SCHEMA_VERSION 45, rule 4 in one commit),
-51e73ea4 (PartOne::ReturnThralls at OnCellLoaded and at the subscribe, the return line, the restart line), 0ba43ed7 (FateApi's
-commandActor, game/Offsets.h's four ids, the TS declarations, magicEffectsService's upkeep), 2b1f07fc (a found fault, fixed:
-RunningEffect's caster is an optional FormDesc; a server's first player, 0xff000000, has the FormDesc an empty one has, so
-"none" as an empty desc dropped that player's caster at the effect rule's first rewrite of the record and its thrall's record
-named no caster; the lab's c1 is ff000000. The change form writes the key whenever there is a caster, "0" for 0xff000000; its
-meaning is unchanged and an older server reads "0" as none, as it wrote it, so no migration), 6b2d72b3 (NpcFateTest's return
-cases and the restart's round trip), a2a737ba (difftest's per-client start_ms) and 6b6d42f5 (magic-effects.yaml's and
-poison.yaml's caster, thrall-return.yaml); then the branch's fresh review (FIX FIRST), applied as written: e8237d69 (MUST 1:
-the upkeep's player id was localIdToRemoteId(0x14), which answers 0x14, so no caster ever matched; MUST 2: a link marked only
-on its entry; SHOULD 2: a thrall noted by its server id, resolved by remoteIdToLocalId) and 9a0a0914 (SHOULD 1: NpcFateTest's
-subscribe-trigger case). cargo test --workspace 739 passed, clippy -D warnings, fork-lint and tsc --noEmit clean; the C++ and
-the platform not compiled here (the server image at the push, the Windows build). Then m4-reanimate-claim-2's 27ea0e3d,
-merged in at ed8a4c90 (thrall-departure's c1 isDead declared twice; Tests below), and the fix for pipeline 5939's red (unit
-job 21195, 1 of 745 cases on two assertions, REQUIRE( body.GetReanimateCaster().caster == kCaster ) expanded 0 == 4278193462
-(0xff000d36) at that build's NpcFateTest.cpp:1921 and :2031): dafcac67 (the Dead Thrall T0 to a case of its own on a body its
-Reanimate effect's conditions take; Tests below), b50b738f (the claim's gate, above) and 7eaffba3 (the review of b50b738f, no
-finding above NIT; F2 and F3 applied as written: the reanimate case's setup asserts Reanimate Corpse's 0x96d0b holds on the
-predator for the caster, NpcFateTest.cpp:1364-1373, so a refusal by the gate reads as a failed premise and not as a later
-CommanderOf assertion; the gate's HYPOTHESIS cites UESP; F4 a note for the next T2, Tests below). clang-format 21.1.8 and
-fork-lint exit 0 at each; the C++ not compiled here (the server image at the push), and no unit job at 7eaffba3 is cited
-in this doc. The probe: x-reanimate-return v2.1
-(lab/.cache/drafts/reanimate/x-reanimate-return-v2.1.yaml, sha1 c79dfe5f, a copy in lab/.cache/probes; v2 a7be0bfb kept beside
-it), the probe review's F1 to F3 applied, BUILD m4-reanimate-return 9a0a0914, probe-check ok. Its header voids a read whose
-result.json names another build (x-reanimate-return-v2.1.yaml:21-23), so a stage of the head 7eaffba3 reads it only once that
-line is re-pointed (a probe change by path, not this doc's). Its Dead Thrall is cast at Sven 0x13491 by hand
-(x-reanimate-return-v2.1.yaml:37); HYPOTHESIS until the run's server log shows no "conditions fail on the body" line for
-him: the gate takes him, Odin's 0x7e8e0 asking MagicNoReanimate == 0 alone on the lab (lab/.cache/drafts/reanimate-fx.md
+by ls-remote at 23:22 PST 2026-11-12): 29258b56 (wire-rules cells.rs returning, its T0, the bridge's ThrallRecord), 5d5c868a
+(MagicEffects' caster, SCHEMA_VERSION 45, rule 4 in one commit), 51e73ea4 (PartOne::ReturnThralls at OnCellLoaded and at the
+subscribe, the return line, the restart line), 0ba43ed7 (FateApi's commandActor, game/Offsets.h's four ids, the TS
+declarations, magicEffectsService's upkeep), 2b1f07fc (a found fault, fixed: RunningEffect's caster is an optional FormDesc;
+a server's first player, 0xff000000, has the FormDesc an empty one has, so "none" as an empty desc dropped that player's
+caster at the effect rule's first rewrite of the record and its thrall's record named no caster; the lab's c1 is ff000000.
+The change form writes the key whenever there is a caster, "0" for 0xff000000; its meaning is unchanged and an older server
+reads "0" as none, as it wrote it, so no migration), 6b2d72b3 (NpcFateTest's return cases and the restart's round trip),
+a2a737ba (difftest's per-client start_ms) and 6b6d42f5 (magic-effects.yaml's and poison.yaml's caster, thrall-return.yaml);
+then the branch's fresh review (FIX FIRST), applied as written: e8237d69 (MUST 1: the upkeep's player id was
+localIdToRemoteId(0x14), which answers 0x14, so no caster ever matched; MUST 2: a link marked only on its entry; SHOULD 2: a
+thrall noted by its server id, resolved by remoteIdToLocalId) and 9a0a0914 (SHOULD 1: NpcFateTest's subscribe-trigger case).
+cargo test --workspace 739 passed, clippy -D warnings, fork-lint and tsc --noEmit clean; the C++ and the platform not
+compiled here (the server image at the push, the Windows build). Then m4-reanimate-claim-2's 27ea0e3d, merged in at ed8a4c90
+(thrall-departure's c1 isDead declared twice; Tests below), and the fix for pipeline 5939's red (server-build job 21195, 1 of
+745 cases on two assertions, REQUIRE( body.GetReanimateCaster().caster == kCaster ) expanded 0 == 4278193462 (0xff000d36) at
+that build's NpcFateTest.cpp:1921 and :2031): dafcac67 (the Dead Thrall T0 to a case of its own on a body its Reanimate
+effect's conditions take; Tests below), b50b738f (the claim's gate, above) and 7eaffba3 (the review of b50b738f, no finding
+above NIT; F2 and F3 applied as written: the reanimate case's setup asserts Reanimate Corpse's 0x96d0b holds on the predator
+for the caster, NpcFateTest.cpp:1364-1373, so a refusal by the gate reads as a failed premise and not as a later CommanderOf
+assertion; the gate's HYPOTHESIS cites UESP; F4 a note for the next T2, Tests below). clang-format 21.1.8 and fork-lint exit
+0 at each; the C++ not compiled here, and pipeline 5944 at 7eaffba3 green (server-build job 21211, 07:17Z 2026-11-13: "All
+tests passed (486778 assertions in 746 test cases)", ctest 13 of 13, the image skymp-server:m4-reanimate-return-7eaffba3;
+"ff000d3d stands by reanimate 7e8df of ff000d36: its effects on the record (7e8e0 for 86313600 s, 8bb2a for 86400 s)" four
+times, the full thrall case's premise; rust-image 21207, wire-test 21208, difftest-build 21209 and wire-fuzz 21210 green).
+The probe: x-reanimate-return v2.1 (lab/.cache/drafts/reanimate/x-reanimate-return-v2.1.yaml, sha1 c79dfe5f, a copy in
+lab/.cache/probes; v2 a7be0bfb kept beside it), the probe review's F1 to F3 applied, BUILD m4-reanimate-return 9a0a0914,
+probe-check ok. Its header voids a read whose result.json names another build (x-reanimate-return-v2.1.yaml:21-23), so a
+stage of the head 7eaffba3 reads it only once that line is re-pointed (a probe change by path, not this doc's). Its Dead
+Thrall is cast at Sven 0x13491 by hand (x-reanimate-return-v2.1.yaml:37); HYPOTHESIS until the run's server log shows no
+"conditions fail on the body" line for him: the gate takes him by the masters' rows too (his base 0x1347f's NordRace 0x13746
+carries ActorTypeNPC 0x13794, and neither race nor base carries MagicNoReanimate 0x6f6fb; Skyrim.esm by lab/esm.py, the lab's
+overrides of NordRace unread), and the lab's Odin 0x7e8e0 asks MagicNoReanimate == 0 alone (lab/.cache/drafts/reanimate-fx.md
 6.1, the gate above).
 
 Tests. T0: cells.rs's return cases (at the cell's load and not before it; under another seat's hosting; none for a dead
@@ -3526,34 +3536,38 @@ with its record's caster past the record's own duration (:2317); the caster's ne
 the word and MagicEffects' caster (:2352); killed while away, no return (:2430); the subscribe trigger, the cell loaded first
 and the thrall served by the grid after it, claimed once with its create word naming the caster (:2465). Its body is a
 server-made Nord bandit 0xff000d3d (base EncBandit01Melee2HBerserkNordM 0x3DE6F, NordRace, the full thrall's look case's) at
-the predator's spot in cell 0x9810, between the reanimate case's host 0xff000d35 and caster 0xff000d36. The four sections
-were the reanimate case's, on the forest's predator 0x85547, until pipeline 5939 failed them (Built above): the predator
-lacks ActorTypeNPC 0x13794, so the stand-up put no Reanimate state on the record and the return read no caster, and the
-sections that read the command alone had passed on the same unreal premise. They moved with every assertion at its strength,
-the body's id in the two return lines and the create word; the setup, which Catch2 runs ahead of each section, asserts their
-premise (ActorHasKeyword(body, ActorTypeNPC) and EffectConditionsHold of 0x7e8e0 on the body for the caster, :2214-2222), and
-all four assert the record naming the caster after the stand-up. The reanimate case (:1297) keeps Reanimate Corpse's sections
-on the predator, its setup asserting 0x96d0b's conditions hold there for the caster (:1364-1373, 7eaffba3's F2), and gains the
-gate's section (:1554-1596, b50b738f): Dead Thrall's hit at the predator commands nothing (the refusal line once with its
-failing row, no command line, CommanderOf 0, the host simulating and hosting it, no hoster word to either game, the body
-still dead), then Reanimate Corpse's hit commands it. The restart's case: the change form's round trip into a fresh world,
-then the return (:3004, its thrall a bandit of the same base 0x3DE6F);
-wire-validate's caster case and the 43 fixture. T2: magic-effects.yaml and poison.yaml declare the caster; thrall-return.yaml
-(Dead Thrall's command kept through the departure with no ThrallExpired; the returning character's load of the cell claims no
-body that never stood); thrall-departure.yaml (m4-reanimate-claim-2's, in this branch since ed8a4c90): c1 hears the copy's
-death word twice, now declared wire: 2 (skymp-wire/difftest/sessions/thrall-departure.yaml:113-117, its header :27-28; fork
-27ea0e3d), as the T2 of 8464f322 drew it (numidium, ONLY=thrall-departure: 2 differences, both that line). The route: the
-copy is its own actor listener (MoveOnGrid's neighbours hold it; Subscribe admits emitter == listener into
-actorListenerArray, with no check of the two before the insert, MpObjectReference.cpp:1449-1490), and
-SendMessageToActorListeners hands each listener's word to GetActorToSendTo (:3019-3025), which for the copy, a
-listener with no user, is its cell's host, c1 (MpActor.cpp:872-889),
-beside c1's own actor; canon's since 5b90e4c5 (ADR-048's seam), not this branch's, and the old declaration was read from the
-code and never run. Both thrall sessions raise a copy of Hilde's base 0x35533 (b50b738f's message); the next T2
+the predator's spot in cell 0x9810, with the reanimate case's host 0xff000d35 and caster 0xff000d36, both at the cell's spot
+kForest, 100 units from the body (NpcFateTest.cpp:2180, :2184, :2199). The four sections were the reanimate case's, on the
+forest's predator 0x85547, until pipeline 5939 failed them (Built above): the predator lacks ActorTypeNPC 0x13794, so the
+stand-up put no Reanimate state on the record and the return read no caster, and the sections that read the command alone had
+passed on the same unreal premise. They moved with every assertion at its strength, the body's id in the two return lines and
+the create word; the setup, which Catch2 runs ahead of each section, asserts their premise (ActorHasKeyword(body,
+ActorTypeNPC) and EffectConditionsHold of 0x7e8e0 on the body for the caster, :2214-2222), and all four assert the record
+naming the caster after the stand-up. The reanimate case (:1297) keeps Reanimate Corpse's sections on the predator, its setup
+asserting 0x96d0b's conditions hold there for the caster (:1364-1373, 7eaffba3's F2), and gains the gate's section
+(:1554-1596, b50b738f): Dead Thrall's hit at the predator commands nothing (the refusal line once with its failing row, no
+command line, CommanderOf 0, the host simulating and hosting it, no hoster word to either game, the body still dead), then
+Reanimate Corpse's hit commands it. The restart's case: the change form's round trip into a fresh world, then the return
+(:3004, its thrall a bandit of the same base 0x3DE6F); wire-validate's caster case and the 43 fixture. T2: magic-effects.yaml
+and poison.yaml declare the caster; thrall-return.yaml (Dead Thrall's command kept through the departure with no
+ThrallExpired; the returning character's load of the cell claims no body that never stood); thrall-departure.yaml (fork
+cce9bd17, in this branch from its base 8464f322; its wire: 2 since the merge ed8a4c90): c1 hears the copy's death word twice,
+now declared wire: 2 (skymp-wire/difftest/sessions/thrall-departure.yaml:113-117, its header :27-28; fork 27ea0e3d), as the
+T2 of 8464f322 drew it (numidium, ONLY=thrall-departure: 2 differences, both that line). The route: the copy is its own actor
+listener (ForceSubscriptionsUpdate's neighbours, read from the grid after its MoveOnGrid, hold it, upstream's own
+self-subscription, MpObjectReference.cpp:1099-1136; Subscribe admits emitter == listener into actorListenerArray, with no
+check of the two before the insert, MpObjectReference.cpp:1449-1490), and SendMessageToActorListeners hands each listener's
+word to GetActorToSendTo (:3019-3025), which for the copy, a listener with no user, is its cell's host, c1
+(MpActor.cpp:872-889), beside c1's own actor; canon's since 634c2874 (train 51, ADR-050 decision 3: the death word to the
+listeners of every actor not created as a player, MpActor.cpp:2279-2285 at 7eaffba3; 5b90e4c5's ADR-048 broadcast took
+game-file actors alone, GetFormId() < 0xff000000), not this branch's, and the old declaration was read from the code and
+never run. Both thrall sessions raise a copy of Hilde's base 0x35533 (b50b738f's message; ElderRace 0x67cd8, whose KWDA holds
+ActorTypeNPC 0x13794 and no MagicNoReanimate 0x6f6fb, Skyrim.esm by lab/esm.py, so both rows hold on it); the next T2
 (ONLY=thrall-departure, then ONLY=thrall-return) greps the wire server's log for "conditions fail on the body", zero lines
-confirming both sessions' declarations stand under the gate (the review of b50b738f, F4; unrun). T3: x-reanimate-return
-v2.1 (lab/.cache/drafts/reanimate/x-reanimate-return-v2.1.yaml): Dead Thrall by
-hand, c2 simulating Sven while c1 is away, c1's return with the native in place of thrall-link.js's link; the fight is
-recorded, not claimed (the landing's cell is c2's from leg H on).
+confirming both sessions' declarations stand under the gate (the review of b50b738f, F4; unrun). T3: x-reanimate-return v2.1
+(lab/.cache/drafts/reanimate/x-reanimate-return-v2.1.yaml): Dead Thrall by hand, c2 simulating Sven while c1 is away, c1's
+return with the native in place of thrall-link.js's link; the fight is recorded, not claimed (the landing's cell is c2's from
+leg H on).
 
 Rule 6 (option A, the coordinator for Eli, 2026-11-12): no schema change and no migration, since the return reads the
 record, which keeps its Reanimate state's caster across a restart since 65c40b6f. The restart's proof: NpcFateTest's round
