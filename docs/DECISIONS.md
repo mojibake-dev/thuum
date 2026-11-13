@@ -4211,6 +4211,8 @@ Decision.
    Amended 2026-11-11 for Havok props (Eli, in thuum-fa's plan mode, W1b, verbatim "Rung by rung"; ADR-071): the freeze lifts per
    change. A physics rung reaches a seat once the docs/engine/havok-props.md rows it rests on read on both viewpoints and its
    two-seat scenario is green; the doc thaws whole at ADR-071's last rung.
+   Amended 2026-11-12 late (Eli, in thuum-magnus' session, verbatim "prove rungs 1 and 2 together"; the note of that date under
+   ADR-071): rungs 1 and 2 lift the freeze as one change, on rung 2's head; every later rung stays rung by rung.
 
 Consequences. Tooling: verb-lint (on main, 3df010af; into docs-lint after the 29 boxes are unticked); the scenario lint
 and the mutation run (lab-api's parser, a kill-switch relaunch per verb); verb-merge refuses a doc naming an unrun probe
@@ -5435,6 +5437,27 @@ note above left with Eli:
   sitting over ADR-072 decision 3's eight.
 - The split draft's two withdrawn wordings: "Confirm withdrawals". The eight regrouped rows and the "P1" and "P2" naming are no
   part of the cut, and W7's four playtests stand as the plan has them.
+
+Amended (Eli in thuum-magnus' session, 2026-11-12 late, recorded 00:1xZ 2026-11-13 by thuum-magnus), verbatim "prove rungs 1 and
+2 together", after auriel's graded notes on the physics approach (lab/.cache/drafts/physics-review-auriel-2026-11-12/NOTES.md,
+N1, sent at Eli's word) and the answer that rung 1's merge gates P1:
+- W1b's "Rung by rung" (Status above; ADR-064 decision 7's note) is amended for rungs 1 and 2 alone: they stage and merge as one
+  unit on rung 2's head, fork m4-physics-2-sample 22c2466d, which contains rung 1's head d9da7da3 (merge-base checked 2026-11-13).
+  The reason on record: in 20261112-140518 leg 3c c2 drew a held ingot at its crosshair while its stream sent only heartbeats at
+  the rest pose (lab/.cache/drafts/physics/read-rung1-stage-140518.md:116-127; the control 20261112-142009 streamed the lift), so
+  rung 1 alone can ship a hold whose samples never move, where rung 2 reads the body itself (22c2466d PuppetApi.cpp:868,
+  :870-871). The cause of 3c stays HYPOTHESIS.
+- Carried to the unit: D-PH17 (it merges only once E13 and E32 read on both screens); E10 read under the cap and the cap layer
+  merging with it (decision 7); W3's drop fix.
+- Its stage: x-body-read v1.2 first, alone, on both seats, since it can refute the unit (E45, E46, E48 are HYPOTHESIS); then
+  rung 1's six probes and x-prop-follow on 22c2466d. A probe whose premise rung 2 changed is retimed or re-aimed at equal
+  strength, never weakened (rule 13), and gets its fresh review (ADR-064 amendment A). Known: x-prop-stall v1.1's stall clock,
+  STREAM_LIVE_MS 1,600 after the last sample at d9da7da3, is gone at 22c2466d, where a follower goes quiet about 1,300 ms after
+  its last sample (FOLLOW_QUIET_MS and FOLLOW_DELAY_MS, propService.ts:98-104, :131-139). A red on E45, E46 or E48 sends both
+  rungs back together.
+- Unchanged: every later rung is proven rung by rung; ADR-072 decision 4 counts the unit as the rung the lab stages, so rung 3
+  (fork m4-physics-3-impact 4518ca61, which contains 22c2466d) is the one built ahead; W7's four playtests and their items
+  stand, and which sitting carries which item follows what is merged on canon at its cut (ADR-072 decision 3).
 
 Amends: ADR-064 decision 7 (dated note under it), ADR-063's props note (accepted under it), ADR-058's slices (slice two kept as a
 derived class; slice three is rungs 5 and 6), ADR-067 decision 4 (its final sample is the asleep sample; the built ChangeForm
