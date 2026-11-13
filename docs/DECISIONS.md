@@ -5481,6 +5481,34 @@ N1, sent at Eli's word) and the answer that rung 1's merge gates P1:
   (fork m4-physics-3-impact 4518ca61, which contains 22c2466d) is the one built ahead; W7's four playtests and their items
   stand, and which sitting carries which item follows what is merged on canon at its cut (ADR-072 decision 3).
 
+Bodies, the unit's gates and E45 (Eli in thuum-magnus' session, 2026-11-13 about 04:35Z, by AskUserQuestion at Eli's "pose the
+decisions as questions?"; recorded 04:45Z by thuum-magnus; asked from the read of stage-j1's x-body-read v1.4,
+lab/.cache/drafts/physics/read-x-body-read-040607.md, and the bodies plan refresh, D-PH20 and D-PH21 asked once D-PH19 was
+answered; Eli's choices verbatim in quotes):
+- D-PH19, how far bodies go now: "Build 5a and 5 now". Rung 5's client half (the drag, the bone stream, the impose) is built
+  ahead of its reads (x-body-impose v2, prop-sleep.js on a corpse, prop-grab.js v3, save-havok.js); the reads still run before
+  rung 5's stage, and every premise they settle stays HYPOTHESIS in its verb doc until then (rule 2). 5a (fork
+  m4-physics-5a-bodies-srv 9dd4d74a) stages as queued. ADR-072 decision 4 is amended for this ladder (the note under it).
+- D-PH20, where the bodies' stream and impose are built: "Build rung 4, then 5". D-PH10 A stands: rung 4 (the derived static
+  class, D-PH9, and the bodies' stream and impose, proved on the Riverwood Trader's sign) is built now, cut from rung 3's head
+  4518ca61 with 5a merged in, and rung 5 adds the ragdoll parts and the grab's end on rung 4's head.
+- D-PH21, the saved Havok block's bounds: "Read first, bounds in rung 5". Rung 5 is built without them; save-havok.js runs solo
+  after playtest 51, and the bounds commit lands from its read before rung 5's T2 and stage (decision 9: no float relayed
+  unbounded; rule 2: never the decompiler's layout alone).
+- D-PH24, E46's two halves for the unit: "Both halves gate". The rest half (a resting body's awake bit falls at the engine's
+  deactivation) and the held half (a held body's island stays awake through a still hold) both gate rungs 1 and 2. The held
+  half's counting read is x-prop-rest-e10-v2. In 20261113-040607, c1's prop-sleep.js trace (a hand read the probe records, not a
+  claim) read the held ingot's island out of the active list for 6.5 s of a still hold while the hold stayed on the wire, so a
+  like read in x-prop-rest-e10-v2 is the red on E46 that sends both rungs back together (the unit's note above).
+- D-PH25, what E45 asks of a copy at rest: "Pose match + settle bound". E45 is the pose match: readBodies' pose against the same
+  copy's reference within 0.5 units and 0.5 degrees, on the owner and on the follower after a placement (040607: 0.0 and 0.0 at
+  a tilt of about 20 degrees, both seats). The follower's own Dynamic settle is asserted within the client's placement bound,
+  SAMPLE_UNITS 2 and SAMPLE_DEGREES 2 (propService.ts:52-53 at 22c2466d; 040607 read 0.3 units and 1.2 degrees there), by
+  x-body-read v1.5, which also swaps the Basket01 that rolled off the strip at its own drop (the probe's premise, not the unit's
+  code; prop-physics.md:806-812) for a second IronIngot.
+Not asked, the builder's reading: D-PH22 (ChangeForm in 5a) is D-PH11 A's as written, the ChangeForm part and its SCHEMA bump in
+rung 5, so 5a carries none.
+
 Amends: ADR-064 decision 7 (dated note under it), ADR-063's props note (accepted under it), ADR-058's slices (slice two kept as a
 derived class; slice three is rungs 5 and 6), ADR-067 decision 4 (its final sample is the asleep sample; the built ChangeForm
 apply is the record). W3 stays Eli's at the time: a rewrite of b-prop-push's step 27 if the drop read calls for one (decided
@@ -5602,6 +5630,11 @@ Open at the acceptance, each Eli's to say (found by the same check; none is deci
 Answered (Eli in auriel's session, 2026-11-12 about 17:05Z, by AskUserQuestion, "Keep ROUTE-CLOSE.md"; recorded 17:07Z by auriel):
 the walk's table that changes is docs/ROUTE-CLOSE.md, laid out as docs/M3-CLOSE.md is, and this ADR's own table stays as accepted.
 The five points above stay open.
+
+Amended for ADR-071's physics ladder (Eli in thuum-magnus' session, 2026-11-13 about 04:35Z, D-PH19 "Build 5a and 5 now" and
+D-PH20 "Build rung 4, then 5"; recorded under ADR-071 by thuum-magnus): decision 4's one rung ahead is lifted for this ladder
+alone. Rungs 4, 5a and 5 are built while the lab stages the rungs 1 and 2 unit, with rung 3 the rung already built ahead; each
+still stages and merges in ladder order, and a finding in the unit or rung 3 costs each of them a re-merge.
 
 Amends: ADR-064 decision 6 and ADR-053 decision 1 (what a playtest is; a dated note under each), the ladders of ADR-068 decision 9
 and ADR-071 (decision 4: one rung built ahead; noted under ADR-071 and under ADR-067 decision 7's amendments, whose order stands),
