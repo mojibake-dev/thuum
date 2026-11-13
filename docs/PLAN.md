@@ -1536,6 +1536,12 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   proc (train 52's effect-helper fix), a spell's end handler lost on a warm relaunch (b-ghostwalk-look, cause unread). Next:
   heads' merge, train 52's T2, playtest 51 on Eli's go (Ariadne's vampirism in Morthal, shared quests; its setup on thuum
   playtest-client-settings), then train 52's stage.
+- STATE 2026-11-12 08:58 PST (auriel): ADR-072 ACCEPTED (Eli about 15:42Z, "B, accept it, send all three messages"): the closeout is one
+  route, the Golden Claw walk, and docs/ROUTE-CLOSE.md says what is left of it (a leg green in the lab, then ticked by Eli, then
+  DONE; a sitting eight items at most on the current canon, never waiting for a build; a ladder one rung built ahead).
+  Playtest 51 is cut on fork canon 6fe5fea0 (train 52 c3f9d175, merged 11-12, and the double-shout fix) and no longer waits for
+  ADR-071's physics rungs or the reanimation (ADR-071's note of 11-12): each is played at the first sitting cut after it merges
+  on canon. Next: 51 on Eli's go.
 
 ### M5: Progression (4 to 8 weeks, Class A/B). Started 2026-10-31 (the weekend pass)
 

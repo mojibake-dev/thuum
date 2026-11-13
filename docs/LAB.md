@@ -445,9 +445,13 @@ pinned:
 
 Results are browsed at https://thuum.gaussing.tv/results/<run>/; a run set's
 record is results/runsets/<id>.json, written after every run. The nightly sweep
-(ADR-030) is the set named `nightly` over every committed scenario, started by
-lab-api's clock at NIGHTLY_SWEEP_UTC (10:30, which is 03:30 PDT) once no run or
-snapshot is in progress and nothing has run for NIGHTLY_QUIET_S (half an hour).
+(ADR-030) is the set named `nightly` over every committed scenario. It is OFF
+since 2026-11-03 (Eli: "stop the nightly now, i dont feel like we're gaining
+anything from it"): NIGHTLY_SWEEP_UTC is "" in
+lab/deploy/sky-srv/docker-compose.yml, so no sweep starts by itself, and an R0
+merge's T3 is the next gate or stage that runs its scenarios. With the value set
+(it was 10:30, which is 03:30 PDT), lab-api's clock starts the set once no run
+or snapshot is in progress and nothing has run for NIGHTLY_QUIET_S (half an hour).
 `just sweep` runs the same set by hand; `just verb-merge` runs the gate. The
 nightly also needs every managed client polling within HEARTBEAT_FRESH_S (its
 game up: a clone with its game stopped for a dist copy or shut down for a

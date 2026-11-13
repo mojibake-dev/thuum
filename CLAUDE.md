@@ -102,9 +102,11 @@ toolchain per layer, every feature the same shape.
 ## The developer loop (ADR-053, ADR-054; 2026-10-27)
 
 - Two stage slots a day, morning and evening, each with a playtest of at most eight items;
-  a merge's gate is the always set plus the touched verbs' own scenarios plus watch; the
-  milestone lists run nightly. An R0 change (server-only, no engine behavior on a seat)
-  merges on T0 and T2; anything the engine does on a seat keeps one probe at the slot.
+  a merge's gate is the always set plus the touched verbs' own scenarios plus watch. The
+  nightly sweep of the milestone lists is off since 2026-11-03 (Eli; docs/LAB.md), so no
+  sweep starts by itself: `just sweep` runs one by hand. An R0 change (server-only, no
+  engine behavior on a seat) merges on T0 and T2; anything the engine does on a seat keeps
+  one probe at the slot.
 - A TypeScript client change goes to a running seat with `just client-hot <client> [file]`
   (webpack here, Skyrim Platform reloads the plugin; the seat is then no playtest's until
   its relaunch); the train's pipeline still runs before a stage.
