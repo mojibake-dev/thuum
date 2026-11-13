@@ -9702,3 +9702,18 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   accepted; about 17:05Z: 51 under the staged cap, one sitting. The profile recut (905826c1) and docs-closeout-route and
   physics-sleep-v3 merged; the lab goes back to canon for 51: both clones to clean-m1, the server to
   skymp-server:m4-shout-once-6fe5fea0.
+- (numidium) The night of 2026-11-13. Eli in thuum-magnus' session: "im not able to play test till tomorrow" (51 moves a
+  day, the lab free tonight) and "prove rungs 1 and 2 together" (rungs 1 and 2 one unit on fork m4-physics-2-sample
+  22c2466d, main 2a842b48). The lab had gone back to canon for 51 at 17:40Z by the playtest's own recipes (turbo-srv
+  m4-shout-once-6fe5fea0; turbo-dist of gitlab 20605 at ff467dab, SkyrimPlatformImpl 333d2a2291486ed5 on both seats;
+  turbo-client 6fe5fea0, skymp5-client.js ef1ee0a463578347, both as the double-shout stage laid them; clean-m1-next
+  retaken), and the profile recut 905826c1. labapi-stop-first merged (main e5e0291e, lab-api e5e0291e live from 00:2xZ:
+  relaunch {until: stopped} kills first, about 50 ms inside sky-c1's guest, its fresh review's five fixes applied as
+  written). D-PH9 to D-PH15 reached main from physics-docs' 7e8b9f9a alone (a86e372e). ADR-072's first act, the route run
+  set 20261113-002613-route-canon on canon under the staged cap: green 43 of 43 (44 runs, 00:26Z to 03:53Z; b-npc-talk red
+  at its stillness pair 021752 and green on its relaunched rerun 022104; b-leveled-reward's first run under its id green),
+  its Lab column in ROUTE-CLOSE.md (auriel). b-npc-talk's recurring first-run red gets no gate.yaml line, npc-talk.md saying
+  what it is (thuum-magnus; numidium's call). 22c2466d's Formatting check green on its rerun (the SP Types FunctionsDump
+  flake). The joint unit's stage-j1 from the cap a5131ebd: x-body-read v1.4 alone, 20261113-040607 red at step 130 (the
+  tracked prop ff000004 994 units off on x, no 0x12fe7 within 400 on either seat), so the seven wait for thuum-magnus's
+  read.
