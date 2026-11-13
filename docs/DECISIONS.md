@@ -5509,6 +5509,28 @@ answered; Eli's choices verbatim in quotes):
 Not asked, the builder's reading: D-PH22 (ChangeForm in 5a) is D-PH11 A's as written, the ChangeForm part and its SCHEMA bump in
 rung 5, so 5a carries none.
 
+Rung 4's two questions and the joint unit's probes (Eli in thuum-magnus' session, 2026-11-13 about 06:55Z and 07:15Z, by
+AskUserQuestion; recorded 07:20Z by thuum-magnus; asked from the rung 4 build spec, the builder's scratchpad rung4-spec.md section
+G, and from the fresh reviews of x-body-read v1.5 and x-prop-follow v1.5; Eli's choices verbatim in quotes):
+- D-PH26, how another seat shows a body of several parts set moving elsewhere (the Riverwood Trader's sign, seven bodies on a
+  Fixed anchor): "Live and steered". The follower's parts stay Dynamic and are driven by velocity each frame toward the owner's
+  interpolated pose (route K3), placed outright only past 64 units or at the rest; a body of one part keeps the items' Keyframed
+  route (E24). Decision 3's "a copy goes Keyframed" is amended for a body of several parts, and ADR-063 decision 3's "non-owners
+  never simulate" is read for that case as "never simulate free": the copy is steered every frame. Declared limits: the watcher's
+  own capsule, hand or local-cause spell can nudge its copy for a frame before the drive pulls it back, and a watcher can grab
+  it mid-swing (A2). x-body-impose v2 still reads K3 on the sign before rung 4's stage.
+- D-PH27, 5a and rung 4: "5a first, on its own". 5a (fork m4-physics-5a-bodies-srv) merges by its own gate, once the rungs 1+2
+  unit and rung 3 have merged; rung 4, which contains it, merges after it with main merged in first. ADR-072's ladder note's
+  "in ladder order" is read as: no rung merges ahead of a rung it contains.
+- The probes' own questions (their labels the probes'; the answers in each probe's header): x-body-read's D-BR1 "the press
+  shortens" (600 ms, fitting B's window to 040607's measured carry) and D-BR2 "0.5, read by hand" (c2's first look at a placed
+  body, its motion-4 line, is D-PH25 C's follower after a placement, held at 0.5 by the node line read before the verdict);
+  x-prop-follow's D-PF1 (leg D, the take-over, moves to a premise probe of its own and legs A to C stage alone), D-PF2 "a short
+  basket-roll probe" (P2's item 5 proved before P2 by a follow-only probe of the basket's own roll from X: one follow line of 5
+  or more samples and 0 jumps, no rest claim), D-PF3 (leg C's loss raised from 15 to 25 percent), D-PF4 (leg B waits on a short
+  read of the four cabbages' rests on the strip) and D-PF5 (a walk that moves no ingot is waited on, not routed around), each
+  at its recommendation ("Yes, all five").
+
 Amends: ADR-064 decision 7 (dated note under it), ADR-063's props note (accepted under it), ADR-058's slices (slice two kept as a
 derived class; slice three is rungs 5 and 6), ADR-067 decision 4 (its final sample is the asleep sample; the built ChangeForm
 apply is the record). W3 stays Eli's at the time: a rewrite of b-prop-push's step 27 if the drop read calls for one (decided
