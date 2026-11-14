@@ -26,11 +26,47 @@ Phases: rollback-server, netem (when the scenario asks), rollback-clients,
 steps, artifacts. A run's directory is `RESULTS_DIR/<utc stamp>-<scenario
 id>/` with `result.json`, `world-before/`, `world-after/`, `world-diff`,
 `server.log`, `screenshots/`, `lab.pcap`, `frida/`, and client logs when the
-scenario lists them. The verdict is green only when every assertion held and
-no step timed out; red when an assertion failed, a step timed out, or the
-server refused a command; error when the lab itself failed (no snapshot, the
-server never became ready, a client never heartbeated, the scenario timed
-out, an assertion that is not in the language).
+scenario lists them. A Frida trace, `frida/<client>-<script>.jsonl` (the
+injector's .out, then the script's .log), is copied on the seat by a read
+that shares write access, the copy exec printing the copy's length (three
+tries, 10 s apart, but one for an exec that ran to its deadline), and read back by Proxmox's own ranged agent file-read
+(offset, count, decode=0), 512 KiB a call, joined as bytes, checked against
+the copy's length and decoded as UTF-8 once; a copy past 64 MiB is refused
+before its first read, and the copy is removed once read. Its removal is
+tried four times 1 s apart, each try that still finds it a note, since a
+scan of a file just written can hold it a moment (train 52's stage,
+numidium's HYPOTHESIS), then over a 30 s window, pinging the agent after
+pauses of 2, 4, 8 and 16 s, each ping it answers bringing another try. A
+copy or sidecar still there then is held open in the agent, a busy agent
+keeping the handle of a read or close that timed out until it works through
+its queue (core's host journal, 2026-11-12; HYPOTHESIS, the next relaunch's
+held count decides): a note naming the file and its seat, never the seat's
+fault, and the seat's next reset (a rollback, or the relaunch's cleaning)
+removes it; a file that cleaning still finds held rolls the seat back in
+that reset. Every agent call Proxmox answers
+"QEMU guest agent is not running", its 3 s guest-ping unanswered by a busy
+agent, is asked again for up to 30 s (`LAB_AGENT_BUSY_S`) before it fails
+as it did. A client log (`<client>.log`, `-driver.log`,
+`-console.log`, `-before.log`, `-launch.log`, a relaunch's
+`-relaunch-<step>.log` and `-console.log`) comes back the same way, since the
+game holds its logs open for writing. `c1.log` in a scenario's artifacts
+brings c1's one fetch, its driver and console logs with it, and so does a
+seat's named log listed itself (`c1-console.log`, `c1-driver.log`), made once
+however many of them are listed. One not fetched is a note ending
+"(log fetch)" with its code, E_PVE_* or E_RUN_LOG_FETCH, never a failure. The
+SKSE folders' logs are still copied by Copy-Item and read whole. The verdict is green only
+when every assertion held and no step timed out; red when an assertion
+failed, a step timed out, or the server refused a command; error when the
+lab itself failed (no snapshot, the server never became ready, a client
+never heartbeated, the scenario timed out, an assertion that is not in the
+language, an exception out of the artifacts phase in a run not already red, a trace the run's own
+frida step or relaunch arm started that its end could not fetch whole).
+That last is E_RUN_FRIDA_FETCH, naming the script, the seat and the reason
+(its copy failed three tries or its exec answer was lost, a range still unread after the file read's
+retries, a range that came back as no base64, bytes that do not come to the
+copy's length, a copy past 64 MiB); as for a crash at the end, a red run
+stays red and gains the failure. A trace started by hand (POST /lab/frida)
+is no run's evidence: what of it is not fetched is a note.
 
 Server rollback runs in `state` mode by default: stop the server container,
 restore `SERVER_WORLD_DIR` from `SERVER_SNAPSHOTS_DIR/<snapshot>/`, `docker
@@ -49,17 +85,34 @@ the rollback (ADR-036; docs/LAB.md, "Between runs"); result.json's
 Server-side verbs (`teleport`, `give`) go to the server's `labCommand` RPC;
 client verbs (`connect`, `reconnect`, `move`, `equip`, `cast`, `activate`,
 `hit`, `dump-state`) are queued for lab-driver; `screenshot` is a guest exec
-plus guest-agent file read on a managed guest (the helper writes a base64
-text file beside the PNG because the guest-agent file API carries text
-only), and a `request-screenshot` client verb on an unmanaged one.
+on a managed guest whose helper writes a base64 sidecar beside the PNG, read
+back through the agent's ranged file-read (512 KiB a call, decoded once
+joined, removed once read, as a client log is: a whole read past about 1 MiB
+is unreliable on a busy seat), a burst's frames likewise, and a
+`request-screenshot` client verb on an unmanaged one; a shot or frame not
+read is the step's note, never a fault, and so is a sidecar held open past
+its removal's window. A shot's file and a burst's folder carry the run's
+name (`shots\<run>-<step>.png`), so a sidecar left held is never read as
+the next run's shot (docs/LAB.md).
 `wait: N` sleeps N times `TIME_SCALE`. Before an `assert:` block, every
 client the block reads through `.sees()` or `.view()` gets a `dump-state`
 step so the view is fresh. `server.log_count("<regex>")` is counted from the
 run's server log anew before every `assert:` and every poll of an `until:`. A
 seat's `c1.log_count("<regex>")` is counted anew before each poll of an
 `until:` that names it, by a `log-count {pattern}` step's own copies of the
-seat's logs: each pattern once a poll, about 1.5 s of guest-agent reads each,
-so a poll takes that much longer than its `every`. An `assert:` counts no
+seat's logs: each pattern once a poll, its guest-agent time measured by the log
+fetch's seat check (2026-11-12, both seats: 6.5 to 6.6 s for two 6 MB logs, about
+1.8 MB/s; a run's own logs are far smaller), so a poll takes that much longer
+than its `every`. A known cost: every pattern copies the seat's two logs
+anew, where one copy a seat a poll could serve all its patterns; that saving
+is left for later. The copies come back as the
+run's logs do, in ranges, each removed once read (a copy, a ranged read and a
+removal a log), and one the agent holds open is a note; each count's copies
+carry their run, their step and their number there
+(logcount-<run>-<index>-<n>), so one held open spoils its own poll alone,
+not the rest of its until nor a later run's count; a range
+that comes back short keeps no count, as does a copy whose exec answer the
+agent lost, since only that exec's own lengths prove a copy whole. An `assert:` counts no
 seat's log itself: it reads the last count taken, a `log-count` step's or an
 until's last poll's, the moment its scenario chose to count at.
 
@@ -127,7 +180,12 @@ does too).
 save at the next login) and holds until the new game is in and logged in;
 `relaunch {until: gone}` returns as soon as the player is off the server's
 online list, so a scenario can read the server while that game is down, and a
-later `- c2: connect` waits for the new game's login. `relaunch {files: [...]}`
+later `- c2: connect` waits for the new game's login. `relaunch {until:
+stopped}` kills the game as the step's first act and returns at the kill, the
+server not told, so what follows is timed from the kill (b-host-kill's stale
+pass, x-prop-stall's game stopped mid-flight); the outgoing game's logs and the
+new game's start follow behind it, and the next connect waits for them. With
+files or frida it kills after them, as `gone` does. `relaunch {files: [...]}`
 changes the run's game folder while the game is stopped, for what loads only
 at a launch: `{rename: <path>, to: <name>}`, `{ini: <path>, section, key,
 value}` for a key the ini has, or `{json: <path>, key, value}` to set or add a

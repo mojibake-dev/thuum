@@ -92,6 +92,7 @@
 #                                   keeps the one before): what add-mods.ps1 deletes by hash when a
 #                                   clone has no record of its own last lay (C:\sky-lab\mods.sums)
 #   mods/game-ini.tsv               the game's own ini keys every seat sets (lab/layer/game-ini.tsv)
+#   mods/game-owned.tsv             files the game rewrites after their first lay (lab/layer/game-owned.tsv)
 #   mods/papyrus-admitted/Platform/papyrus-scripts.txt
 #                                   ADR-044: "<plugin>: <script class> ..." per admitted plugin
 #                                   (lab/layer/papyrus-admitted.tsv), what skymp5-client admits
@@ -277,7 +278,10 @@ unzip -q "$ff_zip" "SKSE/Plugins/TMS_AIPathingFreezeFix.dll" -d "$ff"
 # Files a mod manager never puts under Data: a mod's top-level readmes,
 # pictures and manager metadata (the staging folders carry them).
 junk=(--exclude '__folder_managed_by_vortex' --exclude '/*.jpg' --exclude '/*.jpeg' --exclude '/*.png' --exclude '/*.docx'
-      --exclude '/*.modgroups' --exclude '/*.txt' --exclude '/*.md' --exclude '/*.pdf' --exclude '/meta.ini')
+      --exclude '/*.modgroups' --exclude '/*.txt' --exclude '/*.md' --exclude '/*.pdf' --exclude '/meta.ini'
+      # a log a mod shipped from its author's machine, at any depth: the plugin rewrites it at every launch, so laying it
+      # only made every lay fetch it again (BarterLimitFix, BugFixesSSE, ScrambledBugs; apocrypha's lay read, 2026-11-07)
+      --exclude '*.log')
 tree_hash() { # <dir>: sha256 over the sorted "sha256  path" lines of its files, as the manifest's tree: value
   (cd "$1" && find . -type f | sed 's|^\./||' | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)
 }
@@ -380,6 +384,9 @@ python3 "$root/lab/tools/ini-patch.py" "$root/lab/layer/ini-patches.tsv" "$stage
 # The game's own ini keys every seat gets (lab/layer/game-ini.tsv): at the tree's root beside plugins.txt, read by
 # add-mods.ps1 and the friend installer, not a Data file and not in SHA256SUMS.
 cp "$root/lab/layer/game-ini.tsv" "$stage/tree/game-ini.tsv"
+# The files the game owns after their first lay (lab/layer/game-owned.tsv): add-mods.ps1 lays one again only when its
+# layer copy changed since the clone's last lay, so a plugin rewriting its own ini is not fetched again at every lay
+cp "$root/lab/layer/game-owned.tsv" "$stage/tree/game-owned.tsv"
 # Rows install in order, as a mod manager does: a later row's file replaces an
 # earlier row's (or a folder laid above the rows) at the same Data path. The
 # clients apply SHA256SUMS in its sorted order and keep the last copy they
@@ -441,7 +448,7 @@ while IFS=$'\t' read -r plugin source _; do
 done < <(grep -v '^#' "$root/lab/layer/papyrus-admitted.tsv" | tail -n +2)
 mkdir -p "$stage/tree/papyrus-admitted/Platform"
 python3 "$root/lab/tools/papyrus-map.py" "$stage/tree" "$root/lab/layer/papyrus-admitted.tsv" "$order_tsv" "$game_cache" "$stage/tree/papyrus-admitted/Platform/papyrus-scripts.txt"
-(cd "$stage/tree" && find . -type f ! -name SHA256SUMS ! -name plugins.txt ! -name PREVIOUS.sums ! -name game-ini.tsv | sed 's|^\./||' | LC_ALL=C sort \
+(cd "$stage/tree" && find . -type f ! -name SHA256SUMS ! -name plugins.txt ! -name PREVIOUS.sums ! -name game-ini.tsv ! -name game-owned.tsv | sed 's|^\./||' | LC_ALL=C sort \
   | while IFS= read -r f; do shasum -a 256 "$f"; done > SHA256SUMS)
 echo "mod layer: $(wc -l < "$stage/tree/SHA256SUMS" | tr -d ' ') files, $(du -sh "$stage/tree" | cut -f1)"
 if [ -n "${PERSIST_LOCAL:-}" ]; then

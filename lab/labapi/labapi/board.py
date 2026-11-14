@@ -81,6 +81,12 @@ class StepBoard:
         # a factions step's answers by the actor it named: {formId, ranks, members, crime} or the error, which replaces the
         # actor's earlier answer (c.factions(id), ADR-068 rung 4's standing)
         self._factions: dict[str, dict[int, dict[str, Any]]] = {}
+        # a script-vars step's answers by the form it named: {form, vars: [{form, script, var, k, i | f | b} or {..., error}]}
+        # or the error a failed read answered, which replaces the form's earlier answer (c.script_vars(form), ADR-068 rung 5)
+        self._script_vars: dict[str, dict[int, dict[str, Any]]] = {}
+        # a quest-objectives step's answers by the quest it named: {quest, running, objectives: index (decimal) -> {displayed,
+        # completed}} or the error, which replaces the quest's earlier answer (c.quest(id).objectiveDisplayed(i), rung 5)
+        self._objectives: dict[str, dict[int, dict[str, Any]]] = {}
         # a figure-spells step's answer: {formId, name, base, added, equipped, extra} (ADR-046)
         self._figure_spells: dict[str, dict[str, Any]] = {}
         # a log-count step's answers: the regex -> how many lines of the seat's Skyrim Platform log matched
@@ -101,6 +107,8 @@ class StepBoard:
         self._presets: dict[str, dict[str, Any]] = {}
         # a console step's answer: {typed, lines, keys}
         self._consoles: dict[str, dict[str, Any]] = {}
+        # a settings step's answer, the live values it read: {ini: {name: value}, gmst: {name: value}} (c.setting(name))
+        self._settings: dict[str, dict[str, Any]] = {}
         # a head-parts step's answer on the client's own player: {parts, ...}
         self._head_parts: dict[str, dict[str, Any]] = {}
         self._seq = itertools.count(1)
@@ -181,7 +189,7 @@ class StepBoard:
                 except (TypeError, ValueError):
                     continue
                 self._quests.setdefault(step.client, {})[key] = v if isinstance(v, dict) else None
-        if step.action in ("alias", "factions"):
+        if step.action in ("alias", "factions", "script-vars", "quest-objectives"):
             # every answer takes its key's place, an error one and a step that failed outright alike, so the accessor
             # raises on a failed read instead of reading the seat's last good answer (script-state's rule)
             data = body.get("data") if isinstance(body.get("data"), dict) else {"error": str(body.get("error") or "the step failed")}
@@ -191,10 +199,15 @@ class StepBoard:
                     pair = (int(args.get("quest") or data.get("quest")), int(args.get("alias", data.get("alias"))))
                     if pair[0]:
                         self._aliases.setdefault(step.client, {})[pair] = data
-                else:
+                elif step.action == "factions":
                     key = int(args.get("formId") or data.get("formId"))
                     if key:
                         self._factions.setdefault(step.client, {})[key] = data
+                else:
+                    field, table = ("form", self._script_vars) if step.action == "script-vars" else ("quest", self._objectives)
+                    key = int(args.get(field) or data.get(field))
+                    if key:
+                        table.setdefault(step.client, {})[key] = data
             except (TypeError, ValueError):
                 pass
         if step.action == "poisons" and isinstance(body.get("data"), dict):
@@ -229,7 +242,11 @@ class StepBoard:
             self._av_reads.setdefault(step.client, {})[kind] = body["data"]
         if step.action == "console" and isinstance(body.get("data"), dict):
             self._consoles[step.client] = body["data"]
+        if step.action == "settings" and isinstance(body.get("data"), dict):
+            self._settings[step.client] = body["data"]
         if step.action == "head-parts" and not (step.args or {}).get("other") and isinstance(body.get("data"), dict):
+            # a {other: true} read of a SkyMP figure lists the seat's own player's base (skymp5-client applyTints gives the
+            # figure's base the player's form id), so only the own read is kept; a figure's parts are read by node
             self._head_parts[step.client] = body["data"]
         if step.action == "racemenu-save" and isinstance(body.get("data"), dict):
             self._presets.setdefault(step.client, {})[str((step.args or {}).get("name", ""))] = body["data"]
@@ -338,6 +355,12 @@ class StepBoard:
     def factions(self, observer: str, form_id: int) -> dict[str, Any] | None:
         return (self._factions.get(observer) or {}).get(int(form_id))
 
+    def script_vars(self, observer: str, form_id: int) -> dict[str, Any] | None:
+        return (self._script_vars.get(observer) or {}).get(int(form_id))
+
+    def objectives(self, observer: str, quest: int) -> dict[str, Any] | None:
+        return (self._objectives.get(observer) or {}).get(int(quest))
+
     def poisons(self, observer: str) -> dict[str, Any] | None:
         return self._poisons.get(observer)
 
@@ -371,6 +394,9 @@ class StepBoard:
     def consoles(self, observer: str) -> dict[str, Any] | None:
         return self._consoles.get(observer)
 
+    def settings(self, observer: str) -> dict[str, Any] | None:
+        return self._settings.get(observer)
+
     def head_parts(self, observer: str) -> dict[str, Any] | None:
         return self._head_parts.get(observer)
 
@@ -390,6 +416,8 @@ class StepBoard:
         self._quests.clear()
         self._aliases.clear()
         self._factions.clear()
+        self._script_vars.clear()
+        self._objectives.clear()
         self._figure_spells.clear()
         self._log_counts.clear()
         self._poisons.clear()
@@ -400,6 +428,7 @@ class StepBoard:
         self._av_reads.clear()
         self._presets.clear()
         self._consoles.clear()
+        self._settings.clear()
         self._head_parts.clear()
 
     def clear(self, client: str | None = None) -> None:

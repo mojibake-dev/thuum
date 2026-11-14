@@ -2076,7 +2076,7 @@ function run(step: Step, player: Actor): unknown {
       return { node, ...scales(near[0]), all };
     }
     case "quest-stage": {
-      // quests' stages as this seat's game holds them (Papyrus Quest.GetCurrentStageID, IsStageDone, IsRunning;
+      // quests' stages as this seat's game holds them (Papyrus Quest.GetCurrentStageID, IsStageDone, IsRunning, IsCompleted;
       // skyrimPlatform.ts's Quest): {quests: [formId, ...], stages?: [n, ...]} answers per quest its current stage,
       // whether it runs, and which of the named stages are done, keyed by the quest's form id as decimal text
       // (docs/verbs/quest-stage.md, memo D55 B: one seat sets a shared quest's stage, the other reads it)
@@ -2091,7 +2091,9 @@ function run(step: Step, player: Actor): unknown {
         }
         const done: Record<string, boolean> = {};
         for (const n of stages) done[String(n)] = q.isStageDone(n);
-        out[String(id)] = { stage: q.getCurrentStageID(), running: q.isRunning(), done };
+        // completed: Quest.IsCompleted, the flag a stage marked Complete Quest sets (thuum D-E1's script reads it; whether a
+        // served, fragment-suppressed SetStage sets it is what x-rotfern-eyes' premise reads)
+        out[String(id)] = { stage: q.getCurrentStageID(), running: q.isRunning(), completed: q.isCompleted(), done };
       }
       return out;
     }
@@ -2169,6 +2171,54 @@ function run(step: Step, player: Actor): unknown {
       if (!ref) return { error: `alias ${aliasId} of ${questId.toString(16)} (${state}) is no reference alias`, name: held.getName(), running };
       const refr = ref.getReference();
       return { quest: questId, alias: aliasId, refr: refr ? refr.getFormID() : 0, name: held.getName(), running };
+    }
+    case "script-vars": {
+      // thuum ADR-068 rung 5's ScriptVariables read (docs/research/rung5-quests-2026-11-09.md 1(c) and 1(e)): named
+      // variables of a quest's or a reference's attached scripts as this seat's own VM holds them, through the platform's
+      // native the world streamer reads them with (TESModPlatform.ReadScriptVariables(String keysJson) -> String: the keys
+      // [{form, script, var}], the answer [{form, script, var, k, i | f | b}] with a refusal in a key's place), the driver's
+      // callNative idiom: {form, keys: ["<script>::<var>"]}, each key split at its first "::" (an auto property's backing
+      // variable keeps its own "::"). Answers {form, vars} for lab-api's c.script_vars(<form>).value("<script>::<var>"). A
+      // dist without the native throws "Native function not found" (lab memory: a TESModPlatform native is three files) and
+      // its empty answer is its refusal (the seat's log says why); each is the step's error, its data, and the run goes on
+      // (script-state's way)
+      const form = num(a.form);
+      if (!form) return { error: "no {form}: a quest's or a reference's form id" };
+      const keys = Array.isArray(a.keys) ? (a.keys as unknown[]).map(String) : [];
+      const asked = keys.map((k) => {
+        const at = k.indexOf("::");
+        return { form, script: at < 0 ? "" : k.slice(0, at), var: at < 0 ? k : k.slice(at + 2) };
+      });
+      let answer: unknown;
+      try {
+        answer = callNative("TESModPlatform", "ReadScriptVariables", undefined, JSON.stringify(asked));
+      } catch (e) {
+        return { error: `ReadScriptVariables unavailable on this platform: ${String(e)}` };
+      }
+      if (typeof answer !== "string" || answer === "") {
+        return { error: `ReadScriptVariables refused ${form.toString(16)} (answer ${JSON.stringify(answer)}; the seat's log says why)` };
+      }
+      try {
+        const vars = JSON.parse(answer) as unknown;
+        if (!Array.isArray(vars)) return { error: `ReadScriptVariables' answer for ${form.toString(16)} is no list`, head: answer.slice(0, 200) };
+        return { form, vars };
+      } catch (e) {
+        return { error: `ReadScriptVariables' answer for ${form.toString(16)} is no JSON: ${String(e)}`, head: answer.slice(0, 200) };
+      }
+    }
+    case "quest-objectives": {
+      // a quest's objectives as this seat's game shows them (thuum ADR-068 rung 5, docs/research/rung5-quests-2026-11-09.md
+      // 1(e): every seat's engine runs the fragment that shows them, R3 per seat): {quest, objectives: [i, ...]} answers per
+      // objective whether its journal shows it and whether it is completed (Papyrus Quest.IsObjectiveDisplayed and
+      // IsObjectiveCompleted, skyrimPlatform.ts's Quest), keyed by the index as decimal text, and whether the quest runs, for
+      // lab-api's c.quest(<quest>).objectiveDisplayed(<i>); a quest this game lacks is the step's error
+      const questId = num(a.quest);
+      const q = questId ? Quest.from(Game.getFormEx(questId)) : null;
+      if (!q) return { error: `no quest ${questId.toString(16)} in this game` };
+      const ids = Array.isArray(a.objectives) ? (a.objectives as unknown[]).map((x) => num(x)) : [];
+      const objectives: Record<string, { displayed: boolean; completed: boolean }> = {};
+      for (const i of ids) objectives[String(i)] = { displayed: q.isObjectiveDisplayed(i), completed: q.isObjectiveCompleted(i) };
+      return { quest: questId, running: q.isRunning(), objectives };
     }
     case "face-keyframes": {
       // an actor's FaceGen keyframes as the engine animates its face (faceOf above): {formId}, else the placed npc;
@@ -2285,6 +2335,14 @@ function run(step: Step, player: Actor): unknown {
         const part = base.getNthHeadPart(i);
         if (part) parts.push({ id: part.getFormID(), type: part.getType(), name: part.getPartName() });
       }
+      // the overlay parts (SKSE ActorBase.GetNumOverlayHeadParts and GetNthOverlayHeadPart): SKSE's overlay natives read
+      // the engine's per-NPC overlay map, not HasOverlays; which parts the face takes from it is HYPOTHESIS (thuum-fa's
+      // delta review of 9f7f6426; thuum D-E1 A' reads rotfernRaceVampire's here)
+      const overlays: { id: number; type: number; name: string }[] = [];
+      for (let i = 0; i < base.getNumOverlayHeadParts(); ++i) {
+        const part = base.getNthOverlayHeadPart(i);
+        if (part) overlays.push({ id: part.getFormID(), type: part.getType(), name: part.getPartName() });
+      }
       const tints: { type: number; argb: number; texture: string }[] = [];
       if (!a.other) {
         for (let i = 0; i < Game.getNumTintMasks(); ++i) {
@@ -2296,7 +2354,7 @@ function run(step: Step, player: Actor): unknown {
       // appearance apply sets the base's; the two can differ until a reload
       const actorRace = target.getRace(); const baseRace = base.getRace();
       return { actor: target.getFormID(), base: base.getFormID(), weight: base.getWeight(),
-        actorRace: actorRace ? actorRace.getFormID() : 0, baseRace: baseRace ? baseRace.getFormID() : 0, parts, tints };
+        actorRace: actorRace ? actorRace.getFormID() : 0, baseRace: baseRace ? baseRace.getFormID() : 0, parts, overlays, tints };
     }
     case "global": {
       // a global variable set on this client (GlobalVariable.setValue) and

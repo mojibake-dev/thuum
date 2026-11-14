@@ -46,6 +46,25 @@ class ProbeCheck(unittest.TestCase):
         self.assertEqual(len(findings), 1, findings)
         self.assertIn("no earlier log-count step", findings[0])
 
+    def test_a_snapshot_counts_nothing_so_even_the_servers_log_count_needs_a_stored_count(self):
+        # x-quest-cause v2 7ca974e0: loginRuns read server.log_count with no step before it (E_RUN_SNAPSHOT at step 12)
+        check = _module().check
+        bare = HEAD + "  - server: snapshot {name: runs, of: 'server.log_count(\"ff[0-9a-f]+ starts\")'}\n"
+        findings = check(bare)
+        self.assertEqual(len(findings), 1, findings)
+        self.assertIn("a snapshot counts nothing", findings[0])
+        stepped = HEAD + ("  - server: log-count {pattern: \"ff[0-9a-f]+ starts\"}\n"
+                          "  - server: snapshot {name: runs, of: 'server.log_count(\"ff[0-9a-f]+ starts\")'}\n")
+        self.assertEqual(check(stepped), [])
+        # an earlier assert's live server count is stored as a step's is, and so is an until's seat count
+        live = HEAD + ("  - assert:\n      - 'server.log_count(\"ff[0-9a-f]+ starts\") >= 0'\n"
+                       "  - until: {within: 5, expect: ['c1.log_count(\"armed\") >= 1']}\n"
+                       "  - server: snapshot {name: runs, of: 'server.log_count(\"ff[0-9a-f]+ starts\")'}\n"
+                       "  - server: snapshot {name: armed, of: 'c1.log_count(\"armed\")'}\n")
+        self.assertEqual(check(live), [])
+        seat = HEAD + "  - server: snapshot {name: armed, of: 'c2.log_count(\"armed\")'}\n"
+        self.assertEqual(len(check(seat)), 1, check(seat))
+
     def test_assert_syntax_is_caught_before_a_run(self):
         # x-body-loot v3 20261027-000612: refs_near is a method
         check = _module().check

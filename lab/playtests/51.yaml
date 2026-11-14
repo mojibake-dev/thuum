@@ -1,0 +1,100 @@
+# Playtest 51 (numidium, 2026-11-11 04:2x UTC; recut 2026-11-12 17:2xZ): Ariadne turns vampire on rotfern's screen and is
+# cured, quests are shared, and M3's close rows other than M3-2, on the canonical seats. Eli's cut (D-C1 B, auriel's session,
+# about 15:42Z 2026-11-12): 51 plays on the current canon and waits for no build, M3-2 (reanimation) and every physics item out.
+# The build is fork canon 6fe5fea0: train 52 (m4-train-52 c3f9d175, merged 07:11Z) and the double-shout fix (m4-shout-once,
+# merged 10:19Z): the server image skymp-server:m4-shout-once-6fe5fea0 (canon's server tree, c3f9d175's), the client
+# m4-shout-once client 6fe5fea0 on both clones' clean-m1 (promoted at that merge), under apocrypha's staged 60 fps Havok cap
+# (layer-havok-cap, laid at its stage and promoted with clean-m1; Eli about 17:05Z: "Under the cap", over canon alone) and the
+# tidy layer as merged. thuum-fa's checklist is docs/private/playtest-51.md (recut 11-12, sha1 a7f181d6: items 1 to 8 and
+# M3-1, M3-3 to M3-8, one sitting, Eli's "One sitting"; its limits include "don't raise a body").
+# The world is playtest-canon-51-20261111T033258Z, composed 2026-11-11 03:32Z from the canonical
+# playtest-canon-chars-20261107T064547Z (untouched; 1,337 records to 1,329): Arvel 0x39655 (dead in 0x371de since 47),
+# Embershard's six recorded bandits 0xb6dbb, 0xb6fdb, 0xb6fe4 (50's arrow-proof one), 0xb6fe6, 0xb6fec, 0xb6fee and the main
+# door's lookout 0xb6ce1 moved aside, so each one's first serve rolls it fresh (m4-fix-51); MS13 0x39645's journal stages 12,
+# 15, 20, 35 and MS13BleakFallsBarrowLeverScene 0x3ac44's 10, 20 cleared (a fresh Golden Claw; 21 stage entries left, no
+# quest runs); the MS13GoldenClaw 0x39647 both characters still carried taken out of inv and equipmentDump.inv. Both looks
+# (appearanceDump, appearanceForms, raceMenuPreset) are byte-identical to canon's. None of Movarth's Lair 0x1526f's actors is
+# recorded (all served fresh); nothing stands within 4,000 units of its door (lab/esm.py near: a mudcrab at 5,291).
+# The clock: gameHour 12 at the normal pace (timeScale 20, 72 real minutes a game day); the catch lands about 17:00 to 20:00,
+# the turn three game days after the drain that took (about 3.6 real hours) in the same evening hours, then a dawn (03:00 to
+# 07:00) for Falion's circle 6 to 12 game hours on (18 to 36 real minutes). Ariadne's game is never relaunched between the
+# drain that took and her turn (a relaunch re-adds the disease at login, a fresh roll); a server restart is fine.
+# The camps, each the game's own landing of an interior door (lab/esm.py door), the second seat 60 units behind the first on
+# the exit path, both facing the door (the Temple's pair keeps 50's camp as played, the landing's own facing 104.6, away
+# from the door); Ariadne first at the lair (she walks in first, so her game runs the vampires):
+#   Movarth's Lair (the start, below): door 0x1f595's landing (-31537, 77289, -13729), rot -53.9
+#   Moorside Inn (item 2, Gorm; and the cure, Jonna then Falion), door 0x1738c's landing:
+#     - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [-40054, 65484, -13802], rot: [0, 0, -30.6]}
+#     - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [-40024, 65432, -13802], rot: [0, 0, -30.6]}
+#   Riverwood Trader (item 3, Lucan; and item 5's claw back), door 0x133e9's landing:
+#     - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [21950, -45680, -118], rot: [0, 0, 135.1]}
+#     - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [21908, -45638, -118], rot: [0, 0, 135.1]}
+#   Bleak Falls Temple (item 4 with M3-1; rotfern walks in first, the recut checklist), 50's camp at door 0x15da5's landing:
+#     - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [-2966, -43331, 6145], rot: [0, 0, 104.6]}
+#     - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [-2908, -43346, 6145], rot: [0, 0, 104.6]}
+#   The Sleeping Giant Inn (item 6, Orgnar's rumor), door 0x13419's landing:
+#     - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [23260, -44476, -8], rot: [0, 0, 131.8]}
+#     - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [23215, -44436, -8], rot: [0, 0, 131.8]}
+#   Embershard (item 8; rotfern walks in first), the main door 0xb6ccd's landing (its lookout 0xb6ce1 stands about 800 units
+#   off, fresh and hostile), else 50's back door 0xb6f24's; inside, eyeball the arrival views stage 2's reads saw the guest's
+#   graph refuse (the bridge 0xb6c56 startRaised, the lever 0xb6c8c FullPull, the forge 0xfcc67):
+#     - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [8849, -58120, 1446], rot: [0, 0, 141.0]}
+#     - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [8811, -58073, 1446], rot: [0, 0, 141.0]}
+#     - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [16198, -53980, 1349], rot: [0, 0, 164.5]}
+#     - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [16146, -54009, 1380], rot: [0, 0, 164.5]}
+# Each move is `just playtest-teleport <profile> 3c:Skyrim.esm <x> <y> <z> <rot>`. The live steps, each a recipe: item 7's
+# Beast Form `just playtest-console 1 addspell 20 0x92c48` (WerewolfChange, SPEL; the server's AddSpell, ConsoleCommands.cpp's
+# ExecuteAddSpell, then rotfern's own game told; labCommand answers before the server runs it, so confirm it by the server
+# log's "added the spell 92c48"); item 5's restart `just playtest-restart 51`; item 1's relaunch of Ariadne after her turn
+# `PLAYTEST=51 just playtest-relaunch c2` (clientSettings set again in the stopped game, as ready set them); M3-3's and M3-4's
+# relaunch of rotfern's seat `PLAYTEST=51 just playtest-relaunch c1` (never Ariadne's for them). After a dist push
+# or a clone rollback (on Eli's word only) the seat's relaunch names the playtest the same way, never Ariadne's between the
+# drain that took and her turn. The ids above read from Skyrim.esm 1.6.1170 (lab/esm.py id, 2026-11-11).
+id: 51
+build: "fork canon 6fe5fea0 (train 52 and the double-shout fix): server skymp-server:m4-shout-once-6fe5fea0, both clones' clean-m1 as promoted at that merge, under apocrypha's staged 60 fps Havok cap (Eli: Under the cap) and the tidy layer as merged"
+world: playtest-canon-51-20261111T033258Z
+hold:
+  minutes: 360   # the checklist's five hours and M3's rows; a second dawn falls at 333 to 345 minutes by the clock above
+  reason: "playtest 51: Ariadne turns vampire and is cured, quests are shared, and M3's close (canon 6fe5fea0)"
+server:
+  npcEnabled: true
+  gameHour: 12.0
+  locks: true   # every switch on, as the 44 baseline
+  weatherSync: true
+  perks: true
+  leveling: true
+  cureSpells: []   # lifted for the whole session (D-T3 B): the server's SendCures would drop Ariadne's disease at every login
+# a relayed stage's script runs on both seats under the acting scope (D-Q10 A, Eli about 04:53Z 2026-11-11, main 7ced7f5a;
+# x-acting-player 20261111-034406 read it on this build): set in each stopped game by ready's relaunch
+clientSettings:
+  questFragmentLive: true
+camp:
+  # Movarth's Lair's door landing, the game's landing of the door 0x1f595; Ariadne first (she walks in first and hosts)
+  teleports:
+    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [-31537, 77289, -13729], rot: [0, 0, 126.1]}
+    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [-31586, 77324, -13729], rot: [0, 0, 126.1]}
+seats:
+  - profile: 1
+    name: "test 1"
+    perks: [0x7934b]   # Overdraw40 through the server's AddPerk (284a4d51): the headshot rule's condition
+    # Raise Wall for M3-6 (D74's shape A, Apocalypse's SPEL 0xcc14; the server's labState spell read 2026-11-12:
+    # WB_Alt_WorldInteractions2_Spell_RaiseWall); Beast Form comes mid-session, item 7 (playtest-console addspell). No Dead
+    # Thrall or Reanimate Corpse: M3-2 is out of 51 and its limits say don't raise a body
+    spells: [0x1a00cc14]   # Raise Wall
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]   # Survival off
+    values:
+      Marksman: 60
+    percentages: {health: 1, magicka: 1, stamina: 1}
+  - profile: 2
+    name: "test 2"
+    perks: []
+    spells: []
+    items:
+      - {id: 0x2e504, count: 1}   # SoulGemBlackFilled for Rising at Dawn (Falion sells only an empty one)
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]
+    percentages: {health: 1, magicka: 1, stamina: 1}
+streams:
+  test1: 48989
+  test2: 49989
+after:
+  readback: percentages

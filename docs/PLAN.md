@@ -1529,6 +1529,19 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
   an unrecorded NPC's outfit missing on the fixed server (b-npc-stream-equipment, not e2595d14's path), the close half of the
   D-C2 A body open (b-npc-body-release v5 and c-dungeon-enemies, Eli's word), b-word-wall's guest learning, b-second-hand's
   proc ticks, b-quest-rumor v2 (W1). Next: rung 5's slot 0 after the nightly (about 08:00 PST 11-10), then rung 5's build.
+- STATE 2026-11-11 03:35 PST (numidium): canon fast-forwarded to fork f6ca339d, ADR-068 rung 5 whole (quests under one record: its
+  first head 44ffafc2 by its gate at 15:01Z 11-10, 35 green; its second head by the pair's cited sweep plus a rest set, 139
+  runs, watch); apocrypha's layer tidy merged to main 5f5579c5 by the same sweep (ADR-042a), both clones promoted. Open: the
+  headless figure after a vampire turn (fork m4-scripts-5-heads 24f1cc6a, its own train staging now, for 51), b-second-hand's
+  proc (train 52's effect-helper fix), a spell's end handler lost on a warm relaunch (b-ghostwalk-look, cause unread). Next:
+  heads' merge, train 52's T2, playtest 51 on Eli's go (Ariadne's vampirism in Morthal, shared quests; its setup on thuum
+  playtest-client-settings), then train 52's stage.
+- STATE 2026-11-12 08:58 PST (auriel): ADR-072 ACCEPTED (Eli about 15:42Z, "B, accept it, send all three messages"): the closeout is one
+  route, the Golden Claw walk, and docs/ROUTE-CLOSE.md says what is left of it (a leg green in the lab, then ticked by Eli, then
+  DONE; a sitting eight items at most on the current canon, never waiting for a build; a ladder one rung built ahead).
+  Playtest 51 is cut on fork canon 6fe5fea0 (train 52 c3f9d175, merged 11-12, and the double-shout fix) and no longer waits for
+  ADR-071's physics rungs or the reanimation (ADR-071's note of 11-12): each is played at the first sitting cut after it merges
+  on canon. Next: 51 on Eli's go.
 
 ### M5: Progression (4 to 8 weeks, Class A/B). Started 2026-10-31 (the weekend pass)
 
@@ -1565,6 +1578,21 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
 - Skills, experience, and leveling from the documented formulas, computed
   R0; the client's own leveling disabled.
 - Perks, enchanting, alchemy, pickpocketing as server transactions.
+- PvP pickpocketing (Eli, 2026-11-12 about 04:1xZ, in thuum-fa's session, verbatim "id like pvp pick pocketing to work for when
+  we get to m5"): one player picks the other's pocket. NEXT when M5 opens. The shape, inventory transfer being R0: the thief's
+  engine opens its pickpocket menu on the other player's figure; each take is a request the server judges, rolling the engine's
+  own chance (skill, the item's value and weight, perks) and moving the item between the two players' records; the thief's
+  Pickpocket XP as leveling.md:100 has it. Eli's calls (2026-11-12 about 04:18Z, verbatim): "only on failure (X is
+  pickpocketing you)"; "equipped can be taken but only with the perk"; "no opt in, defualt"; "bounty if in town, no fight but
+  like, perhaps the pickpocket goes hostile so the victim can attack with impunity". So:
+  - the victim is told only of a failure, by name ("<thief> is pickpocketing you"); a success is silent;
+  - equipped items are takeable only with the engine's own perks for them (vanilla's Misdirection for equipped weapons and
+    Perfect Touch for other equipped items, read from the perk records when built), the server checking the same rule the
+    engine's menu shows; carried items and gold need no perk;
+  - on by default for every player, no consent;
+  - a failure in a hold's town is a crime: the thief gains that hold's pickpocket bounty (the engine's own amount and crime
+    faction, read when built); no fight is started, but the thief turns hostile to the victim, so the victim's attacks on the
+    thief raise no assault crime. Open for the build: how long that hostility lasts (until the two part, a timer, or a death).
 - Vampirism and lycanthropy as declared state (R0; Eli's caveat on
   Nature's Balance, 2026-10-18): the race swap accepted from the player's
   game against the known vampire variant of its race and relayed to every
@@ -1625,6 +1653,18 @@ props (D68), Raise Wall's copies (D70, the fix staging as m3-wall-pose), b-body-
 Dragons, lycanthropy, vampirism, mounted combat, custom record push to
 clients (TES3MP 0.8 parity), a mod compatibility matrix generated from the
 natives ledger.
+
+- Dragon fights (Eli, 2026-11-12 about 04:2xZ, in thuum-fa's session, verbatim: "everyone in the fight can absorb", "yes,
+  attacks are synced per world", and of a dragon leaving every player's loaded area, "whatever happens in single player i
+  assume, right?"). The shape: a dragon is an NPC whose flight and fighting run on one engine, its owner; it flies across many
+  cells, so its owner follows the actor, not the cell (ADR-066's ActorOwner, d2, not yet built; physics' "a moving body stays
+  with its mover" is the same idea). Its breath rides the shout relay (the double relay of a late hit fixed first, shouts.md).
+  Its soul goes to every player in the fight (the server's shout record, R0; who counts as in the fight is the build's to
+  define, from the combat targets). Dragon attacks happen once for the world, not once per seat: a server rule over the Story
+  Manager's world encounters, which each seat starts on its own today (D-Q5 A's per-seat start words). Out of every player's
+  loaded area: the owner's engine treats it as single player does (an actor past the loaded grid drops to the engine's own
+  low-detail processing, HYPOTHESIS for a dragon's flight, read when built), the server keeps its last record for the other
+  seats, and it freezes only if its owner leaves while it is unloaded (TES3MP's unhosted-cell rule).
 
 ### Stretch: Eli's mods
 

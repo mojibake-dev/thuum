@@ -13,7 +13,9 @@ A profile's `server: {npcEnabled: true}` is that playtest's server alone (ADR-03
 settings with it over them as /srv/lab/server/server-settings-run.json (the file a run's own npcEnabled uses) and the
 restore recreates the server on that file; both setup and ready read the container's mount back. A lab run after the
 playtest mounts its own settings again. `server: {gameHour: 7.9}` sets the clock the same way, as the runner's time
-block does for a run (the epoch is setup's own time, the hour holds at it). `camp: {teleports: [...]}` names the camp's
+block does for a run (the epoch is setup's own time, the hour holds at it). `server: {cureSpells: []}` lays the sitting's
+own cure list (ADR-068 rung 5's D-T3 B), each entry's plugin one of the deployed load order's, case for case.
+`camp: {teleports: [...]}` names the camp's
 teleports as labCommand takes them, in order, where `playtest-start` reads playtest-start.sh's two. From profile 48 a
 camp is outside unless `camp: {interior: <reason>}` says why not, and every living actor placed near it is listed in
 `camp: {near: [<form id>, ...]}` (CAMP_RULES_FROM, playtest 47's two load-in faults).
@@ -50,7 +52,10 @@ OVERLAY = "/srv/lab/server/server-settings-run.json"
 # the turbo switches (docs/private/playtest-turbo-2.md: the merged base carries every switch OFF, each item turns
 # its own on): the deployed settings keep them ON for the gates' scenarios, a playtest's overlay says otherwise
 SWITCHES = ("locks", "weatherSync", "perks", "leveling")
-SERVER_KEYS = {"npcEnabled", "gameHour", *SWITCHES}
+SERVER_KEYS = {"npcEnabled", "gameHour", "cureSpells", *SWITCHES}
+# a cure as the server's cureSpells setting takes it, "<hex id>:<plugin>" (ADR-068 rung 5's D-T3 B: playtest 51 lifts
+# Sanguinare Vampiris b8780:Skyrim.esm so a seat can turn)
+CURE = re.compile(r"[0-9A-Fa-f]{1,8}:[^:]+\.(?:esm|esp|esl)", re.IGNORECASE)
 PLAYER = 20  # the console's word for the player itself (0x14)
 BARS = ("health", "magicka", "stamina")
 # The standing base (Eli, 2026-11-03, after playtest 44's first lay: "every test should have - no survival - weather synced -
@@ -66,6 +71,13 @@ HEADSHOT_PROFILE = 1  # rotfern, test 1: CIF's rule wants base Archery 60 and Ov
 HEADSHOT_PERK = 0x7934B  # Overdraw40
 HEADSHOT_ARCHERY = 60  # the actor value Marksman
 SOULS_DLL = r"Data\SKSE\Plugins\SkyrimSoulsRE.dll"  # the archive's SKSE/Plugins/SkyrimSoulsRE.dll (lab/layer/essentials.tsv)
+# A playtest's client settings (`clientSettings: {<key>: <value>}`; playtest 51's questFragmentLive, D-Q10 A, until ADR-070
+# moves it to the server's settings): keys of the client's skymp5-client-settings.txt, read once at the client's start, so
+# ready's relaunch sets them while each game is stopped, by the probes' own relaunch file change (lab-api's
+# runner._relaunch_files_ps on the lab's default game, the entries checked by scenario._relaunch_args), and so does any
+# `PLAYTEST=<n> just playtest-relaunch <client>` (settings-ps below). The file keeps them through the playtest's later
+# relaunches; a dist push or a clone's rollback lays the dist's copy again, so the relaunch after one names the playtest.
+CLIENT_SETTINGS_FILE = "Data/Platform/Plugins/skymp5-client-settings.txt"
 # The camp's two rules, from profile 48 (playtest 47, 2026-11-05). Outside: both seats logged in inside Bleak Falls Temple
 # 0x371de and neither game ran the cell's OnCellLoad, so the pillars sat empty and the darts unarmed; after the restart
 # outside the entrance, both walked in by a real cell load and every scripted item worked. A camp inside a cell needs
@@ -125,6 +137,9 @@ def check_profile(p: Any, n: int) -> dict[str, Any]:
     hour = server.get("gameHour", 0)
     if isinstance(hour, bool) or not isinstance(hour, (int, float)) or not 0 <= hour < 24:
         raise ProfileError(f"server.gameHour is an hour from 0 up to 24, got {server['gameHour']!r}")
+    cures = server.get("cureSpells", [])
+    if not isinstance(cures, list) or not all(isinstance(c, str) and CURE.fullmatch(c) for c in cures):
+        raise ProfileError(f'server.cureSpells is a list of "<hex id>:<plugin>" strings ([] lifts every cure), got {cures!r}')
     camp_block = p.get("camp") or {}
     if not isinstance(camp_block, dict) or set(camp_block) - {"teleports", "interior", "near"}:
         raise ProfileError(f"camp takes teleports, interior and near, got {camp_block!r}")
@@ -179,9 +194,38 @@ def check_profile(p: Any, n: int) -> dict[str, Any]:
     if ((p.get("after") or {}).get("readback")) not in (None, "percentages"):
         raise ProfileError("after.readback is percentages or absent")
     _check_lay(p.get("lay"))
+    if "clientSettings" in p:
+        client_settings_files(p["clientSettings"])
     if n >= STANDING_FROM:
         _standing(p)
     return p
+
+
+def _labapi() -> tuple[Any, Any, Any]:
+    """lab-api's runner, scenario grammar and settings defaults (playtest_setup runs in lab/labapi's uv project)."""
+    if str(ROOT / "lab" / "labapi") not in sys.path:
+        sys.path.insert(0, str(ROOT / "lab" / "labapi"))
+    from labapi import config, runner, scenario
+
+    return runner, scenario, config.Settings()
+
+
+def client_settings_files(settings: Any) -> list[dict[str, Any]]:
+    """A profile's clientSettings as a relaunch's JSON file changes, checked as a scenario's are."""
+    if not isinstance(settings, dict) or not settings:
+        raise ProfileError(f"clientSettings is a map of skymp5-client-settings.txt keys to values, got {settings!r}")
+    _, scenario, _ = _labapi()
+    try:
+        return scenario._relaunch_args({"files": [{"json": CLIENT_SETTINGS_FILE, "key": k, "value": v} for k, v in settings.items()]})["files"]
+    except ValueError as e:
+        raise ProfileError(f"clientSettings: {e}") from None
+
+
+def client_settings_ps(settings: Any) -> str:
+    """The PowerShell that sets a profile's clientSettings in a stopped game (playtest-relaunch.sh runs it between the stop
+    and the launch task): the runner's own text, with no stop command of its own."""
+    runner, _, s = _labapi()
+    return runner._relaunch_files_ps(s.client_lab_dir, s.game_default, client_settings_files(settings), "")
 
 
 def _check_lay(lay: Any) -> None:
@@ -258,6 +302,14 @@ def overlay_text(settings_text: str, server: dict[str, Any], now: float | None =
     for key in ("npcEnabled", *SWITCHES):
         if key in server:
             d[key] = server[key]
+    if "cureSpells" in server:
+        # the server matches a cure's plugin case for case and skips an unresolved one silently (fork FormDesc.cpp:62-70,
+        # ActionListener.cpp:6765-6770), as lab-api's runner refuses one for a run
+        plugins = {Path(p).name for p in d.get("loadOrder") or []}
+        unknown = [c for c in server["cureSpells"] if c.split(":", 1)[1] not in plugins]
+        if unknown:
+            raise ProfileError(f"server.cureSpells {unknown} name a plugin the deployed load order lacks (case counts)")
+        d["cureSpells"] = list(server["cureSpells"])
     if "gameHour" in server:
         block = dict(d.get("time") or {})
         block["epoch"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(time.time() if now is None else now))
@@ -484,13 +536,14 @@ def setup(n: int) -> int:
     p = load_profile(n)
     rep = Report()
     print(f"== playtest {n}: {p.get('build', '')}", flush=True)
-    env = dict(os.environ)
+    # the restore's relaunches are the first login on the restored world: they set the profile's clientSettings too
+    env = {**os.environ, "PLAYTEST": str(n)}
     server = p.get("server") or {}
     if server:
         overlay = _lay_overlay(server)
         env["PLAYTEST_SERVER_SETTINGS"] = overlay
         rep.ok(f"server {server} laid over the deployed settings: {overlay}")
-    print(f"== restore {p['world']} (both seats relaunched on it) {time.strftime('%H:%M:%S')}", flush=True)
+    print(f"== restore {p['world']} (both seats relaunched on it, c1 then c2) {time.strftime('%H:%M:%S')}", flush=True)
     r = subprocess.run([str(ROOT / "lab/tools/playtest-world.sh"), "restore", p["world"]], text=True, env=env)
     if r.returncode != 0:
         print("== the restore failed: no setup", flush=True)
@@ -546,6 +599,39 @@ def setup(n: int) -> int:
     return 0 if not rep.bad else 1
 
 
+def relaunch_seats(env: dict[str, str]) -> list[tuple[str, int, list[str]]]:
+    """Both games stopped at once, then c1 started and c2 once c1's player is online again (playtest-relaunch.sh's stop and
+    start halves; start returns once its player is back), as playtest-world.sh's restore does. Stopped together, neither
+    seat hands its cells to the other while it relaunches (playtest 46, go()'s fresh-grant gate); started apart, a seat's
+    own Story Manager start never races the other seat's relayed start, the race under b-ghostwalk-look's warm reds
+    (20261111-060821, 061001: a start arm put c1's game in c2's scope and a spell's end handler did not run). Eli's word of
+    2026-11-11 ("Restore and ready()"); x-ghostwalk-race-read v2.1's S leg held the staggered logins (20261111-200503,
+    202253). Each seat's (client, return code, output lines): a seat whose stop failed is not started, and c2 waits for a
+    hand (return code 9) when c1's start failed, since c1's game may still log in late."""
+    relaunch = str(ROOT / "lab/tools/playtest-relaunch.sh")
+    # the two stops at once, so neither seat's game hosts the other's cells while it waits its turn (the second review:
+    # one stop after the other gave c2's live game c1's cells for 10 to 15 s, cells.rs's grace)
+    procs = {c: subprocess.Popen([relaunch, c, "stop"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=env)
+             for c in ("c1", "c2")}
+    stopped = {}
+    for c, pr in procs.items():
+        out = (pr.communicate()[0] or "").strip().splitlines()
+        stopped[c] = (pr.returncode, out)
+    done = []
+    c1_failed = False
+    for c in ("c1", "c2"):
+        rc, out = stopped[c]
+        if rc == 0 and c == "c2" and c1_failed:
+            # c1's game may still log in late, which is the race the stagger exists to avoid: c2 waits for a hand
+            rc, out = 9, out + ["c2 not started: c1's start failed (start c2 once c1 is online)"]
+        elif rc == 0:
+            r = subprocess.run([relaunch, c, "start"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=env)
+            rc, out = r.returncode, out + (r.stdout or "").strip().splitlines()
+            c1_failed = c1_failed or (c == "c1" and rc != 0)
+        done.append((c, rc, out))
+    return done
+
+
 def ready(n: int) -> int:
     p = load_profile(n)
     rep = Report()
@@ -554,10 +640,12 @@ def ready(n: int) -> int:
         since = _srv("date -u +%Y-%m-%dT%H:%M:%SZ").strip()
     except Exception:
         since = None
-    procs = [subprocess.Popen([str(ROOT / "lab/tools/playtest-relaunch.sh"), c], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True) for c in ("c1", "c2")]
-    for c, pr in zip(("c1", "c2"), procs):
-        out = (pr.communicate()[0] or "").strip().splitlines()
-        (rep.ok if pr.returncode == 0 else rep.fail)(f"{c}: {out[-1] if out else 'no output'}")
+    env = {**os.environ, "PLAYTEST": str(n)}  # the relaunch sets the profile's clientSettings in each stopped game, read back
+    for c, rc, out in relaunch_seats(env):
+        (rep.ok if rc == 0 else rep.fail)(f"{c}: {out[-1] if out else 'no output'}")
+        if p.get("clientSettings"):
+            got = [line for line in out if line.startswith("set ")]
+            (rep.ok if len(got) == len(p["clientSettings"]) else rep.fail)(f"{c}: client settings {'; '.join(got) or 'none set'}")
     online = sorted(x.get("profileId") for x in state({"kind": "online"}).get("players", []))
     want = sorted(s["profile"] for s in p["seats"])
     (rep.ok if online == want else rep.fail)(f"online {online} (wanted {want})")
@@ -885,10 +973,10 @@ def streams(n: int) -> int:
 def go(n: int) -> int:
     """The one way into a playtest (Eli, 2026-11-04 after 46: "that should be canonized into a script instead of hand
     rolled every time"), in a fixed order: the profile's build laid first; setup (the world restored, the server's host
-    table fresh, the camp, the standing base); the streams; ready, which relaunches both seats TOGETHER (a seat
-    relaunched alone hands its hosted cells to a seat that loaded them as a guest); then every interior camp cell's host
-    proven a fresh grant from the server's own lines, both seats relaunched together again when one was inherited (at most
-    twice). The recorder is the caller's next command: `just playtest-record <n>`, in the background."""
+    table fresh, the camp, the standing base); the streams; ready, which stops both seats TOGETHER (a seat
+    relaunched alone hands its hosted cells to a seat that loaded them as a guest) and starts them one after the other,
+    c1 first (relaunch_seats); then every interior camp cell's host proven a fresh grant from the server's own lines, ready
+    again when one was inherited (at most twice). The recorder is the caller's next command: `just playtest-record <n>`, in the background."""
     p = load_profile(n)
     rep = Report()
     print(f"== playtest {n}: go {time.strftime('%H:%M:%S')}", flush=True)
@@ -910,7 +998,7 @@ def go(n: int) -> int:
             roles(n)
             print(f"== playtest {n} ready {time.strftime('%H:%M:%S')}: next `just playtest-record {n}` in the background")
             return 0
-        print(f"   attempt {attempt + 1}: ready exit {rc}, not fresh {bad or 'none'}: both seats relaunched together again", flush=True)
+        print(f"   attempt {attempt + 1}: ready exit {rc}, not fresh {bad or 'none'}: both seats stopped together and started again, c1 first", flush=True)
     print(f"== playtest {n} NOT ready after three attempts")
     return 1
 
@@ -1012,11 +1100,17 @@ def main(argv: list[str]) -> int:
         except ProfileError as e:
             print(f"== profile {argv[1]}: {e}", file=sys.stderr)
             return 2
-    if len(argv) != 2 or argv[0] not in ("setup", "ready", "check", "go", "roles", "streams", "restart") or not argv[1].isdigit():
-        print("usage: playtest_setup.py go|setup|ready|check|roles|streams|restart <n> | switch <n> <" + "|".join(SWITCHES) + "> on|off", file=sys.stderr)
+    if len(argv) != 2 or argv[0] not in ("setup", "ready", "check", "go", "roles", "streams", "restart", "settings-ps") or not argv[1].isdigit():
+        print("usage: playtest_setup.py go|setup|ready|check|roles|streams|restart|settings-ps <n> | switch <n> <" + "|".join(SWITCHES) + "> on|off", file=sys.stderr)
         return 2
     n = int(argv[1])
     try:
+        if argv[0] == "settings-ps":
+            # playtest-relaunch.sh's PLAYTEST=<n>: the profile's clientSettings as the base64 of the PowerShell that sets
+            # them in a stopped game, or nothing when the profile has none
+            settings = load_profile(n).get("clientSettings")
+            print(base64.b64encode(client_settings_ps(settings).encode()).decode() if settings else "")
+            return 0
         if argv[0] == "check":
             p = load_profile(n)
             print(f"profile {n} ok: {len(p['seats'])} seats, {sum(len(seat_commands(s)) for s in p['seats'])} sets, world {p['world']}")

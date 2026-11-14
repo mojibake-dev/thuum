@@ -26,7 +26,7 @@ from . import burst
 from . import mouse
 from .guests import Guest, Tables
 from . import slots as plugin_slots
-from .proxmox import GuestControl, ProxmoxError
+from .proxmox import AGENT_BUSY, GuestControl, ProxmoxError
 from .scenario import CLIENT_ACTIONS, SERVER_ACTIONS, Netem, Scenario, Step
 from .state import ServerState, StateError
 from .system import Capture, System
@@ -46,6 +46,12 @@ def _brief(value: Any, limit: int = 800) -> str:
     """A step's answer as one short JSON string for result.json."""
     text = _text(value)
     return text if len(text) <= limit else text[: limit - 3] + "..."
+
+
+def _last_line(text: str) -> str:
+    """The last line of an exec's stdout that is not blank, stripped; empty for none."""
+    lines = [ln.strip() for ln in (text or "").splitlines() if ln.strip()]
+    return lines[-1] if lines else ""
 
 
 # A hung seat's dump (Settings.hang_evidence), run on the seat as SYSTEM through the guest
@@ -88,7 +94,9 @@ $bytes = (Get-Item -LiteralPath $path).Length
 # would end the script there with the dump left on the disk
 $ErrorActionPreference = 'Continue'
 $sw.Restart()
-& "$env:SystemRoot\System32\curl.exe" --fail --silent --show-error --max-time @UPLOAD_S@ --upload-file $path '@URL@'
+# curl.exe's answer captured: a native program left uncaptured writes to the script's stdout itself, and lab-api's
+# {"ok": true, ...}, which ends in no newline, would share the last line with the JSON below (20261112-125536's c1)
+$null = & "$env:SystemRoot\System32\curl.exe" --fail --silent --show-error --max-time @UPLOAD_S@ --upload-file $path '@URL@'
 $curl = $LASTEXITCODE
 $upMs = $sw.ElapsedMilliseconds
 Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
@@ -101,8 +109,14 @@ if ($curl -ne 0) { exit 4 }
 # Windows Error Reporting wrote for SkyrimSE.exe since the run began. LocalDumps names them
 # <exe>.<pid>.dmp under its DumpFolder (Microsoft, "Collecting User-Mode Dumps",
 # learn.microsoft.com/windows/win32/wer/collecting-user-mode-dumps; crash-dumps.ps1 sets it). The
-# newest goes up through the inbox curl.exe as the hang dump does. The last stdout line is one
-# JSON object. Placeholders: @DUMP_DIR@ @SINCE@ (Unix seconds) @URL@ @UPLOAD_S@.
+# newest goes up through the inbox curl.exe as the hang dump does. And the exit row Windows wrote
+# for each SkyrimSE.exe that ended since then (Security event 4689, which crash-dumps.ps1's Audit
+# Process Termination turns on): its pid and exit status, read by the event's own field names
+# (Microsoft, "4689(S) A process has exited", learn.microsoft.com), with the count of every 4689
+# row read, so an empty or unread log is never taken for no exit,
+# so a game lost with no dump still says how it ended (20261112-130030's c1: 0xC0000005, no WER
+# dump, no Application row). The last stdout line is one JSON object. Placeholders: @DUMP_DIR@
+# @SINCE@ (Unix seconds) @URL@ @UPLOAD_S@.
 _CRASH_PS = r"""
 $ErrorActionPreference = 'Stop'
 $since = [DateTimeOffset]::FromUnixTimeSeconds(@SINCE@).UtcDateTime
@@ -116,15 +130,69 @@ $list = @($dumps | ForEach-Object { '{"name": "' + $_.Name + '", "bytes": ' + $_
 $curl = -1
 if ($dumps.Count -gt 0) {
     $ErrorActionPreference = 'Continue'
-    & "$env:SystemRoot\System32\curl.exe" --fail --silent --show-error --max-time @UPLOAD_S@ --upload-file $dumps[-1].FullName '@URL@'
+    # captured, as the hang dump's: uncaptured, lab-api's answer and this script's JSON shared one line, which read as no
+    # answer, the seat a fault and the crash unnamed (20261112-125536, c1's SkyrimSE.exe.6408.dmp)
+    $null = & "$env:SystemRoot\System32\curl.exe" --fail --silent --show-error --max-time @UPLOAD_S@ --upload-file $dumps[-1].FullName '@URL@'
     $curl = $LASTEXITCODE
 }
-Write-Output ('{"games": [' + ($games -join ', ') + '], "dumps": [' + $list + '], "curl": ' + $curl + '}')
+$ErrorActionPreference = 'Continue'
+$exits = @()
+$rows = 0
+try {
+    $all = @(Get-WinEvent -FilterHashtable @{LogName = 'Security'; Id = 4689; StartTime = $since.ToLocalTime()} -ErrorAction SilentlyContinue)
+    $rows = $all.Count
+    $exits = @($all | ForEach-Object {
+            $d = @{}; foreach ($n in ([xml]$_.ToXml()).Event.EventData.Data) { $d[$n.Name] = [string]$n.'#text' }
+            if ($d['ProcessName'] -like '*\SkyrimSE.exe') {
+                '{"pid": "' + $d['ProcessId'] + '", "status": "' + $d['Status'] + '", "utc": "' + $_.TimeCreated.ToUniversalTime().ToString('o') + '"}'
+            } })
+} catch { $exits = @('"unreadable"') }
+Write-Output ('{"games": [' + ($games -join ', ') + '], "dumps": [' + $list + '], "curl": ' + $curl + ', "exits": [' + ($exits -join ', ') +
+    '], "exit_rows": ' + $rows + '}')
 """
 
 # the modules a CrashLogger call stack passes through below any plugin, never the plugin it names
 _CRASH_LOG_SYSTEM = frozenset({"kernel32.dll", "kernelbase.dll", "ntdll.dll", "ucrtbase.dll", "vcruntime140.dll",
                                "vcruntime140_1.dll", "msvcp140.dll"})
+
+
+def exit_note(seen: dict[str, Any], game: str) -> str:
+    """How the run's game ended by Windows' own exit row (_CRASH_PS's exits, Security event 4689),
+    for E_RUN_GAME_LOST and E_RUN_GAME_REPLACED: "; Windows logged its exit, 0xC0000005 at
+    2026-11-12T13:03:13Z (Security 4689)" from the earliest row whose pid is the game's and whose
+    time is not before its start (Windows reuses pids, and Get-WinEvent answers newest first); that
+    no row names it; or that the log went unread (the read failed, or it gave no 4689 row at all,
+    which a run's own guest execs always leave). Nothing when the answer carries no exits. A kill
+    reads 0xFFFFFFFF and a crash its exception's code: on both seats on 2026-11-12 the stage's
+    Stop-Process kills of the game left 0xFFFFFFFF and 20261112-130030's c1 crash 0xC0000005, each
+    row's account the game's own (lab), so the row's account names no killer and is not read."""
+    if "exits" not in seen:
+        return ""
+    rows = seen.get("exits") or []
+    if "unreadable" in rows:
+        return "; its exit unread: the Security log could not be read (Security 4689)"
+    if seen.get("exit_rows") == 0:
+        return "; its exit unread: the Security log gave no exit rows at all since the run began (Security 4689)"
+    pid, _, start = game.partition("@")
+    mine = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        try:
+            row_pid = int(str(row.get("pid")), 16)
+        except ValueError:
+            continue
+        if str(row_pid) == pid and str(row.get("utc") or "") >= start:
+            mine.append(row)
+    if not mine:
+        return "; Windows logged no exit for it since the run began (Security 4689)"
+    row = min(mine, key=lambda r: str(r.get("utc") or ""))
+    raw = str(row.get("status") or "")
+    try:
+        status = f"0x{int(raw, 16):08X}"
+    except ValueError:
+        status = f"status {raw or 'unnamed'}"
+    return f"; Windows logged its exit, {status} at {str(row.get('utc'))[:19]}Z (Security 4689)"
 
 
 def crash_logger_signature(run_dir: Path, client: str, game: str) -> str:
@@ -175,6 +243,10 @@ class RunnerError(Exception):
     """E_RUN: the lab itself failed; the verdict is error, not red."""
 
 
+class SeatFileMissing(ValueError):
+    """A seat copy's source is not there (its copy exec printed `missing <path>`): no further try finds it."""
+
+
 @dataclass
 class RunRecord:
     run_id: str
@@ -206,6 +278,9 @@ class RunRecord:
     snapshots: dict[str, Any] = field(default_factory=dict)
     # clients a `relaunch {until: gone}` left starting a new game: their next connect takes its identity
     pending_identity: set[str] = field(default_factory=set)
+    # what a `relaunch {until: stopped}` left behind its kill, by client (Runner._relaunch_behind, an asyncio task): the
+    # outgoing game's two log copies and the new game's start, which the client's next connect and the run's end await
+    behind: dict[str, Any] = field(default_factory=dict)
     # ADR-036: the seats this run must roll back whatever the reset mode or their state, each with why (a run set's
     # first run on it, a cold-rollback rerun, lab-up)
     rollback: dict[str, str] = field(default_factory=dict)
@@ -217,6 +292,22 @@ class RunRecord:
     reset_started: set[str] = field(default_factory=set)
     faulted: dict[str, str] = field(default_factory=dict)
     levers: set[str] = field(default_factory=set)
+    # the epoch a run's own timeScale laid at its start (the time block's, wire-rules clock.rs), laid again unchanged at a
+    # restart inside the run so the clock resumes where its function says (ADR-068 rung 5's vampire probes)
+    clock_epoch: str | None = None
+    # the Frida traces this run's own steps started (a frida step, a relaunch's frida arm) as (client, script name): its
+    # evidence, which its end must fetch whole or the run is a lab fault (E_RUN_FRIDA_FETCH); a trace started by hand
+    # beside it (POST /lab/frida) is not
+    frida: set[tuple[str, str]] = field(default_factory=set)
+    # the seats whose guest agent a log fetch found not running past GuestControl's patience with a busy one, each with
+    # that error and whether the skip of its other log fetches is noted yet: they are skipped until the seat's reset
+    # (_fetch_client_file, _skse_logs, _reset_seat)
+    agents_down: dict[str, tuple[str, bool]] = field(default_factory=dict)
+    # the log-count counts taken at each step index, so each count's copies carry their run and their own number
+    # (logcount-<run>-<index>-<n>.log.copy, _log_count): a copy still held after its removal spoils that one count,
+    # where one name a step made every later poll of its until fail its Create (the review of b1f2ffd4, nit 2), and a
+    # held copy no longer rolls its seat back, so a name of this run's alone keeps the next run's counts clear of it
+    log_counts: dict[int, int] = field(default_factory=dict)
 
     def progress(self) -> dict[str, Any]:
         if self.verdict != "running":
@@ -254,6 +345,32 @@ class SeatState:
 
 # a preset name the relaunch's cleaning may write into its script (lab-driver saves <name>.jslot in the Presets folder)
 _PRESET_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9 _.-]*")
+
+# The bytes of a seat's file one ranged agent file-read asks for (Runner._read_back, GuestControl.file_read_range).
+# Proxmox's file-read takes a file in guest-file-read calls of its read_size, 1 MiB (qemu-server's
+# src/PVE/API2/Qemu/Agent.pm, file-read), and calls of that size timed out on both seats in
+# 20261111-191642-x-prop-blast (notes 49 and 50: prop-impulse.js's .log read whole, "qga command 'guest-file-read' failed
+# - got timeout" on 711 and 712); a range of half that is one guest-file-read of at most 512 KiB (the fresh review of
+# 77a4279d)
+READ_RANGE_BYTES = 512 * 1024
+# The largest copy a fetch reads back, refused before its first read: 128 ranges at most, so a runaway trace cannot hold
+# up the run's end, whose artifacts phase has no deadline
+FETCH_MAX_BYTES = 64 * 1024 * 1024
+# A removal's quick tries of a file the runner read, and the pause between them (Runner._removed): on qemu-server
+# 9.2.15, which closes its handles, a running game's console log copy stayed a moment after a small read (train 52's
+# stage: x-console-arm's logcount-052-console.log.copy and x-acting-player's logcount-133-console.log.copy, both on c1,
+# the first a 73.1 s rollback at the next run), while the 6 MB seat check left nothing; numidium's HYPOTHESIS, a scan of
+# a file just written (Defender or the indexer) holding it a moment
+REMOVE_TRIES = 4
+REMOVE_PAUSE_S = 1.0
+# The window after the quick tries, 30 s of pauses: after each the agent is pinged, and each ping it answers brings
+# another try, until the file goes or the window is spent. A busy agent holds the handle of a read or close that timed
+# out until it works through its queue, and Windows keeps the file locked meanwhile (core's host journal, 2026-11-12:
+# c1's shot 076 at 20261112-081535 and c2's 056 at 101523 met four sharing violations a second apart and faulted their
+# seats); HYPOTHESIS, since those agents ran all four removal execs while the file stayed locked (the fresh review of
+# 5771141b, finding 1): a leaked handle or a scan is still possible. A file still there past the window is only a note
+# (_held); one the next relaunch's cleaning still finds held rolls its seat back (Runner._relaunch_seat's "leak")
+REMOVE_BACKOFF_S = (2.0, 4.0, 8.0, 16.0)
 
 
 class Runner:
@@ -385,7 +502,12 @@ class Runner:
             try:
                 await self._artifacts(rec, capture)
             except Exception as e:
-                rec.notes.append(f"artifacts: {type(e).__name__}: {e}")
+                # a bug in lab-api, reported as one (the internal failure above): what it skipped may be the run's own
+                # Frida traces, whose fetch is the run's evidence, so the run is error, never green with them unread; a
+                # red stays red, and the internal failure still rolls its seats back at their next run (_remember_seats)
+                rec.failures.append({"step": "end", "kind": "internal", "error": f"artifacts: {type(e).__name__}: {e}"})
+                if rec.verdict != "red":
+                    rec.verdict = "error"
             if self.netem_active:
                 try:
                     await self._clear_netem(rec)
@@ -499,8 +621,10 @@ class Runner:
         settle = rec.scenario.server.handoffPassSettleMs
         roll = rec.scenario.server.npcRollLevel
         world_globals = rec.scenario.server.worldGlobals
+        scale = rec.scenario.server.timeScale
+        cures = rec.scenario.server.cureSpells
         if settings and (npc is not None or hour is not None or respawn is not None or settle is not None or roll is not None
-                         or world_globals is not None):
+                         or world_globals is not None or scale is not None or cures is not None):
             # ADR-035 point 9: the run's own npcEnabled (and its game hour) over the version's
             # file, laid beside the world for this run alone, so no second file is kept in step
             try:
@@ -517,12 +641,35 @@ class Runner:
                 d["npcRollLevel"] = roll
             if world_globals is not None:
                 d["worldGlobals"] = world_globals
+            if cures is not None:
+                # ADR-068 rung 5's D-T3 B: a probe lifts a cure for its run alone, the version's file untouched. The server
+                # matches a cure's plugin by its name case for case and skips one it cannot resolve without a word (fork
+                # FormDesc.cpp:62-70, ActionListener.cpp:6765-6770), so an entry naming a plugin the run's load order lacks
+                # is refused here, before a probe reads a cure that never ran as one lifted
+                plugins = {Path(p).name for p in d.get("loadOrder") or []}
+                unknown = [c for c in cures if c.split(":", 1)[1] not in plugins]
+                if unknown:
+                    raise RunnerError(f"E_RUN_SETTINGS: cureSpells {unknown} name a plugin the run's load order lacks "
+                                      "(the server matches plugin names case for case)")
+                d["cureSpells"] = list(cures)
             if hour is not None:
                 # the clock is a pure function of the wall clock and the time block (wire-rules
                 # clock.rs): it reads start.hour at the epoch, so the run's start is the epoch
                 time_block = dict(d.get("time") or {})
                 time_block["epoch"] = _iso(self._wall())
                 time_block["start"] = {**(time_block.get("start") or {}), "hour": hour}
+                if scale is not None:
+                    time_block["timeScale"] = scale
+                    rec.clock_epoch = time_block["epoch"]
+                d["time"] = time_block
+            elif scale is not None:
+                # a rate is a factor on all the time since the epoch, so the run's rate runs from an epoch of its own,
+                # laid at its start (the file's start date, as a gameHour run's) and kept at a restart inside the run
+                time_block = dict(d.get("time") or {})
+                if rec.clock_epoch is None:
+                    rec.clock_epoch = _iso(self._wall())
+                time_block["epoch"] = rec.clock_epoch
+                time_block["timeScale"] = scale
                 d["time"] = time_block
             overlay = Path(self.s.server_world_dir).parent / "server-settings-run.json"
             overlay.write_text(json.dumps(d, indent=2) + "\n")
@@ -810,11 +957,16 @@ class Runner:
         """A trace started outside a run (POST /lab/frida) is still being
         written on its clone, and this run's rollback is about to erase it
         (2026-10-05: the idle-client leak traces went that way). Fetch each one
-        into this run first, once however often it was started."""
+        into this run first, once however often it was started. None of them
+        is this run's evidence, so what of one is not fetched whole is a note,
+        never E_RUN_FRIDA_FETCH: no step of this run started it (an earlier
+        run's own trace lands here only when that run's end never finished its
+        fetch, and it was that run's evidence, its verdict already written),
+        and a rerun could not fetch it again, this reset erasing it either way."""
         keep: list[tuple[str, str]] = []
         for client, script in dict.fromkeys(self.frida_started):
             if client in clients:
-                await self._frida_trace(rec, client, script, ".before-run")
+                rec.notes.extend(f"frida {why}" for why in await self._frida_trace(rec, client, script, ".before-run"))
             else:
                 keep.append((client, script))
         self.frida_started = keep
@@ -839,7 +991,7 @@ class Runner:
                 if outcome == "ok":
                     cleaned = said
                     break
-                if outcome == "hot":
+                if outcome in ("hot", "leak"):
                     reason = said
                     break
                 failed.append(said)
@@ -865,6 +1017,9 @@ class Runner:
         except RunnerError as e:
             rec.faulted[client] = str(e)
             raise
+        # a reset that finished had the seat's agent answer its relaunch or its VM restart: a log fetch before it that
+        # found the agent not running (a .before-run one) no longer stops the seat's later ones
+        rec.agents_down.pop(client, None)
         seconds = round(self._clock() - t0, 1)
         runs = seat.since_rollback if seat is not None else None
         if reason:
@@ -905,10 +1060,12 @@ class Runner:
     async def _relaunch_seat(self, client: str, g: Guest) -> tuple[str, str]:
         """One relaunch try between runs (ADR-036): _client_relaunch_ps through the guest agent, then a poll from the
         new game within relaunch_heartbeat_timeout_s. ("ok", what the cleaning did), ("hot", why) for a
-        seat a hot push marked, which only a rollback undoes, or ("failed", why)."""
+        seat a hot push marked, which only a rollback undoes, ("leak", why) for one whose cleaning found a file still
+        held, a hold that outlived the run gap and so the rollback's too (a held file is a note at its own run,
+        Runner._held: the fresh review of 5771141b, finding 1), or ("failed", why)."""
         seat = self.seats.get(client)
         script = _client_relaunch_ps(self.s.client_lab_dir, self.s.client_driver_log, list(seat.presets) if seat else [],
-                                     self.s.relaunch_stop_cmd, self.s.relaunch_start_cmd)
+                                     self.s.relaunch_stop_cmd, self.s.relaunch_start_cmd, client)
         cmd = ["powershell", "-NoProfile", "-NonInteractive", "-EncodedCommand", base64.b64encode(script.encode("utf-16-le")).decode("ascii")]
         try:
             res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
@@ -935,7 +1092,7 @@ class Runner:
         note = f"{int(said.get('removed') or 0)} files cleaned"
         held = [str(x) for x in said.get("held") or []]
         if held:
-            note += f", {len(held)} held open left in place ({', '.join(held[:2])})"
+            return "leak", f"its cleaning found {len(held)} held open ({', '.join(held[:2])}), kept past a run gap"
         stale = str(said.get("stale") or "").strip()
         if stale:
             note += f", a stale hot mark removed ({stale[:100]}; a dist was laid after it)"
@@ -1178,11 +1335,24 @@ class Runner:
         counted in both for c.log_count("<pattern>"). The console log is lab-driver's tee of every console line:
         printConsole, which skymp5-client's logTrace and logError use, reaches no other file, so a count of the
         first alone never saw them (x-handoff-door 20261024-013234). An unmanaged seat or a failed copy of the
-        Skyrim Platform log keeps no count, so the assert raises; a console log not there yet (a driver from
-        before the tee) counts as empty."""
+        Skyrim Platform log keeps no count, so the assert raises, as does a copy of either log whose exec answer the
+        agent lost, which nothing proves whole; a console log not there yet (a driver from
+        before the tee) counts as empty. The note carries each log's bytes three ways: the file's length on the
+        seat when the copy opened it, the copy's length and what lab-api read of the copy, since a copy after a
+        plain relaunch counted 0 for a line the run's own artifact holds (b-puzzle-relay 20261110-135219 and
+        135510, step 24; the cold rollback's 135732 counted it), and the three numbers say where the bytes went.
+        The copies come back as the run's logs do (_seat_copy, _read_back: ranged reads, decoded once, each copy removed
+        once read, one the agent holds open a note), where the logs were read whole into copies nobody removed or
+        checked, so a read that timed out leaked a handle unseen (the fresh review of e8d8de9b, nit 4)."""
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
             return True, f"log-count skipped: {client} is unmanaged or unmapped"
+        down = rec.agents_down.get(client)
+        if down is not None:
+            # a log fetch found the seat's guest agent not running past GuestControl's patience: nothing is tried on it
+            # until its reset, and the count stays unkept, so a claim on it raises (the re-review of 486e80f3)
+            return True, (f"log-count: {client}'s logs unread, its guest agent found not running ({down[0][:160]}); "
+                          "no count kept")
         # both logs are copied by a read that shares write access, the frida traces' way: Copy-Item's read refuses a
         # file another process holds open for writing, and lab-driver's console tee is open whenever the game prints
         # (b-npc-stream-voice 20261028-063409: step 29's copy failed and read as an empty log, 0 lines, while step 30's
@@ -1193,34 +1363,55 @@ class Runner:
         except ProxmoxError as e:
             return True, f"log-count: {client}'s game folder unread: {e}"
         texts: list[str] = []
+        byte_notes: list[str] = []
+        # each count's copies named by its run, its step and its number there (RunRecord.log_counts): an until polls the
+        # same step index, and a copy held open spoils its own count alone, never a later run's
+        n = rec.log_counts[index] = rec.log_counts.get(index, 0) + 1
         for src, suffix in ((self.s.client_driver_log, ""), (f"{game_dir}\\{self.s.client_console_log}", "-console")):
-            copy = f"{self.s.client_lab_dir}\\logcount-{index:03d}{suffix}.log.copy"
-            read = (f"$s = [IO.File]::Open('{src}', 'Open', 'Read', 'ReadWrite'); $d = [IO.File]::Create('{copy}'); "
-                    f"$s.CopyTo($d); $d.Close(); $s.Close()")
+            which = "console log" if suffix else "Skyrim Platform log"
+            copy = f"{self.s.client_lab_dir}\\logcount-{rec.run_id}-{index:03d}-{n}{suffix}.log.copy"
+            # the source's length at the open and the copy's after it, printed for the note (single quotes only: the
+            # guest agent's argument passing strips double quotes)
+            read = (f"$s = [IO.File]::Open('{src}', 'Open', 'Read', 'ReadWrite'); $n = $s.Length; "
+                    f"$d = [IO.File]::Create('{copy}'); $s.CopyTo($d); $m = $d.Length; $d.Close(); $s.Close(); "
+                    f"Write-Output ([string]$n + ' ' + [string]$m)")
             if suffix:
-                read = f"if (Test-Path '{src}') {{ {read} }} else {{ Set-Content -Path '{copy}' -Value '' -NoNewline }}"
+                # a tee that is not there says so, and counts as empty with no try repeated
+                read = f"if (Test-Path '{src}') {{ {read} }} else {{ Write-Output 'missing {src}' }}"
             cmd = ["powershell", "-NoProfile", "-Command", read]
-            text, why = None, ""
-            for attempt in range(3):
-                try:
-                    res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
-                    if res.exitcode == 0:
-                        text = await asyncio.to_thread(self.control.file_read, g, copy)
-                        break
-                    why = f"the copy exited {res.exitcode}: {res.err.strip()[:200]}"
-                except ProxmoxError as e:
-                    why = str(e)
-                await asyncio.sleep(1.0 * self.s.time_scale if self.s.time_scale else 0.01)
-            if text is None:
-                which = "console log" if suffix else "Skyrim Platform log"
-                return True, f"log-count: {client}'s {which} unread after three tries ({why}); no count kept"
-            texts.append(text)
+            try:
+                # its tries 1 s apart as they were: eight committed untils poll seat counts in 25 s windows
+                # (b-lever-relay, x-lever-relay, x-lever-furn, x-lever-after-scene), which two 10 s pauses would spend
+                seat_n, seat_m = await self._seat_copy(g, cmd, copy, pause_s=1.0)
+                if seat_n is None:
+                    # only the copy exec's own "N M" with M >= N proves a copy whole: one whose answer the agent lost
+                    # may have failed to open its source, leaving an empty copy (this copy runs without Stop, so its
+                    # Create still runs) whose count of 0 would pass an absence claim (the check of 508697c3)
+                    raise ValueError("its copy's exec answer was lost, so the copy is unchecked")
+                # read whole or not counted: a log read only in part keeps no count, since a count of part of it could
+                # pass an absence claim (b-race-permit's c1.log_count("E_RACE_PERMIT") == 0, the re-review of 486e80f3)
+                data = await self._read_back(rec, g, copy, seat_m, f"log-count: {client}'s {which}")
+            except SeatFileMissing:
+                texts.append("")
+                byte_notes.append("0 read")
+                continue
+            except (ProxmoxError, ValueError) as e:
+                # a dead agent met here marks nothing: Proxmox says "guest agent is not running" for any guest-ping not
+                # answered in 3 s, checked before every exec (qemu-server's QemuServer/Agent.pm at ec268ede5b, 91-99 and
+                # 123-129), so a busy agent reads as a dead one, and log-count's tries, 1 s apart, would mark a seat on
+                # a busy spell and starve every later count of its run; a log fetch's, 10 s apart, still mark it, and
+                # the read above honours that (the check of 508697c3, SHOULD). Each failure says how it came: three
+                # tries, a lost answer or a short read
+                return True, f"log-count: {client}'s {which} unread ({e}); no count kept"
+            texts.append(data.decode("utf-8", errors="replace"))
+            byte_notes.append(f"{len(data)} read of {seat_m} copied of {seat_n} on the seat")
         rx = re.compile(pattern)
         counts = [sum(1 for line in text.splitlines() if rx.search(line)) for text in texts]
         n = sum(counts)
         self.board.set_log_count(client, pattern, n)
         return True, (f"{n} line(s) of {client}'s logs match {pattern!r} "
-                      f"({counts[0]} in its Skyrim Platform log, {counts[1]} in its console log)")
+                      f"({counts[0]} in its Skyrim Platform log, {counts[1]} in its console log; "
+                      f"bytes {byte_notes[0]}, {byte_notes[1]})")
 
     async def _game_dir(self, rec: RunRecord, g, client: str) -> str:
         """The seat's game folder (C:\\sky-lab\\game-dir.txt), read once a run: log-count's copies name literal paths."""
@@ -1366,7 +1557,17 @@ class Runner:
         the logged-in players. skymp5-client connects and logs in by itself at
         launch and again after a server restart; lab-driver stays out of
         mpClientPlugin (docs/LAB.md). A restart empties the server's list, so
-        presence after one is a fresh login."""
+        presence after one is a fresh login. A relaunch {until: stopped}'s work behind its kill (the outgoing logs, the
+        new game's start) is awaited first, and its error fails the step."""
+        behind = rec.behind.get(client)
+        if behind is not None:
+            # shielded: a scenario timeout cancelling this connect leaves the task running for the run's end to await
+            kind, error = await asyncio.shield(behind)
+            rec.behind.pop(client, None)
+            if error:
+                rec.failures.append({"step": index, "kind": kind, "client": client, "error": error})
+                rec.verdict = "error" if kind == "internal" else "red"
+                return False, error
         started = self._clock()
         deadline = started + self.s.connect_timeout_s
         while True:
@@ -1404,8 +1605,10 @@ class Runner:
         # server.log_count("<regex>") is live: the run's server log counted anew before each evaluation, an
         # until's every poll included (x-host-quit: the leave's line inside the until right after the quit). In an
         # until a seat's c.log_count("<regex>") is live too: each poll copies that seat's logs anew by a log-count
-        # step's own path (_log_count, its count kept as the step's is), each pattern once a poll and about 1.5 s of
-        # guest-agent reads a pattern, so a line that lands mid-until holds it (x-npc-death-freeze, x-scene-guest).
+        # step's own path (_log_count, its count kept as the step's is), each pattern once a poll and its guest-agent
+        # time a pattern measured by the log fetch's seat check (2026-11-12, lab-api 58502b08, both seats: 6.5 to 6.6 s for
+        # two 6,292,690-byte logs, about 1.8 MB/s through 512 KiB ranges; a run's own logs are far smaller), so a line that
+        # lands mid-until holds it (x-npc-death-freeze, x-scene-guest).
         # An assert counts no seat's log: it reads the last count taken (a log-count step's, or an until's last
         # poll's), the moment its scenario chose to count at
         holders = ["server", *(rec.scenario.clients if seat_counts else [])]
@@ -1565,6 +1768,28 @@ class Runner:
                 return False, f"{len(failed)} of {len(step.assertions)} did not hold within {step.seconds:g}s" + (f" ({read})" if read else "")
             await asyncio.sleep((step.every or 1.0) * self.s.time_scale if self.s.time_scale else 0.01)
 
+    async def _relaunch_behind(self, rec: RunRecord, index: int, client: str, g: Guest) -> tuple[str, str | None]:
+        """What a relaunch {until: stopped} leaves behind its kill: the outgoing game's Skyrim Platform and console logs,
+        copied now that nothing writes them (a failure a note, as before the kill), then the launch task's start, so the
+        new game logs in by itself. Its answer is (kind, error): ("lab", ...) for a start the seat refused, ("internal",
+        ...) for a bug of lab-api's here, which execute reports the same way; the client's next connect, a second
+        relaunch of the client and the run's end await it, and record the error as that kind of failure."""
+        try:
+            game_dir = f"(Get-Content -LiteralPath '{self.s.client_lab_dir}\\game-dir.txt' -Raw).Trim()"
+            await self._fetch_client_file(rec, g, f"{client}-relaunch-{index:03d}.log", f"'{self.s.client_driver_log}'")
+            await self._fetch_client_file(rec, g, f"{client}-relaunch-{index:03d}-console.log",
+                                          f"(Join-Path {game_dir} '{self.s.client_console_log}')")
+            res = await asyncio.to_thread(self.control.exec, g, ["powershell", "-NoProfile", "-Command", self.s.relaunch_start_cmd],
+                                          self.s.guest_task_timeout_s)
+            if res.exitcode != 0:
+                return "lab", f"E_RUN_RELAUNCH: {g.name}: the new game's start behind the kill: exit {res.exitcode}: {(res.err or res.out).strip()[:200]}"
+        except ProxmoxError as e:
+            return "lab", f"E_RUN_RELAUNCH: {g.name}: the new game's start behind the kill: {e}"
+        except Exception as e:  # lab-api's own bug: the awaiting step or the run's end records it as internal, the run error
+            return "internal", f"behind the kill on {client}: {type(e).__name__}: {e}"
+        rec.notes.append(f"step {index}: {client}'s outgoing logs kept and its new game started behind the kill")
+        return "lab", None
+
     async def _relaunch(self, rec: RunRecord, index: int, client: str, files: list[dict[str, Any]] | None = None,
                         until: str | None = None, frida: dict[str, Any] | None = None) -> tuple[bool, str]:
         """relaunch: the player quits the game and starts it again, so its
@@ -1587,6 +1812,45 @@ class Runner:
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
             return fail(f"E_RUN_RELAUNCH: {client} is not a managed client")
+        prior = rec.behind.pop(client, None)
+        if prior is not None:
+            # an earlier relaunch {until: stopped} of this client that no connect took: its copies and its new game's start
+            # finish first (shielded, as the connect's), and its error fails this step
+            kind, error = await asyncio.shield(prior)
+            if error:
+                rec.failures.append({"step": index, "kind": kind, "client": client, "error": error})
+                rec.verdict = "error" if kind == "internal" else "red"
+                return False, error
+        if until == "stopped" and not files and not frida:
+            # the kill first, the step back at it: x-prop-stall stops a game mid-flight (E32), where the two log copies
+            # before the stop cost seconds (20261111-190610's relaunch stopped c1 after the ingot's asleep sample, 0.88 s
+            # after the contact). One exec, the launch task ended and the game killed by cmd.exe's inbox programs
+            # (Settings.relaunch_kill_cmd); the outgoing logs, which nothing writes once the game is gone, and the new
+            # game's start follow behind the step (_relaunch_behind), and the client's next connect waits for them
+            if rec.scenario.solo:
+                return fail("E_RUN_RELAUNCH: until: stopped leaves a new game to log in by itself, which a solo seat never does")
+            began = self._clock()
+            try:
+                res = await asyncio.to_thread(self.control.exec, g, ["cmd.exe", "/d", "/c", self.s.relaunch_kill_cmd], self.s.guest_task_timeout_s)
+            except ProxmoxError as e:
+                return fail(f"E_RUN_RELAUNCH: {g.name}: the kill: {e}")
+            took = self._clock() - began
+            if res.exitcode not in (0, 128):
+                return fail(f"E_RUN_RELAUNCH: {g.name}: the kill: exit {res.exitcode}: {(res.err or res.out).strip()[:200]}")
+            rec.games.pop(client, None)
+            rec.pending_identity.add(client)
+            rec.behind[client] = asyncio.create_task(self._relaunch_behind(rec, index, client, g))
+            if res.exitcode == 128:
+                # taskkill's answer for no such process: the game was gone before the kill, as _crash_check reads a lost
+                # game, a lab fault, and what the scenario would time from the kill never happened
+                lost = f"E_RUN_GAME_LOST: {client}'s game was not running when the kill came (taskkill 128)"
+                rec.failures.append({"step": index, "kind": "lab", "client": client, "error": lost})
+                rec.verdict = "error"
+                return False, lost
+            # took is the exec's round trip, its exec-status polls included (GuestControl): the kill came within it
+            stopped = f"{client}'s game stopped within {took:.2f}s of the step's start, the server not told; its new game logs in by itself"
+            rec.notes.append(f"step {index}: {stopped}")
+            return True, stopped
         # the outgoing game's own logs, kept before the new game truncates them: its Skyrim Platform log and its
         # console log (a quit's one production line for D12-B lived there, x-host-quit; every relaunch scenario
         # lost the game before's client lines the same way). A failure is a note, never the step's
@@ -1631,9 +1895,9 @@ class Runner:
             return fail(f"E_RUN_RELAUNCH: {g.name}: exit {res.exitcode}: {res.err.strip()[:200]}")
         started = self._clock()
         if until == "stopped":
-            # the kill alone: the guest agent stopped the game and started the launch task, and nothing has told the
-            # server, so the scenario times what follows from here (b-host-kill); the new game logs in by itself
-            # and the next connect takes its identity, as after gone
+            # with files or frida, the kill after the copies and the lever (the fast path above has neither): the guest
+            # agent stopped the game and started the launch task, and nothing has told the server, so the scenario
+            # times what follows from here; the new game logs in by itself and the next connect takes its identity
             if rec.scenario.solo:
                 return fail("E_RUN_RELAUNCH: until: stopped leaves a new game to log in by itself, which a solo seat never does")
             rec.games.pop(client, None)
@@ -1732,6 +1996,7 @@ class Runner:
         if res.exitcode != 0:
             return fail(f"E_RUN_FRIDA: {name} on {client} exited {res.exitcode}: {res.err.strip()[:200]}")
         self.frida_started.append((client, name))
+        rec.frida.add((client, name))
         return True, f"frida {name} started"
 
     async def _screenshot(self, rec: RunRecord, index: int, client: str) -> tuple[bool, str]:
@@ -1742,7 +2007,9 @@ class Runner:
         lost = ""
         try:
             if g is not None and g.managed:
-                remote = f"{self.s.client_lab_dir}\\shots\\{index:03d}.png"
+                # named by its run as a trace's copy is: a sidecar held past its removal stays to the seat's next reset,
+                # and a step of the next run at this index whose helper answer was lost reads its own name, never this
+                remote = f"{self.s.client_lab_dir}\\shots\\{rec.run_id}-{index:03d}.png"
                 cmd = ["powershell", "-NoProfile", "-Command", self.s.screenshot_cmd_template.format(lab_dir=self.s.client_lab_dir, out=remote)]
                 try:
                     res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
@@ -1753,7 +2020,13 @@ class Runner:
                     if "E_PVE_EXEC_LOST" not in str(e):
                         raise
                     lost = " (the helper's exec answer was lost; read from its file)"
-                b64 = await asyncio.to_thread(self.control.file_read, g, remote + ".b64")
+                # the helper's base64 sidecar comes back in ranges, decoded once joined, and leaves the seat once read:
+                # a whole agent file-read past about 1 MiB is unreliable on a busy seat (numidium's measure: a 1.46 MB
+                # console copy timed out three times in a row on c1, and 512 KiB ranges took it whole in 4 s; 195437
+                # lost three shots at 23 s each)
+                sidecar = remote + ".b64"
+                size = await self._seat_length(g, sidecar, "its sidecar's length")
+                b64 = await self._read_back(rec, g, sidecar, size, f"screenshot {index:03d}-{client}")
                 target.write_bytes(base64.b64decode(b64))
             else:
                 qs = await self.board.run_step(client, "request-screenshot", {}, self.s.step_timeout_s)
@@ -1768,14 +2041,16 @@ class Runner:
     async def _burst(self, rec: RunRecord, index: int, client: str, args: dict[str, Any]) -> tuple[bool, str]:
         """screenshot {count, intervalMs} (scenario.py; burst.py): frames at an animation's rate, filmed in the
         seat's desktop session by one exec and read back after it as NNN-<client>-<k>.png beside
-        NNN-<client>-burst.json (each frame's offset in ms). As a plain shot does, a burst never fails a run: a
-        frame not filmed or not read is the step's note."""
+        NNN-<client>-burst.json (each frame's offset in ms), each frame's .b64 sidecar in ranges as a plain shot's is,
+        and the folder's sidecars removed by one exec once all are read (_remove_frames), one that stays a note as a
+        plain shot's is. As a plain shot does, a burst never fails a run: a frame not filmed or not read is the step's
+        note. The folder is named by its run as a plain shot is (_screenshot)."""
         shots = rec.dir / "screenshots"
         shots.mkdir(exist_ok=True)
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
             return True, f"screenshot burst skipped: {client} is unmanaged or unmapped; a burst films a managed seat"
-        remote = f"{self.s.client_lab_dir}\\shots\\{index:03d}-burst"
+        remote = f"{self.s.client_lab_dir}\\shots\\{rec.run_id}-{index:03d}-burst"
         cmd = burst.command(args, self.s.client_lab_dir, self.s.client_lab_user, remote)
         lost = ""
         try:
@@ -1792,14 +2067,39 @@ class Runner:
                 lost = " (the helper's exec answer was lost; read from its files)"
         except (ProxmoxError, ValueError) as e:
             return True, f"screenshot burst skipped: {e}"
-        got, missing = 0, []
+        # each frame's sidecar comes back as a plain shot's does, in ranges and decoded once joined, its length from one
+        # listing of the burst's folder; the folder's sidecars then go by one exec, where a removal a frame cost an
+        # exec each (x-npc-legs-burst's 40 frames, 40 execs: the check of 508697c3, nit 1)
+        def lengths(res) -> dict[str, int] | None:
+            if res.exitcode != 0:
+                return None
+            pairs = [ln.strip().rsplit(" ", 1) for ln in res.out.splitlines() if ln.strip()]
+            return {p[0]: int(p[1]) for p in pairs if len(p) == 2 and p[1].isdigit()}
+
+        listing = ["powershell", "-NoProfile", "-Command",
+                   f"Get-ChildItem -LiteralPath '{remote}' -Filter '*.png.b64' -File | ForEach-Object {{ $_.Name + ' ' + [string]$_.Length }}"]
+        try:
+            sizes, unlisted = await self._tried(g, listing, lengths, "its frames' listing"), ""
+        except (ProxmoxError, ValueError) as e:
+            sizes, unlisted = {}, f" (its frames' listing failed: {str(e)[:80]})"
+        got, missing, died, whats = 0, [], set(), {}
         for f in data["frames"]:
+            name = f"{f['file']}.b64"
+            sidecar = f"{remote}\\{name}"
+            whats[name] = f"screenshot burst {index:03d}-{client} frame {f['k']}"
             try:
-                b64 = await asyncio.to_thread(self.control.file_read, g, f"{remote}\\{f['file']}.b64")
+                if name not in sizes:
+                    raise SeatFileMissing(f"{sidecar} is not there{unlisted}")
+                try:
+                    b64 = await self._read_ranges(g, sidecar, sizes[name])
+                except (ProxmoxError, ValueError):
+                    died.add(name)  # a read that died is what leaves a handle open (_read_back)
+                    raise
                 (shots / f"{index:03d}-{client}-{int(f['k'])}.png").write_bytes(base64.b64decode(b64))
                 got += 1
             except (ProxmoxError, ValueError) as e:
                 missing.append(f"frame {f['k']}: {e}"[:120])
+        await self._remove_frames(rec, g, remote, whats, died, f"screenshot burst {index:03d}-{client}")
         (shots / f"{index:03d}-{client}-burst.json").write_text(json.dumps(data, indent=1))
         ms = [int(f["ms"]) for f in data["frames"]]
         note = (f"{got} of {len(ms)} frames over {ms[-1]} ms, {index:03d}-{client}-0.png to {index:03d}-{client}-{len(ms) - 1}.png "
@@ -1807,6 +2107,36 @@ class Runner:
         if missing:
             note += "; not read: " + "; ".join(missing[:3])
         return True, note
+
+    async def _remove_frames(self, rec: RunRecord, g: Guest, folder: str, whats: dict[str, str], died: set[str],
+                             what: str) -> None:
+        """A burst's .b64 sidecars removed from `folder` on the seat once every frame is read, by the one helper every
+        read file's removal goes through (_removed), a try being one exec for the whole folder (_remove_folder_try):
+        eight execs at most, the four quick tries and one after each ping of the window the agent answers, whatever the
+        burst's size, where a try a sidecar gave 40 held frames 120 execs and 120 s inside a mid-run step (the review
+        of b1f2ffd4, nit 1). Each
+        sidecar's notes are its own, named by its frame's `whats` entry (a sidecar's name to its frame) or else `what`;
+        `died` names the frames' sidecars whose read died."""
+        await self._removed(rec, g, lambda: self._remove_folder_try(g, folder),
+                            {f"{folder}\\{name}": w for name, w in whats.items()}, {f"{folder}\\{name}" for name in died}, what)
+
+    async def _remove_folder_try(self, g: Guest, folder: str) -> tuple[set[str] | None, str]:
+        """One try at a burst folder's .b64 sidecars by one exec, which removes every one there and names each one that
+        stayed and then their count, so an answer cut short never reads as none staying: the paths still there (none:
+        all gone), or None and the reason for an exec that failed or answered otherwise."""
+        cmd = ["powershell", "-NoProfile", "-Command",
+               f"$stayed = @(Get-ChildItem -LiteralPath '{folder}' -Filter '*.png.b64' -File | ForEach-Object {{ "
+               f"Remove-Item -LiteralPath $_.FullName -Force -ErrorAction SilentlyContinue; "
+               f"if (Test-Path -LiteralPath $_.FullName) {{ $_.Name }} }}); $stayed; Write-Output ('stayed ' + $stayed.Count)"]
+        try:
+            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+        except ProxmoxError as e:
+            return None, f"{folder}'s sidecars on {g.name} not removed: {e}"
+        lines = [ln.strip() for ln in (res.out or "").splitlines() if ln.strip()]
+        count = re.fullmatch(r"stayed (\d+)", lines[-1]) if lines else None
+        if res.exitcode == 0 and count and int(count.group(1)) == len(lines) - 1:
+            return {f"{folder}\\{name}" for name in lines[:-1]}, ""
+        return None, f"the removal of {folder}'s sidecars on {g.name} answered exit {res.exitcode}: {(res.err or res.out).strip()[:200]}"
 
     async def _mouse(self, rec: RunRecord, index: int, step: Step) -> tuple[bool, str]:
         """A relative mouse move in the seat's own desktop session (scenario.py's mouse; mouse.py): what the
@@ -1851,6 +2181,17 @@ class Runner:
 
     async def _artifacts(self, rec: RunRecord, capture: Capture | None) -> None:
         rec.phase = "artifacts"
+        # a relaunch {until: stopped} the run never reconnected: its log copies and the new game's start finish first,
+        # so the copies are the run's and no task outlives it (a second kill of the client awaits the first's; a connect a
+        # timeout cancelled left its task here, shielded); a seat's refusal is a note now, a bug of lab-api's the run's error
+        for client, behind in list(rec.behind.items()):
+            kind, error = await behind
+            if kind == "internal" and error:
+                rec.failures.append({"step": "end", "kind": "internal", "client": client, "error": error})
+                rec.verdict = "error"
+            elif error:
+                rec.notes.append(f"{client}: {error}")
+        rec.behind.clear()
         wanted = list(rec.scenario.artifacts)
         if capture is not None:
             capture.stop()
@@ -1870,10 +2211,16 @@ class Runner:
             r = await asyncio.to_thread(self.system.run, self._compose("logs", "--no-color", "--since", rec.started_at, self.s.compose_service))
             (rec.dir / "server.log").write_text(r.stdout)
             rec.artifacts.append("server.log")
+        # a seat's logs come in one fetch whatever the scenario names them: <client>.log, or a log that fetch keeps
+        # beside it (<client>-console.log, <client>-driver.log), which read as a client called "c1-console" and gave
+        # "c1-console is unmanaged or unmapped" notes; eight committed scenarios list c1-console.log beside c1.log
+        fetched: list[str] = []
         for name in wanted:
             if name.endswith(".log") and name != "server.log":
-                client = name[:-4]
-                await self._client_log(rec, client, name)
+                client = self._log_seat(name, rec.scenario.clients)
+                if client not in fetched:
+                    fetched.append(client)
+                    await self._client_log(rec, client, f"{client}.log")
         if "screenshots" in wanted and (rec.dir / "screenshots").is_dir():
             rec.artifacts.append("screenshots")
         if "trace" in wanted:
@@ -1886,9 +2233,24 @@ class Runner:
                     name = f"trace-{client}.json"
                     (rec.dir / name).write_text(json.dumps(data, indent=1, sort_keys=True))
                     rec.artifacts.append(name)
+        # the run's own traces (RunRecord.frida) are its evidence: one not fetched whole is a lab fault, as a crash at the
+        # end is (below), so a run that would have been green is error and its run set reruns it (ADR-030), the rerun
+        # starting the trace again, and the failure names the seat, whose next run rolls it back (_seat_fault) and so
+        # closes what a timed-out read left open in its agent; a red stays red and gains it. 20261111-191642-x-prop-blast
+        # stayed green with both seats' traces unread, two notes. A trace started by hand beside the run (POST
+        # /lab/frida) is no evidence of the run's, and a rerun would not start it again: what of it is unread is a note
+        green = rec.verdict == "running" and not rec.failures
+        unread = False
         for client, script in dict.fromkeys(self.frida_started):
-            await self._frida_trace(rec, client, script)
+            lost = await self._frida_trace(rec, client, script)
+            if (client, script) in rec.frida:
+                rec.failures.extend({"step": "end", "kind": "lab", "client": client, "error": f"E_RUN_FRIDA_FETCH: {why}"} for why in lost)
+                unread = unread or bool(lost)
+            else:
+                rec.notes.extend(f"frida {why}" for why in lost)
         self.frida_started.clear()
+        if unread and green:
+            rec.verdict = "error"
         if self.s.hang_evidence:
             for client in self._hung_clients(rec):
                 await self._hang_evidence(rec, client)
@@ -1904,6 +2266,16 @@ class Runner:
         unknown = [n for n in wanted if n not in ("server.log", "screenshots", "world-diff", "pcap", "trace") and not n.endswith(".log")]
         for n in unknown:
             rec.notes.append(f"unknown artifact {n!r} ignored")
+
+    @staticmethod
+    def _log_seat(name: str, clients: list[str]) -> str:
+        """The client whose log fetch keeps the artifact `name`: <client>.log's own, else one of the run's seats it is
+        named after, <client>-<log>.log (its console or driver log, which the fetch keeps beside <client>.log), the
+        longest such name; any other name stands for a client of its own, as every .log entry did."""
+        stem = name[:-4]
+        if stem in clients:
+            return stem
+        return max((c for c in clients if stem.startswith(c + "-")), key=len, default=stem)
 
     def _hung_clients(self, rec: RunRecord) -> list[str]:
         """The clients whose seat stopped answering: the board's own timeout, a dump-state before
@@ -1998,9 +2370,10 @@ class Runner:
         games = [x for x in seen.get("games") or [] if isinstance(x, str)]
         if was and "unreadable" not in games:
             if not games:
-                errors.append(f"E_RUN_GAME_LOST: {client}'s game ({was}) was not running at the run's end")
+                errors.append(f"E_RUN_GAME_LOST: {client}'s game ({was}) was not running at the run's end" + exit_note(seen, was))
             elif was not in games:
-                errors.append(f"E_RUN_GAME_REPLACED: {client}'s game was {was} at the version check and {', '.join(games)} at the run's end")
+                errors.append(f"E_RUN_GAME_REPLACED: {client}'s game was {was} at the version check and {', '.join(games)} at the run's end"
+                              + exit_note(seen, was))
         if not errors:
             return False
         added = [{"step": "end", "kind": "lab", "client": client, "error": error} for error in errors]
@@ -2029,11 +2402,14 @@ class Runner:
         hypothesis ties to the hang (thuum-magnus, 2026-10-17), and each SKSE plugin writes its
         own log there (TMS_AIPathingFreezeFix.log is the freeze fix layer's evidence), so a new
         layer's log needs no edit here. skyrim-platform.log itself is <client>.log. Copied into
-        the lab directory first, as _fetch_client_file does, then read one by one; a failure is
-        a note, never a failed run."""
+        the lab directory by one Copy-Item over the listing, then read one by one whole; a failure
+        is a note, never a failed run. Not on _fetch_client_file's ranged read yet: these logs are
+        small, and one exec copies them all where a ranged fetch costs three agent calls a log."""
         if client in rec.skse_fetched:
             return
         rec.skse_fetched.add(client)
+        if client in rec.agents_down:
+            return  # its guest agent was found not running, noted once (_fetch_client_file)
         # skyrim-platform.log's folder first, then every other My Games\<folder>\SKSE: a CommonLibSSE-NG
         # plugin can log under My Games\Skyrim.INI\SKSE (the freeze fix's TMS_AIPathingFreezeFix.log does,
         # 2026-10-17); a name already taken by an earlier folder keeps the first. Extension, since -Filter
@@ -2051,6 +2427,8 @@ class Runner:
             res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
         except ProxmoxError as e:
             rec.notes.append(f"{client} SKSE logs: {e}")
+            if "guest agent is not running" in str(e):
+                rec.agents_down.setdefault(client, (str(e), False))
             return
         if res.exitcode != 0:
             rec.notes.append(f"{client} SKSE logs: exit {res.exitcode}: {res.err.strip()[:200]}")
@@ -2074,9 +2452,9 @@ class Runner:
         """<client>.log is Skyrim Platform's log; <client>-driver.log is
         lab-driver's own (writeLogs), and <client>-console.log every line the
         game's console printed (lab-driver's tee), both found under the game
-        directory the client recorded at install. Both are copied first: the game holds its logs
-        open without read sharing, which the agent's file-read cannot get past,
-        and PowerShell's Copy-Item can."""
+        directory the client recorded at install. Each is copied first, by a read
+        that shares write access since the game holds its logs open for writing,
+        and read back in ranges (_fetch_client_file)."""
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
             rec.notes.append(f"{name}: {client} is unmanaged or unmapped; log not fetched")
@@ -2089,27 +2467,293 @@ class Runner:
         await self._skse_logs(rec, g, client)
 
     async def _fetch_client_file(self, rec: RunRecord, g: Guest, name: str, source: str) -> None:
-        """Copy the file at the PowerShell path expression `source` on the
-        client into the lab directory as `name`, read it back and store it as
-        an artifact; a failure is a note, never a failed run."""
+        """Copy the file at the PowerShell path expression `source` on the client into the lab directory as
+        <run>-`name`, named by its run as log-count's copies are, so one held past its removal never refuses the next
+        run's Create (the fresh review of 5771141b, nit 4), and keep it as the artifact `name`, decoded as UTF-8 once.
+        The copy is a read that shares write access, as the frida traces'
+        and log-count's are, since the game holds its logs open for writing and Copy-Item's read refused them (the c1.log
+        entry's console copy in 20261111-193821, 194559 and 195437); it prints the source's length at its open and the
+        copy's, three tries 10 s apart (_seat_copy). The copy then comes back through Proxmox's ranged file-reads
+        (_read_back: 512 KiB a call, the length check, the 64 MiB cap, the copy removed once read, one the agent holds
+        open a note): read whole, the console logs timed out the agent on both seats in 20261111-191642, and
+        playtest 45's c1 log reached 25k lines. A failure is a note naming its code and "(log fetch)", an E_PVE_* the
+        agent's or E_RUN_LOG_FETCH the runner's own (a copy that failed its tries or whose exec answer was lost, a short
+        read, the cap), never a failed run. A source that is not there is said by the copy itself (`missing <path>`) and not tried again, and
+        once a fetch finds the seat's guest agent not running its other log fetches are skipped until its reset, with
+        one note: each would spend its copy's three tries on an agent that answered none (the fresh review of e8d8de9b:
+        a missing log cost about 25 s, a dead agent about 75 s a seat). That answer is a busy agent's as often as a
+        stopped one's (core's host journal, 2026-11-12), so it reaches here only once GuestControl has asked each try's
+        call again for agent_busy_s, and a busy spell no longer silences the seat."""
+        seat = g.client or g.name
+        down = rec.agents_down.get(seat)
+        if down is not None:
+            if not down[1]:
+                rec.notes.append(f"{name} and {seat}'s other logs after it not fetched: its guest agent was found not running "
+                                 f"({down[0][:160]}) (log fetch)")
+                rec.agents_down[seat] = (down[0], True)
+            return
+        copy = f"{self.s.client_lab_dir}\\{rec.run_id}-{name}"
+        cmd = ["powershell", "-NoProfile", "-Command",
+               f"$ErrorActionPreference = 'Stop'; $src = {source}; "
+               f"if (-not (Test-Path -LiteralPath $src)) {{ Write-Output ('missing ' + $src); exit 0 }}; "
+               f"$s = [IO.File]::Open($src, 'Open', 'Read', 'ReadWrite'); "
+               f"$n = $s.Length; $d = [IO.File]::Create('{copy}'); $s.CopyTo($d); $m = $d.Length; $d.Close(); $s.Close(); "
+               f"Write-Output ([string]$n + ' ' + [string]$m)"]
         try:
-            copy = f"{self.s.client_lab_dir}\\{name}"
-            cmd = ["powershell", "-NoProfile", "-Command", f"Copy-Item -LiteralPath {source} -Destination '{copy}' -Force"]
-            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
-            if res.exitcode != 0:
-                rec.notes.append(f"{name}: copy exited {res.exitcode}: {res.err.strip()[:200]}")
-                return
-            text = await asyncio.to_thread(self.control.file_read, g, copy)
-            (rec.dir / name).write_text(text)
-            rec.artifacts.append(name)
-        except ProxmoxError as e:
-            rec.notes.append(f"{name}: {e}")
+            seat_n, size = await self._seat_copy(g, cmd, copy)
+            if seat_n is None:
+                # log-count's rule (_log_count): only the copy exec's own "N M" proves a copy whole
+                raise ValueError("its copy's exec answer was lost, so the copy is unchecked")
+            data = await self._read_back(rec, g, copy, size, name)
+        except (ProxmoxError, ValueError) as e:
+            rec.notes.append(f"{name}: {e} (log fetch)" if isinstance(e, ProxmoxError) else f"{name}: E_RUN_LOG_FETCH: {e} (log fetch)")
+            if "guest agent is not running" in str(e):
+                rec.agents_down.setdefault(seat, (str(e), False))
+            return
+        (rec.dir / name).write_text(data.decode("utf-8", errors="replace"), encoding="utf-8")
+        rec.artifacts.append(name)
 
-    async def _frida_trace(self, rec: RunRecord, client: str, script: str, suffix: str = "") -> None:
+    async def _tried(self, g: Guest, cmd: list[str], answer, what: str, pause_s: float = 10.0) -> Any:
+        """`cmd` on the seat with three tries 10 s apart, as the game check and log-count's copy try theirs (a busy
+        agent's "got timeout", a file refused for a moment): `answer` reads a finished exec, None for a try that
+        failed, and the first good answer is the value; three failed tries are a ValueError naming the last, and an
+        answer may raise one itself for a failure no try mends (SeatFileMissing, a source that is not there). An exec
+        whose answer the agent lost (E_PVE_EXEC_LOST) has ended on the seat, so that ProxmoxError is the caller's at
+        once. An exec that ran to its deadline (it "did not exit in" guest_task_timeout_s) is not tried again: three
+        such tries and their pauses held a trace's end for up to about 760 s (the re-review of 5b982dc6, nit 4). Nor is
+        one refused by an agent still busy past GuestControl's window, which a try would only spend again (the fresh
+        review of 5771141b, finding 2: 18 asks a log before the skip, about 220 s a Frida trace). The tries are
+        `pause_s` apart, 10 s but for log-count's 1 s (an until polls seat counts in 25 s windows)."""
+        why = ""
+        for attempt in range(3):
+            if attempt:
+                await asyncio.sleep(pause_s * self.s.time_scale)
+            try:
+                res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+            except ProxmoxError as e:
+                if "E_PVE_EXEC_LOST" in str(e):
+                    raise
+                if "still busy after" in str(e):
+                    raise ValueError(f"{what}: its agent stayed busy, not tried again: {e}") from e
+                if "did not exit in" in str(e):
+                    raise ValueError(f"{what} ran out its time, not tried again: {e}") from e
+                why = str(e)
+                continue
+            got = answer(res)
+            if got is not None:
+                return got
+            why = f"exit {res.exitcode}: {(res.err or res.out).strip()[:200]}"
+        raise ValueError(f"{what} failed three tries {pause_s:g} s apart, the last {why}")
+
+    async def _seat_copy(self, g: Guest, cmd: list[str], copy: str, pause_s: float = 10.0) -> tuple[int | None, int]:
+        """A copy `cmd` makes on the seat, whose last stdout line is "<the source's bytes at its open> <the copy's
+        bytes>" as log-count's copy prints them, and those two lengths from that line, three tries 10 s apart (_tried).
+        A copy whose exec answer the agent lost (E_PVE_EXEC_LOST) ran to its end on the seat, so its length then comes
+        from the copy itself, by one length exec under the same tries, the source's unknown (None); such a copy is
+        unchecked, since only the exec's own two lengths prove it whole, and no caller takes it: log-count counts none,
+        a log fetch is a note, a trace is not fetched whole (_log_count, _fetch_client_file, _frida_trace). A copy
+        shorter than its source at its open was cut short, since the sources only grow (the script's .log is opened
+        'a', frida_script_text; frida-inject's stdout appends), and is tried again as a failed one is. A copy whose exec
+        printed `missing <path>` instead (a client log's source that is not there, _fetch_client_file; log-count's tee
+        not there) is SeatFileMissing at once: no try finds it. A copy not there after its answer was lost is a plain
+        ValueError, a copy that failed, never SeatFileMissing, which a caller reads as its source not there (log-count's
+        tee then counts as empty: the check of 508697c3)."""
+        def copied(res) -> tuple[int, int] | None:
+            last = _last_line(res.out)
+            if res.exitcode == 0 and last.startswith("missing "):
+                raise SeatFileMissing(f"its source {last[len('missing '):]} is not there")
+            got = re.fullmatch(r"(\d+) (\d+)", last)
+            if res.exitcode == 0 and got and int(got.group(2)) >= int(got.group(1)):
+                return int(got.group(1)), int(got.group(2))
+            return None
+
+        try:
+            return await self._tried(g, cmd, copied, "its copy", pause_s)
+        except ProxmoxError as e:  # E_PVE_EXEC_LOST, the one error _tried passes on
+            lost = f"the copy's own answer lost ({str(e)[:120]})"
+            try:
+                return None, await self._seat_length(g, copy, f"its copy's length, {lost},", pause_s)
+            except SeatFileMissing as gone:
+                raise ValueError(f"its copy {gone}, {lost}") from gone
+
+    async def _seat_length(self, g: Guest, path: str, what: str, pause_s: float = 10.0) -> int:
+        """The length of the file at `path` on the seat by one exec, three tries `pause_s` apart (_tried): a file a
+        helper wrote for the runner to read (a screenshot's .b64 sidecar, a copy whose exec answer was lost). One that
+        is not there says so, `missing <path>`, and is SeatFileMissing at once."""
+        def length(res) -> int | None:
+            last = _last_line(res.out)
+            if res.exitcode == 0 and last.startswith("missing "):
+                raise SeatFileMissing(f"{last[len('missing '):]} is not there")
+            return int(last) if res.exitcode == 0 and last.isdigit() else None
+
+        cmd = ["powershell", "-NoProfile", "-Command",
+               f"if (Test-Path -LiteralPath '{path}') {{ (Get-Item -LiteralPath '{path}').Length }} else {{ 'missing {path}' }}"]
+        return await self._tried(g, cmd, length, what, pause_s)
+
+    async def _read_ranges(self, g: Guest, path: str, size: int) -> bytes:
+        """The `size` bytes of the file at `path` on the seat, a file the runner made there to read (a shared-read copy
+        whose exec printed its length, _seat_copy; a helper's .b64 sidecar, _seat_length), through Proxmox's own
+        ranged agent file-reads of READ_RANGE_BYTES (GuestControl.file_read_range, whose retry on "got timeout" is the
+        only retry). A file past FETCH_MAX_BYTES is refused before its first read. Each range must come back whole: one
+        that comes back short met the file's end first, a copy shorter than its length (an offset at or past the end
+        answers no bytes). The caller decodes the whole once, since a range boundary can fall inside a multibyte
+        character, and removes the file: one file by _read_back, a burst's frames by one exec for them all
+        (_remove_frames). A ProxmoxError (a read refused, a range that came back as no base64) or a ValueError (the
+        cap, a short read) is the caller's."""
+        if size > FETCH_MAX_BYTES:
+            raise ValueError(f"its copy is {size} bytes, past the {FETCH_MAX_BYTES} ({FETCH_MAX_BYTES // (1024 * 1024)} MiB) a fetch reads")
+        data = bytearray()
+        ranges = -(-size // READ_RANGE_BYTES)
+        for k in range(ranges):
+            at = k * READ_RANGE_BYTES
+            want = min(READ_RANGE_BYTES, size - at)
+            try:
+                got = await asyncio.to_thread(self.control.file_read_range, g, path, at, want)
+            except ProxmoxError as e:
+                raise ProxmoxError(f"range {k + 1} of {ranges}: {e}") from e
+            data += got
+            if len(got) != want:
+                raise ValueError(f"{len(data)} bytes read of its {size}: range {k + 1} of {ranges}, at {at}, came back "
+                                 f"{len(got)} of its {want}")
+        return bytes(data)
+
+    async def _read_back(self, rec: RunRecord, g: Guest, path: str, size: int, what: str) -> bytes:
+        """The `size` bytes of the file at `path` on the seat in ranges (_read_ranges), and then the file removed
+        (_removed). A ProxmoxError or a ValueError from the read is the caller's, after the removal, which runs whatever
+        happened: a copy that will not go is held open in the agent (a read or close that timed out keeps its handle in
+        a busy agent until it works through its queue; qemu-server 9.2.10's file-read left one for good when a read
+        died, Agent.pm at ec268ede5b lines 539-555), a note (_held) once its removal's window is spent, which the seat's
+        next reset removes. The frida traces, the client logs (_fetch_client_file, _log_count)
+        and the plain screenshots' .b64 sidecars come back through it, a burst's frames through _read_ranges and one
+        removal for them all (_remove_frames); _skse_logs is the fetch still read whole."""
+        came_back = False
+        try:
+            data = await self._read_ranges(g, path, size)
+            came_back = True
+            return data
+        finally:
+            await self._removed(rec, g, lambda: self._remove_try(g, path), {path: what}, set() if came_back else {path}, what)
+
+    async def _remove_try(self, g: Guest, path: str) -> tuple[set[str] | None, str]:
+        """One try at the file at `path` on the seat by one exec, Remove-Item and then Test-Path: the path still there
+        ({path}, or none for one gone), or None and the reason for an exec that failed or answered neither."""
+        cmd = ["powershell", "-NoProfile", "-Command",
+               f"Remove-Item -LiteralPath '{path}' -Force -ErrorAction SilentlyContinue; Test-Path -LiteralPath '{path}'"]
+        try:
+            res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
+        except ProxmoxError as e:
+            return None, f"{path} on {g.name} not removed: {e}"
+        said = _last_line(res.out)
+        if res.exitcode != 0 or said not in ("True", "False"):
+            return None, f"the removal of {path} on {g.name} answered exit {res.exitcode}: {(res.err or res.out).strip()[:200]}"
+        return ({path} if said == "True" else set()), ""
+
+    async def _removed(self, rec: RunRecord, g: Guest, attempt, whats: dict[str, str], died: set[str], what: str) -> None:
+        """Files the runner read on the seat, removed: the one helper every removal of a read file goes through,
+        _read_back's one file (so log-count's, the log fetch's, the traces' and the plain shots') and a burst's
+        sidecars (_remove_frames). `attempt()` is one try, one exec however many files (_remove_try, _remove_folder_try),
+        answering the paths still there (none: all gone) or None and the reason for an exec that confirmed nothing;
+        `whats` names each path's notes (its keys the files removed), `what` the removal's own, and `died` holds the
+        paths whose read died. First REMOVE_TRIES quick tries REMOVE_PAUSE_S apart, the pause times time_scale as
+        _tried's is, each try at every file still there; a try that finds a file still there with tries left is a note
+        naming the try for that file, so the notes show how often a file stays and for how long. A try that confirms
+        nothing is tried again while a file whose read died may still be there (the fresh review of e8d8de9b, nit 3: a
+        read that died is what leaves a handle open); with none such it is the removal's note and not tried again, as
+        is one that ran out its time, since a hung agent would hold the run's end (_tried's rule), each file whose read
+        died then taken as held at once. Then the window, REMOVE_BACKOFF_S apart: after each pause one guest-ping
+        (GuestControl.agent_ping), and each ping the agent answers brings another try, until the file goes or the
+        window is spent (the fresh review of 5771141b, finding 1: an agent that just answered four execs answers the
+        first ping, and one try 2 s on ended the window); a quick try refused by an agent still busy past
+        GuestControl's patience goes to the window at once, whose pings wait on it without an exec each. A file gone at
+        a try is a note; one still there past the window is held (_held): a note, never the seat's fault, its tries
+        and their whole span, as the runner's clock measures it, in the note."""
+        pending, why, spent, t0 = set(whats), "", 0.0, self._clock()
+        for k in range(1, REMOVE_TRIES + 1):
+            stayed, why = await attempt()
+            if stayed is not None:
+                if not stayed:
+                    return
+                pending, why = set(stayed), ""
+                if k == REMOVE_TRIES:
+                    break
+                for p in sorted(stayed):
+                    rec.notes.append(f"{whats.get(p, what)}: {p} still there at its removal's try {k} of {REMOVE_TRIES}, "
+                                     f"tried again in {REMOVE_PAUSE_S:g} s")
+            else:
+                suspects = sorted(pending & died)
+                if not suspects:
+                    rec.notes.append(f"{what}: {why}")
+                    return
+                if "did not exit in" in why:
+                    span = self._clock() - t0
+                    for p in suspects:
+                        self._held(rec, g, p, whats.get(p, what), f"{k} {'try' if k == 1 else 'tries'} over {span:.1f} s", why)
+                    return
+                if k == REMOVE_TRIES or AGENT_BUSY in why:
+                    pending = set(suspects)
+                    break
+                for p in suspects:
+                    rec.notes.append(f"{whats.get(p, what)}: {p} not confirmed gone at its removal's try {k} of "
+                                     f"{REMOVE_TRIES} ({why}), tried again in {REMOVE_PAUSE_S:g} s")
+            await asyncio.sleep(REMOVE_PAUSE_S * self.s.time_scale)
+            spent += REMOVE_PAUSE_S
+        tries, answered = k, False
+        for pause in REMOVE_BACKOFF_S:
+            await asyncio.sleep(pause * self.s.time_scale)
+            spent += pause
+            try:
+                pinged = await asyncio.to_thread(self.control.agent_ping, g)
+            except ProxmoxError:
+                pinged = False
+            answered = answered or pinged
+            if not pinged:
+                continue
+            stayed, said = await attempt()
+            tries += 1
+            if stayed is None:
+                # a file only taken as held keeps the newest reason; one a try found there stays found
+                why = said if why else ""
+            else:
+                for p in sorted(pending - set(stayed)):
+                    rec.notes.append(f"{whats.get(p, what)}: {p} gone at its removal's try {tries}, {spent:g} s after its "
+                                     "first, once the agent answered a ping")
+                pending, why = pending & set(stayed), ""
+            if not pending:
+                break
+        span = self._clock() - t0
+        counted = f"{tries} {'try' if tries == 1 else 'tries'} over {span:.1f} s"
+        how = (f"{counted}, the last once the agent answered a ping" if answered
+               else f"{counted}, and no ping answered in the {sum(REMOVE_BACKOFF_S):g} s after")
+        for p in sorted(pending):
+            self._held(rec, g, p, whats.get(p, what), how, why)
+
+    def _held(self, rec: RunRecord, g: Guest, path: str, what: str, how: str, unconfirmed: str = "") -> None:
+        """A file the runner read on the seat that would not go (_removed, `how` its tries): held open in the agent, or
+        taken as held (a removal that confirmed nothing, `unconfirmed`, after a read that died). The run's note, naming
+        the file and its seat, and never the seat's fault: a busy agent keeps the handle of a read or close that timed
+        out until it works through its queue (core's host journal, 2026-11-12), and the fault cost a rollback each time
+        and a mixed reset (c1's shot 076 at 20261112-081535, c2's 056 at 101523; x-two-hands' red at 082053 came from
+        one). Every run resets its seats, and the next reset removes the file: a rollback's disk, or the relaunch's
+        cleaning (_client_relaunch_ps), which rolls the seat back instead when it still finds a file held, a hold that
+        outlived the run gap (Runner._relaunch_seat's "leak"). What the next run reads never meets it: the shots', the
+        bursts', log-count's and the log fetch's names carry their run and a trace's copy its script's. A read that
+        failed is still the caller's, as it was (a run's own trace not fetched whole is E_RUN_FRIDA_FETCH, which names
+        the seat)."""
+        seat = f"{g.client} ({g.name})" if g.client else g.name
+        if unconfirmed:
+            held = f"{what}: {path} on {seat} taken as held open in the agent, its read having failed ({how}; {unconfirmed})"
+        else:
+            held = f"{what}: {path} on {seat} held open in the agent after its read ({how})"
+        rec.notes.append(f"{held}; left to the seat's next reset")
+
+    async def _frida_trace(self, rec: RunRecord, client: str, script: str, suffix: str = "") -> list[str]:
+        """A trace from its seat as frida/<client>-<script><suffix>.jsonl, the injector's .out and then the script's
+        .log, each as far as it came back whole. What did not is returned, a line a file ("<script>.<ext> on <client>
+        (<guest>) not fetched whole: <why>"), for the caller to judge: the run's own trace (RunRecord.frida) makes it
+        a lab fault, E_RUN_FRIDA_FETCH (_artifacts); any other trace's is a note."""
         g = self.tables.guest_for_client(client)
         if g is None or not g.managed:
-            rec.notes.append(f"frida {script}: {client} unmanaged; trace not fetched")
-            return
+            return [f"{script} on {client} not fetched: the seat is unmanaged"]
         (rec.dir / "frida").mkdir(exist_ok=True)
         name = f"{client}-{script}{suffix}.jsonl"
         # frida-inject's stdout, still open for writing while the game runs:
@@ -2118,25 +2762,35 @@ class Runner:
         # write access can, so it is copied that way first
         # the injector's .out (a load error; the injector exits once the script is eternalized) and then
         # the script's own .log (frida_script_text's preamble, flushed every 250 ms), each copied with a
-        # read that shares write access, since the script still holds its .log open
-        texts = []
+        # read that shares write access, since the script still holds its .log open; the copy prints its
+        # length last, as log-count's does (_seat_copy), and comes back in ranges (_read_back): read whole,
+        # prop-impulse.js's large .log timed out on both seats (20261111-191642-x-prop-blast) and the copy
+        # stayed held open in the agent
+        texts, lost = [], []
         for ext in ("out", "log"):
             src = f"{self.s.client_lab_dir}\\frida\\{script}.{ext}"
             copy = f"{src}.copy"
+            whole = f"{script}.{ext} on {client} ({g.name}) not fetched whole"
+            cmd = ["powershell", "-NoProfile", "-Command",
+                   f"if (Test-Path '{src}') {{ $s = [IO.File]::Open('{src}', 'Open', 'Read', 'ReadWrite'); $n = $s.Length; "
+                   f"$d = [IO.File]::Create('{copy}'); $s.CopyTo($d); $m = $d.Length; $d.Close(); $s.Close() }} "
+                   f"else {{ Set-Content -Path '{copy}' -Value '' -NoNewline; $n = 0; $m = 0 }}; Write-Output ([string]$n + ' ' + [string]$m)"]
             try:
-                cmd = ["powershell", "-NoProfile", "-Command",
-                       f"if (Test-Path '{src}') {{ $s = [IO.File]::Open('{src}', 'Open', 'Read', 'ReadWrite'); $d = [IO.File]::Create('{copy}'); "
-                       f"$s.CopyTo($d); $d.Close(); $s.Close() }} else {{ Set-Content -Path '{copy}' -Value '' -NoNewline }}"]
-                res = await asyncio.to_thread(self.control.exec, g, cmd, self.s.guest_task_timeout_s)
-                if res.exitcode != 0:
-                    rec.notes.append(f"frida {script}.{ext}: copy exited {res.exitcode}: {res.err.strip()[:200]}")
-                    continue
-                texts.append(await asyncio.to_thread(self.control.file_read, g, copy))
-            except ProxmoxError as e:
-                rec.notes.append(f"frida {script}.{ext}: {e}")
+                seat_n, size = await self._seat_copy(g, cmd, copy)
+                if seat_n is None:
+                    # log-count's rule (_log_count): only the copy exec's own "N M" proves a copy whole; this copy runs
+                    # without Stop, so a lost answer's copy may be the empty one a failed open left, an empty trace
+                    # with no fault (the final check of 7ebf12a7)
+                    raise ValueError("its copy's exec answer was lost, so the copy is unchecked")
+                # one decode of the whole; a character the copy cut mid-write at its end reads as U+FFFD
+                data = await self._read_back(rec, g, copy, size, f"frida {script}.{ext}")
+                texts.append(data.decode("utf-8", errors="replace"))
+            except (ProxmoxError, ValueError) as e:
+                lost.append(f"{whole}: {e}")
         if texts:
-            (rec.dir / "frida" / name).write_text("".join(t if t.endswith("\n") or not t else t + "\n" for t in texts))
+            (rec.dir / "frida" / name).write_text("".join(t if t.endswith("\n") or not t else t + "\n" for t in texts), encoding="utf-8")
             rec.artifacts.append(f"frida/{name}")
+        return lost
 
     @staticmethod
     def _client_names(scenario) -> list[str]:
@@ -2158,7 +2812,8 @@ class Runner:
         reference id, or a name a later refs table resolves), race-pick's
         race its form id, known's and held's ids theirs, inventory's ref its
         form id, transfer's item and its to or from theirs, alias's quest and
-        each of factions' factions theirs (ADR-068 rung 4), and a FormDesc in
+        each of factions' factions theirs (ADR-068 rung 4), script-vars' form
+        and quest-objectives' quest theirs (rung 5), and a FormDesc in
         braces inside console text the run's id in the console's hex
         ("player.equipspell {044d44:Apocalypse - Magic of Skyrim.esp} right"
         types 1a044d44 under the essentials layer)."""
@@ -2178,8 +2833,10 @@ class Runner:
                 out["ids"] = [self.tables.base_id(x) if isinstance(x, str) else x for x in out["ids"]]
             if action == "inventory" and isinstance(out.get("ref"), str):
                 out["ref"] = self.tables.base_id(out["ref"])
-            if action == "alias" and isinstance(out.get("quest"), str):
+            if action in ("alias", "quest-objectives") and isinstance(out.get("quest"), str):
                 out["quest"] = self.tables.base_id(out["quest"])
+            if action == "script-vars" and isinstance(out.get("form"), str):
+                out["form"] = self.tables.base_id(out["form"])
             if action == "factions" and isinstance(out.get("factions"), list):
                 out["factions"] = [self.tables.base_id(x) if isinstance(x, str) else x for x in out["factions"]]
             if action == "transfer":
@@ -2317,7 +2974,7 @@ def _relaunch_files_ps(lab_dir: str, game: str, files: list[dict[str, Any]], sto
     return "\n".join(out)
 
 
-def _client_relaunch_ps(lab_dir: str, driver_log: str, presets: list[str], stop: str, start: str) -> str:
+def _client_relaunch_ps(lab_dir: str, driver_log: str, presets: list[str], stop: str, start: str, client: str = "") -> str:
     """ADR-036's relaunch between runs as one PowerShell script for the guest agent (SYSTEM), its last stdout line one
     JSON object. A seat a hot push marked (<lab_dir>\\hot.txt, lab/tools/client-hot.sh:65) is left as it is and the mark
     printed: only a rollback undoes the push. Otherwise every running sky-lab task stops, as a snapshot's quiesce stops
@@ -2327,8 +2984,13 @@ def _client_relaunch_ps(lab_dir: str, driver_log: str, presets: list[str], stop:
     leaves on a seat that its rollback undid, by folder and name pattern, never a wildcard over the lab folder
     (launch.ps1 needs game-dir.txt and games\\):
     - frida\\: each run's script and its .out, .err and .log, and, as far as they go, the runner's shared-read .copy
-      of the last two (config.frida_exec_template, frida_script_text, Runner._frida_trace); frida-inject.exe and the
-      tools beside it stay;
+      of the last two (config.frida_exec_template, frida_script_text, Runner._frida_trace, Runner._read_back);
+      frida-inject.exe and the tools beside it stay;
+    - the lab folder's logcount-*.log.copy, as far as they go, log-count's shared-read copies (Runner._log_count,
+      logcount-<run>-<index>-<n>.log.copy and its -console twin, and the older logcount-<index> ones), by that pattern
+      alone; and the seat's `client`.log and `client`-*.log there, as far as they go, the SKSE folder logs' copies
+      (Runner._skse_logs) and the log fetch's older ones, and *-`client`.log and *-`client`-*.log, the log fetch's
+      copies named by their run (Runner._fetch_client_file), each made anew by the run reading it;
     - shots\\ (a screenshot step's copy and its base64 sidecar, a burst's frame folder), screenshots\\
       (screenshot.ps1's captures and latest.png), burst\\ and input\\ (their tasks' request and done files);
     - every recorded game folder's RaceMenu presets: skymp5-client's thuum-*.jslot (raceMenuService.ts) and
@@ -2371,11 +3033,20 @@ def _client_relaunch_ps(lab_dir: str, driver_log: str, presets: list[str], stop:
         "}",
         "Clean (Join-Path $lab 'frida') @('*.js', '*.js.out', '*.js.err', '*.js.log') @()",
         # the capture folders and the trace copies the agent read back are cleaned as far as they will go: a file a
-        # timed-out guest-file-close left open in the agent (proxmox.py file_read, 2026-10-17) stays until the VM
-        # restarts, and failing the try on it cost a rollback (sky-c2, b-cloak-fight 20261030-053144: 025.png.b64 and
-        # 032.png.b64; sky-c1, x-quest-mode 20261030-131512: story-location-20261030-131130-x-story-arrival-login-13
-        # .js.log.copy); the next capture writes its own name, and a copy carries its run's script name
+        # timed-out guest-file-close left open in the agent (proxmox.py file_read, 2026-10-17) stays until the agent
+        # works through its queue, or until the VM restarts on qemu-server 9.2.10, and failing the try on it cost a
+        # rollback (sky-c2, b-cloak-fight 20261030-053144: 025.png.b64 and 032.png.b64; sky-c1, x-quest-mode
+        # 20261030-131512: story-location-20261030-131130-x-story-arrival-login-13.js.log.copy); each capture carries
+        # its run's name, and a copy its run's script name, so the next run never reads one left here. A copy leaves
+        # the seat once read (Runner._read_back); one here is a copy the agent held past its removal (Runner._held).
+        # log-count's copies in the lab folder go the same way, by that pattern alone: the code before 9e37956b never
+        # removed one, so seats carry many, and a lost answer's copy is left unread (Runner._log_count). The log fetch's
+        # copies go the same way: since a file still held after its removal is a note and no longer a rollback, this is
+        # the reset that takes it, and one still held here outlived the run gap, so the seat rolls back instead
+        # (Runner._relaunch_seat's "leak")
         "Clean (Join-Path $lab 'frida') @('*.js.out.copy', '*.js.log.copy') @() -soft",
+        "Clean $lab @('logcount-*.log.copy') @() -soft",
+        *([f"Clean $lab @('{client}.log', '{client}-*.log', '*-{client}.log', '*-{client}-*.log') @() -soft"] if client else []),
         "Clean (Join-Path $lab 'shots') @('*.png', '*.png.b64') @('*-burst') -soft",
         "Clean (Join-Path $lab 'screenshots') @('*.png') @() -soft",
         "Clean (Join-Path $lab 'burst') @('request.json', 'done.json') @()",

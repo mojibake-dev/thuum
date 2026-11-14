@@ -224,9 +224,19 @@ ssh_srv "$dc pull -q skymp-server-test skymp-server-legacy"
 # server under test numbers light plugins apart (docs/verbs/light-plugins.md).
 # No session names a light plugin's form.
 ssh_srv "cat > /srv/lab/server/t2-load-order.json" < lab/deploy/sky-srv/server-settings-t2-load-order.json
-ssh_srv "python3 - /srv/lab/server/server-settings.json /srv/lab/server/t2-load-order.json /srv/lab/server/server-settings-t2.json /srv/lab/server/server-settings-legacy.json" <<'PY'
+# rung 5's quest keys stay in T2's settings when the head's own difftest declares their login watch (the t:81 entry
+# in skymp-wire/difftest/divergences.yaml, train 52 with the drain fix, fork 1bb3893b); an older head, or one this
+# checkout has not fetched, keeps them popped, so a T2 of any head is consistent with its own declarations. The fork
+# is read where FORK_DIR names it (verb-stage's and verb-merge's default): a worktree's skymp/ is an uninitialized
+# submodule directory, so git would walk up to the thuum worktree and find no fork commit (numidium, 2026-11-11)
+r5_keys=pop
+if [ -n "${head_commit:-}" ] && git -C "${FORK_DIR:-skymp}" show "$head_commit:skymp-wire/difftest/divergences.yaml" 2>/dev/null \
+     | grep -Eq 'msg: \{t: 81[,}]'; then
+  r5_keys=keep
+fi
+ssh_srv "python3 - /srv/lab/server/server-settings.json /srv/lab/server/t2-load-order.json /srv/lab/server/server-settings-t2.json /srv/lab/server/server-settings-legacy.json $r5_keys" <<'PY'
 import json, sys
-deployed, pinned, t2, legacy = sys.argv[1:5]
+deployed, pinned, t2, legacy, r5_keys = sys.argv[1:6]
 d = json.load(open(deployed))
 d["loadOrder"] = json.load(open(pinned))
 # the weather (thuum docs/verbs/weather.md): the deployed lab pool alternates two weathers every ten game
@@ -235,6 +245,24 @@ d["loadOrder"] = json.load(open(pinned))
 if d.get("weatherSync"):
     d["weather"] = {"changeGameMinutes": 1440, "seed": 1,
                     "pools": {"3c:Skyrim.esm": [{"weather": "12f89:Skyrim.esm", "chance": 100}]}}
+# rung 5's quest keys (thuum ADR-068 rung 5, r5-settings, deployed with rung 5's stage 2026-11-10): the legacy server
+# has none of their words (ScriptVariables' login watch, the player-class split, the derived quest scope), so each one
+# was an undeclared divergence in every session: m4-scripts-5-second f6ca339d's T2 of 16:40Z, 413 watch lines over all
+# 52 sessions, where every green T2 before the deploy (013692c7 at 10:29Z) had none. T2 compares the two stacks on
+# what both know, as it pins the load order and the weather; no T2 session runs with these keys, so T0 and T3 prove
+# them. The pin also keeps difftest's stdout deadlock out of T2: its run_stack reads c1's stdout to the end before
+# c2's, and a keyed login's ~91 KB of watch lines fill sky-srv's 64 KiB pipe, so c2's script blocks until c1 quits
+# (20 of that T2's 22 declared-but-absent relays; only player-own's two starts were the keys' own, E_QUEST_PLAYER by
+# design). The keys come back with the drain fix (fork m4-difftest-drain 1bb3893b) and the t:81 lines declared: a
+# head whose divergences.yaml declares the watch keeps them (r5_keys "keep", read from the head above)
+R5_KEYS = ("conditionVariables", "playerQuests", "playerQuestVariables", "playerQuestGlobals", "playerQuestCallers",
+           "questScope")
+if r5_keys == "keep":
+    print("   rung 5's quest keys kept: the head's divergences.yaml declares their login watch (t:81)")
+else:
+    for k in R5_KEYS:
+        d.pop(k, None)
+    print("   rung 5's quest keys popped: the head declares no t:81 login watch (a head before train 52's drain)")
 json.dump(d, open(t2, "w"), indent=2)
 d["loadOrder"] = [p for p in d["loadOrder"] if not p.lower().endswith(".esl")]
 json.dump(d, open(legacy, "w"), indent=2)

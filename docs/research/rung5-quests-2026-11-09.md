@@ -200,10 +200,17 @@ The core:
   seat. `acting` stamped: the report's own when it names a connected player's actor, else the reporter (E_QUEST_ACTING once a
   minute per seat). The stage line "[verb:quest-stage] {:x} set {} stage {}: recorded, relayed to {}" (:3461) byte for byte:
   b-quest-stage, b-quest-rumor and b-quest-stage-restart grep it. R0 record, R1 feed as before; the reported `acting` is R2.
-- SendQuestStages (:6695-6746): the order becomes the list message (unchanged; mode all names denied ∪ player), served start
-  words for recorded-running quests, served stages (no acting), served stop words for recorded-stopped quests; the
-  start-game-enabled skip (:6729-6737) deleted. The login line (:6741-6745) byte for byte, with one beside it: "QuestStage: actor
-  <id> sent <n> running and <m> stopped quest(s) around the stages after a login".
+- SendQuestStages (:6695-6746): the order becomes the list message (unchanged; mode all names denied ∪ player), served start words
+  for recorded-running quests and for recorded-stopped quests whose stages the login replays, served stages (no acting), served
+  stop words for recorded-stopped quests, so per quest the replay reads its start (its start-up stages in `wordStages`), its
+  stages ascending, its stop, and a stopped quest with no stage to replay gets its stop alone; the start-game-enabled skip
+  (:6729-6737) deleted. The login line (:6741-6745) byte for byte, with one beside it: "QuestStage: actor <id> sent <n> running
+  and <m> stopped quest(s) around the stages after a login, <k> of the stopped started ahead of their stages (D-Q3 A)". CORRECTED
+  2026-11-10 by fork m4-scripts-5-loginstart f2689cfa (merged at m4-scripts-5-second f6ca339d; D-Q3 A): this plan served a
+  recorded-stopped quest its stages and its stop with no start word, and its line had no <k>, so a fresh seat's first replayed
+  stage started the quest with its start-up fragments unsuppressed (a static read found it, the code at 685f6a24 confirmed it);
+  the starts now come from wire-rules quest_runs at_login (quest_runs.rs :438-457 at f6ca339d), the order and the line from
+  SendQuestStages :7894-7957 at f6ca339d.
 - The record (rule 6): MpChangeFormREFR (the journal, PartOne::WorldJournal, PartOne.cpp:3654) gains `std::optional<std::vector<
   QuestRun>> questRuns` and `std::optional<std::vector<ScriptVariableRecord>> scriptVariables` beside questStages
   (MpChangeForms.h:265) and aliasFills (:394-420), inside ToTuple (:455-462); keys "questRuns" and "scriptVariables" beside
@@ -404,7 +411,7 @@ T0:
 - wire-validate: check_quest_stage's word, acting and served cases; check_script_variables; proptests (.claude/rules/rust.md: no
   panic from a packet).
 - unit/QuestStageTest.cpp v2: replaces the D62 and D69 case (:340) (a start-game-enabled quest's stage 0 is the start word's: the
-  run recorded, no stage, no E_QUEST_ line; its start-up stage recorded like any other); a start recorded and relayed with the
+  run recorded, no stage, no E_QUEST_ line; its start-up stage recorded like any other; REVISED 01:34 PST 2026-11-10, fork ef9215c9: a report of a start-up stage, QUST INDX, is the start word's as stage 0's is, read 5 generalized, so b-quest-rumor's kept HeartwoodMill claim "set e3ea5:Skyrim.esm stage 10" == 0 holds); a start recorded and relayed with the
   reporter as acting; a repeated start folded (no relay); a stop relayed; a denied quest's word refused E_QUEST_DENIED;
   E_QUEST_PLAYER under `questScope` "aliases", none under "off"; a report's acting relayed as reported; an acting naming no
   connected player stamped as the reporter, E_QUEST_ACTING; the login: the list, starts (served), stages (served), stops (served),
@@ -688,6 +695,24 @@ Reads:
     knows recorded, Playable, restricted and permitted only; no twin, nor WerewolfBeastRace 0xcdd84, nor DLC1VampireBeastRace
     0x0200283a is Playable (esm.py races), so even the menu refuses them (E_APPEARANCE_RACE, :1364). rotfernRaceVampire 0x19d08 is
     Playable and restricted to profile 1.
+20. The platform's SendEvent gate blanks the per-player quests' own scripts (the transformation drafter's read, 2026-11-09,
+    after this section's plan). At canon the gate (FridaHooks.cpp:834-896 at 762305f1) admits a hosted world script, a class
+    AdmittedByChain names and four scripts by name (RaceMenu*, GRIM_ALT_TeleportationMarker, WB_DestroyAfterDelay_Script,
+    defaultDisableHavokOnLoad), and the branch before it an effect the player bears or cast (:802-828); a quest's own scripts
+    and its aliases' are none of these, so PlayerVampireQuestScript's OnUpdateGameTime never fires (the stage never past 1) and
+    the beast form never ends by itself. The fix is the ownership rule, no name list: each seat runs its own player's per-player
+    quests. Landed on m4-scripts-5-quests 44ffafc2: the login's list message carries `player`, the whole player class while
+    questScope is "derived" (fork m4-scripts-5-server dc5c51ec, fixture 57-QuestStage-6; docs/WIRE.md's QuestStage row);
+    skymp5-client hands it to the platform's new export setPlayerQuests (PuppetApi.cpp:457-480, ActingScope::PlayerQuests, the
+    set replaced whole) at every login, game load and plugin reload ("[verb:quest-stage] player quests: <n> told to the platform
+    at the login") and never reports a player-class quest; and the gate's player-quest branch (FridaHooks.cpp:934-962, after the
+    effect branch and before the class-chain test, never asked for an actor's or a reference's event) passes an event to a quest
+    in the set or to an alias of one (PlayerQuestOfHandle :245-283: TESQuest::FORMTYPE, else the three alias VM types and
+    BGSBaseAlias::owningQuest), tallied " (player quest)", its first admission per quest logged ("[verb:quests] <event> to
+    handle <h> passed (player quest): a script of <q>, this seat's own player's quest (<n> so far)"). An effect the player bears
+    or cast (Sanguinare Vampiris's VampireDiseaseEffectScript among them) passes the effect branch as before (:922-932).
+    HYPOTHESIS H-PQ1: HandleIsType(Quest) holds for a quest's own handle (the gate never resolved a quest's handle before); if
+    not, the quest's scripts stay blanked while its aliases' pass. x-vampire-stage (the stage past 1) and the gate's line read it.
 
 ### (a) Scope 1, the classification
 

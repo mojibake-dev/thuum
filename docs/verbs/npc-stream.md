@@ -48,7 +48,7 @@ Dynamic plan), the records (riverwood-ids.md) and the code read:
 | the engine's BGSActions (the attack, the power attack, the draw and sheathe: r-npc-fight's three IsAttacking windows and 22 moveStarts on one bandit, readings-18:67-71) | trace | native on the host, imposed on a puppet (R2): UpdateAction 44 extended from the player to the actors this game hosts (ADR-035 point 5: "actions ride cast-action's action replay (ADR-032), extended from players' figures to NPCs"; cast-action.md:229 left them "a later slice"): the native PerformAction hook's filter widened from the player to a hosted set (FridaHooks.cpp:455-470 reads `data->source.get() == player` at :460); a puppet performs them through performAction with the variables first, as a figure does (formView.ts:613, the method :824); H2 CONFIRMED (172720: every streamed attack performed through the entry on the AI-off puppet); the event an action carries is not re-sent as an animation event; H1 CONFIRMED (101422: an action's events ride the mark) |
 | health, magicka and stamina as the host's engine moves them (regeneration; a bandit's hit on a bandit; a fall; a script) | trace (r-npc-fight's bandit took none; the engine alone's NPC values are not in a trace yet), code | native on the host, imposed on a puppet from the server's record: R2 for the numbers, recorded from HostedActorState (new, MsgType 51) under R1 bounds (finite, 0 to 1 inclusive, and the attributes hold, wire-rules attributes.rs, the players' rule: a host's report cannot undo a value the server lowered itself); at most twice a second per actor; the server tells the other games as ChangeValues 16, the path a figure's values take (remoteServer.ts:882-904); a report of 0 does not kill: a death is the server's (R0, npc-fate), the record floors at one point and the floor logs (Server) |
 | the combat target and the combat state (a hit drafts the actor, combatTarget the player, inCombat true: readings-18:100-102; TESCombatEvent) | trace | native on the host; recorded in memory (R2) from HostedActorState (the target's identity; the look point stays in the movement sample, movementGet.ts:46-56, where the puppet's head tracking reads it, movementApply.ts:37-56); never imposed on a puppet (npc-puppet's H6: a puppet is never in combat); restored at a promote: later, npc-handoff |
-| the running package and its changes (the schedule switch at 8:00, Hod back to the mill, readings-17:39-43; packageStart, packageChange, packageEnd) | trace (the Papyrus getter read 0x3EAB9 at every read, AI on or off and mid-recoil, readings-17:67, readings-18:77-82 and :116-118), code | native on the host; recorded in memory (R2) from HostedActorState, an observation only: nothing imposes a package on a puppet (Skyrim Together's package sync, written, crashed and compiled out, te-npcs.md section 3); the proposed source is Skyrim Platform's package events, not the getter (ADR-034; H3, HYPOTHESIS until b-npc-stream-state's claim, drafted and not committed: a c1 log-count of the sender's package-event line for 0x13483 across 8:00, gameHour 7.9 for 60 s, `>= 1`, with c1.npc_state(0x13483).package recorded before and after, the line's text the fork's, 9b7be620; b-npc-stream-state.yaml, promoted from P5 163259, carries no package line, so the read waits on the claim's own commit, rule 13, and a gate, P3 222300 and P5 163259 having asserted nothing on the package); what the getter's one id means is the open question stated under Engine surface, the package |
+| the running package and its changes (the schedule switch at 8:00, Hod back to the mill, readings-17:39-43; packageStart, packageChange, packageEnd) | trace (the Papyrus getter read 0x3EAB9 at every read, AI on or off and mid-recoil, readings-17:67, readings-18:77-82 and :116-118), code | native on the host; recorded in memory (R2) from HostedActorState, an observation only: nothing imposes a package on a puppet (Skyrim Together's package sync, written, crashed and compiled out, te-npcs.md section 3); the proposed source is Skyrim Platform's package events, not the getter (ADR-034; H3 CONFIRMED from the server's logs, read 2026-11-11 for M3's paper close: the state line's package is filled only by a packageStart or packageChange event on the host, slice 2 as built, and hosted actors' lines carry nonzero packages, Sigrid's d2c5c from ff000001 in x-handoff-cross 20261027-211054, Hod's 734cd and Gerdur's ff000c38 from ff000000 in x-cloak-hostile 20261030-130606; no claim singles out the 8:00 switch itself, b-npc-stream-state.yaml carrying no package line); what the getter's one id means is the open question stated under Engine surface, the package |
 | what the actor wears and holds (the server's EquipBestWeapon on a hosted caster, MpActor.cpp:193, skymp-hosting.md:130; the engine's own equips under its packages; ActorEquipManager) | code | native on the host, imposed on a puppet (R1): UpdateEquipment 5 under the actor's own idx from the host's half-second poll (slice 3: a poll, not the equip events, which were the player's alone, sendInputsService.ts:55-103, :287-290), validated against that actor's own inventory and base spells, recorded on that actor (today the handler writes the sender's record whatever the idx, ActionListener.cpp:873-876 and :1024-1025: the latent corruption skymp-hosting.md:131 names), relayed reliably; a puppet applies it as every view does (formView.ts:655-675); the client's -1 inventory count that the wire's u32 refuses (docs/LOG.md:2245, 2026-10-22 03:19, c2's 1,835 refused UpdateEquipment sends) is this row's prerequisite |
 | the actor's inventory changing on the host (a pickup, loot taken, an arrow spent) | ADR-035 point 6; PLAN.md:1045-1047 | later: npc-fate, on ADR-035 point 6 (docs/DECISIONS.md:1302-1305: inventories are R0, the server's); open question for Eli: docs/PLAN.md:1045-1047 has inventory changes streaming from the host as R2 with cheap bounds, the ADR has them R0, and the two have not been reconciled; this doc follows the ADR and carries no inventory_delta either way (the M0 row's field, Message contract) until he says which |
 | the actor's death on the host (NPC against NPC, a fall, a trap) | ADR-035 point 6 | later: npc-fate (deaths that persist, R0); until then a puppet shows the relayed isDead as today (movementApply.ts:73, deathService), a corpse the server's record calls alive: carried by name, with H9's count |
@@ -282,14 +282,15 @@ Skyrim Platform already sinks or from a hook cast-action already owns
   hook added with minSelfId and maxSelfId both the actor's local id (the
   driver's shape, lab/driver/src/index.ts:945) and removed through
   hooks.sendAnimationEvent.remove (skyrimPlatform.ts:1596-1597) when the
-  word flips away (H10, HYPOTHESIS: a handler removed mid-game stops its
-  callbacks at once; no source has ever been removed in this client,
-  skymp-hosting.md:316-320; the read is a count of "No permission to update
-  actor 1348[23]" in x-handoff-cross 211054 and 230629, whose passes flip
-  the word, a count not yet taken of logs in hand,
-  b-npc-handoff-cross.yaml:68-79 claiming "may not move 13483" == 0 and not
-  this line: zero confirms H10, nonzero becomes b-npc-handoff-cross's
-  claim); the PerformAction hook's native filter widened to a
+  word flips away (H10: a handler removed mid-game stops its callbacks at
+  once; no source had been removed in this client before,
+  skymp-hosting.md:316-320; CONFIRMED by the count this line named, "No
+  permission to update actor 1348[23]", taken 2026-11-11 for M3's paper
+  close from the server logs of x-handoff-cross 20261027-211054 and
+  20261027-230629: zero in both, where Sigrid's simulation moved from
+  ff000000 to ff000001 in each, and across Sven's 25 D9 flips in 211054 one
+  refusal for him, in the flip's own millisecond (21:15:02.308), a send in
+  flight rather than a callback after the removal); the PerformAction hook's native filter widened to a
   hosted set (Hosted.h beside Puppets.h, the same mutex-guarded set, written
   by a setHosted(actorId, bool) export from HostService at the word's flip,
   read at FridaHooks.cpp:455-470 beside the player test); Skyrim Platform's
@@ -422,7 +423,25 @@ accepted. A relayed arrow's flight on the watcher against the host's launch
 (H-53e) is a screenshot read no probe takes: one relayed arrow flew on c2
 per shot and none of the puppet's own (x-npc-archer 032303), Eli read 'bows
 work' in playtest 35's Bleak Falls note, and the hit is the server's number
-whatever the arrow's path.
+whatever the arrow's path. Named at M3's paper close (2026-11-11): a
+creature's cast reaches the server by the spellCast event (five of five in
+x-cloak-hostile 20261030-130606, the spell in the atronach's left slot), so
+the launch report and its 400 ms dedupe (H-53f) are unexercised in both runs
+that counted them (x-npc-creature-caster v2 20261029-205125 and 130606, the
+launch lines 0 and 0); a creature whose cast fills no slot is the dedupe's
+first read, and a cast doubled on a watcher its symptom. The cloak on a
+stranger (H-53h): the server applies a cloak's damage only across a counted
+hit, so a player in an atronach's cloak before any blow takes none, where
+vanilla likely burns him (the engine answered 1 for the player against the
+atronach in 130606's trace, its asking caller unnamed); M3-CLOSE's bonus read
+carries the look. A leveled mage's spell list through the template chain
+(H-53a) is unread (both mages read were plain NPC_s, 0x39d37 in x-npc-caster
+032625 and 0xc3c9f in x-npc-spell v2 000211), and a miss costs a seat
+nothing: a hosted cast the record's hands lack is recorded and relayed with
+an E_CAST_UNKNOWN line. The puppet's face against the point heuristic
+(H-54c, per-sample jitter of the gaze and the expression on the watcher) is
+unread, x-puppet-head-face v2 written and unrun: a look's quality with no
+state for two seats to diverge on, M3-CLOSE's other bonus read.
 
 ## Message contract
 
@@ -749,10 +768,12 @@ slots (EventHandler.cpp isCastValid), and a creature's AI cast fills none (which
 the host, and a Frida plan on MagicCaster's CastSpellImmediate, ActorMagicCaster::SpellCast and FinishCast by
 CommonLib name). Built: the host reports a hosted actor's spell LAUNCH (the launch hook admits hosted shooters) as
 its SpellCast under the caster's id with the launch's hand, origin and angles when no cast event claimed it within
-400 ms, the two deduping each other (H-53f, HYPOTHESIS until x-npc-creature-caster v3 records the launch counts: v2
-20261029-205125 held 14 of 15 with c1's "hosted launch" and "hosted cast from its launch" lines at 0 and 0 while the
-server accepted four casts, so the launch-report path never fired, the dedupe was unexercised and the path that reported
-the casts is unnamed; v3, 14:00 PDT, records those counts, unrun); the watcher's creature puppet
+400 ms, the two deduping each other (H-53f, a named limit since 2026-11-11, Known limits: v2 20261029-205125 held 14 of
+15 with c1's "hosted launch" and "hosted cast from its launch" lines at 0 and 0 while the server accepted four casts, and
+x-cloak-hostile 20261030-130606, the same frame, took the counts v3 was written for, 0 and 0 again against five casts,
+each reported by the spellCast event with the spell in the creature's left slot, c1's "spellCast event for hosted
+ff000928: spell 7e882, slots left 7e882 ... reported"; so the path that reported the casts is named and the launch
+report and its dedupe are unexercised); the watcher's creature puppet
 casts and ends without graph variables (MagicApi's HasMasterGraph: a non-master graph skips the apply instead of
 returning, H-53g); the server stands a known constant-effect ability as the cast behind a cloak's hit
 (PartOne::AbilityReaching over KnownBaseSpells' reached spells), so the atronach's cloak damage lands at the reach
@@ -780,16 +801,36 @@ atronach's own host standing in the cloak (playtest 37's seat), is refused "its 
 health unchanged, the engine's rule between strangers; a claimed Firebolt of the atronach's begins the fight with the
 other player (health 0.9, GetFights().between, no StartCombat notice, the pair kept through a TickFights); then
 the cloak's first report on that player lands one cadence, 0.5 s (wire-rules casts REACHED_TICK_MS) of magnitude 10, 5
-of the recorded 250: 0.9 to 0.88, with no E_CONDITION_UNKNOWN. HYPOTHESIS (H-53h, what remains; the read is
-lab/frida/cloak-hostile.js under x-cloak-hostile's frame, both by path since 16:39 and 16:40 PDT 2026-10-29 and unrun;
-x-npc-creature-caster 205125 carried no trace): the engine's own 719 with a null parameter on an aggressive creature,
-whether a creature whose AI means to attack the player counts as hostile to it before any blow (then the single-player
-cloak burns a player it has not yet hit, where the server's table waits for a counted hit); the script hooks
-IsHostileToActor (Actor.h:593, its id by `just addr`) on the host's seat and logs self, other and the result at the
-first cloak proc before any counted hit: 1 means vanilla burns strangers, a limit to declare, 0 means the rule matches;
-no new notice reaches a seat, the StartCombat stays between players.
+of the recorded 250: 0.9 to 0.88, with no E_CONDITION_UNKNOWN. What remained of H-53h is a named limit since
+2026-11-11 (Known limits): the engine's own 719 with a null parameter on an aggressive creature, whether a creature whose
+AI means to attack the player counts as hostile to it before any blow (then the single-player cloak burns a player it has
+not yet hit, where the server's table waits for a counted hit). Its trace ran on 2026-10-30 and is read here:
+x-cloak-hostile 20261030-130606, green, with lab/frida/cloak-hostile.js on the host (IsHostileToActor, Actor.h:593, its
+id by `just addr`), logged the answer 1 for the player against the atronach (self 0x14, other ff000928, the atronach's
+copy on c1 by c1.log's setHosted line; eleven calls from one caller) and 0 for every resident against the player, with no
+counted hit on either player in the run (the scenario's own claim, 0 "OnSpellHit - Target ff000000"). The doc's rule was
+1 means vanilla burns strangers, a limit to declare, 0 means the rule matches; the step left unread is that the asking
+caller is the cloak's condition, since the trace ran without backtraces. No new notice reaches a seat, the StartCombat
+stays between players.
 
 ## Dynamic plan (fill when any tag above is still HYPOTHESIS)
+
+2026-11-11, M3's paper close: one tag stays open, the later response lines
+(Train 56's voice paragraph), and its read is the first line below; H3 and H10
+are read from logs in hand (the Inventory's package row, Observe), and
+H-53a, H-53f, H-53h and H-54c are named limits (Known limits).
+
+- The later response lines (M3-CLOSE's row 10): x-npc-voice-lines (a probe
+  file written 00:16 PDT 2026-10-28, never run; the results index holds no run
+  of it): c1 talks to a held Sven through a topic whose info has two or more
+  responses, c2 watches his puppet; claims on c2: the first line started, at
+  least one continuation started from DriveVoice, at least two ends, and the
+  server's one ActorSpeech per info. lab/frida/voice-lines.js rides it on c2
+  this time (39643 entered once per response, 39632 never for the puppet's
+  handle), since its host-side run x-voice-lines 20261028-131134 met
+  single-line infos alone; x-voice-inflight v2, a probe file never run, records
+  whether the started continuation sounded, the half Eli heard in playtest 37. Owner:
+  agent; Eli's ear at the row's sitting.
 
 2026-10-28, the fragment gate (playtest 37, Eli: "if i ask 'what do you have
 for sale' the trading menue is opened for both people"; the re-analyst's
@@ -1857,8 +1898,8 @@ gaze targets taken on c2's puppets within the relay's sample) and ticked at
 T4 for heads toward players (playtest 37 finding 9), the NPC-to-NPC partner
 D53's design item; H-54b (the Mood mapping reads right on the puppet's face)
 WITHDRAWN (read B, 2026-10-28: the override leaves the puppet path); H-54c
-(no per-sample jitter against the heuristic) HYPOTHESIS until
-x-puppet-head-face (54's stage, second read). Probe x-npc-stream-face by
+(no per-sample jitter against the heuristic) unread, a named limit since
+2026-11-11 (Known limits). Probe x-npc-stream-face by
 path (30 steps). The cadence row (P3) and slice 4's counters, budgets and
 parity scenario follow on this train.
 
@@ -1936,7 +1977,8 @@ sample ("face: 3550c gaze -> 13483 (slot 1)", "35534 gaze -> 13491 (slot
 eye (playtest 35). H-54b read: 18 non-neutral expressions on c2 ("face:
 1348c expression 1 50 (mood 8)", anger at 50 as Mood 8; neutral 0 at mood
 7), the mapping as the table says. H-54c (no jitter against the heuristic)
-stays HYPOTHESIS until x-puppet-head-face (v2, by path 2026-10-28 16:31,
+is a named limit since 2026-11-11 (Known limits), its read
+x-puppet-head-face (v2, by path 2026-10-28 16:31,
 unrun): it records six paired face-keyframes samples and claims only the
 speech, say and gaze log lines, so the equality claim, c2's expression equal
 to c1's at every pair and changing no more often, still waits on the lab-api
@@ -2017,7 +2059,8 @@ player (the hands recorded and relayed, a sword refused; the cast recorded
 and relayed, its hit claimed once; a hit with no cast refused; an unlisted
 spell's cast recorded and its hit landing by reach; a touch cast relayed at
 its first hit). H-53a (the template chain gives a leveled mage's list)
-HYPOTHESIS until a leveled mage is placed in x-npc-caster's frame (an
+unread, a named limit since 2026-11-11 (Known limits), its read a leveled
+mage placed in x-npc-caster's frame (an
 LVLN-templated mage NPC_ by esm.py; the claim E_CAST_UNKNOWN == 0 for it):
 both mages read so far are plain NPC_s (0x39d37 in x-npc-caster 032625, zero
 E_CAST_UNKNOWN; 0xc3c9f in x-npc-spell v2 000211, on 50b before train 53's
@@ -2152,6 +2195,8 @@ decided nothing; under play the continuation's say returned 'started' for
 the second response (playtest 37 findings 4 and 14) while Eli heard half,
 and whether it sounded is x-voice-inflight v2's recorded read. The different
 greeting was two greeting infos 147 ms apart, the puppet starting the first.
+Kept open by M3's paper close (2026-11-11), the one tag left in this doc: it
+is M3-CLOSE's row 10, and its read is the Dynamic plan's later-lines line.
 
 ### Train 57, Dynamic: the later response lines (the re-analyst's read, 22:36 PDT 2026-10-27)
 
@@ -2283,7 +2328,7 @@ H6, the hosted set, still open). Slice
 4's voice line read twice by the re-analyst and BUILT 2026-10-26 05:33 PDT
 on fork branch m3-npc-voice 614eadbe (the sink, the native, the detour's pair, the
 message with its validator and fixtures, the server relay, the client
-service; HYPOTHESIS V1 to V4 for P7); the rest of slice 4 waits on the
+service; V1 to V4 for P7, CONFIRMED since by P7 v5 20261027-083204); the rest of slice 4 waits on the
 stage's reads (P4 to P6 queued behind the nightly, numidium's chain). Open questions for Eli before the build as
 they stood, each stated once in its section: (1) the epoch on
 HostedActorState alone, not on the players' hot messages (Authority); (2)
@@ -2307,7 +2352,12 @@ Inventory's voice row).
 - [x] native hook + T1 (no new Address Library id in slices 1 to 3; the voice slice's ids are the re-analyst's reads, their T1 the stage's log lines)
 - [x] TS handler
 - [x] T2 green (the v2 and v3 stages, 17:05Z and 18:01Z)
-- [ ] T3 scenario green, no HYPOTHESIS tags
+- [ ] T3 scenario green, no HYPOTHESIS tags (2026-11-11, M3's paper close: of the ten tags open that day, three CONFIRMED (H3
+  and H10 from the logs of 20261027-211054, 20261027-230629 and 20261030-130606; V1 to V4 by 20261027-083204), one REFUTED
+  (the AddItems cause of b-npc-stream-equipment's reds, by 20261110-062127), five named limits (H-53a, H-53f, H-53h and
+  H-54c twice), and one kept with a Dynamic plan line, the later response lines, so the box stays unticked; eight lines still
+  carry the static-confirmation label ADR-064 decision 1 retired, with no run on the line, open claims that verb-lint counts,
+  the next pass's)
 - [ ] parity scenario green, or its later list reviewed with it (ADR-031)
 - [ ] sequences and combinations green, every checklist item with its scenario (ADR-033)
 - [ ] ledger and suppression registry updated
@@ -2329,7 +2379,7 @@ Inventory's voice row).
    for the owner and the epoch; the budgets once measured.)
 5. Does the restart scenario exist and pass? (b-npc-stream's restart step;
    no migration, since no field is new to the record.)
-6. Are the HYPOTHESIS tags gone, and were they cleared by evidence? (H1 to
+6. Are the open engine-claim tags gone, and were they cleared by evidence? (H1 to
    H10 against P3, P4, P5, x-npc-stream-values and b-npc-stream.)
 7. Is the suppression reversible on host handoff? (The source removal and
    the hosted set follow the word; the handoff step.)
@@ -2385,7 +2435,8 @@ equipment update: inventory does not contain item 6c1d9", the same for 209a5, th
 ff000000 refused ... the record stands, nothing sent to the host" (030052, 03:02:18.687Z), and likewise for 13489, 35534 and
 1348a. The two ids are 1348c's outfit (lab/esm.py on sky-srv: ARMO 0x6c1d9 ClothesFarmClothesVariant02, ARMO 0x209a5
 ClothesFarmBoots02), and the log holds no roll line for 1348c, so the server's record or base-container inventory is missing
-exactly the worn outfit. The cause is canon's, not the layer's, HYPOTHESIS: upstream's Inventory::AddItems returned at the
+exactly the worn outfit. The cause read first, canon's, not the layer's (REFUTED by 20261110-062127, red as before on the
+AddItems fix; the second correction below names c312fd39's roll timing, fixed on m4-fix-51, green 20261110-110409): upstream's Inventory::AddItems returned at the
 first item that merged into a held stack (Inventory.cpp:98, "TODO: It seems there is a bug"), and an NPC's base container and
 outfit go into its record through one multi-entry AddItems call (EnsureBaseContainerAdded), so an id that repeats early in the
 list dropped the outfit after it; the host's honest report then names pieces the server never added. Playtest 50's naked
@@ -2426,3 +2477,22 @@ first at the loader's level (FateRollLevel) and sends its fate as the respawn do
 record in 0x133ca, a host pass at (4,-11), the sighting, then a hosted report of 6c1d9, 209a5 and 13985 accepted with no
 E_EQUIP_REFUSED. UNVERIFIED: that c2's pass at 06:22:40.919 rolled the ten (42 minus 32, SendFates logs counts only). The
 scenario stays as written; out of pending when it reads green on the fixed server.
+
+The fix built (01:16 PST 2026-11-10 (09:16Z 11-10), thuum-fa): fork m4-fix-51 762305f1, two commits on canon 862b9375 (062e9065, then a fresh read-only
+review's notes), T0 green (pipeline 5720, ctest 13 of 13, test_unit 694 cases) and T2 green (50 of 50 sessions, both heads),
+merging R0 at numidium's slot with the lab pinned to skymp-server:m4-fix-51-762305f1. The roll belongs to the actor:
+PartOne::EnsureFated (PartOne.cpp:2315) rolls an unrolled game-file actor at its loader's level wherever its record first
+reaches a game, called by the grid walk (:2433) and by a new onActorSubscribe hook at the top of MpObjectReference::Subscribe
+(MpObjectReference.cpp:1446), so the create word carries the roll (the sighting's move, a script's MoveTo, an alias load, a
+login's 3x3, Enable). The loader is the cell's host when a game hosts it, else the served listener; a throw in the roll is
+caught and logged once per actor. A fated NPC's fate now rides ahead of every create word (PartOne.cpp:1647; a repeat costs the
+seat nothing, actorFateService.ts:59-63), EquipBestWeapon sends only to listeners with a user (MpActor.cpp:313), and the roll
+restores the outer loader level. T0: Faendal 0x1348c loaded indoors in 0x133ca and sighted into the host's fated square rolls
+once at the host's level, one fate ahead of his create word naming 0x6c1d9 and 0x209a5, and the host's report of 0x6c1d9, 0x209a5
+and 0x13985 is accepted whole; Sigrid 0x13483 moved by Teleport rolls once; a walk-rolled actor is not rolled again; a login's
+3x3 carries rolls behind their fates. Found on the way: on canon a first login's create words carried unrolled records until the
+first pass, about a second later. Open (UNVERIFIED, no lab case yet): a record holding a roll but no fate level can be rolled
+again (RebuildAndRespawn's level-less roll, a world older than c312fd39; D-N1 A covers a record wearing an item); an already
+rolled actor moving into a fated square outside a seat's 3x3 sends that seat no fate; a throw after the level is set is never
+retried; the walk's roll is unguarded, as on canon; the fate's key includes the worn hands, so a seat's copy is redressed once
+after an accepted hands report or a loot changes the worn set.

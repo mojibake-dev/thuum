@@ -146,6 +146,38 @@ class BoardTests(unittest.TestCase):
         self.assertIsNone(board.alias("c1", 0x39645, 0))
         self.assertIsNone(board.factions("c2", 0x39655))
 
+    def test_script_vars_and_objectives_answers_are_kept_by_what_they_named(self):
+        # ADR-068 rung 5's reads: a script-vars answer by its form, a quest-objectives answer by its quest; an error answer
+        # and a failed step take the key's place, as script-state's do
+        from labapi.board import StepBoard
+
+        board = StepBoard(clock=lambda: 100.0)
+
+        def answer(client, action, args, body):
+            step = board.enqueue(client, action, args)
+            board.poll(client)
+            board.complete(step.id, body)
+
+        keys = ["PlayerVampireQuestScript::::VampireStatus_var"]
+        row = {"form": 0xEAFD5, "script": "PlayerVampireQuestScript", "var": "::VampireStatus_var", "k": 3, "i": 1}
+        answer("c1", "script-vars", {"form": 0xEAFD5, "keys": keys}, {"ok": True, "data": {"form": 0xEAFD5, "vars": [row]}})
+        self.assertEqual(board.script_vars("c1", 0xEAFD5)["vars"], [row])
+        answer("c1", "script-vars", {"form": 0xEAFD5, "keys": keys}, {"ok": True, "data": {"error": "ReadScriptVariables refused eafd5"}})
+        self.assertIn("refused", board.script_vars("c1", 0xEAFD5)["error"])
+        answer("c1", "script-vars", {"form": 0xEAFD5, "keys": keys}, {"ok": False, "error": "TypeError: x is undefined"})
+        self.assertEqual(board.script_vars("c1", 0xEAFD5), {"error": "TypeError: x is undefined"})
+        self.assertIsNone(board.script_vars("c2", 0xEAFD5))
+
+        read = {"quest": 0x74A83, "running": True, "objectives": {"10": {"displayed": True, "completed": False}}}
+        answer("c2", "quest-objectives", {"quest": 0x74A83, "objectives": [10]}, {"ok": True, "data": read})
+        self.assertEqual(board.objectives("c2", 0x74A83), read)
+        answer("c2", "quest-objectives", {"quest": 0x74A83, "objectives": [10]}, {"ok": True, "data": {"error": "no quest 74a83 in this game"}})
+        self.assertIn("no quest", board.objectives("c2", 0x74A83)["error"])
+        self.assertIsNone(board.objectives("c1", 0x74A83))
+        board.clear_views()
+        self.assertIsNone(board.script_vars("c1", 0xEAFD5))
+        self.assertIsNone(board.objectives("c2", 0x74A83))
+
     def test_a_seats_kept_perks_go_again_after_a_heartbeat_gap(self):
         from labapi.board import PERK_GAP_S, StepBoard
 
@@ -250,6 +282,21 @@ class BoardTests(unittest.TestCase):
             board.poll("c1")
             board.complete(save.id, {"ok": True, "data": {"saved": "own-before", "bytes": 2932, "sha256": "54d2"}})
             self.assertEqual(board.presets("c1")["own-before"]["bytes"], 2932)
+            # a head-parts step on the client's own player is kept; a {other: true} one (a SkyMP figure's read lists the seat's
+            # own base) is not (thuum D-E1, thuum-fa's delta review of 9f7f6426)
+            mine = board.enqueue("c2", "head-parts", {})
+            board.poll("c2")
+            board.complete(mine.id, {"ok": True, "data": {"actor": 0x14, "parts": [{"id": 0x5162F, "type": 1, "name": "x"}]}})
+            theirs = board.enqueue("c2", "head-parts", {"other": True})
+            board.poll("c2")
+            board.complete(theirs.id, {"ok": True, "data": {"actor": 0xFF000001, "parts": [{"id": 0x19D09, "type": 2, "name": "e"}]}})
+            self.assertEqual(board.head_parts("c2")["actor"], 0x14)
+            # a settings step's live values are kept per client
+            st = board.enqueue("c1", "settings", {"ini": ["fMaxTime:HAVOK"]})
+            board.poll("c1")
+            board.complete(st.id, {"ok": True, "data": {"ini": {"fMaxTime:HAVOK": 0.016667}, "gmst": {}}})
+            self.assertEqual(board.settings("c1")["ini"]["fMaxTime:HAVOK"], 0.016667)
+            self.assertIsNone(board.settings("c2"))
             board.clear_views()
             self.assertIsNone(board.node_rotations("c2"))
             self.assertIsNone(board.held("c1"))
@@ -259,6 +306,8 @@ class BoardTests(unittest.TestCase):
             self.assertIsNone(board.log_count("c2", "moved .* into"))
             self.assertIsNone(board.node_scales("c1"))
             self.assertIsNone(board.presets("c1"))
+            self.assertIsNone(board.head_parts("c2"))
+            self.assertIsNone(board.settings("c1"))
             # a timed-out step is cancelled and a late result is ignored
             late = board.enqueue("c1", "connect")
             board.poll("c1")

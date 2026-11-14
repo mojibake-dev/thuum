@@ -87,14 +87,74 @@ class FakeProxmox:
         self.calls.append(("exec", guest.vmid, tuple(command)))
         if any("game-dir.txt" in c and "Get-Content" in c and "Join-Path" not in c and "Copy" not in c for c in command):
             return ExecResult(0, self.game_dir + "\r\n", "")
+        # Runner._fetch_client_file's shared-read copy of a client log at a path expression ($src), which prints the
+        # source's length at its open and the copy's: a literal source the seat holds is copied; a copy a test named
+        # itself (C:\sky-lab\<name>, as the log tests have since the copy was Copy-Item's) is the copy of a source it
+        # left unnamed, and becomes the runner's own, which carries its run first (<run>-<name>); with neither the
+        # source is not there, and the copy says so (`missing <path>`, the expression's text for a path the fake cannot
+        # work out)
+        fetched = re.search(r"\$src = (.+?); if \(-not \(Test-Path -LiteralPath \$src\)\) \{ Write-Output \('missing ' \+ \$src\); "
+                            r"exit 0 \}; \$s = \[IO\.File\]::Open\(\$src, 'Open', 'Read', 'ReadWrite'\);.*"
+                            r"\[IO\.File\]::Create\('([^']+)'\)", " ".join(command))
+        if fetched:
+            literal, copy = re.fullmatch(r"'([^']+)'", fetched.group(1)), fetched.group(2)
+            folder, base = copy.rsplit("\\", 1)
+            named = next((p for p in self.files if "\\" in p and p.rsplit("\\", 1)[0] == folder
+                          and base.endswith("-" + p.rsplit("\\", 1)[1])), None)
+            if literal and literal.group(1) in self.files:
+                self.files[copy] = self.files[literal.group(1)]
+            elif copy not in self.files and named is not None:
+                self.files[copy] = self.files.pop(named)
+            elif copy not in self.files:
+                return ExecResult(0, f"missing {literal.group(1) if literal else fetched.group(1)}\r\n", "")
+            n = len(self.files[copy].encode("utf-8"))
+            return ExecResult(0, f"{n} {n}\r\n", "")
         # the runner's shared-read copy of a file another process still writes
         copied = re.search(r"\[IO\.File\]::Open\('([^']+)'.*\[IO\.File\]::Create\('([^']+)'\)", " ".join(command))
         if copied and copied.group(1) in self.files:
             self.files[copied.group(2)] = self.files[copied.group(1)]
-        # its else branch: a source not yet written leaves an empty copy (a frida script's .log before any line)
+            # log-count's copy prints the source's length at the open and the copy's (runner.py _log_count)
+            if "Write-Output" in " ".join(command) and self.exec_result.exitcode == 0:
+                n = len(self.files[copied.group(1)].encode("utf-8"))
+                return ExecResult(0, f"{n} {n}\r\n", "")
+        # log-count's tee copy, whose else branch says a tee that is not there (Runner._log_count)
+        absent = re.search(r"\} else \{ Write-Output 'missing ([^']+)' \}", " ".join(command))
+        if absent and not (copied and copied.group(1) in self.files):
+            return ExecResult(0, f"missing {absent.group(1)}\r\n", "")
+        # its else branch: a source not yet written leaves an empty copy (a frida script's .log before any line), whose
+        # lengths a frida trace's copy prints after both branches (Runner._frida_trace), where log-count's prints none
         empty = re.search(r"Set-Content -Path '([^']+\.copy)' -Value ''", " ".join(command))
         if empty and not (copied and copied.group(1) in self.files):
             self.files[empty.group(1)] = ""
+            if re.search(r"\} else \{[^{}]*\}; Write-Output", " ".join(command)):
+                return ExecResult(0, "0 0\r\n", "")
+        # Runner._seat_length's length of a file of the seat's, its UTF-8 bytes, or `missing <path>` for one not there;
+        # and Runner._read_back's removal of a copy once read, which prints whether it is still there
+        length = re.search(r"\(Get-Item -LiteralPath '([^']+)'\)\.Length", " ".join(command))
+        if length:
+            if length.group(1) not in self.files:
+                return ExecResult(0, f"missing {length.group(1)}\r\n", "")
+            return ExecResult(0, f"{len(self.files[length.group(1)].encode('utf-8'))}\r\n", "")
+        # Runner._remove_frames: a burst folder's sidecars removed by one exec, which names each one that stayed and then
+        # their count (ahead of the listing below, whose Get-ChildItem it starts with)
+        swept = re.search(r"\$stayed = @\(Get-ChildItem -LiteralPath '([^']+)' -Filter '\*\.png\.b64' -File \| ForEach-Object",
+                          " ".join(command))
+        if swept:
+            folder = swept.group(1) + "\\"
+            for p in [p for p in self.files if p.startswith(folder) and p.endswith(".png.b64") and "\\" not in p[len(folder):]]:
+                del self.files[p]
+            return ExecResult(0, "stayed 0\r\n", "")
+        # Runner._burst's listing of its frames' sidecars, each name and length
+        frames = re.search(r"Get-ChildItem -LiteralPath '([^']+)' -Filter '\*\.png\.b64' -File", " ".join(command))
+        if frames:
+            folder = frames.group(1) + "\\"
+            listed = [(p[len(folder):], len(t.encode("utf-8"))) for p, t in self.files.items()
+                      if p.startswith(folder) and p.endswith(".png.b64") and "\\" not in p[len(folder):]]
+            return ExecResult(0, "".join(f"{name} {n}\r\n" for name, n in sorted(listed)), "")
+        removal = re.search(r"Remove-Item -LiteralPath '([^']+)' -Force -ErrorAction SilentlyContinue; Test-Path", " ".join(command))
+        if removal:
+            self.files.pop(removal.group(1), None)
+            return ExecResult(0, "False\r\n", "")
         if any("Get-Process SkyrimSE" in c for c in command):
             # a guest agent too busy to answer, this many times first
             if self.game_misses > 0:
@@ -163,6 +223,13 @@ class FakeProxmox:
         if path not in self.files:
             raise ProxmoxError(f"E_PVE_FILE: no such file {path} on {guest.name}")
         return self.files[path]
+
+    def file_read_range(self, guest: Guest, path: str, offset: int, count: int) -> bytes:
+        # the file's UTF-8 bytes from offset; from an offset at or past the end none, as Agent.pm answers there
+        self.calls.append(("file_read_range", guest.vmid, path, offset, count))
+        if path not in self.files:
+            raise ProxmoxError(f"E_PVE_FILE: no such file {path} on {guest.name}")
+        return self.files[path].encode("utf-8")[offset:offset + count]
 
 
 class _FakeCapture:
@@ -274,6 +341,11 @@ class FakeState:
         # rows [{quest, alias, refr, created, container, added}], as the gamemode answers them; None answers found: false
         self.world_globals: dict[str, Any] | None = None
         self.alias_fills: list[dict[str, Any]] | None = None
+        # ADR-068 rung 5's journal reads (labState kinds questRuns, questStages and scriptVariables), the rows as the gamemode
+        # answers them ([{quest, running, seq}], [{quest, stage}], [{form, script, var, k, value, seq}]); None answers found: false
+        self.quest_runs: list[dict[str, Any]] | None = None
+        self.quest_stages: list[dict[str, Any]] | None = None
+        self.script_variables: list[dict[str, Any]] | None = None
 
     def spawn(self, profile_id: int, x: float = 0.0, y: float = 0.0, z: float = 0.0, cell: str = "lab-spawn") -> FakeActor:
         a = FakeActor(x, y, z, cell)
@@ -304,6 +376,10 @@ class FakeState:
                 if self.alias_fills is None:
                     return {"found": False, "error": "no such property"}
                 return {"found": True, "fills": list(self.alias_fills)}
+            for kind, rows, name in (("questRuns", self.quest_runs, "runs"), ("questStages", self.quest_stages, "stages"),
+                                     ("scriptVariables", self.script_variables, "entries")):
+                if payload.get("kind") == kind:
+                    return {"found": False, "error": "no such property"} if rows is None else {"found": True, name: list(rows)}
             if payload.get("kind") == "ref":
                 ref_id = int(payload.get("actorId", -1))
                 ref = self.refs.get(ref_id)

@@ -1,0 +1,343 @@
+# The physics leg's plan, as approved (2026-11-11, thuum-fa; ADR-071)
+
+
+## Context
+Eli, 2026-11-11, about 16:04Z: "instead of expanding on functionality we havent tested, can you start the physics leg of work?"
+Eli then switched to plan mode to see the plan first. This is recorded under ADR-067 decision 7's order (main 8fbfd188):
+- physics prework starts now, ahead of rung 6;
+- nothing new is built on the scripting and quest lines until playtest 51 is played;
+- train 52 stays built and stages after 51.
+
+**The two tests (ADR-067 d7):**
+- a player drags a corpse, and both screens see it;
+- spells hit a cart's cabbages, and both screens show the same scatter.
+
+**The problem today:**
+- **Slice one has a weak foundation.** It made dropped items props (ADR-058, merged 2026-11-01), but:
+  - playtest 44 read "physics props do not work" (E_PROP_CELL at a cell edge);
+  - b-prop-push is pending in gate.yaml;
+  - the arbitration rule, statics, the blast pair and the E_PROP_CELL retirement sit off canon, never verified;
+  - ADR-064 d7 froze new prop code, with no thaw recorded.
+- **The docs contradict themselves.** There are six contradictions, including three mechanisms on record for bodies.
+
+**The intended outcome:** one row kind and one stream for every Havok body, whether item, static or corpse. The seat that set a body moving owns it. Both tests are green on canon, and four playtests verify them in play.
+
+**Inputs:**
+- Research:
+  - the repo and fork (acdcc86c);
+  - the Havok surface, with CommonLib ids checked by `just addr` (ab87ae92);
+  - prior art: Fiedler's Networked Physics and VR authority, Source's prop_ragdoll, Unity and PUN, FiveM, Skyrim Together (a9265ff8).
+- Design: the mechanism (a4d3278b), the ladder (af4fd77f), the skeptic (a0b18542).
+- Eli's calls below.
+
+## Eli's decisions (2026-11-11, in plan mode)
+- **W1a, ownership: A1 to A7.** This is ADR-063's proposed props note.
+  - A grab beats a touch.
+  - A moving prop stays with its mover.
+  - It returns to the cell's host only at rest, by the owner's own final sample, never on a timer.
+- **W1b, the ADR-064 d7 freeze: lifted rung by rung.** A rung merges once the havok-props.md rows it rests on read on both screens and its scenario is green. The whole doc thaws at the last rung.
+- **W5, the impact: caster only.** Other seats skip a remote player's push on props and render the caster's stream. Sound and visuals still play everywhere.
+- **W6, bodies:** the engine's saved Havok block holds the resting pose (D78, re-applied at reload, login and restart), and compact per-bone samples carry the live drag.
+- **W2, statics: kept.** They are a rung of this leg. The static class is derived from the base's model (its BSXFlags kDynamic bit, read once from the archives or the loaded 3D),
+  never from a per-name list (ADR-063 d5); rung 0's census found the record type no predictor.
+- **W4: test with all three.** Hailstone, Fireball and Unrelenting Force on the cabbage cart.
+- **W7: four playtests,** P1 to P4.
+- **Physics settings: the same fix for everyone.** Already true (apocrypha, 2026-11-11): the shared layer lays Display Tweaks
+  0.5.16 with Eli's INI on every seat (essentials.tsv:89). Its dynamic mode steps a 47 fps seat at 1/60 and a 144 fps seat
+  at 1/144, so rest is read by the engine's deactivation (model point 8). Eli then capped it ("that works . cap it"): every
+  player at 60 fps with a static 1/60 physics step, an ini-patches row on SSEDisplayTweaks.ini laid after playtest 51.
+- **The b-npc-handoff-cross window: widened.** The scenario waits up to 60 s more for Sigrid's crossing through an until, with the claim unchanged. Its red was marginal by seconds in any mode: the green's crossing came at 225.6 s, and the reds' logs end at about 227 s.
+- **The two diagnostic reads: "Run them now"** (step 0).
+- **W3 stays Eli's at the time:** a rewrite of b-prop-push's step 27, if the drop read calls for one.
+
+## Step 0, at approval
+1. **docs/DECISIONS.md:**
+   - ADR-071 ACCEPTED, "Physics as one system", carrying the model below and Eli's calls verbatim;
+   - ADR-064 d7's dated amendment (rung by rung);
+   - ADR-063's props note marked accepted.
+   - Save this plan as docs/research/physics-leg-2026-11-11.md.
+2. **The two diagnostic reads.** Write them from /Users/eli/.claude/plans/humble-crunching-iverson-agent-a34854dbae83ce2b9.md into lab/.cache/drafts/reads/, byte for byte:
+   - x-ghostwalk-warm-read (sha1 a20627b6);
+   - x-handoff-cross-timing (c567fbcb).
+
+   Run probe-check on each, get a fresh review, then send them to numidium, who runs them as agreed: ghostwalk once, the handoff read as a cold-then-warm pair.
+   - The ghostwalk read now leads with suspect 1. Every red run's start ran c2's Companions quests under rung 5's acting scope in c1's game (060821 c1.log :222-249); no green did.
+3. **b-npc-handoff-cross's widened window,** as its own scenario commit (rule 13) citing Eli's word.
+4. **ghostwalk.md's correction:** 061139 rolled c2 back too.
+5. **The physics step for every player:** Display Tweaks is already laid (essentials.tsv:89). Eli's cap (60 fps, a static
+   1/60 step) is apocrypha's ini-patches row, laid after playtest 51. The rest reads (E10) read Havok's own deactivation and run
+   after the cap lands.
+
+## The model
+1. **One row, one stream.** Every Havok body, whether an item, a derived static or a dead actor's ragdoll, is a "prop" row in wire-rules props.rs, on PropTransform. No rule names content.
+2. **Ownership (A1 to A7), with no timers:**
+
+   | state | owner | taken by | ends by |
+   |---|---|---|---|
+   | resting, stalled | the cell's host (player 0) | any claim at e+1 | |
+   | moving | its mover | a grab only; else E_PROP_MOVING | the owner's asleep sample, or a departure word (A7) |
+   | held | the grabber | nothing (E_PROP_HELD) | `held` false, then as moving |
+   | dying body | the death's simulator | as moving | as moving |
+
+   - **Claim causes:** touch 0 is the capsule (the 79131 hook); 1 is the hand; 2 is a drop; 3 is an impulse whose cause the seat owns, or island contact with a body it moved.
+   - **A moving island has one owner,** and other claims on its members are refused.
+   - **Liveness is judged, never timed out.** Every return to the host is a word, and a take-over's first read is always sent.
+3. **Cell edges.** A moving body's owner never depends on its cell. A listener check (E_PROP_UNSEEN) replaces E_PROP_CELL and E_PROP_REACH; those retire only together with A1 to A7 (alone, they granted 13 of 13 claims). The default owner at rest is the server's word.
+4. **Non-owners render.**
+   - A copy goes Keyframed at a word naming another seat, or at the first awake sample. Otherwise it stays Dynamic and asleep (D73 kept, for a responsive first touch).
+   - It interpolates three samples behind the owner's clock (about 300 ms, UNMEASURED) and never extrapolates.
+   - A late joiner stays Keyframed until the owner's rest, and no copy is placed inside a capsule.
+5. **Impulses.** A seat applies a Havok impulse only from a cause it owns.
+   - The mechanism is one Replace on the impulse site H2 names (26005 AddExplosionImpulse or 26004 ScaleGameplayImpulseForce). The cause comes from HitData::aggressor or Explosion::actorOwner.
+   - An impulse from another seat's cause is zeroed and counted in native code (rule 9). This covers replayed projectiles, explosions and puppet pushes.
+   - The caster raises propImpulse, claims its bodies in one PropClaim per impact, and tracks what it owns at any distance.
+6. **Bodies.**
+   - A dead actor's row is owned by the death's simulator, and its rest is its asleep sample.
+   - The grab on a corpse:
+     - the dragger's copy is Dynamic at the first frame (a laid corpse takes no SetMotionType), with a pre-grab guard at StartGrabObject 40552 if H5 says otherwise;
+     - Held is answered at once, and the loser ends its grab and swallows its next activation;
+     - one hold covers both: a held corpse can't be looted, and an open one can't be grabbed.
+   - The live drag streams PropTransform's bones field. The follower imposes the pose by path A (keyframe each body) or path B (a block replay through 19535), whichever H6 reads within 32 units. It skips zero-step and paused frames, re-asserts after KillDying, and warps past a bound.
+   - At rest, the engine's saved Havok block goes out as ChangeForm 72, served to late joiners and at restart (D78 whole). If neither path holds, D78's backlog clause applies: the drag ships as a re-rest alone.
+7. **The wire** (rule 4: one SCHEMA bump after train 52's 44, with validators, fixtures, C++ structs and WIRE.md rows in one commit):
+   - **PropTransform v2:**
+     - fields: refr; epoch; seq u16; t_ms u32 (the owner's clock); pos; rot (Euler for the root, as the record keeps it); lin and ang velocity; asleep; held; bones Vec<{pos, quat}, 64>;
+     - validator codes: E_VAL_NONFINITE, E_VAL_RANGE (a quaternion more than 1% off unit, a bone more than 512 from pos, |lin| over 6000), E_VAL_OUT_OF_WORLD and E_VAL_RATE;
+     - rule codes: E_PROP_STALE, E_PROP_FUTURE, E_PROP_NOT_OWNER and E_PROP_STEP;
+     - each sample is bounded against the sender's previous one. A live owner's rest is clamped and accepted, and every refusal is answered with the record.
+   - **PropClaim v2:** touch at most 3; refrs Vec<u32, 16>; a per-refr outcome.
+   - **PropOwner:** player 0 admitted.
+   - **ChangeForm 72:** a dead actor's record is accepted from its prop owner at the prop epoch, with Rust bounds on the Havok block's floats.
+8. **Rest and budget.** Rest is the engine's deactivation, not the per-frame stir test. A 500 ms heartbeat goes out while a body is awake. The asleep sample is reliable, and a priority accumulator always lets rests through.
+9. **Trust (rules 5 and 12)** stays on four checks: the epoch, conservation (no record under the floor or outside a cell), the speed cap, and Rust bounds on every relayed float.
+10. **Scope of ADR-066.** This leg builds d3 and d4 (epochs) for the prop row. d5's ack and d2's ActorOwner are not built: a prop's new owner is always the engine whose copy moved, so nothing needs applying before its first report.
+11. **Traps** are unified under these rules, with their scenarios kept green and unweakened.
+
+## The ladder
+Each fork rung is cut from the head below it. Canon fast-forwards after each proof, a failed rung is parked, and nothing is rebased. Every rung:
+- runs T0 and T2 before any lab run;
+- gets a fresh read-only review before its first lab run;
+- carries its probes by path, and commits each scenario alone (rule 13).
+
+R0 rungs merge on T0 and T2 alone. There is one Windows runner.
+
+| rung | branch | builds | proof | deletes | slots |
+|---|---|---|---|---|---|
+| 0 reads | thuum physics-0-reads (lab/frida, its own commits) | prop-impulse.js (H2, H3, H4), prop-grab.js on a corpse (H5), body-impose.js (H6), save-havok.js; esm reads of Hailstone, Fireball and Unrelenting Force's PROJ and EXPL forces (H1, done: all three push) and the cart's six cabbages; x-prop-blast v1's unread red | x-prop-engine v1 (the rule-free havok-props.md rows), x-prop-blast v3, x-corpse-grab v1, x-body-impose v1, b-prop-push with bInventoryMenu=false: each row gets a two-seat run id | rows E7, E19, E38 | 2 windows |
+| 1 props hold | m4-physics-1-arbitration | A1 to A7, rebuilt from 8deb7809, 4b471676 and up to 147a6cfe, with f67fb0f8; PropOwner player 0; the listener check; island refusal; cell-free ownership; traps unified | x-prop-arbitration v12, x-prop-edge v1 (playtest 44's edge); b-prop-push out of pending, then b-prop-arbitration | PROP_LEASE_MS, PROP_SILENCE_MS, the lease mirror, E_PROP_CELL, E_PROP_REACH, the propStatics list | 2 |
+| 2 sample v2 | m4-physics-2-sample | PropTransform v2 and PropClaim v2 (rule 4); the platform's ReadBodies native; the three-sample buffer on the owner's clock; 78089 hand-off velocity; seq-bounded allowance; answered refusals; rest by deactivation plus heartbeat; prop epochs | x-prop-follow v1 (rolling basket, tumbling cabbages, a 5% loss leg); b-prop-follow | the arrival stamp, the one-interval glide, the stir test | 2 |
+| 3a | m4-physics-3a-impact-srv (R0) | the first-sample allowance refill at each grant; budgets sized from rung 0's per-blast count | T0, T2 | | 0 |
+| 3 impact | m4-physics-3-impact | the impulse Replace with the owned-cause test; propImpulse; one claim per impact; tracking owned props at any distance; island claims | x-prop-impact v1; b-prop-impulse with three legs (Hailstone, Fireball, Unrelenting Force of two words or more, at the Riverwood Trader cart's six ALCH cabbages 0x1c0c6 to 0x1c0cb, from XMarkerHeading 0x96595) and a restart leg; x-prop-blast v4 | objectReferenceEx's Keyframing of items on arrival; TOUCH_RADIUS and the proximity stand-in | 2 |
+| 4 statics | m4-physics-4-statics | the derived static class (the base model's BSXFlags kDynamic bit, read from the archives or the loaded 3D), admitted as references under the same rows; f07ba07e as prior art only | x-prop-static v1 (a Havok world object pushed by a kick and by a spell); b-prop-static | | 2 |
+| 5a | m4-physics-5a-bodies-srv (R0) | a dead actor as a props.rs row; ChangeForm acceptance from the prop owner | T0; T2's npc-fate sessions identical | BodyOwnerId, ClaimBodyOwner, E_BODY_NOT_OWNER | 0 |
+| 5 drag | m4-physics-5-drag | its design read first takes three Source SDK 2013 files for design, never copied (Eli 2026-11-11): props.h's physics attacker (:196-231), physics_prop_ragdoll.cpp's networked bone arrays with ragdoll_shared.h's 24-bone cap (:59-65, :30), player_pickup.h's pickup and drop hooks; then PropClaim admits a dead actor; propService tracks the dead; the pre-grab guard; Held answered; the hold covering grab and loot; the bones stream and its impose path | x-corpse-drag v1 (a bandit dragged 300 units, within 32 per bone); b-corpse-drag; x-corpse-record, b-npc-death and b-npc-body-release unweakened | E_BODY_AT_REST; the corpse movement-sample path | 3 |
+| 6 rest and reload | m4-physics-6-rest | D78 whole: the saved block recorded at deactivation and re-applied at reload, login and restart; late joiners Keyframed until rest; Rust checks of the block's velocities; rule 6's migration if the record changes | x-corpse-reload v1; b-corpse-drag's restart leg (its own commit) | CORPSE_REST_* and the settle backstop | 2 |
+| 7 chaff | m4-physics-7a (R0), then 7 | dead code out; havok-props.md thawed whole; prop-physics.md's T3 box ticked; gate.yaml's pending list emptied | the regression run set: always, plus every prop, trap and body scenario, plus watch | as listed | 1 |
+
+**Estimate:** about 16 stage slots, roughly 8 to 10 days with the reds and slots shared with train 52, and about 13 Windows heads.
+**The smaller ladder, if the whole one stalls:** rungs 0, 1, 3a and 3 on v1 samples, then 5a plus the re-rest, in about 8 slots.
+
+## Playtests (eight items each, every item with a green two-seat run id)
+- **P1, after rungs 0 and 1:**
+  1. a walk nudges a prop;
+  2. the guest kicks the host's basket;
+  3. a bucket carried across the cell edge;
+  4. a grab and release from each seat;
+  5. a kick into the other player takes nothing;
+  6. a drop with Souls RE on;
+  7. props rest where they did after a restart;
+  8. Embershard's rocks from the guest's tripwire.
+- **P2, after rungs 2 and 3:**
+  1. Hailstone at the cart, cast by c1;
+  2. Hailstone cast by c2;
+  3. Fireball at the cart;
+  4. Unrelenting Force at the cart;
+  5. a rolling basket stays smooth on the other screen;
+  6. the scatter is unchanged after a restart;
+  7. a walk-in after the blast;
+  8. an arrow at a bucket.
+- **P3, after rungs 4 and 5:**
+  1. a Havok world object kicked;
+  2. one hit by a spell;
+  3. the host drags a corpse;
+  4. the guest drags one;
+  5. both players grab one corpse, and only one hand holds it;
+  6. the same rest on both screens;
+  7. a shout on a corpse;
+  8. a fresh kill's fall.
+- **P4, after rungs 6 and 7:**
+  1. leaving the cell and coming back to a dragged corpse;
+  2. a server restart with a dragged corpse;
+  3. a late joiner sees the corpse's pose;
+  4. the scatter's rest after a restart;
+  5. a dragged body looted;
+  6. the trap rocks;
+  7. everything from both seats;
+  8. regressions, named.
+
+## Hypotheses, each with its settling read (rung 0 unless named)
+- **H1:** Hailstone, Fireball and Unrelenting Force each push props. Read their PROJ and EXPL forces with esm.py.
+- **H2:** which call pushes a prop, and what names its cause. prop-impulse.js on the caster: 26005, 26004 and 78091.
+- **H3:** a remote figure's projectile copy pushes the watcher's props. prop-impulse.js on the watcher. If it doesn't, the detour isn't built.
+- **H4:** islands merge before a knocked body moves. Island entities logged per frame.
+- **H5:** the engine grabs a ragdoll, and a laid corpse is Dynamic. prop-grab.js on the watcher's corpse: 40552, 40557, grabSpring 0x8A0, grabbedObject 0x8D0, grabType 0xAFC. Also whether canon's activation block on corpses (puppetService.ts:515-527) stops the grab.
+- **H6:** the pose holds within 32 units by path A or B, and a humanoid's bodies fit 64 in one packet. body-impose.js.
+- **H7:** rest by deactivation (E10, E14, E15, E31). prop-sleep.js and prop-grab.js on both seats, after the physics fix is laid.
+- **The kHavokMoved block keeps an awake body's velocities.** save-havok.js. Records are written only at rest, so nothing depends on this.
+
+## Verification
+- **Per rung:**
+  - `just test` (T0) and `just test-proto <branch>` (T2, with FORK_DIR set from a worktree);
+  - the fresh review;
+  - `just verb-stage <branch> <probes>`;
+  - `just verb-merge <branch> <scenarios>`;
+  - every claim is the other seat's screen or log, never the owner's (ADR-064).
+- **The leg is done when:**
+  - b-prop-impulse (all three spells) and b-corpse-drag are each green twice on canon, both seats' positions checked against the server record;
+  - P1 to P4's items are VERIFIED IN PLAY;
+  - havok-props.md §5 holds with run ids;
+  - verb-lint is clean.
+- **Rule 8 throughout:** where a read fails, its Dynamic section is written and handed to Eli. No looping on it.
+
+## Critical files
+- fork skymp-wire/crates/wire-rules/src/props.rs
+- fork skymp-wire/crates/wire-schema/src/skymp.rs (PropTransform, PropClaim, PropOwner)
+- fork skymp-wire/crates/wire-validate/src/lib.rs
+- fork skymp5-server/cpp/server_guest_lib/ActionListener.cpp (OnPropClaim, OnPropTransform, ChangeForm)
+- fork skymp5-client/src/services/services/propService.ts
+- fork skymp5-client/src/services/services/sendInputsService.ts
+- fork skyrim-platform/src/platform_se/skyrim_platform/FridaHooks.cpp (the contact hook; the impulse Replace)
+- thuum docs/verbs/prop-physics.md, docs/engine/havok-props.md, docs/DECISIONS.md, lab/frida/, lab/gate.yaml
+
+## Rung 0's static reads (2026-11-11, a7896bda; esm.py on sky-srv, the winning records in the 91-plugin order)
+- H1 done, all three push props: Hailstone SPEL 02e634:Apocalypse (PROJ 0b477d impact force 5; its Shatter EXPL 0b2c7d force 24,
+  radius 128), Fireball SPEL 0x01c789 (Odin's; PROJ 0x10fbed impact 1.5; EXPL 0x0439c0 force 1, radius 320), Unrelenting Force SHOU
+  0x013e07 (a cone, impact 50, 65, 85 and range 1000, 2000, 10000 by word, no EXPL); fGameplayImpulseMultClutter 1.0. The engine
+  scales PROJ and EXPL forces differently, so the records do not rank them; H2's trace does.
+- The cart: six ALCH FoodCabbage 0x064b3f references (0x1c0c6 to 0x1c0cb, 0x1c0c9 included), each one CLUTTER body of 2 kg, on
+  STAT HandCart02 0x1c0c1 (FIXED, a collider) by the Riverwood Trader's sign in cell 0x9731, not the mill. The caster spot:
+  XMarkerHeading 0x96595 at (20587, -46080, -122), 1,190 units southwest on the road, in the same cell; Unrelenting Force's first
+  word falls short from there, so the test shouts two words or more.
+- x-prop-blast v1's red (20261104-004612): its build had no touch-3 claim (the blast pair off canon), and its refs-near steps
+  passed no ids, so steps 19 and 20 listed nothing.
+- Statics: the record type does not predict a moving body (0 of 194 STAT, 5 of 27 MSTT near Riverwood); the mesh's BSXFlags
+  kDynamic bit matched the rigid-body read on all 252 referenced models. Riverwood's movable statics: SignRiverwoodBlacksmith01
+  0x3822a, two HandCart01Wheel 0x1c0c2 and 0x14201, SignRiverwoodRiverwoodTrader01 0x5161a, SpitPotOpen01 0x54177.
+
+## Rung 0 results (2026-11-11 and 11-12)
+
+Recorded 00:52Z 2026-11-12 by thuum-fa, the v2.1 reads added at 02:18Z, from read-only analysts' reads of the runs. Every run is
+on canon 24f1cc6a: the server m4-scripts-5-heads-24f1cc6a, both seats clean-m1-next with the m4-scripts-5-heads client 24f1cc6a.
+The ladder's rung 0 proof (:126):
+- x-prop-engine v1 (4a11a803) 20261111-190610, green: the rule-free havok-props.md rows, traced on both seats;
+- x-prop-blast v3 (b0c8945e) 20261111-191642, green with its traces back as their ready rows alone (both .log reads timed out),
+  and 20261111-223256, green with both traces whole through lab-api 8bd23824's ranged fetch;
+- x-corpse-grab v1 (de011d36) 20261111-193821 and x-body-impose v1 (c3c887fe) 20261111-194559, green;
+- b-prop-push with bInventoryMenu=false, run as x-prop-push-souls v1 (23970a3b) 20261111-195437, green;
+- W3's two: b-prop-push as committed, 20261111-204534, the same-build control, red at step 27 on runtime_of 2 and the 64 bound;
+  x-drop-leftover v1.1 (296ff33b) 20261111-220150, red at its two Q3 claims (c1Cell, c1Restart), the leftover gone after a cell
+  change. Eli's call on them, "Fix the drop", is DECISIONS.md's (ADR-071, W3).
+- The v2.1 reads (2026-11-12): x-corpse-grab v2.1 (9ade4b5a) 20261112-002429, green, both seats rolled back cold: H5 on the
+  watcher's corpse and the release; x-prop-engine v2.1 (c6213c80) 20261112-003027, red on 15 of its 46 claims, every red a setup
+  and none a refuted row (walks across the settled ingot that drew no contact, c2's aim from the south lane holding nothing twice,
+  a hold that ended about 0.2 s before the other seat's touch, and leg 8's ingot settled 21.8 units off the marker before the
+  login), its legs whose setup held reading E2, E12, E13, E15, E16, E24, E26, E27, E28, E29, E30 and E31.
+
+Each row's run ids, seats and verdict are docs/engine/havok-props.md's, and its section 5 names the rows that now read on both
+viewpoints. Of the three deletions, E7 and E19 are deleted; E38 is kept, CONFIRMED for a pausing InventoryMenu by the frame's
+seven pausing runs, so deleting it would lose a confirmed fact, and E39 stands beside it for Souls RE's running menu. The v2.1
+reads added E40 to E43: the grab outlives its key (E40), the engine can end a hold with no key (E41), a still held body reads
+asleep (E42), and a grab the engine refuses still claims touch 1, which the server grants (E43).
+
+The hypotheses:
+- H1, CONFIRMED by 20261111-223256 on both seats: Hailstone's Shatter, the Fireball's explosion and Unrelenting Force's cone
+  each pushed props (a7896bda's static read named their forces).
+- H2, CONFIRMED by 20261111-223256 on both seats: ScaleGameplayImpulseForce 26004 on every prop push, SetLinearImpulse 78091
+  applying its result after it for the explosions and the shout (58 of 58 pairs), AddExplosionImpulse 26005 on no prop; the
+  cause from the enclosing frame, never an argument, and the shout's unread.
+- H3, CONFIRMED yes by 20261111-223256: c2's copy of c1's casts pushed c2's own Dynamic bodies with c1's numbers to 0.01 Havok
+  units, its cabbages spared only by canon's Keyframing beyond TRACK_RADIUS 1024, so rung 3 builds the remote-cause zeroing.
+- H4, CONFIRMED by 20261111-223256 on c1: the resting pile was one sleeping island before the push, a neighbour joined it on the
+  first moving frame, and islands split within 2 to 9 frames and re-merged on contact in flight, Keyframed members included; the
+  island claim's rule built on it is HYPOTHESIS.
+- H5, CONFIRMED on both seats. The host's own corpse, 20261111-193821 (c1): one spring on one bone, the 19 bodies already
+  simulated (types 2 and 3) with no SetMotionType, the four grab fields sane, 40552 the entry, canon's activation block no lock.
+  The watcher's corpse, 20261112-002429 (c2): attempts A, B and D grabbed c2's copy, one spring each, from an eye 116 to 151
+  units off at Pitch -54.8, -60.9 and -67.0 (C's pitch passed over it); the copy's 18 bone bodies read types 2 and 3 with no
+  SetMotionType and its weapon body type 4, kKeyframed, on the watcher; the block stopped no grab; the drag moved the copy 53.9
+  units. The release is a second press: the grab outlives its key, 40557 runs only at the next press, and every key-up reached
+  the engine (TalkService's fresh-press counts 2, 4, 6, 8); the host's engine also dropped a hold on its own, mid-press
+  (havok-props.md E40, E41). Canon carries none of the watcher's drag: the copies ended 58.6 units apart and the record never
+  moved.
+- H6, CONFIRMED at rest on the death's simulator, both clauses (20261111-194559, c1): the pose held within 2.1 units by path B,
+  and 19 bodies fit 64; path A's keyframe REFUTED as built; a moving pose and a follower's impose STILL OPEN.
+- H7, STILL OPEN: 20261111-190610's E10 is a pre-cap baseline on c1 (BASELINE ONLY); 20261112-003027 CONFIRMED E15 on both
+  seats and E31's refusal on c2, and missed E14 (c2's aim) and E10 (no kick); E10's read waits for the 60 fps cap.
+- The kHavokMoved block's velocities: save-havok.js is written and did not run in rung 0; nothing depends on it.
+
+What the next rungs take, measured:
+- 26004 is the replacement site (CommonLibSSE-NG TESHavokUtilities.h:18): every prop push on both seats went through it, and
+  78091 (bhkRigidBody.h:54) applied its result, |impulse| times 69.99 equal to the result on all 58 pairs (within 0.25 percent
+  for results of 100 and more). The cause comes from the enclosing per-thread frame: every impulse call ran on a worker thread,
+  inside Explosion::Update for an explosion, whose actorOwner (Explosion.h:72) named the caster on its own seat (0x14) and its
+  figure on the watcher's (0xff000b6f), or inside ProcessImpacts for an arrow, whose shooter named it; HitData::aggressor
+  (HitData.h:54) never appears, since 26004 and 78091 take no HitData and 26005's was null in all seven calls. So the bracket is
+  thread-local, as the trace's own brackets were, and filtered in native code (rule 9). The shout's cone pushed from outside every
+  hooked frame: its cause is unread. That a zero result zeroes the push is HYPOTHESIS until a replacement returns 0 in a run.
+- 26004's scaling, on both seats: the result is the input times 3 times the mass on the props layer (10), for 2, 4 and 5 kg
+  bodies, and the input times 30 times the mass on the clutter layer (4) for the light bodies (the 2 kg cabbages, a 1.3 kg body),
+  its 6, 20 and 33 kg bodies all reading the input times 150 (a mass factor capped at 5 kg, the cap inferred). No cap at 1000 on
+  the velocity change: the 6 kg board took 1062.5 and the cabbages 1275 to 1314. So a light clutter body's velocity changes by 30
+  times the input, a props-layer body's by 3 times. The inputs: Shatter 24, the Fireball's explosion 1, the three-word cone 42.5,
+  the arrow 1.
+- An arrow's push is its own: one 26004 (input 1, result 150) for the 20 kg bucket and no 78091, yet the bucket left at 497 units
+  a second, about 66 times what 150 times its inverse mass gives (7.5). It goes through a call the script did not hook
+  (HYPOTHESIS), so the replacement at 26004 may not zero it; an arrow needs its own read before rung 3's arrow leg.
+- The per-blast counts, bodies pushed on c1 (the caster) and then on c2 (the watcher): Hailstone from the road 7 and 7 (the sign
+  0x5161a's seven, no cabbage, all six beyond c1's 1024); Hailstone across the edge 9 (the sign's and two cabbages, 1440 each) and
+  7; the Fireball 8 (the sign's and one cabbage) and 7; the arrow 1 (the bucket) and 0 (c2's bucket Keyframed); the shout, c1's
+  one cone 7 (four cabbages at 2550 each, the sign's board and 0x10f9a0's two bodies) and c2's two cones 3 each. By reference: 1
+  to 3 for an explosion, 6 for the cone, 1 for the arrow, statics counted. With every item Dynamic the cart's ceiling is its six
+  cabbages and the two statics, 8 references, inside PropClaim v2's 16 (ADR-071 decision 6); whether one blast reaches all six is
+  unread (HYPOTHESIS). Without the remote-cause zeroing every blast's pushes double (H3).
+- Path B holds at rest within 2.1 units (one 36014 replay of the engine's own block, 20261111-194559 on c1), and path A's keyframe
+  switched only 1 of 19 bodies: BSIRagdollDriver::SetMotionType(kKeyframed) (BSIRagdollDriver.h:23) moved one body to type 4, so
+  A's writes, which held every bone within 0.4 and the weapon within 6.4, held a resting pose on simulated bodies and say nothing
+  for a moving pose. Rung 5's follower keyframes each body by another route, read on a ragdoll before x-corpse-drag v1
+  (HYPOTHESIS).
+- A humanoid has 19 bodies (18 bones and the weapon, a Nord bandit's), so it fits in 64 (fitsIn64 true, 194559); creatures are
+  unread.
+- The activation block does not stop a grab: canon's kBlockActivate (ExtraFlags.h:17) was set on c1's corpse at 40552's leave,
+  and the grab took it (193821), and it was set on the watcher's copy at every grab (002429). So ADR-071 decision 5's one hold
+  for grab and loot rests on the Held answer ending the loser's grab itself and on the loot path refusing a held body
+  (HYPOTHESIS). A press made while holding releases the grab and activates nothing, the blocked corpse under the crosshair
+  included (002429, CONFIRMED), so "swallows its next activation" is the engine's own for the holder.
+- The grab outlives its key (CONFIRMED, E40): 193821's 4 min 29 s hold came of no second press, and 002429's three grabs and
+  003027's props on both seats each ended at the next press, never at a key-up. The engine can also end a hold with no key, on
+  its main thread (E41, twice on c1; the cause HYPOTHESIS: a body that does not follow, or its weight). D-PH3 A's held state,
+  the engine's own grab read at each sample, follows both; a key-based or timed end would follow neither.
+- Two more, for rungs 2 and 3: an owned prop's position comes from its body, never its reference (prop-physics.md, 2026-11-11);
+  and one shout reached the watcher as two cones, so caster-only impulses also need one relay per cast (shouts.md, 2026-11-11).
+- For rung 1, from 20261112-003027: a still held body reads asleep on canon's stir test, and the follower rests its copy Dynamic
+  mid-hold (E42), which A6's held stream answers; a grab the engine refuses still claims touch 1, and the server granted it, so a
+  moving row went to a seat that never held it (E43), which A2's grant of a grab over a live row must not do (HYPOTHESIS on the
+  remedy: drop a touch 1 that a touch 2 follows in one update, or take the pair as no grab).
+
+Lab premises the rung 1 reads take, read in these runs (each probe reads its own premise first, so they are no havok-props.md
+rows): both seats pitch 16.43 mouse counts a degree by the player graph's Pitch (002429; about 16 to 17 in 003027), where v2.1
+used 14.7; a lone placement at the marker settles within about 4 units of (133421, -61375), where a walk does not touch it
+(003027, E9).
+
+Follow-ups:
+- The six one-question probes for rung 1's engine reads, drafted by path under lab/.cache/drafts/physics/rung1-reads and in
+  review (ADR-064 rules A and B): x-sl-aim v1 (7d4ca8e6) runs first, the pitch from each spot that puts each seat's crosshair on
+  its copy; then x-held-touch v1 (3e396be2: E2, E26 and E27 on c1, E27's server half), x-two-hands v1 (09de5037: E14),
+  x-late-word v1 (e6c72434: E35), x-moving-press v1 (b19eb079: E31 on c1, E43 again) and x-login-overlap v1 (2071661b: E37).
+  They rest on E40 and E42, now rows (ADR-064 amendment C).
+- Leg 6 (E32) split out of x-prop-engine v2 as x-prop-stall v1, pending lab-api's stop-first change (a relaunch that stops the
+  game, then copies its logs).
+- E41's cause: a corpse on open floor grabbed at several weights, the grab's settings read live by lab-api's c.setting, their
+  names from a static read first.
+- A backtrace at 26004 during a shout, or a bracket on the cone's own update: the cone's cause, before rung 3 can zero it.
+- E10's read after the 60 fps cap (H7); W3's drop fix in physics rung 1's client commit after playtest 51.
+

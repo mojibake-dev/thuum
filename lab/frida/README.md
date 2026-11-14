@@ -329,19 +329,39 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   contact with motion type 1 to 3 then the impulse every step; the other
   seat sees motion type 4 and no impulse. Struct offsets are read from the
   CommonLibSSE-NG headers named in the header. Run on both seats through
-  x-prop-push.
+  x-prop-push. v2 (2026-11-11, for x-prop-engine v1's E2): Main's thread in
+  the ready row and a `main` field on every row, the ready row's pid, base
+  and first bytes, a liveness row every 10 s; and the impulse body read at
+  the interaction event's +0x30 (v1 read the event itself as the body).
 - prop-grab.js: the player's grab of a prop (docs/engine/havok-props.md rows
   E13, E14, E15, E31; docs/verbs/prop-physics.md A2, A6). Hooks
   PlayerCharacter::StartGrabObject (40552; the grab fields before and after,
   the grabbed reference by LookupReferenceByHandle) and DestroyMouseSprings
   (40557, the release; EndGrabObject is inline in CommonLibSSE-NG), and
-  polls the player's grabbedObject, grabObjectWeight and grabType every
-  250 ms (the runtime data at the newer layout's 0x3E0 start, so each
-  header comment plus 8), emitting on change. Expected: the grabber's seat
-  shows the call, a handle and a weight held until the release; the other
-  seat shows no call and handle 0 throughout, and a second hand on the same
-  body shows a call with the handle still 0 or no call. Written 2026-11-03
-  for x-prop-arbitration leg 3 on both seats; never run.
+  polls the player's grabbedObject, grabObjectWeight and grabType once a
+  game frame inside the player's own update (v2; v1 polled every 250 ms on
+  Frida's thread), the runtime data at the newer layout's 0x3E0 start, so
+  each header comment plus 8, emitting on change. Expected: the grabber's
+  seat shows the call, a handle and a weight held until the release; the
+  other seat shows no call and handle 0 throughout, and a second hand on the
+  same body shows a call with the handle still 0 or no call. Written
+  2026-11-03 for x-prop-arbitration leg 3 on both seats; never run. v2
+  (2026-11-11, ADR-071 rung 0's H5, x-corpse-grab v1): the grabbed
+  reference's facts at each grab, release and handle change (its form
+  type, an actor's life state, its 3D's bodies by motion type with each
+  bone's name, layer and kAnimTargeted bit, and the kBlockActivate bit of
+  its ExtraFlags, the block canon puts on every dead NPC body); the
+  grabSpring array (0x8A0) with each spring's vtable checked against
+  VTABLE_bhkMouseSpringAction (208070) and the body its Havok action
+  names, matched by value against the walk; every 30 frames while held,
+  the named bodies' positions and speeds; the ready row's pid, base, Main's
+  thread and first bytes, a liveness row every 10 s. v2.1 (the same day, its
+  review's fixes): the hold rows' game units by GetWorldScaleInverse's float
+  (187407; v2 read GetWorldScale's, 188105, the inverse, and fell back to
+  1), trusted only when the two multiply to 1, each row labelled with its
+  units; the walk counts every body of the grabbed 3D (BODIES_MAX bounds
+  only the printed list). v2.2: without the scale the game-unit fields
+  print null (no fallback to 1), the raw Havok values beside them.
 - prop-sleep.js: the engine's own sleep of a prop against the client's
   500 ms stir test (docs/engine/havok-props.md row E10; prop-physics.md A3,
   A4). Finds the clutter bodies the player's capsule touches through
@@ -352,7 +372,30 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   +0x32), emitted on change and once a second while awake. Expected on the
   simulating seat: the frames reach 5 and the island leaves the active array
   within one sample interval of the seat's "stream ... asleep" line; the
-  non-owner's Keyframed copy reads type 4. Written 2026-11-03; never run.
+  non-owner's Keyframed copy reads type 4. Written 2026-11-03; never run. v2
+  (2026-11-11, x-prop-engine v1): the poll runs once a game frame inside the
+  player's own update instead of on a 100 ms timer on Frida's thread, each
+  row with its frame, the change key on the thresholds (an awake body every
+  15 frames besides); the ready row's pid, base, Main's thread and first
+  bytes, a liveness row every 10 s. E10's verdict waits for ADR-071's cap.
+  v3.0 (2026-11-12, E10's read on both seats, havok-props.md:109): v2
+  watches a body only after its own seat's capsule touches it, so a body
+  the seat grabbed and dropped or threw went unwatched (x-prop-rest-e10
+  v1's fresh review). v3.0 adds a watch from the leave of
+  PlayerCharacter::StartGrabObject (40552): the grabbedObject handle
+  (0x8D0) to its reference by LookupReferenceByHandle (12332), that
+  reference's bodies by prop-grab.js v2.2's walk, each (up to
+  GRAB_WATCH_MAX, 8) read by v2's poll into the same sleep rows. One watch
+  a body: a contact or impulse on a known address adds nothing, as in v2,
+  while a grab of a known address starts a fresh watch row (`previous`
+  names the old entry), since a Disable frees a body and a later copy can
+  reuse its address. New fields: a `grab` row at every StartGrabObject
+  leave (`before`, the handle at the enter), `via` on watch rows, `body` on sleep rows, an `unwatch` with
+  reason 'room for a grab' past GRAB_WATCH_MAX; v2's WATCH_MAX counts the
+  touched entries alone. v3.1: the fresh review's three fixes as written
+  (the bodyRef lookup before the known read, so no contact lands between;
+  the walk's two reads on v2's constants said; `before` on the grab row).
+  Never run.
 - prop-launch.js: prop-contact.js plus the body's motion at each contact and before and after every impulse push (the hkpEntity's
   embedded motion: type, position, linear velocity and its length, angular speed, inverse mass; offsets from hkpEntity.h, hkpMotion.h,
   hkMotionState.h, hkTransform.h), for D73's open item: a resting Dynamic basket thrown out of reach by a standing capsule contact (push
@@ -360,6 +403,85 @@ is; no relaunch needed (the hooks are the per-frame path, not a login).
   own console placeatme) in the same run. A launch reads as a jump in vel per push (the push's impulse), a huge massInv (a wrong mass
   after the Dynamic set) or vel growing between pushes (something else moving it). The field offsets are HYPOTHESES until the native
   basket's lines read sane (massInv about 0.3 to 1, a nudge's speed under 100). 2026-10-30.
+- prop-impulse.js: ADR-071 rung 0's impulse read (docs/research/physics-leg-2026-11-11.md H2, H3, H4): which engine call pushes a
+  prop at a spell's or a shout's impact and what names its cause. TESHavokUtilities::AddExplosionImpulse (26005) and
+  ScaleGameplayImpulseForce (26004) are replaced by pass-throughs of their CommonLibSSE-NG signatures, so the forces in xmm2 and xmm0
+  print (REPLACE false attaches them instead, no force); bhkRigidBody::SetLinearImpulse (78091) is attached. Each row carries the
+  body's reference, its motion facts before and after, the HitData's handles resolved, the thread against Main's, and the innermost
+  bracket on its thread: Explosion's Update and FindTargets (209940's slots 0xA3, 0xA4) and every projectile class's ProcessImpacts
+  (slot 0xAC; AddImpact, 0xBD, a row per impact). For POLL_MS (2000) after each call, every named body and its island's members are
+  sampled once a game frame inside the player's own update (rock-motion-trace.js v1.2's idiom): velocity (the body's +0x230, in
+  game units by GetWorldScaleInverse's float, 187407, used only when GetWorldScale's, 188105, is its inverse; the raw Havok vector
+  beside it), motion type, the deactivation counters, the island's pointer, size and active bit, its members by reference on change.
+  Run on both seats through x-prop-blast v3: the caster's rows read H2, the watcher's H3, the island rows H4. The originals run under
+  exceptions 'propagate'; the replacements are reverted after TTL_S (1800) from Frida's own thread, and until then a second
+  instance on the same game falls back to attaching 26005 and 26004 with no forces: relaunch the seat before a rerun inside the
+  half hour. Ids by `just addr`, 2026-11-11; 1.6.1170 only. Written 2026-11-11, v1.1 the same day (its review's fixes), run in
+  x-prop-blast v3 (20261111-223256). v1.2 (2026-11-12, ADR-071 rung 3's premise reads; its fresh review READY, its glib include
+  applied as written): BACKTRACE (default false, x-prop-cone v1) takes an accurate backtrace at a 26004 or 26005 call with no
+  projectile bracket, the cone's UpdateImpl, HandleHits and ProcessImpacts (slots 0xAB, 0xBE, 0xAC) brackets too, with a 'cone' and
+  a 'coneEnd' row a cone; ARROW (default false, x-prop-arrow v1) attaches bhkRigidBody's push candidates (78089, 78090, 78092 and
+  the motions' velocity and impulse slots) in native code, each row with the velocities before and after, the caller and a stack
+  scan; ATTACH_ONLY (default false, rung 3's own probes) leaves 26004 and 26005 unhooked, since the rung 3 build replaces 26004 in
+  the platform's own Gum. The brackets keep per-thread stacks in a CModule and never cross into JavaScript (rule 9); the watch is
+  keyed by body and prints a world's fixed island without its members; liveness carries a Sleep pulse and the native counters;
+  'btSelfTest' reads the backtracer's reach at the first PlayerCharacter::Update; the ready row says scriptVersion '1.2'. Reading
+  it (the review): a frame's label is the nearest known start below it, not its function (the helper at 0x7ed640-0x7ed89d reads as
+  'Projectile slot 0xbf'); under REPLACE true only a backtrace's frame 1 is sure; SkyrimSE.exe's frames get no symbols (no PDB).
+  v1.3 (2026-11-12, rung 3's stage; its fresh review READY with nits, applied as written): PUSH_ONLY (default false) attaches
+  78091, 78092 and slot 0x14 of the three dynamic motions as native candidates, plus AddImpact, FindTargets and the sampler, and
+  never the rung 3 build's own sites (26004, 26005, Explosion::Update, the five ProcessImpacts sites, HandleHits): a guard refuses an
+  attach at any of them, so the build's Replace and this read never share an entry (v1.2's ATTACH_ONLY still attached the brackets,
+  the e9 collision); the ready row prints each refused site's first bytes; scriptVersion '1.3'. For x-prop-impact v1.2 and
+  x-prop-blast v4.2 on both seats.
+- thrall-link.js: ADR-060's return to the caster, as amended (Eli, 2026-11-12: "thrall returns to caster obvs"), read before
+  any build (rule 8): can a fresh game take command of a living, already-reanimated thrall through the engine's own command routine,
+  with no death and no get-up? Mode trace attaches hooks only (the add check 34754, ReanimateEffect's start 34750, the command
+  routines 38798 to 38800, 39950's writes). Mode link replaces 40447 and, on the main thread inside the player's own update, runs
+  the static read's recipe on the first eligible frame: 37490(thrall, 1), then 38798(thrall, player, null); a state row every
+  STATE_MS (2000) with the thrall's life state, its commanding actor, kIsCommandedActor, the player's commanded-actor list, its
+  combat target and that target's own; 38800 at the thrall's death, then the replacement reverted. A lab experiment that writes
+  engine state on one seat, never a resident. The refresh 38799 stays off, so a lapsed command is read, not hidden. Its probe is
+  x-reanimate-return v1.1 (by path); the static read is lab/.cache/drafts/reanimate/return-to-caster-read.md. Ids by `just addr`,
+  2026-11-12; 1.6.1170 only. Written 2026-11-12, v1.1 the same day (its fresh review's fixes as written). v1.1 ran in
+  20261112-103005 and never linked: it replaced PlayerCharacter::Update only while VTABLE_PlayerCharacter slot 0xAD still held 40447,
+  and on c1 another module's function sat there (read-return-103005.md). v1.2 (the read's decisions) replaces whatever the slot
+  holds and calls through it, as body-impose.js does, naming the slot's module, base and offset in the ready row; runs the 38799
+  refresh every 30 frames; and its probe waits for Sven's intro scene (quest 954d9) to end. v1.3 (its fresh review, as written):
+  a step runs only when the update's this is 401069's player (counts.notPlayer otherwise), the liveness row prints the slot's
+  current target, and the cast rows filter on Dead Thrall's spell 0x7e8df.
+- body-impose.js: ADR-071 rung 0's pose read on one seat (H6): can the engine hold a dead body in a pose it is handed, within 32
+  units a bone. It finds FORM's actor in the process lists, waits for its body to rest, captures each body's position and rotation
+  (bhkRigidBody slots 0x33, 0x34) and the Havok block by the engine's own serializer (36016, the copy freed), then, each time the
+  probe has shouted the body away and it rests again: path A, every animation graph's BSIRagdollDriver::SetMotionType(kKeyframed)
+  and ten writes 100 ms apart toward the capture (slots 0x36, 0x35), a 3 s hold, Dynamic again and 3 s more; path B, the block
+  copied onto the engine heap, the reference's location and angle set back, and the re-apply route 36014 (19535 on the live 3D,
+  its 19538 and slot 0x35 and 0x36 calls counted). Pose rows carry the per-bone error against the capture in game units (max, mean,
+  the root's, the worst three bones) and the motion types, the rotation error at each window's end. Its engine calls run inside a
+  replacement of the player's own update, never inside a listener (the listener guard), on Main's thread alone (a 'thread' row if
+  the update runs elsewhere), and the replacement is reverted when the run ends. Its writes, a lab experiment's, never a
+  resident's: path A's body transforms and the driver's motion type (set back to kDynamic at its release and by any finish while
+  keyframed); path B's block through 36014, and the reference's data.angle and data.location written directly in memory to the
+  capture's values and NOT restored afterwards, so the body's record moves with the host's next samples. v1.1 (the same day, its
+  review's fixes): game units by GetWorldScaleInverse's float (187407; v1 read GetWorldScale's, 188105, the inverse), the original
+  under exceptions 'propagate', the graphs re-resolved at every driver call, the walk counting every body so H6's 64 can fail,
+  slots 0x35 and 0x36 counted on bhkRigidBodyT (239275) too, and the pose errors read memory against memory while the writes go
+  accessor to accessor (bhkRigidBodyT overrides GetPosition and SetPosition). v1.2 (its re-review's fix): path B's setPos and
+  setRot totals count at bhkRigidBody's sites alone, since each bhkRigidBodyT setter ends in bhkRigidBody's own (a T SetPosition
+  skips it only for a null hkpRigidBody, which moves no body), so each write that moves a body counts once against 19538's; the
+  bhkRigidBodyT sites' labels are the breakdown, not added to the totals. 36014, 36016, 19535 and 19538 are the static
+  read's (HYPOTHESIS); the rest by `just addr` and CommonLibSSE-NG, 2026-11-11. Written 2026-11-11, never run.
+- save-havok.js: ADR-071 rung 0's save read (the plan's "the kHavokMoved block keeps an awake body's velocities"): at a save, the
+  Havok block writer 19534 (its bytes the save buffer's between its entry and leave positions, BGSSaveGameBuffer.h:30-32) sliced per
+  body by 19537's entry and leave, each slice decoded by its length (position and rotation, the body flag byte, six velocity floats
+  when active, in game units by the static read); at the load, the reader 19535 as a bracket per thread with its 19538 count and the
+  vectors bhkRigidBody::SetLinearVelocity (78089) and SetAngularVelocity (78090) take inside it, in Havok units and times
+  GetWorldScaleInverse's float (187407, v1.1; v1 read GetWorldScale's, 188105, the inverse, so its game columns were null), trusted
+  only when the two floats multiply to 1: a linear row's game column, an angular row's scaled one (rad/s is no length, v1.2); a
+  setter outside any 19535 prints its caller (the first 32). FORM names the rolling body; another reference prints
+  only when its block holds an active body's velocities. Attach only, no engine call. Run on a seat that saves and loads (a solo run,
+  x-quit-solo's frame). 19534, 19535, 19537 and 19538 are the adr065 static read's (HYPOTHESIS); 78089 and 78090 CommonLibSSE-NG's;
+  ids by `just addr`, 2026-11-11. Written 2026-11-11, never run.
 - cloak-hostile.js: whether a hostile creature's engine counts the player as
   hostile before any blow (docs/verbs/npc-stream.md slice 6, H-53h). Hooks
   Actor::IsHostileToActor and logs self, other, the answer and the caller's
@@ -611,6 +733,19 @@ TURN_SIGN) that ramps lockAngle with the pick snapped: HYPOTHESIS that the menu'
   count before its filter, a kernel32!Sleep pulse and emptyNames (above 0 says the hook runs after
   the gate). Ids by `just addr`; the event and argument layouts are Ghidra's static read
   (HYPOTHESIS until a run's rows agree). Written 2026-11-07; never run. 1.6.1170 only.
+- corpse-lay-heap-pool.js: the watcher crash on canon (x-reanimate-look-u0 2 of 2, 20261112-085636 and 102238;
+  lab/.cache/drafts/reanimate/read-u0-085636.md section 7): both faults on c2 were victims of one corrupted 0x20-byte MemoryManager
+  pool, its free list walked through MovementMessagePathComplete's vtable. Read-only to the engine; CModule listeners (rule 9) on the
+  pool's allocate, free and reallocate, the post-death lay and its 3D drop, the reanimate start, resurrect and reanimation calls
+  (34750, 37321, 38820), and every equip, unequip and RemoveItem on a watched, laid or dead actor (RemoveItem's list is its sixth
+  argument: 37797 returns through a hidden pointer). Rows: heap inImage (the poisoned pop), link, twice, double (both freers with a
+  stack), lay and set3D, the raise rows, the equip rows with each list's record and the actor's equip queue, a layWindow summary
+  per lay, liveness every 10 s, ready and ttl. It holds a thread 600 ms only inside a lay that shows an in-image or a critical
+  row. Verdict: a double or twice row inside a lay's window, on a block that is a list from that window's rows or with 37797, 19689,
+  38901, 39814 or 39822 on its stack, points at the lay; a reanimateStart row with why `ref` means the watcher's raise refusal
+  failed; a fault with no anomaly row means the trace was blind. Run on c2 from a probe's frida step right after it connects; TTL
+  1200 s. Ids by `just addr`, 2026-11-12; 1.6.1170 only. Written 2026-11-12, v1.1 the same day (its fresh review's fixes as
+  written); never run.
 - corpse-lay-heap.js: an ActorMediator sink add or remove against the engine heap's recent frees
   through a corpse lay on a loaded leveled actor, for playtest 49's c1 crash (2026-11-06
   22:20:47 PST: 70199+0x7 on the background loader cloning draugr 0x380b8's skeleton 54 ms after
@@ -644,3 +779,25 @@ TURN_SIGN) that ramps lockAngle with the pick snapped: HYPOTHESIS that the menu'
   counted (platformQuiet) and skip the walk. Reads only, no engine call from a listener; a liveness row with a kernel32!Sleep
   pulse. Layouts CommonLib b93280e8's (Stack.h, StackFrame.h, Variable.h, ObjectTypeInfo.h, Object.h; file:line in the header).
   Fresh-reviewed 2026-11-09 (GO WITH NOTES, the notes applied as written); never run. 1.6.1170 only.
+- additem-functor.js: whether a script's AddItem of a leveled list on its own player lands through a container event fired
+  synchronously inside SkyrimScript::AddItemFunctor's operator() on its thread, carrying the stack id the platform's seam recorded
+  at the call (ADR-068 rung 5, Eli's D-R1 C and its named gap: fork m4-scripts-5-rewards 1bc4059b refuses a leveled list by name,
+  E_SCRIPTCALL_LEVELED, because the engine rolls it later, in the functor). The probe x-additem-functor by path
+  (lab/.cache/drafts/rung5) sets MS01's stages 39 and 49, each a fragment's AddItem of LvlQuestReward02Medium 0xc0405 on the
+  player, and FreeformStonehillsA's 20, Gold001 x25, the control. Hooks: native-frame.js's NativeFunctionBase::Call (104651, `just
+  addr` 0x143dc00), filtered to ObjectReference.AddItem and Activate by the bound IFunction's own class and name; AddItemFunctor's
+  operator() at the address its live vtable's slot 01 holds (218372; the locator checked against RTTI 397281, slots 00 to 06
+  printed, slot 01 against the static read's 56095); the VM's container sink (SkyrimVM 400475 +0x48, slot 01 ProcessEvent, RTTI
+  396984) and Skyrim Platform's, found in the event source's sink array at the VM sink's first event and attached 500 ms later
+  from Frida's own thread. A sink call whose `this` is not the registered sink counts as foreign and reads nothing. Rows: ready
+  (pid, each site's live first bytes, the locator and slot checks); addItemCall per AddItem (the Stack, the three arguments, the
+  caller frame, the CallResult); activateCall for an Activate whose window caught an event; functorEnter and functorLeave
+  (stackID, the matched call or a requeued functor's rerun, raw bytes named by value as HYPOTHESIS, a leveled list's live members
+  capped at 256 entries and 64 leaves, the sret reading a detour needs: rax against the entry's rdx); event per container event
+  naming the player or fired in a window (the window, member, listItself, paired across the two sinks); sinks and platformSink
+  once; a summary every 10 s with every hook's count before its filter and the pending calls; final and detached at TTL.
+  Backtraces go only to functors matched to a call on PLAYER and to their events. Reads only, no engine call from a listener; a
+  kernel32!Sleep pulse. LAB_PARAMS: TTL (default 600; the probe passes 100 so final lands before the run's fetch), ROWS (64),
+  EVENT_ROWS (200), BT (3), RAW (0x28), PLAYER (0x14). Ids by `just addr` on 2026-11-10; layouts CommonLib b93280e8's (file:line
+  in the header). Fresh-reviewed 2026-11-10 (runs as is, its notes all NOTE; notes 1 to 6 and 8 applied, 7 and 9 optional and
+  left); never run. 1.6.1170 only.

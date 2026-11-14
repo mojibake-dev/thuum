@@ -21,10 +21,27 @@ the lab can grep (E_ASSERT_*).
                                                      is its head node's world position (headZ - z tells a body lying
                                                      from one upright), scene the scene that game runs it in (0 for none),
                                                      faceNode whether its copy holds the facegen head (npc-fate 1e)
-  <client>.quest(<id>).stage() | .stageDone(<n>) | .running()
+  <client>.quest(<id>).stage() | .stageDone(<n>) | .running() | .completed()
                                                      that seat's game's quest: its current stage, whether stage n is
-                                                     done (n among the step's stages), whether it runs; from its last
+                                                     done (n among the step's stages), whether it runs, whether the
+                                                     game holds it completed (Quest.IsCompleted); from its last
                                                      quest-stage {quests, stages} step naming it (ADR-056)
+  <client>.quest(<id>).objectiveDisplayed(<i>) | .objectiveCompleted(<i>)
+                                                     whether that seat's game shows objective i of the quest, and
+                                                     whether it is completed there (Papyrus Quest.IsObjectiveDisplayed
+                                                     and IsObjectiveCompleted), from its last quest-objectives {quest,
+                                                     objectives} step naming the quest, i among the step's (ADR-068
+                                                     rung 5: each seat's engine runs the fragment that shows them)
+  <client>.script_vars(<form>).value("<script>::<var>")
+                                                     a variable of a quest's or a reference's attached script as that
+                                                     seat's own VM holds it, from its last script-vars {form, keys}
+                                                     step naming the form (TESModPlatform.ReadScriptVariables, ADR-068
+                                                     rung 5's ScriptVariables read): an int, a float or a bool as
+                                                     itself; the key is split at its first "::"
+                                                     ("PlayerVampireQuestScript::::VampireStatus_var"), a bare
+                                                     "::<var>" names the one script that has it, a property's name its
+                                                     backing ::<name>_var, all case-blind; a key the native refused,
+                                                     or a last step that answered an error, is a data error
   <client>.alias(<quest>, <alias>).refr | .name    that seat's game's reference alias, from its last alias {quest,
                                                      alias} step naming the pair: the reference it holds (0 for none)
                                                      and the alias's name (ADR-068 rung 4's AliasFill); a last step
@@ -68,6 +85,20 @@ the lab can grep (E_ASSERT_*).
                                                      epoch, and one global's recorded value by its FormDesc or
                                                      form id (a global the server holds no value of is a data
                                                      error)
+  server.quest_runs(<quest>).running | .seq | .recorded
+                                                     the server's run record of a quest (ADR-068 rung 5's start and
+                                                     stop words, labState kind questRuns): whether it holds the quest
+                                                     running and its sequence for it, both a data error when it holds
+                                                     no row of the quest, and whether it holds one
+  server.quest_record(<quest>).stageDone(<n>) | .count
+                                                     the server's record of the quest's stages done (labState kind
+                                                     questStages, ADR-056 decision 2's journal): whether it holds
+                                                     stage n, and how many stages of the quest it holds (0 for none)
+  server.script_variables().value(<form>, "<script>::<var>")
+                                                     the world's record of a condition-read script variable (ADR-068
+                                                     rung 5's ScriptVariables 81, labState kind scriptVariables), the
+                                                     form by id or FormDesc and the key as c.script_vars' value takes
+                                                     it; a key the server records no value of is a data error
   server.alias_fill(<quest>, <alias>).refr | .created | .container | .added
                                                      the server's record of a quest's alias (ADR-068 rung 4's
                                                      AliasFill): the reference it holds (0 when cleared or never
@@ -140,6 +171,17 @@ the lab can grep (E_ASSERT_*).
   server.actor(<client>).headParts                   the appearance's head parts, "0x..,0x.." sorted
   <client>.head_parts()                              the parts on its player's base from its last head-parts
                                                      step, the same form (thuum ADR-026: the two agree)
+  <client>.head_part(<type>)                         the form id of the part of that HDPT type (2 eyes, 1 face,
+                                                     3 hair, 6 brows) in that read, 0 for none; a SkyMP figure's
+                                                     parts are read by node (node-scale {other, node}), since a
+                                                     head-parts {other: true} read of one lists the seat's own
+  <client>.overlay_part(<type>)                      the same in the overlay parts its last head-parts step read on
+                                                     its player (SKSE's overlay natives read the engine's per-NPC
+                                                     overlay map, not HasOverlays; which parts the face takes from
+                                                     it is HYPOTHESIS), 0 for none
+  <client>.setting("<name>")                         the live value its last settings step read under that name: an
+                                                     INI setting "name:Section" (Utility.GetINIFloat, the engine's
+                                                     live value, a plugin's write included) or a game setting
   <client>.printed("<text>")                         true when a line the console printed during its last
                                                      console step contains the text (the server's
                                                      ConsoleOutput as skymp5-client prints it)
@@ -218,6 +260,9 @@ class ServerFacade(Protocol):
     def stream(self, client: str) -> dict[str, Any] | None: ...
     def world_globals(self) -> dict[str, Any] | None: ...
     def alias_fills(self) -> dict[str, Any] | None: ...
+    def quest_runs(self) -> dict[str, Any] | None: ...
+    def quest_stages(self) -> dict[str, Any] | None: ...
+    def script_variables(self) -> dict[str, Any] | None: ...
 
 
 class ViewsFacade(Protocol):
@@ -236,6 +281,8 @@ class ViewsFacade(Protocol):
     def quests(self, observer: str) -> dict[int, dict[str, Any] | None] | None: ...
     def alias(self, observer: str, quest: int, alias: int) -> dict[str, Any] | None: ...
     def factions(self, observer: str, form_id: int) -> dict[str, Any] | None: ...
+    def script_vars(self, observer: str, form_id: int) -> dict[str, Any] | None: ...
+    def objectives(self, observer: str, quest: int) -> dict[str, Any] | None: ...
     def poisons(self, observer: str) -> dict[str, Any] | None: ...
     def figure_spells(self, observer: str) -> dict[str, Any] | None: ...
     def log_count(self, observer: str, pattern: str) -> int | None: ...
@@ -246,6 +293,7 @@ class ViewsFacade(Protocol):
     def av_reads(self, observer: str) -> dict[str, Any] | None: ...
     def presets(self, observer: str) -> dict[str, Any] | None: ...
     def consoles(self, observer: str) -> dict[str, Any] | None: ...
+    def settings(self, observer: str) -> dict[str, Any] | None: ...
     def head_parts(self, observer: str) -> dict[str, Any] | None: ...
 
 
@@ -1282,12 +1330,36 @@ class QuestView:
     `quest-stage {quests, stages}` step naming it (Papyrus Quest.GetCurrentStageID,
     IsStageDone and IsRunning; docs/verbs/quest-stage.md): stage() its current
     stage, stageDone(n) whether stage n is done, for an n among the step's
-    stages, running() whether it runs."""
+    stages, running() whether it runs, completed() whether the game holds it
+    completed (Quest.IsCompleted; thuum D-E1). objectiveDisplayed(i) and
+    objectiveCompleted(i) read its last `quest-objectives {quest, objectives}`
+    step instead (Quest.IsObjectiveDisplayed and IsObjectiveCompleted, ADR-068
+    rung 5), for an i among that step's; either step alone makes the view."""
 
-    def __init__(self, client: str, form_id: int, data: dict[str, Any]):
+    def __init__(self, client: str, form_id: int, data: dict[str, Any] | None, objectives: dict[str, Any] | None = None):
         self._client = client
         self._id = int(form_id)
-        self._data = data
+        self._data = data or {}
+        self._objectives = objectives
+
+    def _objective(self, i: int, field: str) -> bool:
+        o = self._objectives
+        if o is None:
+            raise AssertionData(f"{self._client} has not reported a quest-objectives step for {self._id:#x}")
+        if "error" in o:
+            raise AssertionData(f"{self._client}'s last quest-objectives step for {self._id:#x} answered an error: {str(o['error'])[:200]}")
+        table = o.get("objectives")
+        entry = table.get(str(int(i))) if isinstance(table, dict) else None
+        v = entry.get(field) if isinstance(entry, dict) else None
+        if not isinstance(v, bool):
+            raise AssertionData(f"{self._client}'s quest-objectives step did not read objective {int(i)} of {self._id:#x}")
+        return v
+
+    def objectiveDisplayed(self, i: int) -> bool:
+        return self._objective(i, "displayed")
+
+    def objectiveCompleted(self, i: int) -> bool:
+        return self._objective(i, "completed")
 
     def stage(self) -> int:
         v = self._data.get("stage")
@@ -1307,6 +1379,142 @@ class QuestView:
         if not isinstance(v, bool):
             raise AssertionData(f"{self._client}'s quest-stage step read no running state of {self._id:#x}")
         return v
+
+    def completed(self) -> bool:
+        v = self._data.get("completed")
+        if not isinstance(v, bool):
+            raise AssertionData(f"{self._client}'s quest-stage step read no completed state of {self._id:#x} (a driver before IsCompleted's read)")
+        return v
+
+
+def _var_key(key: str) -> tuple[str | None, str]:
+    """A script variable's key as the grammar writes it: "<script>::<var>" split at its first "::", or a bare "::<var>"
+    (no script named), both lowercased."""
+    k = key.strip().lower()
+    if k.startswith("::"):
+        return None, k
+    script, sep, var = k.partition("::")
+    if not sep or not script or not var:
+        raise AssertionData(f'{key!r} names no variable: write "<script>::<var>" or "::<var>"')
+    return script, var
+
+
+def _var_entry(rows: list[dict[str, Any]], key: str, label: str) -> dict[str, Any]:
+    """The one row whose script and variable the key names, case-blind: the variable itself or, for a property's name, its
+    backing ::<name>_var (the Papyrus compiler's); a bare variable that two scripts carry is a data error."""
+    script, var = _var_key(key)
+    wanted = (var, f"::{var}_var")
+    hits = [r for r in rows if str(r.get("var", "")).lower() in wanted
+            and (script is None or str(r.get("script", "")).lower() == script)]
+    if not hits:
+        seen = ", ".join(f"{r.get('script')}::{r.get('var')}" for r in rows[:6]) or "none"
+        raise AssertionData(f"{label} has no variable {key!r} (it read {seen})")
+    if len({str(r.get("script", "")).lower() for r in hits}) > 1:
+        raise AssertionData(f"{label}: {key!r} names a variable of {len(hits)} scripts; name the script, \"<script>::<var>\"")
+    return hits[0]
+
+
+class ScriptVarsView:
+    """c.script_vars(form): named variables of a quest's or a reference's attached scripts as that seat's own VM held them at
+    its last `script-vars {form, keys}` step naming the form (lab-driver's call of TESModPlatform.ReadScriptVariables: ADR-068
+    rung 5, docs/research/rung5-quests-2026-11-09.md 1(c), the read the world streamer reports ScriptVariables 81 with).
+    value(key) is the variable's value by its kind: 3 an int, 4 a float, 5 a bool (rung 3's folded kinds; a condition compares
+    a number). A key the native refused (its entry carries the refusal), a kind outside the three, or a key the step did not
+    read is a data error, never a 0."""
+
+    def __init__(self, client: str, form_id: int, data: dict[str, Any]):
+        self._client = client
+        self._id = int(form_id)
+        rows = data.get("vars")
+        self._rows = [r for r in rows if isinstance(r, dict)] if isinstance(rows, list) else []
+
+    def value(self, key: str) -> Any:
+        label = f"{self._client}'s script-vars of {self._id:#x}"
+        r = _var_entry(self._rows, key, label)
+        why = r.get("reason", r.get("error"))
+        if why is not None:
+            raise AssertionData(f"{label}: the native refused {key!r}: {str(why)[:160]}")
+        k = r.get("k")
+        slot = {3: ("i", int), 4: ("f", (int, float)), 5: ("b", bool)}.get(k) if isinstance(k, int) and not isinstance(k, bool) else None
+        if slot is None:
+            raise AssertionData(f"{label}: {key!r} is of kind {k!r}, not an int, a float or a bool")
+        v = r.get(slot[0])
+        if not isinstance(v, slot[1]) or (k != 5 and isinstance(v, bool)):
+            raise AssertionData(f"{label}: {key!r} (k {k}) lacks its value: {r!r:.160}")
+        return float(v) if k == 4 else v
+
+
+class QuestRunsView:
+    """server.quest_runs(quest): the server's run record of one quest (labState kind questRuns, ADR-068 rung 5's start and
+    stop words: docs/research/rung5-quests-2026-11-09.md 1(b)). recorded is whether the record holds a row of the quest;
+    running and seq read that row (whether it holds the quest running, and the record's sequence for it) and are a data error
+    when there is none, never a false or a 0."""
+
+    def __init__(self, quest: int, row: dict[str, Any] | None):
+        self._quest = quest
+        self._row = row
+        self.recorded = row is not None
+
+    def _field(self, name: str) -> Any:
+        if self._row is None:
+            raise AssertionData(f"the server records no run of {self._quest:#x}")
+        return self._row.get(name)
+
+    @property
+    def running(self) -> bool:
+        return bool(self._field("running"))
+
+    @property
+    def seq(self) -> int:
+        return int(self._field("seq") or 0)
+
+
+class QuestRecordView:
+    """server.quest_record(quest): the server's record of one quest's stages done (labState kind questStages, ADR-056
+    decision 2: per quest the stages the world has done, on the world's journal), so a claim reads the record instead of a
+    log line. stageDone(n) whether the record holds stage n; count how many stages of the quest it holds, 0 for none (an
+    empty record is the server's answer, not missing data: x-werewolf-form's "no 0x2ba16 stage")."""
+
+    def __init__(self, quest: int, stages: set[int]):
+        self._quest = quest
+        self._stages = stages
+        self.count = len(stages)
+
+    def stageDone(self, n: int) -> bool:
+        return int(n) in self._stages
+
+
+class ScriptVariablesView:
+    """server.script_variables(): the world's condition-read script variables as the server records them (labState kind
+    scriptVariables, ADR-068 rung 5's ScriptVariables 81, D-V1 B: the latest write per key). value(form, key) the recorded
+    value of one key, the form by id or FormDesc (each row's resolved through the run's load order, so a server that keeps
+    FormDescs and one that answers form ids read alike) and the key as c.script_vars' value takes it; a key the server holds
+    no value of is a data error."""
+
+    def __init__(self, entries: list[dict[str, Any]], resolver: Any):
+        self._entries = entries
+        self._resolve = resolver
+
+    def value(self, spec: Any, key: str) -> Any:
+        try:
+            want = int(self._resolve(spec)) if isinstance(spec, str) else int(spec)
+        except KeyError as e:
+            raise AssertionData(str(e)) from e
+        rows = []
+        for e in self._entries:
+            try:
+                form = int(self._resolve(e["form"])) if isinstance(e.get("form"), str) else int(e.get("form") or 0)
+            except (KeyError, TypeError, ValueError):
+                continue
+            if form == want:
+                rows.append(e)
+        r = _var_entry(rows, key, f"the server's script variables of {want:#x}")
+        v = r.get("value")
+        if isinstance(v, bool) or r.get("k") == 5:
+            return bool(v)
+        if not isinstance(v, (int, float)):
+            raise AssertionData(f"the server's value of {want:#x} {key!r} is malformed: {r!r:.160}")
+        return float(v) if r.get("k") == 4 else int(v)
 
 
 @dataclass(frozen=True)
@@ -1370,18 +1578,21 @@ class AvView:
     health, magicka and stamina, <name> is the base value, <name>Current the
     current one, <name>Max the maximum and <name>Percentage the share, as the
     driver read them on the player (c.av()) or on its figure of another client
-    (c.av_of(o))."""
+    (c.av_of(o)). The driver answers each name as {base, current, max,
+    percentage} (lab/driver/src/index.ts readActorValue); a maximum stored as
+    `maximum`, an older answer's shape, still reads."""
 
     def __init__(self, who: str, values: dict[str, Any]):
         self._who = who
         self._values = values
 
-    def _field(self, name: str, field: str) -> float:
+    def _field(self, name: str, field: str, *older: str) -> float:
         v = self._values.get(name)
-        if not isinstance(v, dict) or field not in v:
+        key = next((f for f in (field, *older) if isinstance(v, dict) and f in v), None)
+        if key is None:
             raise AssertionData(f"{self._who}'s av-read did not read {name}'s {field}")
         try:
-            return float(v[field])
+            return float(v[key])
         except (TypeError, ValueError) as e:
             raise AssertionData(f"{self._who}'s av-read {name} {field} is not a number") from e
 
@@ -1411,15 +1622,15 @@ class AvView:
 
     @property
     def healthMax(self) -> float:
-        return self._field("health", "maximum")
+        return self._field("health", "max", "maximum")
 
     @property
     def magickaMax(self) -> float:
-        return self._field("magicka", "maximum")
+        return self._field("magicka", "max", "maximum")
 
     @property
     def staminaMax(self) -> float:
-        return self._field("stamina", "maximum")
+        return self._field("stamina", "max", "maximum")
 
     @property
     def healthPercentage(self) -> float:
@@ -1694,6 +1905,56 @@ class _ServerRef:
                 raise AssertionData(f"the server's fill of {want:#x} alias {int(alias)} is malformed: {e}") from e
         raise AssertionData(f"the server records no fill of {want:#x} alias {int(alias)}")
 
+    def _quest_rows(self, quest, fn_name: str, field: str, what: str, kind: str) -> tuple[int, list[dict[str, Any]]]:
+        """One journal kind's rows of a quest (the quest by form id or FormDesc, each row's resolved through the run's load
+        order), read when the assert runs; a server without the kind is a data error."""
+        try:
+            want = self._f.base_id(quest) if isinstance(quest, str) else int(quest)
+        except KeyError as e:
+            raise AssertionData(str(e)) from e
+        fn = getattr(self._f, fn_name, None)
+        d = fn() if fn else None
+        if not d or not d.get("found"):
+            raise AssertionData(f"server has no {what} to read (labState {kind} found nothing: a server before ADR-068 rung 5, "
+                                "or an answer the gamemode refused)")
+        rows = []
+        for row in d.get(field) or []:
+            if not isinstance(row, dict):
+                continue
+            try:
+                q = int(self._f.base_id(row["quest"])) if isinstance(row.get("quest"), str) else int(row.get("quest") or 0)
+            except (KeyError, TypeError, ValueError):
+                continue
+            if q == want:
+                rows.append(row)
+        return want, rows
+
+    def quest_runs(self, quest) -> QuestRunsView:
+        """server.quest_runs(quest): the server's run record of one quest (labState kind questRuns, ADR-068 rung 5)."""
+        want, rows = self._quest_rows(quest, "quest_runs", "runs", "quest runs", "questRuns")
+        return QuestRunsView(want, rows[-1] if rows else None)
+
+    def quest_record(self, quest) -> QuestRecordView:
+        """server.quest_record(quest): the server's record of one quest's stages done (labState kind questStages)."""
+        want, rows = self._quest_rows(quest, "quest_stages", "stages", "quest stages", "questStages")
+        stages = set()
+        for row in rows:
+            try:
+                stages.add(int(row["stage"]))
+            except (KeyError, TypeError, ValueError):
+                continue
+        return QuestRecordView(want, stages)
+
+    def script_variables(self) -> ScriptVariablesView:
+        """server.script_variables(): the world's record of condition-read script variables (labState kind scriptVariables,
+        ADR-068 rung 5's ScriptVariables 81), read when the assert runs."""
+        fn = getattr(self._f, "script_variables", None)
+        d = fn() if fn else None
+        if not d or not d.get("found"):
+            raise AssertionData("server has no script variables to read (labState scriptVariables found nothing: a server before "
+                                "ADR-068 rung 5, or an answer the gamemode refused)")
+        return ScriptVariablesView([e for e in d.get("entries") or [] if isinstance(e, dict)], self._f.base_id)
+
     def spell(self, spec) -> SpellView:
         form_id = self._f.base_id(spec) if isinstance(spec, str) else int(spec)
         fn = getattr(self._f, "spell", None)
@@ -1921,9 +2182,13 @@ class _ClientRef:
             raise AssertionData(f"server has no actor for {other}")
         absolute = target.get("absolute") or target
         origin = self._origin("desc", absolute.get("cell"))
-        best: dict[str, Any] | None = None
-        best_d = 0.0
-        for e in entries:
+        found = self._within(absolute, entries, pos_of)
+        return (found[0] if found else None), origin
+
+    def _within(self, absolute: dict[str, Any], entries: list[Any], pos_of: Any) -> list[dict[str, Any]]:
+        """Every entry within SEE_RADIUS of an absolute position, nearest first (the first of equals as listed)."""
+        found: list[tuple[float, int, dict[str, Any]]] = []
+        for i, e in enumerate(entries):
             try:
                 pos = pos_of(e)
                 dx = float(pos[0]) - float(absolute["x"])
@@ -1932,9 +2197,10 @@ class _ClientRef:
             except (KeyError, IndexError, TypeError, ValueError):
                 continue
             d = (dx * dx + dy * dy + dz * dz) ** 0.5
-            if d <= self.SEE_RADIUS and (best is None or d < best_d):
-                best, best_d = e, d
-        return best, origin
+            if d <= self.SEE_RADIUS:
+                found.append((d, i, e))
+        found.sort(key=lambda f: (f[0], f[1]))
+        return [e for _, _, e in found]
 
     def sees(self, other: str) -> bool:
         return self._seen(other)[0] is not None
@@ -2220,15 +2486,36 @@ class _ClientRef:
 
     def quest(self, form_id: int) -> QuestView:
         """c.quest(id): that quest in that client's game at its last
-        `quest-stage` step naming it: stage(), stageDone(n), running()."""
+        `quest-stage` step naming it: stage(), stageDone(n), running(); and at its
+        last `quest-objectives` step naming it: objectiveDisplayed(i),
+        objectiveCompleted(i). Neither step is a data error."""
         fn = getattr(self._views, "quests", None)
         data = fn(self.name) if fn else None
-        if not isinstance(data, dict) or int(form_id) not in data:
+        ofn = getattr(self._views, "objectives", None)
+        objectives = ofn(self.name, int(form_id)) if ofn else None
+        staged = isinstance(data, dict) and int(form_id) in data
+        if not staged and objectives is None:
             raise AssertionData(f"{self.name} has not reported a quest-stage step for {int(form_id):#x}")
-        q = data[int(form_id)]
-        if not isinstance(q, dict):
+        q = data[int(form_id)] if staged else None
+        if staged and not isinstance(q, dict) and objectives is None:
             raise AssertionData(f"{self.name}'s game holds no quest {int(form_id):#x}")
-        return QuestView(self.name, int(form_id), q)
+        return QuestView(self.name, int(form_id), q if isinstance(q, dict) else None, objectives)
+
+    def script_vars(self, form) -> ScriptVarsView:
+        """c.script_vars(form): the seat's last script-vars step for that quest or reference (`script-vars {form, keys}`), the
+        form by id or FormDesc. No step, or a last step that answered an error (the native's refusal of the form, a dist
+        without the native, a step that failed), is a data error, never a pass."""
+        try:
+            form_id = self._server.base_id(form) if isinstance(form, str) else int(form)
+        except KeyError as e:
+            raise AssertionData(str(e)) from e
+        fn = getattr(self._views, "script_vars", None)
+        data = fn(self.name, form_id) if fn else None
+        if not isinstance(data, dict):
+            raise AssertionData(f"{self.name} has not reported a script-vars step for {form_id:#x}")
+        if "error" in data:
+            raise AssertionData(f"{self.name}'s last script-vars step for {form_id:#x} answered an error: {str(data['error'])[:200]}")
+        return ScriptVarsView(self.name, form_id, data)
 
     def alias(self, quest, alias: int) -> AliasView:
         """c.alias(quest, alias): that quest's reference alias in that client's game at its last `alias {quest, alias}` step
@@ -2348,6 +2635,50 @@ class _ClientRef:
             raise AssertionData(f"{self.name}'s head-parts step lacks {e}") from e
         return _parts(ids) or ""
 
+    def head_part(self, kind: int) -> int:
+        """c.head_part(t): the form id of the part of HDPT type t on that client's player's base, from its last
+        `head-parts` step (0 when none), so a claim names one part: c1.head_part(2) == form("19d09:rotfern.esp")."""
+        self.head_parts()  # the same data errors
+        return self._part_of_type(self._views.head_parts(self.name), kind)
+
+    def overlay_part(self, kind: int) -> int:
+        """c.overlay_part(t): the form id of the overlay part of HDPT type t on that client's player, from its last
+        `head-parts` step (SKSE ActorBase.GetNthOverlayHeadPart; 0 when none). SKSE's overlay natives read the engine's
+        per-NPC overlay map, not HasOverlays; which parts the face takes from it is HYPOTHESIS (thuum-fa's delta review of
+        9f7f6426). thuum D-E1 A' reads c1.overlay_part(2) == 0 beside a nonzero c1.overlay_part(1)."""
+        self.head_parts()  # the same data errors
+        data = self._views.head_parts(self.name)
+        if not isinstance(data.get("overlays"), list):
+            raise AssertionData(f"{self.name}'s head-parts step read no overlay list (a driver before the overlay read)")
+        return self._part_of_type(data, kind, "overlays")
+
+    def _part_of_type(self, data: dict[str, Any], kind: int, field: str = "parts") -> int:
+        try:
+            found = [int(p["id"]) for p in data[field] if int(p["type"]) == int(kind)]
+        except (KeyError, TypeError, ValueError) as e:
+            raise AssertionData(f"{self.name}'s head-parts step lacks {e}") from e
+        if len(found) > 1:
+            raise AssertionData(f"{self.name}'s head-parts read holds {len(found)} parts of type {kind}")
+        return found[0] if found else 0
+
+    def setting(self, name: str) -> float:
+        """c.setting(name): one setting's live value as that client's last `settings` step read it, by the name the step
+        named: an INI setting "name:Section" (Utility.GetINIFloat, the engine's live value, so a plugin's write shows) or a
+        game setting (Game.GetGameSettingFloat or GetGameSettingInt). thuum ADR-071 decision 7 reads Display Tweaks'
+        static Havok step with it: abs(c1.setting("fMaxTime:HAVOK") - 1/60) < 0.0005."""
+        fn = getattr(self._views, "settings", None)
+        data = fn(self.name) if fn else None
+        if not isinstance(data, dict):
+            raise AssertionData(f"{self.name} has not reported a settings step yet")
+        for kind in ("ini", "gmst"):
+            table = data.get(kind)
+            if isinstance(table, dict) and name in table:
+                v = table[name]
+                if isinstance(v, bool) or not isinstance(v, (int, float)):
+                    raise AssertionData(f"{self.name}'s settings step read {name} as {v!r}, not a number")
+                return float(v)
+        raise AssertionData(f"{self.name}'s last settings step did not read {name}")
+
     def printed(self, text: str) -> bool:
         """c.printed(text): whether a line the game's console printed during
         that client's last `console` step contains the text (Skyrim
@@ -2431,7 +2762,15 @@ class _ClientRef:
             raise AssertionData(f"{self.name} has not reported a {step} step yet")
         if other is not None:
             live = [n for n in read.get("all") or [] if isinstance(n, dict) and n.get("enabled") and n.get("loaded")]
-            read, _ = self._nearest(other, live, lambda n: n["pos"])
+            target = self._server.actor(other)
+            if not target or not target.get("found", True):
+                raise AssertionData(f"server has no actor for {other}")
+            near = self._within(target.get("absolute") or target, live, lambda n: n["pos"])
+            if len(near) > 1:
+                # two live figures where the server has o name no one figure (thuum-fa's delta review of 9f7f6426)
+                ids = ", ".join(f"{int(n.get('actor') or 0):x}" for n in near)
+                raise AssertionData(f"{self.name} read {len(near)} live actors with 3D where the server has {other} ({ids}); its node-scale {{other: true}} names no one figure")
+            read = near[0] if near else None
             if read is None:
                 raise AssertionData(f"{self.name} read no enabled actor with 3D where the server has {other}")
         try:
@@ -2531,6 +2870,8 @@ _ATTRS = {
     FactionsView: {"crime"},
     AliasFillView: {"refr", "created", "container", "added"},
     WorldGlobalsView: {"streamer", "epoch", "actorId"},
+    QuestRunsView: {"running", "seq", "recorded"},
+    QuestRecordView: {"count"},
     FigureSpellsView: {"count", "extra", "base"},
     FollowView: {"following", "client", "cell", "actorId"},
     FateView: {"fated", "baseId", "level", "raceId", "worn"},
@@ -2546,7 +2887,12 @@ _NUMBER_METHODS = {
     WatchView: {"movedBy"},
     RefsNearView: {"count"},
     StreamView: {"accepted", "dropped", "foreign"},
-    QuestView: {"stageDone"},
+    QuestView: {"stageDone", "objectiveDisplayed", "objectiveCompleted"},
+    QuestRecordView: {"stageDone"},
+}
+# Methods that take an integer: c1.head_part(2), an HDPT type
+_INT_METHODS = {
+    _ClientRef: {"head_part", "overlay_part"},
 }
 # Methods that take a form id: c.marker(0x00016223)
 _ID_METHODS = {
@@ -2557,8 +2903,8 @@ _ID_METHODS = {
 _FORM_SPEC_METHODS = {
     WatchView: {"launched"},
     SelfWatchView: {"launched"},
-    _ServerRef: {"spell", "host", "ref", "follow", "fate", "inventory"},  # inventory: a client name or a ref
-    _ClientRef: {"inventory"},  # a ref: the container as that seat's own game holds it
+    _ServerRef: {"spell", "host", "ref", "follow", "fate", "inventory", "quest_runs", "quest_record"},  # inventory: a client name or a ref
+    _ClientRef: {"inventory", "script_vars"},  # inventory's ref: the container as that seat's own game holds it
     FactionsView: {"rank", "member"},  # a faction by form id or FormDesc
     WorldGlobalsView: {"value"},  # a global by its FormDesc ("<hex id>:<plugin>") or form id
 }
@@ -2566,6 +2912,10 @@ _FORM_SPEC_METHODS = {
 _QUEST_ALIAS_METHODS = {
     _ServerRef: {"alias_fill"},
     _ClientRef: {"alias"},
+}
+# Methods that take a form (an id or a FormDesc) and a string: server.script_variables().value(0xeafd5, "<script>::<var>")
+_FORM_STRING_METHODS = {
+    ScriptVariablesView: {"value"},
 }
 # Methods that take a form id and a string, then optionally a second: c2.node_rotation(0xaa8cb, "Pillar01", "before")
 _ID_STRING_METHODS = {
@@ -2590,18 +2940,21 @@ _STRING_NUMBER_METHODS = {
 }
 # Methods that take no argument: server.time()
 _NULLARY = {
-    _ServerRef: {"time", "world_globals"},
+    _ServerRef: {"time", "world_globals", "script_variables"},
     _ClientRef: {"level", "node_scale", "morph", "head_parts", "watched_self", "av", "refs_near", "figure_spells", "weather"},
-    QuestView: {"stage", "running"},
+    QuestView: {"stage", "running", "completed"},
 }
 _METHODS = {
     _ServerRef: {"actor", "inventory", "effects", "time", "spell", "host", "ref", "follow", "fate", "log_count", "stream",
-                 "world_globals", "alias_fill"},
-    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "inventory", "globalValue", "projectile", "poison", "skill", "level", "weather", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "head_parts", "refs_near", "node_rotation", "script_state", "alias", "factions"},
+                 "world_globals", "alias_fill", "quest_runs", "quest_record", "script_variables"},
+    _ClientRef: {"sees", "view", "watched", "watched_id", "watched_self", "npc_state", "quest", "figure_spells", "log_count", "marker", "known", "favorite", "held", "inventory", "globalValue", "projectile", "poison", "skill", "level", "weather", "node_scale", "node_scale_of", "morph", "morph_of", "av", "av_of", "preset", "printed", "setting", "head_parts", "head_part", "overlay_part", "refs_near", "node_rotation", "script_state", "alias", "factions", "script_vars"},
     NodeRotationView: {"angle_to", "local_angle_to"},
     FactionsView: {"rank", "member"},
     WorldGlobalsView: {"value"},
     ScriptStateView: {"script", "variable"},
+    ScriptVarsView: {"value"},
+    ScriptVariablesView: {"value"},
+    QuestRecordView: {"stageDone"},
     InventoryView: {"count"},
     RefsNearView: {"count", "has", "distance", "runtime_of", "pos", "disabled", "listed", "pos_of", "disabled_of"},
     EffectsView: {"left", "magnitude"},
@@ -2609,7 +2962,7 @@ _METHODS = {
     SelfWatchView: {"saw", "ever", "drops", "rises", "launched"},
     StateView: {"menuOpen"},
     StreamView: {"accepted", "dropped", "foreign"},
-    QuestView: {"stage", "stageDone", "running"},
+    QuestView: {"stage", "stageDone", "running", "completed", "objectiveDisplayed", "objectiveCompleted"},
 }
 _CMP = {
     ast.Eq: operator.eq, ast.NotEq: operator.ne, ast.Lt: operator.lt,
@@ -2759,6 +3112,11 @@ class Evaluator:
                     if len(args) != 2 or not isinstance(args[0], SelfWatchView) or not isinstance(args[1], str):
                         raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes a client's watched_self() and a string")
                     return self._read(node, getattr(obj, node.func.attr)(args[0], args[1]))
+                if node.func.attr in _FORM_STRING_METHODS.get(type(obj), set()):
+                    if (len(args) != 2 or isinstance(args[0], bool) or not isinstance(args[0], (int, str))
+                            or not isinstance(args[1], str)):
+                        raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes a form (0xeafd5 or \"eafd5:Skyrim.esm\") and a \"<script>::<var>\" key")
+                    return self._read(node, getattr(obj, node.func.attr)(args[0], args[1]))
                 if node.func.attr in _QUEST_ALIAS_METHODS.get(type(obj), set()):
                     if (len(args) != 2 or isinstance(args[0], bool) or not isinstance(args[0], (int, str))
                             or isinstance(args[1], bool) or not isinstance(args[1], int)):
@@ -2767,6 +3125,10 @@ class Evaluator:
                 if node.func.attr in _FORM_SPEC_METHODS.get(type(obj), set()):
                     if len(args) != 1 or isinstance(args[0], bool) or not isinstance(args[0], (int, str)):
                         raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes one form id, 0x3f9eb or \"0x3f9eb\"")
+                    return self._read(node, getattr(obj, node.func.attr)(args[0]))
+                if node.func.attr in _INT_METHODS.get(type(obj), set()):
+                    if len(args) != 1 or isinstance(args[0], bool) or not isinstance(args[0], int):
+                        raise AssertionSyntax(f"E_ASSERT_SYNTAX: {node.func.attr} takes one integer")
                     return self._read(node, getattr(obj, node.func.attr)(args[0]))
                 if node.func.attr in _STRING_NUMBER_METHODS.get(type(obj), set()):
                     if not 1 <= len(args) <= 2 or not isinstance(args[0], str) or any(

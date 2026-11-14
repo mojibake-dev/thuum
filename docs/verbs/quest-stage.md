@@ -56,6 +56,16 @@ What the server validates (R1): the quest is a QUST in the server's load order; 
 the reporter is a logged-in player. What it records (R0): per quest the set of stages done, world-wide.
 Rate limit / bounds: 50 ms per quest per player; a report of a stage already done is a no-op (no error, no relay).
 
+**Rung 5's trust (rule 5; ADR-068 rung 5, fork m4-scripts-5-quests 44ffafc2, as its server half m4-scripts-5-server a403ddd4
+declares it: the run words and their acting player, the quest scope, a player's own rows and their overlay, ScriptVariables 81;
+docs/WIRE.md's QuestStage, ScriptCall and ScriptVariables rows):** A player's own row is R1 on the seat's word that its calling
+script ran: the server checks the kind, the bound over the live attachments, the twin rule, the Playable flag, restrictedRaces and
+the head part's race list, and cannot tell which named form a script chose or when. Journal liveness is the world's (once any seat
+runs or stages a world quest, every seat may use that quest script's properties); under questScope derived a player-class quest is
+live for every player at all times. Run-time values (CurrentHowl, Game.GetFormFromFile) and cast-only spells are refused and
+counted. Overlay contents never reach the change form; the figure's look is R2. A run word's acting player is the seat's word when
+it names a connected player; wordStages are the server's read of the record. ScriptVariables stay R2.
+
 ## Engine surface
 
 - Quest.SetStage, GetStage, GetStageDone, IsRunning: Papyrus natives on the client, through Skyrim Platform's Quest
@@ -93,6 +103,26 @@ Rate limit / bounds: 50 ms per quest per player; a report of a stage already don
 - How: a set of (quest, stage) pairs the service is applying, consumed by the `questStage` handler.
 - Release condition: per pair, at its event or after 2 s.
 - Side effects: none.
+- The served start (ADR-068 rung 5, D-Q3 A; fork m4-scripts-5-quests 44ffafc2): the client's 5b head declared a limit, its
+  builder's note 5: a served START word still ran the quest's start-up stage fragments, since the suppress mark is per (quest,
+  stage) and Skyrim Platform cannot name a quest's start-up stages. SCHEMA_VERSION 42 closes it (the fresh review's note 7):
+  the server stamps every start and stop word it sends with `wordStages`, read from the QUST record (stage 0 and the
+  StartUpStage stages for a start, the ShutDownStage stages for a stop; ActionListener.cpp WordStages :3331-3368), and the
+  receiver marks each before Quest.Start or Quest.Stop, an echo mark always and the sink's suppress mark when the word is served
+  or questFragmentLive is not true (questStageService.ts markWordStages :434-450, marksFragment :1670-1672).
+- The login replay of a stopped quest, a gap a static read found and the code at 685f6a24 confirmed (the client keeps a start
+  word's stages alone, questStageService.ts :455-476, and the implicit start a stage's apply makes on a quest not running here
+  marks only those, :594-608; the server's at_login served start words to the quests recorded running alone, quest_runs.rs
+  :434-439): a login served a quest the record holds stopped its stages and then its stop, no start word, so a fresh seat's first
+  stage of it started the quest with its start-up fragments unsuppressed. Fixed by fork m4-scripts-5-loginstart f2689cfa, merged
+  at m4-scripts-5-second f6ca339d (D-Q3 A: a served replay's fragments are the world's history and never run again on a seat):
+  at_login (quest_runs.rs :438-457 at f6ca339d) puts a quest recorded stopped among the starts when the login replays any of its
+  stages, so per quest the replay reads its start, served with its start-up stages in `wordStages`, its stages ascending, its
+  stop; a stopped quest with no stage to replay gets its stop alone, and a Story Manager instance under "seat" no word, as before
+  (ActionListener.cpp SendQuestStages :7894-7957). The runs line gains the count: "QuestStage: actor <a> sent <n> running and <m>
+  stopped quest(s) around the stages after a login, <k> of the stopped started ahead of their stages (D-Q3 A)". The gap that
+  remains: a quest with replayed stages but no run record still gets the client's fallback start, its start-up fragments unmarked
+  unless a start word named them on this connection (UNVERIFIED by a run).
 
 ## Message contract
 
@@ -104,8 +134,8 @@ Rate limit / bounds: 50 ms per quest per player; a report of a stage already don
 - mode (u8, D58 B, m3-quest-mode): 0 list, 1 all; set by the server on the login message, whose `shared` carries the
   shared quests in mode 0 and the DENIED quests in mode 1; a client's message with mode != 0 is refused (Range).
 - Validator rules: structural (wire-validate check_quest_stage): a quest of 0 only with a list, the list naming each
-  quest once and never 0; from a client no list and a quest named, under a budget of 16 then 4 a second
-  (quest_stage_budget, UNMEASURED). Semantic (wire-rules quest_stages, through the bridge): the quest on the server's
+  quest once and never 0; from a client no list and a quest named, under a budget of 32 then 8 a second (wire-validate
+  lib.rs:286) (quest_stage_budget, UNMEASURED). Semantic (wire-rules quest_stages, through the bridge): the quest on the server's
   `sharedQuests` list (E_QUEST_UNLISTED); the handler's own: a QUST in the load order (E_QUEST_UNKNOWN). A stage
   already recorded is a no-op at debug, never a relay.
 - Idempotency / ordering: a stage already recorded is a no-op; the replay is ascending per quest; the relay is
@@ -161,7 +191,9 @@ Rate limit / bounds: 50 ms per quest per player; a report of a stage already don
 - T2: difftest/sessions/quest-stage.yaml (c1's stage 10 of FreeformRiverwood01 recorded and relayed to c2, the same
   again a no-op, MQ102's refused as unlisted) and the login list in divergences.yaml.
 - T3 scenario id: lab/scenarios/b-quest-stage.yaml (after lab-api's quest-stage read: `c.quest(id).stage()` and
-  `.stageDone(n)`), b-quest-stage-restart.yaml.
+  `.stageDone(n)`), b-quest-stage-restart.yaml, and b-leveled-reward.yaml (train 52's Fix 1, D-R1 C's leveled gap: a quest
+  script's AddItem of a leveled list on the seat's own player lands on the record and nothing takes it back; x-leveled-reward v1
+  b87e591e green 20261112-044101 on train 52's stage, promoted unchanged at main 3e2ad0cd).
 - Assertions that would fail if the verb silently regressed: c2's GetStage of the listed quest equals c1's within the
   relay's lag after c1's setstage; the server log holds the record line and no refusal; after the restart and a login,
   GetStage on a fresh seat equals the record.
@@ -416,3 +448,240 @@ mode a number, the same dead pattern the gate audit's 521cba05 (2026-11-02) gave
 (ADR-068's "Rung 5's words", Eli 14:4x PST 2026-11-09): b-quest-rumor v2's rewrite, which takes the numeric form and the rung's new
 quest rules, approved once x-quest-runs v1 names the vampire castle controller's lines inside its window. Pending in lab/gate.yaml,
 named here, until v2 lands green; a run before then is evidence only.
+
+## D-Q4 C: a run word is the world's only when a world cause makes it (Eli 2026-11-10; fork m4-scripts-5-cause a1bd95e0, on m4-scripts-5-second 685f6a24; SCHEMA_VERSION 43)
+
+Eli's word (docs/DECISIONS.md, rung 5's stage-eve words): a quest's run word counts as the world's only when a script's native
+call makes it, read at the seam, not every engine start and stop (the template save's load, start-game housekeeping, the Story
+Manager's per-seat starts); its rule came from a read first. The run-cause read (2026-11-10, a read-only agent's, condensed by
+thuum-fa; the deployed load order on sky-srv, 2568 served quests) found what tells the two apart: the ROOT of the stack that
+called Quest.Start or Quest.Stop. USSEP's USKPRetroactive213Script.Process stops its own quest under
+USKP_VersionTrackingScript.ProcessRetroScripts, rooted at OnInit and at USKP_VersionTrackingPlayerAliasScript.OnPlayerLoadGame,
+while a world completion roots at its stage fragment (QF_MS13_00039645.Fragment_42). The immediate caller does not tell them
+apart (the seam's `handler` names the helper, "Process", for 113 of 300 seat-own stop sites), nor does the quest's self (the
+self-restart test holds for all 101 USSEP-type stoppers and all 556 world stops), nor its flags (Start Game Enabled with Run Once
+covers MS13's 0x0111, MS05 to MS10, MS14 and 36 world quests).
+
+**The rule, by the root's class (the platform's QuestCause.h :10-58, QuestCause.cpp Classify :184-227):**
+- The seat's own: lifecycle (OnInit, OnPlayerLoadGame, OnReset); cell and load events (OnLoad, OnUnload, OnCellLoad,
+  OnCellAttach, OnCellDetach, OnAttachedToCell, OnDetachedFromCell); the Story Manager's OnStory* events; a magic effect's
+  (OnEffectStart, OnEffectFinish); OnRaceSwitchComplete; the UI (SKSE's input, menu and camera events from Form.psc, SkyUI's MCM
+  events: OnConfig*, OnOption*, OnPageReset, OnGameReload, OnVersionUpdate, OnVersionUpdateBase, OnMessageDialogClose and the ST
+  events); an engine start's start-up fragment (a stage fragment no mark arms); any stage set inside a seat-own chain; and a root
+  no list names (a plain function a plugin dispatched, a fragment of no kind read): the world's needs a positive read.
+- The direct timers (OnUpdate, OnUpdateGameTime): the seat's own for a run word, the world's progress for a stage they set (TG02B,
+  MGR22 and TutorialAlchemy time their completion; no controller cycles through a timer-set stage, the read).
+- The world's: a topic info's, a scene's, a package's or a perk's fragment (by its self's form type, else TIF_, SF_, PF_ or PRKF_
+  by name), every other On* event (an interaction: OnActivate, OnTriggerEnter, OnHit, OnDeath, OnRead, OnLocationChange), and a
+  quest's own stage fragment whose stage a world cause or a timer set.
+
+**How the verdict rides (QuestCause.h's three tables; ScriptNatives.cpp MarkQuestCause :1585, called at every Quest row past step
+(b) at :1789-1791, never for the platform's own call; FridaHooks.cpp's quest stage sink :3041-3049; EventHandler.cpp :1226-1232
+and :1263-1272):** marks, (quest, stage or word) to a verdict for 10 s (kMarkMs), written at a Quest row, read by the stage's
+event and taken once by the word's; arms, a quest to its latest stage's verdict for 30 s (kArmMs), written by the sink at every
+stage event before the original dispatches the fragment (a stage the engine set by itself arms the seat's own), so a fragment's
+stack carries the verdict of whoever set its stage; joined stacks, a fragment's stack to the verdict it joined at its first Quest
+row, 120 s (kJoinedMs), dropped at a game load; bounds 1024, 256 and 512, the oldest dropped. A Start on a running quest and a
+Stop on a stopped one mark nothing (the review of edf64dee, note 4: an untaken mark would lend its cause to the quest's next
+engine start); a SetStage on a stopped quest marks the start beside the stage with the run word's verdict, a direct timer's the
+seat's own (note 5). questStart, questStop and questStage carry `cause` ('world' or 'seat') and `root` to the client, the seat's
+own with an empty root when no script call made the event. Lines: a trace a mark, "[verb:quest-stage] Quest.Stop on 701e8bd
+(stop): cause seat (root USKP_VersionTrackingScript.OnInit), stack <n>", and one info line a census window, "<n> quest call(s) in
+30 s marked by cause: <w> world, <s> the seat's own (<c> by a fragment's carried verdict)".
+
+**The client and the server.** QuestStageService (questStageService.ts :384-410, :1780-1820) reports a run word only with a world
+cause, and so a stage-0 report (the server judges it a start, read 5); the login load's hold and the listed, client-only and
+puppet-stop skips stay ahead of the rule, the churn hold behind it; every report names its cause and root (QuestStage's `cause`
+and `root`, docs/WIRE.md; a root the wire would refuse left off, the cause kept); the reports the rule held are counted,
+"[verb:quest-stage] causes in 60 s: <w> world sent, <h> seat-own held (<a> word(s), <b> stage-0; <r> script-rooted)". The kill
+switch: the client setting questRunCause "any" turns the rule off (every report as before, naming no cause; said once), and a
+platform that names no cause gets the same. The server (ActionListener.cpp OnQuestStage :3601-3662; wire-rules quest_runs
+judge_caused :359-369) refuses a run word with the seat's own cause (E_QUEST_CAUSE, a line a minute per seat and quest, the
+reported cause and root named) and records no stage report it reads as a start (a start-up stage, which the seat cannot tell and
+the record can) with the seat's own cause, the designed path, in one plain line a minute per seat with no E_QUEST_ code; any other
+stage crosses whatever its cause. R2 (rule 5): the cause and the root are the seat's word, judged against nothing, logged.
+
+**The Story Manager's instances: D-Q5 A (Eli 17:11Z 2026-11-10, verbatim "A for D-Q5"; docs/DECISIONS.md, "Rung 5's second head,
+Eli's later words", main 3e9ea244).** A quest a Story Manager quest node names runs once per seat, each seat's Story Manager
+starting its own (the audit of 685f6a24: 526 live SMQN nodes naming 1,454 quests in the deployed order). Its run words, start and
+stop, stay its own seat's (the setting `questStoryInstances` "seat", the default): wire-rules quest_runs refuses them
+(Code::Instance), neither recorded nor relayed, and the login serves none of its runs, since a relayed stop would cut another
+seat's own instance (a WI, WE or ADIA quest; 220 Story Manager quests' world-looking stops stay per seat: about 35 CLOC dungeon
+quests, DA10, the CW missions, the Favors); its stages still cross. Taken over B (split by the quest's cast: a quest whose aliases
+are all fixed judged by cause like any world quest, one with a condition-picked alias per seat in words and stages) and C (every
+Story Manager quest judged by cause, the setting's "world", one line of server-settings.json). Since fork m4-scripts-5-review
+b23085da (Fix A, merged at f6ca339d) the refusal, the designed path, prints a plain line with no E_QUEST_ code (ActionListener.cpp
+OnQuestStage :3646-3672 at f6ca339d, one line a minute per seat and quest, the rest counted into it), every fact the old line had:
+"[verb:quest-stage] the <start|stop> of <q> by <actor> kept to its seat: a Story Manager instance (questStoryInstances seat[;
+cause <world|seat>, root <r|none>, R2])[, named by <node> <id>[ and <n> more]], its stages still crossing; user <u>'s report not
+recorded, nothing relayed; <n> such report(s) of the quest since the last line" (c1's typed `setstage 74a83 310` runs A Lovely
+Letter's Fragment_22, whose Stop() inherits the console's world cause). The refusal and E_QUEST_INSTANCE's judgment in quest_runs
+are kept, and E_QUEST_CAUSE's line is unchanged. The server reads the nodes itself (libespm SMQN.h, its NNAMs, CommonLibSSE-NG
+BGSStoryManagerQuestNode.h:48; PartOne.cpp StoryIndexOf :3988-4058 at 685f6a24, each node's last version, a deleted or ignored
+node naming nothing; ComposeStoryQuests :4133-4157), with one line, "[verb:quest-stage] the Story Manager's <n> quest node(s) name
+<m> quest(s) (SMQN NNAM): ... (questStoryInstances seat, D-Q4 C)". Known limits shipped with playtest 51 (the audit): (1) a
+fixed-cast Story Manager quest finished on one seat stays open on another: A Lovely Letter 0x74a83's stage 310 crosses, but its
+Fragment_22 Stop() is kept to its seat, so the other seat keeps the letter at 310 and a later login never gets its end; (2) a
+radiant Story Manager quest's stage crosses to another seat's own, different instance: BQ01 0x95125, whose bounty target is picked
+by conditions per seat.
+
+**The console arm (fork a1bd95e0, Fix C since m4-scripts-5-review ab02d45c merged at f6ca339d; skymp5-client
+consoleCommandsService.ts :151-272 and :330-350 at f6ca339d; PuppetApi.cpp markQuestCause :434-475).** A quest command the player
+types is the player's own act and runs no script, so the seam reads no root for it and its words were the seat's own
+(x-quest-words red at its first start; every lab lever that drives a quest by console held). Skyrim Platform runs a replaced
+command's JS execute before the engine's own handler, which runs only when execute answers true (ConsoleApi.cpp
+ConsoleComand_Execute), so the client marks the typed quest first, each mark the world's, root "console.<command>", for 30 s
+(CONSOLE_MARK_MS: a typed start or stop is queued to the story teller's next pass, and a console left open may hold that pass
+back); then execute answers true and the engine runs the command as typed. Since Fix C a command marks only the words it will
+make, the seam's own rule (MarkQuestCause marks no Start of a running quest and no Stop of a stopped one): setstage marks its
+typed stage always and a start only for a quest not running here (SetStage starts a stopped quest with no story event); startquest
+a start only for a quest not running; stopquest a stop only for a running one; resetquest by its handler's read, a running quest's
+stop or a stopped one's start. The run is the client's own map, questRuns, from this game's questStart and questStop events since
+its last load (at most 4096 quests, QUEST_RUNS_MAX, the oldest let go first, cleared at gameLoad), not Quest.IsRunning: a console
+command's execute runs outside the Papyrus VM's update, where no game function may be called (the fork's
+docs/skyrim_platform/features.md:31; CallNativeApi.cpp:77-79 throws "can't be called in this context" while no VM is set), so a
+Quest.IsRunning there would throw and mark nothing. A quest no event named since the load is unread here and its command marks
+every word it may make, as before, so no command marks less than it did where nothing is known. Lines: "[verb:quest-stage] console
+<cmd> <quest>: armed world for its next event (<stage s, start, stop>; <running here|stopped here|its run unread here>)", and for
+a command that marks nothing, "[verb:quest-stage] console <cmd> <quest>: nothing armed (<run>, so it makes no <start|stop>)"; a
+typed name no form has marks nothing. resetquest's open half: its handler stops a running quest that is not Start Game Enabled and
+starts a stopped one that is, and Start Game Enabled is unreadable on this client (no Papyrus native or platform export names
+TESQuest's kStartsEnabled, CommonLibSSE-NG include/RE/T/TESQuest.h:30), so the run alone picks its word: a running Start Game
+Enabled quest's reset still marks a stop it does not make, and a stopped one that is not, a start. completequest is not
+intercepted: it flags the quest completed and never starts or stops it, so it makes nothing to mark. Which word each command makes
+is a static read of SkyrimSE.exe 1.6.1170's handlers, HYPOTHESIS until a trace; HYPOTHESIS too that the events' run is the flag
+the seam reads (TESQuest::IsEnabled, kEnabled, CommonLibSSE-NG src/RE/T/TESQuest.cpp:42-45), that every start or stop after a load
+raises one, and that its event reaches this game's update before the next typed command. The engine's own starts (a load, Start
+Game Enabled, the Story Manager) mark nothing and stay the seat's own.
+
+**Open items.**
+- Leftover marks: a console mark the engine never takes stays its 30 s and lends its world cause to that quest's next engine start
+  or stop and the stages riding it. Since Fix C that is left to a quest whose run this game read no event of since its load (every
+  word marked, as before) and to resetquest's Start Game Enabled half (above); the review's note 4 closed it for the seam's own
+  marks. Since train 52's Fix 3 (below) both close for a typed command: the platform reads the engine's own flags at the execute
+  and marks only the word they say the command makes, so a mark is left over only where a handler differs from the static read
+  (the commands' words, H-RQ1) or the flags move before it runs (H-QR1).
+- A mod script's console command reads as the world's: a command a plugin's script runs through the console reaches the same
+  replaced execute, so it is marked as if the player typed it (UNVERIFIED: no run has read one).
+- The lab driver's set-stage {start: true} is a seat start: its Quest.Start is the platform's own call, which the seam never
+  marks, so its questStart carries the seat's own cause and the client holds the word; a probe that needs a world start types the
+  console's startquest or setstage instead (a typed command is the world's, above).
+- D-Q9 (a player alias's OnLocationChange read as a world cause: the class rule above reads every other On* event as an
+  interaction), D-Q6 and D-Q7: CLOSED, Eli's D-Q9 B, D-Q6 A and D-Q7 A (about 04:53Z 2026-11-11, docs/DECISIONS.md main 7ced7f5a,
+  the four recommendations with D-Q10 A). D-Q9 B is built in train 52 as the default of the server setting questPlayerAliasCause
+  (below); playtest 51 keeps the second head's world reading as a declared limit.
+
+**Hypotheses (QuestCause.h :49-58; x-quest-cause v1 by path, lab/.cache/drafts/rung5, reads the first two).** HYPOTHESIS H-QC1:
+a script-set stage's fragment runs on its own stack rooted at the fragment (x-acting-frame showed it for a platform-applied stage
+only). HYPOTHESIS H-QC2: a word's event lands inside its mark's window. HYPOTHESIS H-QC3: a fragment's first Quest row comes
+within kArmMs of its stage's event and before its quest's next stage event, so the lazy join takes its own stage's verdict (a
+Fragment_N names no stage; a fragment behind a long wait, or racing a later stage of its quest, joins the arm then standing or
+none, the seat's own). Unverified by the read besides: whether the event gate covers alias and cell-load events, and 909 run and
+stage call sites with unresolved receivers (mostly stage sets on GetOwningQuest() in dialogue fragments).
+
+## T2 against rung 5's keys (numidium's read, 16:40Z 2026-11-10; fork m4-scripts-5-second f6ca339d)
+
+T2 ran against the rung's keys: each login served 1,013 watch keys in four ScriptVariables messages, about 91 KB of the
+fakeclient's event lines, and difftest reads one fakeclient's stdout at a time (difftest main.rs:334-335, each child's
+wait_with_output in turn). So each session's later seat sat blocked on a full 64 KiB pipe until the first seat quit, and every
+relay toward the first seat (trigger-entry's 70, trigger-look's 30, destruction's 78, alias-fill's 79, the movement of six
+sessions) found it gone; none of those handlers reads the keys except OnAliasFill's player-class gate, which MS13 passes. The
+keys' own change in that run is player-own's two start words, refused E_QUEST_PLAYER under questScope "derived" as designed. T2
+runs without the six keys since main 4063122d (test-proto), so the derived scope is proved by T0 and T3 until difftest drains each
+client as it writes (fork m4-difftest-drain, building).
+
+## Train 52: D-Q9 B built as questPlayerAliasCause, and the console arm's one quest-run rule (fork m4-train-52 c3f9d175, on m4-scripts-5-second f6ca339d; built 2026-11-11, T3 pending)
+
+Train 52 (its plan, gitignored: lab/.cache/drafts/train52-plan.md, sections 3 and 4.1) is pushed with its pipelines green (5795 at
+ff467dab, the one Windows build; 5797 at c3f9d175, its T0), its lab stage after playtest 51. No seat has run it: each lab claim
+below is built and T3 pending with the probe that reads it, or HYPOTHESIS. Line numbers are c3f9d175's.
+
+**D-Q9 B, built (8c53b76c, server only; Eli about 04:53Z 2026-11-11, docs/DECISIONS.md main 7ced7f5a).** Eli's word: a player
+alias's OnLocationChange is its seat's own cause, since the event is about that seat's player, not the world's, so a quest that
+stops itself when its player changes location stops on that seat alone; his frame, that each such answer is a quest setting's
+default (ADR-070, PROPOSED, lists the key among its axes). The platform's class rule above reads every On* event outside its seat
+lists as an interaction, a world cause (QuestCause.cpp Classify), so the server re-judges:
+- The rule: wire-rules quest_runs' PLAYER_ALIAS_EVENTS, ["OnLocationChange"] (quest_runs.rs:235-238: Eli's word names one; the
+  list grows by name only on a census read), and root_is_seat_own(function, script_on_player_aliases_only) (:240-250, names
+  without case: the function one of the list, on a script the game files attach to player aliases alone).
+- The index: PartOne's PlayerAliasScriptIndexOf (PartOne.cpp:3916), read once per set of game files over QuestScopeFacts' alias
+  scripts (libespm ScriptData's aliases, each with its alias id), marks a script class player-only when every alias it rides, over
+  every quest, is the player's by quest_scope::is_players (ALFR 0x14, ALUA 0x7, created in a player alias's inventory, or an
+  external player alias; quest_scope's new player_alias_ids, quest_scope.rs:143), mixed otherwise. AttachEspm keeps it and logs
+  "[verb:quest-stage] the game files attach <n> script class(es) to quest aliases, <m> of them to player aliases alone
+  (questPlayerAliasCause <seat|world>, D-Q9 B)" (PartOne.cpp:854-867). The index reads QUST VMADs alone, so a script class also
+  attached to a placed reference is judged by its aliases.
+- The setting: questPlayerAliasCause in server-settings.json, "seat" (D-Q9 B, the default) or "world" (D-Q9 A), read beside
+  questStoryInstances (ScampServer.cpp:500-503, settingOr, "seat" when absent) into PartOne::SetQuestPlayerAliasCauseSettings
+  (PartOne.cpp:4215), parsed strictly (wire-rules PlayerAliasCause::from_json, quest_runs.rs:269-279: anything but the two words
+  stops the server, named). No deployed settings file changes: the default is Eli's B.
+- The re-judgment: OnQuestStage (ActionListener.cpp:3618-3640), under "seat", takes a report with cause 1 whose root, split at its
+  last dot, passes quest_root_is_seat_own as cause 2: a run word refused E_QUEST_CAUSE, a report judged a start not recorded (the
+  plain line a minute), a plain stage crossing as before (D-Q4 C judges only run words and start-up stages by cause); its lines
+  add "(cause world re-judged the seat's own: <root> is a player alias's OnLocationChange, D-Q9 B)". wire-schema's QuestStage
+  `cause` doc names it; no field moves.
+- Rule 5: R2 as before (the root is the seat's word); the re-judgment only moves a report toward the seat's own, so a forged root
+  gains a seat nothing it could not get by reporting cause 2 itself.
+- T0 (pipeline 5797): quest_runs (the event on a player-only script true, on a mixed one false, OnItemAdded and OnActivate false,
+  case, the setting's parse), quest_scope's player_alias_ids and the bridge's; unit/QuestStageTest.cpp on Skyrim.esm, MQ101
+  0x3372b (no Story Manager node names it), which carries MQ101PlayerScript on its player alias 119 alone and MQ101CartRiderScript
+  on that alias and nine NPC ones (lab/esm.py's walk of the lab's cached Skyrim.esm, Dawnguard.esm and Dragonborn.esm: 729 alias
+  script classes, 90 riding player aliases alone, one riding a player alias and another): under "seat" a world-caused stop rooted
+  at MQ101PlayerScript.OnLocationChange refused E_QUEST_CAUSE with the D-Q9 words, MQ101PlayerScript.OnActivate and
+  MQ101CartRiderScript.OnLocationChange recorded; under "world" the location change recorded; "off" refused at the setter.
+- T2: the difftest session quest-stage's new step (fork 63f987b8): at 4.7 s c1 reports FreeformRiften04 0x53308's stop with cause
+  1 rooted at FFR04PlayerScript.OnLocationChange, a script the game files attach to the quest's player alias 1 alone (its alias 0
+  the world's, so the quest is; no Story Manager node names it); under "seat" the wire stack refuses it E_QUEST_CAUSE and relays
+  nothing, where a world reading would relay it to c2 as an undeclared divergence. Its run is pending (the first keyed T2,
+  docs/WIRE.md's ScriptVariables section).
+- T3: Dynamic first, a read-only lab/census.py query for quests whose player alias script handles OnLocationChange and calls
+  Start, Stop or SetStage; no content is named until it reads one. Playtest 51 keeps the second head's world reading as a declared
+  limit.
+
+**Fix 3, the console arm's one quest-run rule (f54bdfc3; the plan's section 3).** Which word a quest request makes is decided in
+one place that reads the engine's own flags, and the seam and the console share it:
+- QuestCause::WordMade(word, running, startsEnabled) (QuestCause.h:70-89, QuestCause.cpp:184-211), game-free: a stage (0 to 65535)
+  always itself; a start only of a stopped quest; a stop only of a running one; a reset's stop of a running quest that is not
+  Start Game Enabled, or its start of a stopped one that is (HYPOTHESIS H-RQ1); nothing otherwise. QuestCause::kReset, -3
+  (QuestCause.h:63-68), is a typed resetquest's input word alone, never a table key (ActingScope's kEntry -3 is another table's).
+- The seam's MarkQuestCause (ScriptNatives.cpp:2091) applies it in place of its two hand tests (the early return for a Start of a
+  running quest or a Stop of a stopped one, and the start beside a stopped quest's stage): the same behavior, one rule; a quest
+  the form table holds no TESQuest for marks its word as before.
+- The console's markQuestCause (PuppetApi.cpp:437-512) looks the quest up (TESForm::LookupByID<TESQuest>, the form table's own
+  lock) and reads TESQuest::IsEnabled and StartsEnabled (:489-490; CommonLibSSE-NG src/RE/T/TESQuest.cpp:42-45 and :112-115,
+  kEnabled and kStartsEnabled at include/RE/T/TESQuest.h:26 and :30) on the JS thread while the console's own thread waits in
+  PushAndWait (ConsoleApi.cpp ConsoleComand_Execute), so the flags read are the ones the engine's handler reads next; no Papyrus
+  call. It marks WordMade's word when there is one and answers { marked: number | null, running, startsEnabled }, or null for a
+  refused shape or a quest id no TESQuest has, where it answered a boolean (the stage bound moved to -3 for the reset;
+  Definitions.txt and skyrimPlatform.ts regenerated, clientListener.ts:285).
+- The client (consoleCommandsService.ts): resetquest's word is QUEST_RESET, -3 (:16, the table :333-338); markTypedQuest
+  (:213-257) sends each word the command may make (setstage's stage beside its start) and builds its line from the platform's
+  answers: "[verb:quest-stage] console <cmd> <quest>: armed world for its next event (<stage s, start, stop>; <running|stopped>
+  here)" (:256), or "...: nothing armed (<running|stopped> here[, Start Game Enabled], so <it|its reset> makes no <start|stop>)"
+  (:253).
+- Fix C's client bookkeeping retires whole: QUEST_RUNS_MAX, the questStart and questStop listeners and the gameLoad clear, the run
+  filter, noteQuestRun and its HYPOTHESIS (the events' run is the seam's flag, every start or stop after a load raises one, its
+  event reaches the update before the next typed command), the questRuns map, the QuestStartStopEvent import and the "its run
+  unread here" branch: the platform reads the flag the seam reads, so resetquest's Start Game Enabled half closes. What stays: the
+  table of which words each command may make (a static read of the handlers, HYPOTHESIS), the 30 s mark life, the lines' words.
+- HYPOTHESIS H-RQ1 (QuestCause.h:81-87): the console's ResetQuest handler stops a running quest that is not Start Game Enabled and
+  starts a stopped one that is, and nothing else (the static read Fix C, ab02d45c, cites); CommonLib's own
+  TESQuest::ResetAndUpdate (src/RE/T/TESQuest.cpp:74-89: Reset, then a start-up when IsEnabled is set and StartsEnabled is not, a
+  shut-down the other way) reads otherwise. HYPOTHESIS H-QR1: the flags read at the execute are the handler's (a VM thread's own
+  Quest.Start in that window races, as the seam's own read races). HYPOTHESIS H-QR2, inherited: IsEnabled is the run the engine's
+  words follow.
+- T0 and T2: none possible (a platform export and the client; checked with tsc --noEmit and webpack, QuestCause.cpp under the
+  local clang with a scratch test of WordMade's twelve cases, and a scratch harness over the service). T3: x-console-arm v1
+  (bec6d9ee, by path, lab/.cache/drafts/train52), c1 alone at lab-spawn: MS10MiscObjPointer 0x10d3bb (neither Start Game Enabled
+  nor Run Once) and MS01 0x18b4b (running from the load, Start Game Enabled, DNAM 0x0011), typed 3 s apart, legs A to G with
+  claims 1 to 8, then leg H. Claim 8 (MS01's resetquest, running and Start Game Enabled) cannot tell H-RQ1 from ResetAndUpdate,
+  since both make no stop there unless the engine's Reset clears kEnabled; leg H, a resetquest of 10d3bb while it runs, not Start
+  Game Enabled, separates them: H-RQ1 stops it, ResetAndUpdate with kEnabled kept starts it up again and leaves it running, and
+  with kEnabled cleared by Reset does neither and leaves it stopped (claims H2 to H5 read which). A red there goes to Eli with the
+  reading it shows before WordMade's reset branch moves.
+
+T2 with rung 5's six keys back (fork 63f987b8 on the drain 1bb3893b, which reads every client's stdout on its own thread from its
+spawn; thuum's lab/tools/test-proto.sh keeps the keys for a head whose divergences.yaml declares the t:81 watch, branch
+t2-r5-keys, unmerged at this writing): the session player-own drops its two c2 relays of the player-class starts (E_QUEST_PLAYER
+by design under questScope "derived", as the section above read) and says the attachments are live by class, so the derived scope
+gets its T2 with that run, pending (docs/WIRE.md's ScriptVariables section).

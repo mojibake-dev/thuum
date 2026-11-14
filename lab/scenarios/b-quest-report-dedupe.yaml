@@ -1,3 +1,82 @@
+# b-quest-report-dedupe v2 (2026-11-11): D-Q7 A, Eli's word (about 04:53Z 2026-11-11, verbatim "go with recommendations in the
+# mean time if we're trying a few different questing paradigms"; docs/DECISIONS.md, main 7ced7f5a). It rewrites claim 2 of a
+# scenario green on the first head, so the rewrite was Eli's first (rule 13, ADR-064 decision 4). For fork m4-scripts-5-second
+# f6ca339d, rung 5's second head, on
+# the server and both seats; D-Q4 C's commits in it: b69d473e (server and wire), 9db243a0 (platform), edf64dee (client), 81527867
+# (the server's start-up stage line). Every line number below is f6ca339d's. v1's last green is on the first head, fork 44ffafc2:
+# 20261110-125113-b-quest-report-dedupe (server image m4-scripts-5-quests, both clients 44ffafc2). D-Q5 A (Eli, meanwhile: Story
+# Manager runs stay per seat) leaves 2002b6e's case as it is.
+# WHY. D-Q4 C judges a stage-0 report by the root of the stack that set the stage (skymp5-client questStageService.ts:384-411),
+# and a stage the engine set by itself is the seat's own with no root (skyrim-platform EventHandler.cpp:1226-1231). reportStage
+# holds a stage 0 with the seat's own cause (:1434-1437; holdByCause counts it for the minute's line, :1824-1833) ahead of the
+# dedupe (:1438), and the login load's release sends its held stages down the same path (:1023). Neither of 2002b6e's stage-0
+# fires reaches the repeat window, so v1's drop line (:1632) and report line (:1451) cannot print and v1's lines 46 to 49 are red
+# by design (a read-only audit's finding; v1 has no run on f6ca339d).
+# THE PREMISE, a static read, UNVERIFIED until v2 runs: both fires are the seat's own. The first comes at the load (125113's
+# c1-console.log, the driver's questStart of 2002b6e at 12:51:51.063): the engine's start-up stage, or DLC1Init 0x02002c09's
+# Fragment_0, whose first call is MentalModel.SetStage(0) (DLC1_QF_DLC1Init_01002C09.pex, vanilla's and USSEP 4.3.8a's, read
+# with lab/pex.py disasm); a quest fragment's call takes the verdict its own quest's arm holds, here DLC1Init's engine start,
+# the seat's, and no live arm reads the same (ScriptNatives.cpp:1647-1652, :1658). The second, about 30 s later, is no Papyrus
+# call (125113's census names one Quest.SetCurrentStageID on 2002b6e a seat in the whole run, DLC1Init's), so its event finds no
+# live mark (QuestCause.h:67 kMarkMs 10 s, :74 kRideMs 2 s) and is the seat's own with root none. A world-rooted call setting
+# it would be sent by design: 2a's record and 2c to 2e read that case below.
+# WHAT CHANGED, claim 2 alone: v1's four claims (lines 46 to 49) become eight, with the steps they read; v1's comment above them
+# (line 45) stays, a v2 comment after it. 2a: each seat traced 2002b6e's stage 0 with the seat's own cause; 2b: each seat's
+# minute line counted a held stage 0; both counted twice, 10 s apart, and claimed on either count (after a plain relaunch a
+# seat's log-count has missed a fresh line its own log holds: b-puzzle-relay 20261110-135219 and 135510, cause unexplained).
+# 2c: neither seat printed a report of the quest's stage 0 (v1's own counts of :1451, lines 41-42, now == 0). 2d: the server
+# recorded no start of the quest from a seat's report. 2e: it set aside or refused no stage-0 report of the quest. The intent
+# stands, the engine's own stage 0 is not doubled across seats: v1 deduped it on each seat, v2 sends it from neither. Claims 1,
+# 3 and 4 (lines 32-33, 51, 57-58) and every other v1 line are v1's byte for byte; v1's drop counts (lines 39-40) stay as
+# records, 0 by design. v2 reads red on the first head (125113: both seats reported the stage, the server recorded the start).
+# THE LINES at f6ca339d (logTrace prints "Trace in QuestStageService: ...", logLab "[verb:quest-stage] ..."):
+#   2a: "quest 2002b6e stage 0: cause seat (root <Script>.<Function> or none)", sayCause (questStageService.ts:1776-1779, the
+#       line :1778) from onQuestStage (:1404), every stage event before any judgment, the login load's included; patterns
+#       "quest 2002b6e stage 0: cause seat" and that plus " .root [A-Za-z0-9_.]+" (a dot for the parenthesis);
+#   2b: "causes in 60 s: <w> world sent, <h> seat-own held (<a> word(s), <b> stage-0; <r> script-rooted)", sayCauses
+#       (:1836-1850, the line :1845, CAUSE_SAY_MS :157): first printed CAUSE_SAY_MS after the service's first update, then once
+#       a minute while the counts move; both patterns ask b of 1 or more, the second runs on to "<r> script-rooted";
+#   2c: "this game set stage 0 of shared quest 2002b6e; reported" (:1451), printed only when the report goes;
+#   2d: "[verb:quest-stage] <actor> starts 2b6e:Dawnguard.esm: recorded, relayed to <n> with its engine stages 0[ (cause ...,
+#       root ..., R2)]" (ActionListener.cpp:3743-3750): a stage-0 report with no word is the start word's (quest_report_word(0,
+#       0, _) is 1, skymp-wire wire-bridge rules.rs:5656-5663, its test :6667), so the stage record line (:3801-3804, "set <q>
+#       stage <s>: recorded") never prints for a stage 0; 125113's server.log has the line once, 12:51:59.391, "ff000000 starts
+#       2b6e:Dawnguard.esm: recorded, relayed to 1 with its engine stages 0";
+#   2e: "reported stage 0 of 2b6e:Dawnguard.esm, which the record reads as its start (cause seat, ...)" (:3637-3642) and
+#       "reported start 0 of 2b6e:Dawnguard.esm" (E_QUEST_DENIED :3544, E_QUEST_PLAYER :3556, E_QUEST_UNLISTED :3565, and
+#       E_QUEST_ACTING's stamp line :3581);
+#   records, no claim: "quest 2002b6e stage 0: cause (world|unnamed)" (sayCause's other verdicts, :1777) and "this game started
+#       shared quest 2002b6e; reported" (reportRun's start word, :907).
+# HOW TO READ A RED (the first red step ends a run, so a red at claim 2 leaves claim 4's relay unplayed until the next run):
+#   2a: the seat's record "cause (world|unnamed)" says which. world: a world-rooted call set the stage (the trace names its
+#       root), which D-Q4 C sends by design, so 2c and 2d go red beside it and the premise above is wrong, not the build: back
+#       to Eli before any change. unnamed: the platform names no cause ("the platform names no quest event's cause", said once;
+#       D-Q4 C is off there). Both 0: no stage-0 event of 2002b6e reached the service (the quest did not start at this login, or
+#       questStage is off), or both copies came up short (the run's own cN-console.log settles it; each log-count note carries
+#       its bytes, on the seat, copied and read);
+#   2b: the rule is off on the seat ("questRunCause is any in settings", said once), the platform names no cause (2a's
+#       unnamed), the line had not printed by the second count (its first stamp in cN-console.log against the step's), or both
+#       copies came up short;
+#   2c: the seat sent the report. Its trace beside the report line says why: seat, the hold at :1434 failed; world or unnamed,
+#       as 2a's; with questRunCause "any" every report goes with no cause named;
+#   2d: a seat's report was recorded as the quest's start; the line names the reporter's actor and its cause words: "(cause
+#       world, root X, R2)" is 2a's world; none, the report carried no cause (questRunCause "any", an older client). A start word
+#       of the quest prints the same line, and the seat's record "this game started shared quest 2002b6e; reported" tells the
+#       two apart (the load's own start is held by the login load's hold, :875-878);
+#   2e: a seat's stage-0 report reached the server and went unrecorded: set aside with the seat's own cause (the seat's hold
+#       failed, 2c's seat) or refused (DENIED, UNLISTED, PLAYER: the login's lists and the server's disagree). The set-aside line
+#       is one a minute per seat (the "seat-own start-up" key, :3635), so another quest's start-up report can carry 2002b6e's in
+#       its count ("<n> such report(s) since the last line"): a 0 here proves less than a 1.
+#   2c is the seat's word, which a short copy can only turn to 0; 2d and 2e are the server's, out of the copy fault's reach.
+# THE DEDUPE stays in the build (repeated :1609-1626, the flush :1630-1648) and is claimed nowhere at f6ca339d: no committed
+# scenario but v1 claims its drop line, and the one probe that does, x-quest-report-dedupe v3 (lab/.cache/probes), claims the
+# same 2002b6e drop, red here for the same reason; x-quest-runs (a rung 5 draft) keeps 201a428's drop counts as snapshots only,
+# and that controller's stage 0 is the seat's own, held the same way; the fork has no client test of it (git grep:
+# questStageService.ts alone). The server's no-op on a repeated stage stays unit-tested (QuestStageTest.cpp:133). OWED: a run in
+# which a report the rule lets through (a world-caused stage 0, or any other stage whatever its cause) repeats inside
+# REPORT_REPEAT_MS (:55, 30 s) on each seat, claiming the drop line; its frame is unread (a set of the stage a quest already
+# stands at fires nothing: the lesson of x-quest-report-dedupe v2).
+#
 # b-quest-report-dedupe (thuum-magnus, 22:25 PDT 2026-10-31, promoted from x-quest-report-dedupe v3; docs/verbs/quest-stage.md, the report
 # dedupe after D69; fork m3-quest-report-dedupe, client only): a seat's repeated report of one quest stage within REPORT_REPEAT_MS (30 s)
 # is dropped on the seat and counted, one flush line per quest per window, so the engine's repeats of a quest's stage at a login never
@@ -40,13 +119,40 @@ steps:
   - c2: log-count {pattern: "stage 0 of quest 2002b6e repeated [0-9]+ times in [0-9]+ s; dropped"}
   - c1: log-count {pattern: "this game set stage 0 of shared quest 2002b6e; reported"}
   - c2: log-count {pattern: "this game set stage 0 of shared quest 2002b6e; reported"}
+  # v2 (D-Q7 A): the second head holds 2002b6e's stage 0 on each seat ahead of the dedupe, so the two drop counts above
+  # read 0 by design and stay as records, and the two report counts are claim 2c's. Each seat's trace of the quest's stage events
+  # (2a) and its minute line of the reports the rule held (2b) are counted here and again 10 s later, either count enough (the
+  # lab's relaunch fault); the minute line first prints about 60 s after the seat's game load (CAUSE_SAY_MS after the service's
+  # first update), inside the wait above. The trace's other verdicts and the start word's report line are records for reading
+  # a red; the server's two counts are 2d's and 2e's (live in the assert, counted here for the notes).
+  - c1: log-count {pattern: "quest 2002b6e stage 0: cause seat"}
+  - c2: log-count {pattern: "quest 2002b6e stage 0: cause seat"}
+  - c1: log-count {pattern: "causes in 60 s: [0-9]+ world sent, [0-9]+ seat-own held .[0-9]+ word.s., [1-9][0-9]* stage-0"}
+  - c2: log-count {pattern: "causes in 60 s: [0-9]+ world sent, [0-9]+ seat-own held .[0-9]+ word.s., [1-9][0-9]* stage-0"}
+  - wait: 10
+  - c1: log-count {pattern: "quest 2002b6e stage 0: cause seat .root [A-Za-z0-9_.]+"}
+  - c2: log-count {pattern: "quest 2002b6e stage 0: cause seat .root [A-Za-z0-9_.]+"}
+  - c1: log-count {pattern: "causes in 60 s: [0-9]+ world sent, [0-9]+ seat-own held .[0-9]+ word.s., [1-9][0-9]* stage-0; [0-9]+ script-rooted"}
+  - c2: log-count {pattern: "causes in 60 s: [0-9]+ world sent, [0-9]+ seat-own held .[0-9]+ word.s., [1-9][0-9]* stage-0; [0-9]+ script-rooted"}
+  - c1: log-count {pattern: "quest 2002b6e stage 0: cause (world|unnamed)"}
+  - c2: log-count {pattern: "quest 2002b6e stage 0: cause (world|unnamed)"}
+  - c1: log-count {pattern: "this game started shared quest 2002b6e; reported"}
+  - c2: log-count {pattern: "this game started shared quest 2002b6e; reported"}
+  - server: log-count {pattern: "starts 2b6e:Dawnguard.esm: recorded"}
+  - server: log-count {pattern: "reported (stage|start) 0 of 2b6e:Dawnguard.esm"}
   - c1: screenshot
   - assert:
       # each seat reported the first fire and dropped the repeat inside REPORT_REPEAT_MS (one flush line per quest per window)
-      - 'c1.log_count("stage 0 of quest 2002b6e repeated [0-9]+ times in [0-9]+ s; dropped") >= 1'
-      - 'c2.log_count("stage 0 of quest 2002b6e repeated [0-9]+ times in [0-9]+ s; dropped") >= 1'
-      - 'c1.log_count("this game set stage 0 of shared quest 2002b6e; reported") >= 1'
-      - 'c2.log_count("this game set stage 0 of shared quest 2002b6e; reported") >= 1'
+      # v2 (D-Q7 A), in place of v1's four claims under the line above: each seat holds 2002b6e's engine stage 0 as its own
+      # report and never sends it (2a to 2c), and the server records, sets aside or refuses no stage-0 report of it (2d, 2e)
+      - 'c1.log_count("quest 2002b6e stage 0: cause seat") >= 1 or c1.log_count("quest 2002b6e stage 0: cause seat .root [A-Za-z0-9_.]+") >= 1'
+      - 'c2.log_count("quest 2002b6e stage 0: cause seat") >= 1 or c2.log_count("quest 2002b6e stage 0: cause seat .root [A-Za-z0-9_.]+") >= 1'
+      - 'c1.log_count("causes in 60 s: [0-9]+ world sent, [0-9]+ seat-own held .[0-9]+ word.s., [1-9][0-9]* stage-0") >= 1 or c1.log_count("causes in 60 s: [0-9]+ world sent, [0-9]+ seat-own held .[0-9]+ word.s., [1-9][0-9]* stage-0; [0-9]+ script-rooted") >= 1'
+      - 'c2.log_count("causes in 60 s: [0-9]+ world sent, [0-9]+ seat-own held .[0-9]+ word.s., [1-9][0-9]* stage-0") >= 1 or c2.log_count("causes in 60 s: [0-9]+ world sent, [0-9]+ seat-own held .[0-9]+ word.s., [1-9][0-9]* stage-0; [0-9]+ script-rooted") >= 1'
+      - 'c1.log_count("this game set stage 0 of shared quest 2002b6e; reported") == 0'
+      - 'c2.log_count("this game set stage 0 of shared quest 2002b6e; reported") == 0'
+      - 'server.log_count("starts 2b6e:Dawnguard.esm: recorded") == 0'
+      - 'server.log_count("reported (stage|start) 0 of 2b6e:Dawnguard.esm") == 0'
       # the controller's own-start refusals stay at the designed per-login count, never a burst's thirty or more
       - 'server.log_count("E_QUEST_OWN_START: .* of 1a428:Dawnguard.esm: .* (3[0-9]|[4-9][0-9]|[1-9][0-9][0-9]) such report") == 0'
   # the relay unchanged (x-quest-mode v6's set): c1's console set of The Golden Claw's pointer stage crosses to c2

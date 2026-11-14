@@ -706,3 +706,84 @@ test("labState aliasFills reads the server's alias rows, found: false without th
   };
   assert.strictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "aliasFills" }).found, false);
 });
+
+test("labState questRuns, questStages and scriptVariables read the journal's rung 5 rows, found: false without each property", () => {
+  // thuum ADR-068 rung 5 (docs/research/rung5-quests-2026-11-09.md 1(e)): mp.get(0, "questRuns"), mp.get(0, "questStages") and
+  // mp.get(0, "scriptVariables"), a quest or form named by FormDesc text or by form id
+  global.mp = fakeMp();
+  mp.set(0, "questRuns", [
+    { quest: 0x74a83, running: true, seq: 3 },
+    { quest: "2ba16:Skyrim.esm", running: false },
+  ]);
+  mp.set(0, "questStages", [{ quest: 0x74a83, stage: 10 }, { quest: "74a83:Skyrim.esm", stage: 20 }]);
+  mp.set(0, "scriptVariables", [
+    { form: "1f251:Skyrim.esm", script: "MG01QuestScript", var: "::NiryaSkillVar_var", k: 3, i: 2, seq: 5 },
+    { form: 0x30042b4, script: "BYOHRelationshipAdoptionScript", var: "::numChildrenAdopted_var", k: 4, f: 1.5 },
+    { form: 0xeafd5, script: "PlayerVampireQuestScript", var: "::VampireStatus_var", k: 5, b: false, seq: 1 },
+  ]);
+  delete require.cache[require.resolve("./gamemode.js")];
+  require("./gamemode.js");
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "questRuns" }), {
+    found: true,
+    runs: [
+      { quest: 0x74a83, running: true, seq: 3 },
+      { quest: "2ba16:Skyrim.esm", running: false, seq: 0 },
+    ],
+  });
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "questStages" }), {
+    found: true,
+    stages: [
+      { quest: 0x74a83, stage: 10 },
+      { quest: "74a83:Skyrim.esm", stage: 20 },
+    ],
+  });
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "scriptVariables" }), {
+    found: true,
+    entries: [
+      { form: "1f251:Skyrim.esm", script: "MG01QuestScript", var: "::NiryaSkillVar_var", k: 3, value: 2, seq: 5 },
+      { form: 0x30042b4, script: "BYOHRelationshipAdoptionScript", var: "::numChildrenAdopted_var", k: 4, value: 1.5, seq: 0 },
+      { form: 0xeafd5, script: "PlayerVampireQuestScript", var: "::VampireStatus_var", k: 5, value: false, seq: 1 },
+    ],
+  });
+  // nothing recorded yet
+  for (const k of ["questRuns", "questStages", "scriptVariables"]) mp.set(0, k, null);
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "questRuns" }), { found: true, runs: [] });
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "questStages" }), { found: true, stages: [] });
+  assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: "scriptVariables" }), { found: true, entries: [] });
+  // an answer that is no list of rows (canon's journal shape {entries: [...]} passed through) is no empty record
+  for (const [k, wrapped] of [
+    ["questRuns", { runs: [{ quest: 0x74a83, running: true }] }],
+    ["questStages", { entries: [{ quest: 0x74a83, stage: 10 }] }],
+    ["scriptVariables", { entries: [] }],
+  ]) {
+    mp.set(0, k, wrapped);
+    assert.deepStrictEqual(mp.onHttpRpcRunAttempt("labState", { kind: k }), { found: false, error: "not a list of rows" }, k);
+  }
+  // one malformed row makes the whole answer missing data, never a shorter record
+  for (const [k, rows] of [
+    ["questRuns", [{ quest: 0x74a83, running: true }, { running: true, seq: 9 }]],
+    ["questRuns", [{ quest: 0x74a83, seq: 2 }]],
+    ["questStages", [{ quest: 0x74a83, stage: 10 }, { quest: 0x74a83 }]],
+    ["questStages", [null]],
+    ["questStages", [{ quest: 0x74a83, stage: "10" }]],
+    ["scriptVariables", [{ form: 0xeafd5, script: "PlayerVampireQuestScript", var: "::FeedTimer_var", k: 3 }]],
+    ["scriptVariables", [{ script: "NoForm", var: "x", k: 3, i: 1 }]],
+    ["scriptVariables", [{ form: 0xeafd5, script: "S", var: "::v", k: 5, b: 1 }]],
+    ["scriptVariables", [{ form: 0xeafd5, script: "S", var: "::v", k: 2, s: "x" }]],
+  ]) {
+    mp.set(0, k, rows);
+    const answer = mp.onHttpRpcRunAttempt("labState", { kind: k });
+    assert.strictEqual(answer.found, false, `${k} ${JSON.stringify(rows)}`);
+    assert.match(answer.error, new RegExp(`${k} rows malformed`));
+  }
+  const get = mp.get;
+  mp.get = (id, k) => {
+    if (k === "questRuns" || k === "questStages" || k === "scriptVariables") throw new Error(`Property '${k}' doesn't exist`);
+    return get(id, k);
+  };
+  for (const kind of ["questRuns", "questStages", "scriptVariables"]) {
+    const legacy = mp.onHttpRpcRunAttempt("labState", { kind });
+    assert.strictEqual(legacy.found, false, kind);
+    assert.match(legacy.error, new RegExp(kind));
+  }
+});

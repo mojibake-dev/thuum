@@ -228,3 +228,40 @@ nothing in the bolt's or the proc's path reads them; every train since 11-02 and
 11-03) are canon's side. Cause UNREAD; the read is c1's: whether the bolt's effect script casts the proc on c2's figure at all
 (its effect events through the Papyrus gate, the caster-is-the-player branch), and if it does, why magicSyncService reports no
 stream for it. Pending in lab/gate.yaml, named here, until that read finds the fix and a run reads green.
+
+The read's first hypothesis (numidium's static read, 2026-11-10; HYPOTHESIS, unconfirmed): H1, ADR-068's seam skips Crackle's
+helper placement because the call's subject is c2's figure. The bolt's effect script (WB_CrackleNew_Script, Apocalypse 10.2.3's
+pex) never casts the proc at the figure: its OnEffectStart places TheBox = akTarget.PlaceAtMe(FXEmptyActivator), then
+TheShooter = TheBox.PlaceAtMe(...), a MoveTo, then WB_Crackle.RemoteCast(TheShooter, akCaster, TheBox). PlaceAtMe is a state
+row keyed on its subject (skyrim-platform NativeRows.inc:37, non-latent); OwnedHere answers false for any figure
+(ScriptNatives.cpp:567-578, used at :1706-1708), and with the lever at nonLatent its body is skipped (:903) with None returned
+(:1709-1717). TheBox is then None, RemoteCast has no source, no proc is cast and c1 reports nothing, as the server's silence after
+the bolt's OnSpellHit reads. The dates fit: the seam (fork 43cc22a3, 11-05 02:13Z), its lever (183566c4, 02:27Z) and the lever
+set to nonLatent in thuum's skymp5-client-settings.txt (18eaf29e, 12:15Z) all fall after the 11-02 green and before ce0d2664.
+The Papyrus gate itself passes the script (FridaHooks.cpp:922-932, an active effect whose caster is the player). If H1 holds,
+the class is wider than this spell: the seam judges a call by the object it is called on, not by who cast the calling effect,
+against ADR-068 decision 6 (the player's effects belong to the player's seat), so every effect script that places a helper on
+its target fails the same way on a figure. H2, the weak alternative: OnEffectStart never ran on the figure.
+
+H1's skip CONFIRMED from the sweep's own artifacts (read 2026-11-10 by a drafting agent, no new run): the same sweep's two
+further reds, 20261110-043108 and 062541, kept c1.log (042731's and 042924's copies failed, "being used by another process"),
+and each holds the seam's line 0.2 s after c1's cast release, "[verb:scripts] ObjectReference.PlaceAtMe on ff000923: skipped, not
+hosted here (nonLatent)" (043108; 062541 on ff00082f), each self the run's "test 2" figure of c2 (its trace-c1.json), beside the
+lever logged nonLatent and PlaceAtMe's row "4 parameter(s), not latent"; all four reds carry the bolt's one hit and no proc line on
+the server, against 50 in the 11-02 green. H2 is refuted. The chain from that skip to the missing proc keeps two HYPOTHESIS links:
+the call order inside WB_CrackleNew_Script's OnEffectStart (numidium's read of the pex; no disassembly in the tree) and the skipped
+call's None return (H-F1, marked so in the code, ScriptNatives.cpp:2223-2240 at fork f6ca339d). The read probe drafted for this
+(x-second-hand-read v1) is not run: it would re-read the same line. The fix is owed to a later train (platform C++, a Windows
+build): a call made inside an active effect whose caster is the seat's own player counts as that seat's (ADR-068 decision 6) in
+the seam's owner test (OwnedHere, ScriptNatives.cpp:585-596 at f6ca339d), with the placed helper's record (ScriptPlacement, W3's
+mechanism-only row) settled in its design; b-second-hand stays pending until that fix reads green.
+
+The fix, built in train 52 (fork m4-train-52 ea6da0a1, Fix 2, D-H1 B; in c3f9d175, its stage after playtest 51): the gate's effect
+test moves into one shared function, Frida::PlayersEffect, which the seam asks too. Inside an effect this seat runs for its own
+player, a PlaceAtMe of an activator, a static or a light (the census's helper kinds that simulate nothing) runs whatever its
+subject's owner, and what it places is a local helper that never crosses: nothing is recorded (ScriptPlacement stays
+mechanism-only, since a server copy would double the target seat's own helper), and an action row on a helper runs under the
+script-action mark. No wire change. Known limit: on the target's own seat TheBox sits on that seat's own player, an owned subject,
+so only TheShooter is a helper there; TheBox's latent Disable and Delete keep the owner judgment. The read: x-effect-helper
+(lab/.cache/drafts/train52, sha1 6516c470), b-second-hand's frame with its helper lines claimed, and b-second-hand itself named in
+train 52's gate, where it must read green; its pending line in lab/gate.yaml comes out in its own commit after that green.

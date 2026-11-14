@@ -360,9 +360,87 @@ every other player and replays the record after a login in order after
 PlayerGlobals, behind the list. Server to client, R0: the list, the relay, the
 replay; the seat applies each stage through the engine's own SetStage and
 consumes the engine's event for it. Validator: a client names no list and a
-quest other than 0; the list names each quest once and never 0; budget 16 then
-4 a second (UNMEASURED). Refusals (the server's log): E_QUEST_UNKNOWN (not a
-QUST in the load order), E_QUEST_UNLISTED; a stage already recorded is a no-op.
+quest other than 0; the list names each quest once and never 0; budget 32 then
+8 a second since m3-quest-mode, 16 then 4 before it (wire-validate lib.rs:286;
+UNMEASURED). Refusals (the server's log): E_QUEST_UNKNOWN (not a QUST in the
+load order), E_QUEST_UNLISTED; a stage already recorded is a no-op.
+
+Since SCHEMA_VERSION 41 (fork m4-scripts-5-wire af1f35e0, on m4-scripts-5-quests 44ffafc2; ADR-068 rung 5,
+docs/research/rung5-quests-2026-11-09.md section 1(a)): optional `word: u8` (1 a start, 2 a stop, with stage 0), `acting: u32`
+(the acting player's actor: from the server its stamp; from a seat its scope's player, absent meaning the sender) and `served:
+bool` (the login replay, applied as a load), each absent unless set, so a stage renders as before. Validator (E_VAL_RANGE): a
+word other than 1 or 2, or with a stage above 0 or quest 0; an acting below 0xff000000 or with quest 0; a client's served true;
+a word spends the stages' budget, 32 then 8 a second. wire-rules quest_runs records the run on the world's journal (its change
+form's `questRuns`): a report with no word of stage 0, or of one of the quest's start-up stages (QUST INDX), is a start (read 5,
+generalized 2026-11-10); an equal word folds; a seat flipping one quest more than 6 times in 60 s holds it out of the record for
+the server's run (E_QUEST_CHURN); 2048 quests (E_QUEST_RUNS_FULL); the churn's two numbers UNMEASURED. The server stamps
+`acting` as the report's when it names a connected player's actor, else as the reporter (E_QUEST_ACTING, a line a minute per
+seat; the reported `acting` is R2), relays a recorded word at once to every other connected seat, and at a login serves the
+quests recorded running as start words ahead of the stages and those recorded stopped as stop words behind them, `served` true
+("QuestStage: actor <id> sent <n> running and <m> stopped quest(s) around the stages after a login"). The mode block's `allowed`
+(`sharedQuestsMode`) is a retired key, read and ignored with one line at load (memo D62's start-game-enabled rule retires with
+it); a player-class quest (wire-rules quest_scope, settings `questScope` and `playerQuests`; the class acts under "derived",
+the default "off" only measures) is refused E_QUEST_PLAYER and named in mode all's login list (denied plus player). Fixtures
+57-QuestStage-2 (a relayed start of 0x10d3bb, c1 0xff000000 acting), -3 (a stop word with stage 10, refused), -4 (A Lovely
+Letter 0x74a83's stage 10 served) and -5 (a seat's start word claiming the replay, refused from a client); QuestStageMessage.h
+carries the three as optionals; the difftest session quest-stage v2.
+
+Since fork m4-scripts-5-server dc5c51ec (inside SCHEMA_VERSION 41; the ownership rule): the login list (quest 0) carries an
+optional `player`, the player-class quests while the server's questScope is "derived" (the playerQuests list and the
+alias-derived class), whose scripts each seat runs for its own player (skymp5-client hands the list to the platform's
+setPlayerQuests at every login, game load and plugin reload, and its SendEvent gate admits their events); absent under "off"
+and when none is; on quest 0 alone, never empty, each a load-order form named once, at most cap::SHARED_QUESTS (E_VAL_RANGE).
+Fixture 57-QuestStage-6 (mode all's list naming MQ102 0x4e50d denied, and PlayerWerewolfQuest 0x2ba16 and PlayerVampireQuest
+0xeafd5 in `shared` and `player` both).
+
+Since SCHEMA_VERSION 42 (fork m4-scripts-5-server 17b630e2, on m4-scripts-5-quests 44ffafc2; rung 5's fresh review, D-Q3 A): a
+run word the server sends (the relay and the login's served words) carries an optional `wordStages`, the stages whose
+fragments the engine runs with it, read from the quest's INDX flags: stage 0 and the start-up stages for a start
+(JournalIndex::StartUpStage), the shut-down stages for a stop (ShutDownStage), each once in the record's order, at most
+cap::WORD_STAGES (16); on a word alone, never empty, absent when the record flags none; a client's is E_VAL_RANGE. The receiver
+marks each before Quest.Start or Quest.Stop, an echo mark always and the sink's suppress mark when the word is served or
+questFragmentLive is not true (questStageService.ts markWordStages), so the receiver of a served word suppresses the fragments
+its acting seat ran. QuestStage's byte cap is 4 KiB (2 KiB held the login's list alone; `player` doubles it). The number also
+moves for 41's server half (CreateActorProps' and UpdateAppearance's `overlay`, ScriptCall's figure argument, QuestStage's
+`player`), whose layouts changed inside 41 after pipeline 5676's image carried an earlier 41; a schema 41 client cannot connect
+to a schema 42 server (netcode's protocol id carries the version), so rung 5's client and server build from one tree. Fixtures
+57-QuestStage-7 (a relayed start of dunEldergleamT03 0x15cc2, [0, 10]) and 57-QuestStage-8 (a served stop of ClearSkiesQuest
+0x1e3b1, [100]).
+
+Since SCHEMA_VERSION 43 (fork m4-scripts-5-cause b69d473e, on m4-scripts-5-second 685f6a24; D-Q4 C, docs/verbs/quest-stage.md
+"D-Q4 C"): a seat's report names what made it, optional `cause: u8` (1 a world cause, 2 the seat's own; wire-schema
+QUEST_CAUSE_WORLD and QUEST_CAUSE_SEAT) and `root` (the root frame of the script stack that called Quest.Start, Quest.Stop or
+SetStage, "<Script>.<Function>", at most cap::QUEST_ROOT 257 bytes, two PAPYRUS_NAMEs and the dot; "console.<command>" for a quest
+command the player typed), absent from an older client and from the server, the seat's own word (R2). Validator (E_VAL_RANGE): a
+cause other than 1 or 2, or with quest 0; a root without a cause, empty, or with a byte outside [A-Za-z0-9_.]. wire-rules
+quest_runs' judge_caused refuses a run word whose cause is the seat's own first (E_QUEST_CAUSE), touching neither the record nor
+the churn counter; a stage report the record reads as a start (stage 0 or a start-up stage, with no word) and the seat's own cause
+is not recorded either, the designed path and no E_QUEST_ code, in one plain line a minute per seat ("QuestStage: user <u> actor
+<a> reported stage <s> of <q>, which the record reads as its start (cause seat, root <r>, R2): the seat's own, not the world's
+(D-Q4 C), nothing recorded; <n> such report(s) since the last line"); any other stage crosses whatever its cause, and a report
+with no cause, an older client's, is judged as before. A quest a Story Manager quest node names (SMQN NNAM, which libespm now
+reads; PartOne reads each node's last version at AttachEspm, a deleted or ignored node naming nothing, and logs the nodes and
+quests it read) keeps its runs per seat while the server setting `questStoryInstances` is "seat" (the default, Eli's D-Q5 A since
+2026-11-10, docs/DECISIONS.md; "world" judges such a quest by its cause like any other; any other value is a settings error at
+start): its run words are refused (E_QUEST_INSTANCE, touching neither the record nor the churn counter) and the login serves none
+of its runs, while its stages still cross. E_QUEST_CAUSE logs one line a minute per seat and quest with the reported cause and
+root; the instance's refusal, the designed path, logs instead (since fork m4-scripts-5-review b23085da, merged at
+m4-scripts-5-second f6ca339d) a plain line a minute per seat and quest, "[verb:quest-stage] the <start|stop> of <q> by <actor>
+kept to its seat: a Story Manager instance (questStoryInstances seat[; cause <world|seat>, root <r|none>, R2])[, named by <node>
+<id>[ and <n> more]], its stages still crossing; user <u>'s report not recorded, nothing relayed; <n> such report(s) of the quest
+since the last line", the refusal itself unchanged; a recorded line names a reported cause. On the seat a run word, and a stage-0
+report, goes only with a world cause; the client setting `questRunCause` "any" turns that rule off (every report as before, naming
+no cause; said once), the kill switch, and a platform that names no cause gets the same. Fixture 57-QuestStage-9 (c1's
+world-caused stop of dunEmbershardQST 0xb6fef rooted at QF_dunEmbershardQST_000B6FEF.Fragment_16); QuestStageMessage.h carries
+both, and QuestStage's 4 KiB holds them at their caps. A schema 42 client cannot connect to a schema 43 server (netcode's protocol
+id carries the version). The difftest sessions are unchanged; T0 unit/QuestStageTest.cpp's cause and instance cases and
+unit/EspmTest.cpp's SMQN case.
+
+Since fork m4-scripts-5-loginstart f2689cfa (merged at m4-scripts-5-second f6ca339d; D-Q3 A; no wire change) the login also serves
+a start word to a quest recorded stopped whose stages it replays, ahead of them (wire-rules quest_runs at_login), so per quest the
+replay reads its start, with its `wordStages`, its stages ascending, its stop; a stopped quest with no stage to replay gets its
+stop alone. The runs line gains the count: "QuestStage: actor <a> sent <n> running and <m> stopped quest(s) around the stages
+after a login, <k> of the stopped started ahead of their stages (D-Q3 A)".
 
 DamageCause (id 63, MsgType 55), server to client, reliable, R0 output (fork
 m3-npc-death 354b13c2, 2026-10-26; docs/verbs/npc-fate.md, ADR-050 decision 2,
@@ -879,6 +957,107 @@ events on the other seats. No fixture (ScriptCall's shape is unchanged); the dif
 on the ore vein 0x10e6c5 from the spawn, E_SCRIPTCALL_FAR with nothing sent; the same call on the vein, relayed to c1 as SpSnippet
 PlayAnimation with seq 1 and kept nowhere; c1, the host, under epoch 2, E_SCRIPTCALL_OWNER); T0 unit/ScriptCallLookTest.cpp.
 
+Since fork m4-scripts-5-server aa350dc4 (inside SCHEMA_VERSION 41, on m4-scripts-5-quests 44ffafc2; ADR-068 rung 5): an object
+argument may name a server id, 0xff000000 to 0xffffffff (a scoped call's figure: inside an acting scope the platform puts the
+acting player's figure where the script named the player, and the seat sends it by the player's actor id); past 32 bits stays
+E_VAL_RANGE, and so does a subject at 0xff000000 and up. The core takes such an argument only when it names a connected
+player's actor (wire-rules natives::figures, E_SCRIPTCALL_ARGS by name), never another server form (a server copy of an NPC,
+the journal, an id nobody holds). A player's own row (record 4, below) is judged at any epoch. Fixture 75-ScriptCall-2 (an
+object argument at 0xff000002) now passes the edge, the server's rule judging it, and -4 (an object argument past 32 bits) is
+refused at the wire.
+
+Rung 5 (fork m4-scripts-5-wire 2fdcfa3a, the seventh row m4-scripts-5-server a403ddd4; on m4-scripts-5-quests 44ffafc2;
+docs/research/rung5-quests-2026-11-09.md section 8(b)) appends seven record rows, fifty in all, natives_table.rs and
+NativeRows.inc together: Actor.SetRace, AddSpell, RemoveSpell, AddShout, RemoveShout and EquipItem, and since Eli's D-E1 A
+Actor.ChangeHeadPart (SKSE's native, bound from the VM's binding outside the game's module; HYPOTHESIS H-HP1: it reaches the
+seam's hook as a game native does), each State, Self, relay none, Owner::Player, kept as the player's own record
+(RecordKind::PlayerOwn, the bridge's record 4), on the reporter's own player alone (subject 0x14, no sequence; any other subject
+E_SCRIPTCALL_ROW). The platform batches
+such a call with its arguments only when its self is 0x14, and the client sends it in the engine's order, never folded. A
+player's own row is judged by wire-rules player_own in this order: the form's record type (RACE for SetRace, SPEL for AddSpell
+and RemoveSpell, SHOU for AddShout and RemoveShout, an item for EquipItem, HDPT for ChangeHeadPart; E_SCRIPTCALL_ARGS), then the
+bound over the VMAD properties of the calling class's attachments live for the reporter, a property's value or a member of a
+FormList one (a QUST's while the quest scope classes the quest the player's or the world's journal records it running or
+staged, an MGEF's while the player's record or overlay holds a SPEL that carries it; E_SCRIPTCALL_UNNAMED otherwise, a SetRace
+back to the recorded race passing unnamed); for SetRace then restrictedRaces (E_SCRIPTCALL_RACE), then the twin rule (two
+FormList properties holding the recorded race and the new one at one index, RaceCompatibility's RaceList and VampireList) and
+the Playable flag: a twin or a Playable race is recorded and sent as the player's look, and any other race opens the player's
+overlay, which holds what its scripts add off the change form until the race's return or a disconnect (D-T1 A). Outside an
+overlay EquipItem folds an item the record holds and is refused E_SCRIPTCALL_UNNAMED for one it lacks: no row writes the
+inventory. The equipment gate passes what the overlay holds and relays the report as sent, and records it without the
+overlay's entries.
+
+ChangeHeadPart, past the kind (an HDPT, E_SCRIPTCALL_ARGS otherwise) and the bound: the part must be one the player's recorded
+race may wear, its HDPT's valid-race FormList (RNAM) holding the race (E_SCRIPTCALL_UNNAMED otherwise); one the look wears
+already folds; any other replaces the look's part of the same HDPT type (PNAM) and is sent as UpdateAppearance to every game
+that sees the player. No wire change. Lines: "[verb:quest-stage] <player>'s own <Class.Name> <form> (from <caller>.<handler>):
+<what>", a refusal one a minute per seat and code. R1 (rule 5; docs/verbs/quest-stage.md, Authority): the seat's word that its
+calling script ran, bounded by what the game files name for that script. The difftest session player-own (c1's twin by the
+lists recorded and sent as its look; the beast race opening its overlay; the race's return ending it; E_SCRIPTCALL_UNNAMED,
+E_SCRIPTCALL_ARGS twice and E_SCRIPTCALL_ROW sending nothing).
+
+Since fork m4-scripts-5-rewards 1bc4059b (on m4-scripts-5-second 685f6a24; Eli's D-R1 C; no schema change) the player's own
+inventory: the flip's ObjectReference.AddItem and RemoveItem keep their places (natives_table.rs:62-63, still fifty rows;
+NativeRows.inc has no owner or keep column, so its lines stand) with Owner::Player and Keep::Record(PlayerOwn), so on the
+reporter's own player (subject 0x14) a script's call is the player's own record, nine rows in all (wire-rules player_own's ROWS,
+the two first in the table's order), and on any other subject neither has a channel (E_SCRIPTCALL_ROW). Their judgment has no
+bound (R2, rule 5's "record it as unvalidated": a quest's reward fires every time, a leveled one or a count its script computes
+among them): the form an item (E_SCRIPTCALL_ARGS otherwise, a FormList or a reference among them), a leveled list's add refused by
+name (E_SCRIPTCALL_LEVELED: what landed is the engine's roll, which the report does not carry, so the record never holds the
+list), the count, aiCount, a whole number from 1 to 2147483647 (E_SCRIPTCALL_ARGS otherwise); an add recorded whole up to the
+record's u32 bound over the form's stacks; a removal at most what the record holds (one of what it lacks folds), the open
+overlay's item first (the beast form's WolfSkinFXArmor), and folding into a container the player holds open (that container's
+PutItem moves the item). Since fork m4-scripts-5-review f3a2a44c (merged at m4-scripts-5-second f6ca339d; rule 12's bound on a
+client-fed record) an add that needs a new stack (no plain, unworn stack of the form in the record, Inventory::AddItems' own
+match) is refused once the record holds 4096 stacks, the wire's in one inventory (player_own.rs INVENTORY_STACKS, which
+wire-bridge's test holds equal to wire-schema cap::INVENTORY), by a new E_SCRIPTCALL_FULL, after the leveled, kind and count
+checks: past it the server's edge would refuse every SetInventory and CreateActor naming the player's inventory. An add joining a
+stack the record holds, and every removal, are untouched; the refusal is a server line, so no field, validator or fixture moves.
+The core writes MpObjectReference::AddItem, or RemoveItems over StacksToRemove (the plain stack first), and only the player's own
+game hears its inventory, at the tick. The platform batches the two on the seat's own player alone (kBatchedStateRows,
+RecordRow::PlayerOwn; a non-owned call on a container, an NPC or a figure keeps its latent rule under the recorded lever), and
+inside another player's acting scope the self is that player's figure by step (0), so a relayed fragment's grant crosses once,
+from the acting seat. The client sends them as the seven go (selfId 0x14, unfolded) and holds each item's base against its 5 s
+inventory apply for 10 s past the send (remoteServer.ts holdPcInventoryBase). Named gaps: a leveled reward, a removal's receiving
+side, and a reward a giver moves into the player (RemoveItem on the giver: the giver's row). Since fork m4-scripts-5-rewards
+922d881e a recorded ChangeHeadPart also rewrites the player's stored RaceMenu look to the new part of its type and sends it as
+RaceMenuPreset ahead of the appearance (F2), and a quest's alias scripts count as its attachments for the bound (F1, libespm's
+VMAD Alias Scripts Section); no wire change. The difftest sessions are unchanged; T0 unit/PlayerOwnTest.cpp.
+
+Since SCHEMA_VERSION 44 (fork m4-train-52 4b5d9950, the contract in one commit as rule 4 asks, and 9d635d6b, the server; thuum
+train 52, D-R1 C's leveled gap and D-R2 B; docs/verbs/papyrus-events.md, "Train 52"; built, T2 and T3 pending): ScriptCall gains
+the optional `landed: [{ item: u32, count: i32 }]` (wire-schema skymp.rs:2449-2459; lib.rs's ItemDelta, the one inventory-change
+shape the wire has, positive here), on an AddItem whose form is a leveled list on the sender's own player (selfId 0x14) alone:
+what the engine's roll put in that player's inventory, read from the container events inside the call's AddItemFunctor, each base
+once, its count summed, in landing order; empty when the roll landed nothing; absent on every other call. R2, the seat's word,
+delivered once on the reliable channel (a duplicate would grant twice, as a plain own AddItem's would). Cap:
+cap::SCRIPT_CALL_LANDED 255 (lib.rs:283: a leveled list's entry count is one byte, CommonLibSSE-NG
+include/RE/T/TESLeveledList.h:72, and the platform folds the landings by base); a 256th landing is E_WIRE_MALFORMED at decode (the
+bounded Vec's length past its bound, wire-codec's a_reported_rolls_landings_stop_at_255_at_decode) and E_WIRE_CAPACITY at
+construction (bounded.rs, "E_WIRE_CAPACITY: 256 > 255"). Validator (wire-validate check_landed, lib.rs:1473-1501), structural
+only: `landed` on any call but ObjectReference.AddItem (names without case) or on a self other than 0x14 is E_VAL_RANGE, an empty
+list too; a landing's item 0 or at or above 0xff000000 E_VAL_RANGE; a count of 0 E_VAL_ZERO_DELTA (the ItemDelta rule), a negative
+one E_VAL_RANGE; a base twice E_VAL_RANGE. The size row stays 180 KiB: the worst case (script_call_at_its_caps, 255 landings of
+ten varint bytes) is 183,365 bytes of 184,320, and 180,813 with no landing. The server's rule (wire-rules player_own's items(),
+:448-454; the core's RecordLandings): the call's form an LVLI (E_SCRIPTCALL_ARGS otherwise, "its <k> landing(s) land on no list");
+each landing refused first when its base is none the list can roll, E_SCRIPTCALL_ROLL (new: the list's entries with nested lists
+followed to 16 levels over the game files, LeveledListUtils::Reach, D-R2 B), then judged as a plain add of its base (the kind, the
+count, the u32 room, Fix B's 4096 stacks); the accepted ones written in one edit of the record (fork 1a70a16b,
+MpObjectReference::AddPlainItems: one change-form edit, one inventory update at the tick, one OnItemAdded per landing), so one
+record token buys one plain AddItem's server work plus a constant per landing. E_SCRIPTCALL_LEVELED stays for a leveled AddItem
+that carries no `landed` (the seat's scriptLeveledLandings off), so D-R1 C's leveled gap above closes for a call that carries its
+roll. Netcode's protocol id carries the version, so a schema 43 seat cannot connect to a schema 44 server and every seat moves
+with the server. Fixture 75-ScriptCall-5 (MS01's stage 39 reward: AddItem of LvlQuestReward02Medium 0xc0405 x1 on 0x14 from
+QF_MS01_00018B4B.Fragment_56, `landed` [{item 15, count 400}]) with its C++ pair (ScriptCallMessage.h: a nested Landing { item,
+count }, `landed` serialized as "landed"); a codec_decode corpus seed with `landed` at its cap (c788b10b); T0 the validator's
+cases and two proptests, the codec's bound, player_own's and the bridge's cases, unit/PlayerOwnTest.cpp and
+LeveledListUtilsTest.cpp. T2: the difftest session player-own-items (new): c1 (profile 9, 140 Gold001) reports
+FreeformStonehillsA's AddItem(Gold001, 25) at 3 s and MS01's AddItem(LvlQuestReward02Medium, 1) with `landed` [Gold001 x400] at
+3.5 s, declared legacy 0 and wire 1 each as c1's SetInventory with 165 and then 565 gold (the legacy server knows no MsgType 75);
+the same call with no `landed` at 4 s (E_SCRIPTCALL_LEVELED), with `landed` [IronSword 0x12eb7 x1] at 4.5 s (E_SCRIPTCALL_ROLL)
+and a RemoveItem carrying `landed` at 5 s (E_VAL_RANGE at the edge) send nothing on either stack, their names T0's; c2 hears
+nothing of c1's inventory. Its run is pending (the first keyed T2, ScriptVariables below).
+
 ### ScriptState (t 76, wire id 84) and ScriptStateApply (t 77, wire id 85): the script record (ADR-068 rung 3)
 
 Fork m4-scripts-3-record 4f525bad (12:49 PST 2026-11-06, SCHEMA_VERSION 38; ADR-068 rung 3,
@@ -966,6 +1145,54 @@ epoch 0 is E_VAL_RANGE, judged before the budget of 4 at once then 1 a second (U
 Fixtures 80-WorldGlobal-0 (a report at epoch 2 of DA04MinLevel 0xe316c), -1 (the stream word at epoch 3) and -2 (a global named
 twice, refused); the difftest session world-global. R2 (rule 5): the streamer's engine's values, recorded, never judged.
 
+### ScriptVariables (t 81, wire id 89): the condition-read script variables, the latest write per key (ADR-068 rung 5)
+
+Fork m4-scripts-5-wire af1f35e0 (SCHEMA_VERSION 41, on m4-scripts-5-quests 44ffafc2; D-V1 B, D-T2 B): ScriptVariables (MsgType
+81, wire id 89), both directions, reliable, R2: `{ watch: [{ form, script, var, own }], entries: [{ form, script, var, own, k:
+u8, i?, f?, b?, seq: u32 }], served: bool }`. Topic-info fragments run on the talker's seat alone, so every seat reports the
+listed keys its game changed (seq 0) and the server (wire-rules script_variables) keeps the latest write per key, an equal one
+folded, each key with its own sequence; a world key is relayed to every other seat with it, and at login the watch (at most 256
+keys a message, `own` set per key) and the record are served (`served` true). The keys are the setting `conditionVariables`,
+`[{form: "<hex id>:<plugin>", script, var}]`, names without case, at most 1024. A player-class quest's key is its player's own:
+recorded on its change form, never relayed, served to it alone. Validator (E_VAL_RANGE): a form of 0 or 0xff000000 and up, a
+name empty or with a NUL, a key twice in a list (names without case), a kind outside 3 to 5 or a payload not its kind's, a
+served seq of 0; from a client any watch, served or seq; E_VAL_NONFINITE; 4 at once then 1 a second (UNMEASURED). Refusals by
+name: E_SCRIPTVAR_UNLISTED, E_SCRIPTVAR_PLAYER (an own key as the world's, or the reverse), E_SCRIPTVAR_KIND (a kind other than
+the one the record holds for the key), E_SCRIPTVAR_FULL (a new key past the record's 1024). No epoch: D-V1 B elects no streamer.
+Row 144 KiB (141,062 bytes at the fullest). A seat (ScriptVariablesService) reads its watch once a second through
+TESModPlatform.ReadScriptVariables, 256 keys a call, reports what changed inside the validator's budget, and writes relayed and
+served entries through WriteScriptVariables, 32 an update, an entry taken only above the sequence it holds for the key; its
+watch holds 2048 keys, an own key never dropped for a world one. Fixtures 81-ScriptVariables-0 (a seat's report of MS13
+0x39645's ::camillaescort_var), -1 (the login's watch and its served value at sequence 2), -2 (a kind 2, refused) and -3 (a
+seat's own entry, PlayerVampireQuest 0xeafd5's ::vampirestatus_var); ScriptVariablesMessage.h; the difftest session
+script-variables (its refusals alone: T2's settings list no conditionVariables). R2 (rule 5): the reporting engine's value,
+recorded, never judged.
+
+The server composes a player-class quest's own keys beyond the listed ones (fork m4-scripts-5-server ca924a5f; D-T2 B): the
+setting `playerQuestVariables` ({"<quest>": ["<script>::<var>", ...]}, the census's ownVariables) and, for each player-class
+quest with a script, the two reserved names `<OnUpdateGameTime>` and `<OnUpdateGameTime:repeat>` (its queued game-time
+registration's hours left and repeat interval, which ReadScriptVariables reads and WriteScriptVariables refuses); the login's
+watch lists the listed keys, then these, each own; an own entry is recorded on the reporter's actor (an ended registration's -1
+kept), relayed to nobody, and served to that player alone, a form's two registration entries in one message. Settings beside
+it: `playerQuestGlobals` ({"<quest>": ["<glob>", ...]}, composed into playerGlobals) and `playerQuestCallers` ({"<world quest>":
+[stages]}, PQ-3: those stages relayed served). Each is composed only while questScope is "derived".
+
+T2 with rung 5's six keys (fork m4-train-52 63f987b8, on the difftest drain 1bb3893b merged at 35895870; thuum train 52, the
+plan's 5.1): difftest reads every client's stdout on a thread of its own from its spawn (main.rs's drain, :363, taken right after
+each spawn, :341), so a keyed login's watch lines (about 91 KB for the deployed 1,013 keys) no longer stall a fakeclient on a full
+64 KiB pipe (pipe(7)) while the driver waits on another client, which had made the clients run one after the other and lost every
+relay toward the first. skymp-wire/difftest/divergences.yaml declares the login's watch once for every client of every session,
+`{t: 81, served: true}`, legacy 0 and wire 4: ceil(keys / 256), ActionListener.cpp's kScriptVariablesPerMessage (:7009), and no
+value, since a fresh T2 world records none; a census that moves the key count past a multiple of 256 moves the number. The session
+script-variables declares its relay: c1's 2 s report of MS13 0x39645's ::camillaescort_var is a listed key now (the deployed list
+names ::CamillaEscort_var, and keys compare without case), so the wire server records it as the world's and relays it to c2
+(served false), legacy 0 and wire 1; its header no longer says no setting lists it. The session player-own drops its two c2 relays
+of the player-class starts (questScope "derived" makes PlayerVampireQuest 0xeafd5 and PlayerWerewolfQuest 0x2ba16 the player's
+own, so c1's two starts are E_QUEST_PLAYER by design). The keys stay in T2's settings only for a head whose own divergences.yaml
+declares the t:81 watch (thuum lab/tools/test-proto.sh on branch t2-r5-keys, be2e28bd and fdff91e8, unmerged at this writing; an
+older head keeps the pop, with a line saying which). The first keyed T2 is a trial: script-variables' relay assumes c2 logged in
+before c1's 2 s report, as quest-stage's 2 s relay already does. The run on m4-train-52 c3f9d175 is pending.
+
 ### RelayedActivation (t 70): a linked activation the cell's host reported, to the cell's other games (traps, M4)
 
 Since fork m4-traps (01:43 PST 2026-11-01, SCHEMA_VERSION 28): RelayedActivation (id 78, MsgType 70), server to client, reliable, to the
@@ -1036,6 +1263,19 @@ repeated, every permitted race among the restricted, else E_VAL_RANGE; the trans
 direction. The rule stays the server's (wire-rules appearance::race_allowed, two new facts): the client's RacePermitService
 only takes the difference off its race menu. wire-legacy reads both as absent (LEGACY_ABSENT); fixture 33-CreateActor-2
 carries them, WireJsonContractTest reads it through CreateActorMessage.h.
+
+### CreateActor's and UpdateAppearance's overlay: a player's race overlay on its figure (ADR-068 rung 5, D-T1 A)
+
+Since fork m4-scripts-5-server aa350dc4 (inside SCHEMA_VERSION 41, on m4-scripts-5-quests 44ffafc2; ADR-068 D-T1 A):
+CreateActorProps' and UpdateAppearance's optional `overlay`, a player's race overlay `{ open: bool, race: u32, base: u32,
+spells: [u32], shouts: [u32], items: [u32] }` (wire-schema RaceOverlay, cap::OVERLAY_FORMS 64 a list), on another player's
+figure alone and rendered only when present: an open one wears a load-order race over a different recorded one, each listed
+form once and below 0xff000000; a closed one names nothing. A player's own CreateActor carrying one, or a seat's
+UpdateAppearance carrying one, is E_VAL_RANGE. The overlay's end is an UpdateAppearance without it. The server holds the
+overlay at runtime (wire-rules player_own, from ScriptCall 75's player's own rows above), never on the change form, so a
+restart has none. wire-legacy reads both as absent (LEGACY_ABSENT); fixtures 33-CreateActor-4 (rotfern's figure 0xff000000
+wearing WerewolfBeastRace 0xcdd84 over NordRace 0x13746, with a spell, a shout and an item) and 04-UpdateAppearance-2 (its look
+with the same overlay, refused from a client); the C++ RaceOverlay.h.
 
 ### ObjectAnimation (t 71): the host's world-object animations to the guests (traps, M4; ADR-059 decision 3)
 

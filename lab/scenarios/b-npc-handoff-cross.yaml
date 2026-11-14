@@ -66,15 +66,23 @@ steps:
   - c2: screenshot
   - assert:
       - 'server.log_count("may not move 13483") == 0'
-      # under the brake a crossing within the margin is a FOLLOW (the crossing host keeps the actor, the
-      # other seat sees a puppet, no host flip): v3's 211054 on 55's stage read Sigrid 160 units into c1's
-      # cell as a follow and zero passes in three minutes, Sven's 26 border hovers followed every time; the
-      # unbraked rule's "one pass per crossing" (836 passes in the nightly 132333) is what D22 removes, and
-      # the pass a step beyond the margin is CellHostTest's (a hold at 256 inside, a pass a step deeper)
-      - 'server.log_count("follows 1348[23] into cell .* within the pass margin") >= 1'
       - 'server.log_count("passes 13483 into cell") <= 6'
       - 'server.log_count("passes 13482 into cell") <= 6'
       # the passes are bounded above (<= 6, the lines before); their literal >= 0 reads are gone (the gate audit,
       # 2026-11-02): zero while nobody walks 256 deep is no claim
       - c1.npc_state(0x13483).aiEnabled != c2.npc_state(0x13483).aiEnabled
+  # under the brake a crossing within the margin is a FOLLOW (the crossing host keeps the actor, the
+  # other seat sees a puppet, no host flip): v3's 211054 on 55's stage read Sigrid 160 units into c1's
+  # cell as a follow and zero passes in three minutes, Sven's 26 border hovers followed every time; the
+  # unbraked rule's "one pass per crossing" (836 passes in the nightly 132333) is what D22 removes, and
+  # the pass a step beyond the margin is CellHostTest's (a hold at 256 inside, a pass a step deeper).
+  # Widened 2026-11-11 (Eli, "Widen it", in thuum-fa's plan mode): the scenario's restart resets the
+  # clock to 7.91 and Sigrid's 9:00 package switch comes 197 to 198 s after it in every run read, so her
+  # crossing lands near the old window's end in any clone mode (20261111-073308 green at 225.6 s after
+  # the restart, 072204 and 072734 red with their logs ending at 226.7 and 227.1 s); the follow claim now
+  # waits up to 60 s more, unchanged, and the four claims above read at the moment they always did
+  - until:
+      within: 60
+      expect:
+        - 'server.log_count("follows 1348[23] into cell .* within the pass margin") >= 1'
 artifacts: [server.log, c1.log, c2.log, screenshots]

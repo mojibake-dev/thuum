@@ -71,6 +71,8 @@ merged away (D71 the guest's loot, D70 Raise Wall's pose, D68 props): test 1 rot
 6. [ ] Quests, three halves: (a) both seats start outside Riverwood and walk in: A Lovely Letter starts for both; Prisoner relaunches
        and logs in inside: the quest is already there. (b) Prisoner talks to Lucan: The Golden Claw's entry appears in rotfern's
        journal within seconds. (c) a stage set on one seat (numidium's lever, MS10MiscObjPointer 0x10d3bb) shows in the other's journal.
+       (a) is struck (Eli in auriel's session, 2026-11-12, "Strike row 6(a)"): under ADR-068's D-Q5 A a Story Manager quest starts
+       per seat, and no checklist asked it. The row is ticked on (b) and (c).
 7. [ ] Physics props (ADR-058 slice one, merged 2026-11-01): rotfern drops a basket from the inventory: it lands where Prisoner sees
        it land, within a step; rotfern runs through it: it flies and rests at the SAME spot on both screens, a beat behind on
        Prisoner's, no snap-back; Prisoner kicks it back: it moves on rotfern's screen the same way; a server restart leaves it where it

@@ -116,6 +116,25 @@ class PlaytestProfile(unittest.TestCase):
             with self.assertRaises(ProfileError, msg=bad):
                 self.load(PROFILE + bad)
 
+    def test_a_profiles_cure_list_is_laid_over_the_deployed_file(self):
+        # ADR-068 rung 5's D-T3 B: playtest 51 lifts Sanguinare Vampiris from the deployed cureSpells for its sitting alone;
+        # a cure naming a plugin the deployed load order lacks (case counts, as the server's match does) is refused
+        import json
+
+        from playtest_setup import ProfileError, overlay_text
+
+        deployed = '{"loadOrder": ["/srv/skymp/esm/Skyrim.esm"], "cureSpells": ["b8780:Skyrim.esm"]}'
+        laid = json.loads(overlay_text(deployed, self.load(PROFILE + "server: {cureSpells: []}\n")["server"]))
+        self.assertEqual(laid, {"loadOrder": ["/srv/skymp/esm/Skyrim.esm"], "cureSpells": []})
+        laid = json.loads(overlay_text(deployed, self.load(PROFILE + 'server: {cureSpells: ["e8ae:Skyrim.esm"]}\n')["server"]))
+        self.assertEqual(laid["cureSpells"], ["e8ae:Skyrim.esm"])
+        for cure in ("b8780:skyrim.esm", "b8780:Dawnguard.esm"):
+            with self.subTest(cure=cure), self.assertRaises(ProfileError):
+                overlay_text(deployed, self.load(PROFILE + f'server: {{cureSpells: ["{cure}"]}}\n')["server"])
+        for bad in ("server: {cureSpells: b8780}\n", "server: {cureSpells: [0xb8780]}\n", 'server: {cureSpells: ["b8780"]}\n'):
+            with self.subTest(bad=bad), self.assertRaises(ProfileError):
+                self.load(PROFILE + bad)
+
     def test_a_profiles_switches_are_laid_off_over_the_deployed_file(self):
         # turbo 2 (numidium, 2026-11-02): the deployed settings carry locks, weatherSync, perks and leveling ON for
         # the gates' scenarios; the sitting's server runs them OFF and an item turns its own on
@@ -377,6 +396,242 @@ class PlaytestProfile(unittest.TestCase):
         for f in sorted((ROOT / "lab" / "playtests").glob("*.yaml")):
             with self.subTest(profile=f.name):
                 load_profile(int(f.stem))
+
+
+@needs_deps
+class PlaytestClientSettings(unittest.TestCase):
+    """Playtest 51's questFragmentLive (D-Q10 A): a profile's clientSettings become the runner's own relaunch file
+    changes, set in each stopped game by ready's relaunch."""
+
+    def test_settings_become_the_runners_json_changes(self):
+        from playtest_setup import client_settings_files, client_settings_ps
+
+        self.assertEqual(client_settings_files({"questFragmentLive": True}),
+                         [{"json": "Data/Platform/Plugins/skymp5-client-settings.txt", "key": "questFragmentLive", "value": True}])
+        ps = client_settings_ps({"questFragmentLive": True})
+        self.assertIn("C:\\sky-lab\\games\\1.6.1170.txt", ps)
+        self.assertIn("Data\\Platform\\Plugins\\skymp5-client-settings.txt", ps)
+        self.assertIn("-NotePropertyName 'questFragmentLive' -NotePropertyValue $true -Force", ps)
+        self.assertIn("'set questFragmentLive in ' + $p", ps)
+        self.assertNotIn("Stop-Process", ps)  # playtest-relaunch.sh stops the game itself, before this text runs
+
+    def test_a_bad_setting_is_refused(self):
+        from playtest_setup import ProfileError, client_settings_files
+
+        for bad in ({}, [], "questFragmentLive", {"a b": True}, {"questFragmentLive": None}, {"k": "it's"}, {"k": [1]}):
+            with self.subTest(bad=bad), self.assertRaises(ProfileError):
+                client_settings_files(bad)
+
+    def test_settings_ps_serves_the_relaunch(self):
+        """playtest-relaunch.sh's PLAYTEST=<n>: the profile's PowerShell as base64, nothing for a profile without settings."""
+        import base64
+        import contextlib
+        import io
+
+        from playtest_setup import client_settings_ps, main
+
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            self.assertEqual(main(["settings-ps", "51"]), 0)
+        self.assertEqual(base64.b64decode(out.getvalue().strip()).decode(), client_settings_ps({"questFragmentLive": True}))
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            self.assertEqual(main(["settings-ps", "50"]), 0)
+        self.assertEqual(out.getvalue().strip(), "")
+
+    def test_a_profile_carries_them(self):
+        import yaml
+        from playtest_setup import ProfileError, check_profile
+
+        p = check_profile(yaml.safe_load(PROFILE + "clientSettings: {questFragmentLive: true}\n"), 24)
+        self.assertEqual(p["clientSettings"], {"questFragmentLive": True})
+        with self.assertRaises(ProfileError):
+            check_profile(yaml.safe_load(PROFILE + "clientSettings: {questFragmentLive: null}\n"), 24)
+
+
+@needs_deps
+class PlaytestStaggeredRelaunch(unittest.TestCase):
+    """Eli's word of 2026-11-11 ("Restore and ready()"): a playtest's seats log in one after the other, c1 first and c2
+    once c1 is online again, at the restore and at ready, so a seat's own Story Manager start never races the other's
+    relayed start (b-ghostwalk-look's warm reds)."""
+
+    @staticmethod
+    def _fake_seats(events, stop_rc=None, start_rc=None):
+        """relaunch_seats' two process calls faked: a stop is a Popen (spawned, then waited by communicate), a start a run;
+        each step lands in events in the order it happens."""
+        import subprocess
+
+        stop_rc, start_rc = stop_rc or {}, start_rc or {}
+
+        class Popen:
+            def __init__(self, argv, **kw):
+                self.c, self.returncode = argv[-2], None
+                events.append(("spawn", self.c, argv[-1], kw["env"].get("PLAYTEST")))
+
+            def communicate(self):
+                events.append(("wait", self.c))
+                self.returncode = stop_rc.get(self.c, 0)
+                return (f"{self.c} stop ok\n", None)
+
+        def run(argv, **kw):
+            events.append(("run", argv[-2], argv[-1], kw["env"].get("PLAYTEST")))
+            return subprocess.CompletedProcess(argv, start_rc.get(argv[-2], 0), stdout=f"{argv[-2]} start ok\n")
+
+        return Popen, run
+
+    def test_ready_stops_both_at_once_then_starts_c1_then_c2(self):
+        from unittest import mock
+
+        import playtest_setup as t
+
+        events = []
+        Popen, run = self._fake_seats(events)
+        with mock.patch.object(t.subprocess, "Popen", Popen), mock.patch.object(t.subprocess, "run", side_effect=run):
+            done = t.relaunch_seats({"PLAYTEST": "51"})
+        # both stops spawned before either is waited, both done before any start; c1 started, then c2 (run returns first)
+        self.assertEqual(events, [("spawn", "c1", "stop", "51"), ("spawn", "c2", "stop", "51"), ("wait", "c1"), ("wait", "c2"),
+                                  ("run", "c1", "start", "51"), ("run", "c2", "start", "51")])
+        self.assertEqual(done, [("c1", 0, ["c1 stop ok", "c1 start ok"]), ("c2", 0, ["c2 stop ok", "c2 start ok"])])
+
+    def test_a_seat_whose_stop_failed_is_not_started(self):
+        from unittest import mock
+
+        import playtest_setup as t
+
+        events = []
+        Popen, run = self._fake_seats(events, stop_rc={"c2": 4})
+        with mock.patch.object(t.subprocess, "Popen", Popen), mock.patch.object(t.subprocess, "run", side_effect=run):
+            done = t.relaunch_seats({"PLAYTEST": "51"})
+        self.assertEqual([e for e in events if e[0] == "run"], [("run", "c1", "start", "51")])
+        self.assertEqual([(c, rc) for c, rc, _ in done], [("c1", 0), ("c2", 4)])
+
+    def test_c2_waits_for_a_hand_when_c1s_start_failed(self):
+        from unittest import mock
+
+        import playtest_setup as t
+
+        events = []
+        Popen, run = self._fake_seats(events, start_rc={"c1": 4})
+        with mock.patch.object(t.subprocess, "Popen", Popen), mock.patch.object(t.subprocess, "run", side_effect=run):
+            done = t.relaunch_seats({"PLAYTEST": "51"})
+        self.assertEqual([e for e in events if e[0] == "run"], [("run", "c1", "start", "51")])
+        self.assertEqual([(c, rc) for c, rc, _ in done], [("c1", 4), ("c2", 9)])
+        self.assertIn("c1's start failed", done[1][2][-1])
+
+    def _restore(self, name="playtest-x-20261111T000000Z", **rc):
+        """playtest-world.sh's restore in a copy of its tree, with ssh, curl and playtest-relaunch.sh stubbed: each call
+        lands in calls.log. Each stop waits up to 5 s for the other's to begin and says whether it saw it, so stops at once
+        end "together" after both begins, and stops one after the other leave c1's "alone" (deterministic both ways). rc:
+        C1_STOP, C2_STOP, C1_START, C2_START return codes."""
+        import os
+        import shutil
+        import subprocess
+        import tempfile
+
+        tmp = Path(tempfile.mkdtemp(prefix="restore-"))
+        self.addCleanup(shutil.rmtree, tmp, True)
+        tools, bin_ = tmp / "lab" / "tools", tmp / "bin"
+        tools.mkdir(parents=True)
+        bin_.mkdir()
+        log = tmp / "calls.log"
+        log.touch()
+        shutil.copy(ROOT / "lab" / "tools" / "playtest-world.sh", tools / "playtest-world.sh")
+        stubs = {
+            tools / "playtest-relaunch.sh": f"""#!/usr/bin/env bash
+log={log}
+key=$(printf '%s' "$1_$2" | tr a-z A-Z)
+if [ "$2" = stop ]; then
+  echo "begin $1 stop" >> "$log"
+  saw=alone; other=c2; [ "$1" = c2 ] && other=c1
+  for i in $(seq 1 50); do grep -q "begin $other stop" "$log" && {{ saw=together; break; }}; sleep 0.1; done
+  echo "end $1 stop $saw" >> "$log"
+else
+  echo "$1 $2" >> "$log"
+fi
+rc=$(printenv "$key" || true)
+exit "${{rc:-0}}"
+""",
+            bin_ / "ssh": f"""#!/usr/bin/env bash
+last=${{@: -1}}
+case "$last" in
+  "test -d "*missing*) echo "ssh test-d missing" >> {log}; exit 1;;
+  "test -d "*) echo "ssh test-d" >> {log}; exit 0;;
+  *"docker compose stop skymp-server"*) echo "ssh swap" >> {log}; echo restored; exit 0;;
+esac
+exit 0
+""",
+            bin_ / "curl": """#!/usr/bin/env bash
+case "$*" in *"/status"*) echo '{"run": null}';; esac
+exit 0
+""",
+        }
+        for path, text in stubs.items():
+            path.write_text(text, encoding="utf-8")
+            path.chmod(0o755)
+        env = {**os.environ, "PATH": f"{bin_}:{os.environ['PATH']}", "LAB_API": "http://stub", "PLAYTEST": "51",
+               **{k: str(v) for k, v in rc.items()}}
+        env.pop("PLAYTEST_NO_RELAUNCH", None)
+        env.pop("PLAYTEST_SERVER_SETTINGS", None)
+        r = subprocess.run(["bash", str(tools / "playtest-world.sh"), "restore", name], capture_output=True, text=True,
+                           env=env, timeout=60)
+        return r, log.read_text(encoding="utf-8").splitlines()
+
+    def test_the_restore_stops_both_at_once_then_swaps_then_starts_c1_then_c2(self):
+        r, calls = self._restore()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(calls[0], "ssh test-d")
+        self.assertEqual(sorted(calls[1:3]), ["begin c1 stop", "begin c2 stop"])
+        self.assertEqual(sorted(calls[3:5]), ["end c1 stop together", "end c2 stop together"])
+        self.assertEqual(calls[5:], ["ssh swap", "c1 start", "c2 start"])
+        self.assertIn("both seats relaunched on the restored world, c1 then c2", r.stdout)
+
+    def test_a_missing_world_stops_nothing(self):
+        r, calls = self._restore(name="playtest-missing-20261111T000000Z")
+        self.assertEqual(r.returncode, 4)
+        self.assertEqual(calls, ["ssh test-d missing"])
+        self.assertIn("nothing stopped", r.stderr)
+
+    def test_a_failed_stop_leaves_the_world_untouched(self):
+        r, calls = self._restore(C2_STOP=4)
+        self.assertEqual(r.returncode, 5)
+        self.assertNotIn("ssh swap", calls)
+        self.assertFalse([c for c in calls if c.endswith(" start")])
+        # the hint names a command that runs: the script's own path, since the just recipe takes no phase
+        self.assertIn("lab/tools/playtest-relaunch.sh c1 stop", r.stderr)
+
+    def test_the_restore_holds_c2_when_c1s_start_failed(self):
+        r, calls = self._restore(C1_START=4)
+        self.assertEqual(r.returncode, 5)
+        self.assertEqual(calls[-2:], ["ssh swap", "c1 start"])
+        self.assertIn("c2 not started", r.stderr)
+
+    def test_the_relaunch_refuses_an_unknown_phase_before_anything(self):
+        import subprocess
+
+        r = subprocess.run(["bash", str(ROOT / "lab" / "tools" / "playtest-relaunch.sh"), "c1", "pause"],
+                           capture_output=True, text=True, timeout=30)
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("the phase is stop or start", r.stderr)
+
+    def test_setup_hands_the_restore_its_profile(self):
+        import contextlib
+        import io
+        import subprocess
+        from unittest import mock
+
+        import playtest_setup as t
+
+        seen = []
+
+        def run(argv, **kw):
+            seen.append((argv[1:], kw["env"].get("PLAYTEST")))
+            return subprocess.CompletedProcess(argv, 1)  # the restore fails, so setup stops right after it
+
+        profile = {"world": "playtest-x-20261111T000000Z", "seats": [{"profile": 1}, {"profile": 2}]}
+        with mock.patch.object(t, "load_profile", return_value=profile), mock.patch.object(t.subprocess, "run", side_effect=run), \
+                contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(t.setup(51), 2)
+        self.assertEqual(seen, [(["restore", "playtest-x-20261111T000000Z"], "51")])
 
 
 if __name__ == "__main__":

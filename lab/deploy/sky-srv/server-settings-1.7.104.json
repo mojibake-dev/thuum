@@ -341,6 +341,4588 @@
     "b6031:Skyrim.esm",
     "3dd29:Skyrim.esm"
   ],
+  "questScope": "derived",
+  "playerQuests": [
+    "9a7a6:Skyrim.esm",
+    "e6de3:Skyrim.esm",
+    "e8283:Skyrim.esm",
+    "eafd5:Skyrim.esm",
+    "fc1a2:Skyrim.esm",
+    "10b0e0:Skyrim.esm",
+    "97f:Update.esm",
+    "2c09:Dawnguard.esm",
+    "8e3b:Dawnguard.esm",
+    "f899:Dawnguard.esm",
+    "1964a:Dawnguard.esm",
+    "26242:Dragonborn.esm",
+    "2e7d:unofficial skyrim special edition patch.esp",
+    "2e85:unofficial skyrim special edition patch.esp",
+    "2e87:unofficial skyrim special edition patch.esp",
+    "2ea7:unofficial skyrim special edition patch.esp",
+    "a318:unofficial skyrim special edition patch.esp",
+    "1a09c4:Odin - Skyrim Magic Overhaul.esp",
+    "1b4e43:Odin - Skyrim Magic Overhaul.esp",
+    "4c706:LRD.esp",
+    "1c7ad:Dwemer Goggles & Scouter.esp"
+  ],
+  "conditionVariables": [
+    {
+      "form": "15d24:Skyrim.esm",
+      "script": "TGRDUQuestScript",
+      "var": "::pTGRDUPlanted_var"
+    },
+    {
+      "form": "17f01:Skyrim.esm",
+      "script": "CarriageSystemScript",
+      "var": "::currentDestination_var"
+    },
+    {
+      "form": "18b4b:Skyrim.esm",
+      "script": "MS01QuestScript",
+      "var": "::MarkarthMarket_var"
+    },
+    {
+      "form": "19e53:Skyrim.esm",
+      "script": "CWScript",
+      "var": "::BuddyDialogueAllowed_var"
+    },
+    {
+      "form": "19e53:Skyrim.esm",
+      "script": "CWScript",
+      "var": "::countHoldsImperial_var"
+    },
+    {
+      "form": "19e53:Skyrim.esm",
+      "script": "CWScript",
+      "var": "::countHoldsSons_var"
+    },
+    {
+      "form": "19e53:Skyrim.esm",
+      "script": "CWScript",
+      "var": "::countWinWhiterunSons_var"
+    },
+    {
+      "form": "19e53:Skyrim.esm",
+      "script": "CWScript",
+      "var": "::countWinWinterholdImperials_var"
+    },
+    {
+      "form": "19e53:Skyrim.esm",
+      "script": "CWScript",
+      "var": "::OwnerFalkreath_var"
+    },
+    {
+      "form": "19e53:Skyrim.esm",
+      "script": "CWScript",
+      "var": "::OwnerHaafingar_var"
+    },
+    {
+      "form": "19e53:Skyrim.esm",
+      "script": "CWScript",
+      "var": "::OwnerReach_var"
+    },
+    {
+      "form": "19e53:Skyrim.esm",
+      "script": "CWScript",
+      "var": "::OwnerRift_var"
+    },
+    {
+      "form": "19e53:Skyrim.esm",
+      "script": "CWScript",
+      "var": "::OwnerWhiterun_var"
+    },
+    {
+      "form": "19e53:Skyrim.esm",
+      "script": "CWScript",
+      "var": "::playerAllegiance_var"
+    },
+    {
+      "form": "19e53:Skyrim.esm",
+      "script": "CWScript",
+      "var": "::PlayerGotIntro_var"
+    },
+    {
+      "form": "19e53:Skyrim.esm",
+      "script": "CWScript",
+      "var": "::playerInvolved_var"
+    },
+    {
+      "form": "19e53:Skyrim.esm",
+      "script": "CWScript",
+      "var": "::PlayerRank_var"
+    },
+    {
+      "form": "19e53:Skyrim.esm",
+      "script": "CWScript",
+      "var": "::Salary_var"
+    },
+    {
+      "form": "19e53:Skyrim.esm",
+      "script": "CWScript",
+      "var": "::WarIsActive_var"
+    },
+    {
+      "form": "19e53:Skyrim.esm",
+      "script": "CWScript",
+      "var": "::WhiterunSiegeFinished_var"
+    },
+    {
+      "form": "1bfc4:Skyrim.esm",
+      "script": "DA03Script",
+      "var": "::BarbasFollow_var"
+    },
+    {
+      "form": "1bfc4:Skyrim.esm",
+      "script": "DA03Script",
+      "var": "::VileOffer_var"
+    },
+    {
+      "form": "1c48e:Skyrim.esm",
+      "script": "T03QuestScript",
+      "var": "::MauriceShouldAdmonish_var"
+    },
+    {
+      "form": "1c48e:Skyrim.esm",
+      "script": "T03QuestScript",
+      "var": "::MauriceShouldFollow_var"
+    },
+    {
+      "form": "1c48e:Skyrim.esm",
+      "script": "T03QuestScript",
+      "var": "::MauriceShouldIntro_var"
+    },
+    {
+      "form": "1c48e:Skyrim.esm",
+      "script": "T03QuestScript",
+      "var": "::MauriceShouldTalkAtEnd_var"
+    },
+    {
+      "form": "1c48e:Skyrim.esm",
+      "script": "T03QuestScript",
+      "var": "::PlayerAskedAboutTree_var"
+    },
+    {
+      "form": "1c48e:Skyrim.esm",
+      "script": "T03QuestScript",
+      "var": "::PlayerHeardAboutEldergleam_var"
+    },
+    {
+      "form": "1c48e:Skyrim.esm",
+      "script": "T03QuestScript",
+      "var": "::PlayerShowedNettlebane_var"
+    },
+    {
+      "form": "1c48e:Skyrim.esm",
+      "script": "T03QuestScript",
+      "var": "::PlayerTookSap_var"
+    },
+    {
+      "form": "1c5d9:Skyrim.esm",
+      "script": "MQ00QuestScript",
+      "var": "::DragonFlag_var"
+    },
+    {
+      "form": "1c5d9:Skyrim.esm",
+      "script": "MQ00QuestScript",
+      "var": "::DragonWarFlag_var"
+    },
+    {
+      "form": "1c5d9:Skyrim.esm",
+      "script": "MQ00QuestScript",
+      "var": "::ElisifFlag_var"
+    },
+    {
+      "form": "1c5d9:Skyrim.esm",
+      "script": "MQ00QuestScript",
+      "var": "::JurgenWindcallerFlag_var"
+    },
+    {
+      "form": "1c5d9:Skyrim.esm",
+      "script": "MQ00QuestScript",
+      "var": "::MQArngeirNoSpeakFlag_var"
+    },
+    {
+      "form": "1c5d9:Skyrim.esm",
+      "script": "MQ00QuestScript",
+      "var": "::PaarthurnaxConversationChoice_var"
+    },
+    {
+      "form": "1c5d9:Skyrim.esm",
+      "script": "MQ00QuestScript",
+      "var": "::PaarthurnaxFlag_var"
+    },
+    {
+      "form": "1c5d9:Skyrim.esm",
+      "script": "MQ00QuestScript",
+      "var": "::StormcloaksFlag_var"
+    },
+    {
+      "form": "1c5d9:Skyrim.esm",
+      "script": "MQ00QuestScript",
+      "var": "::TalosFlag_var"
+    },
+    {
+      "form": "1c5d9:Skyrim.esm",
+      "script": "MQ00QuestScript",
+      "var": "::ThalmorDialogueFlag_var"
+    },
+    {
+      "form": "1c5d9:Skyrim.esm",
+      "script": "MQ00QuestScript",
+      "var": "::UlfricCaptureFlag_var"
+    },
+    {
+      "form": "1c5d9:Skyrim.esm",
+      "script": "MQ00QuestScript",
+      "var": "::UlfricGreybeardFlag_var"
+    },
+    {
+      "form": "1c5d9:Skyrim.esm",
+      "script": "MQ00QuestScript",
+      "var": "::WayoftheVoiceFlag_var"
+    },
+    {
+      "form": "1ceee:Skyrim.esm",
+      "script": "CR01QuestScript",
+      "var": "::IsAccepted_var"
+    },
+    {
+      "form": "1cef4:Skyrim.esm",
+      "script": "C03QuestScript",
+      "var": "::AelaGreetPostTransform_var"
+    },
+    {
+      "form": "1cef4:Skyrim.esm",
+      "script": "C03QuestScript",
+      "var": "::AelaShouldForceGreet_var"
+    },
+    {
+      "form": "1cef4:Skyrim.esm",
+      "script": "C03QuestScript",
+      "var": "::SkjorOfferingTransform_var"
+    },
+    {
+      "form": "1cef4:Skyrim.esm",
+      "script": "C03QuestScript",
+      "var": "::TransformedRecently_var"
+    },
+    {
+      "form": "1cef5:Skyrim.esm",
+      "script": "C04QuestScript",
+      "var": "::KodlakHasTask_var"
+    },
+    {
+      "form": "1cef5:Skyrim.esm",
+      "script": "C04QuestScript",
+      "var": "::KodlakToldAboutWitches_var"
+    },
+    {
+      "form": "1cef5:Skyrim.esm",
+      "script": "C04QuestScript",
+      "var": "::PlayerSittingDown_var"
+    },
+    {
+      "form": "1cef5:Skyrim.esm",
+      "script": "C04QuestScript",
+      "var": "::VilkasShouldForceGreet_var"
+    },
+    {
+      "form": "1cef6:Skyrim.esm",
+      "script": "C06QuestScript",
+      "var": "::EorlundFGAtFuneralEnd_var"
+    },
+    {
+      "form": "1cef6:Skyrim.esm",
+      "script": "C06QuestScript",
+      "var": "::FarkasFGBeforeSpiders_var"
+    },
+    {
+      "form": "1cef6:Skyrim.esm",
+      "script": "C06QuestScript",
+      "var": "::FarkasLeft_var"
+    },
+    {
+      "form": "1cef6:Skyrim.esm",
+      "script": "C06QuestScript",
+      "var": "::PlayerPresentAtFuneral_var"
+    },
+    {
+      "form": "1cf25:Skyrim.esm",
+      "script": "MS08QuestScript",
+      "var": "::DungeonFound_var"
+    },
+    {
+      "form": "1cf25:Skyrim.esm",
+      "script": "MS08QuestScript",
+      "var": "::FineVar_var"
+    },
+    {
+      "form": "1cf25:Skyrim.esm",
+      "script": "MS08QuestScript",
+      "var": "::InitialForcegreet_var"
+    },
+    {
+      "form": "1cf25:Skyrim.esm",
+      "script": "MS08QuestScript",
+      "var": "::KematuAngry_var"
+    },
+    {
+      "form": "1cf25:Skyrim.esm",
+      "script": "MS08QuestScript",
+      "var": "::SaadiaCaptured_var"
+    },
+    {
+      "form": "1cf25:Skyrim.esm",
+      "script": "MS08QuestScript",
+      "var": "::SaadiaConfide_var"
+    },
+    {
+      "form": "1cf25:Skyrim.esm",
+      "script": "MS08QuestScript",
+      "var": "::SaadiaFollow_var"
+    },
+    {
+      "form": "1cf26:Skyrim.esm",
+      "script": "MS09QuestScript",
+      "var": "::MS09AvulsteinSceneTrigger_var"
+    },
+    {
+      "form": "1cf26:Skyrim.esm",
+      "script": "MS09QuestScript",
+      "var": "::MS09HomeSceneDone_var"
+    },
+    {
+      "form": "1cf26:Skyrim.esm",
+      "script": "MS09QuestScript",
+      "var": "::MS09NonCombat_var"
+    },
+    {
+      "form": "1cf26:Skyrim.esm",
+      "script": "MS09QuestScript",
+      "var": "::MS09SceneRun_var"
+    },
+    {
+      "form": "1cf26:Skyrim.esm",
+      "script": "MS09QuestScript",
+      "var": "::ProofDelivered_var"
+    },
+    {
+      "form": "1da3c:Skyrim.esm",
+      "script": "MS03Script",
+      "var": "::WorkingWithMaven_var"
+    },
+    {
+      "form": "1dbfc:Skyrim.esm",
+      "script": "MS10QuestScript",
+      "var": "::AdelaisaFGInOffice_var"
+    },
+    {
+      "form": "1dbfc:Skyrim.esm",
+      "script": "MS10QuestScript",
+      "var": "::KnowsNameOfPirates_var"
+    },
+    {
+      "form": "1dbfc:Skyrim.esm",
+      "script": "MS10QuestScript",
+      "var": "::PlayerKnowsAboutHaldyn_var"
+    },
+    {
+      "form": "1dbfc:Skyrim.esm",
+      "script": "MS10QuestScript",
+      "var": "::StigIntroduced_var"
+    },
+    {
+      "form": "1dbfc:Skyrim.esm",
+      "script": "MS10QuestScript",
+      "var": "::StigPersuaded_var"
+    },
+    {
+      "form": "1ea50:Skyrim.esm",
+      "script": "DB01QuestScript",
+      "var": "::GrelodAlreadyDead_var"
+    },
+    {
+      "form": "1ea50:Skyrim.esm",
+      "script": "DB01QuestScript",
+      "var": "::GrelodDeadChoice_var"
+    },
+    {
+      "form": "1ea50:Skyrim.esm",
+      "script": "DB01QuestScript",
+      "var": "::GrelodThreatened_var"
+    },
+    {
+      "form": "1ea51:Skyrim.esm",
+      "script": "DB02Script",
+      "var": "::Captive1Speech_var"
+    },
+    {
+      "form": "1ea51:Skyrim.esm",
+      "script": "DB02Script",
+      "var": "::Captive2Speech_var"
+    },
+    {
+      "form": "1ea51:Skyrim.esm",
+      "script": "DB02Script",
+      "var": "::Captive3Speech_var"
+    },
+    {
+      "form": "1ea51:Skyrim.esm",
+      "script": "DB02Script",
+      "var": "::pCaptive1Free_var"
+    },
+    {
+      "form": "1ea51:Skyrim.esm",
+      "script": "DB02Script",
+      "var": "::pCaptive2Free_var"
+    },
+    {
+      "form": "1ea51:Skyrim.esm",
+      "script": "DB02Script",
+      "var": "::pCaptive3Free_var"
+    },
+    {
+      "form": "1ea52:Skyrim.esm",
+      "script": "DB03Script",
+      "var": "::AlainAlreadyDead_var"
+    },
+    {
+      "form": "1ea52:Skyrim.esm",
+      "script": "DB03Script",
+      "var": "::FamilySuffer_var"
+    },
+    {
+      "form": "1ea52:Skyrim.esm",
+      "script": "DB03Script",
+      "var": "::NilsineDead_var"
+    },
+    {
+      "form": "1ea52:Skyrim.esm",
+      "script": "DB03Script",
+      "var": "::NilsineTaunt_var"
+    },
+    {
+      "form": "1ea52:Skyrim.esm",
+      "script": "DB03Script",
+      "var": "::PitTaunt_var"
+    },
+    {
+      "form": "1ea52:Skyrim.esm",
+      "script": "DB03Script",
+      "var": "::TalkedPoison_var"
+    },
+    {
+      "form": "1ea53:Skyrim.esm",
+      "script": "DB04Script",
+      "var": "::Side_var"
+    },
+    {
+      "form": "1ea54:Skyrim.esm",
+      "script": "DB05Script",
+      "var": "::Bonus_var"
+    },
+    {
+      "form": "1ea54:Skyrim.esm",
+      "script": "DB05Script",
+      "var": "::EmperorQuestion_var"
+    },
+    {
+      "form": "1ea54:Skyrim.esm",
+      "script": "DB05Script",
+      "var": "::Unsealed_var"
+    },
+    {
+      "form": "1ea54:Skyrim.esm",
+      "script": "DB05Script",
+      "var": "::VeezaraGreet_var"
+    },
+    {
+      "form": "1ea54:Skyrim.esm",
+      "script": "DB05Script",
+      "var": "::VeezaraShowed_var"
+    },
+    {
+      "form": "1ea54:Skyrim.esm",
+      "script": "DB05Script",
+      "var": "::VittoriaGreet_var"
+    },
+    {
+      "form": "1ea55:Skyrim.esm",
+      "script": "DB06Script",
+      "var": "::pBonus_var"
+    },
+    {
+      "form": "1ea55:Skyrim.esm",
+      "script": "DB06Script",
+      "var": "::pPlantedLetter_var"
+    },
+    {
+      "form": "1ea55:Skyrim.esm",
+      "script": "DB06Script",
+      "var": "::Threaten_var"
+    },
+    {
+      "form": "1ea56:Skyrim.esm",
+      "script": "DB07Script",
+      "var": "::ArnbjornTalked_var"
+    },
+    {
+      "form": "1ea56:Skyrim.esm",
+      "script": "DB07Script",
+      "var": "::CiceroConfronted_var"
+    },
+    {
+      "form": "1ea56:Skyrim.esm",
+      "script": "DB07Script",
+      "var": "::CiceroThreatened_var"
+    },
+    {
+      "form": "1ea57:Skyrim.esm",
+      "script": "pDB08Script",
+      "var": "::pAntonDead_var"
+    },
+    {
+      "form": "1ea57:Skyrim.esm",
+      "script": "pDB08Script",
+      "var": "::pBodyHidden_var"
+    },
+    {
+      "form": "1ea57:Skyrim.esm",
+      "script": "pDB08Script",
+      "var": "::pFestusFirstTalk_var"
+    },
+    {
+      "form": "1ea57:Skyrim.esm",
+      "script": "pDB08Script",
+      "var": "::pGourmetThreatened_var"
+    },
+    {
+      "form": "1ea57:Skyrim.esm",
+      "script": "pDB08Script",
+      "var": "::pHasPapers_var"
+    },
+    {
+      "form": "1ea58:Skyrim.esm",
+      "script": "pDB09Script",
+      "var": "::pDecoyDeadPoison_var"
+    },
+    {
+      "form": "1ea58:Skyrim.esm",
+      "script": "pDB09Script",
+      "var": "::pGiannaMet_var"
+    },
+    {
+      "form": "1ea58:Skyrim.esm",
+      "script": "pDB09Script",
+      "var": "::pPotagePoisoned_var"
+    },
+    {
+      "form": "1ea59:Skyrim.esm",
+      "script": "pDB11Script",
+      "var": "::pEmperorTalked_var"
+    },
+    {
+      "form": "1ea59:Skyrim.esm",
+      "script": "pDB11Script",
+      "var": "::pEmperorWish_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::AstridCiceroOpinion_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::AstridContractAdvice_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::AstridNightMotherTalk1_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::BlackDoorPass_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::BlackSacrament_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::CiceroArrive_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::CiceroBack_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::CiceroFollower_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::CiceroFramed_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::CiceroGone_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::CiceroGuardResponse_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::CiceroSancMood_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::CiceroState_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::CiceroTalk1_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::ContractSet_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::DawnstarDoorPass_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::DB01MiscResolved_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::FestusRespect_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::FirstSet_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::Initiate1Follower_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::Initiate1State_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::Initiate2Follower_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::Initiate2State_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::ListenerTopic_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::LoreiusState_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::NextSet_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::pCiceroGuardScene_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::pGiveOlavaToken_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::SolitudeStormcloaks_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::TovaDead_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::Victim1Secret_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::Victim2Secret_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::Victim3Secret_var"
+    },
+    {
+      "form": "1ea5c:Skyrim.esm",
+      "script": "DarkBrotherhood",
+      "var": "::Victim4Secret_var"
+    },
+    {
+      "form": "1f251:Skyrim.esm",
+      "script": "MG01QuestScript",
+      "var": "::AncanoSceneDone_var"
+    },
+    {
+      "form": "1f251:Skyrim.esm",
+      "script": "MG01QuestScript",
+      "var": "::ApprenticeKilled_var"
+    },
+    {
+      "form": "1f251:Skyrim.esm",
+      "script": "MG01QuestScript",
+      "var": "::ComplainInfo_var"
+    },
+    {
+      "form": "1f251:Skyrim.esm",
+      "script": "MG01QuestScript",
+      "var": "::FaraldaComplainInfo_var"
+    },
+    {
+      "form": "1f251:Skyrim.esm",
+      "script": "MG01QuestScript",
+      "var": "::FaraldaProgress_var"
+    },
+    {
+      "form": "1f251:Skyrim.esm",
+      "script": "MG01QuestScript",
+      "var": "::NiryaInit_var"
+    },
+    {
+      "form": "1f251:Skyrim.esm",
+      "script": "MG01QuestScript",
+      "var": "::NiryaRejection_var"
+    },
+    {
+      "form": "1f251:Skyrim.esm",
+      "script": "MG01QuestScript",
+      "var": "::NiryaSkillVar_var"
+    },
+    {
+      "form": "1f251:Skyrim.esm",
+      "script": "MG01QuestScript",
+      "var": "::NiryaSpellSold_var"
+    },
+    {
+      "form": "1f251:Skyrim.esm",
+      "script": "MG01QuestScript",
+      "var": "::NiryaSpellSuccess_var"
+    },
+    {
+      "form": "1f251:Skyrim.esm",
+      "script": "MG01QuestScript",
+      "var": "::PlayerHit_var"
+    },
+    {
+      "form": "1f251:Skyrim.esm",
+      "script": "MG01QuestScript",
+      "var": "::TestRandomVar_var"
+    },
+    {
+      "form": "1f251:Skyrim.esm",
+      "script": "MG01QuestScript",
+      "var": "::TimerInit_var"
+    },
+    {
+      "form": "1f251:Skyrim.esm",
+      "script": "MG01QuestScript",
+      "var": "::TolfdirResponseVar_var"
+    },
+    {
+      "form": "1f251:Skyrim.esm",
+      "script": "MG01QuestScript",
+      "var": "::WaitingForShout_var"
+    },
+    {
+      "form": "1f251:Skyrim.esm",
+      "script": "MG01QuestScript",
+      "var": "::WardGiven_var"
+    },
+    {
+      "form": "1f252:Skyrim.esm",
+      "script": "MG02QuestScript",
+      "var": "::AmuletInfo_var"
+    },
+    {
+      "form": "1f252:Skyrim.esm",
+      "script": "MG02QuestScript",
+      "var": "::MG02DraugrTolfdirCount_var"
+    },
+    {
+      "form": "1f252:Skyrim.esm",
+      "script": "MG02QuestScript",
+      "var": "::MG02TolfdirLecture_var"
+    },
+    {
+      "form": "1f252:Skyrim.esm",
+      "script": "MG02QuestScript",
+      "var": "::MG02TolfdirTunnelSceneVar_var"
+    },
+    {
+      "form": "1f252:Skyrim.esm",
+      "script": "MG02QuestScript",
+      "var": "::TolfdirUpdate_var"
+    },
+    {
+      "form": "1f253:Skyrim.esm",
+      "script": "MG03QuestScript",
+      "var": "::FaraldaGreet_var"
+    },
+    {
+      "form": "1f253:Skyrim.esm",
+      "script": "MG03QuestScript",
+      "var": "::MG03AncanoConvo_var"
+    },
+    {
+      "form": "1f253:Skyrim.esm",
+      "script": "MG03QuestScript",
+      "var": "::MG03CallerPermission_var"
+    },
+    {
+      "form": "1f253:Skyrim.esm",
+      "script": "MG03QuestScript",
+      "var": "::MG03OrthornCaller_var"
+    },
+    {
+      "form": "1f253:Skyrim.esm",
+      "script": "MG03QuestScript",
+      "var": "::MG03OrthornIntro_var"
+    },
+    {
+      "form": "1f253:Skyrim.esm",
+      "script": "MG03QuestScript",
+      "var": "::OrthornReject_var"
+    },
+    {
+      "form": "1f254:Skyrim.esm",
+      "script": "MG04QuestScript",
+      "var": "::MG04AugurInfo_var"
+    },
+    {
+      "form": "1f254:Skyrim.esm",
+      "script": "MG04QuestScript",
+      "var": "::MG04AugurSpeak_var"
+    },
+    {
+      "form": "1f254:Skyrim.esm",
+      "script": "MG04QuestScript",
+      "var": "::MG04ClassScene_var"
+    },
+    {
+      "form": "1f254:Skyrim.esm",
+      "script": "MG04QuestScript",
+      "var": "::MG04MirabelleAugurInfo_var"
+    },
+    {
+      "form": "1f254:Skyrim.esm",
+      "script": "MG04QuestScript",
+      "var": "::MG04MonkScene_var"
+    },
+    {
+      "form": "1f254:Skyrim.esm",
+      "script": "MG04QuestScript",
+      "var": "::MonkSceneConvoStep_var"
+    },
+    {
+      "form": "1f255:Skyrim.esm",
+      "script": "MG05QuestScript",
+      "var": "::MG05Aid_var"
+    },
+    {
+      "form": "1f255:Skyrim.esm",
+      "script": "MG05QuestScript",
+      "var": "::MG05CreatureCount_var"
+    },
+    {
+      "form": "1f256:Skyrim.esm",
+      "script": "MG06QuestScript",
+      "var": "::MG06CrystalInfo_var"
+    },
+    {
+      "form": "1f256:Skyrim.esm",
+      "script": "MG06QuestScript",
+      "var": "::MG06DoorSceneFlag_var"
+    },
+    {
+      "form": "1f256:Skyrim.esm",
+      "script": "MG06QuestScript",
+      "var": "::MG06ParatusTracker_var"
+    },
+    {
+      "form": "1f256:Skyrim.esm",
+      "script": "MG06QuestScript",
+      "var": "::MG06SynodInfo_var"
+    },
+    {
+      "form": "1f256:Skyrim.esm",
+      "script": "MG06QuestScript",
+      "var": "::Stage55Progress_var"
+    },
+    {
+      "form": "1f257:Skyrim.esm",
+      "script": "MG07QuestScript",
+      "var": "::WaveTrigger_var"
+    },
+    {
+      "form": "1f258:Skyrim.esm",
+      "script": "MG08QuestScript",
+      "var": "::MG08TandilFree_var"
+    },
+    {
+      "form": "1f258:Skyrim.esm",
+      "script": "MG08QuestScript",
+      "var": "::TriggerVar1_var"
+    },
+    {
+      "form": "1f326:Skyrim.esm",
+      "script": "TG01QuestScript",
+      "var": "::pTG01BersiPaid_var"
+    },
+    {
+      "form": "1f326:Skyrim.esm",
+      "script": "TG01QuestScript",
+      "var": "::pTG01BersiWarned_var"
+    },
+    {
+      "form": "1f326:Skyrim.esm",
+      "script": "TG01QuestScript",
+      "var": "::pTG01Dia01_var"
+    },
+    {
+      "form": "1f326:Skyrim.esm",
+      "script": "TG01QuestScript",
+      "var": "::pTG01Dialogue01_var"
+    },
+    {
+      "form": "1f326:Skyrim.esm",
+      "script": "TG01QuestScript",
+      "var": "::pTG01GotCash_var"
+    },
+    {
+      "form": "1f326:Skyrim.esm",
+      "script": "TG01QuestScript",
+      "var": "::pTG01GotStatue_var"
+    },
+    {
+      "form": "1f326:Skyrim.esm",
+      "script": "TG01QuestScript",
+      "var": "::pTG01HaelgaPaid_var"
+    },
+    {
+      "form": "1f326:Skyrim.esm",
+      "script": "TG01QuestScript",
+      "var": "::pTG01HaelgaWarned_var"
+    },
+    {
+      "form": "1f326:Skyrim.esm",
+      "script": "TG01QuestScript",
+      "var": "::pTG01KeeravaPaid_var"
+    },
+    {
+      "form": "1f326:Skyrim.esm",
+      "script": "TG01QuestScript",
+      "var": "::pTG01KeeravaWarned_var"
+    },
+    {
+      "form": "1f326:Skyrim.esm",
+      "script": "TG01QuestScript",
+      "var": "::pTG01LoverFound_var"
+    },
+    {
+      "form": "1f326:Skyrim.esm",
+      "script": "TG01QuestScript",
+      "var": "::pTG01QuestFail_var"
+    },
+    {
+      "form": "1f326:Skyrim.esm",
+      "script": "TG01QuestScript",
+      "var": "::pTG01SmashUrn_var"
+    },
+    {
+      "form": "1f7a3:Skyrim.esm",
+      "script": "ms11questscript",
+      "var": "::BodyIsInHallOfDead_var"
+    },
+    {
+      "form": "1f7a3:Skyrim.esm",
+      "script": "ms11questscript",
+      "var": "::GotRedHerringFromCalixto_var"
+    },
+    {
+      "form": "1f7a3:Skyrim.esm",
+      "script": "ms11questscript",
+      "var": "::GuardGavePlayerStory_var"
+    },
+    {
+      "form": "1f7a3:Skyrim.esm",
+      "script": "ms11questscript",
+      "var": "::InvestigateCalixtoPointer_var"
+    },
+    {
+      "form": "1f7a3:Skyrim.esm",
+      "script": "ms11questscript",
+      "var": "::PlayerHasAuthority_var"
+    },
+    {
+      "form": "1f7a3:Skyrim.esm",
+      "script": "ms11questscript",
+      "var": "::PlayerHasFoundHorridRoom_var"
+    },
+    {
+      "form": "1f7a3:Skyrim.esm",
+      "script": "ms11questscript",
+      "var": "::PlayerInMurderZone_var"
+    },
+    {
+      "form": "1f7a3:Skyrim.esm",
+      "script": "ms11questscript",
+      "var": "::PlayerReadJournal2_var"
+    },
+    {
+      "form": "1f7a3:Skyrim.esm",
+      "script": "ms11questscript",
+      "var": "::PlayerTalkedToViolaAboutButcher_var"
+    },
+    {
+      "form": "1f7a3:Skyrim.esm",
+      "script": "ms11questscript",
+      "var": "::SentViolaToHjerim_var"
+    },
+    {
+      "form": "1f7a3:Skyrim.esm",
+      "script": "ms11questscript",
+      "var": "::TalkedToHelgird_var"
+    },
+    {
+      "form": "1f7a3:Skyrim.esm",
+      "script": "ms11questscript",
+      "var": "::USKPButcherFlyerSeen_var"
+    },
+    {
+      "form": "1f7a3:Skyrim.esm",
+      "script": "ms11questscript",
+      "var": "::USLEEPSoldAmulet_var"
+    },
+    {
+      "form": "1f7a3:Skyrim.esm",
+      "script": "ms11questscript",
+      "var": "::ViolaConversationShunt_var"
+    },
+    {
+      "form": "1fa52:Skyrim.esm",
+      "script": "CWResolution02Script",
+      "var": "::jarlWillSurrender_var"
+    },
+    {
+      "form": "1fa52:Skyrim.esm",
+      "script": "CWResolution02Script",
+      "var": "::questHookSaid_var"
+    },
+    {
+      "form": "20be7:Skyrim.esm",
+      "script": "TG00SceneScript",
+      "var": "::pTG00SPExtenderSceneStarter_var"
+    },
+    {
+      "form": "20be7:Skyrim.esm",
+      "script": "TG00SceneScript",
+      "var": "::pTG00SPSetupSceneStarter_var"
+    },
+    {
+      "form": "211d5:Skyrim.esm",
+      "script": "T02QuestScript",
+      "var": "::DinyaReadyToOffer_var"
+    },
+    {
+      "form": "211d5:Skyrim.esm",
+      "script": "T02QuestScript",
+      "var": "::FastredMoveToRiften_var"
+    },
+    {
+      "form": "211d5:Skyrim.esm",
+      "script": "T02QuestScript",
+      "var": "::GotPitchFromBoti_var"
+    },
+    {
+      "form": "211d5:Skyrim.esm",
+      "script": "T02QuestScript",
+      "var": "::GotPitchFromJofthor_var"
+    },
+    {
+      "form": "211d5:Skyrim.esm",
+      "script": "T02QuestScript",
+      "var": "::PlayerToldYngvarAboutCalcelmo_var"
+    },
+    {
+      "form": "211d5:Skyrim.esm",
+      "script": "T02QuestScript",
+      "var": "::TalkedToFaleen_var"
+    },
+    {
+      "form": "211d5:Skyrim.esm",
+      "script": "T02QuestScript",
+      "var": "::YngvarOfferedPoem_var"
+    },
+    {
+      "form": "212ff:Skyrim.esm",
+      "script": "defaultOnEnter",
+      "var": "::bAllTargetsInTrigger_var"
+    },
+    {
+      "form": "21382:Skyrim.esm",
+      "script": "RelationshipMarriageSpouseHouseScript",
+      "var": "::SpouseCurrentHome_var"
+    },
+    {
+      "form": "21382:Skyrim.esm",
+      "script": "RelationshipMarriageSpouseHouseScript",
+      "var": "::USKPStoreDialogueDelivered_var"
+    },
+    {
+      "form": "2154e:Skyrim.esm",
+      "script": "TG02QuestScript",
+      "var": "::pTG02AringothDone_var"
+    },
+    {
+      "form": "2154e:Skyrim.esm",
+      "script": "TG02QuestScript",
+      "var": "::pTG02BrynPathDone_var"
+    },
+    {
+      "form": "2154e:Skyrim.esm",
+      "script": "TG02QuestScript",
+      "var": "::pTG02Dia01_var"
+    },
+    {
+      "form": "2154e:Skyrim.esm",
+      "script": "TG02QuestScript",
+      "var": "::pTG02Dia02_var"
+    },
+    {
+      "form": "2154e:Skyrim.esm",
+      "script": "TG02QuestScript",
+      "var": "::pTG02Dia_var"
+    },
+    {
+      "form": "2154e:Skyrim.esm",
+      "script": "TG02QuestScript",
+      "var": "::pTG02Forcegreet_var"
+    },
+    {
+      "form": "2154e:Skyrim.esm",
+      "script": "TG02QuestScript",
+      "var": "::pTG02MavenDialogue_var"
+    },
+    {
+      "form": "2154e:Skyrim.esm",
+      "script": "TG02QuestScript",
+      "var": "::pTG02QuestFailure_var"
+    },
+    {
+      "form": "2154f:Skyrim.esm",
+      "script": "TG03QuestScript",
+      "var": "::pDia01_var"
+    },
+    {
+      "form": "2154f:Skyrim.esm",
+      "script": "TG03QuestScript",
+      "var": "::pDia02_var"
+    },
+    {
+      "form": "2154f:Skyrim.esm",
+      "script": "TG03QuestScript",
+      "var": "::pDia03_var"
+    },
+    {
+      "form": "2154f:Skyrim.esm",
+      "script": "TG03QuestScript",
+      "var": "::pTG03QuestFailure_var"
+    },
+    {
+      "form": "21550:Skyrim.esm",
+      "script": "TG04QuestScript",
+      "var": "::pDia_var"
+    },
+    {
+      "form": "21550:Skyrim.esm",
+      "script": "TG04QuestScript",
+      "var": "::pInfoTog_var"
+    },
+    {
+      "form": "21550:Skyrim.esm",
+      "script": "TG04QuestScript",
+      "var": "::pTG04QuestFailure_var"
+    },
+    {
+      "form": "21550:Skyrim.esm",
+      "script": "TG04QuestScript",
+      "var": "::pWineTog_var"
+    },
+    {
+      "form": "21551:Skyrim.esm",
+      "script": "TG05QuestScript",
+      "var": "::pDia01_var"
+    },
+    {
+      "form": "21551:Skyrim.esm",
+      "script": "TG05QuestScript",
+      "var": "::pDia02_var"
+    },
+    {
+      "form": "21551:Skyrim.esm",
+      "script": "TG05QuestScript",
+      "var": "::pDia03_var"
+    },
+    {
+      "form": "21551:Skyrim.esm",
+      "script": "TG05QuestScript",
+      "var": "::pTG05MercerMoved_var"
+    },
+    {
+      "form": "21553:Skyrim.esm",
+      "script": "TG07QuestScript",
+      "var": "::pTG07Dia_var"
+    },
+    {
+      "form": "21553:Skyrim.esm",
+      "script": "TG07QuestScript",
+      "var": "::pTG07KarliahFG01_var"
+    },
+    {
+      "form": "21553:Skyrim.esm",
+      "script": "TG07QuestScript",
+      "var": "::pTG07KarliahMoved_var"
+    },
+    {
+      "form": "21553:Skyrim.esm",
+      "script": "TG07QuestScript",
+      "var": "::pTG07MustSay01_var"
+    },
+    {
+      "form": "21553:Skyrim.esm",
+      "script": "TG07QuestScript",
+      "var": "::pTG07MustSay02_var"
+    },
+    {
+      "form": "21553:Skyrim.esm",
+      "script": "TG07QuestScript",
+      "var": "::pTG07MustSay03_var"
+    },
+    {
+      "form": "21553:Skyrim.esm",
+      "script": "TG07QuestScript",
+      "var": "::pTG07MustSayTotal_var"
+    },
+    {
+      "form": "21553:Skyrim.esm",
+      "script": "TG07QuestScript",
+      "var": "::pTG07ValdSpeechGate_var"
+    },
+    {
+      "form": "21554:Skyrim.esm",
+      "script": "TG08BQuestScript",
+      "var": "::pTG08BKarliahAccompany_var"
+    },
+    {
+      "form": "21555:Skyrim.esm",
+      "script": "TG09QuestScript",
+      "var": "::pTG09Cont01_var"
+    },
+    {
+      "form": "21555:Skyrim.esm",
+      "script": "TG09QuestScript",
+      "var": "::pTG09Cont02_var"
+    },
+    {
+      "form": "21555:Skyrim.esm",
+      "script": "TG09QuestScript",
+      "var": "::pTG09Cont03_var"
+    },
+    {
+      "form": "21555:Skyrim.esm",
+      "script": "TG09QuestScript",
+      "var": "::pTG09Cont04_var"
+    },
+    {
+      "form": "21556:Skyrim.esm",
+      "script": "TG00QuestScript",
+      "var": "::pTG00BrynPass_var"
+    },
+    {
+      "form": "21556:Skyrim.esm",
+      "script": "TG00QuestScript",
+      "var": "::pTG00Dialogue01_var"
+    },
+    {
+      "form": "21556:Skyrim.esm",
+      "script": "TG00QuestScript",
+      "var": "::pTG00GateGuardKilled_var"
+    },
+    {
+      "form": "21556:Skyrim.esm",
+      "script": "TG00QuestScript",
+      "var": "::pTG00HaveRing_var"
+    },
+    {
+      "form": "21556:Skyrim.esm",
+      "script": "TG00QuestScript",
+      "var": "::pTG00Killer_var"
+    },
+    {
+      "form": "21896:Skyrim.esm",
+      "script": "FreeformMorthalBQuestScript",
+      "var": "::RejectVar_var"
+    },
+    {
+      "form": "23a64:Skyrim.esm",
+      "script": "MS07Script",
+      "var": "::Guards_var"
+    },
+    {
+      "form": "23b6c:Skyrim.esm",
+      "script": "T01QuestScript",
+      "var": "::EnmonShouldFollow_var"
+    },
+    {
+      "form": "23b6c:Skyrim.esm",
+      "script": "T01QuestScript",
+      "var": "::HamalDefinedSybil_var"
+    },
+    {
+      "form": "23b6c:Skyrim.esm",
+      "script": "T01QuestScript",
+      "var": "::HamalShouldConfront_var"
+    },
+    {
+      "form": "23b6c:Skyrim.esm",
+      "script": "T01QuestScript",
+      "var": "::PlayerJustHadToKeepGoing_var"
+    },
+    {
+      "form": "23e60:Skyrim.esm",
+      "script": "CompanionsDialogueScript",
+      "var": "::PlayerAroundJorrvaskr_var"
+    },
+    {
+      "form": "24151:Skyrim.esm",
+      "script": "DarkSideContractDialogue",
+      "var": "::AgnisThreat_var"
+    },
+    {
+      "form": "24151:Skyrim.esm",
+      "script": "DarkSideContractDialogue",
+      "var": "::AnoriathThreat_var"
+    },
+    {
+      "form": "24151:Skyrim.esm",
+      "script": "DarkSideContractDialogue",
+      "var": "::BeitildThreat_var"
+    },
+    {
+      "form": "24151:Skyrim.esm",
+      "script": "DarkSideContractDialogue",
+      "var": "::DeekusThreat_var"
+    },
+    {
+      "form": "24151:Skyrim.esm",
+      "script": "DarkSideContractDialogue",
+      "var": "::EnnodiusThreat_var"
+    },
+    {
+      "form": "24151:Skyrim.esm",
+      "script": "DarkSideContractDialogue",
+      "var": "::HelvardThreat_var"
+    },
+    {
+      "form": "24151:Skyrim.esm",
+      "script": "DarkSideContractDialogue",
+      "var": "::HernThreat_var"
+    },
+    {
+      "form": "24151:Skyrim.esm",
+      "script": "DarkSideContractDialogue",
+      "var": "::LurbukThreat_var"
+    },
+    {
+      "form": "24151:Skyrim.esm",
+      "script": "DarkSideContractDialogue",
+      "var": "::MalurilThreat_var"
+    },
+    {
+      "form": "24151:Skyrim.esm",
+      "script": "DarkSideContractDialogue",
+      "var": "::MarandrujoThreat_var"
+    },
+    {
+      "form": "24151:Skyrim.esm",
+      "script": "DarkSideContractDialogue",
+      "var": "::NarfiThreat_var"
+    },
+    {
+      "form": "24151:Skyrim.esm",
+      "script": "DarkSideContractDialogue",
+      "var": "::SafiaThreat_var"
+    },
+    {
+      "form": "242af:Skyrim.esm",
+      "script": "DA16QuestScript",
+      "var": "::pDA16FirstSceneBreak_var"
+    },
+    {
+      "form": "242af:Skyrim.esm",
+      "script": "DA16QuestScript",
+      "var": "::pDA16IHaveTorpor_var"
+    },
+    {
+      "form": "242af:Skyrim.esm",
+      "script": "DA16QuestScript",
+      "var": "::pDADial02_var"
+    },
+    {
+      "form": "242ba:Skyrim.esm",
+      "script": "MQ105QuestScript",
+      "var": "::iSprintWordToUnlock_var"
+    },
+    {
+      "form": "242ba:Skyrim.esm",
+      "script": "MQ105QuestScript",
+      "var": "::sceneCount_var"
+    },
+    {
+      "form": "242ba:Skyrim.esm",
+      "script": "MQ105QuestScript",
+      "var": "::sprintTrialPlayerReady_var"
+    },
+    {
+      "form": "242ba:Skyrim.esm",
+      "script": "MQ105QuestScript",
+      "var": "bPushTrialGoodHit"
+    },
+    {
+      "form": "242ba:Skyrim.esm",
+      "script": "MQ105QuestScript",
+      "var": "bPushTrialWaiting"
+    },
+    {
+      "form": "242ba:Skyrim.esm",
+      "script": "MQ105QuestScript",
+      "var": "bPushTrialWeakHit"
+    },
+    {
+      "form": "2430e:Skyrim.esm",
+      "script": "DialogueWinterholdQuestScript",
+      "var": "::JarlCollapseInfo_var"
+    },
+    {
+      "form": "2430e:Skyrim.esm",
+      "script": "DialogueWinterholdQuestScript",
+      "var": "::JarlCrisisInfo_var"
+    },
+    {
+      "form": "2430e:Skyrim.esm",
+      "script": "DialogueWinterholdQuestScript",
+      "var": "::KorirInit_var"
+    },
+    {
+      "form": "2430e:Skyrim.esm",
+      "script": "DialogueWinterholdQuestScript",
+      "var": "::USSEPKidsSceneSetupDone_var"
+    },
+    {
+      "form": "2522f:Skyrim.esm",
+      "script": "CR05QuestScript",
+      "var": "::IsActive_var"
+    },
+    {
+      "form": "25231:Skyrim.esm",
+      "script": "CR04QuestScript",
+      "var": "::IsAccepted_var"
+    },
+    {
+      "form": "25231:Skyrim.esm",
+      "script": "CR04QuestScript",
+      "var": "::IsActive_var"
+    },
+    {
+      "form": "25251:Skyrim.esm",
+      "script": "CR08QuestScript",
+      "var": "::IsAccepted_var"
+    },
+    {
+      "form": "25f3e:Skyrim.esm",
+      "script": "MS14",
+      "var": "::StopHouseRumor_var"
+    },
+    {
+      "form": "2610a:Skyrim.esm",
+      "script": "MQ102QuestScript",
+      "var": "::FriendTravelChatter_var"
+    },
+    {
+      "form": "2610c:Skyrim.esm",
+      "script": "MQ104Script",
+      "var": "::dragonSceneLoop_var"
+    },
+    {
+      "form": "2694b:Skyrim.esm",
+      "script": "WIKill02Script",
+      "var": "::pGhostState_var"
+    },
+    {
+      "form": "26e4c:Skyrim.esm",
+      "script": "RiverwoodDryGoodsScene1Script",
+      "var": "::Sale_var"
+    },
+    {
+      "form": "270a4:Skyrim.esm",
+      "script": "DialogueWhiterunScript",
+      "var": "::pAmulet_var"
+    },
+    {
+      "form": "270a4:Skyrim.esm",
+      "script": "DialogueWhiterunScript",
+      "var": "::pBrenuinAle_var"
+    },
+    {
+      "form": "270a4:Skyrim.esm",
+      "script": "DialogueWhiterunScript",
+      "var": "::pEorlundCompanions_var"
+    },
+    {
+      "form": "270a4:Skyrim.esm",
+      "script": "DialogueWhiterunScript",
+      "var": "::pIrilethThreats_var"
+    },
+    {
+      "form": "270a4:Skyrim.esm",
+      "script": "DialogueWhiterunScript",
+      "var": "::pJonMikael_var"
+    },
+    {
+      "form": "270a4:Skyrim.esm",
+      "script": "DialogueWhiterunScript",
+      "var": "::pKidFight_var"
+    },
+    {
+      "form": "270a4:Skyrim.esm",
+      "script": "DialogueWhiterunScript",
+      "var": "::pOlavaReading_var"
+    },
+    {
+      "form": "270a4:Skyrim.esm",
+      "script": "DialogueWhiterunScript",
+      "var": "::pSoulGem_var"
+    },
+    {
+      "form": "270a4:Skyrim.esm",
+      "script": "DialogueWhiterunScript",
+      "var": "::pSword_var"
+    },
+    {
+      "form": "28923:Skyrim.esm",
+      "script": "TGRShellScript",
+      "var": "::pTGRBERun_var"
+    },
+    {
+      "form": "28923:Skyrim.esm",
+      "script": "TGRShellScript",
+      "var": "::pTGRCapCount_var"
+    },
+    {
+      "form": "28923:Skyrim.esm",
+      "script": "TGRShellScript",
+      "var": "::pTGRDelvinRunning_var"
+    },
+    {
+      "form": "28923:Skyrim.esm",
+      "script": "TGRShellScript",
+      "var": "::pTGRDURun_var"
+    },
+    {
+      "form": "28923:Skyrim.esm",
+      "script": "TGRShellScript",
+      "var": "::pTGRFirstCap_var"
+    },
+    {
+      "form": "28923:Skyrim.esm",
+      "script": "TGRShellScript",
+      "var": "::pTGRFORun_var"
+    },
+    {
+      "form": "28923:Skyrim.esm",
+      "script": "TGRShellScript",
+      "var": "::pTGRGFRun_var"
+    },
+    {
+      "form": "28923:Skyrim.esm",
+      "script": "TGRShellScript",
+      "var": "::pTGRHCRun_var"
+    },
+    {
+      "form": "28923:Skyrim.esm",
+      "script": "TGRShellScript",
+      "var": "::pTGRNTRun_var"
+    },
+    {
+      "form": "28923:Skyrim.esm",
+      "script": "TGRShellScript",
+      "var": "::pTGRSLRun_var"
+    },
+    {
+      "form": "28923:Skyrim.esm",
+      "script": "TGRShellScript",
+      "var": "::pTGRVexRunning_var"
+    },
+    {
+      "form": "28923:Skyrim.esm",
+      "script": "TGRShellScript",
+      "var": "::USKPBedlamJobsIntro_var"
+    },
+    {
+      "form": "28923:Skyrim.esm",
+      "script": "TGRShellScript",
+      "var": "::USKPBurglaryJobsIntro_var"
+    },
+    {
+      "form": "28923:Skyrim.esm",
+      "script": "TGRShellScript",
+      "var": "::USKPFishingJobsIntro_var"
+    },
+    {
+      "form": "28923:Skyrim.esm",
+      "script": "TGRShellScript",
+      "var": "::USKPHeistJobsIntro_var"
+    },
+    {
+      "form": "28923:Skyrim.esm",
+      "script": "TGRShellScript",
+      "var": "::USKPNumbersJobsIntro_var"
+    },
+    {
+      "form": "28923:Skyrim.esm",
+      "script": "TGRShellScript",
+      "var": "::USKPShillJobsIntro_var"
+    },
+    {
+      "form": "28923:Skyrim.esm",
+      "script": "TGRShellScript",
+      "var": "::USKPSolitudeTurnedIn_var"
+    },
+    {
+      "form": "28923:Skyrim.esm",
+      "script": "TGRShellScript",
+      "var": "::USKPSweepJobsIntro_var"
+    },
+    {
+      "form": "28923:Skyrim.esm",
+      "script": "TGRShellScript",
+      "var": "::USKPWhiterunTurnedIn_var"
+    },
+    {
+      "form": "28923:Skyrim.esm",
+      "script": "TGRShellScript",
+      "var": "::USKPWindhelmTurnedIn_var"
+    },
+    {
+      "form": "28a19:Skyrim.esm",
+      "script": "MGR11QuestScript",
+      "var": "::Intro_var"
+    },
+    {
+      "form": "28a19:Skyrim.esm",
+      "script": "MGR11QuestScript",
+      "var": "::MGR11Type_var"
+    },
+    {
+      "form": "28a55:Skyrim.esm",
+      "script": "MGRShellScript",
+      "var": "::MGR21FirstTime_var"
+    },
+    {
+      "form": "28a55:Skyrim.esm",
+      "script": "MGRShellScript",
+      "var": "::pMGR20Done_var"
+    },
+    {
+      "form": "2a49a:Skyrim.esm",
+      "script": "DA05QuestScript",
+      "var": "::MathiesToldStory_var"
+    },
+    {
+      "form": "2a49a:Skyrim.esm",
+      "script": "DA05QuestScript",
+      "var": "::PlayerSawFuneral_var"
+    },
+    {
+      "form": "2a49a:Skyrim.esm",
+      "script": "DA05QuestScript",
+      "var": "::SindingMentionedHircine_var"
+    },
+    {
+      "form": "2a49a:Skyrim.esm",
+      "script": "DA05QuestScript",
+      "var": "::SindingToldAboutWitches_var"
+    },
+    {
+      "form": "2a49a:Skyrim.esm",
+      "script": "DA05QuestScript",
+      "var": "::SindingToldStory_var"
+    },
+    {
+      "form": "2ac68:Skyrim.esm",
+      "script": "DA15Script",
+      "var": "::Start_var"
+    },
+    {
+      "form": "2b272:Skyrim.esm",
+      "script": "CWResolution01Script",
+      "var": "::questHookSaid_var"
+    },
+    {
+      "form": "2bf9c:Skyrim.esm",
+      "script": "MQ102QuestScript",
+      "var": "::FriendTravelChatter_var"
+    },
+    {
+      "form": "2c258:Skyrim.esm",
+      "script": "MS12QuestScript",
+      "var": "::GivenBrokenPhialToNurelion_var"
+    },
+    {
+      "form": "2c258:Skyrim.esm",
+      "script": "MS12QuestScript",
+      "var": "::HeardAboutPhial_var"
+    },
+    {
+      "form": "2c367:Skyrim.esm",
+      "script": "TG05SPQuestScript",
+      "var": "::pTG05SceneMover_var"
+    },
+    {
+      "form": "2d512:Skyrim.esm",
+      "script": "DA04QuestScript",
+      "var": "::BoxOpened_var"
+    },
+    {
+      "form": "2d512:Skyrim.esm",
+      "script": "DA04QuestScript",
+      "var": "::DefiedHermaeusMora_var"
+    },
+    {
+      "form": "2d512:Skyrim.esm",
+      "script": "DA04QuestScript",
+      "var": "::ReadCrazyBook_var"
+    },
+    {
+      "form": "2d512:Skyrim.esm",
+      "script": "DA04QuestScript",
+      "var": "::SeptimusMentionedBlackreach_var"
+    },
+    {
+      "form": "2d512:Skyrim.esm",
+      "script": "DA04QuestScript",
+      "var": "::SeptimusSentForPlayer_var"
+    },
+    {
+      "form": "2d512:Skyrim.esm",
+      "script": "DA04QuestScript",
+      "var": "::SeptimusStartAscension_var"
+    },
+    {
+      "form": "2d515:Skyrim.esm",
+      "script": "MQ204QuestScript",
+      "var": "::iFireWordToUnlock_var"
+    },
+    {
+      "form": "2e0ee:Skyrim.esm",
+      "script": "DialogueMorthalQuestScript",
+      "var": "::VisionInfo_var"
+    },
+    {
+      "form": "2e7af:Skyrim.esm",
+      "script": "DarkSanctuaryDialogueScript",
+      "var": "::ArnbjornFirstGreet_var"
+    },
+    {
+      "form": "2e7af:Skyrim.esm",
+      "script": "DarkSanctuaryDialogueScript",
+      "var": "::BabetteFirstGreet_var"
+    },
+    {
+      "form": "2e7af:Skyrim.esm",
+      "script": "DarkSanctuaryDialogueScript",
+      "var": "::FestusFirstGreet_var"
+    },
+    {
+      "form": "2e7af:Skyrim.esm",
+      "script": "DarkSanctuaryDialogueScript",
+      "var": "::GabriellaFirstGreet_var"
+    },
+    {
+      "form": "2e7af:Skyrim.esm",
+      "script": "DarkSanctuaryDialogueScript",
+      "var": "::VeezaraFirstGreet_var"
+    },
+    {
+      "form": "302c0:Skyrim.esm",
+      "script": "HeartwoodMillDialogueQuestScript",
+      "var": "::USKPHusbandMentioned_var"
+    },
+    {
+      "form": "32926:Skyrim.esm",
+      "script": "MQ106Script",
+      "var": "::dragonHitByShout_var"
+    },
+    {
+      "form": "3502e:Skyrim.esm",
+      "script": "DialogueWindhelmScript",
+      "var": "::DBScene_var"
+    },
+    {
+      "form": "35354:Skyrim.esm",
+      "script": "QF_dunForelhostQST_00035354",
+      "var": "::ValmirIsImp_var"
+    },
+    {
+      "form": "35d56:Skyrim.esm",
+      "script": "MQKillDragonScript",
+      "var": "::bIsAbsorbing_var"
+    },
+    {
+      "form": "35d5f:Skyrim.esm",
+      "script": "MQ201QuestScript",
+      "var": "::BrelasReleased_var"
+    },
+    {
+      "form": "35d5f:Skyrim.esm",
+      "script": "MQ201QuestScript",
+      "var": "::DelphineIntroAlduinAtHelgen_var"
+    },
+    {
+      "form": "35d5f:Skyrim.esm",
+      "script": "MQ201QuestScript",
+      "var": "::PartyDistractionDrunkSceneDone_var"
+    },
+    {
+      "form": "35d5f:Skyrim.esm",
+      "script": "MQ201QuestScript",
+      "var": "::PartyDistractionDrunkState_var"
+    },
+    {
+      "form": "35d5f:Skyrim.esm",
+      "script": "MQ201QuestScript",
+      "var": "::PartyDistractionState_var"
+    },
+    {
+      "form": "35d5f:Skyrim.esm",
+      "script": "MQ201QuestScript",
+      "var": "::PlayerInExitPartyTrigger_var"
+    },
+    {
+      "form": "35d5f:Skyrim.esm",
+      "script": "MQ201QuestScript",
+      "var": "::PlayerLiesAboutBrelas_var"
+    },
+    {
+      "form": "35d5f:Skyrim.esm",
+      "script": "MQ201QuestScript",
+      "var": "::PrisonerReleased_var"
+    },
+    {
+      "form": "3618f:Skyrim.esm",
+      "script": "DialogueWinterholdCollegeQuestScript",
+      "var": "::AncanoAdviceInfo_var"
+    },
+    {
+      "form": "3618f:Skyrim.esm",
+      "script": "DialogueWinterholdCollegeQuestScript",
+      "var": "::CollapseInfo_var"
+    },
+    {
+      "form": "3618f:Skyrim.esm",
+      "script": "DialogueWinterholdCollegeQuestScript",
+      "var": "::EnthirSell_var"
+    },
+    {
+      "form": "3618f:Skyrim.esm",
+      "script": "DialogueWinterholdCollegeQuestScript",
+      "var": "::FalionInfo_var"
+    },
+    {
+      "form": "3618f:Skyrim.esm",
+      "script": "DialogueWinterholdCollegeQuestScript",
+      "var": "::SavosIntro_var"
+    },
+    {
+      "form": "3618f:Skyrim.esm",
+      "script": "DialogueWinterholdCollegeQuestScript",
+      "var": "::ScrollDonated_var"
+    },
+    {
+      "form": "3618f:Skyrim.esm",
+      "script": "DialogueWinterholdCollegeQuestScript",
+      "var": "::TolfdirPostQuestFG_var"
+    },
+    {
+      "form": "36192:Skyrim.esm",
+      "script": "MQ203QuestScript",
+      "var": "::bEsbernEscortRatway_var"
+    },
+    {
+      "form": "36192:Skyrim.esm",
+      "script": "MQ203QuestScript",
+      "var": "::bMeetAtKarthspire_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia01_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia02_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia03_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia04_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia05_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia06_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia07_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia08_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia09_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia11_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia12_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia13_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia14_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia15_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia16_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia17_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia18_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia19_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia20_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia21_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia22_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia23_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pDia24_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pMeadCount_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::pMjollOpinion_var"
+    },
+    {
+      "form": "368d8:Skyrim.esm",
+      "script": "DialogueRiftenQuestScript",
+      "var": "::USLEEPToniliaGreetingDone_var"
+    },
+    {
+      "form": "37cc2:Skyrim.esm",
+      "script": "DialogueWhiterunArgueScript",
+      "var": "::SceneTrigger_var"
+    },
+    {
+      "form": "39645:Skyrim.esm",
+      "script": "MS13QuestScript",
+      "var": "::CamillaEscort_var"
+    },
+    {
+      "form": "39645:Skyrim.esm",
+      "script": "MS13QuestScript",
+      "var": "::SceneTriggers_var"
+    },
+    {
+      "form": "39b3b:Skyrim.esm",
+      "script": "dunBlindCliffQSTscript",
+      "var": "::gotReward_var"
+    },
+    {
+      "form": "3b681:Skyrim.esm",
+      "script": "DA06QuestScript",
+      "var": "::AtubReject_var"
+    },
+    {
+      "form": "3b681:Skyrim.esm",
+      "script": "DA06QuestScript",
+      "var": "::GiantDead100_var"
+    },
+    {
+      "form": "3b681:Skyrim.esm",
+      "script": "DA06QuestScript",
+      "var": "::GiantDead_var"
+    },
+    {
+      "form": "3b681:Skyrim.esm",
+      "script": "DA06QuestScript",
+      "var": "::GroveGhostAppear_var"
+    },
+    {
+      "form": "3b681:Skyrim.esm",
+      "script": "DA06QuestScript",
+      "var": "::OrcsKilled_var"
+    },
+    {
+      "form": "3b681:Skyrim.esm",
+      "script": "DA06QuestScript",
+      "var": "::Stage30AtubGreet_var"
+    },
+    {
+      "form": "3bcc4:Skyrim.esm",
+      "script": "CWMission03Script",
+      "var": "::objectiveCompleted_var"
+    },
+    {
+      "form": "3ceda:Skyrim.esm",
+      "script": "pDB10Script",
+      "var": "::NazirLakeGreet_var"
+    },
+    {
+      "form": "44c56:Skyrim.esm",
+      "script": "MQ301Script",
+      "var": "::DragonAttackStage_var"
+    },
+    {
+      "form": "45923:Skyrim.esm",
+      "script": "MQ302Script",
+      "var": "::bImperialCouncilBlocked_var"
+    },
+    {
+      "form": "45923:Skyrim.esm",
+      "script": "MQ302Script",
+      "var": "::bStormcloakCouncilBlocked_var"
+    },
+    {
+      "form": "45923:Skyrim.esm",
+      "script": "MQ302Script",
+      "var": "::CityToSwitch_var"
+    },
+    {
+      "form": "45923:Skyrim.esm",
+      "script": "MQ302Script",
+      "var": "::ImperialMajorHoldID_var"
+    },
+    {
+      "form": "45923:Skyrim.esm",
+      "script": "MQ302Script",
+      "var": "::ImperialMinorHold2ID_var"
+    },
+    {
+      "form": "45923:Skyrim.esm",
+      "script": "MQ302Script",
+      "var": "::ImperialMinorHoldID_var"
+    },
+    {
+      "form": "45923:Skyrim.esm",
+      "script": "MQ302Script",
+      "var": "::KickOutFlag_var"
+    },
+    {
+      "form": "45923:Skyrim.esm",
+      "script": "MQ302Script",
+      "var": "::NegotiationDelta_var"
+    },
+    {
+      "form": "45923:Skyrim.esm",
+      "script": "MQ302Script",
+      "var": "::SideFavored_var"
+    },
+    {
+      "form": "45923:Skyrim.esm",
+      "script": "MQ302Script",
+      "var": "::SonsMajorHoldID_var"
+    },
+    {
+      "form": "45923:Skyrim.esm",
+      "script": "MQ302Script",
+      "var": "::SonsMinorHold2ID_var"
+    },
+    {
+      "form": "45923:Skyrim.esm",
+      "script": "MQ302Script",
+      "var": "::SonsMinorHoldID_var"
+    },
+    {
+      "form": "46ef2:Skyrim.esm",
+      "script": "MQ305Script",
+      "var": "::LoopingDialogueCount_var"
+    },
+    {
+      "form": "46ef2:Skyrim.esm",
+      "script": "MQ305Script",
+      "var": "::MistClearCount_var"
+    },
+    {
+      "form": "4a37b:Skyrim.esm",
+      "script": "DA08QuestScript",
+      "var": "::PlayerGotRumor_var"
+    },
+    {
+      "form": "4b2d9:Skyrim.esm",
+      "script": "companionshousekeepingscript",
+      "var": "::AelaIsObserver_var"
+    },
+    {
+      "form": "4b2d9:Skyrim.esm",
+      "script": "companionshousekeepingscript",
+      "var": "::AelaShouldForceGreet_var"
+    },
+    {
+      "form": "4b2d9:Skyrim.esm",
+      "script": "companionshousekeepingscript",
+      "var": "::DoneReconQuestForAela_var"
+    },
+    {
+      "form": "4b2d9:Skyrim.esm",
+      "script": "companionshousekeepingscript",
+      "var": "::EorlundToldAboutSkyforge_var"
+    },
+    {
+      "form": "4b2d9:Skyrim.esm",
+      "script": "companionshousekeepingscript",
+      "var": "::FarkasIsObserver_var"
+    },
+    {
+      "form": "4b2d9:Skyrim.esm",
+      "script": "companionshousekeepingscript",
+      "var": "::FarkasSceneGo_var"
+    },
+    {
+      "form": "4b2d9:Skyrim.esm",
+      "script": "companionshousekeepingscript",
+      "var": "::GotWeaponReward_var"
+    },
+    {
+      "form": "4b2d9:Skyrim.esm",
+      "script": "companionshousekeepingscript",
+      "var": "::PlayerHasBeastBlood_var"
+    },
+    {
+      "form": "4b2d9:Skyrim.esm",
+      "script": "companionshousekeepingscript",
+      "var": "::PlayerHelpedCompanionsAtGiant_var"
+    },
+    {
+      "form": "4b2d9:Skyrim.esm",
+      "script": "companionshousekeepingscript",
+      "var": "::PlayerMetCompanionsAtGiant_var"
+    },
+    {
+      "form": "4b2d9:Skyrim.esm",
+      "script": "companionshousekeepingscript",
+      "var": "::PlayerWalkedAwayDuringKVScene_var"
+    },
+    {
+      "form": "4b2d9:Skyrim.esm",
+      "script": "companionshousekeepingscript",
+      "var": "::PlayerWalkedAwayDuringSAScene_var"
+    },
+    {
+      "form": "4b2d9:Skyrim.esm",
+      "script": "companionshousekeepingscript",
+      "var": "::RadiantQuestAccepted_var"
+    },
+    {
+      "form": "4b2d9:Skyrim.esm",
+      "script": "companionshousekeepingscript",
+      "var": "::RadiantQuestFinished_var"
+    },
+    {
+      "form": "4b2d9:Skyrim.esm",
+      "script": "companionshousekeepingscript",
+      "var": "::StoryQuestIsRunning_var"
+    },
+    {
+      "form": "4b2d9:Skyrim.esm",
+      "script": "companionshousekeepingscript",
+      "var": "::TotemsFound_var"
+    },
+    {
+      "form": "4b2d9:Skyrim.esm",
+      "script": "companionshousekeepingscript",
+      "var": "::USKPFarkasIntroDone_var"
+    },
+    {
+      "form": "4d8d6:Skyrim.esm",
+      "script": "DA02Script",
+      "var": "::ReasonGiven_var"
+    },
+    {
+      "form": "4d8d6:Skyrim.esm",
+      "script": "DA02Script",
+      "var": "::stage_var"
+    },
+    {
+      "form": "4d8d6:Skyrim.esm",
+      "script": "DA02Script",
+      "var": "::warnedChampion_var"
+    },
+    {
+      "form": "4e4e1:Skyrim.esm",
+      "script": "DA09Script",
+      "var": "::GemSceneStage_var"
+    },
+    {
+      "form": "4e4e1:Skyrim.esm",
+      "script": "DA09Script",
+      "var": "::QuestHook_var"
+    },
+    {
+      "form": "4f8bf:Skyrim.esm",
+      "script": "CWAttackCityScript",
+      "var": "::jarlHasSurrendered_var"
+    },
+    {
+      "form": "4f8bf:Skyrim.esm",
+      "script": "CWAttackCityScript",
+      "var": "::jarlWillSurrender_var"
+    },
+    {
+      "form": "4fa24:Skyrim.esm",
+      "script": "defaultOnEnter",
+      "var": "::bAllTargetsInTrigger_var"
+    },
+    {
+      "form": "504f0:Skyrim.esm",
+      "script": "CWMission07Script",
+      "var": "::Persuaded_var"
+    },
+    {
+      "form": "50785:Skyrim.esm",
+      "script": "MG05WinterholdUpdateTriggerScript",
+      "var": "::BridgeWarning_var"
+    },
+    {
+      "form": "50faf:Skyrim.esm",
+      "script": "dunKarthspirePuzzleMaster",
+      "var": "::pillarAState_var"
+    },
+    {
+      "form": "50faf:Skyrim.esm",
+      "script": "dunKarthspirePuzzleMaster",
+      "var": "::pillarBState_var"
+    },
+    {
+      "form": "50faf:Skyrim.esm",
+      "script": "dunKarthspirePuzzleMaster",
+      "var": "::pillarCState_var"
+    },
+    {
+      "form": "50faf:Skyrim.esm",
+      "script": "dunKarthspirePuzzleMaster",
+      "var": "::pillarSolved_var"
+    },
+    {
+      "form": "5119c:Skyrim.esm",
+      "script": "dunKarthspirePuzzleMaster",
+      "var": "::plateSolved_var"
+    },
+    {
+      "form": "5119c:Skyrim.esm",
+      "script": "dunKarthspirePuzzleMaster",
+      "var": "::plateTriggered_var"
+    },
+    {
+      "form": "51417:Skyrim.esm",
+      "script": "DBNPCDialogueScript",
+      "var": "::HadringTalk_var"
+    },
+    {
+      "form": "53511:Skyrim.esm",
+      "script": "MS05QuestScript",
+      "var": "::Patronage_var"
+    },
+    {
+      "form": "53511:Skyrim.esm",
+      "script": "MS05QuestScript",
+      "var": "::Verse2Choice_var"
+    },
+    {
+      "form": "53511:Skyrim.esm",
+      "script": "MS05QuestScript",
+      "var": "::Verse4Choice_var"
+    },
+    {
+      "form": "55bfd:Skyrim.esm",
+      "script": "MS08ArgueQuestScript",
+      "var": "::SceneUpdate_var"
+    },
+    {
+      "form": "57f99:Skyrim.esm",
+      "script": "TG08AQuestScript",
+      "var": "::pTG08ADia_var"
+    },
+    {
+      "form": "57f99:Skyrim.esm",
+      "script": "TG08AQuestScript",
+      "var": "::pTG08ADLG01_var"
+    },
+    {
+      "form": "57f99:Skyrim.esm",
+      "script": "TG08AQuestScript",
+      "var": "::pTG08AMasterEquip_var"
+    },
+    {
+      "form": "63b57:Skyrim.esm",
+      "script": "MQ201PartyScript",
+      "var": "::OrthusIntroducedVittoria_var"
+    },
+    {
+      "form": "64958:Skyrim.esm",
+      "script": "FreeformStonehillsAQuestScript",
+      "var": "::Reject_var"
+    },
+    {
+      "form": "649fc:Skyrim.esm",
+      "script": "DRMSQuestScript",
+      "var": "::pDialogue01_var"
+    },
+    {
+      "form": "649fc:Skyrim.esm",
+      "script": "DRMSQuestScript",
+      "var": "::pDirge_var"
+    },
+    {
+      "form": "649fc:Skyrim.esm",
+      "script": "DRMSQuestScript",
+      "var": "::pGo_var"
+    },
+    {
+      "form": "64ea8:Skyrim.esm",
+      "script": "FFWinterholdCQuestScript",
+      "var": "::QuestInit_var"
+    },
+    {
+      "form": "64ea8:Skyrim.esm",
+      "script": "FFWinterholdCQuestScript",
+      "var": "::QuestRejected_var"
+    },
+    {
+      "form": "6531d:Skyrim.esm",
+      "script": "FreeformWinterholdCFinQuestScript",
+      "var": "::RanmirGone_var"
+    },
+    {
+      "form": "65bdf:Skyrim.esm",
+      "script": "FFRiftenThaneQuestScript",
+      "var": "::pFFDia_var"
+    },
+    {
+      "form": "65bdf:Skyrim.esm",
+      "script": "FFRiftenThaneQuestScript",
+      "var": "::pFFRiftenHouse_var"
+    },
+    {
+      "form": "681d4:Skyrim.esm",
+      "script": "FreeformFrostRiverQuestScript",
+      "var": "::DestinationVar_var"
+    },
+    {
+      "form": "6a08d:Skyrim.esm",
+      "script": "MGRArniel02Script",
+      "var": "::EnthirIntro_var"
+    },
+    {
+      "form": "6a08d:Skyrim.esm",
+      "script": "MGRArniel02Script",
+      "var": "::QuestTrigger_var"
+    },
+    {
+      "form": "6a097:Skyrim.esm",
+      "script": "MGRArniel03Script",
+      "var": "::ArnielStep_var"
+    },
+    {
+      "form": "6a119:Skyrim.esm",
+      "script": "MGRArniel04Script",
+      "var": "::ArnielStage20Step_var"
+    },
+    {
+      "form": "6a119:Skyrim.esm",
+      "script": "MGRArniel04Script",
+      "var": "::EnthirStep_var"
+    },
+    {
+      "form": "6bc33:Skyrim.esm",
+      "script": "MGRAppOnmund1QuestScript",
+      "var": "::EnthirInfo_var"
+    },
+    {
+      "form": "6bc33:Skyrim.esm",
+      "script": "MGRAppOnmund1QuestScript",
+      "var": "::HelpAsked_var"
+    },
+    {
+      "form": "6c0ea:Skyrim.esm",
+      "script": "MS05KingOlafsFestivalScript",
+      "var": "::Pie_var"
+    },
+    {
+      "form": "6c0ea:Skyrim.esm",
+      "script": "MS05KingOlafsFestivalScript",
+      "var": "::Wine_var"
+    },
+    {
+      "form": "6cd54:Skyrim.esm",
+      "script": "dunIronBindSCRIPT",
+      "var": "::BeemJaDead_var"
+    },
+    {
+      "form": "6d1e1:Skyrim.esm",
+      "script": "WISabotage",
+      "var": "::ResourceType_var"
+    },
+    {
+      "form": "6e028:Skyrim.esm",
+      "script": "WIChangeLocation03Script",
+      "var": "::HitByNonPlayer_var"
+    },
+    {
+      "form": "6e028:Skyrim.esm",
+      "script": "WIChangeLocation03Script",
+      "var": "::HitByNonSpell_var"
+    },
+    {
+      "form": "6e241:Skyrim.esm",
+      "script": "defaultOnEnter",
+      "var": "::bAllTargetsInTrigger_var"
+    },
+    {
+      "form": "6e803:Skyrim.esm",
+      "script": "C01QuestScript",
+      "var": "::DogsOutOfTheBag_var"
+    },
+    {
+      "form": "6e803:Skyrim.esm",
+      "script": "C01QuestScript",
+      "var": "::ObserverDismissed_var"
+    },
+    {
+      "form": "6e803:Skyrim.esm",
+      "script": "C01QuestScript",
+      "var": "::ObserverReadyForReveal_var"
+    },
+    {
+      "form": "6e803:Skyrim.esm",
+      "script": "C01QuestScript",
+      "var": "::SkjorGaveLowdown_var"
+    },
+    {
+      "form": "6e804:Skyrim.esm",
+      "script": "C02QuestScript",
+      "var": "::PlayerEnteredCeremonyRoom_var"
+    },
+    {
+      "form": "6e804:Skyrim.esm",
+      "script": "C02QuestScript",
+      "var": "::PlayerTalkedToQuestgiver_var"
+    },
+    {
+      "form": "6f211:Skyrim.esm",
+      "script": "WIChangeLocation04Script",
+      "var": "::CountHit_var"
+    },
+    {
+      "form": "6f9a5:Skyrim.esm",
+      "script": "DBEvictionQuestScript",
+      "var": "::DBEvicted_var"
+    },
+    {
+      "form": "74793:Skyrim.esm",
+      "script": "RelationshipMarriageQuestScript",
+      "var": "::WeddingSet_var"
+    },
+    {
+      "form": "74a55:Skyrim.esm",
+      "script": "BardSongsScript",
+      "var": "InstrumentalSong"
+    },
+    {
+      "form": "74a55:Skyrim.esm",
+      "script": "BardSongsScript",
+      "var": "LocationOwner"
+    },
+    {
+      "form": "750ba:Skyrim.esm",
+      "script": "DialogueFollowerScript",
+      "var": "::USKPMjollInWindhelm_var"
+    },
+    {
+      "form": "753ca:Skyrim.esm",
+      "script": "WEScript",
+      "var": "::SceneStage_var"
+    },
+    {
+      "form": "76b4a:Skyrim.esm",
+      "script": "DarkwaterDerkeethusRescueScript",
+      "var": "::DerkeethusShouldForceGreet_var"
+    },
+    {
+      "form": "799df:Skyrim.esm",
+      "script": "TGTQ01QuestScript",
+      "var": "::pTGTQ01RhorlakDone_var"
+    },
+    {
+      "form": "799df:Skyrim.esm",
+      "script": "TGTQ01QuestScript",
+      "var": "::pTGTQ01RhorlakSolved_var"
+    },
+    {
+      "form": "799e0:Skyrim.esm",
+      "script": "TGTQ02QuestScript",
+      "var": "::pTGTQ02Planted_var"
+    },
+    {
+      "form": "84abd:Skyrim.esm",
+      "script": "TG02BQuestScript",
+      "var": "::pTG02BDiaDelvin_var"
+    },
+    {
+      "form": "84abd:Skyrim.esm",
+      "script": "TG02BQuestScript",
+      "var": "::pTG02BDiaVex_var"
+    },
+    {
+      "form": "85d40:Skyrim.esm",
+      "script": "FFRiften20QuestScript",
+      "var": "::pFFR20Dia_var"
+    },
+    {
+      "form": "87ba2:Skyrim.esm",
+      "script": "DarkBrotherhoodSanctuaryRepairScript",
+      "var": "::RefitChoice1_var"
+    },
+    {
+      "form": "87ba2:Skyrim.esm",
+      "script": "DarkBrotherhoodSanctuaryRepairScript",
+      "var": "::RefitChoice2_var"
+    },
+    {
+      "form": "87ba2:Skyrim.esm",
+      "script": "DarkBrotherhoodSanctuaryRepairScript",
+      "var": "::RefitChoice3_var"
+    },
+    {
+      "form": "87ba2:Skyrim.esm",
+      "script": "DarkBrotherhoodSanctuaryRepairScript",
+      "var": "::RefitChoice4_var"
+    },
+    {
+      "form": "87ba2:Skyrim.esm",
+      "script": "DarkBrotherhoodSanctuaryRepairScript",
+      "var": "::RefitChoice5_var"
+    },
+    {
+      "form": "87ba2:Skyrim.esm",
+      "script": "DarkBrotherhoodSanctuaryRepairScript",
+      "var": "::RefitFirst_var"
+    },
+    {
+      "form": "87ba2:Skyrim.esm",
+      "script": "DarkBrotherhoodSanctuaryRepairScript",
+      "var": "::RefitTotal_var"
+    },
+    {
+      "form": "87e24:Skyrim.esm",
+      "script": "FavorJarlsMakeFriendsScript",
+      "var": "::EastmarchImpGetOutofJail_var"
+    },
+    {
+      "form": "87e24:Skyrim.esm",
+      "script": "FavorJarlsMakeFriendsScript",
+      "var": "::EastmarchSonsGetOutofJail_var"
+    },
+    {
+      "form": "87e24:Skyrim.esm",
+      "script": "FavorJarlsMakeFriendsScript",
+      "var": "::FalkreathImpGetOutofJail_var"
+    },
+    {
+      "form": "87e24:Skyrim.esm",
+      "script": "FavorJarlsMakeFriendsScript",
+      "var": "::FalkreathSonsGetOutofJail_var"
+    },
+    {
+      "form": "87e24:Skyrim.esm",
+      "script": "FavorJarlsMakeFriendsScript",
+      "var": "::HaafingarImpGetOutofJail_var"
+    },
+    {
+      "form": "87e24:Skyrim.esm",
+      "script": "FavorJarlsMakeFriendsScript",
+      "var": "::HaafingarSonsGetOutofJail_var"
+    },
+    {
+      "form": "87e24:Skyrim.esm",
+      "script": "FavorJarlsMakeFriendsScript",
+      "var": "::HjaalmarchImpGetOutofJail_var"
+    },
+    {
+      "form": "87e24:Skyrim.esm",
+      "script": "FavorJarlsMakeFriendsScript",
+      "var": "::HjaalmarchSonsGetOutofJail_var"
+    },
+    {
+      "form": "87e24:Skyrim.esm",
+      "script": "FavorJarlsMakeFriendsScript",
+      "var": "::PaleImpGetOutofJail_var"
+    },
+    {
+      "form": "87e24:Skyrim.esm",
+      "script": "FavorJarlsMakeFriendsScript",
+      "var": "::PaleSonsGetOutofJail_var"
+    },
+    {
+      "form": "87e24:Skyrim.esm",
+      "script": "FavorJarlsMakeFriendsScript",
+      "var": "::ReachImpGetOutofJail_var"
+    },
+    {
+      "form": "87e24:Skyrim.esm",
+      "script": "FavorJarlsMakeFriendsScript",
+      "var": "::ReachSonsGetOutofJail_var"
+    },
+    {
+      "form": "87e24:Skyrim.esm",
+      "script": "FavorJarlsMakeFriendsScript",
+      "var": "::RiftImpGetoutofJail_var"
+    },
+    {
+      "form": "87e24:Skyrim.esm",
+      "script": "FavorJarlsMakeFriendsScript",
+      "var": "::RiftSonsGetOutofJail_var"
+    },
+    {
+      "form": "87e24:Skyrim.esm",
+      "script": "FavorJarlsMakeFriendsScript",
+      "var": "::WhiterunImpGetOutofJail_var"
+    },
+    {
+      "form": "87e24:Skyrim.esm",
+      "script": "FavorJarlsMakeFriendsScript",
+      "var": "::WhiterunSonsGetOutofJail_var"
+    },
+    {
+      "form": "87e24:Skyrim.esm",
+      "script": "FavorJarlsMakeFriendsScript",
+      "var": "::WinterholdImpGetOutofJail_var"
+    },
+    {
+      "form": "87e24:Skyrim.esm",
+      "script": "FavorJarlsMakeFriendsScript",
+      "var": "::WinterholdSonsGetOutofJail_var"
+    },
+    {
+      "form": "8f18b:Skyrim.esm",
+      "script": "MG06GavrosSceneTriggerScript",
+      "var": "::GavrosSceneUpdate_var"
+    },
+    {
+      "form": "90a05:Skyrim.esm",
+      "script": "default2StateActivator",
+      "var": "::isOpen_var"
+    },
+    {
+      "form": "958b3:Skyrim.esm",
+      "script": "MGRJzargoSpell01QuestScript",
+      "var": "::HelpAsked_var"
+    },
+    {
+      "form": "99f27:Skyrim.esm",
+      "script": "MGRitual03QuestScript",
+      "var": "::DremoraFlag_var"
+    },
+    {
+      "form": "99f27:Skyrim.esm",
+      "script": "MGRitual03QuestScript",
+      "var": "::SceneDone_var"
+    },
+    {
+      "form": "a0f43:Skyrim.esm",
+      "script": "WIAddItem07Script",
+      "var": "::ItemCount_var"
+    },
+    {
+      "form": "a3ebc:Skyrim.esm",
+      "script": "C00VilkasTrainingScript",
+      "var": "::VilkasShouldForceGreet_var"
+    },
+    {
+      "form": "a7b33:Skyrim.esm",
+      "script": "HousePurchaseScript",
+      "var": "::MarkarthHouseVar_var"
+    },
+    {
+      "form": "a7b33:Skyrim.esm",
+      "script": "HousePurchaseScript",
+      "var": "::RiftenHouseVar_var"
+    },
+    {
+      "form": "a7b33:Skyrim.esm",
+      "script": "HousePurchaseScript",
+      "var": "::SolitudeHouseVar_var"
+    },
+    {
+      "form": "a7b33:Skyrim.esm",
+      "script": "HousePurchaseScript",
+      "var": "::WhiterunHouseVar_var"
+    },
+    {
+      "form": "a7b33:Skyrim.esm",
+      "script": "HousePurchaseScript",
+      "var": "::WindhelmHouseVar_var"
+    },
+    {
+      "form": "aa0b3:Skyrim.esm",
+      "script": "RDSQuestScript",
+      "var": "::pGo_var"
+    },
+    {
+      "form": "ae004:Skyrim.esm",
+      "script": "WIGamesTagScript",
+      "var": "::IsPlayerInvolved_var"
+    },
+    {
+      "form": "b03a2:Skyrim.esm",
+      "script": "TGBanQuestScript",
+      "var": "::pTGBanFirstTime_var"
+    },
+    {
+      "form": "b0f5b:Skyrim.esm",
+      "script": "QF_dunLostValleyRedoubtQST_000B0F5B",
+      "var": "::HagravensAttacked_var"
+    },
+    {
+      "form": "b35af:Skyrim.esm",
+      "script": "default2StateActivator",
+      "var": "::isOpen_var"
+    },
+    {
+      "form": "b3a3f:Skyrim.esm",
+      "script": "defaultOnEnter",
+      "var": "::bAllTargetsInTrigger_var"
+    },
+    {
+      "form": "b627d:Skyrim.esm",
+      "script": "C06PostQuestScript",
+      "var": "::AelaShouldFG_var"
+    },
+    {
+      "form": "bc0bd:Skyrim.esm",
+      "script": "C00JorrvaskrFightSceneScript",
+      "var": "::Clockwise_var"
+    },
+    {
+      "form": "bc0bd:Skyrim.esm",
+      "script": "C00JorrvaskrFightSceneScript",
+      "var": "::CrowdSceneSetup_var"
+    },
+    {
+      "form": "bc0bd:Skyrim.esm",
+      "script": "C00JorrvaskrFightSceneScript",
+      "var": "::EndVolley_var"
+    },
+    {
+      "form": "bc0bd:Skyrim.esm",
+      "script": "C00JorrvaskrFightSceneScript",
+      "var": "::FightOngoing_var"
+    },
+    {
+      "form": "bc0bd:Skyrim.esm",
+      "script": "C00JorrvaskrFightSceneScript",
+      "var": "::StartPhase_var"
+    },
+    {
+      "form": "bd753:Skyrim.esm",
+      "script": "QF_WEDL12_000BD753",
+      "var": "::MapMarkerAdded_var"
+    },
+    {
+      "form": "c0416:Skyrim.esm",
+      "script": "MGRAppBrelyna01QuestScript",
+      "var": "::HelpAsked_var"
+    },
+    {
+      "form": "c0416:Skyrim.esm",
+      "script": "MGRAppBrelyna01QuestScript",
+      "var": "::Spell2Cast_var"
+    },
+    {
+      "form": "c0416:Skyrim.esm",
+      "script": "MGRAppBrelyna01QuestScript",
+      "var": "::SpellCast_var"
+    },
+    {
+      "form": "c19a8:Skyrim.esm",
+      "script": "RDSQuestScript",
+      "var": "::pGo_var"
+    },
+    {
+      "form": "c97d9:Skyrim.esm",
+      "script": "C00GiantAttackScript",
+      "var": "::PlayerAttacked_var"
+    },
+    {
+      "form": "c9ba0:Skyrim.esm",
+      "script": "NN01QuestScript",
+      "var": "::pNNTold01_var"
+    },
+    {
+      "form": "cab3c:Skyrim.esm",
+      "script": "dunArcherQuestScript",
+      "var": "::FamilyStory_var"
+    },
+    {
+      "form": "cab3c:Skyrim.esm",
+      "script": "dunArcherQuestScript",
+      "var": "::feedbackFlag_var"
+    },
+    {
+      "form": "cab3c:Skyrim.esm",
+      "script": "dunArcherQuestScript",
+      "var": "::playerChallengeComplete01_var"
+    },
+    {
+      "form": "cab3c:Skyrim.esm",
+      "script": "dunArcherQuestScript",
+      "var": "::PlayerTookBow_var"
+    },
+    {
+      "form": "cc794:Skyrim.esm",
+      "script": "T02PostQuestScript",
+      "var": "::FastredMoveToRiften_var"
+    },
+    {
+      "form": "cd987:Skyrim.esm",
+      "script": "MGRitual04QuestScript",
+      "var": "::Blocker_var"
+    },
+    {
+      "form": "cd987:Skyrim.esm",
+      "script": "MGRitual04QuestScript",
+      "var": "::testinfo_var"
+    },
+    {
+      "form": "d0593:Skyrim.esm",
+      "script": "MQ101DragonAttackQuestScript",
+      "var": "::AlduinSmashDone_var"
+    },
+    {
+      "form": "d0755:Skyrim.esm",
+      "script": "MGRitual05QuestScript",
+      "var": "::Reject_var"
+    },
+    {
+      "form": "d1444:Skyrim.esm",
+      "script": "CWFinaleScript",
+      "var": "::ExecutePrompt_var"
+    },
+    {
+      "form": "d3c5f:Skyrim.esm",
+      "script": "CW00AScript",
+      "var": "::PlayerBravado_var"
+    },
+    {
+      "form": "d5165:Skyrim.esm",
+      "script": "CWMapTableSceneScript",
+      "var": "::ScenePhase_var"
+    },
+    {
+      "form": "d5f0a:Skyrim.esm",
+      "script": "CWMapTableSceneScript",
+      "var": "::ScenePhase_var"
+    },
+    {
+      "form": "db88c:Skyrim.esm",
+      "script": "MQ104GrabTrigger",
+      "var": "::bAllTargetsInTrigger_var"
+    },
+    {
+      "form": "dd5fa:Skyrim.esm",
+      "script": "RDSQuestScript",
+      "var": "::pGo_var"
+    },
+    {
+      "form": "e0e0c:Skyrim.esm",
+      "script": "MGR22QuestScript",
+      "var": "::RewardState_var"
+    },
+    {
+      "form": "e1782:Skyrim.esm",
+      "script": "TG09PostQuestScript",
+      "var": "::pTG09PostBrynFG01_var"
+    },
+    {
+      "form": "e1a9d:Skyrim.esm",
+      "script": "dunSleepingTreeCampQSTScript",
+      "var": "::BuyerApproached_var"
+    },
+    {
+      "form": "e1a9d:Skyrim.esm",
+      "script": "dunSleepingTreeCampQSTScript",
+      "var": "::NoteObtained_var"
+    },
+    {
+      "form": "e1b36:Skyrim.esm",
+      "script": "CWMapTableSceneScript",
+      "var": "::ScenePhase_var"
+    },
+    {
+      "form": "e1b5a:Skyrim.esm",
+      "script": "CW00BScript",
+      "var": "::PlayerBravado_var"
+    },
+    {
+      "form": "e2d3a:Skyrim.esm",
+      "script": "CWMapTableSceneScript",
+      "var": "::ScenePhase_var"
+    },
+    {
+      "form": "e38c9:Skyrim.esm",
+      "script": "FreeformSkyHavenTempleAScript",
+      "var": "::BladesCount_var"
+    },
+    {
+      "form": "eafd5:Skyrim.esm",
+      "script": "PlayerVampireQuestScript",
+      "var": "::VampireStatus_var"
+    },
+    {
+      "form": "2850:Dawnguard.esm",
+      "script": "DLC1VQ05QuestScript",
+      "var": "::pDLC1VQ05SC_var"
+    },
+    {
+      "form": "2850:Dawnguard.esm",
+      "script": "DLC1VQ05QuestScript",
+      "var": "::pDLC1VQ05Speech01_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::BelievesPlayerIsMarried_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::CanBeDismissed_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::CanFollow_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::CutOffCureDiscussion_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::DTR_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::HadMarriageTalk_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::HappyHomeLife_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::IsDismissed_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::IsFollowing_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::IsWaiting_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::IsWillingToWait_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::LockedIn_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::MentionedLoneliness_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::PlayerInsultedFamily_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::PlayerLikedParents_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::PlayerOrphan_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::PlayerTalkedAboutParents_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::QuestLineCompleted_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::SpouseIsMale_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::TalkedAboutKillingHarkon_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::TalkedAboutKillingHarkonForReal_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::TalkedPostQuest_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::ToldPlayerSheDidntWantCure_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::TurnOffComeWithMe_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::UnhappyHomeLife_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "::WillingToTradeItemsWithPlayer_var"
+    },
+    {
+      "form": "2b6e:Dawnguard.esm",
+      "script": "DLC1_NPCMentalModelScript",
+      "var": "__axisSeriousToPlayful"
+    },
+    {
+      "form": "4bc4:Dawnguard.esm",
+      "script": "DLC1defaultDetectPresenceTriggerScript",
+      "var": "::PresenceDetected_var"
+    },
+    {
+      "form": "4bd6:Dawnguard.esm",
+      "script": "DLC1defaultDetectPresenceTriggerScript",
+      "var": "::PresenceDetected_var"
+    },
+    {
+      "form": "4c1c:Dawnguard.esm",
+      "script": "dlc1radiantscript",
+      "var": "::PlayerHasTroll_var"
+    },
+    {
+      "form": "4e24:Dawnguard.esm",
+      "script": "DLC1HunterBaseIntroQuestScript",
+      "var": "::BearDead_var"
+    },
+    {
+      "form": "4e24:Dawnguard.esm",
+      "script": "DLC1HunterBaseIntroQuestScript",
+      "var": "::GyroGiven_var"
+    },
+    {
+      "form": "4e24:Dawnguard.esm",
+      "script": "DLC1HunterBaseIntroQuestScript",
+      "var": "::IsranEndSceneCure_var"
+    },
+    {
+      "form": "4e24:Dawnguard.esm",
+      "script": "DLC1HunterBaseIntroQuestScript",
+      "var": "::IsranIntroDone_var"
+    },
+    {
+      "form": "4e24:Dawnguard.esm",
+      "script": "DLC1HunterBaseIntroQuestScript",
+      "var": "::SorineInfo_var"
+    },
+    {
+      "form": "4e24:Dawnguard.esm",
+      "script": "DLC1HunterBaseIntroQuestScript",
+      "var": "::SpeechChalDone_var"
+    },
+    {
+      "form": "4e24:Dawnguard.esm",
+      "script": "DLC1HunterBaseIntroQuestScript",
+      "var": "::StartSceneDone_var"
+    },
+    {
+      "form": "4e24:Dawnguard.esm",
+      "script": "DLC1HunterBaseIntroQuestScript",
+      "var": "::VQ02Progress_var"
+    },
+    {
+      "form": "594c:Dawnguard.esm",
+      "script": "DLC1VampireBaseIntroQuestScript",
+      "var": "::GaranStage15SceneDone_var"
+    },
+    {
+      "form": "6bda:Dawnguard.esm",
+      "script": "DLC1_BF_DunTempleQstSCRIPT",
+      "var": "::ForceGreetComplete_var"
+    },
+    {
+      "form": "7c25:Dawnguard.esm",
+      "script": "DLC1VQ08QuestScript",
+      "var": "::HunterUpdate_var"
+    },
+    {
+      "form": "c73a:Dawnguard.esm",
+      "script": "DLC1VQDragonScript",
+      "var": "::iSummonCount_var"
+    },
+    {
+      "form": "e6a7:Dawnguard.esm",
+      "script": "DLC1VQ01RNPCQuestScript",
+      "var": "::BadmouthedTolan_var"
+    },
+    {
+      "form": "e6a7:Dawnguard.esm",
+      "script": "DLC1VQ01RNPCQuestScript",
+      "var": "::MentionedTolan_var"
+    },
+    {
+      "form": "f363:Dawnguard.esm",
+      "script": "DLC1VQ03RNPCQuestScript",
+      "var": "::LookingForMothPriest_var"
+    },
+    {
+      "form": "f363:Dawnguard.esm",
+      "script": "DLC1VQ03RNPCQuestScript",
+      "var": "::MadeInnuendoChoice_var"
+    },
+    {
+      "form": "f711:Dawnguard.esm",
+      "script": "DLC1WerewolfPerkExplanationQuestScript",
+      "var": "::PlayerToldAboutPerks_var"
+    },
+    {
+      "form": "15aa7:Dawnguard.esm",
+      "script": "DLC1VQ02RNPCQuestScript",
+      "var": "::LongTimeAgo_var"
+    },
+    {
+      "form": "15aa9:Dawnguard.esm",
+      "script": "DLC1defaultDetectPresenceTriggerScript",
+      "var": "::PresenceDetected_var"
+    },
+    {
+      "form": "15abd:Dawnguard.esm",
+      "script": "DLC1defaultDetectPresenceTriggerScript",
+      "var": "::PresenceDetected_var"
+    },
+    {
+      "form": "15abf:Dawnguard.esm",
+      "script": "DLC1defaultDetectPresenceTriggerScript",
+      "var": "::PresenceDetected_var"
+    },
+    {
+      "form": "16673:Dawnguard.esm",
+      "script": "DLC1VQ04RNPCQuestScript",
+      "var": "::EncounteredGargoyle_var"
+    },
+    {
+      "form": "16673:Dawnguard.esm",
+      "script": "DLC1VQ04RNPCQuestScript",
+      "var": "::GavePitchAboutSecret_var"
+    },
+    {
+      "form": "16673:Dawnguard.esm",
+      "script": "DLC1VQ04RNPCQuestScript",
+      "var": "::LonelyWeirdDecision_var"
+    },
+    {
+      "form": "16677:Dawnguard.esm",
+      "script": "DLC1defaultDetectPresenceTriggerScript",
+      "var": "::PresenceDetected_var"
+    },
+    {
+      "form": "16848:Dawnguard.esm",
+      "script": "FerrySystemScript",
+      "var": "::currentDestination_var"
+    },
+    {
+      "form": "176c2:Dawnguard.esm",
+      "script": "DLC1VQ05RNPCQuestScript",
+      "var": "::PostMotherChoice_var"
+    },
+    {
+      "form": "1a1c1:Dawnguard.esm",
+      "script": "DLC1VQ08PostQuestScript",
+      "var": "::DexionScrollSell_var"
+    },
+    {
+      "form": "1a1c1:Dawnguard.esm",
+      "script": "DLC1VQ08PostQuestScript",
+      "var": "::GaranPostFG_var"
+    },
+    {
+      "form": "1a1c1:Dawnguard.esm",
+      "script": "DLC1VQ08PostQuestScript",
+      "var": "::IsranPostFG_var"
+    },
+    {
+      "form": "1a1c1:Dawnguard.esm",
+      "script": "DLC1VQ08PostQuestScript",
+      "var": "::RepairsDone_var"
+    },
+    {
+      "form": "1a1c1:Dawnguard.esm",
+      "script": "DLC1VQ08PostQuestScript",
+      "var": "::UDGPFlorentiusGreet_var"
+    },
+    {
+      "form": "1a1c1:Dawnguard.esm",
+      "script": "DLC1VQ08PostQuestScript",
+      "var": "::UDGPGunmarGreet_var"
+    },
+    {
+      "form": "1a1c1:Dawnguard.esm",
+      "script": "DLC1VQ08PostQuestScript",
+      "var": "::UDGPSorineFGreet_var"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "HasChildBedroom_Any"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "HasChildBedroom_CCHouse01"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "HasChildBedroom_CCHouse02"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "HasChildBedroom_CCHouse03"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "HasChildBedroom_CCHouse04"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "HasChildBedroom_CCHouse05"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "HasChildBedroom_CCHouse06"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "HasChildBedroom_CCHouse07"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "HasChildBedroom_CCHouse08"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "HasChildBedroom_CCHouse09"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "HasChildBedroom_CCHouse10"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "HasChildBedroom_CCHouse11"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "HasChildBedroom_CCHouse12"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "HasChildBedroom_CCHouse13"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "HasChildBedroom_CCHouse14"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "HasChildBedroom_CCHouse15"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "HasChildBedroom_CCHouse16"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "HasChildBedroom_CCHouse17"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "HasChildBedroom_CCHouse18"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "HasChildBedroom_CCHouse19"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "HasChildBedroom_CCHouse20"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "HasChildBedroom_Multiple"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "PlayerOwns_AnyCCHouse"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "PlayerOwns_CCHouse01"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "PlayerOwns_CCHouse02"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "PlayerOwns_CCHouse03"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "PlayerOwns_CCHouse04"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "PlayerOwns_CCHouse05"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "PlayerOwns_CCHouse06"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "PlayerOwns_CCHouse07"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "PlayerOwns_CCHouse08"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "PlayerOwns_CCHouse09"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "PlayerOwns_CCHouse10"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "PlayerOwns_CCHouse11"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "PlayerOwns_CCHouse12"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "PlayerOwns_CCHouse13"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "PlayerOwns_CCHouse14"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "PlayerOwns_CCHouse15"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "PlayerOwns_CCHouse16"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "PlayerOwns_CCHouse17"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "PlayerOwns_CCHouse18"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "PlayerOwns_CCHouse19"
+    },
+    {
+      "form": "ddb:HearthFires.esm",
+      "script": "CCHouseQuestScript",
+      "var": "PlayerOwns_CCHouse20"
+    },
+    {
+      "form": "305e:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::bBoughtBard_var"
+    },
+    {
+      "form": "305e:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::bBoughtCarriage_var"
+    },
+    {
+      "form": "305e:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::bBoughtGarden_var"
+    },
+    {
+      "form": "305e:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::bBoughtHorse_var"
+    },
+    {
+      "form": "305e:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::bHaveSteward_var"
+    },
+    {
+      "form": "305e:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::bOwnProperty_var"
+    },
+    {
+      "form": "305e:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::bRoom1Remodeled_var"
+    },
+    {
+      "form": "305e:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::numChickens_var"
+    },
+    {
+      "form": "305e:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::numCows_var"
+    },
+    {
+      "form": "305e:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::numRoomsCompleted_var"
+    },
+    {
+      "form": "4291:HearthFires.esm",
+      "script": "BYOHRelationshipAdoptableScript",
+      "var": "::BYOHAdoption_HasChildBedroom_Any_var"
+    },
+    {
+      "form": "4291:HearthFires.esm",
+      "script": "BYOHRelationshipAdoptableScript",
+      "var": "::BYOHAdoption_HasChildBedroom_BYOHFalkreath_var"
+    },
+    {
+      "form": "4291:HearthFires.esm",
+      "script": "BYOHRelationshipAdoptableScript",
+      "var": "::BYOHAdoption_HasChildBedroom_BYOHHjaalmarch_var"
+    },
+    {
+      "form": "4291:HearthFires.esm",
+      "script": "BYOHRelationshipAdoptableScript",
+      "var": "::BYOHAdoption_HasChildBedroom_BYOHPale_var"
+    },
+    {
+      "form": "4291:HearthFires.esm",
+      "script": "BYOHRelationshipAdoptableScript",
+      "var": "::BYOHAdoption_HasChildBedroom_Markarth_var"
+    },
+    {
+      "form": "4291:HearthFires.esm",
+      "script": "BYOHRelationshipAdoptableScript",
+      "var": "::BYOHAdoption_HasChildBedroom_Multiple_var"
+    },
+    {
+      "form": "4291:HearthFires.esm",
+      "script": "BYOHRelationshipAdoptableScript",
+      "var": "::BYOHAdoption_HasChildBedroom_Riften_var"
+    },
+    {
+      "form": "4291:HearthFires.esm",
+      "script": "BYOHRelationshipAdoptableScript",
+      "var": "::BYOHAdoption_HasChildBedroom_Solitude_var"
+    },
+    {
+      "form": "4291:HearthFires.esm",
+      "script": "BYOHRelationshipAdoptableScript",
+      "var": "::BYOHAdoption_HasChildBedroom_Whiterun_var"
+    },
+    {
+      "form": "4291:HearthFires.esm",
+      "script": "BYOHRelationshipAdoptableScript",
+      "var": "::BYOHAdoption_HasChildBedroom_Windhelm_var"
+    },
+    {
+      "form": "4291:HearthFires.esm",
+      "script": "BYOHRelationshipAdoptableScript",
+      "var": "::BYOHAdoption_PlayerOwns_BYOHFalkreath_var"
+    },
+    {
+      "form": "4291:HearthFires.esm",
+      "script": "BYOHRelationshipAdoptableScript",
+      "var": "::BYOHAdoption_PlayerOwns_BYOHHjaalmarch_var"
+    },
+    {
+      "form": "4291:HearthFires.esm",
+      "script": "BYOHRelationshipAdoptableScript",
+      "var": "::BYOHAdoption_PlayerOwns_BYOHPale_var"
+    },
+    {
+      "form": "4291:HearthFires.esm",
+      "script": "BYOHRelationshipAdoptableScript",
+      "var": "::BYOHAdoption_PlayerOwnsAnyHouse_var"
+    },
+    {
+      "form": "42b4:HearthFires.esm",
+      "script": "BYOHRelationshipAdoptionScript",
+      "var": "::currentHome_var"
+    },
+    {
+      "form": "42b4:HearthFires.esm",
+      "script": "BYOHRelationshipAdoptionScript",
+      "var": "::GiftReaction_var"
+    },
+    {
+      "form": "42b4:HearthFires.esm",
+      "script": "BYOHRelationshipAdoptionScript",
+      "var": "::lastChildAdoptedTimestamp_var"
+    },
+    {
+      "form": "42b4:HearthFires.esm",
+      "script": "BYOHRelationshipAdoptionScript",
+      "var": "::newHome_var"
+    },
+    {
+      "form": "42b4:HearthFires.esm",
+      "script": "BYOHRelationshipAdoptionScript",
+      "var": "::numChildrenAdopted_var"
+    },
+    {
+      "form": "42b4:HearthFires.esm",
+      "script": "BYOHRelationshipAdoptionScript",
+      "var": "::WeArePoorCount_var"
+    },
+    {
+      "form": "be09:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::bBoughtBard_var"
+    },
+    {
+      "form": "be09:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::bBoughtCarriage_var"
+    },
+    {
+      "form": "be09:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::bBoughtHorse_var"
+    },
+    {
+      "form": "be09:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::bHaveSteward_var"
+    },
+    {
+      "form": "be09:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::bOwnProperty_var"
+    },
+    {
+      "form": "be09:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::bRoom1Remodeled_var"
+    },
+    {
+      "form": "be09:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::numChickens_var"
+    },
+    {
+      "form": "be09:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::numCows_var"
+    },
+    {
+      "form": "be09:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::numRoomsCompleted_var"
+    },
+    {
+      "form": "10bee:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::bBoughtBard_var"
+    },
+    {
+      "form": "10bee:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::bBoughtCarriage_var"
+    },
+    {
+      "form": "10bee:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::bBoughtHorse_var"
+    },
+    {
+      "form": "10bee:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::bHaveSteward_var"
+    },
+    {
+      "form": "10bee:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::bOwnProperty_var"
+    },
+    {
+      "form": "10bee:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::bRoom1Remodeled_var"
+    },
+    {
+      "form": "10bee:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::numChickens_var"
+    },
+    {
+      "form": "10bee:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::numCows_var"
+    },
+    {
+      "form": "10bee:HearthFires.esm",
+      "script": "byohhousescript",
+      "var": "::numRoomsCompleted_var"
+    },
+    {
+      "form": "16e1f:Dragonborn.esm",
+      "script": "DLC2MQ04Script",
+      "var": "::bReadingRoomPowered_var"
+    },
+    {
+      "form": "173be:Dragonborn.esm",
+      "script": "DLC2dunNchardakTrackingScript",
+      "var": "::CubesInNeloth_var"
+    },
+    {
+      "form": "17706:Dragonborn.esm",
+      "script": "DLC2dunNchardakWaterPlane",
+      "var": "::myWaterStage_var"
+    },
+    {
+      "form": "1786a:Dragonborn.esm",
+      "script": "default2StateActivator",
+      "var": "::isAnimating_var"
+    },
+    {
+      "form": "1786a:Dragonborn.esm",
+      "script": "default2StateActivator",
+      "var": "::isOpen_var"
+    },
+    {
+      "form": "17884:Dragonborn.esm",
+      "script": "default2StateActivator",
+      "var": "::isAnimating_var"
+    },
+    {
+      "form": "17884:Dragonborn.esm",
+      "script": "default2StateActivator",
+      "var": "::isOpen_var"
+    },
+    {
+      "form": "17887:Dragonborn.esm",
+      "script": "DLC2dunNchardakWaterPlane",
+      "var": "::myWaterStage_var"
+    },
+    {
+      "form": "17896:Dragonborn.esm",
+      "script": "default2StateActivator",
+      "var": "::isAnimating_var"
+    },
+    {
+      "form": "17896:Dragonborn.esm",
+      "script": "default2StateActivator",
+      "var": "::isOpen_var"
+    },
+    {
+      "form": "179d7:Dragonborn.esm",
+      "script": "DLC2MQ06Script",
+      "var": "::MiraakDragonsKilled_var"
+    },
+    {
+      "form": "17f90:Dragonborn.esm",
+      "script": "DLC2MQ03QuestScript",
+      "var": "::FreaSceneChatter_var"
+    },
+    {
+      "form": "17f90:Dragonborn.esm",
+      "script": "DLC2MQ03QuestScript",
+      "var": "::StornStoneTalk_var"
+    },
+    {
+      "form": "18b0f:Dragonborn.esm",
+      "script": "DLC2DialogueRRQuestScript",
+      "var": "::GjalundShouldTalk_var"
+    },
+    {
+      "form": "18b0f:Dragonborn.esm",
+      "script": "DLC2DialogueRRQuestScript",
+      "var": "::RidingTheBoat_var"
+    },
+    {
+      "form": "18b0f:Dragonborn.esm",
+      "script": "DLC2DialogueRRQuestScript",
+      "var": "::ShrineTrigger_var"
+    },
+    {
+      "form": "1a50b:Dragonborn.esm",
+      "script": "DLC2MH01QuestScript",
+      "var": "::BujoldFGPostCommune_var"
+    },
+    {
+      "form": "1a50b:Dragonborn.esm",
+      "script": "DLC2MH01QuestScript",
+      "var": "::PlayerEnteredCamp_var"
+    },
+    {
+      "form": "1a50b:Dragonborn.esm",
+      "script": "DLC2MH01QuestScript",
+      "var": "::PlayerOutsideBarrow_var"
+    },
+    {
+      "form": "1a50c:Dragonborn.esm",
+      "script": "DLC2MH02QuestScript",
+      "var": "::Stage30ResumeShunt_var"
+    },
+    {
+      "form": "1bbb2:Dragonborn.esm",
+      "script": "defaultSetStageOnEnter",
+      "var": "::bAllTargetsInTrigger_var"
+    },
+    {
+      "form": "1c793:Dragonborn.esm",
+      "script": "DLC2dunNchardakWaterPlane",
+      "var": "::myWaterStage_var"
+    },
+    {
+      "form": "1d4c0:Dragonborn.esm",
+      "script": "DLC2dunNchardakDoorSeal",
+      "var": "::isSealed_var"
+    },
+    {
+      "form": "1d4c1:Dragonborn.esm",
+      "script": "DLC2dunNchardakDoorSeal",
+      "var": "::isSealed_var"
+    },
+    {
+      "form": "200d8:Dragonborn.esm",
+      "script": "DLC2SoulStealScript",
+      "var": "fightPlayer"
+    },
+    {
+      "form": "200d8:Dragonborn.esm",
+      "script": "DLC2SoulStealScript",
+      "var": "MiraakStoleSoul"
+    },
+    {
+      "form": "209ae:Dragonborn.esm",
+      "script": "DLC2WB01QuestScript",
+      "var": "::TorkildTransformed_var"
+    },
+    {
+      "form": "3cd64:Dragonborn.esm",
+      "script": "defaultOnEnter",
+      "var": "::bAllTargetsInTrigger_var"
+    },
+    {
+      "form": "b98:ccBGSSSE001-Fish.esm",
+      "script": "ccBGSSSE001_RadiantFishQuest",
+      "var": "::currentObjective_var"
+    },
+    {
+      "form": "c2f:ccBGSSSE001-Fish.esm",
+      "script": "ccBGSSSE001_RadiantFishQuest",
+      "var": "::currentObjective_var"
+    },
+    {
+      "form": "801:IntuitiveDragonRideControl.esp",
+      "script": "_ts_DR_DragonRegisterScript",
+      "var": "::bIsMounted_var"
+    },
+    {
+      "form": "801:IntuitiveDragonRideControl.esp",
+      "script": "_ts_DR_RideControlScript",
+      "var": "::bTriggerMessage_var"
+    }
+  ],
+  "playerQuestGlobals": {
+    "2ba16:Skyrim.esm": [
+      "2ba19:Skyrim.esm"
+    ],
+    "eafd5:Skyrim.esm": [
+      "ed06d:Skyrim.esm",
+      "f69cf:Skyrim.esm"
+    ],
+    "71d0:Dawnguard.esm": [
+      "6938:Dawnguard.esm",
+      "693a:Dawnguard.esm",
+      "693b:Dawnguard.esm",
+      "71d5:Dawnguard.esm",
+      "14627:Dawnguard.esm",
+      "14628:Dawnguard.esm",
+      "14629:Dawnguard.esm",
+      "1462b:Dawnguard.esm",
+      "15fc8:Dawnguard.esm",
+      "17e90:Dawnguard.esm"
+    ],
+    "33a57:ccBGSSSE001-Fish.esm": [
+      "38bd3:ccBGSSSE001-Fish.esm",
+      "38bd4:ccBGSSSE001-Fish.esm",
+      "42dde:ccBGSSSE001-Fish.esm",
+      "201818:ccBGSSSE001-Fish.esm"
+    ],
+    "800:MoreCraftableEquipment.esp": [
+      "6ce010:Update.esm"
+    ],
+    "12c9:Jewelry limiter.esp": [
+      "d64:Jewelry limiter.esp",
+      "d65:Jewelry limiter.esp",
+      "12ca:Jewelry limiter.esp",
+      "33fc:Jewelry limiter.esp",
+      "95c9:Jewelry limiter.esp",
+      "95ca:Jewelry limiter.esp",
+      "103bc:Jewelry limiter.esp",
+      "1297e:Jewelry limiter.esp",
+      "12ee3:Jewelry limiter.esp",
+      "14f33:Jewelry limiter.esp",
+      "14f35:Jewelry limiter.esp"
+    ],
+    "15bc9:Dwemer Goggles & Scouter.esp": [
+      "13b74:Dwemer Goggles & Scouter.esp",
+      "14b9d:Dwemer Goggles & Scouter.esp",
+      "16694:Dwemer Goggles & Scouter.esp",
+      "16bfd:Dwemer Goggles & Scouter.esp",
+      "16bfe:Dwemer Goggles & Scouter.esp",
+      "176c4:Dwemer Goggles & Scouter.esp",
+      "186f3:Dwemer Goggles & Scouter.esp",
+      "191ba:Dwemer Goggles & Scouter.esp",
+      "191bb:Dwemer Goggles & Scouter.esp",
+      "191bc:Dwemer Goggles & Scouter.esp",
+      "1a74c:Dwemer Goggles & Scouter.esp",
+      "1b21a:Dwemer Goggles & Scouter.esp",
+      "1bce5:Dwemer Goggles & Scouter.esp",
+      "1ed7a:Dwemer Goggles & Scouter.esp",
+      "1f2dd:Dwemer Goggles & Scouter.esp",
+      "1f840:Dwemer Goggles & Scouter.esp",
+      "1f841:Dwemer Goggles & Scouter.esp",
+      "1f842:Dwemer Goggles & Scouter.esp",
+      "20307:Dwemer Goggles & Scouter.esp",
+      "20308:Dwemer Goggles & Scouter.esp",
+      "2086b:Dwemer Goggles & Scouter.esp",
+      "2086c:Dwemer Goggles & Scouter.esp",
+      "2086d:Dwemer Goggles & Scouter.esp",
+      "2086f:Dwemer Goggles & Scouter.esp",
+      "21337:Dwemer Goggles & Scouter.esp",
+      "21338:Dwemer Goggles & Scouter.esp",
+      "22360:Dwemer Goggles & Scouter.esp",
+      "22361:Dwemer Goggles & Scouter.esp",
+      "22362:Dwemer Goggles & Scouter.esp",
+      "22363:Dwemer Goggles & Scouter.esp",
+      "2338c:Dwemer Goggles & Scouter.esp",
+      "238f4:Dwemer Goggles & Scouter.esp",
+      "238f5:Dwemer Goggles & Scouter.esp",
+      "23e59:Dwemer Goggles & Scouter.esp",
+      "2492a:Dwemer Goggles & Scouter.esp",
+      "2492b:Dwemer Goggles & Scouter.esp",
+      "2492c:Dwemer Goggles & Scouter.esp",
+      "26985:Dwemer Goggles & Scouter.esp",
+      "26eea:Dwemer Goggles & Scouter.esp",
+      "27450:Dwemer Goggles & Scouter.esp",
+      "27451:Dwemer Goggles & Scouter.esp",
+      "27452:Dwemer Goggles & Scouter.esp",
+      "28f44:Dwemer Goggles & Scouter.esp"
+    ],
+    "1c7ad:Dwemer Goggles & Scouter.esp": [
+      "10ae7:Dwemer Goggles & Scouter.esp",
+      "11b1d:Dwemer Goggles & Scouter.esp",
+      "1d27f:Dwemer Goggles & Scouter.esp",
+      "23e5b:Dwemer Goggles & Scouter.esp",
+      "26985:Dwemer Goggles & Scouter.esp",
+      "26eea:Dwemer Goggles & Scouter.esp"
+    ],
+    "12c5:UndeadFX.esp": [
+      "58dc:UndeadFX.esp",
+      "f5c8:UndeadFX.esp"
+    ],
+    "13be4:UndeadFX.esp": [
+      "e594:UndeadFX.esp",
+      "e595:UndeadFX.esp",
+      "e596:UndeadFX.esp",
+      "1161e:UndeadFX.esp",
+      "1161f:UndeadFX.esp",
+      "11620:UndeadFX.esp",
+      "11621:UndeadFX.esp",
+      "31688:UndeadFX.esp",
+      "31689:UndeadFX.esp"
+    ],
+    "894:ccQDRSSE001-SurvivalMode.esl": [
+      "81a:ccQDRSSE001-SurvivalMode.esl",
+      "8e2:ccQDRSSE001-SurvivalMode.esl",
+      "2edf:Update.esm"
+    ],
+    "896:ccQDRSSE001-SurvivalMode.esl": [
+      "81b:ccQDRSSE001-SurvivalMode.esl",
+      "821:ccQDRSSE001-SurvivalMode.esl",
+      "8e0:ccQDRSSE001-SurvivalMode.esl",
+      "2edd:Update.esm",
+      "2ede:Update.esm"
+    ],
+    "897:ccQDRSSE001-SurvivalMode.esl": [
+      "8c4:ccQDRSSE001-SurvivalMode.esl"
+    ],
+    "898:ccQDRSSE001-SurvivalMode.esl": [
+      "826:ccQDRSSE001-SurvivalMode.esl",
+      "828:ccQDRSSE001-SurvivalMode.esl",
+      "8df:ccQDRSSE001-SurvivalMode.esl",
+      "a0f:ccQDRSSE001-SurvivalMode.esl",
+      "314a:Update.esm"
+    ],
+    "899:ccQDRSSE001-SurvivalMode.esl": [
+      "816:ccQDRSSE001-SurvivalMode.esl",
+      "8e1:ccQDRSSE001-SurvivalMode.esl",
+      "2ee0:Update.esm"
+    ],
+    "831:StealthKillDetectionFix.esp": [
+      "81e:StealthKillDetectionFix.esp",
+      "81f:StealthKillDetectionFix.esp",
+      "820:StealthKillDetectionFix.esp",
+      "821:StealthKillDetectionFix.esp",
+      "822:StealthKillDetectionFix.esp",
+      "823:StealthKillDetectionFix.esp",
+      "824:StealthKillDetectionFix.esp",
+      "82e:StealthKillDetectionFix.esp",
+      "833:StealthKillDetectionFix.esp"
+    ]
+  },
+  "playerQuestVariables": {
+    "2ba16:Skyrim.esm": [
+      "PlayerWerewolfChangeScript::::DLC1GorgingDurationSeconds_var",
+      "PlayerWerewolfChangeScript::::DurationWarningTimeSeconds_var",
+      "PlayerWerewolfChangeScript::::FeedExtensionTimeSeconds_var",
+      "PlayerWerewolfChangeScript::::StandardDurationSeconds_var",
+      "PlayerWerewolfChangeScript::::Untimed_var",
+      "PlayerWerewolfChangeScript::__durationWarningTime",
+      "PlayerWerewolfChangeScript::__feedExtensionTime",
+      "PlayerWerewolfChangeScript::__gorgeExtensionTime",
+      "PlayerWerewolfChangeScript::__shiftingBack",
+      "PlayerWerewolfChangeScript::__shuttingDown",
+      "PlayerWerewolfChangeScript::__trackingStarted",
+      "PlayerWerewolfChangeScript::__tryingToShiftBack"
+    ],
+    "e6de3:Skyrim.esm": [
+      "FreeformSkyHavenTempleCScript::::fTimer_var"
+    ],
+    "eafd5:Skyrim.esm": [
+      "PlayerVampireQuestScript::::FeedTimer_var",
+      "PlayerVampireQuestScript::::LastFeedTime_var",
+      "PlayerVampireQuestScript::::VampireStatus_var"
+    ],
+    "10b0e0:Skyrim.esm": [
+      "TGNQuestScript::pTGNAward"
+    ],
+    "71d0:Dawnguard.esm": [
+      "DLC1PlayerVampireChangeScript::::DLC1BiteHealthRecover_var",
+      "DLC1PlayerVampireChangeScript::::DLC1HasLightfoot_var",
+      "DLC1PlayerVampireChangeScript::::DurationWarningTimeSeconds_var",
+      "DLC1PlayerVampireChangeScript::::StandardDurationSeconds_var",
+      "DLC1PlayerVampireChangeScript::::UnearthlyWillExtensionTimeSeconds_var",
+      "DLC1PlayerVampireChangeScript::::Untimed_var",
+      "DLC1PlayerVampireChangeScript::__durationWarningTime",
+      "DLC1PlayerVampireChangeScript::__prepped",
+      "DLC1PlayerVampireChangeScript::__shiftingBack",
+      "DLC1PlayerVampireChangeScript::__shuttingDown",
+      "DLC1PlayerVampireChangeScript::__trackingStarted",
+      "DLC1PlayerVampireChangeScript::__tryingToShiftBack",
+      "DLC1PlayerVampireChangeScript::__UnearthlyWillExtensionTime"
+    ],
+    "8e3b:Dawnguard.esm": [
+      "DLC1VampireSleepScript::::IsBedCoffin_var"
+    ],
+    "f899:Dawnguard.esm": [
+      "DLC1LycanthropyRegiftQuestScript::::FadeSeconds_var"
+    ],
+    "18b0f:Dragonborn.esm": [
+      "DLC2DialogueRRQuestScript::::FirstTimeToSolstheim_var",
+      "DLC2DialogueRRQuestScript::::GjalundShouldTalk_var",
+      "DLC2DialogueRRQuestScript::::RidingTheBoat_var",
+      "DLC2DialogueRRQuestScript::::ShrineTrigger_var",
+      "DLC2DialogueRRQuestScript::__finishedBoatRide",
+      "DLC2DialogueRRQuestScript::__numberOfFollowers"
+    ],
+    "33a57:ccBGSSSE001-Fish.esm": [
+      "ccBGSSSE001_FishingSystemScript::currentCatchSequenceIndex",
+      "ccBGSSSE001_FishingSystemScript::currentFishingRodType",
+      "ccBGSSSE001_FishingSystemScript::currentGameHour",
+      "ccBGSSSE001_FishingSystemScript::currentSystemState",
+      "ccBGSSSE001_FishingSystemScript::debugEnabled",
+      "ccBGSSSE001_FishingSystemScript::forcedRainWeather",
+      "ccBGSSSE001_FishingSystemScript::handlingInputOrUpdate",
+      "ccBGSSSE001_FishingSystemScript::isQuestItemCatch",
+      "ccBGSSSE001_FishingSystemScript::lastCatchWasRare",
+      "ccBGSSSE001_FishingSystemScript::nextUpdateType",
+      "ccBGSSSE001_FishingSystemScript::startedInFirstPerson",
+      "ccBGSSSE001_FishingSystemScript::startedWithTorch"
+    ],
+    "2e7f:unofficial skyrim special edition patch.esp": [
+      "UDGP_VersionTrackingScript::::LastVersion_var"
+    ],
+    "2ea9:unofficial skyrim special edition patch.esp": [
+      "UHFP_VersionTrackingScript::::LastVersion_var"
+    ],
+    "a317:unofficial skyrim special edition patch.esp": [
+      "UDBP_VersionTrackingScript::::LastVersion_var"
+    ],
+    "d8b9:unofficial skyrim special edition patch.esp": [
+      "USKP_VersionTrackingScript::::LastVersion_var"
+    ],
+    "f458:unofficial skyrim special edition patch.esp": [
+      "usleep_versiontrackingscript::::LastVersion_var"
+    ],
+    "2c5562:unofficial skyrim special edition patch.esp": [
+      "USSEP_VersionTrackingScript::::LastVersion_var",
+      "USSEP_VersionTrackingScript::::PreviousVersionsCheck_var"
+    ],
+    "1a09c4:Odin - Skyrim Magic Overhaul.esp": [
+      "ODN_Init_Script::::ODN_Delay_var",
+      "ODN_Init_Script::::ODN_GameTimePing_var"
+    ],
+    "1b4e43:Odin - Skyrim Magic Overhaul.esp": [
+      "ODN_PopulateList_Script::::ODN_InitialDelay_var"
+    ],
+    "12c9:Jewelry limiter.esp": [
+      "JewelryLimitMCM::::ActivateToggleCheck_var",
+      "JewelryLimitMCM::::LeveledListsToggleCheck_var",
+      "JewelryLimitMCM::::SlidersOrInputs_var",
+      "JewelryLimitMCM::Finger",
+      "JewelryLimitMCM::_activeOption",
+      "JewelryLimitMCM::_configID",
+      "JewelryLimitMCM::_currentPageNum",
+      "JewelryLimitMCM::_cursorFillMode",
+      "JewelryLimitMCM::_cursorPosition",
+      "JewelryLimitMCM::_initialized",
+      "JewelryLimitMCM::_messageResult",
+      "JewelryLimitMCM::_state",
+      "JewelryLimitMCM::_waitForMessage",
+      "JewelryLimitMCM::::CurrentVersion_var"
+    ],
+    "15bc9:Dwemer Goggles & Scouter.esp": [
+      "dwemergogglesscouter_skyuiconfigmenu::audioOID",
+      "dwemergogglesscouter_skyuiconfigmenu::DLvolumeOID",
+      "dwemergogglesscouter_skyuiconfigmenu::DSvolumeOID",
+      "dwemergogglesscouter_skyuiconfigmenu::equipmenuOID",
+      "dwemergogglesscouter_skyuiconfigmenu::Gflag",
+      "dwemergogglesscouter_skyuiconfigmenu::highestTAOID",
+      "dwemergogglesscouter_skyuiconfigmenu::highTAOID",
+      "dwemergogglesscouter_skyuiconfigmenu::key1OID",
+      "dwemergogglesscouter_skyuiconfigmenu::key2OID",
+      "dwemergogglesscouter_skyuiconfigmenu::key3OID",
+      "dwemergogglesscouter_skyuiconfigmenu::key4OID",
+      "dwemergogglesscouter_skyuiconfigmenu::key5OID",
+      "dwemergogglesscouter_skyuiconfigmenu::key6OID",
+      "dwemergogglesscouter_skyuiconfigmenu::key7OID",
+      "dwemergogglesscouter_skyuiconfigmenu::LIGHTvolumeOID",
+      "dwemergogglesscouter_skyuiconfigmenu::lowestTAOID",
+      "dwemergogglesscouter_skyuiconfigmenu::lowTAOID",
+      "dwemergogglesscouter_skyuiconfigmenu::messageOID",
+      "dwemergogglesscouter_skyuiconfigmenu::NEexteriorSOID",
+      "dwemergogglesscouter_skyuiconfigmenu::NEinteriorSOID",
+      "dwemergogglesscouter_skyuiconfigmenu::NEvolumeOID",
+      "dwemergogglesscouter_skyuiconfigmenu::nosoundOID",
+      "dwemergogglesscouter_skyuiconfigmenu::OilDifference",
+      "dwemergogglesscouter_skyuiconfigmenu::OilSystemOID",
+      "dwemergogglesscouter_skyuiconfigmenu::onheadOID",
+      "dwemergogglesscouter_skyuiconfigmenu::resetallaudioOID",
+      "dwemergogglesscouter_skyuiconfigmenu::resetallautoOID",
+      "dwemergogglesscouter_skyuiconfigmenu::resetallOID",
+      "dwemergogglesscouter_skyuiconfigmenu::ScouterselecttransferOilOID",
+      "dwemergogglesscouter_skyuiconfigmenu::ScouterSpendPerkPointOID",
+      "dwemergogglesscouter_skyuiconfigmenu::ScoutertopupoilOID",
+      "dwemergogglesscouter_skyuiconfigmenu::scoutertransferoilOID",
+      "dwemergogglesscouter_skyuiconfigmenu::Scouterusageamount2OID",
+      "dwemergogglesscouter_skyuiconfigmenu::ScouterusageamountOID",
+      "dwemergogglesscouter_skyuiconfigmenu::selecttransferOilOID",
+      "dwemergogglesscouter_skyuiconfigmenu::Sflag",
+      "dwemergogglesscouter_skyuiconfigmenu::sneak2OID",
+      "dwemergogglesscouter_skyuiconfigmenu::sneak3OID",
+      "dwemergogglesscouter_skyuiconfigmenu::sneak4OID",
+      "dwemergogglesscouter_skyuiconfigmenu::sneak5OID",
+      "dwemergogglesscouter_skyuiconfigmenu::sneak6OID",
+      "dwemergogglesscouter_skyuiconfigmenu::sneakOID",
+      "dwemergogglesscouter_skyuiconfigmenu::SpendPerkPointOID",
+      "dwemergogglesscouter_skyuiconfigmenu::topupoilOID",
+      "dwemergogglesscouter_skyuiconfigmenu::transferoilOID",
+      "dwemergogglesscouter_skyuiconfigmenu::usageamount2OID",
+      "dwemergogglesscouter_skyuiconfigmenu::usageamountOID",
+      "dwemergogglesscouter_skyuiconfigmenu::VNEsoundOID",
+      "dwemergogglesscouter_skyuiconfigmenu::VNEspellOID",
+      "dwemergogglesscouter_skyuiconfigmenu::weapon2OID",
+      "dwemergogglesscouter_skyuiconfigmenu::weapon3OID",
+      "dwemergogglesscouter_skyuiconfigmenu::weapon4OID",
+      "dwemergogglesscouter_skyuiconfigmenu::weapon5OID",
+      "dwemergogglesscouter_skyuiconfigmenu::weapon6OID",
+      "dwemergogglesscouter_skyuiconfigmenu::weaponOID",
+      "dwemergogglesscouter_skyuiconfigmenu::zoomlevelOID",
+      "dwemergogglesscouter_skyuiconfigmenu::zoomOID",
+      "dwemergogglesscouter_skyuiconfigmenu::zoomvolumeOID",
+      "dwemergogglesscouter_skyuiconfigmenu::_activeOption",
+      "dwemergogglesscouter_skyuiconfigmenu::_configID",
+      "dwemergogglesscouter_skyuiconfigmenu::_currentPageNum",
+      "dwemergogglesscouter_skyuiconfigmenu::_cursorFillMode",
+      "dwemergogglesscouter_skyuiconfigmenu::_cursorPosition",
+      "dwemergogglesscouter_skyuiconfigmenu::_initialized",
+      "dwemergogglesscouter_skyuiconfigmenu::_messageResult",
+      "dwemergogglesscouter_skyuiconfigmenu::_state",
+      "dwemergogglesscouter_skyuiconfigmenu::_waitForMessage",
+      "dwemergogglesscouter_skyuiconfigmenu::::CurrentVersion_var"
+    ],
+    "800:RaceMenu.esp": [
+      "RaceMenu::_color",
+      "RaceMenu::_customHair",
+      "RaceMenu::hasInitialized",
+      "RaceMenu::_categoryBuffer",
+      "RaceMenu::_sliderBuffer",
+      "RaceMenu::_textureBuffer",
+      "RaceMenu::_textureBuffer_body",
+      "RaceMenu::_textureBuffer_face",
+      "RaceMenu::_textureBuffer_feet",
+      "RaceMenu::_textureBuffer_hand"
+    ],
+    "801:RaceMenuPlugin.esp": [
+      "racemenuplugin::_versionValid",
+      "racemenuplugin::_categoryBuffer",
+      "racemenuplugin::_sliderBuffer",
+      "racemenuplugin::_textureBuffer",
+      "racemenuplugin::_textureBuffer_body",
+      "racemenuplugin::_textureBuffer_face",
+      "racemenuplugin::_textureBuffer_feet",
+      "racemenuplugin::_textureBuffer_hand"
+    ],
+    "12c5:LostGrimoire.esp": [
+      "GRIM__ModManagerScript::currentVersion"
+    ],
+    "12c5:UndeadFX.esp": [
+      "us_updatescript::ElementalEffectsInstalled"
+    ],
+    "13be4:UndeadFX.esp": [
+      "us_mcmscript::amulet_draugr_id",
+      "us_mcmscript::amulet_skeleton_id",
+      "us_mcmscript::amulet_v3_id",
+      "us_mcmscript::b_use_old_underskin",
+      "us_mcmscript::b_use_v3_FX",
+      "us_mcmscript::decay_id",
+      "us_mcmscript::degrade_time_id",
+      "us_mcmscript::dr_chance_id",
+      "us_mcmscript::draugr_id",
+      "us_mcmscript::effect_wait_time_id",
+      "us_mcmscript::en_cloak_id",
+      "us_mcmscript::en_cm_id",
+      "us_mcmscript::enable_id",
+      "us_mcmscript::eyeglow_id",
+      "us_mcmscript::eyeswap_id",
+      "us_mcmscript::f_chance_id",
+      "us_mcmscript::fadein_id",
+      "us_mcmscript::holes_id",
+      "us_mcmscript::l_chance_id",
+      "us_mcmscript::m_chance_id",
+      "us_mcmscript::old_underskin_id",
+      "us_mcmscript::quest_time_id",
+      "us_mcmscript::ref_time_id",
+      "us_mcmscript::s_chance_id",
+      "us_mcmscript::sk_chance_id",
+      "us_mcmscript::skeleton_id",
+      "us_mcmscript::useV3Decay_id",
+      "us_mcmscript::xl_chance_id",
+      "us_mcmscript::_activeOption",
+      "us_mcmscript::_configID",
+      "us_mcmscript::_currentPageNum",
+      "us_mcmscript::_cursorFillMode",
+      "us_mcmscript::_cursorPosition",
+      "us_mcmscript::_initialized",
+      "us_mcmscript::_messageResult",
+      "us_mcmscript::_state",
+      "us_mcmscript::_waitForMessage",
+      "us_mcmscript::::CurrentVersion_var"
+    ],
+    "894:ccQDRSSE001-SurvivalMode.esl": [
+      "Survival_NeedHunger::::eating_var",
+      "Survival_NeedHunger::currentEatingIndex",
+      "Survival_NeedHunger::::detectedFastTravelEvent_var",
+      "Survival_NeedHunger::::detectedSleepEvent_var",
+      "Survival_NeedHunger::::firstUpdate_var",
+      "Survival_NeedHunger::::hasBonus_var",
+      "Survival_NeedHunger::::lastTimeInGameHours_var",
+      "Survival_NeedHunger::::lastValue_var",
+      "Survival_NeedHunger::::locked_var",
+      "Survival_NeedHunger::::needStage1Value_var",
+      "Survival_NeedHunger::::needStage2Value_var",
+      "Survival_NeedHunger::::needStage3Value_var",
+      "Survival_NeedHunger::::needStage4Value_var",
+      "Survival_NeedHunger::::needStage5Value_var",
+      "Survival_NeedHunger::::oldStage_var",
+      "Survival_NeedHunger::::wasIncreasing_var",
+      "Survival_NeedHunger::genderFemale"
+    ],
+    "896:ccQDRSSE001-SurvivalMode.esl": [
+      "Survival_NeedCold::::cachedColdLevelMult_var",
+      "Survival_NeedCold::::cachedColdResistMaxValue_var",
+      "Survival_NeedCold::::cachedColdTargetGameHoursToNumb_var",
+      "Survival_NeedCold::::cachedNeedUpdateGameTimeInterval_var",
+      "Survival_NeedCold::::cachedTimescale_var",
+      "Survival_NeedCold::::coldLevelBlizzardMod_var",
+      "Survival_NeedCold::::coldLevelCoolArea_var",
+      "Survival_NeedCold::::coldLevelCoolAreaNightMod_var",
+      "Survival_NeedCold::::coldLevelFreezingArea_var",
+      "Survival_NeedCold::::coldLevelFreezingAreaNightMod_var",
+      "Survival_NeedCold::::coldLevelRainMod_var",
+      "Survival_NeedCold::::coldLevelSnowMod_var",
+      "Survival_NeedCold::::coldLevelWarmArea_var",
+      "Survival_NeedCold::::coldLevelWarmAreaNightMod_var",
+      "Survival_NeedCold::::coldStage1ColdLevelMin_var",
+      "Survival_NeedCold::::coldStage2ColdLevelMin_var",
+      "Survival_NeedCold::::coldStage3ColdLevelMin_var",
+      "Survival_NeedCold::::coldStage4ColdLevelMin_var",
+      "Survival_NeedCold::::coldStage5ColdLevelMin_var",
+      "Survival_NeedCold::::currentColdLevel_var",
+      "Survival_NeedCold::::isBeastRace_var",
+      "Survival_NeedCold::::lastColdLevel_var",
+      "Survival_NeedCold::areaTypeChillyInterior",
+      "Survival_NeedCold::areaTypeCool",
+      "Survival_NeedCold::areaTypeFreezing",
+      "Survival_NeedCold::areaTypeInterior",
+      "Survival_NeedCold::areaTypeWarm",
+      "Survival_NeedCold::coldToRestoreInWarmArea",
+      "Survival_NeedCold::lastTemperatureLevel",
+      "Survival_NeedCold::temperatureLevelColdArea",
+      "Survival_NeedCold::temperatureLevelFreezingArea",
+      "Survival_NeedCold::temperatureLevelNearHeat",
+      "Survival_NeedCold::temperatureLevelNeutral",
+      "Survival_NeedCold::temperatureLevelWarmArea",
+      "Survival_NeedCold::VampNeutralStageBool",
+      "Survival_NeedCold::warmthMaxBonusPercent",
+      "Survival_NeedCold::wasInOblivion",
+      "Survival_NeedCold::weatherClassRain",
+      "Survival_NeedCold::weatherClassSnow",
+      "Survival_NeedCold::::detectedFastTravelEvent_var",
+      "Survival_NeedCold::::detectedSleepEvent_var",
+      "Survival_NeedCold::::firstUpdate_var",
+      "Survival_NeedCold::::hasBonus_var",
+      "Survival_NeedCold::::lastTimeInGameHours_var",
+      "Survival_NeedCold::::lastValue_var",
+      "Survival_NeedCold::::locked_var",
+      "Survival_NeedCold::::needStage1Value_var",
+      "Survival_NeedCold::::needStage2Value_var",
+      "Survival_NeedCold::::needStage3Value_var",
+      "Survival_NeedCold::::needStage4Value_var",
+      "Survival_NeedCold::::needStage5Value_var",
+      "Survival_NeedCold::::oldStage_var",
+      "Survival_NeedCold::::wasIncreasing_var",
+      "Survival_NeedCold::genderFemale"
+    ],
+    "897:ccQDRSSE001-SurvivalMode.esl": [
+      "Survival_PlayerInfo::wasInDreamstride",
+      "Survival_PlayerInfo::wasInPlaneOfOblivion"
+    ],
+    "898:ccQDRSSE001-SurvivalMode.esl": [
+      "Survival_ConditionsScript::::isBeastRace_var",
+      "Survival_ConditionsScript::::isFastTravelControlsEnabled_var",
+      "Survival_ConditionsScript::::isHoldingTorch_var",
+      "Survival_ConditionsScript::::isInPlaneOfOblivion_var",
+      "Survival_ConditionsScript::::isMoving_var",
+      "Survival_ConditionsScript::::isRidingDragon_var",
+      "Survival_ConditionsScript::::isSwimmingInFreezingWater_var"
+    ],
+    "899:ccQDRSSE001-SurvivalMode.esl": [
+      "Survival_NeedExhaustion::::playerSleeping_var",
+      "Survival_NeedExhaustion::::detectedFastTravelEvent_var",
+      "Survival_NeedExhaustion::::detectedSleepEvent_var",
+      "Survival_NeedExhaustion::::firstUpdate_var",
+      "Survival_NeedExhaustion::::hasBonus_var",
+      "Survival_NeedExhaustion::::lastTimeInGameHours_var",
+      "Survival_NeedExhaustion::::lastValue_var",
+      "Survival_NeedExhaustion::::locked_var",
+      "Survival_NeedExhaustion::::needStage1Value_var",
+      "Survival_NeedExhaustion::::needStage2Value_var",
+      "Survival_NeedExhaustion::::needStage3Value_var",
+      "Survival_NeedExhaustion::::needStage4Value_var",
+      "Survival_NeedExhaustion::::needStage5Value_var",
+      "Survival_NeedExhaustion::::oldStage_var",
+      "Survival_NeedExhaustion::::wasIncreasing_var",
+      "Survival_NeedExhaustion::genderFemale"
+    ],
+    "800:TrueHUD.esl": [
+      "TrueHUD_MCM::_activeOption",
+      "TrueHUD_MCM::_configID",
+      "TrueHUD_MCM::_currentPageNum",
+      "TrueHUD_MCM::_cursorFillMode",
+      "TrueHUD_MCM::_cursorPosition",
+      "TrueHUD_MCM::_initialized",
+      "TrueHUD_MCM::_messageResult",
+      "TrueHUD_MCM::_state",
+      "TrueHUD_MCM::_waitForMessage",
+      "TrueHUD_MCM::::CurrentVersion_var"
+    ],
+    "800:TrueDirectionalMovement.esp": [
+      "TrueDirectionalMovement_MCM::_activeOption",
+      "TrueDirectionalMovement_MCM::_configID",
+      "TrueDirectionalMovement_MCM::_currentPageNum",
+      "TrueDirectionalMovement_MCM::_cursorFillMode",
+      "TrueDirectionalMovement_MCM::_cursorPosition",
+      "TrueDirectionalMovement_MCM::_initialized",
+      "TrueDirectionalMovement_MCM::_messageResult",
+      "TrueDirectionalMovement_MCM::_state",
+      "TrueDirectionalMovement_MCM::_waitForMessage",
+      "TrueDirectionalMovement_MCM::::CurrentVersion_var"
+    ],
+    "831:StealthKillDetectionFix.esp": [
+      "StealthKillDetectionFix_MCM::_activeOption",
+      "StealthKillDetectionFix_MCM::_configID",
+      "StealthKillDetectionFix_MCM::_currentPageNum",
+      "StealthKillDetectionFix_MCM::_cursorFillMode",
+      "StealthKillDetectionFix_MCM::_cursorPosition",
+      "StealthKillDetectionFix_MCM::_initialized",
+      "StealthKillDetectionFix_MCM::_messageResult",
+      "StealthKillDetectionFix_MCM::_state",
+      "StealthKillDetectionFix_MCM::_waitForMessage",
+      "StealthKillDetectionFix_MCM::::CurrentVersion_var"
+    ]
+  },
+  "playerQuestCallers": {
+    "21554:Skyrim.esm": [
+      45
+    ],
+    "2c367:Skyrim.esm": [
+      10
+    ],
+    "5c625:Skyrim.esm": [
+      200
+    ],
+    "aebfe:Skyrim.esm": [
+      0
+    ],
+    "4c1c:Dawnguard.esm": [
+      10,
+      11
+    ],
+    "4c3d:Dawnguard.esm": [
+      67
+    ],
+    "c8c:ccBGSSSE001-Fish.esm": [
+      0,
+      200
+    ]
+  },
   "weatherSync": true,
   "weather": {
     "changeGameMinutes": 10,

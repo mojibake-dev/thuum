@@ -442,7 +442,9 @@ undefined when the engine's container event carries an empty handle, as a drop's
 DropItemService's gate accepts the same event), so the drops list stayed empty and claimDrop never matched the copy. Fixed on
 m3-prop-physics (2026-10-30; the union at b8a9d4c6): the guard without the reference, a trace per recorded drop and per new track (a
 follower's new prop had no line: placed within two units, Keyframed from the start). The engine reuses the deleted drop's form
-id for the copy's placeAtMe (HYPOTHESIS, harmless). x-prop-drop v4 reruns unchanged on the new client.
+id for the copy's placeAtMe (HYPOTHESIS, harmless; settled 16:48 PST 2026-11-11 from the engine model docs/engine/havok-props.md
+E38 and E39: the reuse is the sign of the engine's free under a pausing InventoryMenu, and under Skyrim Souls RE's running menu
+the deleted drop is not freed while its dropper stays in the cell). x-prop-drop v4 reruns unchanged on the new client.
 
 ### The drop's stream at T3 (09:52 PDT 2026-10-30; x-prop-drop v4 162049 on b8a9d4c6, read by an agent)
 
@@ -884,3 +886,25 @@ deleted reference is not drawn, by the engine's usual rule; the reds stop before
 c1's SkyrimSoulsRE.ini bInventoryMenu=false through the relaunch files lever: one listed entry carrying the deleted id means Souls
 RE; the deleted entry still listed clears it and points at the seam's judging of Delete (NativeRows.inc:25). Pending in
 lab/gate.yaml meanwhile; the claim itself unchanged (a runtime_of that skips deleted references would be a claim rewrite, Eli's).
+
+### A moved prop's place is its body's, not its reference's (16:48 PST 2026-11-11 (00:48Z 11-12), thuum-fa, from a read-only analyst's read of x-prop-blast v3 20261111-223256 on canon 24f1cc6a; ADR-071 rung 0)
+
+x-prop-blast v3's traces (lab/frida/prop-impulse.js v1.1 on both seats, whole) print each watched body's Havok position beside
+the listings' reference position, and on c1 the two parted after canon's put-back at the track radius. When c1's player came
+within TRACK_RADIUS 1024 of the cart (fork 24f1cc6a propService.ts:34), PropService tracked the cabbages, put each one more than
+2 units or 2 degrees from its record back at the record by translateTo, and set it Dynamic (placeAtRecord :621-660, SAMPLE_UNITS
+and SAMPLE_DEGREES :48-49, restMotion :725-734). Two cabbages already lay elsewhere at rest, and for them the translate moved the
+reference and left the body:
+- 0x1c0c7, placed at its record at 22:37:41.531Z (c1-console.log:3874), listed at the record from step 89 to the run's end while
+  its body lay at rest on the road 940 units away (c1's prop-impulse trace, its final body row, row 650);
+- 0x1c0c9, placed at 22:38:29.169Z (:4634), listed at the record at step 152 while its body stayed 263 units east of the cart,
+  drawn on the boardwalk there in screenshot 157-c1, where the shout then woke it (row 485).
+
+So an owned prop's position comes from its body, never its reference: the owner's samples, ADR-071 decision 4's "tracks what it
+owns at any distance" and every check of a moved prop read the body. CONFIRMED as an observation by 20261111-223256 on c1
+(docs/engine/havok-props.md E21). The mechanism, a translate moves the reference and the reference follows a body only while the
+body moves, so a Dynamic body moved by translate alone stays behind, is HYPOTHESIS, as is the remedy for a placement that must
+move a Dynamic body (keyframe it first). The fix is rung 2's body reader, the platform's ReadBodies native (the plan's rung 2,
+docs/research/physics-leg-2026-11-11.md:128). For the lab: refs-near prints the reference's position, the one canon's service
+reads, so a claim on a moved prop's place reads it too; 0x1c0c7's listing agreed with c2's copy and the record while c1 drew the
+cabbage 940 units away.

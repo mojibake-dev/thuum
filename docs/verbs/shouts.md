@@ -752,3 +752,34 @@ snippets).
   is x-tgm-breath4 again, four launches in the observer's game. Fork
   m2-breath (the always-loaded flag) fixes nothing and is deleted.
 
+## One shout, two cones (2026-11-11, x-prop-blast v3 20261111-223256)
+
+- Found, in ADR-071 rung 0's blast read on canon 24f1cc6a (both seats'
+  traces whole): one Unrelenting Force reached c2 as two cones. c1, in
+  god mode, shouted all three words once (Z held 2 s) and reported the
+  release ("shout 13e07 variation 2 recovery 45 hits held 0" at
+  22:39:51.739Z, c1-console.log:5824); 1.57 s later the hit fallback
+  reported the same shout again ("E_SHOUT_UNREPORTED: no release seen ;
+  shout 13e07 variation 2 reported from its hit", :5851). The server
+  accepted both, each "recovers in 0.0 s" (server.log:1943-1944; god mode
+  starts no recovery on the server, 88bc8888), and relayed both: c1's
+  engine fired one cone (0xff000d2e), c2's figure two, 0xff000b97 and
+  0xff000c24, 1.53 s apart, each pushing c2's own Dynamic bodies (both
+  seats' lab/frida/prop-impulse.js traces, their AddImpact rows of spell
+  0x13f3a).
+- Why the fallback fired, on c1's own clock: the cone's first hit came at
+  22:39:53.127Z, 1.39 s after the report (c1's trace, row 530: Embry
+  0x3550c, about 2,300 units from c1), and reportFromHit takes a hit of
+  the reported spell for the same shout only within hitWindowMs, 1200
+  ms, a window sized for a breath's hits (fork 24f1cc6a
+  shoutService.ts:240-268, the window at :241-246, hitWindowMs at :345);
+  past it the hit read as another shout's whose release went unseen.
+  Outside god mode the server's recovery would refuse the second report
+  (HYPOTHESIS: not run).
+- The fix, HYPOTHESIS until a run reads one server shout line and one cone
+  in the watcher's game per shout, after playtest 51: the fallback reports
+  only a shout whose release went unreported, its window held open while
+  the reported shout's cone still flies rather than a fixed 1.2 s.
+  ADR-071's caster-only impulses (W5) also need one relay per cast
+  (docs/research/physics-leg-2026-11-11.md, its rung 0 results).
+

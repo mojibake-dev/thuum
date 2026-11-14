@@ -1,0 +1,72 @@
+# Playtest 52 (numidium, 2026-11-14): playtest 51's vampirism item played whole, and Gorm's letter, on the canon that holds
+# 51's fixes. Eli after 51 (2026-11-13): "yes, do the short sitting when those two pass", then "Sitting wait for infection to
+# open up the rest of the vampirism test". The build is fork canon 9bee10d7: m4-fix-lease-move 78551e27 (a living NPC's items
+# move by the game that simulates it, merged 2026-11-13T23:58Z) and m4-fix-infection 9bee10d7 over m4-fix-absorb ce6a650a (an
+# Absorb moves its value from target to caster, a re-reported stream keeps its count, a non-player's Health, Magicka or Stamina
+# effect lands in the victim's own game with its numbers zeroed so its script rolls there, and the server delivers a hosted
+# NPC's spell to a victim whose game does not host it; merged 2026-11-14T06:40Z, its gate 19 of 19 green): the server image
+# skymp-server:m4-fix-infection-9bee10d7, both clones' clean-m1 as promoted at that merge, under apocrypha's staged 60 fps Havok
+# cap as 51 was. The world is 51's start, playtest-canon-51-20261111T033258Z (Movarth's Lair's actors served fresh, Gorm's quest
+# fresh, the Golden Claw fresh; see 51.yaml's header). The clock: gameHour 12 at the normal pace (timeScale 20, 72 real minutes
+# a game day); the catch lands about 17:00 to 20:00, the turn three game days after the drain that took (about 3.6 real hours),
+# then a dawn for Falion's circle. Ariadne's game is never relaunched between the drain that took and her turn; a server restart
+# is fine. The camp, Ariadne first: Movarth's Lair's door 0x1f595's landing, as 51's (her game runs the vampires). The Moorside
+# Inn (Gorm, Jonna, Falion), door 0x1738c's landing:
+#     - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [-40054, 65484, -13802], rot: [0, 0, -30.6]}
+#     - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [-40024, 65432, -13802], rot: [0, 0, -30.6]}
+# Each move is `just playtest-teleport <profile> 3c:Skyrim.esm <x> <y> <z> <rot>`. The live steps, each a recipe: item 3's drain
+# for rotfern `just playtest-console 1 addspell 20 0x107aa1` (CrVampireDrain00, a LeftHand spell: ETYP EQUP 0x13F43, so she
+# equips it to her left hand), confirmed by the server log's "added the spell 107aa1"; item 2's relaunch of the letter's taker
+# `PLAYTEST=52 just playtest-relaunch <c>` (clientSettings set again in the stopped game, as ready set them; never Ariadne's
+# between the drain that took and her turn). After a dist push or a clone rollback (on Eli's word only) a seat's relaunch names
+# the playtest the same way, so questFragmentLive is set again (playtest_setup.py:74-79). Both seats carry a filled black soul
+# gem, so whoever catches the disease can take Falion's Rising at Dawn: a Cure Disease potion (ALCH 0xAE723) goes through the
+# player's AddTarget, which still refuses alchemy, so it is untested and not the cure. The ids read from Skyrim.esm 1.6.1170
+# (lab/esm.py, 2026-11-11 and 2026-11-14).
+id: 52
+build: "fork canon 9bee10d7 (51's lease, drain and infection fixes): server skymp-server:m4-fix-infection-9bee10d7, both clones' clean-m1 as promoted at its merge, under apocrypha's staged 60 fps Havok cap"
+world: playtest-canon-51-20261111T033258Z
+hold:
+  minutes: 330   # the catch, three game days of the shared clock (about 216 real minutes), the dawn's cure, Gorm's letter
+  reason: "playtest 52: Ariadne turns vampire and is cured, the infection crosses seats, Gorm's letter through a relaunch (canon 9bee10d7)"
+server:
+  npcEnabled: true
+  gameHour: 12.0
+  locks: true   # every switch on, as the 44 baseline
+  weatherSync: true
+  perks: true
+  leveling: true
+  cureSpells: []   # lifted for the whole session (D-T3 B): the server's SendCures would drop Ariadne's disease at every login
+# a relayed stage's script runs on both seats under the acting scope (D-Q10 A, Eli about 04:53Z 2026-11-11, main 7ced7f5a;
+# x-acting-player 20261111-034406 read it on this build): set in each stopped game by ready's relaunch
+clientSettings:
+  questFragmentLive: true
+camp:
+  # Movarth's Lair's door landing, the game's landing of the door 0x1f595; Ariadne first (she walks in first and hosts)
+  teleports:
+    - {kind: teleport, profileId: 2, cell: "3c:Skyrim.esm", pos: [-31537, 77289, -13729], rot: [0, 0, 126.1]}
+    - {kind: teleport, profileId: 1, cell: "3c:Skyrim.esm", pos: [-31586, 77324, -13729], rot: [0, 0, 126.1]}
+seats:
+  - profile: 1
+    name: "test 1"
+    perks: [0x7934b]   # Overdraw40 through the server's AddPerk (284a4d51): the headshot rule's condition
+    spells: []   # the drain comes mid-session, item 3 (playtest-console addspell)
+    items:
+      - {id: 0x2e504, count: 1}   # SoulGemBlackFilled for Rising at Dawn, should she catch it too
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]   # Survival off
+    values:
+      Marksman: 60
+    percentages: {health: 1, magicka: 1, stamina: 1}
+  - profile: 2
+    name: "test 2"
+    perks: []
+    spells: []
+    items:
+      - {id: 0x2e504, count: 1}   # SoulGemBlackFilled for Rising at Dawn (Falion sells only an empty one)
+    globals: [{form: "828:ccQDRSSE001-SurvivalMode.esl", value: 0}]
+    percentages: {health: 1, magicka: 1, stamina: 1}
+streams:
+  test1: 48989
+  test2: 49989
+after:
+  readback: percentages

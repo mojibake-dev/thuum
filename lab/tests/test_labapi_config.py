@@ -119,6 +119,25 @@ class ClientReset(unittest.TestCase):
                 else:
                     os.environ[k] = v
 
+    def test_a_busy_agent_is_asked_again_for_30_s_unless_the_env_says(self):
+        """core's host journal, 2026-11-12: Proxmox's "QEMU guest agent is not running" is a busy agent, so lab-api asks
+        such a call again for agent_busy_s (proxmox.GuestControl._agent); LAB_AGENT_BUSY_S sets it, 0 turning it off."""
+        import os
+        from labapi.config import Settings
+
+        self.assertEqual(Settings().agent_busy_s, 30.0)
+        old = os.environ.get("LAB_AGENT_BUSY_S")
+        try:
+            os.environ["LAB_AGENT_BUSY_S"] = "0"
+            self.assertEqual(Settings.from_env().agent_busy_s, 0.0)
+            os.environ["LAB_AGENT_BUSY_S"] = "45"
+            self.assertEqual(Settings.from_env().agent_busy_s, 45.0)
+        finally:
+            if old is None:
+                os.environ.pop("LAB_AGENT_BUSY_S", None)
+            else:
+                os.environ["LAB_AGENT_BUSY_S"] = old
+
     def test_every_relaunch_stops_the_launch_task_before_the_game(self):
         """install-lab.ps1 registers sky-lab-launch IgnoreNew and launch.ps1 relaunches a game that exits in its first
         minute, so the task stops first and the start is always a fresh launch.ps1."""

@@ -128,7 +128,9 @@ class Settings:
     # The client log artifact (c1.log): Skyrim Platform's own log, which always
     # exists and carries plugin load, JavaScript exceptions and latent-call
     # traces. lab-driver's writeLogs sink (Data\Platform\Logs\lab-driver-logs.txt
-    # in the game directory) only appears once the driver logs an error.
+    # in the game directory) exists whenever the driver loaded: its log() writes
+    # through printConsole and writeLogs (lab/driver/src/index.ts:93), and it
+    # logs "loaded" at load (:3462).
     client_driver_log: str = r"C:\Users\lab\Documents\My Games\Skyrim Special Edition\SKSE\skyrim-platform.log"
     # lab-driver's own log (Skyrim Platform's writeLogs), relative to the game
     # directory the client recorded in {client_lab_dir}\game-dir.txt at install;
@@ -305,6 +307,13 @@ class Settings:
     )
     # a relaunch {frida} starts the game alone: its files step stopped it and the watcher is armed
     relaunch_start_cmd: str = "Start-ScheduledTask -TaskName sky-lab-launch"
+    # relaunch {until: stopped}'s kill, the step's first act (Runner._relaunch): the same order as the stop above, the
+    # launch task ended before the game, by cmd.exe and the two inbox programs rather than a PowerShell to start (schtasks
+    # /end and taskkill, learn.microsoft.com's Windows commands), so a game stopped mid-flight (x-prop-stall, E32) stops
+    # within the exec's own round trip (cmd.exe /d: no AutoRun command first); taskkill answers 128 when no game was there
+    # to stop, which the step reads as a lost game; skse64_loader is not named, since a second /IM missing would answer 128
+    # for a game that was killed, and the loader exits once it has injected (the 4689 rows: exit 0 at the game's start)
+    relaunch_kill_cmd: str = "schtasks /End /TN sky-lab-launch >NUL 2>&1 & taskkill /F /IM SkyrimSE.exe"
     relaunch_cmd: str = relaunch_stop_cmd + "; " + relaunch_start_cmd
     relaunch_timeout_s: float = 300.0
     # ADR-036: how a seat starts a run. "rollback" stops its VM, rolls the disk back to its snapshot and boots it,
@@ -326,6 +335,10 @@ class Settings:
     # seconds between one seat's GPU reset (a VM stop or start) and another's (proxmox.GuestControl, core's
     # dual-reset finding of 2026-10-30: every wedge came with both lab cards reset within seconds)
     reset_stagger_s: float = 20.0
+    # how long a guest agent call Proxmox answers "QEMU guest agent is not running" is asked again before it fails
+    # (proxmox.GuestControl._agent): that answer is its 3 s guest-ping unanswered by a busy agent, not a stopped one
+    # (core's host journal, 2026-11-12, daily on both seats)
+    agent_busy_s: float = 30.0
     # how a client seat's VM stops before a rollback (proxmox.GuestControl): "stop" at once, or "shutdown" (an ACPI
     # shutdown PVE forces to a stop after seat_shutdown_timeout_s), for the night's question of 2026-10-30 whether a
     # running NVIDIA driver pulled out from under its GPU matters to the wedges
@@ -433,6 +446,7 @@ class Settings:
             relaunch_rollback_every=int(_env("LAB_RELAUNCH_ROLLBACK_EVERY", str(d.relaunch_rollback_every))),
             relaunch_heartbeat_timeout_s=float(_env("LAB_RELAUNCH_HEARTBEAT_TIMEOUT_S", str(d.relaunch_heartbeat_timeout_s))),
             reset_stagger_s=float(_env("LAB_RESET_STAGGER_S", str(d.reset_stagger_s))),
+            agent_busy_s=float(_env("LAB_AGENT_BUSY_S", str(d.agent_busy_s))),
             seat_stop=_env("LAB_SEAT_STOP", d.seat_stop).strip() or d.seat_stop,  # unset or empty: stop
             seat_shutdown_timeout_s=int(_env("LAB_SEAT_SHUTDOWN_TIMEOUT_S", str(d.seat_shutdown_timeout_s))),
             time_scale=float(_env("TIME_SCALE", str(d.time_scale))),

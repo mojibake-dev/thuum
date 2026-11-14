@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field, field_validator
 # a managed guest, a client verb on an unmanaged one.
 # craft: lab-driver reproduces the crafting menu's inventory effect at a station
 # (UNCONFIRMED until a lab run); lab-api resolves the recipe name to its form id.
-CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "node-rotation", "script-state", "face-keyframes", "quest-stage", "set-stage", "alias", "draw-weapon", "anim-event", "figure-action", "repeat", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "allow-save", "set-av", "watch-start", "watch-stop", "markers", "known", "add-perks", "favorite", "favorites", "held", "inventory", "transfer", "globals", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "factions", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "refs-near", "look", "solo-start", "place-npc", "place-ref", "npc-ai", "npc-hold", "npc-kill", "npc-state", "look-at", "npc-damage", "figure-spells", "npc-puppet", "npc-pose", "cell-events-start", "cell-events-stop", "play-idle", "combat-spell", "start-combat", "stop-combat", "papyrus-events", "papyrus-log", "quit"}
+CLIENT_ACTIONS = {"connect", "reconnect", "move", "equip", "cast", "activate", "node-rotation", "script-state", "face-keyframes", "quest-stage", "quest-objectives", "set-stage", "alias", "script-vars", "draw-weapon", "anim-event", "figure-action", "repeat", "dump-state", "request-screenshot", "craft", "tap-key", "hold-key", "close-menu", "set-gmst", "allow-save", "set-av", "watch-start", "watch-stop", "markers", "known", "add-perks", "favorite", "favorites", "held", "inventory", "transfer", "globals", "race-pick", "settings", "racemenu", "racemenu-save", "racemenu-load", "racemenu-scale", "racemenu-drop", "body-morph", "node-scale", "head-parts", "global", "factions", "weather", "av-table", "av-names", "av-call", "av-read", "advance-skill", "skills", "plugins", "console", "projectiles", "graph-vars", "graph-float", "voice", "poisons", "arrows", "refs-near", "look", "solo-start", "place-npc", "place-ref", "npc-ai", "npc-hold", "npc-kill", "npc-state", "look-at", "npc-damage", "figure-spells", "npc-puppet", "npc-pose", "cell-events-start", "cell-events-stop", "play-idle", "combat-spell", "start-combat", "stop-combat", "papyrus-events", "papyrus-log", "quit"}
 # Server-side verbs (rung R0) go to the labCommand RPC; CONTRACT.md lists them.
 SERVER_ACTIONS = {"teleport", "give", "set-appearance", "open-race-menu", "set-percentages", "kill", "respawn", "papyrus-av", "staff-rank", "learn-spell",
                   "kill-ref", "respawn-ref", "server-console"}
@@ -88,6 +88,18 @@ class ServerSpec(BaseModel):
     # serves (x-world-globals-rate, b-world-global); None keeps the file's, and the server's own default, false (nobody
     # elected, every game's globals its own), so the lab's settings stay off
     worldGlobals: bool | None = None
+    # the run's own game clock rate (the time block's timeScale, wire-rules clock.rs: game seconds per real second, 20 in
+    # Skyrim.esm): a raised rate brings a game-time timer inside a run (H-VT1: Sanguinare Vampiris turns its host three game
+    # days on, 180 s at 1440). The clock is a pure function of its time block, so a new rate runs from the run's own epoch,
+    # laid at the run's start from the file's start date, as gameHour's is, never over the time before it; a restart in
+    # the run keeps that epoch (docs/research/rung5-quests-2026-11-09.md 8(b)). None keeps the file's
+    timeScale: float | None = None
+    # the run's own cure list (the cureSpells server setting, memo D56 A: the listed spells removed from every player's game
+    # at login and every minute): "<hex id>:<plugin>" strings, [] lifting every cure, so a probe's seat can turn (D-T3 B,
+    # Sanguinare Vampiris b8780:Skyrim.esm lifted per run until playtest 51 verifies a turn); each plugin as the run's load
+    # order writes it, case for case, or the runner refuses the run (the server skips an unresolved cure silently). None
+    # keeps the file's
+    cureSpells: list[str] | None = None
 
 
 class Step(BaseModel):
@@ -357,6 +369,44 @@ def _factions_args(args: dict[str, Any]) -> dict[str, Any]:
     return dict(args)
 
 
+def _script_vars_args(args: dict[str, Any]) -> dict[str, Any]:
+    """script-vars {form, keys}: named variables of a quest's or a reference's attached scripts as the seat's own VM holds
+    them (lab-driver's call of TESModPlatform.ReadScriptVariables, the world streamer's read for ScriptVariables 81: ADR-068
+    rung 5, docs/research/rung5-quests-2026-11-09.md 1(c) and 1(e)), kept per seat and per form for
+    c.script_vars(<form>).value("<script>::<var>"). The form is a form id (0xeafd5) or a FormDesc the runner resolves; each
+    key names the attached script and the variable as a condition does, "<script>::<var>" split at its first "::"
+    (PlayerVampireQuestScript::::VampireStatus_var: an auto property's backing variable keeps its own "::"), one to 32 of
+    them (the native's answer stays one step's note)."""
+    unknown = sorted(set(args) - {"form", "keys"})
+    if unknown:
+        raise ValueError(f"script-vars takes form and keys, not {unknown}")
+    if not _form_or_desc(args.get("form")):
+        raise ValueError(f"script-vars' form is a quest's or a reference's form id (0xeafd5) or a FormDesc, got {args.get('form')!r}")
+    keys = args.get("keys")
+    if not isinstance(keys, list) or not 1 <= len(keys) <= 32 or not all(
+            isinstance(k, str) and "::" in k and all(part.strip() for part in k.split("::", 1)) for k in keys):
+        raise ValueError(f'script-vars\' keys is a list of one to 32 "<script>::<var>" names, got {keys!r}')
+    return dict(args)
+
+
+def _quest_objectives_args(args: dict[str, Any]) -> dict[str, Any]:
+    """quest-objectives {quest, objectives}: a quest's objectives as the seat's own game shows them (lab-driver's Papyrus
+    Quest.IsObjectiveDisplayed and IsObjectiveCompleted: ADR-068 rung 5, docs/research/rung5-quests-2026-11-09.md 1(e); each
+    seat's engine runs the fragment that shows them, R3 per seat), kept per seat and per quest for
+    c.quest(<quest>).objectiveDisplayed(<i>). The quest is a form id (0x74a83) or a FormDesc the runner resolves; the
+    objectives are one to 64 of the quest's objective indices, 0 to 0xFFFF."""
+    unknown = sorted(set(args) - {"quest", "objectives"})
+    if unknown:
+        raise ValueError(f"quest-objectives takes quest and objectives, not {unknown}")
+    if not _form_or_desc(args.get("quest")):
+        raise ValueError(f"quest-objectives' quest is a quest's form id (0x74a83) or a FormDesc, got {args.get('quest')!r}")
+    objectives = args.get("objectives")
+    if not isinstance(objectives, list) or not 1 <= len(objectives) <= 64 or not all(
+            isinstance(i, int) and not isinstance(i, bool) and 0 <= i <= 0xFFFF for i in objectives):
+        raise ValueError(f"quest-objectives' objectives is a list of one to 64 objective indices from 0 to 0xFFFF, got {objectives!r}")
+    return dict(args)
+
+
 def _inventory_args(args: dict[str, Any]) -> dict[str, Any]:
     """inventory {ref}: a container's items as the seat's own game holds them, a chest's or a body's, by its reference's
     form id (or a FormDesc or a table name, which lab-api resolves before the driver sees it), for
@@ -460,7 +510,9 @@ def _relaunch_args(args: dict[str, Any]) -> dict[str, Any]:
     # while that game is down (b-cell-host's unhosted window); a later connect waits for the new game's login.
     # until: stopped returns as soon as the guest agent has stopped the game, the server not yet told, so what
     # follows is timed from the kill itself (b-host-kill: the stale rule's pass inside the grace plus the
-    # threshold, which gone's netcode timeout of about 18 s would hide)
+    # threshold, which gone's netcode timeout of about 18 s would hide). With neither files nor frida the kill is
+    # the step's first act and the outgoing logs and the new game's start follow behind it (Runner._relaunch_behind), so
+    # a game stops mid-flight (x-prop-stall, E32); with either, the kill comes after the copies and the lever
     until = args.get("until")
     if until is not None and until not in ("gone", "stopped"):
         raise ValueError(f"relaunch's until is gone or stopped, not {until!r}")
@@ -524,7 +576,7 @@ def _relaunch_args(args: dict[str, Any]) -> dict[str, Any]:
 # rhythm, and reads that change nothing (a node's scale, the state, the voice, the projectiles nearby, a global's
 # value), never a console line (a seat's setup is the server's, Eli 2026-10-13) nor a connect
 PLAYTEST_READS = {"node-scale", "node-rotation", "script-state", "face-keyframes", "dump-state", "head-parts", "voice", "held", "known", "projectiles", "graph-vars", "skills",
-                  "refs-near", "npc-state", "globals", "quest-stage", "alias", "factions"}
+                  "refs-near", "npc-state", "globals", "quest-stage", "alias", "factions", "script-vars", "quest-objectives"}
 # One lever on a world actor, for a live read Eli watches (playtest thirty's spinning wolves, 2026-10-21 16:5x, his
 # yes to the experiment): npc-ai switches one actor's engine AI off and back on through lab-driver (Actor.EnableAI);
 # start-combat and stop-combat open and end one named NPC's combat against that seat's player (Actor.StartCombat and
@@ -659,6 +711,10 @@ def parse_step(raw: Any, clients: list[str]) -> Step:
         args = _script_state_args(args)
     if action == "alias":
         args = _alias_args(args)
+    if action == "script-vars":
+        args = _script_vars_args(args)
+    if action == "quest-objectives":
+        args = _quest_objectives_args(args)
     if action == "factions":
         args = _factions_args(args)
     if action == "transfer":
@@ -677,6 +733,8 @@ def parse_step(raw: Any, clients: list[str]) -> Step:
 
 
 _WORLD_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
+# a FormDesc's text as the server's settings take it, "<hex id>:<plugin>" (FormDesc::FromString)
+_FORM_DESC = re.compile(r"[0-9A-Fa-f]{1,8}:[^:]+\.(?:esm|esp|esl)", re.IGNORECASE)
 
 
 def _server_spec(server: dict[str, Any]) -> ServerSpec:
@@ -704,16 +762,24 @@ def _server_spec(server: dict[str, Any]) -> ServerSpec:
     world_globals = server.get("worldGlobals")
     if world_globals is not None and not isinstance(world_globals, bool):
         raise ValueError(f"server.worldGlobals is true or false, got {world_globals!r}")
+    scale = server.get("timeScale")
+    if scale is not None and (isinstance(scale, bool) or not isinstance(scale, (int, float)) or not 0 < scale <= 100000):
+        raise ValueError(f"server.timeScale is the game seconds per real second, above 0 and up to 100000 (20 is Skyrim's), got {scale!r}")
+    scale = float(scale) if scale is not None else None
+    cures = server.get("cureSpells")
+    if cures is not None and (not isinstance(cures, list) or len(cures) > 64
+                              or not all(isinstance(c, str) and _FORM_DESC.fullmatch(c) for c in cures)):
+        raise ValueError(f'server.cureSpells is a list of "<hex id>:<plugin>" strings ([] lifts every cure), got {cures!r}')
+    knobs = dict(npcEnabled=npc, gameHour=hour, npcRespawnHours=respawn, handoffPassSettleMs=settle, npcRollLevel=roll,
+                 worldGlobals=world_globals, timeScale=scale, cureSpells=list(cures) if cures is not None else None)
     world = server.get("world")
     if world is None:
-        return ServerSpec(snapshot=str(server.get("snapshot", "clean")), netem=netem, npcEnabled=npc, gameHour=hour,
-                          npcRespawnHours=respawn, handoffPassSettleMs=settle, npcRollLevel=roll, worldGlobals=world_globals)
+        return ServerSpec(snapshot=str(server.get("snapshot", "clean")), netem=netem, **knobs)
     if "snapshot" in server:
         raise ValueError("server takes a snapshot or a world, not both")
     if not isinstance(world, str) or not _WORLD_NAME.fullmatch(world):
         raise ValueError(f"server.world names a directory under lab/fixtures/worlds, got {world!r}")
-    return ServerSpec(world=world, netem=netem, npcEnabled=npc, gameHour=hour, npcRespawnHours=respawn,
-                      handoffPassSettleMs=settle, npcRollLevel=roll, worldGlobals=world_globals)
+    return ServerSpec(world=world, netem=netem, **knobs)
 
 
 # every top-level key load_scenario reads. Any other key was dropped without a word before 2026-11-03: a top-level `asserts:`
