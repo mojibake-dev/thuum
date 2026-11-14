@@ -930,11 +930,14 @@ grace read and the release read then sent nothing; the same harness on f6ca339d'
 release read sending the change).
 
 **Its shared send bucket (the whole-branch review's SHOULD 3).** The grace reads spend the one bucket every record read spends
-(scriptStateService.ts SEND_BURST 64 and SEND_PER_S 8, :136-141, wire-validate's script_state_budget mirrored, lib.rs:306), with
-no priority over the other due reads, and a read waits while the bucket is empty (:1335-1340). So inside the 5 s grace a seat
-sends at most 64 + 8 x 5 = 104 changed records from a full bucket, and fewer from one the cell's sweep, its hops or another cell's
-reads spent just before the unload; a grace read still due when the grace ends goes at the released epoch and is refused behind a
-successor, as before. HYPOTHESIS, UNMEASURED: a busy cell can miss the grace this way (no run has counted a cell's changed
+(scriptStateService.ts's sendBudget, :137-141 and :1637, a ServerBudget of SERVER_BUDGETS.ScriptState: wire-validate's
+script_state_budget, 64 at once then 8 a second, lib.rs:306, mirrored with half a second of its rate kept back, D-PT5 C, the half
+second UNMEASURED, lib/serverBudget.ts:20, :40 and :60; fork m4-client-margins 64c0832f, whose line numbers these are), with no
+priority over the other due reads, and a read waits while the bucket holds fewer than the 5 tokens a send needs, its own and the
+reserve's 4 (:1335-1340). So inside the 5 s grace a seat sends at most 60 + 8 x 5 = 100 changed records from a full bucket (60 at
+once, the 64 less the reserve, then 8 a second), and fewer from one the cell's sweep, its hops or another cell's reads spent just
+before the unload; a grace read still due when the grace ends goes at the released epoch and is refused behind a successor, as
+before. HYPOTHESIS, UNMEASURED: a busy cell can miss the grace this way (no run has counted a cell's changed
 references at its unload report against the bucket).
 
 **The grid case, A's declared gap, and D-S4 B.** The grace read starts at an unload report alone. A host whose exterior cell left

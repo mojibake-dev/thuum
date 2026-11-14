@@ -90,9 +90,10 @@ ends none is E_ENTRY_UNPAIRED, before any other check; a host with no game conne
 (64 open enters a presser, UNMEASURED; a disconnect forgets the player's, a restart all). Rule 5: a leave is validated by its
 pairing, R2 beyond it.
 Rate limit / bounds: the wire's entry_budget, 8 at once then 4 a second per sender (UNMEASURED, E_VAL_RATE); the linked budget, 8
-a second (today's); the client's own entry window of 4 a second. Every accepted loader pair is logged with its reporter: a modified
-client can fire any linked pair of a cell it has loaded, within the link, the reach and the budget, and relay entries for its own
-presser (declared).
+a second (today's); the client's own mirror of entry_budget, a ServerBudget of 8 and 4 with half a second of its rate kept back
+(D-PT5 C, the half second UNMEASURED; fork m4-client-margins 64c0832f, activationService.ts:579), so 6 at once then 4 a second, an
+entry past it not relayed (:369-371). Every accepted loader pair is logged with its reporter: a modified client can fire any linked
+pair of a cell it has loaded, within the link, the reach and the budget, and relay entries for its own presser (declared).
 
 ## Engine surface
 
@@ -229,7 +230,8 @@ presser (declared).
   the target; (3) a later link, not reported: a pair whose caster and target are both in the family (D-S3 point 5's test,
   kept by the train's client review, fork 118b92af note 1, so a mechanism activating a family target, the puzzle lever's darts and
   the pull chains' blades, falls to (4)); (4) otherwise the cell's host's, as today. A "triggerEntry" without family sends Activate
-  with `entry` within its own window of 4 a second.
+  with `entry` within its own budget, a ServerBudget of SERVER_BUDGETS.ActivateEntry (entry_budget's 8 and 4, half a second of
+  its rate kept back, D-PT5 C: 6 at once then 4 a second; fork m4-client-margins 64c0832f, activationService.ts:369-371 and :579).
   RelayedActivationService plays an `entry` through SendTriggerEvent and marks every play relay-played for FIRED_MS.
 - Lines: "trap <t> fired here by <c>: the presser's owner's firing, reported (D-W1)", "...: the relay's own play, not reported
   again (D-W1)", "...: a later link of a firing, each seat's own (D-W1)", "trigger entry <t> by <p> (enter|leave): relayed to the
