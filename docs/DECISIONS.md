@@ -5664,3 +5664,23 @@ ADR-068 decision 9's rung 6 proofs with PLAN.md's M4 and M6 exits (`d-bleak-fall
 dated note at ADR-068's end; `q-main` off the route). Not amended here: playtest 51's cut, Eli's separate word under ADR-071; and
 whether a stage's playtest (ADR-040 decision 1) still exists beside the route's sittings, which is not said. Recorded at the
 acceptance by auriel as a reading of the six decisions, not as Eli's words.
+
+Eli's words after playtest 51 (2026-11-13, in numidium's session, verbatim; recorded 23:24Z by numidium; the findings are
+docs/private/playtest-51-findings.md's breaks 1 to 10):
+- No live arm: "nah just run all the fixes and lmk when ready ." The ten breaks go through the gate as one batch, ahead of the
+  queue from before 51.
+- Absorb for everyone (break 1): "if the spell doesnt work let's sort that fro everyone". An Absorb effect moves its value from
+  its target to its caster for every spell and every caster (fork m4-fix-absorb), never a vampire's case.
+- The infection rides the drain (break 2): "ideally the chance to infect would also propogate", then "Note that whatever does the
+  drain needs to also be transmitting the infection chance." A drain's effect reaches its victim's own game wherever the
+  caster runs, so the effect's own script rolls the disease there, once. The same delivery serves the creature and trap
+  diseases (ADR-063: the victim's game owns its character).
+- The next sitting: "yes, do the short sitting when those two pass", then "Sitting wait for infection to open up the rest of the
+  vampirism test". Playtest 52 plays playtest 51's item 1 whole (the catch, the turn on the shared clock, the cure) and Gorm's
+  letter, once the drain, the infection and the lease fixes are merged on canon.
+- Spell animations (break 6, Raise Wall's rise): "I mean all spells with animations should be animated so sure, ditch the rows
+  gating things and pass it raw". Every spell's scripted placement and animation reaches every screen through one channel,
+  with no per-spell entry: the spellPlacedObjects table (ADR-057's shape A, D74) and its band check (E_PLACED_RANGE) retire
+  when the channel replaces them, as ADR-063 decision 5 and the content census (ScriptPlacement) asked of every list. "Raw" is
+  read as ungated: the channel's messages are still wire-schema types with a validator (CLAUDE.md rules 4 and 12). Its ADR is
+  the builder's to draft after the infection's delivery.
