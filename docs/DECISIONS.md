@@ -5724,3 +5724,20 @@ lab/.cache/drafts/pt51-ownership-plan.md, playtest 51's breaks 3 to 5; recorded 
   discovery is.
 - D-PO2 A "The running game claims it": the game running a quest's lead or scene claims the NPC until the lead or scene ends;
   the claim travels across cells and survives a grant, as a dialogue's does (ADR-063).
+
+The gap audit's answers (Eli in thuum-magnus' session, 2026-11-14 about 08:00Z, by AskUserQuestion on
+lab/.cache/drafts/gap-audit/verified.md; recorded 06:52Z by numidium from thuum-magnus' message; the audit's ADR, accepted with
+these answers folded in, is ADR-073, its text to follow):
+- D-L1 B: quest and alias events run on every seat whose engine raises them, as ADR-068 decision 6 is written.
+- D-L2 B: a scene is owned by the seat that started it, which claims its actors until it ends, the claim surviving a cell grant
+  (grant() keeps claims; ADR-052 decision 3 to be amended).
+- D-L3 A: one wire-rules table of the server-computed effect kinds, exported through the generated header.
+- D-L4 C: a value effect's number is cut by zeroing its magnitude (the infection fix's shape), and where an effect has no
+  magnitude, at the actor-value write.
+- D-G2 A: questFragmentLive is served by the server, true for every world quest (until then, a profile's clientSettings).
+- D-G3 A: a per-seat quest's change to a world object is world state, recorded from the object's owner.
+- D-G4 A: the 44 denied quests retire when ADR-070's questJournal lands.
+- D-G5 A: D-Q5 B for Story Manager instances, by cast, keyed on ENAM.
+- D-G6 A: quest markers go to everyone shown the quest; a bounty is per player per hold (R0); exploration is per player.
+- D-PF6, verbatim: "Use the cabbage cart in riverwood obvs": x-prop-follow's leg B moves to Riverwood's cabbage cart and its own
+  cabbages, and v1.8's ingots are dropped.
