@@ -134,8 +134,8 @@ it names a connected player; wordStages are the server's read of the record. Scr
 - mode (u8, D58 B, m3-quest-mode): 0 list, 1 all; set by the server on the login message, whose `shared` carries the
   shared quests in mode 0 and the DENIED quests in mode 1; a client's message with mode != 0 is refused (Range).
 - Validator rules: structural (wire-validate check_quest_stage): a quest of 0 only with a list, the list naming each
-  quest once and never 0; from a client no list and a quest named, under a budget of 16 then 4 a second
-  (quest_stage_budget, UNMEASURED). Semantic (wire-rules quest_stages, through the bridge): the quest on the server's
+  quest once and never 0; from a client no list and a quest named, under a budget of 32 then 8 a second (wire-validate
+  lib.rs:286) (quest_stage_budget, UNMEASURED). Semantic (wire-rules quest_stages, through the bridge): the quest on the server's
   `sharedQuests` list (E_QUEST_UNLISTED); the handler's own: a QUST in the load order (E_QUEST_UNKNOWN). A stage
   already recorded is a no-op at debug, never a relay.
 - Idempotency / ordering: a stage already recorded is a no-op; the replay is ascending per quest; the relay is
