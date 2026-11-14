@@ -83,7 +83,10 @@ two checks (the reporter hosts the trigger's cell, the actor's own XAPR names th
   caster equals target; the change admits caster-to-target pairs the game files link (the client reads the target's
   XAPR and XLKR through Skyrim Platform? No native lists them: the server judges the pair instead, so the client sends
   every non-player activation in a cell it hosts, bounded by a budget, and the server refuses unlinked pairs).
-- SP filter: the host's cells alone; a budget of 8 then 4 a second.
+- SP filter: the host's cells alone; at most eight a second in a fixed one-second window (activationService.ts
+  linkedBudget, SecondWindow(8), :566 at fork canon 78551e27), the C++ handler's E_TRAP_RATE window (ActionListener.cpp
+  OnLinkedActivation :6177-6197) at its full size, so outside D-PT5 C's reserve (the m4-client-margins review's F3, open
+  to Eli).
 - Data captured: {caster, target} as Activate carries them.
 - Side effects: HYPOTHESIS until x-bleak-traps: the volume of engine-internal activations in a dungeon cell (the
   read counts them).
