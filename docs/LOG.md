@@ -9765,3 +9765,36 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   sessions dead and no network between wakes, which read as GitLab and GitHub timing out and the jump host resetting ssh. core,
   its WAN, the tunnel and the tailnet were fine throughout. A chain run from the Mac survives the lid only if the Mac stays
   awake (caffeinate -s on power, core's advice).
+
+### 2026-11-14
+
+- m4-fix-infection merged to fork canon 9bee10d7 (2026-11-14T06:40Z): the gate 20261114-054212-merge-m4-fix-infection,
+  20261114-054212-smoke-two-players to 20261114-063555-b-npc-caster (19 runs, 19 green); T2 skip on
+  skymp-server:m4-fix-infection (its full T2 green at 04:38:02Z); clones promoted (both, clean-m1-next to clean-m1). It holds
+  m4-fix-absorb ce6a650a, so both of playtest 51's drain breaks land with one gate. Verbs: magic-effects and spell-cast.
+  - The drain (break 1, Eli: "sort that for everyone"): an Absorb moves its value from its target to its caster for every
+    spell and caster (EffectKind::Absorb), and a concentration stream its caster's game reports again keeps its count
+    (Casts::continues).
+  - The infection (break 2, Eli: "whatever does the drain needs to also be transmitting the infection chance"):
+    skyrim-platform's PlayerAddTarget lets a non-player's Health, Magicka or Stamina effect land with its magnitude zeroed,
+    so its script runs in the victim's own game. The server's OnSpellHit delivers an accepted hosted NPC's spell to a victim
+    whose game does not host it, once a contact.
+  - thuum-magnus built both; numidium reviewed both READY (the infection's N1 and N2 applied as 9bee10d7). SpellPlacedTest's
+    premise ends its first stream before the next cast (f3b27e8b).
+  - The stage on 9bee10d7, 3 green of 3:
+    - x-absorb v1.3 20261114-044943 (the drain is a LeftHand spell, ETYP 0x13F43): 34 hits, c1 0.50 to 0.68, c2 0.50 to 0.34;
+    - x-absorb-stream v1.1 045245: 264 stream hits by the placed vampire against its host's 248 launch reports, 8 relays,
+      none counted at 0.00x;
+    - x-infection v1 045627: 22 deliveries to c2, which hosts nothing, and c2's maximum Health 2000 to 1975 (the disease
+      took).
+  - GitHub's Formatting check on 9bee10d7 read the SP Types (FunctionsDump) flake once and passed its rerun. x-absorb v1.1
+    033738 (ce6a650a's stage) was red on its own premise, the drain equipped to the right hand.
+- (numidium) The physics unit under D-PT6 B: rungs 1 and 2 (m4-physics-2-sample) merged with canon 78551e27 as 50658cd5 by
+  numidium (a clean merge-tree), T2 green. Its stage of the eight probes without the login-refusal claim went 5 green of 8.
+  - Green: x-prop-weight (E13), x-prop-rest-e10 (E46), x-prop-stall (E32), x-prop-edge, x-basket-roll.
+  - Red: x-prop-arbitration, x-held-pose, x-cabbage-rest. The cold reruns:
+    - x-held-pose red twice at step 139: a defect, the holder's reference at rest under a lifted body. v1.4's body lines
+      fire only at a first track, so 052737 leaves it for the prop-grab trace.
+    - x-cabbage-rest: D-PF4's answer (all four cabbages rolled off), so x-prop-follow's leg B moves to IronIngots (v1.8).
+    - x-prop-arbitration v14.7 green at its second cold rerun (051342).
+  - The unit does not merge: held-pose's defect and x-body-read (D-PH25 C) stand.

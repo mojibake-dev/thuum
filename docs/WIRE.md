@@ -360,9 +360,10 @@ every other player and replays the record after a login in order after
 PlayerGlobals, behind the list. Server to client, R0: the list, the relay, the
 replay; the seat applies each stage through the engine's own SetStage and
 consumes the engine's event for it. Validator: a client names no list and a
-quest other than 0; the list names each quest once and never 0; budget 16 then
-4 a second (UNMEASURED). Refusals (the server's log): E_QUEST_UNKNOWN (not a
-QUST in the load order), E_QUEST_UNLISTED; a stage already recorded is a no-op.
+quest other than 0; the list names each quest once and never 0; budget 32 then
+8 a second since m3-quest-mode, 16 then 4 before it (wire-validate lib.rs:286;
+UNMEASURED). Refusals (the server's log): E_QUEST_UNKNOWN (not a QUST in the
+load order), E_QUEST_UNLISTED; a stage already recorded is a no-op.
 
 Since SCHEMA_VERSION 41 (fork m4-scripts-5-wire af1f35e0, on m4-scripts-5-quests 44ffafc2; ADR-068 rung 5,
 docs/research/rung5-quests-2026-11-09.md section 1(a)): optional `word: u8` (1 a start, 2 a stop, with stage 0), `acting: u32`
