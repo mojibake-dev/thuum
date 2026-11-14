@@ -69,7 +69,12 @@ else
   if ! RUNSET_AFTER="${GATE_AFTER:-}" lab/tools/runset.sh "layer-$branch"; then
     echo "== the sweep is not green: nothing promoted, main not moved" >&2; exit 1
   fi
-  setfile=$(ls -t lab/results/runsets/*-layer-"$branch"*.json | head -1)
+  # the set's record by the id lab-api gave it: the set's name with each character but a letter, a digit, - or _ made a
+  # dash, cut to 40 (runset.py's start), so apocrypha/<x> is saved as <stamp>-layer-apocrypha-<x>.json; the branch's own
+  # spelling never matches a slashed branch's record, and the merge would stop after a green sweep (found 2026-11-14,
+  # before the eyes layer's sweep: layer-appearance and layer-tidy merged by citation, which reads no file here)
+  slug=$(python3 -c 'import sys; n=sys.argv[1]; print("".join(c if c.isalnum() or c in "-_" else "-" for c in n)[:40] or "set")' "layer-$branch")
+  setfile=$(ls -t lab/results/runsets/*-"$slug"*.json | head -1)
   sweep=$(basename "${setfile%.json}")
 fi
 runs=$(python3 -c 'import json,sys; rs=json.load(open(sys.argv[1])); r=[e["run"] for s in rs["scenarios"] for e in rs["runs"].get(s,[]) if e.get("run")]; print(f"{r[0]} to {r[-1]} ({len(r)} runs)" if r else "")' "$setfile")
