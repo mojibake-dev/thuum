@@ -231,7 +231,8 @@ pair of a cell it has loaded, within the link, the reach and the budget, and rel
   kept by the train's client review, fork 118b92af note 1, so a mechanism activating a family target, the puzzle lever's darts and
   the pull chains' blades, falls to (4)); (4) otherwise the cell's host's, as today. A "triggerEntry" without family sends Activate
   with `entry` within its own budget, a ServerBudget of SERVER_BUDGETS.ActivateEntry (entry_budget's 8 and 4, half a second of
-  its rate kept back, D-PT5 C: 6 at once then 4 a second; fork m4-client-margins 64c0832f, activationService.ts:369-371 and :579).
+  its rate kept back, D-PT5 C, the half second UNMEASURED: 6 at once then 4 a second; fork m4-client-margins 64c0832f,
+  activationService.ts:369-371 and :579).
   RelayedActivationService plays an `entry` through SendTriggerEvent and marks every play relay-played for FIRED_MS.
 - Lines: "trap <t> fired here by <c>: the presser's owner's firing, reported (D-W1)", "...: the relay's own play, not reported
   again (D-W1)", "...: a later link of a firing, each seat's own (D-W1)", "trigger entry <t> by <p> (enter|leave): relayed to the
