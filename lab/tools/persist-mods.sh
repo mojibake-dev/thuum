@@ -233,8 +233,11 @@ cp "$x/20 Dawnguard/Strings/"* "$rc/Strings/"
 # The whole mod folder but its backups and README: the plugin, meshes,
 # textures, its RaceMenu preset (SKSE\Plugins\CharGen\Presets\rotfern.jslot)
 # and RaceMenu config (meshes\...\facegenmorphs\rotfern.esp, interface\
-# translations, HeadpartWhitelist), apocrypha 2026-10-07
-rsync -a --exclude backups/ --exclude README.md --exclude __folder_managed_by_vortex \
+# translations, HeadpartWhitelist), apocrypha 2026-10-07. Not "Claude outputs"
+# either: Eli's own files beside the mod (a kit zip and print PDFs, mode 0700,
+# 2026-11-12), never game data; served unreadable, they stopped the eyes'
+# stage at client-mods (numidium, 2026-11-14)
+rsync -a --exclude backups/ --exclude README.md --exclude __folder_managed_by_vortex --exclude 'Claude outputs/' \
   "$rotfern/" "$stage/tree/rotfern/"
 # Stopgap, lab only (2026-10-06): rotfern.esp's RACE still names RS Children's
 # skeletons (ANAM, male and female: actors\character\ranaline\character
