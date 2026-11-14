@@ -5703,3 +5703,11 @@ docs/private/playtest-51-findings.md's breaks 1 to 10):
   when the channel replaces them, as ADR-063 decision 5 and the content census (ScriptPlacement) asked of every list. "Raw" is
   read as ungated: the channel's messages are still wire-schema types with a validator (CLAUDE.md rules 4 and 12). Its ADR is
   the builder's to draft after the infection's delivery.
+
+The ownership plan's answers (Eli in thuum-magnus' session, 2026-11-13, by AskUserQuestion on
+lab/.cache/drafts/pt51-ownership-plan.md, playtest 51's breaks 3 to 5; recorded 02:03Z by numidium from thuum-magnus' message):
+- D-PO1 B "Everyone sharing the quest": a quest script's AddToMap reveals the marker on the map of everyone sharing the quest,
+  as its stages and objectives cross (ADR-070's paradigm); AddToMap gets a natives-table row and is served at login as a
+  discovery is.
+- D-PO2 A "The running game claims it": the game running a quest's lead or scene claims the NPC until the lead or scene ends;
+  the claim travels across cells and survives a grant, as a dialogue's does (ADR-063).
