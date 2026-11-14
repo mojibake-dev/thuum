@@ -9759,3 +9759,9 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
   x-lease-give v1 20261113-231102 green (c2's claim of Sven, its take of an IronDagger out of him logged as the simulator's
   move with no E_CONTAINER_OCCUPANT, c2's record 1 to 2 and Sven's 3 to 2, both kept through c2's relaunch). Canon was
   6fe5fea0; m4-fix-absorb merges canon in for its own stage and merge.
+- (numidium) A correction to this day's morning entry, which called 06:00Z to 06:45Z a network outage: core's logs read it as
+  this Mac's clamshell sleep. ryuk entered sleep with its lid shut at 05:43:43Z (pmset: "Entering Sleep state due to 'Clamshell
+  Sleep'") and only dark-woke for seconds (06:00:25Z, 06:41:23Z) until a real wake about 06:56Z. Each wake found its ssh
+  sessions dead and no network between wakes, which read as GitLab and GitHub timing out and the jump host resetting ssh. core,
+  its WAN, the tunnel and the tailnet were fine throughout. A chain run from the Mac survives the lid only if the Mac stays
+  awake (caffeinate -s on power, core's advice).
