@@ -5536,6 +5536,25 @@ derived class; slice three is rungs 5 and 6), ADR-067 decision 4 (its final samp
 apply is the record). W3 stays Eli's at the time: a rewrite of b-prop-push's step 27 if the drop read calls for one (decided
 2026-11-11 in the amendment above: no rewrite; the leftover is read first, then fixed or the count restated by Eli's word).
 
+The edge counters' decisions (Eli in numidium's session, 2026-11-13, by AskUserQuestion on thuum-magnus' edge-counters-spec.md
+section G; recorded 00:13Z by numidium; the order, Eli the same hour: "I'd say infection first, pose me the questions, if any of
+the physics is ready to be tested fold that into the canon to test as well anyway"):
+- D-PT3 C, the refusals with no kind: "Giving a kind would help troubleshoot no? Do that." The transport reads a message's
+  variant ahead of the byte budget, so a budget refusal is counted under its kind; decode errors, which never reach a kind,
+  stay under t 0.
+- D-PT4 B "Run-scoped reads": the gamemode numbers every connection and server.edge(cN) sums the profile's connections born
+  after the run's mark (lab code, a third commit).
+- D-PT5 C "One rule, all reporters": every client reporter that mirrors a server budget at full size keeps half a second of
+  its rate back, QuestStage's idiom (a client train), with A.1's clock fix.
+- D-PT6 B "Stage now, minus those probes": the rungs 1 and 2 unit stages now with the probes that carry no edge or log
+  refusal claim; on green it merges, then rung 3 and 5a through their own gates in ladder order (D-PH27), so the physics
+  ready by then joins the next sitting's canon. The claim-carrying probes stage after the counter lands. D-PH17's two reads
+  stand for rung 1's merge.
+- D-PT7 was not asked; its recommendation A (leave a reused slot's rows) stands until a probe needs a count across a
+  reconnect.
+The builder's order after this: the infection's delivery (playtest 51's break 2) first, then the counter build with D-PT3 C
+to D-PT5 C.
+
 ## ADR-072: The closeout is one route: the Golden Claw walk is the chart, and a leg is done when Eli has ticked it
 
 Status: ACCEPTED 2026-11-12 about 15:42Z by Eli in auriel's session (the planning session, first listed as thuum-ff), after plan
