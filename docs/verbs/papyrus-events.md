@@ -12,6 +12,11 @@ Survival Mode Creation first) the way single player runs them, while
 vanilla's quests, aliases and references stay blanked as ADR-008 and ADR-029
 require.
 
+[ADR-073, accepted 2026-11-14 (decision 9, D-L1 B; noted 08:28Z by numidium): quests' and aliases' events run on every
+seat whose engine raises them, a per-seat quest's on its own seat, and ADR-029 decision 1's blank retires for quests and
+aliases. Until step 1 builds the gate's change (FridaHooks.cpp:1465-1468 at canon 9bee10d7, after step 0's read 1), canon
+still blanks them as this section says.]
+
 Roadmap reference: none
 Milestone: M2 (train-29; ADR-044)   Class: A
 

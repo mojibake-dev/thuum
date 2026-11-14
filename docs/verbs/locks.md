@@ -293,6 +293,11 @@ time with c1 hosting; within 5 s of the host's lock the guest's door state equal
 log, the guest's key through the server as b-locks. Eli's key test tonight means something on a server-known lock alone (a
 dungeon's XLOC, the lab's commanded chest).
 
+[ADR-073, accepted 2026-11-14 (decision 12, D-G3 A; noted 08:28Z by numidium): a record the server keeps for a world object, a
+lock among them, is written by its owner's report and keyed as the engine keys it (a door pair, not a reference); the server
+imposes it at a load and a cell's attach, never over a live owner's write. Until the lock record's build (after step 0's read 2),
+canon behaves as this section says.]
+
 ## Status
 
 - [ ] doc complete, inventory listed with a disposition per row, rung declared (the reference trace owed)

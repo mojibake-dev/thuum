@@ -843,6 +843,13 @@ Open for Eli at the first allowlist entry: whether b-apocalypse keeps
 Raise Wall, and whether the server evaluates an allowlisted effect's
 conditions or takes the engine's report that it started.
 
+Amended by ADR-073 (accepted by Eli 2026-11-14 06:50:43Z in thuum-magnus' session; recorded 08:28Z by numidium from its Amends
+list; its DECISIONS.md lines are main 55585f93's): superseded where it conflicts with ADR-068 decision 6, by D-L1 B. An effect's
+script on another actor runs on its target's owner, not in the caster's game (this ADR's title, and :796-797's "and of those its
+player casts"); quests' and aliases' events leave the blank (:798, ADR-073 decision 9), and ADR-044's refinement (:2173) with
+them; the globals paragraph (:815-821) follows ADR-068 decision 6's everyone row; the per-spell allowlist (:801-809) deletes by
+ADR-073 decision 5.
+
 ## ADR-030: The merge runs a gate sweep; the full sweep runs nightly
 
 Status: accepted (2026-10-13, Eli: "im approving the ADRs in the policy section";
@@ -1009,6 +1016,10 @@ Two habits make it worse:
   - then Unrelenting Force's throw, the first verb built this way: the
     server imposes the spell's hit from the shouter's figure, and the
     engine throws.
+
+Amended by ADR-073 (accepted by Eli 2026-11-14 06:50:43Z in thuum-magnus' session; recorded 08:28Z by numidium from its Amends
+list; its DECISIONS.md lines are main 55585f93's): decision 3's cut point "at the value-change chokepoint" (:960-971) becomes D-L4
+C's: the magnitude for a value effect, and the chokepoint only for what has no magnitude to zero (ADR-073 decision 3).
 
 ## ADR-032: A figure plays the caster's actions; the server decides the effect
 
@@ -3045,6 +3056,12 @@ case now covers both: the host's own dialogue sends the same claim at its E (the
 simulator with no pass and refuse others while it is held) and releases it at the menu's close (fork m3-voice-inflight, the
 client's TalkService). No change to decisions 1 to 4; the amendment above stays proposed.
 
+Amended by ADR-073 (accepted by Eli 2026-11-14 06:50:43Z in thuum-magnus' session; recorded 08:28Z by numidium from its Amends
+list; its DECISIONS.md lines are main 55585f93's): decision 2's "a grant into the cell" leaves the list of a claim's ends, and
+decision 3's "no claim outlives its cell's next grant" becomes: a claim (dialogue, lead or scene) outlives a grant for its life,
+its other ends unchanged (:2998-3003). This is the 2026-10-28 amendment's option B (:3029-3033), decided by D-L2 B (ADR-073
+decision 6).
+
 ## ADR-053: Two stage slots a day, a short playtest on each; the gate is the touched verbs' own; R0 changes merge on T0 and T2
 
 Status: ACCEPTED 23:47 PDT 2026-10-27 (Eli: "oh then yes accept"); proposed 23:40 PDT 2026-10-27 (thuum-magnus; Eli, on "how would it look to throw all
@@ -3497,6 +3514,11 @@ testing." Taken: A with the switch off: every lay puts the switch global 828:ccQ
 records and the start word neither switches it on nor zeroes the needs; the Creation stays in the load order (the load-order rule)
 and the deploy settings keep its globals; the checklist's build line names it. x-survival-cold v2 leaves the lab's queue; the
 server's cold kill word stays built, unproven while the mode is off.
+
+Amended by ADR-073 (accepted by Eli 2026-11-14 06:50:43Z in thuum-magnus' session; recorded 08:28Z by numidium from its Amends
+list; its DECISIONS.md lines are main 55585f93's): the settings table of shape A and D74's band (:3475-3489) retire by ADR-073
+decision 13 when its one ungated spell channel replaces them, and "the rise and the shaders are the client's cosmetics (R3, a
+later slice)" (:3437-3438) becomes the caster's R2 channel.
 
 ## ADR-058: Physics props, the toucher simulates (Garry's Mod's shape without its server)
 
@@ -4036,6 +4058,11 @@ the enable and disable row touches every reference's load (ADR-043's running ord
 restart scenario come with it. H5: a script's PlaceAtMe of an actor meets npc-fate's roll at the placement (train 51's "fated
 before PlaceAtMe returns" is the shape).
 
+Amended by ADR-073 (accepted by Eli 2026-11-14 06:50:43Z in thuum-magnus' session; recorded 08:28Z by numidium from its Amends
+list; its DECISIONS.md lines are main 55585f93's): the R3 rows for objectives (:3984) and scenes (:4008) are amended by ADR-073
+decisions 2 (c), the quest record holding each objective's displayed, completed and failed bits (R0), and 6, a scene owned by the
+seat that started it (D-L2 B).
+
 ## ADR-063: Ownership, not permission: one engine owns each piece of the world, the others render, the server records, relays and arbitrates the hand-offs
 
 Status: ACCEPTED about 17:36 PST 2026-11-02 by Eli, verbatim: "commit to that ownership ADR". PROPOSED about 17:30 PST the same
@@ -4427,6 +4454,10 @@ read for design only, rule 7) adds or sharpens these:
   undone before a save, and the observer drops the marks the ledger explains. A record naming a created (0xFF) form goes through
   the server's id map.
 
+
+Amended by ADR-073 (accepted by Eli 2026-11-14 06:50:43Z in thuum-magnus' session; recorded 08:28Z by numidium from its Amends
+list; its DECISIONS.md lines are main 55585f93's): amendment E's per-cell digests (:4421-4423) become a deliverable, step 0's,
+with amendment A's mark-less count (:4405-4410) (ADR-073 decision 7).
 
 ## ADR-066: The hand-off is a two-phase protocol: one owner epoch per piece of the world, stamped on every word and every report, and the new owner is passive until it has applied the record and acked
 
@@ -5124,6 +5155,11 @@ recorded 16:58Z by auriel): decision 9's `q-golden-claw` and PLAN.md's `d-bleak-
 green parts, the route's legs in order, each leg a committed scenario of its own first (ADR-072's consequences; ADR-064 amendment
 B). `q-embershard` and "each green twice before the ADR closes" stand as written; rung 6 still waits for playtest 51.
 
+Amended by ADR-073 (accepted by Eli 2026-11-14 06:50:43Z in thuum-magnus' session; recorded 08:28Z by numidium from its Amends
+list; its DECISIONS.md lines are main 55585f93's): decision 2 (:4620-4624) by ADR-073 decision 11, amendment F of ADR-065 holding
+(no non-owner swallows an engine write); decision 6's scenes by ADR-073 decision 6 (D-L2 B: the seat that started a scene owns
+it).
+
 ## ADR-069: Rotfern's Fixes: engine fixes ship to every player as one SKSE DLL, one detour per lab-read site, never as a lab-only patch
 
 Status: ACCEPTED 2026-11-06 by Eli, to apocrypha directly, after asking what the fixes are ("wait so what ARE the engine fixes???
@@ -5565,8 +5601,19 @@ m4-edge-refusals, lab-edge-refusals and m4-client-margins; recorded 06:17Z by nu
   byte-budget refusal, so every refusal the transport can name is named (decode errors alone stay under t 0).
 - D-PT9 B "A mark per seat": lab-api takes its run mark at each managed seat's reset, so a game an earlier run left running
   that reconnects before its seat's reset is counted in the run.
+  [Erratum 2026-11-14 08:28Z, numidium: "is counted in the run" above is numidium's paraphrase and does not follow from
+  what Eli picked. The question, verbatim: "D-PT9: lab-api marks a run's start once, so a game an earlier run left
+  running that reconnects between that mark and its seat's reset escapes the run's refusal count. Mark each seat?" The
+  option, verbatim: "A mark per seat (Recommended): lab-api takes a mark at each seat's reset, so every connection of the
+  run is counted whatever ran before. Small lab-api code." Read whole, a game an earlier run left running that reconnects
+  before its seat's reset is outside that seat's window, as lab-edge-refusals 1dd6469d builds it (thuum-magnus' read of
+  the branch); thuum-magnus has asked Eli which was meant, and the answer is recorded here when it comes.]
 - D-PT10 C "One shared rule": the linked activations' fixed C++ window (SecondWindow(8)) becomes a wire-rules Bucket, and the
   client mirrors it with D-PT5 C's half-second margin, one rule for every budget (a server and client train).
+
+Amended by ADR-073 (accepted by Eli 2026-11-14 06:50:43Z in thuum-magnus' session; recorded 08:28Z by numidium from its Amends
+list; its DECISIONS.md lines are main 55585f93's): x-prop-follow's leg B (the strip of D-PF4, :5535-5536, then v1.8's ingots)
+moves to Riverwood's cabbage cart and its own cabbages by D-PF6 (ADR-073 decision 15).
 
 ## ADR-072: The closeout is one route: the Golden Claw walk is the chart, and a leg is done when Eli has ticked it
 
@@ -5724,10 +5771,18 @@ lab/.cache/drafts/pt51-ownership-plan.md, playtest 51's breaks 3 to 5; recorded 
   discovery is.
 - D-PO2 A "The running game claims it": the game running a quest's lead or scene claims the NPC until the lead or scene ends;
   the claim travels across cells and survives a grant, as a dialogue's does (ADR-063).
+  Amended by ADR-073 (accepted by Eli 2026-11-14 06:50:43Z in thuum-magnus' session; recorded 08:28Z by numidium from its Amends
+  list; its DECISIONS.md lines are main 55585f93's): D-PO2 A's premise that a claim "survives a grant, as a dialogue's does" is
+  false at canon (wire-rules cells.rs:401-402; verified.md C5) and is made true by ADR-073 decision 6 and its ADR-052 amendment;
+  read "D-PO2 A" by its recorded label, "The running game claims it" (verified.md C6).
 
 The gap audit's answers (Eli in thuum-magnus' session, 2026-11-14 about 08:00Z, by AskUserQuestion on
 lab/.cache/drafts/gap-audit/verified.md; recorded 06:52Z by numidium from thuum-magnus' message; the audit's ADR, accepted with
 these answers folded in, is ADR-073, its text to follow):
+[Erratum 2026-11-14 08:28Z, numidium, from ADR-073's Open list: the session's tool results stamp the answers 06:14:36Z
+(D-L1 to D-L4), 06:18:43Z (D-G2 to D-G5) and 06:20:09Z (D-G6 and D-PF6) and the acceptance 06:50:43Z, not "about
+08:00Z"; and the questions were posed from verified.md section 4, the acceptance naming adr-draft-v2.md (the questions of
+06:13:08Z, 06:14:46Z and 06:19:01Z name no path). The text is ADR-073, below.]
 - D-L1 B: quest and alias events run on every seat whose engine raises them, as ADR-068 decision 6 is written.
 - D-L2 B: a scene is owned by the seat that started it, which claims its actors until it ends, the claim surviving a cell grant
   (grant() keeps claims; ADR-052 decision 3 to be amended).
@@ -5741,3 +5796,445 @@ these answers folded in, is ADR-073, its text to follow):
 - D-G6 A: quest markers go to everyone shown the quest; a bounty is per player per hold (R0); exploration is per player.
 - D-PF6, verbatim: "Use the cabbage cart in riverwood obvs": x-prop-follow's leg B moves to Riverwood's cabbage cart and its own
   cabbages, and v1.8's ingots are dropped.
+
+## ADR-073: Lists are missing rules, and the world's state carries by default: the engine that owns a piece of the world runs it and its effects, the server records and relays what it changes and computes only the listed R0 numbers, and every list left logs what falls through
+
+Status: ACCEPTED 2026-11-14 06:50Z by Eli in thuum-magnus' session, by AskUserQuestion, verbatim "A: accept now, with answers
+(Recommended)", to the question that named the draft, posed at 06:20Z: "The audit's ADR draft
+(lab/.cache/drafts/gap-audit/adr-draft-v2.md) states the default all your answers just chose: the engine that owns a piece of the
+world runs it and its effects, the server records and relays and computes only the listed R0 numbers, a list in code or settings
+is a missing channel or owner rule, and every remaining list logs what falls through (a merge rule). It would also carry
+spellPlacedObjects' retirement (your option (b), the ungated spell channel). Accept it now?" The option as posed: "numidium
+records it on main as the next ADR, ACCEPTED, with D-L1 to D-L4, D-G2 to D-G6 and D-PF6 folded in; step 0 (the alarm and the two
+route reads) starts on it." The answers it folds in, given by the same tool in the same session, each the label Eli picked,
+verbatim (06:14Z: D-L1 to D-L4; 06:18Z: D-G2 to D-G5; 06:20Z: D-G6 and D-PF6; the tool results' stamps in that session's
+transcript): D-L1 "B: every seat runs them (Recommended)"; D-L2 "B: starting seat owns it (Recommended)"; D-L3 "A: one generated
+table (Recommended)"; D-L4 "C: zero, plus value write (Recommended)"; D-G2 "A: server-served, true (Recommended)"; D-G3 "A: world
+state, owner records (Recommended)"; D-G4 "A: retire with quest journal (Recommended)"; D-G5 "A: D-Q5 B, by cast (Recommended)";
+D-G6 "A: markers shared, rest per player (Recommended)"; and D-PF6 in Eli's own words in place of either option, "Use the cabbage
+cart in riverwood obvs". The options' texts below are verified.md section 4's; the descriptions Eli read were the tool's shorter
+wordings (session 93f37424, 06:13:08Z, 06:14:46Z and 06:19:01Z). D-G2 A's said "landing with the forward", D-L2 B's said "Needs
+grant() to keep claims and ADR-052 decision 3 amended (D-PO2 A's shape)", D-L3 A's said "exported to the platform through the
+generated header (just wire-header), read by the hook and the server alike", and D-G6 A's named no rung ("map exploration per
+player"). D-PF6's question is ADR-071's x-prop-follow and is not in that file. Also folded in, as the question said: Eli's word on
+spell animations after playtest 51 (2026-11-13 23:24Z in numidium's session, verbatim, to numidium's option (b) of 23:19Z;
+recorded under ADR-072, DECISIONS.md:5713-5718): "I mean all spells with animations should be animated so sure, ditch the rows
+gating things and pass it raw". The answers themselves are recorded under ADR-072 (DECISIONS.md:5728-5743, numidium); this ADR is
+their design text.
+
+PROPOSED 2026-11-14 in three steps, every path below relative to lab/.cache/drafts/gap-audit/ unless named: version 1
+(adr-draft.md), by the code-side gap-audit workflow's synthesizer from gap-audit.md (196 gaps in classes K0 to K10); version 2
+(adr-draft-v2.md), amended by the world-side audit, which started from what the world does instead of from the code's lists
+(why-we-drop.md, world-audit.md, and audit.md, both sides under one set of classes and one fix order); and version 2 verified claim
+by claim (verified.md: 16 claims, none refuted outright, one HYPOTHESIS refuted by a run, C11, which changed D-L4's
+recommendation). All of it was read-only at fork canon 78551e27 and thuum main b29505f4. This text is version 2 with the answers
+folded in as decided (the draft the question named: adr-draft-v2.md, sha1 1ff3df38, as written at 06:03Z). Beyond the answers,
+this text moves v2's ADR-039 note to Open (its count now read, its correction asked), adds the ADR-057 and ADR-071 amendments that
+decisions 13 and 15 imply, labels decision 15's reading as this text's, widens decision 6's created row from an actor to a
+reference (decision 13's placed objects), and adds the bounty record D-G6 A makes R0 to step 6; what the fold found wrong in v2's
+own words is a dated note before Open. It is re-read where canon moved: m4-fix-infection 9bee10d7, holding the absorb fix
+ce6a650a, merged to fork canon at 06:40Z (docs/LOG.md:9771-9774, its gate 20261114-054212-merge-m4-fix-infection 19 of 19 green).
+Of the fork files cited here, only MpActor.cpp, Hooks.cpp, ActionListener.cpp, PartOne.cpp and wire-bridge rules.rs changed
+between 78551e27 and 9bee10d7 (`git diff --stat`); their cites are re-read at 9bee10d7 (rules.rs:9 is the same line at both), and
+the rest hold at both. DECISIONS.md lines are origin/main
+55585f93's. The D-labels are the audit's: D-L1 to D-L4 from adr-draft.md, D-G2 to D-G6 from why-we-drop.md section 4, D-G1 being
+D-L1. Eli's question that started the world side, 2026-11-14: "the gap audit should cover some preemptive stuff, like, for world
+happenings like quests, or scripted movements, i wonder why our design has it dropping anything at all."
+
+Context.
+
+The code side. Playtest 51's breaks were one shape seen six times:
+- the server's effect rule mapped six MGEF archetypes and default-returned nullopt, so every Absorb was dropped (MpActor.cpp:3961-3980
+  at 78551e27); ce6a650a maps every Absorb and keeps the default (MpActor.cpp:3981-3985 at canon), read green as x-absorb v1.3
+  20261114-044943 (34 drain hits; c1 0.50 to 0.68, c2 0.50 to 0.34) and x-absorb-stream v1.1 045245 (264 hits, 248 launch
+  reports, 8 relayed, 0 at 0.00x);
+- the player's AddTarget hook refused a whole effect to stop its Health number and took the effect's script with it, so the vampire
+  drain's infection ran on no seat (skyrim-platform Hooks.cpp:219-234 at 78551e27; HYPOTHESIS that the refusal, and not the
+  missing delivery to the victim's game that 01b72a19 added, kept OnEffectStart from running: x-infection v1 read the zeroed path
+  only); 9bee10d7 zeroes AddTargetData::magnitude instead (Hooks.cpp:242, under the gate at :229-231, at canon; the field at
+  CommonLibSSE-NG include/RE/M/MagicTarget.h:65), and in x-infection v1 20261114-045627 the drain's VampireAbsorbHealthScript ran
+  in the victim's game (22 deliveries; c2's healthMax 2000 to 1975 on a seat not hosting the vampire);
+- the scripts table holds fifty natives and "A native with no row has no channel" (skymp-wire wire-rules natives_table.rs:42-43;
+  ScriptNatives.cpp:2305-2311), so Azura's marker, TIF__00024528.Fragment_0's AddToMap at op 4 after its SetStage(10) at op 3, stayed
+  on the talker's seat;
+- ContainerMoveByOccupant admitted only a loot hold's holder (MpObjectReference.cpp:909-935); 78551e27 added a living NPC's
+  simulator, and barter, pickpocketing and closed chests still refuse;
+- the cells rule's owner rows know a follow, the pass margin and a dialogue claim, not a lead or a scene (wire-rules cells.rs:178-186),
+  and grant() drops every claim of the cell (cells.rs:401-402, asserted by the test at :1356-1361), so D-PO2 A's premise that a claim
+  "survives a grant, as a dialogue's does" (DECISIONS.md:5725-5726) is false at canon (verified.md C5);
+- the spellPlacedObjects settings table lists spells one by one (wire-rules placements.rs:623-626; one spell deployed) behind a band
+  check (E_PLACED_RANGE: wire-rules placements.rs:693 and :881, named at PartOne.cpp:5530 at canon; D74's band,
+  DECISIONS.md:3475-3489).
+The code audit then found the shape 196 times. 116 of the 196 defaults write no line on any path and 31 more are silent on some
+path; 78 are met often or always (gap-audit.md). The largest: the server dropped 4,136 of 9,890 effect uses of its 91-plugin load
+order, 3,823 (38.7 percent) at canon now that the Absorb case is in (verified.md C10); 1,084 MGEFs pass the hook's archetype and
+actor-value test, of which the 864 on an item type IsCast accepts were refused whole until 9bee10d7 and now land zeroed (C10,
+Hooks.cpp:176-219 at canon); 189 natives with shared or player consequences have no channel (164 carry state, 25 are cosmetic or
+one-shot shared actions; C3); 681,764 of the 883,408 placements of the served order are skipped at load by the base-type gate
+(WorldState.cpp:475-482), a skipped REFR becoming a server form only once an owner's Enable, Disable or Delete is recorded on it
+(:474; C14); 2,463 quest aliases in 646 quests of the three masters (about 2,810 in about 740 quests over the deployed order, C14)
+define an event handler the gate blanks unless a name, a per-player quest or a platform call's Override admits it (FridaHooks.cpp:
+1039-1062, :1465-1468); and the wire edge logs the first rejection of each code per process, then every thousandth
+(skymp5-server/cpp/addon/WireServer.cpp:182-190).
+
+The world side. Read from the engine's and the content's complete lists (record types, change flags, natives, story events, package
+procedures, scene actions), the accepted design carries by default and the build does not. Three default-deny mechanisms older than
+the ADRs were never flipped (why-we-drop.md, verified.md C1 to C3):
+- the state channel was built for one case: ChangeForm 72 carries a dead, hosted game-file actor, never the player, once its body is
+  at rest or its 15 s settle window ends (skyrim-platform ChangeForm.cpp:556-562; the one trigger, sendInputsService.ts:259; the
+  game-file guard, changeFormService.ts:234-236), and no AddChange hook exists in the fork outside the lab's Frida traces, so "the
+  change form carries it", which the table assumes for every state row (ScriptNatives.cpp:2570-2584), means nothing carries it;
+- the event gate still runs ADR-029 decision 1's "references', quests' and aliases' stay blanked" (DECISIONS.md:796-800) as ADR-044
+  refined it (:2173): it admits by kind and blanks the rest with no counter (FridaHooks.cpp:1465-1468); a quest's or alias's handle
+  resolves no self (:1039-1062), so a vanilla world quest's events and its aliases' run on no seat, and only four admissions pass one
+  (a per-player quest's own on its player's seat, :1386-1400; the SKI_* chains, the Survival row's VMAD names and RaceMenu* by name,
+  :186-198, :1418-1431; anything inside a platform call's Override, :981-991), though ADR-068 decision 6 (DECISIONS.md:4662-4672)
+  decided they run on every seat and built code already assumes it (world_streamer.rs:3-5; D-Q9 B; QuestCause's classes);
+- the natives table is a hand-kept list (natives_table.rs:3-8, :42-43), and 680 untabled callees that content calls (591 natives and
+  89 non-native wrappers, C3) run where their script ran.
+Two models were built case by case: quests as a replay with one reconciled number, the receiver's fragment cut unless
+`questFragmentLive` is true (questStageService.ts:1731-1744; true only in a playtest profile, lab/playtests/51.yaml:70 and
+52.yaml:42-43), a served stage never running its fragment (D-Q3 A), and the record holding (quest, stage) pairs with no run instance,
+objective or flag (wire-rules quest_stages.rs:96-102, with :295-305 for done and merge); and ownership as a list of cases, with
+no rule for a scene, a lead, a hire, a brawl, or a guest's press of an object whose script asks "is this the player?". Beside them:
+lists that outlived their fear (44 denied quests; a condition variable generator that reads dialogue conditions only), a
+non-owner's call dropped or run on its own copy by the native's binding rather than forwarded (ScriptNatives.cpp:976-993), R0
+seeds imposed over their owners' writes (an XLOC lock served at each creation of the reference, objectReferenceEx.ts:150-158;
+isOpen every 133 ms), one writer per channel (world globals), and "undeclared" accepted as a rung (lab/state.py:21). Nothing
+compares the games: ADR-065 amendment E's digests (DECISIONS.md:4421-4423) are unbuilt, so every drop so far was found by a player.
+
+What players meet on ADR-072's Golden Claw route (verified.md C7 to C9, C16): Alvor's door locked for one player (BROKEN in play,
+playtest 41), Azura's marker on the asker's map only and Camilla's lead lost at a cell grant (BROKEN in play, playtest 51); and,
+HYPOTHESIS until a read each, the claw's take through the container menu setting MS13 stage 40 in no game (a take inside a platform
+call did set it: x-golden-claw-alias v1 20261107-222959, server.log:845), Whiterun's main gate 0x1b1f1 locked in the server's record
+and on every seat but possibly the persuader's own (its unlock keyed on the denied DialogueWhiterunGuardGateStop 0xd1984), the
+Dragonstone never lootable, bards silent, brawls unending, and a relaunched journal losing its Miscellaneous quests (its mechanism
+already in playtest 51's c1.log 12:40:45.626 to .732).
+
+Two accepted texts contradict each other on the same state: ADR-029 (DECISIONS.md:796-821) and ADR-068 decision 6 on alias scripts,
+effects between two actors and whose a global is; and ADR-065 amendment F (:4424-4429, "never an engine write swallowed") and ADR-068
+decision 2 (:4620-4624, a state row's body skipped on a seat that does not own its self).
+
+Prior art (why-we-drop.md, verified.md C12 and C13):
+- Ownership: ADR-063's (Fiedler, "Networked Physics in Virtual Reality", 2018; IEEE 1516.1's ownership management). FiveM's OneSync
+  (https://docs.fivem.net/docs/scripting-reference/onesync/) migrates an entity's owner by scope; under the default orphan mode an
+  orphan relevant to no player is deleted (SET_ENTITY_ORPHAN_MODE,
+  https://github.com/citizenfx/fivem/blob/master/ext/native-decls/SetEntityOrphanMode.md), and it has no "nobody owns it, everyone
+  runs it" class, which is why D-F1 C's everyone class needs the record to decide.
+- Carry by default: TES3MP, the project's model, shares the journal, topics, faction ranks, faction reputation and kills by default,
+  and keeps two whitelists for replicated variables, synchronizedClientScriptIds for a listed script's local variables and
+  clientVariableScopes.lua for globals, an unlisted global saved per player and never relayed (CoreScripts 0.8.1 config.lua:91-145,
+  https://raw.githubusercontent.com/TES3MP/CoreScripts/0.8.1/scripts/config.lua; eventHandler.lua:1921-1954). It keeps map
+  exploration, bounty and faction expulsion per player (shareMapExploration, shareBounty and shareFactionExpulsion false).
+- The dirty mask: the TRIBES model sends each object's latest masked state (Frohnmayer and Gift,
+  https://www.gamedevs.org/uploads/tribes-networking-model.pdf; SnapNet's summary,
+  http://www.snapnet.dev/blog/netcode-architectures-part-4-tribes/). The engine's change flags are that mask, already complete.
+- Why a replay cannot converge here: lockstep needs bit-exact inputs (Bettner and Terrano, GDC 2001,
+  https://web.cs.wpi.edu/~claypool/courses/4513-B03/papers/games/aoe.pdf; Fiedler, "Deterministic Lockstep",
+  https://gafferongames.com/post/deterministic_lockstep/), and state machine replication excludes commands that read sensors
+  (Schneider, ACM Computing Surveys 22(4), 1990, https://www.cs.cornell.edu/fbs/publications/SMSurvey.pdf, p. 301); a fragment that
+  reads Game.GetPlayer(), its seat's alias fill or a timer is such a command. Sending state removes the need (Fiedler, "State
+  Synchronization", https://gafferongames.com/post/state_synchronization/).
+- Skyrim Together Reborn runs the same quest replay and names the same failures in its code: a scene racing a relayed stage, and a
+  Bleak Falls quest excluded by id (QuestService.cpp,
+  https://github.com/tiltedphoques/TiltedEvolution/blob/master/Code/client/Services/Generic/QuestService.cpp, read at master's
+  83d8080f for design only, rule 7).
+- The loud half: Jim Shore, "Fail Fast" (IEEE Software 21(5), 2004); Ding Yuan et al., "Simple Testing Can Prevent Most Critical
+  Failures" (OSDI 2014): most catastrophic failures studied came from mishandled, explicitly signalled non-fatal errors, many of whose
+  handlers were trivial. A `default: return std::nullopt` and a `// TODO: allow non-weapon sources` (skymp5-client hitService.ts:148)
+  are that handler.
+
+This ADR restates ADR-063's reading and makes it binding on code; it is not a new law. ADR-031 decision 3, ADR-063 decisions 1, 2, 4
+and 5, ADR-065 decisions 1 to 4 and amendments A, E and F, ADR-066, ADR-068 decisions 1, 3 and 6, D-F1 C, D-PO2 A and ADR-071
+already state it.
+
+Decision.
+
+1. The default. Whatever a piece of the world does, the engine that owns it (ADR-063 decision 1, with the rows of decision 6
+   below) runs it whole: its effects, its scripts, its looks and its AI consequences, and what the engine does with no script (an
+   AI's lock, a package's door use, a cleared location). The server records what the owner reports (R2), relays it to the engines
+   that render it, and arbitrates the hand-offs. R2 is the default rung; a piece of state on another rung is on decision 2's list.
+
+2. The R0 list is closed and named. The server computes: (a) the Health, Magicka and Stamina changes one actor deals another, both
+   sides of an Absorb included (ADR-028); (b) inventory transfers between parties and item conservation (ADR-061, ADR-063 decision
+   4); (c) its own numbers and records: leveling, the economy, the clock and the weather, a player's bounty per hold (D-G6 A), and
+   the quest record (D-F1 C), which holds stages, run words, run instances, each objective's displayed, completed and failed bits,
+   the completed and failed flags and quest-owned map markers, served at login through the engine's own natives; (d) the bounds that
+   would break the world for the others (existence, caps, rates). D-L3 A, "one wire-rules table, exported through the generated
+   header": the kinds in (a) live in one wire-rules table, exported to the platform through wire-client-ffi's generated C header
+   (`just wire-header`, checked by `just wire-header-check`), as a C export Skyrim Platform calls beside its seven (HYPOTHESIS until
+   built: that the hook can call it at AddTarget time), and to the server through wire-bridge's cxx rules (skymp::rules,
+   rules.rs:9), replacing the two hand copies of one list that canon keeps (the hook's ChangesServerValue, Hooks.cpp:176-196, and
+   the server's MovesServerValue, ActionListener.cpp:10030; verified.md section 2). A kind not in the table is never refused by a
+   hook and never dropped by the server: it is the owner's.
+
+3. Cut at the number. ADR-031 decision 3 binds code: no hook refuses an engine event, an effect, a drink, a fragment, a dialogue
+   event or a script to stop a number. D-L4 C, "A for value effects, B for what has no magnitude to zero (a Script-archetype effect
+   that writes H/M/S, and the fall taken as the player's own)": a value effect's number is cut by zeroing AddTargetData::magnitude,
+   as 9bee10d7 built it for a cast (A, Hooks.cpp:242 at canon), and only what has no magnitude to zero is cut at the actor-value
+   write, ADR-031's chokepoint (B), after that chokepoint's RE read. The zero is read green for kAbsorb (x-infection v1); for the
+   other five archetypes the hook zeroes (ValueModifier, PeakValue, Dual, AccumulateMagnitude, ValueAndParts) it is HYPOTHESIS that a
+   zero magnitude still starts the effect, until one parity read, an NPC's Frostbite on a player starting
+   MagicImodOnPlayerHitScript. The hooks that break this rule at canon are the audit's K1 rows (Hooks.cpp:224-228,
+   FridaHooks.cpp:3198-3217, :3031-3066, :213 at 9bee10d7; verified.md section 2 for what 9bee10d7 closed). The fragment half,
+   D-G2 A, "served by the server, true for every world quest (ADR-070 decision 2)": `questFragmentLive` moves to the server's
+   settings with the default true and lands with decision 11's forward (risk H7); until then a playtest profile's clientSettings
+   carry it, as D-Q10 A's profiles do (numidium's record, DECISIONS.md:5737; D-Q10 A, :5068-5069; 52.yaml:42-43). A stage's quest
+   fragment runs live on every seat that applies the stage, under the acting scope (D-Q10 A); a served stage keeps its suppress mark
+   (D-Q3 A).
+
+4. An R0 number reads every input the engine reads. Each archetype is "number" or "owner-run"; an owner-run effect is recorded as a
+   running entry and handed to the target's owner at the claimed hit. A condition function is answered by the owner of the state it
+   reads: the server for state it records (a player's perks, level, factions, quest stages), the target owner's report with the hit
+   for engine-only state, bounded. Modifiers, abilities, worn enchantments and running effects come from the owner's report beside
+   the server's own entries. An input the server cannot answer is asked, never assumed: no true default, no false default.
+
+5. A list is a missing rule. A list in code or settings (an allow-list, a deny-list, a kind gate, a switch with a default, a
+   per-content table, a name, an id or a prefix) is admissible only as (a) a declared R3 set (a player's own UI and camera), (b) a
+   consistency bound (decision 2 (d)), or (c) a stopgap that names the rule replacing it and the condition that deletes it. Each
+   existing list gets that line in its verb doc's Ownership section ("Content-specific code:", docs/VERB.md:55-59); a new list without
+   the line does not merge.
+
+6. Owners are asked, never inferred. No id range (0xff000000 and up), parent cell, script class name or prefix, base type or
+   actor-value mark stands for an owner. Each end asks one owner_of, mirrored from the server's owner table, whose row kinds are open:
+   the cell's host (a persistent exterior reference by the exterior cell its position falls in), a player's own game, a toucher
+   (ADR-058, ADR-071), a commander (ADR-060), an opener (ADR-061), a furniture's occupant, a conversation with its purpose (talk,
+   trade, command, lead), a lead (a package that targets a player), a scene, a hire, a brawl, a created reference (an actor or an
+   object: a summon, an alias's creation, a script's spawn, a spell's placement: its creator's seat), a mount. D-L2 B, "a scene
+   row owned by the seat that started it, claiming its actors for its life and surviving a grant": a scene's row, and a lead's
+   under D-PO2 A, claims its actors until it ends and a cell grant passes over a claimed actor, so grant() keeps claims
+   (cells.rs:401-402 changes, with its test at :1356-1361) and ADR-052 decisions 2 and 3 are amended (Amends). Each kind declares
+   its own end events (a lease, an effect's end, a package's or scene's end, a dismount, the actor's death) and carries an ADR-066
+   epoch. A hand-off of any kind carries the object's script record (ADR-065 decision 5), actors included, and the running package
+   and scene (ADR-066 decision 5's keyframe). A relayed activation arms the acting scope as a relayed trigger entry does.
+
+7. Every list left logs what falls through, and this is a merge rule. A default branch logs once per (list, kind) at info, naming the
+   list, the kind that fell through and one subject, then counts in its layer's periodic summary; on the platform the count is kept in
+   native and flushed (rule 9). The wire edge counts per (code, message type) and names the type. The Papyrus gate counts its blanks
+   per handle kind. ADR-065 amendment E's per-cell digests and amendment A's mark-less count (DECISIONS.md:4405-4410, :4421-4423) are
+   built, so a missing channel is a counted lab signal before a player meets it. A default branch with no line does not merge; review
+   reads it as an undeclared rung.
+
+8. Declared means written where the next reader looks. Every verb doc carries "## Known limits" and VERB.md's "## Ownership"; a gap
+   not in one of them is undeclared, whatever prose elsewhere says. STATE.md has no "undeclared" rung: every flag and table takes a
+   rung and a channel, and lab/state.py refuses a row without one.
+
+9. What nobody owns runs everywhere. D-L1 B, "ADR-068 decision 6 as written: every seat whose engine raises the event runs it, and an
+   effect's script runs on its target's owner": a quest's and an alias's events run on every seat whose engine raises them, a
+   per-seat quest's on its own seat; a scene's run and its fragments are the seat's that started it (decision 6, D-L2 B), and the
+   other seats render its actors; their consequences meet the seam at their own selves; SetStage folds as the idempotent record
+   (ADR-068 decision 7, DECISIONS.md:4673-4679). ADR-068 decision 6 binds the gate, and ADR-029 decision 1's blank retires for
+   quests and aliases. The gate's build reads first (step 0's read 1).
+
+10. The observe point. ADR-065 decision 2 binds: the owner observes AddChange for every form type and global table; ChangeForm 72
+    carries any owned form; the receiver applies it record-only, then at a cell's load, then mid-game form type by form type, each
+    stage behind ADR-064's proof. Until a form type is applied mid-game, an engine event that already reports the change (the
+    lockChanged event LockService drops outside the player's pick, lockService.ts:96-109) is a stopgap channel under decision 5 (c).
+
+11. Forward, never drop. A state call on a subject this seat does not own, from a world cause (a quest or dialogue fragment, a relayed
+    trigger or activation, the acting scope), goes with its cause key to the subject's owner, who runs it under the platform's mark;
+    for a cell no seat hosts, the server records it into the frozen cell's record. The server folds a repeated cause key (ADR-068
+    decision 7). A lifecycle-rooted call on a non-owner stays filtered (ADR-063 decision 3's amendment). ADR-065 amendment F holds over
+    ADR-068 decision 2: no non-owner swallows an engine write.
+
+12. R0 records take their owners' writes. A record the server keeps for a world object (a lock, isOpen, the weather, the clock, a reset
+    schedule, an encounter zone's level) is written by its owner's report and keyed as the engine keys it (a door pair, not a
+    reference); the server imposes it at a load and a cell's attach, never over a live owner's write. D-G3 A, "a world object's change
+    is world state, whoever's quest made it, recorded from the subject's owner": Whiterun's gate opened by one player's persuasion is
+    open for everyone. The lock record's build reads first (step 0's read 2).
+
+13. Spells place and animate through one ungated channel. Eli's word after playtest 51, to numidium's option (b) ("The caster's game
+    reports what its spell scripts place and how they move and light them, and the other screens replay that. Nothing is written per
+    spell"): every spell's scripted placement and animation reaches every screen through one typed channel, owned by the caster's
+    game (decision 1; a created object is its creator's, decision 6), recorded and relayed by the server (R2), with no per-spell entry.
+    The spellPlacedObjects table (wire-rules placements.rs; ADR-057's shape A with D74's handshake) and its band check
+    (E_PLACED_RANGE: wire-rules placements.rs:693 and :881, named at PartOne.cpp:5530) retire when the channel replaces them, as
+    decision 5 asks of every list. "Raw" is read as ungated, not untyped (numidium's record, DECISIONS.md:5716-5718): the channel's
+    messages are wire-schema types with a validator in the same commit (rules 4 and 12), and the validator checks shape and
+    decision 2 (d)'s world bounds, never a per-spell table.
+
+14. Scope, as decided. D-G4 A, "retire the list when ADR-070's questJournal lands": sharedQuestsMode.denied's 44 quests stay until
+    then (MQ102A and MQ102B are the Hadvar and Ralof branches; C00, MG01, TG00 and DB01 guild entries; audit.md section 3). D-G5 A,
+    "D-Q5 B. A fixed-cast instance is judged by cause and shared, a condition-cast one stays per seat, and the instance test keys on
+    ENAM": questStoryInstances' "seat" (wire-rules quest_runs.rs:44-50, "PENDING ELI'S WORD") is replaced by that rule, and the test
+    keys on the quest's ENAM event instead of "every quest a Story Manager quest node of the game files names"
+    (PartOne.cpp:4071-4072; the index :4071-4130). D-G6 A, "quest markers go to everyone shown the quest (D-PO1 B); bounty is per
+    player per hold (R0); exploration is per player (R2)": the markers are the quest record's (decision 2 (c)), the bounty is the
+    server's number per player and hold, and map exploration stays per player, at the rungs docs/verbs/map-markers.md declares
+    (discovery R1, the record R0, :21-35), as TES3MP keeps it per player.
+
+15. x-prop-follow's leg B at Riverwood's cabbage cart (D-PF6). D-PF6, Eli verbatim "Use the cabbage cart in riverwood obvs", to
+    x-prop-follow v1.8's question (four iron ingots in leg B, after all four cabbages rolled off the strip in x-cabbage-rest 022933):
+    read by numidium's record (DECISIONS.md:5742-5743) as leg B moving to Riverwood's cabbage cart and its own cabbages, v1.8's
+    ingots dropped. The cart is ADR-071 rung 3's set (the six ALCH cabbages 0x1c0c6 to 0x1c0cb on the Riverwood Trader's cart,
+    DECISIONS.md:5307-5309) and ADR-072's leg 2. ADR-071's probe question, folded in here because the acceptance named it; reading it
+    as decision 5 applied to a probe (the route's own objects over a fixture chosen for the strip) is this text's, not Eli's words.
+
+Consequences.
+- The fix runs by class in audit.md section 4's order, each step starting with its class's silent defaults made loud (decision 7):
+  - Step 0, the alarm and the reads, first, as the acceptance's option said: the loud pass on every class; amendment E's digests and
+    amendment A's mark-less count; a counter per handle kind at the gate's blank (FridaHooks.cpp:1465-1468 has none); and the two
+    route reads of verified.md section 5, each with its Dynamic section, run once and handed to Eli if it does not settle (rule 8):
+    read 1, a 104800 (SendEvent; skyrim-platform game/Offsets.h:26-27) trace of the gate's verdict on both seats while c1's player
+    takes the Golden Claw from Arvel's body through the container menu with no platform call open (the driver's `transfer` is the
+    control, since it runs under Override); read 2, Whiterun's gate guard persuaded once by the gate cell's host and once by a
+    guest, each seat then activating 0x1b1f1 from outside (the LockPrompt line's locked field and a landing in WhiterunWorld 0x1a26f
+    decide it; E_ACTIVATE_LOCKED fires either way). Beside them: GetIsGhost on Arvel's host (break 8), a relaunched seat's journal
+    after DA01Intro (break 10), a brewed potion's revert within 5 s (K10) and a leveled NPC's GetBaseObject (k6-figure-by-base).
+  - Step 1, quests whole (decisions 2 (c), 3's fragment half, 9 and 14; K9's gate half, K1's fragment cut, K11). Met first, in
+    Riverwood, and it holds the route's first blocker. Layers: platform (the gate), client (the served setting), server and wire (the
+    record's new fields, rule 4; a DB migration and a restart-persistence scenario, rule 6).
+  - Step 2, effects whole and the number cut (decisions 2 (a), 3 and 4; K1's AddTarget rows, K2). Its first part is on canon since
+    06:40Z (9bee10d7: the Absorb case and the zeroed magnitude, green in the lab for playtest 51's drain and infection breaks as
+    x-absorb v1.3, x-absorb-stream v1.1, x-infection v1 and the merge gate 20261114-054212, 19 of 19; unticked until playtest 52
+    plays them, ADR-072 decision 2, DECISIONS.md:5603-5604, :5710-5712); what is left is the one kinds table (D-L3 A), K2's other
+    closed archetypes, the Frostbite parity read, the chokepoint read for what has no magnitude, and the K1 rows verified.md section
+    2 lists as narrowed or unchanged.
+  - Step 3, R0 records take their owners' writes (decision 12; K12, K10's report half). Met at night in Riverwood and at Whiterun's
+    gate, the second route blocker.
+  - Step 4, the generated table and the forward (decisions 5 and 11; K4a, K4c): the table generated from FunctionsDump (1,408
+    natives), ADR-062's accepted rows built, a non-owner's state call sent to its subject's owner with its cause key.
+  - Step 5, owners asked and claims for every scene and lead (decision 6; K7, K6): ActorOwner and OwnerAck (ADR-066 decisions 2 and
+    5), open row kinds, grant() keeping claims, TESScenePhaseEvent relayed. Closes Camilla's lead, Arvel's run, the bards, the brawl.
+  - Step 6, scope from the writer (decision 14; the rest of K9, K5's word walls), and a player's bounty per hold as an R0 record
+    (D-G6 A): new DB state, a migration and a restart-persistence scenario (rule 6).
+  - Step 7, ADR-065's observe point for every form type (decision 10; K4b).
+  - Step 8, world objects by record and one source rule (K8, K3).
+  - Step 9, the lists delete and nothing is undeclared (decisions 5 and 8; K5, K13).
+  The spell channel (decision 13) is its own verb train beside these, its rule-8 read first; it is step 4's script placement for the
+  spell family (k5-spell-placed-objects, audit.md section 6's break 6).
+- What deletes when its rule lands: ADR-029's per-spell allowlist and the scriptedEffects, bonds, castTeleports, spellPlacedObjects,
+  survivalFood and cureSpells settings tables; E_PLACED_RANGE; papyrus-admitted.tsv and the platform's four admitted names, except UI
+  scripts declared R3; the client's content names (the secret door, the pillar base, the ambush races, the sit idles); the deployed
+  keys no code reads (propStatics, modLock, activationUnblockedBases); scriptNonOwnerSkip and its three values, the "(not hosted)"
+  class and the standing exception (ScriptNatives.cpp:966-971); dealWithRef's unlock-if-absent (objectReferenceEx.ts:156-158);
+  stopLocalScene as a fix (it stays the render rule); slice two's live fragment cut; the record's "already the world's" drop of a
+  second run (ActionListener.cpp:3780-3785); sharedQuestsMode.denied when ADR-070's questJournal lands (D-G4 A); questStoryInstances'
+  "seat" for fixed-cast instances (D-G5 A). What becomes derived: playerQuests, playerGlobals, playerQuestGlobals,
+  playerQuestVariables and conditionVariables, the last from every CTDA 629 and 630 reader (quest-census.py and ctda-vars.py become
+  checks, not inputs). What stays, each with its decision 5 line: restrictedRaces (an operator permit), the client-only plugins
+  (declared R3), the caps (decision 2 (d)).
+- What stays local, by reason (R3): STATE.md's R3 tables; camera, screen, menus, music, the player's controls; achievements and stats;
+  VM registrations and waits (carried at a hand-off only, ADR-068 decision 8); an effect's local helpers (D-H1 B); the tracked quest;
+  an arrow's launch replay, its residue not pickable.
+- Work, roughly: quests whole, the magic step, the scripts step and the spell channel are each a train (server, wire with rule 4,
+  platform with the Windows build, client); the quest record, the bounty record and the owner rows add DB state (rule 6: a
+  migration and a restart-persistence scenario each); the proxies and the loud pass are mechanical; the observe point is staged.
+  Every step names its T0, T2 and T3 evidence in the audits, and each scenario YAML goes in its own commit for Eli's review (rule
+  13), no assertion weakened.
+
+Risks.
+- H1: a cut moved from the event to the number may double a number where it misses. Mitigation: ADR-031 decision 4's differential
+  scenario per action class; x-absorb v1.3 and x-infection v1 read the magnitude cut green for Absorb; HYPOTHESIS for the other five
+  zeroed archetypes until the Frostbite parity read, and for script-written values until the chokepoint's RE read. A puppet's
+  relayed beam now lands zeroed with its script, which may roll twice per contact (HYPOTHESIS, k1-addtarget-player-target-only;
+  x-infection cannot measure it).
+- H2: log volume. Mitigation: once per kind, then counted; the lab reads counts, not lines.
+- H3: an owner that runs everything whole is trusted more. Accepted by ADR-063 H1 (a friends' server; Skyrim is not competitive);
+  decision 2's R0 list is where trust stops, and the spell channel's validator holds decision 2 (d)'s bounds.
+- H4: the generated table is the largest single change in the plan, and six layers hold name lists today (ScriptNatives.cpp:201-338,
+  NativeRows.inc:1-23, wire-rules natives.rs:1304-1320, scriptCallService.ts:678-683, spSnippetService.ts:30-44, player_own.rs:108;
+  gap-audit.md's k4-name-lists-beside-table). Mitigation: fork-lint refuses a stale table from the first commit.
+- H5: decision 9 runs an alias's OnDeath on every seat whose copy dies, a replayed death included. Mitigation: SetStage is the
+  idempotent record; other state calls go through decision 11's cause key; E_QUEST_CHURN is the backstop. HYPOTHESIS until a
+  two-seat read of an alias death.
+- H6: a mid-game LoadGame of a non-actor reference is unproven (ADR-065's Open). Mitigation: decision 10's stages; the cell-load
+  transplant is CONFIRMED for a lock and an inventory (DECISIONS.md:4397-4399).
+- H7: live fragments on every seat, before the table and the forward exist, run untabled natives on every seat. Mitigation: the
+  server's default true lands with step 4's forward (decision 3). It is live today wherever a profile sets the flag: playtest
+  52's does (52.yaml:42-43), as 51's did (Open asks whether 52 keeps it).
+- H8: retiring the deny list before ADR-070's questJournal puts one player's main-quest branch and guild joins on every seat.
+  Mitigation: D-G4 A.
+
+Corrected at the fold, a premise in version 2's own words found by the fold's fact check (the adr073 fixer in thuum-magnus'
+session, 2026-11-14; not a new decision, and Eli's to overrule):
+- Decision 1's "on decision 2's list" reads "on decision 2's list (R0), on CLAUDE.md's R1 list (movement, hit registration, casts;
+  CLAUDE.md:27) or a declared R3 set (decision 5 (a))". Decision 2 is the closed R0 list, and CLAUDE.md names R0 and R1 as the
+  listed exceptions to R2 (CLAUDE.md:23-24), so the literal sentence would leave R1 state and the R3 sets undeclared.
+
+Open at the acceptance (none decided here; the questions are Eli's):
+- Scenes under D-L1 B and D-L2 B. D-L1 B (ADR-068 decision 6 as written, which lists a scene among the nobody kinds,
+  DECISIONS.md:4664) and D-L2 B (the starting seat owns a scene) differ on scenes. This text reads D-L2 B, the scenes question, as
+  governing (decisions 6 and 9). Is that your reading?
+- A scene a world quest starts. When a quest fragment that runs on every seat (decisions 3 and 9) calls Scene.Start, which seat
+  started it: the acting seat of the stage's cause key (D-Q10 A), the actors' cell host, or the first report the server records
+  (later ones folded by cause key, ADR-068 decision 7, DECISIONS.md:4673-4679)? D-L2 B's row needs one.
+- Map exploration's rungs. verified.md section 4's D-G6 A said exploration "(R2)"; the description you picked named no rung, and
+  docs/verbs/map-markers.md declares discovery R1 and the record R0 and rejects R2, since "an unvalidated report would let a client
+  claim the whole map" (:21-35; wire-rules markers.rs:1-18, DISCOVERY_RANGE). Decision 14 keeps R1 and R0. Keep them?
+- R1 under this ADR. Does R1 stay a rung, as CLAUDE.md:27 lists it (the dated note above reads decision 1 so)?
+- D-PF6's reach. Is it this probe's answer, or a rule for every probe (the route's own objects over a fixture chosen for the
+  strip)? Decision 15 takes it as this probe's.
+- Playtest 52's live fragments. Its profile sets questFragmentLive true (52.yaml:42-43) before the forward exists, so untabled
+  natives run on every seat (H7). Keep it for 52 as D-Q10 A's profiles did, or drop it until step 4?
+- The bounty's inputs. What the server computes a bounty from (the engine's crime reports, from the witness's owner or the
+  criminal's own game) is unread and HYPOTHESIS; no record of bounty exists at canon 9bee10d7 (no file under skymp5-server,
+  skymp-wire or skymp5-client names it), and decision 4 asks the input be answered, not assumed.
+- The two route reads (step 0) are HYPOTHESIS and gate their builds: decision 9's gate change builds on read 1, decision 12's lock
+  record (LockService widened to the host's references) on read 2. The hand-in, the third walk-stopper, follows from read 1.
+- Read 1's premise: if Override reads true at a menu take, C8b's race (Override is process-wide, so a menu take during any open
+  platform call may pass) is live and gets a read of its own (verified.md C8b).
+- D-L4 C's B half waits on the chokepoint's RE read; its A half for five archetypes waits on the Frostbite parity read.
+- The spell channel's design is the builder's: its message types and validator, its verb doc, and its observe point, since
+  ADR-057's context found that Skyrim Platform intercepts no PlaceAtMe (DECISIONS.md:3439-3440); whether ADR-068's Call seam or
+  ADR-065's AddChange sees a spell script's placement is HYPOTHESIS until a read. Which caps of today's table (perCaster, MAX_SETS)
+  are decision 2 (d)'s world bounds and stay is the channel's to say.
+- ADR-052's 10-28 amendment option B is decided here by D-L2 B; its saved patch (thuum-cf's claim-outlives-grant.patch, DECISIONS.md:
+  3029-3033) was cut for m3-turbo-knobs 41d9c69e, and whether it applies to canon 9bee10d7 is unread.
+- ADR-070 is PROPOSED (DECISIONS.md:5167). D-G2 A stands without it (the server serves the flag, default true); D-G4 A's retirement
+  waits on the questJournal it proposes.
+- CLAUDE.md's design law says "An allow-list or a content-specific case is a missing channel or ownership rule" (CLAUDE.md:23-24);
+  the clause "and every list left logs what falls through" is offered for Eli's edit and is not made by this acceptance (a reading).
+- ADR-039's count and self effects. Its 17 condition functions (DECISIONS.md:1503) were its context at fork 93358eea; canon
+  9bee10d7 registers 31 (ConditionFunctionFactory.cpp:42-105, three of them Skymp*). Its "self effects ... not evaluated here"
+  (:1519-1520) stands beside MpActor.cpp's IsConditionGated skip (:4480-4490, called at :4636; gap-audit.md's
+  k2-self-effect-gate). adr-draft-v2.md named both corrected without saying to what. Is v2's correction note still wanted?
+- The note recording these answers under ADR-072 (DECISIONS.md:5728) says "2026-11-14 about 08:00Z" and "recorded 06:52Z"; the
+  session's tool results stamp the answers 06:14:36Z, 06:18:43Z and 06:20:09Z and the acceptance 06:50:43Z; and "on
+  lab/.cache/drafts/gap-audit/verified.md" reads "posed from verified.md section 4; the acceptance named adr-draft-v2.md" (the
+  questions of 06:13:08Z, 06:14:46Z and 06:19:01Z name no path). numidium's to correct.
+- The HYPOTHESIS tags carried from the audit stay until their reads: C4's "one-shot per event" (FridaHooks.cpp:3120-3125), C16's
+  composition cause of break 8 (until GetIsGhost), H5, H6 and H1's puppet beam.
+
+Alternatives.
+- Grow the lists by playtest finding. Both audits measured that road: each break closed one row and left the default.
+- Reconcile the quest replay with more per-quest exceptions (Skyrim Together's kNonSyncableQuestIds road). The inputs differ per
+  seat, so the record must decide.
+- Have the server re-implement scripts per spell (ADR-029's road). Of the 27 scripted effects that change another actor's life or
+  values, one runs on the server today (wire-rules scripted_effects.rs:76-84); the engine already runs all of them.
+- Drop R0 altogether. ADR-028 stands: damage between players and item conservation need one arithmetic, and decision 2 keeps it.
+- The questions' other options, as verified.md section 4 posed them: D-L1 A (keep the blank as ADR-044 refined it) and C (effects
+  now, aliases later); D-L2 A (nobody's, each seat its own copy) and C (only scenes that address a player); D-L3 B (constants per
+  layer kept in step by a parity test) and C (the server alone); D-L4 A (the magnitude alone, leaving script-written values uncut)
+  and B (the actor-value write for everything, replacing the built cut after an RE read); D-G2 B (shared fixed-cast quests only) and
+  C (leave false); D-G3 B (per seat, which already lets two seats disagree about one door, C7) and C (the server evaluates
+  defaultUnlockOnLoad itself, a content-specific case decision 5 forbids); D-G4 B (retire now, H8) and C (leave it); D-G5 B ("world"
+  for every instance) and C (leave "seat"); D-G6 B (TES3MP's per-player defaults for all three) and C (leave it); D-PF6's posed A
+  (run v1.8 as written) and B (a short rest read of four ingots first); and the spell animations' option (a), per-spell rise and
+  shader fields in each spell's table entry, read by hand from each mod's script (numidium's message of 2026-11-13 23:19Z).
+
+Amends (each a dated note under the amended text, for numidium to add with this ADR):
+- ADR-029 (DECISIONS.md:755, its decision :795-821) is superseded where it conflicts with ADR-068 decision 6, by D-L1 B: an
+  effect's script on another actor runs on its target's owner, not in the caster's game (its title, and :796-797's "and of those
+  its player casts"); quests' and aliases' events leave the blank (:798, decision 9), and ADR-044's refinement (:2173) with them;
+  its globals paragraph (:815-821) follows ADR-068 decision 6's everyone row; the per-spell allowlist (:801-809) deletes by
+  decision 5.
+- ADR-052 decisions 2 and 3 (DECISIONS.md:2998-3003): decision 2's "a grant into the cell" leaves the list of a claim's ends, and
+  decision 3's "no claim outlives its cell's next grant" becomes: a claim (dialogue, lead or scene) outlives a grant for its life,
+  its other ends unchanged; this is the 2026-10-28 amendment's option B (:3029-3033), decided by D-L2 B.
+- ADR-031 decision 3 (DECISIONS.md:960-971): the cut point "at the value-change chokepoint" becomes D-L4 C's, the magnitude for a
+  value effect and the chokepoint only for what has no magnitude to zero.
+- ADR-065 amendment E (DECISIONS.md:4421-4423): the per-cell digests become a deliverable, step 0's, with amendment A's mark-less
+  count (:4405-4410).
+- D-PO2 A (DECISIONS.md:5725-5726): its premise that a claim "survives a grant, as a dialogue's does" is false at canon
+  (cells.rs:401-402, verified.md C5) and is made true by decision 6 and the ADR-052 amendment above; read "D-PO2 A" by its recorded
+  label, "The running game claims it" (verified.md C6).
+- ADR-057 (DECISIONS.md:3417) with its shape A and D74 (:3475-3489): the settings table and its band retire by decision 13 when the
+  channel replaces them, and its "the rise and the shaders are the client's cosmetics (R3, a later slice)" (:3437-3438) becomes the
+  caster's R2 channel.
+- ADR-068 decision 2 (DECISIONS.md:4620-4624) by decision 11 (ADR-065 amendment F holds); ADR-068 decision 6's scenes by decision 6
+  (D-L2 B); ADR-062's R3 rows for objectives (DECISIONS.md:3984) and scenes (:4008) by decisions 2 (c) and 6.
+- ADR-071's x-prop-follow: leg B's objects and place (the strip of D-PF4, DECISIONS.md:5535-5536, then v1.8's ingots) by D-PF6
+  (decision 15), which moves the leg to the cart.
+- docs/verbs/papyrus-events.md:9-13 and docs/verbs/locks.md:283-285 are rewritten to decisions 9 and 12 (audit.md's rows).
+Not amended here: ADR-072's route and its sittings (decision 3's "a sitting never waits for a build" stands); ADR-070, still PROPOSED.
