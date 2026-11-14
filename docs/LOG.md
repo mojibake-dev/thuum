@@ -9798,3 +9798,39 @@ analysis, 2026-10-04); rotfern's own look does not need RaceMenu.
     - x-cabbage-rest: D-PF4's answer (all four cabbages rolled off), so x-prop-follow's leg B moves to IronIngots (v1.8).
     - x-prop-arbitration v14.7 green at its second cold rerun (051342).
   - The unit does not merge: held-pose's defect and x-body-read (D-PH25 C) stand.
+- (numidium) The rotfern eyes layer (apocrypha/rotfern-eyes, D-E1 A') toward playtest 52, after Eli's "Put the eyes patch on
+  canon" and "Do eye patch , then we'll run test tomorrow morning"; staged, not merged.
+  - First the lab server went from the bare tag m4-fix-infection to m4-fix-infection-9bee10d7 (one digest, b8dd4ec1; turbo-srv
+    07:24Z), so no push can move the image under the sweep or 52.
+  - Stage 1 on 8e8bc964 (07:25Z) stopped at client-mods on c2 (exit 4): persist-mods' rotfern copy took a folder "Claude outputs"
+    (Eli's own kit zip and two print PDFs, mode 0700, in ~/Code/mods/rotfern-skyrim since 11-12), which SHA256SUMS listed and the
+    mods server, running as eli, answered 404. apocrypha's afc495b7 leaves the folder out; on Eli's word ("Tell apocrypha to put
+    those weird Claude outputs over in the BJD folder in workspaces") the three files moved to ~/Code/workspaces/BJD (mv -n,
+    sha256s matched).
+  - Stage 2 on afc495b7 green at 08:05Z: fetched 5 on c2 and 7 on c1, pruned 0; 101 plugins on the clients, 92 on the server;
+    20261114-080225-smoke-two-players green; clean-m1-next "m4-fix-infection client 9bee10d7, then apocrypha/rotfern-eyes layer
+    afc495b7".
+  - The eye reads, by path:
+    - v6 (4da1de58, 4882c4ff), 080538 and 080800: red at their login premise. The server's record of rotfern's head holds 0xEC1B2
+      MarksFemaleHumanoid00NoGash, which her game's list does not; it comes from her stored look in both worlds, so it is a
+      finding of its own (record against base). In 080800 the eyes did their part: the swap's full line counted 1, her eyes
+      0x2F023F0E, no overlay.
+    - v8 (145fc456, 6ae47d89; the premise recorded, its fresh review's fixes applied as written), 082602 and 083256: red. rotfern
+      turned on c1 (raceId 0x2F019D08 after 106 s and 115 s) and c2's game died at once (E_RUN_GAME_LOST, 0xC0000005).
+  - The crash, read on c2 before any reset at 083256 (WER 1000, 08:39:20Z): SkyrimSE.exe 1.6.1170 at 0x6D88F0, Address Library id
+    39195, a 16-byte function faulting on its first instruction. The minidump (sky-srv /srv/lab/handover/dumps/, sha256 b04dc6ca)
+    read by apocrypha: `mov rax, [rcx+0xF0]` with RCX 0, under Papyrus Actor.UnequipAll (54773 to 38899) called through
+    SkyrimPlatformImpl. The client's one UnequipAll is applyEquipment (equipment.ts:385 at canon), guarded only by isDeleted(), so
+    it reached the old figure the race change's rebuild had disabled and deleted. HYPOTHESIS: the fields' names (the AI process,
+    the left hand).
+  - x-ariadne-turn-watched v1 (apocrypha's, 7e403296, reviewed by numidium), 084357: green. Ariadne turned to KhajiitRaceVampire
+    on 52's world with rotfern's seat watching; that game answered at 10 s and 60 s and its figure of her carried 0x88845. So the
+    crash is rotfern's turn's (two of two), not every remote race change. The fix (thuum-magnus, routed 08:5xZ) gates 52's item 1
+    and the eye reads.
+  - Two tool faults, for after 52: layer-stage step 5's retry never runs (set -e with pipefail exits at the first failed
+    client-mods, its message lost in a variable), and add-mods.ps1's terminating errors escape the scheduled task's `*>`, so
+    add-mods.out stays empty.
+- (numidium) layer-merge.sh finds its own sweep's record by lab-api's slug of the set's name (main ea9daf83): a slashed branch's
+  record (layer-apocrypha-<x>) never matched the branch's own spelling, which would have stopped a merge after a green sweep.
+- (numidium) ADR-073 recorded (main 5cf6885a; accepted by Eli at 06:50:43Z in thuum-magnus' session), its Amends as dated notes
+  under their ADRs, with two errata on numidium's own records (D-PT9 B's paraphrase; the gap audit answers' times).
