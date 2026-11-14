@@ -3844,6 +3844,11 @@ commander's departure from the game ends it with a word that returns the thrall 
 found: gone() and unloaded() dropped the row with no decision); what a commanderless thrall does then is open (default: alive on
 the host until its effect would end, HYPOTHESIS for Eli). Built on fork m4-reanimate-claim-2 (train 52 merged in, 315dce28).
 
+C4's two answers (Eli in numidium's session, 2026-11-14, by AskUserQuestion; asked in plain text 2026-11-12; recorded 06:17Z by
+numidium): D-RC1 A "Persist it": a thrall's command survives a server restart, and it follows its caster after; D-RC2 A "Waits
+in its cell": a caster who logs back in elsewhere finds its thrall where it left it. Both are what fork m4-reanimate-return
+8010a1f6 builds (its full T2 green 2026-11-13 22:18:54Z), so its merge waits only on its stage.
+
 ## ADR-061: A shared container's live view is the menu drawn again whole; exclusive access is the fallback behind a setting
 
 Status: ACCEPTED 16:11 PST 2026-11-02 by Eli, verbatim via numidium: "i say take one more deep dive crack at REALLY getting live
@@ -5554,6 +5559,14 @@ the physics is ready to be tested fold that into the canon to test as well anywa
   reconnect.
 The builder's order after this: the infection's delivery (playtest 51's break 2) first, then the counter build with D-PT3 C
 to D-PT5 C.
+The counter build's three open points (Eli in numidium's session, 2026-11-14, by AskUserQuestion on thuum-magnus' reviews of
+m4-edge-refusals, lab-edge-refusals and m4-client-margins; recorded 06:17Z by numidium):
+- D-PT8 B "Name its kind": a message refused for its size (the 256 KiB cap) carries its peeked kind too, as D-PT3 C has a
+  byte-budget refusal, so every refusal the transport can name is named (decode errors alone stay under t 0).
+- D-PT9 B "A mark per seat": lab-api takes its run mark at each managed seat's reset, so a game an earlier run left running
+  that reconnects before its seat's reset is counted in the run.
+- D-PT10 C "One shared rule": the linked activations' fixed C++ window (SecondWindow(8)) becomes a wire-rules Bucket, and the
+  client mirrors it with D-PT5 C's half-second margin, one rule for every budget (a server and client train).
 
 ## ADR-072: The closeout is one route: the Golden Claw walk is the chart, and a leg is done when Eli has ticked it
 
